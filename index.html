@@ -374,20 +374,20 @@
         <span>Add Bar Mitzvah Student</span>
       </h3>
 
-      <form onsubmit="handleCreateStudent(event)" class="space-y-4">
+      <form id="add-student-form" onsubmit="handleCreateStudent(event)" autocomplete="off" class="space-y-4">
         <div>
           <label id="lbl-student-name" class="block text-xs font-medium text-slate-300 mb-1">Student Name</label>
-          <input type="text" id="new-student-name" required placeholder="e.g. David Cohen" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
+          <input type="text" id="new-student-name" name="student_name_fresh_1793734664716" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" required placeholder="e.g. David Cohen" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
         </div>
 
         <div>
           <label id="lbl-student-date" class="block text-xs font-medium text-slate-300 mb-1">Bar Mitzvah Date / Parsha</label>
-          <input type="text" id="new-student-date" placeholder="e.g. Parshat Vayera / Nov 2026" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
+          <input type="text" id="new-student-date" name="student_date_fresh_1793734664717" autocomplete="off" autocorrect="off" placeholder="e.g. Parshat Vayera / Nov 2026" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
         </div>
 
         <div>
           <label id="lbl-student-notes" class="block text-xs font-medium text-slate-300 mb-1">Tutor Initial Notes</label>
-          <textarea id="new-student-notes" rows="2" placeholder="e.g. Needs focus on Tefillin basics, very interested in science and basketball" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+          <textarea id="new-student-notes" name="student_notes_fresh_1793734664717" autocomplete="off" autocorrect="off" rows="2" placeholder="e.g. Needs focus on Tefillin basics, very interested in science and basketball" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
         </div>
 
         <div class="flex justify-end gap-2 pt-2">
@@ -1603,6 +1603,12 @@ alter publication supabase_realtime add table public.students_sync;`;
       const topics = window.JEWISH_TOPICS_DATA || [];
       const chumash = [...(window.BEREISHIT_PARSHIOT_DATA || []), ...(window.SHEMOT_PARSHIOT_DATA || [])];
 
+      const totalTopics = topics.length;
+      const totalParshiot = chumash.length;
+      const completedTCount = Object.keys(student.completedTopics || {}).filter(k => student.completedTopics[k]).length;
+      const completedPCount = Object.keys(student.completedParshiot || {}).filter(k => student.completedParshiot[k]).length;
+      const overallPct = Math.round(((completedTCount + completedPCount) / (totalTopics + totalParshiot)) * 100);
+
       workspace.innerHTML = `
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
           <div>
@@ -1848,16 +1854,18 @@ alter publication supabase_realtime add table public.students_sync;`;
 
     // Create New Student
     function openAddStudentModal() {
-      // Clear form inputs completely so it is blank and fresh every time
+      const form = document.getElementById('add-student-form');
+      if (form) form.reset();
+
       const nameInput = document.getElementById('new-student-name');
       const dateInput = document.getElementById('new-student-date');
       const notesInput = document.getElementById('new-student-notes');
-      if (nameInput) nameInput.value = '';
-      if (dateInput) dateInput.value = '';
-      if (notesInput) notesInput.value = '';
+      if (nameInput) { nameInput.value = ''; nameInput.setAttribute('value', ''); }
+      if (dateInput) { dateInput.value = ''; dateInput.setAttribute('value', ''); }
+      if (notesInput) { notesInput.value = ''; notesInput.innerHTML = ''; }
 
       document.getElementById('modal-add-student').classList.remove('hidden');
-      if (nameInput) setTimeout(() => nameInput.focus(), 100);
+      if (nameInput) setTimeout(() => nameInput.focus(), 120);
     }
 
     function closeAddStudentModal() {
