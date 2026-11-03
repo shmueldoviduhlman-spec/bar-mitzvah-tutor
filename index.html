@@ -117,8 +117,8 @@
       </div>
 
       <div>
-        <h2 class="text-xl font-bold text-white tracking-tight">Tutor & Rabbi Portal</h2>
-        <p class="text-xs text-slate-400 mt-1">Authorized Access Only • Enter Tutor PIN</p>
+        <h2 id="lock-title" class="text-xl font-bold text-white tracking-tight">Tutor & Rabbi Portal</h2>
+        <p id="lock-subtitle" class="text-xs text-slate-400 mt-1">Authorized Access Only • Enter Tutor PIN</p>
       </div>
 
       <!-- PIN Input Form -->
@@ -139,19 +139,19 @@
 
         <div id="pin-error" class="hidden text-xs text-rose-400 font-medium flex items-center justify-center gap-1">
           <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
-          <span>Incorrect PIN. Try again.</span>
+          <span id="pin-error-text">Incorrect PIN. Try again.</span>
         </div>
 
         <button 
           type="submit" 
           class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
         >
-          <span>Unlock Portal</span>
-          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          <span id="lock-btn-text">Unlock Portal</span>
+          <i data-lucide="arrow-right" class="w-4 h-4 rtl:rotate-180"></i>
         </button>
       </form>
 
-      <div class="pt-2 text-[11px] text-slate-500">
+      <div id="lock-footer-text" class="pt-2 text-[11px] text-slate-500">
         Confidential Bar Mitzvah Student Records
       </div>
     </div>
@@ -257,7 +257,7 @@
           <div class="text-xs text-slate-400 font-mono hidden sm:block">
             <span id="topics-count-display">Showing 13 of 13</span>
           </div>
-          <button onclick="collapseAllTopics()" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+          <button onclick="collapseAllTopics()" id="btn-collapse-topics" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
             Collapse All
           </button>
         </div>
@@ -287,7 +287,7 @@
 
         <!-- Book Filter Toggle -->
         <div class="flex items-center gap-2">
-          <button onclick="collapseAllChumash()" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+          <button onclick="collapseAllChumash()" id="btn-collapse-chumash" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
             Collapse All
           </button>
           <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg p-1 text-xs">
@@ -344,7 +344,7 @@
             Add your Bar Mitzvah students to start checking off completed topics, tracking progress, and syncing with the Rabbi.
           </p>
           <button onclick="openAddStudentModal()" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-lg transition">
-            Add First Student
+            <span id="empty-btn-add">Add First Student</span>
           </button>
         </div>
 
@@ -371,7 +371,7 @@
 
       <h3 id="modal-student-title" class="text-lg font-bold text-white flex items-center gap-2 mb-4">
         <i data-lucide="user-plus" class="w-5 h-5 text-brand-400"></i>
-        <span>Add Bar Mitzvah Student</span>
+        <span id="txt-modal-student-title">Add Bar Mitzvah Student</span>
       </h3>
 
       <form id="add-student-form" onsubmit="handleCreateStudent(event)" autocomplete="off" class="space-y-4">
@@ -391,10 +391,10 @@
         </div>
 
         <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeAddStudentModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold">
+          <button type="button" id="btn-cancel-add-student" onclick="closeAddStudentModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold">
             Cancel
           </button>
-          <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-semibold shadow-md">
+          <button type="submit" id="btn-save-add-student" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-semibold shadow-md active:scale-95 transition">
             Save Student
           </button>
         </div>
@@ -422,7 +422,7 @@
       </div>
 
       <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 my-4 space-y-3">
-        <p class="text-xs text-slate-300 leading-relaxed">
+        <p id="modal-share-instructions" class="text-xs text-slate-300 leading-relaxed">
           The Rabbi can scan this QR code with his phone camera or open the link below. It will automatically load the exact student list, all checked-off lessons, and notes directly onto his phone!
         </p>
 
@@ -442,11 +442,11 @@
       <div class="flex flex-col sm:flex-row gap-2 pt-2">
         <button onclick="sendViaWhatsApp()" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg transition active:scale-95 shadow-md">
           <i data-lucide="message-circle" class="w-4 h-4"></i>
-          <span>Send via WhatsApp</span>
+          <span id="btn-whatsapp-label">Send via WhatsApp</span>
         </button>
         <button onclick="exportDataJson()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg transition">
           <i data-lucide="download" class="w-4 h-4"></i>
-          <span>Download Backup</span>
+          <span id="btn-backup-label">Download Backup</span>
         </button>
       </div>
     </div>
@@ -467,36 +467,36 @@
         </div>
         <div>
           <h3 id="modal-cloud-title" class="text-base font-bold text-white">Live Multi-Tutor Cloud Sync</h3>
-          <p class="text-xs text-slate-400">Powered by Free Supabase • Real-Time Database</p>
+          <p id="modal-cloud-subtitle" class="text-xs text-slate-400">Powered by Free Supabase • Real-Time Database</p>
         </div>
       </div>
 
-      <p class="text-xs text-slate-300 leading-relaxed mb-4">
+      <p id="modal-cloud-desc" class="text-xs text-slate-300 leading-relaxed mb-4">
         Connect to your free Supabase project once. Any checkmark toggled or note written by you or the Rabbi will update live across all phones and laptops automatically with zero effort!
       </p>
 
       <form onsubmit="handleSaveCloudSettings(event)" class="space-y-3.5">
         <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">Supabase Project URL</label>
+          <label id="lbl-cloud-url" class="block text-xs font-medium text-slate-300 mb-1">Supabase Project URL</label>
           <input type="url" id="supabase-url-input" placeholder="https://xyzcompany.supabase.co" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500">
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">Supabase Public Anon Key</label>
+          <label id="lbl-cloud-key" class="block text-xs font-medium text-slate-300 mb-1">Supabase Public Anon Key</label>
           <input type="text" id="supabase-key-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500">
         </div>
 
         <!-- Quick SQL Setup Accordion -->
         <div class="border border-slate-800 rounded-xl bg-slate-950/70 p-3 space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-amber-300 flex items-center gap-1.5">
+            <span id="lbl-cloud-guide-title" class="text-xs font-semibold text-amber-300 flex items-center gap-1.5">
               <i data-lucide="database" class="w-3.5 h-3.5"></i> 1-Minute Free Setup Guide
             </span>
             <button type="button" onclick="copySqlSchema()" class="text-[11px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
               <span id="btn-copy-sql">Copy SQL</span>
             </button>
           </div>
-          <p class="text-[11px] text-slate-400">
+          <p id="lbl-cloud-guide-desc" class="text-[11px] text-slate-400">
             Create a free project at <a href="https://supabase.com" target="_blank" class="text-brand-400 underline">supabase.com</a>, open the <strong>SQL Editor</strong>, paste the copied SQL, and click Run. Then paste your URL and Anon Key above.
           </p>
         </div>
@@ -506,10 +506,10 @@
             Disconnect Cloud
           </button>
           <div class="flex gap-2 ml-auto">
-            <button type="button" onclick="closeCloudModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold">
+            <button type="button" id="btn-cancel-cloud" onclick="closeCloudModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold">
               Cancel
             </button>
-            <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-semibold shadow-md active:scale-95 transition">
+            <button type="submit" id="btn-save-cloud" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-semibold shadow-md active:scale-95 transition">
               Connect & Sync Now
             </button>
           </div>
@@ -533,8 +533,8 @@
           <i data-lucide="settings" class="w-5 h-5 text-amber-400"></i>
         </div>
         <div>
-          <h3 class="text-base font-bold text-white">Tutor Settings</h3>
-          <p class="text-xs text-slate-400">Sync, Backups & Security</p>
+          <h3 id="settings-title" class="text-base font-bold text-white">Tutor Settings</h3>
+          <p id="settings-subtitle" class="text-xs text-slate-400">Sync, Backups & Security</p>
         </div>
       </div>
 
@@ -546,10 +546,10 @@
             <span id="cloud-status-dot-settings" class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
             <div>
               <div class="text-xs font-bold text-white flex items-center gap-1.5">
-                <span>Database Sync</span>
-                <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono">Live</span>
+                <span id="settings-sync-title">Database Sync</span>
+                <span id="settings-sync-badge" class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono">Live</span>
               </div>
-              <p class="text-[11px] text-slate-400 mt-0.5">Connected to Supabase Cloud</p>
+              <p id="settings-sync-desc" class="text-[11px] text-slate-400 mt-0.5">Connected to Supabase Cloud</p>
             </div>
           </div>
           <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
@@ -560,8 +560,8 @@
           <div class="flex items-center gap-3">
             <i data-lucide="share-2" class="w-4 h-4 text-emerald-400"></i>
             <div>
-              <div class="text-xs font-bold text-white">Share QR / WhatsApp Link</div>
-              <p class="text-[11px] text-slate-400 mt-0.5">Send instant link or QR to Rabbi</p>
+              <div id="settings-share-title" class="text-xs font-bold text-white">Share QR / WhatsApp Link</div>
+              <p id="settings-share-desc" class="text-[11px] text-slate-400 mt-0.5">Send instant link or QR to Rabbi</p>
             </div>
           </div>
           <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
@@ -572,8 +572,8 @@
           <div class="flex items-center gap-3">
             <i data-lucide="download" class="w-4 h-4 text-cyan-400"></i>
             <div>
-              <div class="text-xs font-bold text-white">Download Student Backup</div>
-              <p class="text-[11px] text-slate-400 mt-0.5">Save offline JSON file to device</p>
+              <div id="settings-backup-title" class="text-xs font-bold text-white">Download Student Backup</div>
+              <p id="settings-backup-desc" class="text-[11px] text-slate-400 mt-0.5">Save offline JSON file to device</p>
             </div>
           </div>
           <i data-lucide="download" class="w-4 h-4 text-slate-500"></i>
@@ -584,8 +584,8 @@
           <div class="flex items-center gap-3">
             <i data-lucide="lock" class="w-4 h-4 text-rose-400"></i>
             <div>
-              <div class="text-xs font-bold text-rose-300">Lock Portal (PIN 770)</div>
-              <p class="text-[11px] text-slate-500 mt-0.5">Lock screen until PIN is entered</p>
+              <div id="settings-lock-title" class="text-xs font-bold text-rose-300">Lock Portal (PIN 770)</div>
+              <p id="settings-lock-desc" class="text-[11px] text-slate-500 mt-0.5">Lock screen until PIN is entered</p>
             </div>
           </div>
           <i data-lucide="shield" class="w-4 h-4 text-slate-500"></i>
@@ -632,19 +632,29 @@
     const I18N = {
       en: {
         appTitle: "TutorPilot",
-        appSubtitle: "Fast memory cues & real-time student tracking",
+        appSubtitle: "Bar Mitzvah Tutor Companion & Tracker",
         shareRabbi: "Share with Rabbi",
         searchPlaceholder: "Search topics, Rashis, stories, keywords...",
         tabTopics: "Jewish Concepts",
         tabChumash: "Chumash",
         tabStudents: "Student Tracker",
-        topicsTitle: "✦ 13 Core Jewish Concepts",
+        mobTopics: "Concepts",
+        mobChumash: "Chumash",
+        mobStudents: "Tracker",
+        collapseAll: "Collapse All",
+        topicsTitle: "13 Core Jewish Concepts",
         topicsDesc: "Tailored hooks, high-density memory points, and relatable teen analogies for 12-13 year olds.",
-        chumashTitle: "📜 Chumash: Bereishit & Shemot",
+        topicsCount: (n, total) => "Showing " + n + " of " + total,
+        topicsEmptySearch: (q) => 'No concepts found matching "' + q + '"',
+        chumashTitle: "Chumash: Bereishit & Shemot",
         chumashDesc: "Key plot lines, dense memory triggers, Rashi/Midrash gems, and bar mitzvah real-world angles.",
+        chumashCount: (n, total) => "Showing " + n + " of " + total,
+        chumashEmptySearch: (q) => 'No parshiot found matching "' + q + '"',
         allBooks: "All (23)",
         bereishitBook: "Bereishit (12)",
         shemotBook: "Shemot (11)",
+        trackerTitle: "Student Progress Tracker",
+        trackerDesc: "Check off lessons you or the Rabbi taught, log private student notes, and share live via QR/link.",
         addStudent: "+ Add New Student",
         noStudentsTitle: "No Students Added Yet",
         noStudentsDesc: "Add your Bar Mitzvah students to track lessons taught and share with the Rabbi.",
@@ -664,23 +674,118 @@
         markCompleted: "Mark as Learned",
         markIncomplete: "Mark as Not Learned",
         topicsProgress: "Jewish Topics Progress",
-        chumashProgress: "Chumash Progress"
+        chumashProgress: "Chumash Progress",
+        
+        // Add Student Modal
+        addStudentModalTitle: "Add Bar Mitzvah Student",
+        studentNameLabel: "Student Name",
+        studentNamePlaceholder: "e.g. David Cohen",
+        studentDateLabel: "Bar Mitzvah Date / Parsha",
+        studentDatePlaceholder: "e.g. Parshat Vayera / Nov 2026",
+        studentNotesLabel: "Tutor Initial Notes",
+        studentNotesPlaceholder: "e.g. Needs focus on Tefillin basics, very interested in science and basketball",
+        cancel: "Cancel",
+        saveStudent: "Save Student",
+        
+        // Active Student Workspace
+        activeStudentDefault: "Active Student",
+        studentTrackerInstructions: "Toggle completed lessons below to save and synchronize with the Rabbi.",
+        jumpToCurriculum: "Jump to Curriculum",
+        collaborativeNotesTitle: "Tutor & Rabbi Collaborative Notes",
+        filterAllLessons: "All Lessons",
+        filterConcepts: "Concepts",
+        filterChumash: "Chumash",
+        pctCompleted: "Completed",
+        defaultCandidate: "Bar Mitzvah Candidate",
+        deleteStudentTitle: "Delete Student",
+        noNotesText: "No notes recorded",
+        
+        // Lock Screen
+        lockTitle: "Tutor & Rabbi Portal",
+        lockSubtitle: "Authorized Access Only • Enter Tutor PIN",
+        lockPlaceholder: "Enter PIN",
+        lockError: "Incorrect PIN. Try again.",
+        lockButton: "Unlock Portal",
+        lockFooter: "Confidential Bar Mitzvah Student Records",
+        
+        // Settings Modal
+        settingsTitle: "Tutor Settings",
+        settingsSubtitle: "Sync, Backups & Security",
+        settingsSyncTitle: "Database Sync",
+        settingsSyncBadge: "Live",
+        settingsSyncDesc: "Connected to Supabase Cloud",
+        settingsShareTitle: "Share QR / WhatsApp Link",
+        settingsShareDesc: "Send instant link or QR to Rabbi",
+        settingsBackupTitle: "Download Student Backup",
+        settingsBackupDesc: "Save offline JSON file to device",
+        settingsLockTitle: "Lock Portal (PIN 770)",
+        settingsLockDesc: "Lock screen until PIN is entered",
+        
+        // Share Modal
+        shareModalTitle: "Share Live Progress with Rabbi",
+        shareModalSubtitle: "100% Free • No account or cloud login required",
+        shareModalInstructions: "The Rabbi can scan this QR code with his phone camera or open the link below. It will automatically load the exact student list, all checked-off lessons, and notes directly onto his phone!",
+        copyBtn: "Copy",
+        copiedBtn: "Copied!",
+        whatsappBtn: "Send via WhatsApp",
+        downloadBackupBtn: "Download Backup",
+        whatsappShareMsg: (url) => "Shalom Rabbi! Here is our updated Bar Mitzvah student progress tracker:\n\n" + url,
+        
+        // Cloud Modal
+        cloudModalTitle: "Live Multi-Tutor Cloud Sync",
+        cloudModalSubtitle: "Powered by Free Supabase • Real-Time Database",
+        cloudModalDesc: "Connect to your free Supabase project once. Any checkmark toggled or note written by you or the Rabbi will update live across all phones and laptops automatically with zero effort!",
+        cloudUrlLabel: "Supabase Project URL",
+        cloudKeyLabel: "Supabase Public Anon Key",
+        cloudGuideTitle: "1-Minute Free Setup Guide",
+        cloudGuideCopySql: "Copy SQL",
+        cloudGuideSqlCopied: "Copied!",
+        cloudGuideDesc: 'Create a free project at <a href="https://supabase.com" target="_blank" class="text-brand-400 underline">supabase.com</a>, open the <strong>SQL Editor</strong>, paste the copied SQL, and click Run. Then paste your URL and Anon Key above.',
+        cloudDisconnectBtn: "Disconnect Cloud",
+        cloudSaveBtn: "Connect & Sync Now",
+        
+        // Toasts & Prompts
+        toastUnlock: "Welcome! Portal unlocked.",
+        toastLangSwitch: "Language switched to English",
+        toastNoteSaved: (name) => "Notes saved for " + name,
+        toastShareCopied: "Share link copied to clipboard!",
+        toastSqlCopied: "SQL schema copied to clipboard!",
+        toastNameRequired: "Please fill in student name",
+        toastStudentAdded: (name) => 'Added student "' + name + '"!',
+        toastStudentDeleted: "Student deleted",
+        toastConfirmDelete: (name) => 'Are you sure you want to delete student "' + name + '"?',
+        toastFillBoth: "Please fill both Supabase URL and Anon Key",
+        toastConnecting: "Connecting to Supabase...",
+        toastCloudConnected: "Cloud connected & synchronized!",
+        toastConfirmDisconnect: "Disconnect from Supabase Cloud? The app will return to offline local storage.",
+        toastCloudDisconnected: "Cloud disconnected",
+        toastBackupDownloaded: "Student data backup downloaded"
       },
       he: {
         appTitle: "טיוטור-פיילוט",
-        appSubtitle: "עוגני זיכרון מהירים ומעקב התקדמות תלמידים בזמן אמת",
+        appSubtitle: "מלווה מלמדי בר מצווה ומעקב תלמידים",
         shareRabbi: "שתף עם הרב",
         searchPlaceholder: "חיפוש מושגים, רש״י, סיפורים, מילות מפתח...",
         tabTopics: "מושגי יסוד",
         tabChumash: "חומש",
         tabStudents: "מעקב תלמידים",
-        topicsTitle: "✦ 13 מושגי יסוד ביהדות",
+        mobTopics: "מושגים",
+        mobChumash: "חומש",
+        mobStudents: "תלמידים",
+        collapseAll: "כווץ הכל",
+        topicsTitle: "13 מושגי יסוד ביהדות",
         topicsDesc: "פתיחות מרתקות, עוגני זיכרון ממוקדים, וחיבור מעשי לעולמו של נער בן 12-13.",
-        chumashTitle: "📜 חומש: בראשית ושמות",
+        topicsCount: (n, total) => "מציג " + n + " מתוך " + total + " מושגים",
+        topicsEmptySearch: (q) => 'לא נמצאו מושגים התואמים ל-"' + q + '"',
+        chumashTitle: "חומש: בראשית ושמות",
         chumashDesc: "עלילה מרכזית, נקודות מפתח, פניני רש״י ומדרשים, ומוסר השכל לבר מצווה.",
+        chumashCount: (n, total) => "מציג " + n + " מתוך " + total + " פרשיות",
+        chumashEmptySearch: (q) => 'לא נמצאו פרשיות התואמות ל-"' + q + '"',
         allBooks: "הכל (23)",
         bereishitBook: "בראשית (12)",
         shemotBook: "שמות (11)",
+        trackerTitle: "מעקב התקדמות תלמידים",
+        trackerDesc: "סמן שיעורים שלימדת אתה או הרב, כתוב הערות מעקב פרטיות ושתף בזמן אמת באמצעות קוד QR או קישור.",
         addStudent: "+ הוסף תלמיד חדש",
         noStudentsTitle: "עדיין לא נוספו תלמידים",
         noStudentsDesc: "הוסף את תלמידי הבר מצווה שלך כדי לעקוב אחר החומרים שנלמדו ולשתף עם הרב.",
@@ -698,16 +803,97 @@
         notesPlaceholder: "הוסף הערות פרטיות על התקדמות התלמיד...",
         saveNotes: "שמור הערה",
         markCompleted: "סמן כנלמד",
-        markIncomplete: "סמן כלא נלמד",
+        markIncomplete: "בטל סימון כנלמד",
         topicsProgress: "התקדמות מושגי יסוד",
-        chumashProgress: "התקדמות חומש"
+        chumashProgress: "התקדמות חומש",
+        
+        // Add Student Modal
+        addStudentModalTitle: "הוספת תלמיד בר מצווה",
+        studentNameLabel: "שם התלמיד",
+        studentNamePlaceholder: "לדוגמה: דוד כהן",
+        studentDateLabel: "תאריך בר מצווה / פרשה",
+        studentDatePlaceholder: "לדוגמה: פרשת וירא / חשון תשפ״ז",
+        studentNotesLabel: "הערות ראשוניות של המלמד",
+        studentNotesPlaceholder: "לדוגמה: זקוק לחיזוק בהלכות תפילין, מתעניין במדע ובכדורסל",
+        cancel: "ביטול",
+        saveStudent: "שמור תלמיד",
+        
+        // Active Student Workspace
+        activeStudentDefault: "תלמיד פעיל",
+        studentTrackerInstructions: "סמן את השיעורים שהושלמו למטה כדי לשמור ולסנכרן אוטומטית עם הרב.",
+        jumpToCurriculum: "עבור לחומרי הלימוד",
+        collaborativeNotesTitle: "הערות משותפות למלמד ולרב",
+        filterAllLessons: "כל השיעורים",
+        filterConcepts: "מושגי יסוד",
+        filterChumash: "חומש",
+        pctCompleted: "הושלם",
+        defaultCandidate: "חתן בר מצווה",
+        deleteStudentTitle: "מחק תלמיד",
+        noNotesText: "אין הערות שמורות",
+        
+        // Lock Screen
+        lockTitle: "פורטל המלמד והרב",
+        lockSubtitle: "גישה מורשית בלבד • הזן קוד סודי (770)",
+        lockPlaceholder: "הזן קוד (770)",
+        lockError: "קוד שגוי. נסה שוב.",
+        lockButton: "כניסה למערכת",
+        lockFooter: "תיעוד חסוי של תלמידי בר מצווה",
+        
+        // Settings Modal
+        settingsTitle: "הגדרות מלמד",
+        settingsSubtitle: "סנכרון, גיבויים ואבטחה",
+        settingsSyncTitle: "סנכרון מסד נתונים",
+        settingsSyncBadge: "פעיל",
+        settingsSyncDesc: "מחובר לענן סופבייס (Supabase)",
+        settingsShareTitle: "שיתוף קישור או קוד QR",
+        settingsShareDesc: "שלח קישור ישיר או קוד QR לרב",
+        settingsBackupTitle: "הורדת גיבוי תלמידים",
+        settingsBackupDesc: "שמור קובץ JSON למכשיר",
+        settingsLockTitle: "נעילת מערכת (קוד 770)",
+        settingsLockDesc: "נעילת מסך עד להזנת הקוד",
+        
+        // Share Modal
+        shareModalTitle: "שיתוף התקדמות עם הרב",
+        shareModalSubtitle: "חינם לחלוטין • ללא צורך בהתחברות לחשבון",
+        shareModalInstructions: "הרב יכול לסרוק קוד QR זה עם מצלמת הטלפון שלו או לפתוח את הקישור למטה כדי לראות את רשימת התלמידים, השיעורים שהושלמו וההערות שלך בזמן אמת!",
+        copyBtn: "העתק קישור",
+        copiedBtn: "הועתק!",
+        whatsappBtn: "שלח ב-WhatsApp",
+        downloadBackupBtn: "הורד קובץ גיבוי",
+        whatsappShareMsg: (url) => "שלום כבוד הרב! הנה מעקב התקדמות תלמידי הבר מצווה המעודכן שלנו:\n\n" + url,
+        
+        // Cloud Modal
+        cloudModalTitle: "סנכרון ענן בין מלמדים",
+        cloudModalSubtitle: "באמצעות ענן סופבייס החינמי • מסד נתונים בזמן אמת",
+        cloudModalDesc: "התחבר פעם אחת לפרויקט סופבייס החינמי שלך. כל סימון שיעור או הערה שתכתוב אתה או הרב יתעדכנו אוטומטית ובזמן אמת בכל המכשירים ללא שום מאמץ!",
+        cloudUrlLabel: "כתובת פרויקט סופבייס (URL)",
+        cloudKeyLabel: "מפתח ציבורי (Anon Key)",
+        cloudGuideTitle: "מדריך התקנה מהיר בדקה אחת",
+        cloudGuideCopySql: "העתק SQL",
+        cloudGuideSqlCopied: "הועתק!",
+        cloudGuideDesc: 'פתח פרויקט חינמי ב-<a href="https://supabase.com" target="_blank" class="text-brand-400 underline">supabase.com</a>, פתח את ה-SQL Editor, הדבק את ה-SQL שהועתק ולחץ Run. לאחר מכן הדבק את כתובת ה-URL והמפתח למעלה.',
+        cloudDisconnectBtn: "התנתק מהענן",
+        cloudSaveBtn: "שמור והתחבר",
+        
+        // Toasts & Prompts
+        toastUnlock: "ברוך הבא! המערכת נפתחה.",
+        toastLangSwitch: "השפה הוחלפה לעברית",
+        toastNoteSaved: (name) => "ההערה נשמרה עבור " + name,
+        toastShareCopied: "קישור השיתוף הועתק ללוח!",
+        toastSqlCopied: "סקריפט ה-SQL הועתק ללוח!",
+        toastNameRequired: "נא להזין את שם התלמיד",
+        toastStudentAdded: (name) => 'התלמיד "' + name + '" נוסף בהצלחה!',
+        toastStudentDeleted: "התלמיד נמחק",
+        toastConfirmDelete: (name) => 'האם אתה בטוח שברצונך למחוק את התלמיד "' + name + '"?',
+        toastFillBoth: "נא למלא גם כתובת URL וגם מפתח Key",
+        toastConnecting: "מתחבר לענן Supabase...",
+        toastCloudConnected: "הענן חובר וסונכרן בהצלחה!",
+        toastConfirmDisconnect: "האם להתנתק מענן Supabase? האפליקציה תחזור לאחסון מקומי בלבד.",
+        toastCloudDisconnected: "החיבור לענן נותק",
+        toastBackupDownloaded: "קובץ גיבוי התלמידים הורד בהצלחה"
       }
     };
 
-
-    // ==============================================
-    // SUPABASE CLOUD SYNC & REALTIME COLLABORATION
-    // ==============================================
     const SQL_SCHEMA = `-- Create shared students table for Bar Mitzvah tutors
 create table if not exists public.students_sync (
   id text primary key,
@@ -728,15 +914,17 @@ create policy "Allow all tutors to delete students" on public.students_sync for 
 alter publication supabase_realtime add table public.students_sync;`;
 
     function copySqlSchema() {
+      const t = I18N[APP_STATE.lang];
       navigator.clipboard.writeText(SQL_SCHEMA).then(() => {
         const btn = document.getElementById('btn-copy-sql');
-        btn.textContent = 'Copied!';
-        showToast('SQL Schema copied to clipboard!');
-        setTimeout(() => { btn.textContent = 'Copy SQL'; }, 2000);
+        if (btn) btn.textContent = t.cloudGuideSqlCopied;
+        showToast(t.toastSqlCopied);
+        setTimeout(() => { 
+          if (btn) btn.textContent = t.cloudGuideCopySql; 
+        }, 2000);
       });
     }
 
-    
     function openSettingsModal() {
       document.getElementById('modal-settings').classList.remove('hidden');
     }
@@ -955,11 +1143,12 @@ alter publication supabase_realtime add table public.students_sync;`;
 
     async function handleSaveCloudSettings(e) {
       e.preventDefault();
+      const t = I18N[APP_STATE.lang];
       const url = document.getElementById('supabase-url-input').value.trim();
       const key = document.getElementById('supabase-key-input').value.trim();
 
       if (!url || !key) {
-        alert('Please provide both the Supabase URL and Anon Key.');
+        alert(t.toastFillBoth);
         return;
       }
 
@@ -969,12 +1158,13 @@ alter publication supabase_realtime add table public.students_sync;`;
       localStorage.setItem('tutor_sb_key', key);
 
       closeCloudModal();
-      showToast('Connecting to Supabase...');
+      showToast(t.toastConnecting);
       await initSupabaseCloud();
     }
 
     function disconnectCloud() {
-      if (!confirm('Disconnect from Supabase Cloud? The app will return to offline local storage.')) return;
+      const t = I18N[APP_STATE.lang];
+      if (!confirm(t.toastConfirmDisconnect)) return;
       localStorage.removeItem('tutor_sb_url');
       localStorage.removeItem('tutor_sb_key');
       APP_STATE.cloud.url = '';
@@ -984,26 +1174,11 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
       APP_STATE.cloud.client = null;
       APP_STATE.cloud.channel = null;
+      updateCloudStatusPill('disconnected', 'Offline (Local)');
       closeCloudModal();
-      updateCloudStatusPill('disconnected', 'Local Only');
-      showToast('Cloud disconnected');
+      showToast(t.toastCloudDisconnected);
     }
 
-    // Window online/offline listener
-    window.addEventListener('online', () => {
-      showToast('Back online! Reconnecting cloud...');
-      initSupabaseCloud();
-    });
-
-    window.addEventListener('offline', () => {
-      updateCloudStatusPill('offline', 'Offline');
-      showToast('You are offline. Changes saved locally.');
-    });
-
-
-    // ==============================================
-    // SECURITY GATE: PASSCODE AUTHENTICATION
-    // ==============================================
     const TUTOR_PASSCODE = "770";
 
     function checkPasscodeAuth() {
@@ -1022,6 +1197,7 @@ alter publication supabase_realtime add table public.students_sync;`;
 
     function handleUnlock(e) {
       e.preventDefault();
+      const t = I18N[APP_STATE.lang];
       const input = document.getElementById('pin-input');
       const err = document.getElementById('pin-error');
       const lockScreen = document.getElementById('lock-screen');
@@ -1033,7 +1209,7 @@ alter publication supabase_realtime add table public.students_sync;`;
         setTimeout(() => {
           lockScreen.classList.add('hidden');
         }, 300);
-        showToast("Welcome! Portal unlocked.");
+        showToast(t.toastUnlock);
       } else {
         err.classList.remove('hidden');
         input.value = '';
@@ -1065,7 +1241,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       localStorage.setItem('tutor_lang', APP_STATE.lang);
       applyLanguageDirection();
       renderAllViews();
-      showToast(APP_STATE.lang === 'he' ? "השפה הוחלפה לעברית" : "Language switched to English");
+      showToast(I18N[APP_STATE.lang].toastLangSwitch);
     }
 
     function applyLanguageDirection() {
@@ -1074,39 +1250,230 @@ alter publication supabase_realtime add table public.students_sync;`;
       html.setAttribute('dir', isHe ? 'rtl' : 'ltr');
       html.setAttribute('lang', isHe ? 'he' : 'en');
 
-      // Update text in UI header and static buttons
       const t = I18N[APP_STATE.lang];
-      document.getElementById('app-title').textContent = t.appTitle;
-      document.getElementById('app-subtitle').textContent = t.appSubtitle;
-      document.getElementById('btn-share-rabbi').textContent = t.shareRabbi;
-      document.getElementById('lang-indicator').textContent = isHe ? "English" : "עברית";
-      document.getElementById('search-input').placeholder = t.searchPlaceholder;
-      document.getElementById('tab-topics-label').textContent = t.tabTopics;
-      document.getElementById('tab-chumash-label').textContent = t.tabChumash;
-      document.getElementById('tab-students-label').textContent = t.tabStudents;
-      
-      document.getElementById('topics-head-title').innerHTML = `<span class="text-amber-400">✦</span> ` + t.topicsTitle;
-      document.getElementById('topics-head-desc').textContent = t.topicsDesc;
-      document.getElementById('chumash-head-title').innerHTML = `<span class="text-brand-400">📜</span> ` + t.chumashTitle;
-      document.getElementById('chumash-head-desc').textContent = t.chumashDesc;
 
-      document.getElementById('btn-all-books').textContent = t.allBooks;
-      document.getElementById('btn-bereishit').textContent = t.bereishitBook;
-      document.getElementById('btn-shemot').textContent = t.shemotBook;
-      document.getElementById('btn-add-student').textContent = t.addStudent;
+      // Header & Brand
+      const appTitle = document.getElementById('app-title');
+      if (appTitle) appTitle.textContent = t.appTitle;
 
-      document.getElementById('empty-title').textContent = t.noStudentsTitle;
-      document.getElementById('empty-desc').textContent = t.noStudentsDesc;
-      
+      const appSubtitle = document.getElementById('app-subtitle');
+      if (appSubtitle) appSubtitle.textContent = t.appSubtitle;
+
+      const btnShareRabbi = document.getElementById('btn-share-rabbi');
+      if (btnShareRabbi) btnShareRabbi.textContent = t.shareRabbi;
+
+      const langIndicator = document.getElementById('lang-indicator');
+      if (langIndicator) langIndicator.textContent = isHe ? "English" : "עברית";
+
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) searchInput.placeholder = t.searchPlaceholder;
+
+      // Navigation Desktop Tabs
+      const tabTopics = document.getElementById('tab-topics-label');
+      if (tabTopics) tabTopics.textContent = t.tabTopics;
+
+      const tabChumash = document.getElementById('tab-chumash-label');
+      if (tabChumash) tabChumash.textContent = t.tabChumash;
+
+      const tabStudents = document.getElementById('tab-students-label');
+      if (tabStudents) tabStudents.textContent = t.tabStudents;
+
+      // Navigation Mobile Dock Labels
       const mobTopics = document.getElementById('mob-lbl-topics');
+      if (mobTopics) mobTopics.textContent = t.mobTopics;
+
       const mobChumash = document.getElementById('mob-lbl-chumash');
+      if (mobChumash) mobChumash.textContent = t.mobChumash;
+
       const mobStudents = document.getElementById('mob-lbl-students');
-      if (mobTopics) mobTopics.textContent = isHe ? "מושגים" : "Concepts";
-      if (mobChumash) mobChumash.textContent = isHe ? "חומש" : "Chumash";
-      if (mobStudents) mobStudents.textContent = isHe ? "תלמידים" : "Tracker";
+      if (mobStudents) mobStudents.textContent = t.mobStudents;
+
+      // Section: Topics Head
+      const topicsHeadTitle = document.getElementById('topics-head-title');
+      if (topicsHeadTitle) topicsHeadTitle.innerHTML = '<span class="text-amber-400">✦</span> ' + t.topicsTitle;
+
+      const topicsHeadDesc = document.getElementById('topics-head-desc');
+      if (topicsHeadDesc) topicsHeadDesc.textContent = t.topicsDesc;
+
+      const btnCollapseTopics = document.getElementById('btn-collapse-topics');
+      if (btnCollapseTopics) btnCollapseTopics.textContent = t.collapseAll;
+
+      // Section: Chumash Head
+      const chumashHeadTitle = document.getElementById('chumash-head-title');
+      if (chumashHeadTitle) chumashHeadTitle.innerHTML = '<span class="text-brand-400">📜</span> ' + t.chumashTitle;
+
+      const chumashHeadDesc = document.getElementById('chumash-head-desc');
+      if (chumashHeadDesc) chumashHeadDesc.textContent = t.chumashDesc;
+
+      const btnCollapseChumash = document.getElementById('btn-collapse-chumash');
+      if (btnCollapseChumash) btnCollapseChumash.textContent = t.collapseAll;
+
+      const btnAllBooks = document.getElementById('btn-all-books');
+      if (btnAllBooks) btnAllBooks.textContent = t.allBooks;
+
+      const btnBereishit = document.getElementById('btn-bereishit');
+      if (btnBereishit) btnBereishit.textContent = t.bereishitBook;
+
+      const btnShemot = document.getElementById('btn-shemot');
+      if (btnShemot) btnShemot.textContent = t.shemotBook;
+
+      // Section: Tracker Head
+      const trackerHeadTitle = document.getElementById('tracker-head-title');
+      if (trackerHeadTitle) trackerHeadTitle.innerHTML = '<span class="text-emerald-400">👥</span> ' + t.trackerTitle;
+
+      const trackerHeadDesc = document.getElementById('tracker-head-desc');
+      if (trackerHeadDesc) trackerHeadDesc.textContent = t.trackerDesc;
+
+      const btnAddStudentText = document.getElementById('btn-add-student-text');
+      if (btnAddStudentText) btnAddStudentText.textContent = t.addStudent;
+      const btnAddStudent = document.getElementById('btn-add-student');
+      if (btnAddStudent && !btnAddStudentText) btnAddStudent.textContent = t.addStudent;
+
+      // Empty Student State
+      const emptyTitle = document.getElementById('empty-title');
+      if (emptyTitle) emptyTitle.textContent = t.noStudentsTitle;
+
+      const emptyDesc = document.getElementById('empty-desc');
+      if (emptyDesc) emptyDesc.textContent = t.noStudentsDesc;
+
+      const emptyBtnAdd = document.getElementById('empty-btn-add');
+      if (emptyBtnAdd) emptyBtnAdd.textContent = t.addFirstStudent;
+
+      // Modal: Add Student
+      const txtModalStudentTitle = document.getElementById('txt-modal-student-title');
+      if (txtModalStudentTitle) txtModalStudentTitle.textContent = t.addStudentModalTitle;
+
+      const lblStudentName = document.getElementById('lbl-student-name');
+      if (lblStudentName) lblStudentName.textContent = t.studentNameLabel;
+
+      const newStudentName = document.getElementById('new-student-name');
+      if (newStudentName) newStudentName.placeholder = t.studentNamePlaceholder;
+
+      const lblStudentDate = document.getElementById('lbl-student-date');
+      if (lblStudentDate) lblStudentDate.textContent = t.studentDateLabel;
+
+      const newStudentDate = document.getElementById('new-student-date');
+      if (newStudentDate) newStudentDate.placeholder = t.studentDatePlaceholder;
+
+      const lblStudentNotes = document.getElementById('lbl-student-notes');
+      if (lblStudentNotes) lblStudentNotes.textContent = t.studentNotesLabel;
+
+      const newStudentNotes = document.getElementById('new-student-notes');
+      if (newStudentNotes) newStudentNotes.placeholder = t.studentNotesPlaceholder;
+
+      const btnCancelAddStudent = document.getElementById('btn-cancel-add-student');
+      if (btnCancelAddStudent) btnCancelAddStudent.textContent = t.cancel;
+
+      const btnSaveAddStudent = document.getElementById('btn-save-add-student');
+      if (btnSaveAddStudent) btnSaveAddStudent.textContent = t.saveStudent;
+
+      // Modal: Settings
+      const settingsTitle = document.getElementById('settings-title');
+      if (settingsTitle) settingsTitle.textContent = t.settingsTitle;
+
+      const settingsSubtitle = document.getElementById('settings-subtitle');
+      if (settingsSubtitle) settingsSubtitle.textContent = t.settingsSubtitle;
+
+      const settingsSyncTitle = document.getElementById('settings-sync-title');
+      if (settingsSyncTitle) settingsSyncTitle.textContent = t.settingsSyncTitle;
+
+      const settingsSyncBadge = document.getElementById('settings-sync-badge');
+      if (settingsSyncBadge) settingsSyncBadge.textContent = t.settingsSyncBadge;
+
+      const settingsSyncDesc = document.getElementById('settings-sync-desc');
+      if (settingsSyncDesc) settingsSyncDesc.textContent = t.settingsSyncDesc;
+
+      const settingsShareTitle = document.getElementById('settings-share-title');
+      if (settingsShareTitle) settingsShareTitle.textContent = t.settingsShareTitle;
+
+      const settingsShareDesc = document.getElementById('settings-share-desc');
+      if (settingsShareDesc) settingsShareDesc.textContent = t.settingsShareDesc;
+
+      const settingsBackupTitle = document.getElementById('settings-backup-title');
+      if (settingsBackupTitle) settingsBackupTitle.textContent = t.settingsBackupTitle;
+
+      const settingsBackupDesc = document.getElementById('settings-backup-desc');
+      if (settingsBackupDesc) settingsBackupDesc.textContent = t.settingsBackupDesc;
+
+      const settingsLockTitle = document.getElementById('settings-lock-title');
+      if (settingsLockTitle) settingsLockTitle.textContent = t.settingsLockTitle;
+
+      const settingsLockDesc = document.getElementById('settings-lock-desc');
+      if (settingsLockDesc) settingsLockDesc.textContent = t.settingsLockDesc;
+
+      // Modal: Share
+      const modalShareTitle = document.getElementById('modal-share-title');
+      if (modalShareTitle) modalShareTitle.textContent = t.shareModalTitle;
+
+      const modalShareDesc = document.getElementById('modal-share-desc');
+      if (modalShareDesc) modalShareDesc.textContent = t.shareModalSubtitle;
+
+      const modalShareInstructions = document.getElementById('modal-share-instructions');
+      if (modalShareInstructions) modalShareInstructions.textContent = t.shareModalInstructions;
+
+      const btnCopyLabel = document.getElementById('btn-copy-label');
+      if (btnCopyLabel) btnCopyLabel.textContent = t.copyBtn;
+
+      const btnWhatsappLabel = document.getElementById('btn-whatsapp-label');
+      if (btnWhatsappLabel) btnWhatsappLabel.textContent = t.whatsappBtn;
+
+      const btnBackupLabel = document.getElementById('btn-backup-label');
+      if (btnBackupLabel) btnBackupLabel.textContent = t.downloadBackupBtn;
+
+      // Modal: Cloud
+      const modalCloudTitle = document.getElementById('modal-cloud-title');
+      if (modalCloudTitle) modalCloudTitle.textContent = t.cloudModalTitle;
+
+      const modalCloudSubtitle = document.getElementById('modal-cloud-subtitle');
+      if (modalCloudSubtitle) modalCloudSubtitle.textContent = t.cloudModalSubtitle;
+
+      const modalCloudDesc = document.getElementById('modal-cloud-desc');
+      if (modalCloudDesc) modalCloudDesc.textContent = t.cloudModalDesc;
+
+      const lblCloudUrl = document.getElementById('lbl-cloud-url');
+      if (lblCloudUrl) lblCloudUrl.textContent = t.cloudUrlLabel;
+
+      const lblCloudKey = document.getElementById('lbl-cloud-key');
+      if (lblCloudKey) lblCloudKey.textContent = t.cloudKeyLabel;
+
+      const lblCloudGuideTitle = document.getElementById('lbl-cloud-guide-title');
+      if (lblCloudGuideTitle) lblCloudGuideTitle.innerHTML = '<i data-lucide="database" class="w-3.5 h-3.5"></i> ' + t.cloudGuideTitle;
+
+      const btnCopySql = document.getElementById('btn-copy-sql');
+      if (btnCopySql) btnCopySql.textContent = t.cloudGuideCopySql;
+
+      const lblCloudGuideDesc = document.getElementById('lbl-cloud-guide-desc');
+      if (lblCloudGuideDesc) lblCloudGuideDesc.innerHTML = t.cloudGuideDesc;
+
+      const btnDisconnectCloud = document.getElementById('btn-disconnect-cloud');
+      if (btnDisconnectCloud) btnDisconnectCloud.textContent = t.cloudDisconnectBtn;
+
+      const btnCancelCloud = document.getElementById('btn-cancel-cloud');
+      if (btnCancelCloud) btnCancelCloud.textContent = t.cancel;
+
+      const btnSaveCloud = document.getElementById('btn-save-cloud');
+      if (btnSaveCloud) btnSaveCloud.textContent = t.cloudSaveBtn;
+
+      // Lock Screen
+      const lockTitle = document.getElementById('lock-title');
+      if (lockTitle) lockTitle.textContent = t.lockTitle;
+
+      const lockSubtitle = document.getElementById('lock-subtitle');
+      if (lockSubtitle) lockSubtitle.textContent = t.lockSubtitle;
+
+      const pinInput = document.getElementById('pin-input');
+      if (pinInput) pinInput.placeholder = t.lockPlaceholder;
+
+      const pinErrorText = document.getElementById('pin-error-text');
+      if (pinErrorText) pinErrorText.textContent = t.lockError;
+
+      const lockBtnText = document.getElementById('lock-btn-text');
+      if (lockBtnText) lockBtnText.textContent = t.lockButton;
+
+      const lockFooterText = document.getElementById('lock-footer-text');
+      if (lockFooterText) lockFooterText.textContent = t.lockFooter;
     }
 
-    // Tab Switching
     function switchTab(tabId) {
       APP_STATE.activeTab = tabId;
       
@@ -1210,11 +1577,11 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       const countDisplay = document.getElementById('topics-count-display');
       if (countDisplay) {
-        countDisplay.textContent = 'Showing ' + filtered.length + ' of ' + topics.length;
+        countDisplay.textContent = t.topicsCount(filtered.length, topics.length);
       }
 
       if (filtered.length === 0) {
-        container.innerHTML = '<div class="py-12 text-center text-slate-500"><i data-lucide="search-x" class="w-8 h-8 mx-auto mb-2 opacity-50"></i><p>No concepts found matching "' + q + '"</p></div>';
+        container.innerHTML = '<div class="py-12 text-center text-slate-500"><i data-lucide="search-x" class="w-8 h-8 mx-auto mb-2 opacity-50"></i><p>' + t.topicsEmptySearch(q) + '</p></div>';
         lucide.createIcons();
         return;
       }
@@ -1243,91 +1610,83 @@ alter publication supabase_realtime add table public.students_sync;`;
           '<!-- Collapsed Keyword Row -->' +
           '<div onclick="toggleTopicAccordion(\'' + topic.id + '\')" class="cursor-pointer select-none p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-slate-800/50 transition">' +
             '<div class="flex items-center gap-3 min-w-0">' +
-              '<span class="w-7 h-7 shrink-0 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center font-mono text-xs font-bold">' +
+              '<div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center font-mono text-xs font-bold shrink-0">' +
                 (idx + 1) +
-              '</span>' +
-              '<div class="truncate">' +
-                '<h3 class="text-sm sm:text-base font-bold text-white tracking-tight truncate flex items-center gap-2">' +
-                  title +
-                '</h3>' +
-                '<p class="text-[11px] text-slate-400 truncate mt-0.5 font-medium ' + (isExpanded ? 'hidden' : 'block') + '">' +
-                  hook +
-                '</p>' +
+              '</div>' +
+              '<div class="min-w-0">' +
+                '<div class="flex items-center gap-2">' +
+                  '<h3 class="text-sm sm:text-base font-bold text-white truncate">' +
+                    title +
+                  '</h3>' +
+                  (isCompleted ? '<span class="shrink-0 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-semibold flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> ' + t.completedTag + '</span>' : '') +
+                '</div>' +
+                '<p class="text-xs text-slate-400 truncate mt-0.5">' + (nuggets ? nuggets.slice(0, 2).join(' • ') : '') + '</p>' +
               '</div>' +
             '</div>' +
-
             '<div class="flex items-center gap-2 shrink-0">' +
-              (isCompleted ? '<span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"><i data-lucide="check" class="w-3 h-3"></i> <span class="hidden sm:inline">' + t.completedTag + '</span></span>' : '') +
-              '<div class="w-8 h-8 rounded-lg bg-slate-800/80 flex items-center justify-center text-slate-400 hover:text-white transition">' +
-                '<i data-lucide="' + (isExpanded ? 'chevron-up' : 'chevron-down') + '" class="w-4 h-4"></i>' +
-              '</div>' +
+              (APP_STATE.activeStudentId ? 
+                '<button onclick="toggleTopicForActiveStudent(\'' + topic.id + '\', event)" class="px-2.5 py-1 text-[11px] rounded-lg border font-medium transition ' + 
+                (isCompleted ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300' : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300') + '">' +
+                  '<span class="flex items-center gap-1"><i data-lucide="' + (isCompleted ? 'check-circle' : 'circle') + '" class="w-3.5 h-3.5"></i> ' + (isCompleted ? t.markIncomplete : t.markCompleted) + '</span>' +
+                '</button>' : '') +
+              '<i data-lucide="' + (isExpanded ? 'chevron-up' : 'chevron-down') + '" class="w-4 h-4 text-slate-400"></i>' +
             '</div>' +
           '</div>' +
 
-          '<!-- Expandable Details -->' +
-          (isExpanded ?
-            '<div class="p-4 sm:p-5 border-t border-slate-800/90 bg-slate-950/60 space-y-4">' +
-              '<!-- 1. Teen Hook -->' +
-              '<div class="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-l-4 rtl:border-l-0 rtl:border-r-4 border-amber-500 p-3 rounded-r-xl rtl:rounded-r-none rtl:rounded-l-xl">' +
-                '<div class="text-[11px] font-bold uppercase tracking-wider text-amber-400 mb-1 flex items-center gap-1">' +
-                  '<i data-lucide="zap" class="w-3 h-3"></i> ' + t.modernHook +
-                '</div>' +
-                '<p class="text-xs sm:text-sm text-slate-200 leading-relaxed font-medium">' + hook + '</p>' +
+          '<!-- Expanded Full Cheat Sheet Content -->' +
+          (isExpanded ? 
+            '<div class="border-t border-slate-800 bg-slate-950/50 p-4 sm:p-5 space-y-4 text-xs sm:text-sm animate-fadeIn">' +
+              
+              '<!-- Section 1: The Modern Teen Hook -->' +
+              '<div class="p-3 sm:p-3.5 rounded-xl bg-gradient-to-r from-amber-950/30 to-slate-900 border border-amber-900/40">' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5 mb-1.5">' +
+                  '<i data-lucide="zap" class="w-3.5 h-3.5"></i> ' + t.modernHook +
+                '</span>' +
+                '<p class="text-slate-200 leading-relaxed font-normal">' + hook + '</p>' +
               '</div>' +
 
-              '<!-- 2. Core Knowledge Nuggets -->' +
+              '<!-- Section 2: Core Knowledge Anchors -->' +
               '<div>' +
-                '<div class="text-[11px] font-bold uppercase tracking-wider text-brand-400 mb-1.5 flex items-center gap-1">' +
-                  '<i data-lucide="key" class="w-3 h-3"></i> ' + t.coreNuggets +
-                '</div>' +
-                '<ul class="space-y-1.5">' +
-                  nuggets.map(n => '<li class="text-xs sm:text-sm text-slate-300 flex items-start gap-2"><span class="text-brand-400 mt-0.5">•</span><span class="leading-relaxed">' + n + '</span></li>').join('') +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-2">' +
+                  '<i data-lucide="compass" class="w-3.5 h-3.5 text-cyan-400"></i> ' + t.coreNuggets +
+                '</span>' +
+                '<ul class="space-y-1.5 list-none pl-0">' +
+                  nuggets.map(n => '<li class="flex items-start gap-2 text-slate-300"><span class="text-brand-400 mt-1">▸</span><span>' + n + '</span></li>').join('') +
                 '</ul>' +
               '</div>' +
 
-              '<!-- 3. Teen Real-Life Angle -->' +
-              '<div class="bg-slate-900/80 border border-slate-800/80 rounded-xl p-3">' +
-                '<div class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-1 flex items-center gap-1">' +
-                  '<i data-lucide="compass" class="w-3 h-3"></i> ' + t.lifeApplication +
-                '</div>' +
-                '<p class="text-xs sm:text-sm text-slate-300 leading-relaxed">' + lifeApp + '</p>' +
+              '<!-- Section 3: Bar Mitzvah Life Angle -->' +
+              '<div class="p-3 sm:p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-brand-400 flex items-center gap-1.5 mb-1">' +
+                  '<i data-lucide="target" class="w-3.5 h-3.5"></i> ' + t.lifeApplication +
+                '</span>' +
+                '<p class="text-slate-300 leading-relaxed">' + lifeApp + '</p>' +
               '</div>' +
 
-              '<!-- 4. Story / Midrash -->' +
-              '<div class="bg-slate-900/60 border border-slate-800/60 rounded-xl p-3">' +
-                '<div class="text-[11px] font-bold uppercase tracking-wider text-purple-400 mb-1 flex items-center gap-1">' +
-                  '<i data-lucide="book-marked" class="w-3 h-3"></i> ' + t.midrashGem +
-                '</div>' +
-                '<p class="text-xs sm:text-sm text-slate-300 leading-relaxed italic">"' + midrash + '"</p>' +
+              '<!-- Section 4: Midrash / Story Gem -->' +
+              '<div class="p-3 sm:p-3.5 rounded-xl bg-purple-950/20 border border-purple-900/30">' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-purple-300 flex items-center gap-1.5 mb-1">' +
+                  '<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ' + t.midrashGem +
+                '</span>' +
+                '<p class="text-slate-300 leading-relaxed italic">"' + midrash + '"</p>' +
               '</div>' +
 
-              '<!-- 5. Discussion Prompt -->' +
-              (discussion ?
-                '<div class="bg-amber-950/20 border border-amber-900/40 rounded-xl p-3">' +
-                  '<div class="text-[11px] font-bold uppercase tracking-wider text-amber-300 mb-1 flex items-center gap-1">' +
-                    '<i data-lucide="message-square" class="w-3 h-3"></i> ' + t.discussionPrompt +
-                  '</div>' +
-                  '<p class="text-xs sm:text-sm text-amber-100 leading-relaxed font-medium">' + discussion + '</p>' +
-                '</div>' : '') +
-
-              '<!-- Active Student Toggle Button -->' +
-              (APP_STATE.activeStudentId ?
-                '<div class="pt-2 border-t border-slate-800 flex items-center justify-between">' +
-                  '<button onclick="toggleTopicForActiveStudent(\'' + topic.id + '\')" class="w-full py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition ' +
-                    (isCompleted ? 'bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700') + '">' +
-                    '<i data-lucide="' + (isCompleted ? 'check-circle-2' : 'circle') + '" class="w-4 h-4"></i>' +
-                    '<span>' + (isCompleted ? t.markIncomplete : t.markCompleted) + '</span>' +
-                  '</button>' +
-                '</div>' : '') +
+              '<!-- Section 5: Discussion Spark -->' +
+              '<div class="p-3 rounded-lg bg-emerald-950/20 border border-emerald-900/30 flex items-start gap-2.5">' +
+                '<i data-lucide="message-circle-question" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>' +
+                '<div>' +
+                  '<span class="text-[11px] font-bold text-emerald-400 block mb-0.5">' + t.discussionPrompt + '</span>' +
+                  '<p class="text-slate-200">' + discussion + '</p>' +
+                '</div>' +
+              '</div>' +
 
             '</div>' : '') +
-        '</article>';
+          '</article>';
       }).join('');
 
       lucide.createIcons();
     }
 
-    // Toggle Parsha Accordion
     function toggleParshaAccordion(parshaId) {
       if (APP_STATE.expandedParshaId === parshaId) {
         APP_STATE.expandedParshaId = null;
@@ -1369,7 +1728,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       });
 
       if (filtered.length === 0) {
-        container.innerHTML = '<div class="py-12 text-center text-slate-500"><i data-lucide="search-x" class="w-8 h-8 mx-auto mb-2 opacity-50"></i><p>No parshiot found matching "' + q + '"</p></div>';
+        container.innerHTML = '<div class="py-12 text-center text-slate-500"><i data-lucide="search-x" class="w-8 h-8 mx-auto mb-2 opacity-50"></i><p>' + t.chumashEmptySearch(q) + '</p></div>';
         lucide.createIcons();
         return;
       }
@@ -1397,100 +1756,91 @@ alter publication supabase_realtime add table public.students_sync;`;
         return '<article id="parsha-card-' + parsha.id + '" class="bg-slate-900/90 border transition-all duration-200 rounded-xl overflow-hidden shadow-md ' +
           (isExpanded ? 'border-brand-500/60 ring-1 ring-brand-500/30' : 'border-slate-800 hover:border-slate-700') + '">' +
           
-          '<!-- Collapsed Keyword Row -->' +
+          '<!-- Header Row -->' +
           '<div onclick="toggleParshaAccordion(\'' + parsha.id + '\')" class="cursor-pointer select-none p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-slate-800/50 transition">' +
             '<div class="flex items-center gap-3 min-w-0">' +
-              '<span class="w-7 h-7 shrink-0 rounded-lg ' + (isBereishit ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20') + ' flex items-center justify-center font-mono text-xs font-bold">' +
+              '<div class="w-8 h-8 rounded-lg ' + (isBereishit ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400') + ' border flex items-center justify-center font-mono text-xs font-bold shrink-0">' +
                 (idx + 1) +
-              '</span>' +
-              '<div class="truncate">' +
+              '</div>' +
+              '<div class="min-w-0">' +
                 '<div class="flex items-center gap-2">' +
-                  '<h3 class="text-sm sm:text-base font-bold text-white tracking-tight truncate">' +
+                  '<h3 class="text-sm sm:text-base font-bold text-white truncate">' +
                     title +
                   '</h3>' +
-                  '<span class="text-[10px] uppercase font-semibold px-1.5 py-0.2 rounded ' + (isBereishit ? 'bg-brand-500/20 text-brand-300' : 'bg-cyan-500/20 text-cyan-300') + '">' +
+                  '<span class="text-[10px] px-2 py-0.5 rounded font-mono ' + (isBereishit ? 'bg-amber-500/10 text-amber-300' : 'bg-cyan-500/10 text-cyan-300') + '">' +
                     (isBereishit ? (isHe ? 'בראשית' : 'Bereishit') : (isHe ? 'שמות' : 'Shemot')) +
                   '</span>' +
+                  (isCompleted ? '<span class="shrink-0 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-semibold flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> ' + t.completedTag + '</span>' : '') +
                 '</div>' +
-                '<p class="text-[11px] text-slate-400 truncate mt-0.5 font-medium ' + (isExpanded ? 'hidden' : 'block') + '">' +
-                  previewText +
-                '</p>' +
+                '<p class="text-xs text-slate-400 truncate mt-0.5">' + previewText + '</p>' +
               '</div>' +
             '</div>' +
-
             '<div class="flex items-center gap-2 shrink-0">' +
-              (isCompleted ? '<span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"><i data-lucide="check" class="w-3 h-3"></i> <span class="hidden sm:inline">' + t.completedTag + '</span></span>' : '') +
-              '<div class="w-8 h-8 rounded-lg bg-slate-800/80 flex items-center justify-center text-slate-400 hover:text-white transition">' +
-                '<i data-lucide="' + (isExpanded ? 'chevron-up' : 'chevron-down') + '" class="w-4 h-4"></i>' +
-              '</div>' +
+              (APP_STATE.activeStudentId ? 
+                '<button onclick="toggleParshaForActiveStudent(\'' + parsha.id + '\', event)" class="px-2.5 py-1 text-[11px] rounded-lg border font-medium transition ' + 
+                (isCompleted ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300' : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300') + '">' +
+                  '<span class="flex items-center gap-1"><i data-lucide="' + (isCompleted ? 'check-circle' : 'circle') + '" class="w-3.5 h-3.5"></i> ' + (isCompleted ? t.markIncomplete : t.markCompleted) + '</span>' +
+                '</button>' : '') +
+              '<i data-lucide="' + (isExpanded ? 'chevron-up' : 'chevron-down') + '" class="w-4 h-4 text-slate-400"></i>' +
             '</div>' +
           '</div>' +
 
-          '<!-- Expandable Details -->' +
-          (isExpanded ?
-            '<div class="p-4 sm:p-5 border-t border-slate-800/90 bg-slate-950/60 space-y-4">' +
-              '<!-- 1. The Big Plot (Chronological Storyline) -->' +
-              '<div class="bg-slate-900/80 border border-slate-800/80 rounded-xl p-3">' +
-                '<div class="text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5 flex items-center gap-1">' +
-                  '<i data-lucide="map-pin" class="w-3 h-3 text-brand-400"></i> ' + t.bigPlot +
-                '</div>' +
-                '<ul class="space-y-1.5">' +
-                  plot.map(p => '<li class="text-xs sm:text-sm text-slate-300 flex items-start gap-2"><span class="text-brand-400 mt-0.5">•</span><span class="leading-relaxed">' + p + '</span></li>').join('') +
+          '<!-- Expanded Body -->' +
+          (isExpanded ? 
+            '<div class="border-t border-slate-800 bg-slate-950/50 p-4 sm:p-5 space-y-4 text-xs sm:text-sm animate-fadeIn">' +
+              
+              '<!-- Section 1: Big Plot -->' +
+              '<div>' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-brand-400 flex items-center gap-1.5 mb-2">' +
+                  '<i data-lucide="film" class="w-3.5 h-3.5"></i> ' + t.bigPlot +
+                '</span>' +
+                '<ul class="space-y-1.5 list-none pl-0">' +
+                  plot.map(p => '<li class="flex items-start gap-2 text-slate-300"><span class="text-brand-400 mt-1">▸</span><span>' + p + '</span></li>').join('') +
                 '</ul>' +
               '</div>' +
 
-              '<!-- 2. Key Topics & Memory Jewels -->' +
-              '<div class="bg-slate-900/60 border border-slate-800/60 rounded-xl p-3">' +
-                '<div class="text-[11px] font-bold uppercase tracking-wider text-amber-400 mb-1.5 flex items-center gap-1">' +
-                  '<i data-lucide="sparkles" class="w-3 h-3"></i> ' + t.keyTopics +
+              '<!-- Section 2: Key Topics -->' +
+              '<div class="p-3 sm:p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5 mb-2">' +
+                  '<i data-lucide="key" class="w-3.5 h-3.5"></i> ' + t.keyTopics +
+                '</span>' +
+                '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">' +
+                  keyTopics.map(k => '<div class="flex items-start gap-2 text-slate-300"><span class="text-amber-400">✦</span><span>' + k + '</span></div>').join('') +
                 '</div>' +
-                '<ul class="space-y-1.5">' +
-                  keyTopics.map(k => '<li class="text-xs sm:text-sm text-slate-300 flex items-start gap-2"><span class="text-amber-400 mt-0.5">✦</span><span class="leading-relaxed font-medium">' + k + '</span></li>').join('') +
+              '</div>' +
+
+              '<!-- Section 3: Rashi & Midrash Pearls -->' +
+              '<div class="p-3 sm:p-3.5 rounded-xl bg-indigo-950/20 border border-indigo-900/30">' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5 mb-2">' +
+                  '<i data-lucide="gem" class="w-3.5 h-3.5"></i> ' + t.rashiPearls +
+                '</span>' +
+                '<ul class="space-y-2 list-none pl-0">' +
+                  rashiGems.map(r => '<li class="text-slate-300 border-l-2 rtl:border-l-0 rtl:border-r-2 border-indigo-500/50 pl-2.5 rtl:pl-0 rtl:pr-2.5 py-0.5 leading-relaxed">' + r + '</li>').join('') +
                 '</ul>' +
               '</div>' +
 
-              '<!-- 3. Rashi & Midrash Pearls -->' +
-              '<div class="bg-purple-950/20 border border-purple-900/40 rounded-xl p-3">' +
-                '<div class="text-[11px] font-bold uppercase tracking-wider text-purple-300 mb-1.5 flex items-center gap-1">' +
-                  '<i data-lucide="gem" class="w-3 h-3"></i> ' + t.rashiPearls +
-                '</div>' +
-                '<ul class="space-y-1.5">' +
-                  rashiGems.map(r => '<li class="text-xs sm:text-sm text-purple-200 flex items-start gap-2"><span class="text-purple-400 mt-0.5">💎</span><span class="leading-relaxed">' + r + '</span></li>').join('') +
-                '</ul>' +
+              '<!-- Section 4: Bar Mitzvah Life Angle -->' +
+              '<div class="p-3 sm:p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5 mb-1">' +
+                  '<i data-lucide="target" class="w-3.5 h-3.5"></i> ' + t.lifeApplication +
+                '</span>' +
+                '<p class="text-slate-300 leading-relaxed">' + lifeApp + '</p>' +
               '</div>' +
-
-              '<!-- 4. Real-World Life Application for 12-13 Year Olds -->' +
-              '<div class="bg-emerald-950/20 border border-emerald-900/40 rounded-xl p-3">' +
-                '<div class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-1 flex items-center gap-1">' +
-                  '<i data-lucide="award" class="w-3 h-3"></i> ' + t.lifeApplication +
-                '</div>' +
-                '<p class="text-xs sm:text-sm text-emerald-100 leading-relaxed font-medium">' + lifeApp + '</p>' +
-              '</div>' +
-
-              '<!-- Active Student Toggle Button -->' +
-              (APP_STATE.activeStudentId ?
-                '<div class="pt-2 border-t border-slate-800 flex items-center justify-between">' +
-                  '<button onclick="toggleParshaForActiveStudent(\'' + parsha.id + '\')" class="w-full py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition ' +
-                    (isCompleted ? 'bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700') + '">' +
-                    '<i data-lucide="' + (isCompleted ? 'check-circle-2' : 'circle') + '" class="w-4 h-4"></i>' +
-                    '<span>' + (isCompleted ? t.markIncomplete : t.markCompleted) + '</span>' +
-                  '</button>' +
-                '</div>' : '') +
 
             '</div>' : '') +
-        '</article>';
+          '</article>';
       }).join('');
 
       lucide.createIcons();
     }
 
-    // Render Student Tracker View
     function renderStudents() {
       const container = document.getElementById('students-list');
       const emptyState = document.getElementById('students-empty');
       const badge = document.getElementById('student-badge-count');
       const workspace = document.getElementById('active-student-workspace');
       const t = I18N[APP_STATE.lang];
+      const isHe = APP_STATE.lang === 'he';
 
       badge.textContent = APP_STATE.students.length;
       const mobBadge = document.getElementById('mob-student-badge');
@@ -1519,63 +1869,55 @@ alter publication supabase_realtime add table public.students_sync;`;
         const completedPCount = Object.keys(student.completedParshiot || {}).filter(k => student.completedParshiot[k]).length;
         const overallPct = Math.round(((completedTCount + completedPCount) / (totalTopics + totalParshiot)) * 100);
 
-        return `
-          <div 
-            onclick="selectActiveStudent('${student.id}')"
-            class="cursor-pointer rounded-xl p-4 border transition duration-150 flex flex-col justify-between ${
-              isActive 
-                ? 'bg-slate-800/90 border-brand-500 shadow-md ring-1 ring-brand-500' 
-                : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
-            }"
-          >
-            <div>
-              <div class="flex items-start justify-between gap-2 mb-2">
-                <div class="flex items-center gap-2">
-                  <div class="w-8 h-8 rounded-full bg-brand-600/20 text-brand-400 border border-brand-500/30 flex items-center justify-center font-bold text-xs">
-                    ${student.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <h4 class="text-sm font-bold text-white">${student.name}</h4>
-                    <p class="text-[11px] text-slate-400">${student.parshaOrDate || 'Bar Mitzvah Candidate'}</p>
-                  </div>
-                </div>
-                <span class="text-xs font-mono font-bold ${overallPct > 50 ? 'text-emerald-400' : 'text-amber-400'}">
-                  ${overallPct}%
-                </span>
-              </div>
+        return '<div onclick="selectActiveStudent(\'' + student.id + '\')" class="cursor-pointer rounded-xl p-4 border transition duration-150 flex flex-col justify-between ' +
+          (isActive ? 'bg-slate-800/90 border-brand-500 shadow-md ring-1 ring-brand-500' : 'bg-slate-900/60 border-slate-800 hover:border-slate-700') + '">' +
+            '<div>' +
+              '<div class="flex items-start justify-between gap-2 mb-2">' +
+                '<div class="flex items-center gap-2">' +
+                  '<div class="w-8 h-8 rounded-full bg-brand-600/20 text-brand-400 border border-brand-500/30 flex items-center justify-center font-bold text-xs">' +
+                    student.name.charAt(0).toUpperCase() +
+                  '</div>' +
+                  '<div>' +
+                    '<h4 class="text-sm font-bold text-white">' + student.name + '</h4>' +
+                    '<p class="text-[11px] text-slate-400">' + (student.parshaOrDate || t.defaultCandidate) + '</p>' +
+                  '</div>' +
+                '</div>' +
+                '<span class="text-xs font-mono font-bold ' + (overallPct > 50 ? 'text-emerald-400' : 'text-amber-400') + '">' +
+                  overallPct + '%' +
+                '</span>' +
+              '</div>' +
 
-              <!-- Progress Bars -->
-              <div class="space-y-2 mt-3">
-                <div>
-                  <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
-                    <span>${t.tabTopics}</span>
-                    <span>${completedTCount} / ${totalTopics}</span>
-                  </div>
-                  <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
-                    <div class="bg-amber-400 h-1.5 rounded-full" style="width: ${(completedTCount/totalTopics)*100}%"></div>
-                  </div>
-                </div>
+              '<!-- Progress Bars -->' +
+              '<div class="space-y-2 mt-3">' +
+                '<div>' +
+                  '<div class="flex justify-between text-[10px] text-slate-400 mb-0.5">' +
+                    '<span>' + t.tabTopics + '</span>' +
+                    '<span>' + completedTCount + ' / ' + totalTopics + '</span>' +
+                  '</div>' +
+                  '<div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">' +
+                    '<div class="bg-amber-400 h-1.5 rounded-full" style="width: ' + ((completedTCount/totalTopics)*100) + '%"></div>' +
+                  '</div>' +
+                '</div>' +
 
-                <div>
-                  <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
-                    <span>${t.tabChumash}</span>
-                    <span>${completedPCount} / ${totalParshiot}</span>
-                  </div>
-                  <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
-                    <div class="bg-brand-500 h-1.5 rounded-full" style="width: ${(completedPCount/totalParshiot)*100}%"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
+                '<div>' +
+                  '<div class="flex justify-between text-[10px] text-slate-400 mb-0.5">' +
+                    '<span>' + t.tabChumash + '</span>' +
+                    '<span>' + completedPCount + ' / ' + totalParshiot + '</span>' +
+                  '</div>' +
+                  '<div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">' +
+                    '<div class="bg-brand-500 h-1.5 rounded-full" style="width: ' + ((completedPCount/totalParshiot)*100) + '%"></div>' +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
 
-            <div class="mt-4 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-              <span class="truncate max-w-[140px] italic">${student.notes ? student.notes : 'No notes'}</span>
-              <button onclick="event.stopPropagation(); deleteStudent('${student.id}')" class="text-slate-500 hover:text-red-400 p-1">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          </div>
-        `;
+            '<div class="mt-4 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">' +
+              '<span class="truncate max-w-[140px] italic">' + (student.notes ? student.notes : t.noNotesText) + '</span>' +
+              '<button onclick="event.stopPropagation(); deleteStudent(\'' + student.id + '\')" title="' + t.deleteStudentTitle + '" class="text-slate-500 hover:text-red-400 p-1">' +
+                '<i data-lucide="trash-2" class="w-3.5 h-3.5"></i>' +
+              '</button>' +
+            '</div>' +
+          '</div>';
       }).join('');
 
       renderActiveStudentWorkspace();
@@ -1614,15 +1956,15 @@ alter publication supabase_realtime add table public.students_sync;`;
           <div>
             <div class="flex items-center gap-2">
               <h3 class="text-lg font-bold text-white">${student.name}</h3>
-              <span class="text-xs px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 font-mono">${student.parshaOrDate || 'Active Student'}</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 font-mono">${student.parshaOrDate || t.activeStudentDefault}</span>
             </div>
-            <p class="text-xs text-slate-400 mt-0.5">Toggle completed lessons below to save and synchronize with the Rabbi.</p>
+            <p class="text-xs text-slate-400 mt-0.5">${t.studentTrackerInstructions}</p>
           </div>
 
           <!-- Quick Actions -->
           <div class="flex items-center gap-2">
             <button onclick="switchTab('topics')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-lg font-medium transition flex items-center gap-1.5">
-              <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Jump to Curriculum
+              <i data-lucide="book-open" class="w-3.5 h-3.5"></i> ${t.jumpToCurriculum}
             </button>
           </div>
         </div>
@@ -1631,7 +1973,7 @@ alter publication supabase_realtime add table public.students_sync;`;
         <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 space-y-2">
           <label class="block text-xs font-semibold text-slate-300 flex items-center gap-1.5">
             <i data-lucide="file-text" class="w-3.5 h-3.5 text-amber-400"></i>
-            Tutor & Rabbi Collaborative Notes
+            ${t.collaborativeNotesTitle}
           </label>
           <div class="flex gap-2">
             <textarea 
@@ -1653,18 +1995,18 @@ alter publication supabase_realtime add table public.students_sync;`;
         <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
           <div class="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
             <button onclick="setTrackerFilter('all')" id="track-filter-all" class="px-3 py-1.5 rounded-lg ${APP_STATE.trackerFilter === 'all' ? 'bg-brand-600 text-white font-semibold' : 'text-slate-400 hover:text-white'} transition">
-              All Lessons (${totalTopics + totalParshiot})
+              ${t.filterAllLessons} (${totalTopics + totalParshiot})
             </button>
             <button onclick="setTrackerFilter('topics')" id="track-filter-topics" class="px-3 py-1.5 rounded-lg ${APP_STATE.trackerFilter === 'topics' ? 'bg-amber-600 text-white font-semibold' : 'text-slate-400 hover:text-white'} transition">
-              Concepts (${completedTCount}/${totalTopics})
+              ${t.filterConcepts} (${completedTCount}/${totalTopics})
             </button>
             <button onclick="setTrackerFilter('chumash')" id="track-filter-chumash" class="px-3 py-1.5 rounded-lg ${APP_STATE.trackerFilter === 'chumash' ? 'bg-cyan-600 text-white font-semibold' : 'text-slate-400 hover:text-white'} transition">
-              Chumash (${completedPCount}/${totalParshiot})
+              ${t.filterChumash} (${completedPCount}/${totalParshiot})
             </button>
           </div>
           
           <span class="text-xs font-mono font-bold text-emerald-400 hidden sm:inline">
-            ${overallPct}% Completed
+            ${overallPct}% ${t.pctCompleted}
           </span>
         </div>
 
@@ -1724,7 +2066,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                 >
                   <div class="truncate flex items-center gap-1.5">
                     <span class="text-[9px] px-1 rounded ${isBereishit ? 'bg-brand-500/20 text-brand-300' : 'bg-cyan-500/20 text-cyan-300'} font-mono">
-                      ${isBereishit ? 'ב' : 'ש'}
+                      ${isBereishit ? (isHe ? 'בראשית' : 'Ber') : (isHe ? 'שמות' : 'Shem')}
                     </span>
                     <span class="truncate font-medium">${title}</span>
                   </div>
@@ -1739,9 +2081,6 @@ alter publication supabase_realtime add table public.students_sync;`;
       lucide.createIcons();
     }
 
-    // Helper Checklist functions
-    
-    let notesAutoSaveTimer = null;
     function handleNotesInput(val) {
       if (!APP_STATE.activeStudentId) return;
       const student = APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId);
@@ -1795,17 +2134,18 @@ alter publication supabase_realtime add table public.students_sync;`;
 
     function saveActiveStudentNotes() {
       if (!APP_STATE.activeStudentId) return;
+      const t = I18N[APP_STATE.lang];
       const input = document.getElementById('active-student-notes-input');
       const student = APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId);
       if (student && input) {
         student.notes = input.value.trim();
-        saveStudentsToStorage();
+        saveStudentsToStorage(true);
+        if (APP_STATE.cloud.client) pushStudentToCloud(student);
         renderStudents();
-        showToast("Student notes saved");
+        showToast(t.toastNoteSaved(student.name));
       }
     }
 
-    // Storage Management
     function loadStudentsFromStorage() {
       try {
         const raw = localStorage.getItem('tutor_students_v1');
@@ -1860,9 +2200,34 @@ alter publication supabase_realtime add table public.students_sync;`;
       const nameInput = document.getElementById('new-student-name');
       const dateInput = document.getElementById('new-student-date');
       const notesInput = document.getElementById('new-student-notes');
-      if (nameInput) { nameInput.value = ''; nameInput.setAttribute('value', ''); }
-      if (dateInput) { dateInput.value = ''; dateInput.setAttribute('value', ''); }
-      if (notesInput) { notesInput.value = ''; notesInput.innerHTML = ''; }
+      const t = I18N[APP_STATE.lang];
+
+      const salt = Date.now();
+      if (nameInput) { 
+        nameInput.value = ''; 
+        nameInput.setAttribute('value', ''); 
+        nameInput.name = 'student_name_fresh_' + salt;
+        nameInput.placeholder = t.studentNamePlaceholder;
+      }
+      if (dateInput) { 
+        dateInput.value = ''; 
+        dateInput.setAttribute('value', ''); 
+        dateInput.name = 'student_date_fresh_' + salt;
+        dateInput.placeholder = t.studentDatePlaceholder;
+      }
+      if (notesInput) { 
+        notesInput.value = ''; 
+        notesInput.innerHTML = ''; 
+        notesInput.name = 'student_notes_fresh_' + salt;
+        notesInput.placeholder = t.studentNotesPlaceholder;
+      }
+
+      const cancelBtn = document.getElementById('btn-cancel-add-student');
+      if (cancelBtn) cancelBtn.textContent = t.cancel;
+      const saveBtn = document.getElementById('btn-save-add-student');
+      if (saveBtn) saveBtn.textContent = t.saveStudent;
+      const titleTxt = document.getElementById('txt-modal-student-title');
+      if (titleTxt) titleTxt.textContent = t.addStudentModalTitle;
 
       document.getElementById('modal-add-student').classList.remove('hidden');
       if (nameInput) setTimeout(() => nameInput.focus(), 120);
@@ -1874,11 +2239,15 @@ alter publication supabase_realtime add table public.students_sync;`;
 
     function handleCreateStudent(e) {
       e.preventDefault();
+      const t = I18N[APP_STATE.lang];
       const name = document.getElementById('new-student-name').value.trim();
       const parsha = document.getElementById('new-student-date').value.trim();
       const notes = document.getElementById('new-student-notes').value.trim();
 
-      if (!name) return;
+      if (!name) {
+        showToast(t.toastNameRequired);
+        return;
+      }
 
       const newStudent = {
         id: "stu_" + Date.now(),
@@ -1895,18 +2264,15 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (APP_STATE.cloud.client) pushStudentToCloud(newStudent);
       closeAddStudentModal();
       renderStudents();
-      renderTopics();
-      renderChumash();
-      showToast(`Student ${name} added!`);
-
-      // Reset form
-      document.getElementById('new-student-name').value = '';
-      document.getElementById('new-student-date').value = '';
-      document.getElementById('new-student-notes').value = '';
+      showToast(t.toastStudentAdded(name));
     }
 
     function deleteStudent(id) {
-      if (!confirm("Are you sure you want to remove this student?")) return;
+      const t = I18N[APP_STATE.lang];
+      const student = APP_STATE.students.find(s => s.id === id);
+      const studentName = student ? student.name : '';
+      if (!confirm(t.toastConfirmDelete(studentName))) return;
+
       APP_STATE.students = APP_STATE.students.filter(s => s.id !== id);
       if (APP_STATE.activeStudentId === id) {
         APP_STATE.activeStudentId = APP_STATE.students.length > 0 ? APP_STATE.students[0].id : null;
@@ -1916,10 +2282,9 @@ alter publication supabase_realtime add table public.students_sync;`;
       renderStudents();
       renderTopics();
       renderChumash();
-      showToast("Student deleted");
+      showToast(t.toastStudentDeleted);
     }
 
-    // Render All Views
     function renderAllViews() {
       renderTopics();
       renderChumash();
@@ -1983,36 +2348,39 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     function copyShareLink() {
+      const t = I18N[APP_STATE.lang];
       const input = document.getElementById('share-link-input');
       input.select();
       input.setSelectionRange(0, 99999);
       navigator.clipboard.writeText(input.value).then(() => {
-        document.getElementById('btn-copy-label').textContent = "Copied!";
-        showToast("Share link copied to clipboard!");
+        const lbl = document.getElementById('btn-copy-label');
+        if (lbl) lbl.textContent = t.copiedBtn;
+        showToast(t.toastShareCopied);
         setTimeout(() => {
-          document.getElementById('btn-copy-label').textContent = "Copy";
+          if (lbl) lbl.textContent = t.copyBtn;
         }, 2000);
       });
     }
 
     function sendViaWhatsApp() {
+      const t = I18N[APP_STATE.lang];
       const input = document.getElementById('share-link-input');
-      const text = encodeURIComponent(`Shalom Rabbi! Here is our updated Bar Mitzvah student progress tracker:\n\n${input.value}`);
-      window.open(`https://wa.me/?text=${text}`, '_blank');
+      const text = encodeURIComponent(t.whatsappShareMsg(input.value));
+      window.open("https://wa.me/?text=" + text, '_blank');
     }
 
     function exportDataJson() {
+      const t = I18N[APP_STATE.lang];
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(APP_STATE.students, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `bar_mitzvah_tracker_backup_${new Date().toISOString().slice(0,10)}.json`);
+      downloadAnchor.setAttribute("download", "bar_mitzvah_tracker_backup_" + new Date().toISOString().slice(0,10) + ".json");
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
-      showToast("Backup file downloaded");
+      showToast(t.toastBackupDownloaded);
     }
 
-    // Check for incoming shared hash state
     function checkUrlHashSync() {
       const hash = window.location.hash;
       if (hash && hash.startsWith('#sync=')) {
