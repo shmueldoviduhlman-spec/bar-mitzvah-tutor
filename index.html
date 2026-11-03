@@ -102,6 +102,59 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col pb-24 md:pb-12 antialiased selection:bg-brand-600 selection:text-white">
 
+  <!-- ============================================== -->
+  <!-- TUTOR PASSCODE LOCK SCREEN (Security Gate)     -->
+  <!-- ============================================== -->
+  <div id="lock-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-4 transition-all duration-300">
+    <div class="max-w-sm w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-5">
+      
+      <!-- Lock Icon / Badge -->
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-brand-600 to-amber-500 text-white flex items-center justify-center shadow-lg badge-glow">
+        <i data-lucide="shield-check" class="w-8 h-8"></i>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-white tracking-tight">Tutor & Rabbi Portal</h2>
+        <p class="text-xs text-slate-400 mt-1">Authorized Access Only • Enter Tutor PIN</p>
+      </div>
+
+      <!-- PIN Input Form -->
+      <form onsubmit="handleUnlock(event)" class="space-y-4">
+        <div class="relative">
+          <input 
+            type="password" 
+            id="pin-input" 
+            inputmode="numeric" 
+            autocomplete="current-password"
+            placeholder="Enter PIN" 
+            maxlength="10"
+            class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 px-4 text-center text-2xl font-mono tracking-widest text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+            required
+            autofocus
+          >
+        </div>
+
+        <div id="pin-error" class="hidden text-xs text-rose-400 font-medium flex items-center justify-center gap-1">
+          <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+          <span>Incorrect PIN. Try again.</span>
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
+        >
+          <span>Unlock Portal</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </form>
+
+      <div class="pt-2 text-[11px] text-slate-500">
+        Confidential Bar Mitzvah Student Records
+      </div>
+    </div>
+  </div>
+
+
   <!-- Top Sticky Header -->
   <header class="sticky top-0 z-40 glass-nav border-b border-slate-800 px-4 py-3">
     <div class="max-w-7xl mx-auto flex flex-col gap-3">
@@ -140,6 +193,10 @@
           <button onclick="toggleLanguage()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition active:scale-95">
             <i data-lucide="languages" class="w-4 h-4 text-brand-400"></i>
             <span id="lang-indicator">עברית</span>
+          </button>
+          
+          <button onclick="lockPortal()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition" title="Lock Portal">
+            <i data-lucide="lock" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
@@ -865,8 +922,57 @@ alter publication supabase_realtime add table public.students_sync;`;
       showToast('You are offline. Changes saved locally.');
     });
 
+
+    // ==============================================
+    // SECURITY GATE: PASSCODE AUTHENTICATION
+    // ==============================================
+    const TUTOR_PASSCODE = "770";
+
+    function checkPasscodeAuth() {
+      const isAuth = localStorage.getItem('tutor_auth_unlocked');
+      const lockScreen = document.getElementById('lock-screen');
+      if (isAuth === 'true') {
+        if (lockScreen) lockScreen.classList.add('hidden');
+      } else {
+        if (lockScreen) {
+          lockScreen.classList.remove('hidden');
+          const pinInput = document.getElementById('pin-input');
+          if (pinInput) setTimeout(() => pinInput.focus(), 150);
+        }
+      }
+    }
+
+    function handleUnlock(e) {
+      e.preventDefault();
+      const input = document.getElementById('pin-input');
+      const err = document.getElementById('pin-error');
+      const lockScreen = document.getElementById('lock-screen');
+
+      if (input.value.trim() === TUTOR_PASSCODE) {
+        localStorage.setItem('tutor_auth_unlocked', 'true');
+        err.classList.add('hidden');
+        lockScreen.classList.add('opacity-0', 'pointer-events-none');
+        setTimeout(() => {
+          lockScreen.classList.add('hidden');
+        }, 300);
+        showToast("Welcome! Portal unlocked.");
+      } else {
+        err.classList.remove('hidden');
+        input.value = '';
+        input.focus();
+        input.classList.add('border-rose-500');
+        setTimeout(() => input.classList.remove('border-rose-500'), 1500);
+      }
+    }
+
+    function lockPortal() {
+      localStorage.removeItem('tutor_auth_unlocked');
+      location.reload();
+    }
+
     // Initialize App
     document.addEventListener('DOMContentLoaded', () => {
+      checkPasscodeAuth();
       loadStudentsFromStorage();
       checkUrlHashSync();
       applyLanguageDirection();
