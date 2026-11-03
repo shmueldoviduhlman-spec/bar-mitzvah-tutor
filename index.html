@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" class="dark">
+<html lang="en" dir="ltr" class="dark overflow-x-hidden">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -100,7 +100,7 @@
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col pb-24 md:pb-12 antialiased selection:bg-brand-600 selection:text-white">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col pb-24 md:pb-12 antialiased selection:bg-brand-600 selection:text-white overflow-x-hidden w-full">
 
   <!-- ============================================== -->
   <!-- TUTOR PASSCODE LOCK SCREEN (Security Gate)     -->
@@ -155,91 +155,80 @@
   </div>
 
 
-  <!-- Top Sticky Header -->
-  <header class="sticky top-0 z-40 glass-nav border-b border-slate-800 px-4 py-3">
-    <div class="max-w-7xl mx-auto flex flex-col gap-3">
+  <!-- Top Sticky Header (Ultra-Clean & Mobile Fitted) -->
+  <header class="sticky top-0 z-40 glass-nav border-b border-slate-800/90 px-3 sm:px-4 py-2.5">
+    <div class="max-w-7xl mx-auto flex flex-col gap-2.5">
       
-      <!-- Upper Row: Logo + Controls -->
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center text-white shadow-lg badge-glow">
-            <i data-lucide="scroll" class="w-6 h-6"></i>
+      <!-- Upper Row: Brand + Status + Actions -->
+      <div class="flex items-center justify-between gap-2">
+        
+        <!-- Left: Logo & Title -->
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center text-white shadow-md badge-glow">
+            <i data-lucide="scroll" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
-          <div>
-            <h1 class="text-lg md:text-xl font-bold tracking-tight text-white flex items-center gap-2">
-              <span id="app-title">TutorPilot</span>
-              <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-medium">Bar Mitzvah</span>
-            </h1>
-            <p id="app-subtitle" class="text-xs text-slate-400 hidden sm:block">Fast memory cues & real-time student tracking</p>
+          <div class="truncate">
+            <div class="flex items-center gap-1.5">
+              <span id="app-title" class="text-base sm:text-lg font-bold text-white tracking-tight truncate">TutorPilot</span>
+              <span id="cloud-status-dot" class="w-2 h-2 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" title="Live Synced"></span>
+            </div>
+            <p id="app-subtitle" class="text-[10px] text-slate-400 truncate hidden sm:block">Bar Mitzvah Tutor Companion & Tracker</p>
           </div>
         </div>
 
-        <!-- Action Buttons: Language Toggle + Share with Rabbi -->
-        <div class="flex items-center gap-2">
-          <!-- Live Cloud Sync Status & Settings Button -->
-          <button onclick="openCloudModal()" id="btn-cloud-status" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition active:scale-95 shadow-sm" title="Real-Time Cloud Sync">
-            <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
-            <span id="cloud-status-text" class="hidden sm:inline">Local Only</span>
-            <i data-lucide="cloud" class="w-3.5 h-3.5 text-slate-400"></i>
-          </button>
-
-          <!-- Quick Share Button -->
-          <button onclick="openShareModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition active:scale-95 shadow-sm">
-            <i data-lucide="share-2" class="w-4 h-4"></i>
-            <span id="btn-share-rabbi">Share with Rabbi</span>
-          </button>
-
+        <!-- Right: Language Switch & Settings Gear -->
+        <div class="flex items-center gap-1.5 shrink-0">
+          
           <!-- Language Switcher -->
-          <button onclick="toggleLanguage()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition active:scale-95">
-            <i data-lucide="languages" class="w-4 h-4 text-brand-400"></i>
+          <button onclick="toggleLanguage()" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition active:scale-95 shadow-sm">
+            <i data-lucide="languages" class="w-3.5 h-3.5 text-brand-400"></i>
             <span id="lang-indicator">עברית</span>
           </button>
-          
-          <button onclick="lockPortal()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition" title="Lock Portal">
-            <i data-lucide="lock" class="w-4 h-4"></i>
+
+          <!-- Settings Button (Gear) -->
+          <button onclick="openSettingsModal()" class="p-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition active:scale-95 shadow-sm" title="Settings">
+            <i data-lucide="settings" class="w-4 h-4"></i>
           </button>
+
         </div>
       </div>
 
-      <!-- Lower Row: Search Bar & Tab Navigation -->
-      <div class="flex flex-col sm:flex-row gap-2 items-center justify-between">
-        <!-- Live Search Input -->
-        <div class="relative w-full sm:w-80">
-          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 rtl:left-auto rtl:right-3 pointer-events-none"></i>
-          <input 
-            type="text" 
-            id="search-input"
-            oninput="handleSearch(this.value)"
-            placeholder="Search topics, Rashis, stories..." 
-            class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-8 rtl:pr-9 rtl:pl-8 py-2 text-xs md:text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition"
-          >
-          <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 rtl:right-auto rtl:left-2.5 text-slate-400 hover:text-slate-200 p-0.5">
-            <i data-lucide="x" class="w-3.5 h-3.5"></i>
-          </button>
-        </div>
-
-        <!-- Main View Tabs -->
-        <div class="flex items-center gap-1 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-          <button id="tab-topics" onclick="switchTab('topics')" class="tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition whitespace-nowrap bg-brand-600 text-white shadow-sm">
-            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-            <span id="tab-topics-label">Jewish Concepts</span>
-            <span class="text-[10px] bg-brand-800/80 px-1.5 py-0.2 rounded-full font-mono">13</span>
-          </button>
-
-          <button id="tab-chumash" onclick="switchTab('chumash')" class="tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap">
-            <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
-            <span id="tab-chumash-label">Chumash</span>
-            <span class="text-[10px] bg-slate-800 px-1.5 py-0.2 rounded-full font-mono">23</span>
-          </button>
-
-          <button id="tab-students" onclick="switchTab('students')" class="tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap relative">
-            <i data-lucide="users" class="w-3.5 h-3.5"></i>
-            <span id="tab-students-label">Student Tracker</span>
-            <span id="student-badge-count" class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded-full font-mono border border-amber-500/30">0</span>
-          </button>
-        </div>
-
+      <!-- Lower Row: Live Search Input -->
+      <div class="relative w-full">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 rtl:left-auto rtl:right-3 pointer-events-none"></i>
+        <input 
+          type="text" 
+          id="search-input"
+          oninput="handleSearch(this.value)"
+          placeholder="Search topics, Rashis, stories, keywords..." 
+          class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-8 rtl:pr-9 rtl:pl-8 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition shadow-inner"
+        >
+        <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 rtl:right-auto rtl:left-2.5 text-slate-400 hover:text-slate-200 p-0.5">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
       </div>
+
+      <!-- Desktop-Only Tab Row (Hidden on mobile phones, mobile uses bottom dock) -->
+      <div class="hidden md:flex items-center gap-1.5 pt-0.5">
+        <button id="tab-topics" onclick="switchTab('topics')" class="tab-btn flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition whitespace-nowrap bg-brand-600 text-white shadow-sm">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <span id="tab-topics-label">Jewish Concepts</span>
+          <span class="text-[10px] bg-brand-800/80 px-1.5 py-0.2 rounded-full font-mono">13</span>
+        </button>
+
+        <button id="tab-chumash" onclick="switchTab('chumash')" class="tab-btn flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap">
+          <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+          <span id="tab-chumash-label">Chumash</span>
+          <span class="text-[10px] bg-slate-800 px-1.5 py-0.2 rounded-full font-mono">23</span>
+        </button>
+
+        <button id="tab-students" onclick="switchTab('students')" class="tab-btn flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap relative">
+          <i data-lucide="users" class="w-3.5 h-3.5"></i>
+          <span id="tab-students-label">Student Tracker</span>
+          <span id="student-badge-count" class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded-full font-mono border border-amber-500/30">0</span>
+        </button>
+      </div>
+
     </div>
   </header>
 
@@ -526,6 +515,83 @@
     </div>
   </div>
 
+
+  <!-- ============================================== -->
+  <!-- MODAL: APP SETTINGS (Cloud, Share, Backup)     -->
+  <!-- ============================================== -->
+  <div id="modal-settings" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 hidden backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-6 shadow-2xl relative">
+      <button onclick="closeSettingsModal()" class="absolute top-4 right-4 rtl:right-auto rtl:left-4 text-slate-400 hover:text-slate-200">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-10 h-10 rounded-xl bg-slate-800 text-slate-200 border border-slate-700 flex items-center justify-center">
+          <i data-lucide="settings" class="w-5 h-5 text-amber-400"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">Tutor Settings</h3>
+          <p class="text-xs text-slate-400">Sync, Backups & Security</p>
+        </div>
+      </div>
+
+      <div class="space-y-2.5">
+        
+        <!-- Live Cloud Sync Status Tile -->
+        <button onclick="closeSettingsModal(); openCloudModal();" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition active:scale-98 text-left">
+          <div class="flex items-center gap-3">
+            <span id="cloud-status-dot-settings" class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+            <div>
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>Database Sync</span>
+                <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono">Live</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-0.5">Connected to Supabase Cloud</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+        </button>
+
+        <!-- Share with Rabbi (Link / QR) Tile -->
+        <button onclick="closeSettingsModal(); openShareModal();" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition active:scale-98 text-left">
+          <div class="flex items-center gap-3">
+            <i data-lucide="share-2" class="w-4 h-4 text-emerald-400"></i>
+            <div>
+              <div class="text-xs font-bold text-white">Share QR / WhatsApp Link</div>
+              <p class="text-[11px] text-slate-400 mt-0.5">Send instant link or QR to Rabbi</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+        </button>
+
+        <!-- Download Backup Tile -->
+        <button onclick="exportDataJson()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition active:scale-98 text-left">
+          <div class="flex items-center gap-3">
+            <i data-lucide="download" class="w-4 h-4 text-cyan-400"></i>
+            <div>
+              <div class="text-xs font-bold text-white">Download Student Backup</div>
+              <p class="text-[11px] text-slate-400 mt-0.5">Save offline JSON file to device</p>
+            </div>
+          </div>
+          <i data-lucide="download" class="w-4 h-4 text-slate-500"></i>
+        </button>
+
+        <!-- Re-Lock Portal Tile -->
+        <button onclick="lockPortal()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-rose-900/50 text-rose-300 transition active:scale-98 text-left">
+          <div class="flex items-center gap-3">
+            <i data-lucide="lock" class="w-4 h-4 text-rose-400"></i>
+            <div>
+              <div class="text-xs font-bold text-rose-300">Lock Portal (PIN 770)</div>
+              <p class="text-[11px] text-slate-500 mt-0.5">Lock screen until PIN is entered</p>
+            </div>
+          </div>
+          <i data-lucide="shield" class="w-4 h-4 text-slate-500"></i>
+        </button>
+
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 text-white text-xs py-2.5 px-5 rounded-full shadow-2xl z-50 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2 font-medium">
     <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
@@ -665,6 +731,15 @@ alter publication supabase_realtime add table public.students_sync;`;
         showToast('SQL Schema copied to clipboard!');
         setTimeout(() => { btn.textContent = 'Copy SQL'; }, 2000);
       });
+    }
+
+    
+    function openSettingsModal() {
+      document.getElementById('modal-settings').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('modal-settings').classList.add('hidden');
     }
 
     function openCloudModal() {
