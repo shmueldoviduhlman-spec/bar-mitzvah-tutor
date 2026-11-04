@@ -935,7 +935,7 @@
   </div>
 
   <!-- ============================================== -->
-  <!-- MODAL: SCHEDULE LESSON                         -->
+  <!-- MODAL: SCHEDULE LESSON & DAY VIEW              -->
   <!-- ============================================== -->
   <div id="modal-schedule-lesson" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 hidden backdrop-blur-sm">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
@@ -946,27 +946,57 @@
       <!-- Modal Header -->
       <div class="flex items-center gap-3 mb-4">
         <div class="w-10 h-10 rounded-xl bg-brand-500/20 text-brand-400 border border-brand-500/30 flex items-center justify-center shrink-0">
-          <i data-lucide="calendar-plus" class="w-5 h-5"></i>
+          <i data-lucide="calendar" class="w-5 h-5"></i>
         </div>
         <div>
-          <h3 id="modal-schedule-title" class="text-base font-bold text-white">Schedule Bar Mitzvah Lesson</h3>
+          <h3 id="modal-schedule-title" class="text-base font-bold text-white">Day Schedule & Lessons</h3>
           <p id="modal-schedule-date-subtitle" class="text-xs text-brand-300 font-mono mt-0.5">Sunday, Nov 15 • כ״ה חשון תשפ״ז</p>
         </div>
       </div>
 
       <!-- Existing Lessons on this Day -->
-      <div id="schedule-existing-container" class="mb-4 hidden">
-        <label id="lbl-existing-lessons-title" class="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
-          <i data-lucide="list" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span id="txt-existing-lessons-title">Scheduled Lessons for this Day</span>
-        </label>
-        <div id="schedule-existing-list" class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
-          <!-- Populated via JS -->
+      <div id="schedule-existing-container" class="mb-4">
+        <div class="flex items-center justify-between mb-2">
+          <label id="lbl-existing-lessons-title" class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+            <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span id="txt-existing-lessons-title">Scheduled Lessons for this Day</span>
+          </label>
+          <span id="txt-existing-lessons-count" class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">0</span>
+        </div>
+        <div id="schedule-existing-list" class="space-y-2">
+          <!-- Populated dynamically via JS with clean interactive cards -->
         </div>
       </div>
 
+      <!-- Toggle to show Add Lesson form if lessons already exist -->
+      <div id="schedule-add-toggle-container" class="mb-3 hidden">
+        <button
+          type="button"
+          onclick="toggleScheduleAddForm()"
+          id="btn-toggle-schedule-add"
+          class="w-full py-2.5 px-3 rounded-xl border border-dashed border-brand-500/40 bg-brand-950/30 hover:bg-brand-900/40 text-brand-300 font-semibold text-xs flex items-center justify-center gap-1.5 transition"
+        >
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span id="lbl-toggle-schedule-add">+ Add a Lesson for this Date</span>
+        </button>
+      </div>
+
       <!-- Booking Form -->
-      <form id="schedule-lesson-form" onsubmit="handleSaveScheduledLesson(event)" class="space-y-4">
+      <form id="schedule-lesson-form" onsubmit="handleSaveScheduledLesson(event)" class="space-y-3.5 border-t border-slate-800/80 pt-3.5">
+        <div class="flex items-center justify-between pb-1">
+          <span class="text-xs font-bold text-white flex items-center gap-1.5">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5 text-brand-400"></i>
+            <span id="lbl-form-section-title">Schedule New Lesson</span>
+          </span>
+          <button
+            type="button"
+            id="btn-hide-schedule-form"
+            onclick="toggleScheduleAddForm(false)"
+            class="text-[11px] text-slate-400 hover:text-white hidden"
+          >
+            Hide Form
+          </button>
+        </div>
 
         <!-- Student Selector -->
         <div>
@@ -997,21 +1027,31 @@
         </div>
 
         <!-- Weekly Recurrence Checkbox -->
-        <div class="flex items-center gap-2 p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+        <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-950/70 border border-slate-800">
           <input type="checkbox" id="schedule-repeat-weekly" class="w-4 h-4 rounded text-brand-600 bg-slate-900 border-slate-700 focus:ring-brand-500">
           <label for="schedule-repeat-weekly" id="lbl-schedule-repeat" class="text-xs text-slate-300 cursor-pointer select-none">
             Repeat weekly on this day (e.g. every week)
           </label>
         </div>
 
-        <!-- Optional Lesson Focus / Topic -->
+        <!-- Lesson Focus / What to teach him -->
         <div>
-          <label id="lbl-schedule-topic" class="block text-xs font-medium text-slate-300 mb-1">Lesson Focus / Notes (Optional)</label>
-          <input type="text" id="schedule-topic-notes" placeholder="e.g. Reviewing Tefillin & Haftarah" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
+          <label id="lbl-schedule-topic" class="block text-xs font-medium text-slate-300 mb-1">
+            What to teach him during this session? (Optional)
+          </label>
+          <textarea
+            id="schedule-topic-notes"
+            rows="2"
+            placeholder="e.g. Parshat Beshalach Aliyah 1, Haftarah trope, Tefillin demonstration, speech practice..."
+            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
+          ></textarea>
+          <span class="text-[10px] text-slate-400 block mt-0.5" id="lbl-schedule-topic-hint">
+            You can click on the student on the calendar anytime to view what to teach.
+          </span>
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
           <button type="button" onclick="closeScheduleLessonModal()" id="btn-cancel-schedule" class="px-3.5 py-2 text-xs rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
             Cancel
           </button>
@@ -1331,7 +1371,9 @@
         year: new Date().getFullYear(),
         month: new Date().getMonth(),
         selectedDateStr: null,
-        selectedTimeSlot: '4:30 PM'
+        selectedTimeSlot: '4:30 PM',
+        selectedSessionId: null,
+        isAddFormVisible: false
       },
       cloud: {
         url: localStorage.getItem('tutor_sb_url') || 'https://bpkwnqbabokesuesvkex.supabase.co',
@@ -4943,9 +4985,23 @@ alter publication supabase_realtime add table public.students_sync;`;
       (APP_STATE.students || []).forEach(student => {
         (student.schedule || []).forEach(s => {
           if (s.repeatWeekly && s.dayOfWeek === dayOfWeek) {
-            sessions.push({ ...s, studentId: student.id, studentName: student.name, studentAvatar: student.avatar });
+            sessions.push({
+              ...s,
+              studentId: student.id,
+              studentName: student.name,
+              studentAvatar: student.avatar,
+              studentParsha: student.parshaOrDate || '',
+              studentNotes: student.notes || ''
+            });
           } else if (!s.repeatWeekly && s.dateStr === dateStr) {
-            sessions.push({ ...s, studentId: student.id, studentName: student.name, studentAvatar: student.avatar });
+            sessions.push({
+              ...s,
+              studentId: student.id,
+              studentName: student.name,
+              studentAvatar: student.avatar,
+              studentParsha: student.parshaOrDate || '',
+              studentNotes: student.notes || ''
+            });
           }
         });
       });
@@ -5053,8 +5109,8 @@ alter publication supabase_realtime add table public.students_sync;`;
 
         return `
           <div
-            onclick="event.stopPropagation(); openStudentDrawer('${s.studentId}')"
-            title="${t.jumpToPortfolioHint}: ${s.studentName} (${s.time})"
+            onclick="event.stopPropagation(); openScheduleLessonModal('${dateStr}', '${s.id}')"
+            title="${s.studentName} (${s.time}) - ${I18N[APP_STATE.lang].whatToTeachPrompt || 'Click to view teaching notes'}"
             class="cursor-pointer group flex items-center justify-center sm:justify-between gap-0.5 sm:gap-1 px-1 py-0.5 rounded bg-brand-950/80 hover:bg-brand-900 border border-brand-500/30 hover:border-brand-400 text-brand-200 transition text-[9px] sm:text-[10px] leading-tight overflow-hidden w-full max-w-full shadow-2xs"
           >
             <div class="flex items-center gap-0.5 sm:gap-1 min-w-0 overflow-hidden">
@@ -5116,8 +5172,10 @@ alter publication supabase_realtime add table public.students_sync;`;
       openScheduleLessonModal(`${y}-${m}-${d}`);
     }
 
-    function openScheduleLessonModal(dateStr) {
+    function openScheduleLessonModal(dateStr, targetSessionId) {
       APP_STATE.calendar.selectedDateStr = dateStr;
+      APP_STATE.calendar.selectedSessionId = targetSessionId || null;
+      APP_STATE.calendar.isAddFormVisible = false;
       const modal = document.getElementById('modal-schedule-lesson');
       if (!modal) return;
 
@@ -5130,7 +5188,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       const dayOfWeekName = t.daysOfWeekFull[dateObj.getDay()];
 
       const titleEl = document.getElementById('modal-schedule-title');
-      if (titleEl) titleEl.textContent = t.addLessonTitle;
+      if (titleEl) titleEl.textContent = isHe ? "לוח שיעורים ליום זה" : "Day Schedule & Lessons";
 
       const subtitle = document.getElementById('modal-schedule-date-subtitle');
       if (subtitle) {
@@ -5155,10 +5213,22 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (lblRepeat) lblRepeat.textContent = t.repeatWeeklyLabel;
 
       const lblTopic = document.getElementById('lbl-schedule-topic');
-      if (lblTopic) lblTopic.textContent = t.lessonTopicOptional;
+      if (lblTopic) lblTopic.textContent = isHe ? "מה ללמד בשיעור זה? (אופציונלי)" : "What to teach him during this session? (Optional)";
 
       const topicInput = document.getElementById('schedule-topic-notes');
-      if (topicInput) topicInput.value = '';
+      if (topicInput) {
+        topicInput.value = '';
+        topicInput.placeholder = isHe
+          ? "לדוגמה: עלייה א׳ בפרשה, ברכות ההפטרה, חזרת תפילין, תרגול דרשה..."
+          : "e.g. Parsha Aliyah 1, Haftarah trope, Tefillin demonstration, speech practice...";
+      }
+
+      const topicHint = document.getElementById('lbl-schedule-topic-hint');
+      if (topicHint) {
+        topicHint.textContent = isHe
+          ? "תוכל ללחוץ על התלמיד בלוח השנה בכל עת כדי לראות מה ללמד אותו."
+          : "You can click on the student on the calendar anytime to view what to teach.";
+      }
 
       const btnCancel = document.getElementById('btn-cancel-schedule');
       if (btnCancel) btnCancel.textContent = t.cancel;
@@ -5167,7 +5237,16 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (btnSave) btnSave.textContent = t.addLessonBtn;
 
       const txtExisting = document.getElementById('txt-existing-lessons-title');
-      if (txtExisting) txtExisting.textContent = t.scheduledLessonsHeader;
+      if (txtExisting) txtExisting.textContent = isHe ? "שיעורים שנקבעו ליום זה" : "Scheduled Lessons for this Day";
+
+      const lblToggleAdd = document.getElementById('lbl-toggle-schedule-add');
+      if (lblToggleAdd) lblToggleAdd.textContent = isHe ? "+ הוסף שיעור נוסף ליום זה" : "+ Add a Lesson for this Date";
+
+      const lblFormTitle = document.getElementById('lbl-form-section-title');
+      if (lblFormTitle) lblFormTitle.textContent = isHe ? "קביעת שיעור חדש" : "Schedule New Lesson";
+
+      const btnHideForm = document.getElementById('btn-hide-schedule-form');
+      if (btnHideForm) btnHideForm.textContent = isHe ? "הסתר טופס" : "Hide Form";
 
       const studentSelect = document.getElementById('schedule-student-select');
       if (studentSelect) {
@@ -5185,32 +5264,267 @@ alter publication supabase_realtime add table public.students_sync;`;
       const repeatWeeklyCheckbox = document.getElementById('schedule-repeat-weekly');
       if (repeatWeeklyCheckbox) repeatWeeklyCheckbox.checked = false;
 
-      const existingContainer = document.getElementById('schedule-existing-container');
-      const existingList = document.getElementById('schedule-existing-list');
-      const existingSessions = getScheduledSessionsForDate(dateObj);
-
-      if (existingSessions.length > 0) {
-        existingContainer.classList.remove('hidden');
-        existingList.innerHTML = existingSessions.map(s => `
-          <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950 border border-slate-800 text-xs">
-            <div class="flex items-center gap-2">
-              <span class="font-mono text-amber-400 font-bold">${s.time}</span>
-              <span class="text-white font-semibold">${s.studentName}</span>
-              ${s.repeatWeekly ? `<span class="text-[9px] px-1.5 py-0.2 rounded bg-brand-500/20 text-brand-300 font-mono">${t.weeklyBadge}</span>` : ''}
-              ${s.topic ? `<span class="text-slate-400 italic text-[11px] truncate max-w-[130px]">• ${s.topic}</span>` : ''}
-            </div>
-            <button type="button" onclick="deleteScheduledLesson('${s.studentId}', '${s.id}', event)" class="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-slate-800 transition" title="Delete">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
-          </div>
-        `).join('');
-      } else {
-        existingContainer.classList.add('hidden');
-        existingList.innerHTML = '';
-      }
+      // Populate existing lessons and handle view state
+      renderExistingLessonsInModal();
 
       modal.classList.remove('hidden');
       lucide.createIcons();
+    }
+
+    function renderExistingLessonsInModal() {
+      const dateStr = APP_STATE.calendar.selectedDateStr;
+      if (!dateStr) return;
+
+      const parts = dateStr.split('-');
+      const dateObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      const existingSessions = getScheduledSessionsForDate(dateObj);
+      const isHe = APP_STATE.lang === 'he';
+
+      const existingContainer = document.getElementById('schedule-existing-container');
+      const existingList = document.getElementById('schedule-existing-list');
+      const countBadge = document.getElementById('txt-existing-lessons-count');
+      const addToggleContainer = document.getElementById('schedule-add-toggle-container');
+      const bookingForm = document.getElementById('schedule-lesson-form');
+      const hideFormBtn = document.getElementById('btn-hide-schedule-form');
+
+      if (countBadge) countBadge.textContent = String(existingSessions.length);
+
+      if (existingSessions.length > 0) {
+        if (existingContainer) existingContainer.classList.remove('hidden');
+
+        // Auto-expand if only 1 session and not specifically unselected
+        if (!APP_STATE.calendar.selectedSessionId && existingSessions.length === 1) {
+          APP_STATE.calendar.selectedSessionId = existingSessions[0].id;
+        }
+
+        if (existingList) {
+          existingList.innerHTML = existingSessions.map(s => {
+            const isExpanded = (APP_STATE.calendar.selectedSessionId === s.id);
+            const avatar = s.studentAvatar
+              ? `<img src="${s.studentAvatar}" class="w-8 h-8 rounded-full object-cover shrink-0 ring-1 ring-brand-500/40">`
+              : `<span class="w-8 h-8 rounded-full bg-brand-500/20 text-brand-300 font-bold text-xs flex items-center justify-center shrink-0 border border-brand-500/30">${escapeHtml(s.studentName.charAt(0))}</span>`;
+
+            const hasSpecificTopic = !!(s.topic && s.topic.trim());
+            const teachingText = hasSpecificTopic
+              ? s.topic.trim()
+              : (s.studentNotes || s.studentParsha || (isHe ? 'לא הוגדרו נושאי לימוד ספציפיים לשעה זו. לחץ על "ערוך" כדי להוסיף מה ללמד.' : 'No specific lesson notes added for this hour. Tap "Edit" to add what to teach.'));
+
+            return `
+              <div class="rounded-xl border ${isExpanded ? 'border-brand-500/60 bg-slate-950 shadow-md ring-1 ring-brand-500/20' : 'border-slate-800 bg-slate-950/80 hover:border-slate-700'} overflow-hidden transition">
+                <!-- Main Header Row (Clickable) -->
+                <div
+                  onclick="toggleLessonTeachingDetails('${s.id}')"
+                  class="p-3 flex items-center justify-between gap-2.5 cursor-pointer select-none group"
+                >
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/25 font-mono font-bold text-xs shrink-0">
+                      ${s.time}
+                    </span>
+                    ${avatar}
+                    <div class="min-w-0">
+                      <span class="text-white font-bold text-xs sm:text-sm block truncate group-hover:text-brand-300 transition">
+                        ${escapeHtml(s.studentName)}
+                      </span>
+                      ${s.studentParsha ? `<span class="text-[11px] text-slate-400 truncate block">${escapeHtml(s.studentParsha)}</span>` : ''}
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-2 shrink-0">
+                    <span class="text-[11px] font-semibold text-brand-300 flex items-center gap-1 bg-brand-500/15 hover:bg-brand-500/25 px-2.5 py-1 rounded-full border border-brand-500/30 transition">
+                      <span>${isHe ? 'מה ללמד' : 'What to teach'}</span>
+                      <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}" class="w-3.5 h-3.5"></i>
+                    </span>
+                    <button
+                      type="button"
+                      onclick="deleteScheduledLesson('${s.studentId}', '${s.id}', event)"
+                      class="text-slate-500 hover:text-red-400 p-1.5 rounded-lg hover:bg-slate-800 transition"
+                      title="${isHe ? 'הסר שיעור' : 'Remove Lesson'}"
+                    >
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Collapsible Teaching Plan Details -->
+                ${isExpanded ? `
+                  <div class="px-3.5 pb-3.5 pt-1 border-t border-slate-800/80 bg-slate-900/60 space-y-2.5 text-xs">
+                    <div class="p-3 rounded-xl bg-brand-950/40 border border-brand-500/25 space-y-1.5">
+                      <div class="flex items-center justify-between text-brand-300 font-bold text-xs">
+                        <span class="flex items-center gap-1.5">
+                          <i data-lucide="book-open" class="w-3.5 h-3.5 text-amber-400"></i>
+                          ${isHe ? 'חומר לימוד ומשימות לשיעור זה:' : 'What he needs to learn in this session:'}
+                        </span>
+                        <button
+                          type="button"
+                          onclick="event.stopPropagation(); startEditLessonTopic('${s.studentId}', '${s.id}')"
+                          class="text-amber-400 hover:text-white font-semibold underline text-[11px]"
+                        >
+                          ${isHe ? 'ערוך' : 'Edit'}
+                        </button>
+                      </div>
+
+                      <div id="lesson-topic-display-${s.id}" class="text-slate-200 text-xs leading-relaxed whitespace-pre-wrap pl-5 rtl:pl-0 rtl:pr-5">
+                        ${escapeHtml(teachingText)}
+                      </div>
+
+                      <div id="lesson-topic-edit-box-${s.id}" class="hidden space-y-2 pt-1.5">
+                        <textarea
+                          id="lesson-topic-input-${s.id}"
+                          rows="2"
+                          class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
+                          placeholder="${isHe ? 'לדוגמה: עלייה א׳, הפטרה, ברכות...' : 'e.g. Parsha Aliyah 1, Haftarah blessings, Tefillin...'}"
+                        >${escapeHtml(s.topic || '')}</textarea>
+                        <div class="flex items-center gap-2 justify-end">
+                          <button
+                            type="button"
+                            onclick="event.stopPropagation(); cancelEditLessonTopic('${s.id}')"
+                            class="px-2.5 py-1 text-[11px] text-slate-400 hover:text-white"
+                          >
+                            ${isHe ? 'ביטול' : 'Cancel'}
+                          </button>
+                          <button
+                            type="button"
+                            onclick="event.stopPropagation(); saveInlineLessonTopic('${s.studentId}', '${s.id}')"
+                            class="px-3.5 py-1 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-[11px] font-semibold shadow"
+                          >
+                            ${isHe ? 'שמור' : 'Save'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
+                      <span class="flex items-center gap-1">
+                        <i data-lucide="repeat" class="w-3 h-3 text-brand-400"></i>
+                        ${s.repeatWeekly ? (isHe ? 'שיעור שבועי קבוע' : 'Weekly recurring lesson') : (isHe ? 'שיעור חד-פעמי' : 'Single session')}
+                      </span>
+                      <button
+                        type="button"
+                        onclick="event.stopPropagation(); closeScheduleLessonModal(); openStudentDrawer('${s.studentId}')"
+                        class="text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 transition"
+                      >
+                        <span>${isHe ? 'צפה בתיק התלמיד המלא' : 'Open student portfolio'}</span>
+                        <i data-lucide="arrow-right" class="w-3 h-3 rtl:rotate-180"></i>
+                      </button>
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('');
+        }
+
+        if (addToggleContainer) addToggleContainer.classList.remove('hidden');
+        if (bookingForm) {
+          if (APP_STATE.calendar.isAddFormVisible) {
+            bookingForm.classList.remove('hidden');
+            if (hideFormBtn) hideFormBtn.classList.remove('hidden');
+          } else {
+            bookingForm.classList.add('hidden');
+            if (hideFormBtn) hideFormBtn.classList.add('hidden');
+          }
+        }
+
+      } else {
+        // No lessons on this day
+        if (existingContainer) existingContainer.classList.remove('hidden');
+        if (existingList) {
+          existingList.innerHTML = `
+            <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 text-center text-xs text-slate-400">
+              <i data-lucide="calendar-x" class="w-5 h-5 mx-auto mb-1 text-slate-500"></i>
+              ${isHe ? 'עדיין לא נקבעו שיעורים ליום זה. מלא את הפרטים מטה כדי להוסיף שיעור.' : 'No lessons scheduled for this day yet. Fill out the form below to book a lesson.'}
+            </div>
+          `;
+        }
+        if (addToggleContainer) addToggleContainer.classList.add('hidden');
+        if (bookingForm) {
+          bookingForm.classList.remove('hidden');
+          if (hideFormBtn) hideFormBtn.classList.add('hidden');
+        }
+      }
+
+      lucide.createIcons();
+    }
+
+    function toggleLessonTeachingDetails(sessionId) {
+      if (APP_STATE.calendar.selectedSessionId === sessionId) {
+        APP_STATE.calendar.selectedSessionId = null;
+      } else {
+        APP_STATE.calendar.selectedSessionId = sessionId;
+      }
+      renderExistingLessonsInModal();
+    }
+
+    function toggleScheduleAddForm(forceState) {
+      if (typeof forceState === 'boolean') {
+        APP_STATE.calendar.isAddFormVisible = forceState;
+      } else {
+        APP_STATE.calendar.isAddFormVisible = !APP_STATE.calendar.isAddFormVisible;
+      }
+
+      const bookingForm = document.getElementById('schedule-lesson-form');
+      const hideFormBtn = document.getElementById('btn-hide-schedule-form');
+
+      if (bookingForm) {
+        if (APP_STATE.calendar.isAddFormVisible) {
+          bookingForm.classList.remove('hidden');
+          if (hideFormBtn) hideFormBtn.classList.remove('hidden');
+          bookingForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          bookingForm.classList.add('hidden');
+          if (hideFormBtn) hideFormBtn.classList.add('hidden');
+        }
+      }
+      lucide.createIcons();
+    }
+
+    function startEditLessonTopic(studentId, lessonId) {
+      const displayEl = document.getElementById(`lesson-topic-display-${lessonId}`);
+      const editBox = document.getElementById(`lesson-topic-edit-box-${lessonId}`);
+      const input = document.getElementById(`lesson-topic-input-${lessonId}`);
+      if (displayEl) displayEl.classList.add('hidden');
+      if (editBox) editBox.classList.remove('hidden');
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }
+
+    function cancelEditLessonTopic(lessonId) {
+      const displayEl = document.getElementById(`lesson-topic-display-${lessonId}`);
+      const editBox = document.getElementById(`lesson-topic-edit-box-${lessonId}`);
+      if (displayEl) displayEl.classList.remove('hidden');
+      if (editBox) editBox.classList.add('hidden');
+    }
+
+    function saveInlineLessonTopic(studentId, lessonId) {
+      const input = document.getElementById(`lesson-topic-input-${lessonId}`);
+      if (!input) return;
+      const newTopic = input.value.trim();
+
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+
+      if (!Array.isArray(student.schedule)) student.schedule = [];
+      const session = student.schedule.find(s => s.id === lessonId);
+      if (session) {
+        session.topic = newTopic;
+      }
+      if (student.completed_topics?._meta?.lessons) {
+        const ml = student.completed_topics._meta.lessons.find(l => l.id === lessonId);
+        if (ml) {
+          ml.subject = newTopic;
+          ml.notes = newTopic;
+        }
+      }
+
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud.client) {
+        pushStudentToCloud(student);
+      }
+      renderCalendar();
+      renderExistingLessonsInModal();
+      showToast(APP_STATE.lang === 'he' ? 'נושאי השיעור עודכנו בהצלחה!' : 'Lesson teaching notes updated!');
     }
 
     function closeScheduleLessonModal() {
@@ -5274,8 +5588,11 @@ alter publication supabase_realtime add table public.students_sync;`;
         pushStudentToCloud(student);
       }
 
-      closeScheduleLessonModal();
+      APP_STATE.calendar.isAddFormVisible = false;
+      APP_STATE.calendar.selectedSessionId = newSession.id;
+
       renderCalendar();
+      renderExistingLessonsInModal();
       showToast(t.toastLessonScheduled);
     }
 
@@ -5294,35 +5611,12 @@ alter publication supabase_realtime add table public.students_sync;`;
         pushStudentToCloud(student);
       }
 
-      if (APP_STATE.calendar.selectedDateStr) {
-        const parts = APP_STATE.calendar.selectedDateStr.split('-');
-        const dateObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-        const existingSessions = getScheduledSessionsForDate(dateObj);
-        const existingContainer = document.getElementById('schedule-existing-container');
-        const existingList = document.getElementById('schedule-existing-list');
-
-        if (existingSessions.length > 0) {
-          existingContainer.classList.remove('hidden');
-          existingList.innerHTML = existingSessions.map(s => `
-            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950 border border-slate-800 text-xs">
-              <div class="flex items-center gap-2">
-                <span class="font-mono text-amber-400 font-bold">${s.time}</span>
-                <span class="text-white font-semibold">${s.studentName}</span>
-                ${s.repeatWeekly ? `<span class="text-[9px] px-1.5 py-0.2 rounded bg-brand-500/20 text-brand-300 font-mono">${t.weeklyBadge}</span>` : ''}
-                ${s.topic ? `<span class="text-slate-400 italic text-[11px] truncate max-w-[130px]">• ${s.topic}</span>` : ''}
-              </div>
-              <button type="button" onclick="deleteScheduledLesson('${s.studentId}', '${s.id}', event)" class="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-slate-800 transition" title="Delete">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          `).join('');
-        } else {
-          existingContainer.classList.add('hidden');
-          existingList.innerHTML = '';
-        }
+      if (APP_STATE.calendar.selectedSessionId === lessonId) {
+        APP_STATE.calendar.selectedSessionId = null;
       }
 
       renderCalendar();
+      renderExistingLessonsInModal();
       showToast(t.toastLessonRemoved);
       lucide.createIcons();
     }
