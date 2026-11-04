@@ -1319,6 +1319,7 @@
       expandedParshaIds: {},
       studyAdditions: {},
       geminiApiKey: localStorage.getItem('tutor_gemini_key') || '',
+      geminiModel: localStorage.getItem('tutor_gemini_model') || '',
       aiMessages: [],
       aiIsThinking: false,
       trackerFilter: 'all', // 'all', 'topics', 'chumash'
@@ -5635,17 +5636,74 @@ alter publication supabase_realtime add table public.students_sync;`;
       await sendAiPromptToGemini(userText);
     }
 
+    const GEMINI_CANDIDATE_MODELS = [
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-2.5-pro',
+      'gemini-2.0-flash-exp',
+      'gemini-1.5-flash-latest',
+      'gemini-1.5-pro',
+      'gemini-1.5-flash'
+    ];
+
+    function findStudentFlexible(nameOrId) {
+      if (!nameOrId) return null;
+      const raw = String(nameOrId).toLowerCase().trim();
+      const cleaned = raw.replace(/^(a|an|the)\s+/i, '').trim();
+      return (APP_STATE.students || []).find(s => {
+        const sName = (s.name || '').toLowerCase().trim();
+        const sId = (s.id || '').toLowerCase().trim();
+        return sId === raw || sId === cleaned ||
+               sName === raw || sName === cleaned ||
+               sName.includes(raw) || (cleaned && sName.includes(cleaned)) ||
+               raw.includes(sName) || (cleaned && cleaned.includes(sName));
+      }) || null;
+    }
+
+    function formatFriendlyTimeSlot(rawTime) {
+      if (!rawTime) return '4:30 PM';
+      let str = String(rawTime).trim();
+      const clean = str.toLowerCase().replace(/\s+/g, '');
+      if (clean === '530' || clean === '5:30' || clean === '5:30pm') return '5:30 PM';
+      if (clean === '430' || clean === '4:30' || clean === '4:30pm') return '4:30 PM';
+      if (clean === '330' || clean === '3:30' || clean === '3:30pm') return '3:30 PM';
+      if (clean === '500' || clean === '5:00' || clean === '5' || clean === '5pm') return '5:00 PM';
+      if (clean === '400' || clean === '4:00' || clean === '4' || clean === '4pm') return '4:00 PM';
+      if (clean === '600' || clean === '6:00' || clean === '6' || clean === '6pm') return '6:00 PM';
+      if (clean === '630' || clean === '6:30' || clean === '6:30pm') return '6:30 PM';
+      if (clean === '700' || clean === '7:00' || clean === '7' || clean === '7pm') return '7:00 PM';
+      const match24 = str.match(/^(\d{1,2}):(\d{2})$/);
+      if (match24) {
+        let h = parseInt(match24[1], 10);
+        const m = match24[2];
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        if (h > 12) h -= 12;
+        if (h === 0) h = 12;
+        return `${h}:${m} ${ampm}`;
+      }
+      return str;
+    }
+
     async function sendAiPromptToGemini(userText) {
       const apiKey = APP_STATE.geminiApiKey;
       const portalContext = getPortalContextData();
 
+      const now = new Date();
+      const todayStr = now.toISOString().split('T')[0];
+      const weekdayStr = now.toLocaleDateString('en-US', { weekday: 'long' });
+
       const systemInstruction = `You are TutorPilot AI, the intelligent assistant for the Bar Mitzvah Tutor Companion web portal.
 The portal is used by tutors and Rabbi Closter to prepare Bar Mitzvah boys.
+
+Current Reference Date:
+Today is ${weekdayStr}, ${todayStr}.
+When the user mentions days of the week like "this Thursday", "tomorrow", or "next Sunday", calculate the exact YYYY-MM-DD date based on today (${todayStr}).
+When the user gives a time like "530" or "5:30", convert to standard time slot (e.g. "5:30 PM").
 
 Portal Capabilities & Your Authorized Tools:
 1. add_student: Add a new student to the database.
 2. update_student: Rename a student, update their notes, or set their parsha.
-3. schedule_lesson: Schedule a calendar tutoring session (date YYYY-MM-DD, time slot e.g. "4:30 PM", subject).
+3. schedule_lesson: Schedule a calendar tutoring session (date YYYY-MM-DD, time slot e.g. "5:30 PM", subject). If the student does not exist yet in the roster, they are automatically created and scheduled.
 4. cancel_lesson: Remove a scheduled lesson.
 5. mark_topic_progress: Mark a Jewish Concept as completed or incomplete.
 6. mark_parsha_progress: Mark a Chumash Parsha as completed or incomplete.
@@ -5678,19 +5736,56 @@ Guidelines:
       };
 
       try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestPayload)
+        let candidateQueue = [];
+        if (APP_STATE.geminiModel) candidateQueue.push(APP_STATE.geminiModel);
+        const storedModel = localStorage.getItem('tutor_gemini_model');
+        if (storedModel && !candidateQueue.includes(storedModel)) candidateQueue.push(storedModel);
+        GEMINI_CANDIDATE_MODELS.forEach(m => {
+          if (!candidateQueue.includes(m)) candidateQueue.push(m);
         });
 
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error?.message || `API error ${response.status}`);
+        let data = null;
+        let workingModel = null;
+        let lastError = null;
+
+        for (const candidateModel of candidateQueue) {
+          try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${candidateModel}:generateContent?key=${apiKey}`;
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(requestPayload)
+            });
+
+            if (response.ok) {
+              data = await response.json();
+              workingModel = candidateModel;
+              APP_STATE.geminiModel = workingModel;
+              localStorage.setItem('tutor_gemini_model', workingModel);
+              break;
+            }
+
+            const errData = await response.json().catch(() => ({}));
+            const errMsg = errData.error?.message || `API error ${response.status}`;
+            if (response.status === 404 || errMsg.includes('not found') || errMsg.includes('not supported')) {
+              lastError = new Error(errMsg);
+              continue;
+            } else {
+              throw new Error(errMsg);
+            }
+          } catch (modelErr) {
+            if (modelErr.message && (modelErr.message.includes('not found') || modelErr.message.includes('not supported'))) {
+              lastError = modelErr;
+              continue;
+            }
+            throw modelErr;
+          }
         }
 
-        const data = await response.json();
+        if (!data) {
+          throw lastError || new Error('No available Gemini model supported for this API key');
+        }
+
         const candidate = data.candidates?.[0]?.content;
         const parts = candidate?.parts || [];
 
@@ -5729,7 +5824,8 @@ Guidelines:
           };
 
           try {
-            const secondResp = await fetch(url, {
+            const secondUrl = `https://generativelanguage.googleapis.com/v1beta/models/${workingModel}:generateContent?key=${apiKey}`;
+            const secondResp = await fetch(secondUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(secondPayload)
@@ -5806,8 +5902,7 @@ Guidelines:
       }
 
       if (name === 'update_student') {
-        const target = (args.studentNameOrId || '').toLowerCase().trim();
-        const student = APP_STATE.students.find(s => s.id === target || s.name.toLowerCase().includes(target));
+        const student = findStudentFlexible(args.studentNameOrId);
         if (!student) return { success: false, error: `Student not found: ${args.studentNameOrId}` };
 
         if (args.newName) student.name = args.newName.trim();
@@ -5833,18 +5928,37 @@ Guidelines:
       }
 
       if (name === 'schedule_lesson') {
-        const target = (args.studentNameOrId || '').toLowerCase().trim();
-        const student = APP_STATE.students.find(s => s.id === target || s.name.toLowerCase().includes(target));
-        if (!student) return { success: false, error: `Student not found: ${args.studentNameOrId}` };
+        const rawTarget = (args.studentNameOrId || '').trim();
+        let student = findStudentFlexible(rawTarget);
+        let createdOnTheFly = false;
+
+        if (!student) {
+          const cleanName = rawTarget.replace(/^(a|an|the)\s+/i, '').trim() || (isHe ? 'תלמיד חדש' : 'New Student');
+          student = {
+            id: 'stu_' + Date.now(),
+            name: cleanName,
+            parsha_or_date: '',
+            notes: isHe ? 'נוסף אוטומטית בעת קביעת שיעור' : 'Added automatically when scheduling lesson',
+            completed_topics: {
+              _meta: {
+                lessons: []
+              }
+            },
+            completed_parshiot: {}
+          };
+          APP_STATE.students.push(student);
+          createdOnTheFly = true;
+        }
 
         if (!student.completed_topics) student.completed_topics = {};
         if (!student.completed_topics._meta) student.completed_topics._meta = {};
         if (!Array.isArray(student.completed_topics._meta.lessons)) student.completed_topics._meta.lessons = [];
 
+        const formattedTime = formatFriendlyTimeSlot(args.timeSlot);
         const lesson = {
           id: 'les_' + Date.now(),
           date: args.date || new Date().toISOString().split('T')[0],
-          timeSlot: args.timeSlot || '4:30 PM',
+          timeSlot: formattedTime,
           subject: args.subject || (isHe ? 'שיעור בר מצווה' : 'Bar Mitzvah Tutoring'),
           notes: args.subject || ''
         };
@@ -5852,20 +5966,27 @@ Guidelines:
         student.completed_topics._meta.lessons.push(lesson);
         saveStudentsToStorage();
         pushStudentToCloud(student);
+        renderStudents();
         renderCalendar();
+
+        const createdNote = createdOnTheFly
+          ? (isHe ? ` (נוצר תלמיד חדש: ${student.name})` : ` (Created new student: ${student.name})`)
+          : '';
 
         return {
           success: true,
           lessonId: lesson.id,
+          studentName: student.name,
+          date: lesson.date,
+          timeSlot: lesson.timeSlot,
           message: isHe
-            ? `שיעור נקבע עבור ${student.name} בתאריך ${lesson.date} (${lesson.timeSlot})`
-            : `Scheduled lesson for ${student.name} on ${lesson.date} (${lesson.timeSlot})`
+            ? `שיעור נקבע עבור ${student.name} בתאריך ${lesson.date} (${lesson.timeSlot})${createdNote}`
+            : `Scheduled lesson for ${student.name} on ${lesson.date} (${lesson.timeSlot})${createdNote}`
         };
       }
 
       if (name === 'cancel_lesson') {
-        const target = (args.studentNameOrId || '').toLowerCase().trim();
-        const student = APP_STATE.students.find(s => s.id === target || s.name.toLowerCase().includes(target));
+        const student = findStudentFlexible(args.studentNameOrId);
         if (!student) return { success: false, error: `Student not found: ${args.studentNameOrId}` };
 
         if (student.completed_topics?._meta?.lessons) {
@@ -5882,8 +6003,7 @@ Guidelines:
       }
 
       if (name === 'mark_topic_progress') {
-        const target = (args.studentNameOrId || '').toLowerCase().trim();
-        const student = APP_STATE.students.find(s => s.id === target || s.name.toLowerCase().includes(target));
+        const student = findStudentFlexible(args.studentNameOrId);
         if (!student) return { success: false, error: `Student not found: ${args.studentNameOrId}` };
 
         if (!student.completed_topics) student.completed_topics = {};
@@ -5902,8 +6022,7 @@ Guidelines:
       }
 
       if (name === 'mark_parsha_progress') {
-        const target = (args.studentNameOrId || '').toLowerCase().trim();
-        const student = APP_STATE.students.find(s => s.id === target || s.name.toLowerCase().includes(target));
+        const student = findStudentFlexible(args.studentNameOrId);
         if (!student) return { success: false, error: `Student not found: ${args.studentNameOrId}` };
 
         if (!student.completed_parshiot) student.completed_parshiot = {};
