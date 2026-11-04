@@ -11,7 +11,7 @@
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons CDN -->
@@ -52,13 +52,13 @@
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
-    
+
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       -webkit-tap-highlight-color: transparent;
       user-select: text;
     }
-    
+
     html[dir="rtl"] body {
       font-family: 'Heebo', sans-serif;
     }
@@ -92,6 +92,15 @@
     .gold-glow {
       box-shadow: 0 0 18px rgba(245, 158, 11, 0.25);
     }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .animate-slideUp {
+      animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
     /* Mobile-first bottom safe area support */
     @supports (padding-bottom: env(safe-area-inset-bottom)) {
       .mobile-safe-bottom {
@@ -110,7 +119,7 @@
   <!-- ============================================== -->
   <div id="lock-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-4 transition-all duration-300">
     <div class="max-w-sm w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative space-y-5">
-      
+
       <!-- Language Toggle in Auth Screen -->
       <div class="absolute top-4 right-4 rtl:right-auto rtl:left-4">
         <button onclick="toggleLanguage()" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition active:scale-95">
@@ -133,10 +142,10 @@
       <div id="auth-step-email" class="space-y-4">
         <form onsubmit="handleSendAuthOtp(event)" class="space-y-3">
           <div class="relative">
-            <input 
-              type="email" 
-              id="auth-email-input" 
-              placeholder="Enter approved email (e.g. name@gmail.com)" 
+            <input
+              type="email"
+              id="auth-email-input"
+              placeholder="Enter approved email (e.g. name@gmail.com)"
               autocomplete="email"
               class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 px-4 text-center text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
               required
@@ -149,8 +158,8 @@
             <span id="auth-email-error-text">Email not authorized.</span>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             id="btn-auth-send"
             class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
           >
@@ -175,11 +184,11 @@
 
         <form onsubmit="handleVerifyAuthOtp(event)" class="space-y-3">
           <div class="relative">
-            <input 
-              type="text" 
-              id="auth-code-input" 
-              inputmode="numeric" 
-              placeholder="123456" 
+            <input
+              type="text"
+              id="auth-code-input"
+              inputmode="numeric"
+              placeholder="123456"
               maxlength="8"
               class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 px-4 text-center text-2xl font-mono tracking-widest text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
               required
@@ -191,8 +200,8 @@
             <span id="auth-code-error-text">Invalid code. Try again.</span>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             id="btn-auth-verify"
             class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
           >
@@ -220,10 +229,10 @@
   <!-- Top Sticky Header (Ultra-Clean & Mobile Fitted) -->
   <header class="sticky top-0 z-40 glass-nav border-b border-slate-800/90 px-3 sm:px-4 py-2.5">
     <div class="max-w-7xl mx-auto flex flex-col gap-2.5">
-      
+
       <!-- Upper Row: Brand + Status + Actions -->
       <div class="flex items-center justify-between gap-2">
-        
+
         <!-- Left: Logo & Title & Cloud Sync Pill -->
         <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
           <div class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center text-white shadow-md badge-glow">
@@ -243,7 +252,7 @@
 
         <!-- Right: Language Switch & Settings Gear -->
         <div class="flex items-center gap-1.5 shrink-0">
-          
+
           <!-- Language Switcher -->
           <button onclick="toggleLanguage()" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition active:scale-95 shadow-sm">
             <i data-lucide="languages" class="w-3.5 h-3.5 text-brand-400"></i>
@@ -261,11 +270,11 @@
       <!-- Lower Row: Live Search Input -->
       <div class="relative w-full">
         <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 rtl:left-auto rtl:right-3 pointer-events-none"></i>
-        <input 
-          type="text" 
+        <input
+          type="text"
           id="search-input"
           oninput="handleSearch(this.value)"
-          placeholder="Search topics, Rashis, stories, keywords..." 
+          placeholder="Search topics, Rashis, stories, keywords..."
           class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-8 rtl:pr-9 rtl:pl-8 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition shadow-inner"
         >
         <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 rtl:right-auto rtl:left-2.5 text-slate-400 hover:text-slate-200 p-0.5">
@@ -299,12 +308,12 @@
 
   <!-- Main View Container -->
   <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-1">
-    
+
     <!-- ============================================== -->
     <!-- VIEW 1: GENERAL JEWISH CONCEPTS (13 Topics)   -->
     <!-- ============================================== -->
     <section id="view-topics" class="space-y-6">
-      
+
       <!-- Section Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
         <div>
@@ -335,7 +344,7 @@
     <!-- VIEW 2: CHUMASH (23 Parshiot)                 -->
     <!-- ============================================== -->
     <section id="view-chumash" class="space-y-6 hidden">
-      
+
       <!-- Section Header + Book Filter -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
         <div>
@@ -375,7 +384,7 @@
     <!-- VIEW 3: STUDENT TRACKER & RABBI SYNC          -->
     <!-- ============================================== -->
     <section id="view-students" class="space-y-6 hidden">
-      
+
       <!-- Section Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-4">
         <div>
@@ -412,18 +421,13 @@
 
         <!-- Students List / Cards rendered via JS -->
         <div id="students-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-
-        <!-- Active Student Detail Workspace -->
-        <div id="active-student-workspace" class="hidden space-y-6 border border-slate-800 bg-slate-900/60 rounded-2xl p-5 md:p-6">
-          <!-- Rendered dynamically -->
-        </div>
       </div>
     </section>
 
   </main>
 
   <!-- ============================================== -->
-  <!-- MODAL: ADD STUDENT                            -->
+  <!-- MODAL: ADD STUDENT (Clean & Simple)            -->
   <!-- ============================================== -->
   <div id="modal-add-student" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 hidden backdrop-blur-sm">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
@@ -437,14 +441,33 @@
       </h3>
 
       <form id="add-student-form" onsubmit="handleCreateStudent(event)" autocomplete="off" class="space-y-4">
+
+        <!-- Photo Selector Preview -->
+        <div class="flex justify-center mb-1">
+          <div onclick="triggerPhotoUpload('new', event)" class="cursor-pointer group flex flex-col items-center">
+            <div id="new-student-avatar-preview" class="w-16 h-16 rounded-full bg-slate-800 border-2 border-dashed border-slate-600 group-hover:border-brand-400 flex items-center justify-center text-slate-400 group-hover:text-white transition overflow-hidden shadow-inner">
+              <i data-lucide="camera" class="w-6 h-6"></i>
+            </div>
+            <span id="lbl-add-photo-text" class="text-[11px] text-brand-400 group-hover:text-brand-300 mt-1 font-medium">+ Add Photo (Optional)</span>
+          </div>
+        </div>
+
         <div>
           <label id="lbl-student-name" class="block text-xs font-medium text-slate-300 mb-1">Student Name</label>
           <input type="text" id="new-student-name" name="student_name_fresh_1793734664716" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" required placeholder="e.g. David Cohen" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
         </div>
 
         <div>
-          <label id="lbl-student-date" class="block text-xs font-medium text-slate-300 mb-1">Bar Mitzvah Date / Parsha</label>
-          <input type="text" id="new-student-date" name="student_date_fresh_1793734664717" autocomplete="off" autocorrect="off" placeholder="e.g. Parshat Vayera / Nov 2026" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
+          <label id="lbl-student-parsha" class="block text-xs font-medium text-slate-300 mb-1">Bar Mitzvah Parsha</label>
+          <select id="new-student-parsha-select" onchange="handleParshaSelectChange(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+            <!-- Populated dynamically via JS -->
+          </select>
+          <input type="text" id="new-student-parsha-custom" placeholder="e.g. Parshat Vayikra / Custom Event" class="hidden mt-1.5 w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+
+        <div>
+          <label id="lbl-student-date" class="block text-xs font-medium text-slate-300 mb-1">Bar Mitzvah Date / Year</label>
+          <input type="text" id="new-student-date" name="student_date_fresh_1793734664717" autocomplete="off" autocorrect="off" placeholder="e.g. Nov 2026 / 15 Cheshvan" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
         </div>
 
         <div>
@@ -463,6 +486,44 @@
       </form>
     </div>
   </div>
+
+  <!-- ============================================== -->
+  <!-- DRAWER: DEDICATED STUDENT DETAIL & CHECKLIST   -->
+  <!-- ============================================== -->
+  <div id="drawer-student-detail" class="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/75 backdrop-blur-sm hidden transition-opacity duration-300" onclick="closeStudentDrawer()">
+    <div class="bg-slate-900 border-t md:border border-slate-700/80 rounded-t-3xl md:rounded-2xl max-w-3xl w-full max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl relative overflow-hidden animate-slideUp" onclick="event.stopPropagation()">
+
+      <!-- Mobile Pull Bar Handle -->
+      <div class="md:hidden pt-3 pb-1 flex justify-center">
+        <div class="w-12 h-1.5 rounded-full bg-slate-700"></div>
+      </div>
+
+      <!-- Drawer Sticky Top Bar -->
+      <div class="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between gap-3 shrink-0 bg-slate-950/80">
+        <div class="flex items-center gap-3 min-w-0" id="drawer-header-content">
+          <!-- Populated by renderStudentDrawer -->
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <button onclick="switchTab('topics'); closeStudentDrawer();" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-lg font-medium transition">
+            <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400"></i>
+            <span id="drawer-btn-curriculum-label">Curriculum</span>
+          </button>
+          <button onclick="closeStudentDrawer()" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition active:scale-95" title="Close">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Drawer Scrollable Body -->
+      <div id="drawer-body-content" class="p-4 sm:p-6 overflow-y-auto space-y-5 flex-1">
+        <!-- Populated by renderStudentDrawer -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Photo File Input -->
+  <input type="file" id="student-photo-file-input" accept="image/*" class="hidden" onchange="handleStudentPhotoSelected(event)">
 
   <!-- ============================================== -->
   <!-- MODAL: SHARE WITH RABBI (Instant Sync)         -->
@@ -601,7 +662,7 @@
       </div>
 
       <div class="space-y-2.5">
-        
+
         <!-- Active User Profile Card -->
         <div id="settings-user-card" class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
           <div class="flex items-center gap-2.5 min-w-0">
@@ -697,6 +758,8 @@
       trackerFilter: 'all', // 'all', 'topics', 'chumash'
       students: [],
       activeStudentId: null,
+      activeStudentDrawerId: null,
+      newStudentPendingAvatar: '',
       cloud: {
         url: localStorage.getItem('tutor_sb_url') || 'https://bpkwnqbabokesuesvkex.supabase.co',
         key: localStorage.getItem('tutor_sb_key') || 'sb_publishable_hVy0YYOOT9k_LD_ZMe24zg_iuqTC538',
@@ -753,7 +816,7 @@
         markIncomplete: "Mark as Not Learned",
         topicsProgress: "Jewish Topics Progress",
         chumashProgress: "Chumash Progress",
-        
+
         // Add Student Modal
         addStudentModalTitle: "Add Bar Mitzvah Student",
         studentNameLabel: "Student Name",
@@ -764,7 +827,7 @@
         studentNotesPlaceholder: "e.g. Needs focus on Tefillin basics, very interested in science and basketball",
         cancel: "Cancel",
         saveStudent: "Save Student",
-        
+
         // Active Student Workspace
         activeStudentDefault: "Active Student",
         studentTrackerInstructions: "Toggle completed lessons below to save and synchronize with the Rabbi.",
@@ -777,7 +840,7 @@
         defaultCandidate: "Bar Mitzvah Candidate",
         deleteStudentTitle: "Delete Student",
         noNotesText: "No notes recorded",
-        
+
         // Lock Screen
         lockTitle: "Tutor & Rabbi Portal",
         lockSubtitle: "Authorized Access Only • Enter Tutor PIN",
@@ -785,7 +848,7 @@
         lockError: "Incorrect PIN. Try again.",
         lockButton: "Unlock Portal",
         lockFooter: "Confidential Bar Mitzvah Student Records",
-        
+
         // Settings Modal
         settingsTitle: "Tutor Settings",
         settingsSubtitle: "Sync, Backups & Security",
@@ -798,7 +861,7 @@
         settingsBackupDesc: "Save offline JSON file to device",
         settingsLockTitle: "Lock Portal (PIN 770)",
         settingsLockDesc: "Lock screen until PIN is entered",
-        
+
         // Share Modal
         shareModalTitle: "Share Live Progress with Rabbi",
         shareModalSubtitle: "100% Free • No account or cloud login required",
@@ -808,7 +871,7 @@
         whatsappBtn: "Send via WhatsApp",
         downloadBackupBtn: "Download Backup",
         whatsappShareMsg: (url) => "Shalom Rabbi! Here is our updated Bar Mitzvah student progress tracker:\n\n" + url,
-        
+
         // Cloud Modal
         cloudModalTitle: "Live Multi-Tutor Cloud Sync",
         cloudModalSubtitle: "Powered by Free Supabase • Real-Time Database",
@@ -821,9 +884,9 @@
         cloudGuideDesc: 'Create a free project at <a href="https://supabase.com" target="_blank" class="text-brand-400 underline">supabase.com</a>, open the <strong>SQL Editor</strong>, paste the copied SQL, and click Run. Then paste your URL and Anon Key above.',
         cloudDisconnectBtn: "Disconnect Cloud",
         cloudSaveBtn: "Connect & Sync Now",
-        
+
         // Toasts & Prompts
-        
+
         // Email OTP Auth Gate
         authTitle: "Tutor & Rabbi Portal",
         authSubtitle: "Authorized Access Only • Approved Email Required",
@@ -859,7 +922,24 @@
         toastCloudConnected: "Cloud connected & synchronized!",
         toastConfirmDisconnect: "Disconnect from Supabase Cloud? The app will return to offline local storage.",
         toastCloudDisconnected: "Cloud disconnected",
-        toastBackupDownloaded: "Student data backup downloaded"
+        toastBackupDownloaded: "Student data backup downloaded",
+        moveUp: "Move Up",
+        moveDown: "Move Down",
+        changePhoto: "Change Photo",
+        removePhoto: "Remove Photo",
+        uploadPhoto: "Upload Photo",
+        photoUploadHint: "Tap to upload or change student photo",
+        selectParshaPrompt: "-- Select Parsha (Optional) --",
+        customParshaOption: "Custom / Other Parsha",
+        parshaDropdownLabel: "Bar Mitzvah Parsha",
+        barMitzvahDateLabel: "Bar Mitzvah Date / Year",
+        customParshaPlaceholder: "Enter custom parsha or event",
+        closeDrawer: "Close",
+        studentDetailsTitle: "Student Progress & Checklist",
+        toastStudentMoved: "Student list reordered",
+        toastPhotoUpdated: "Student picture updated!",
+        toastPhotoRemoved: "Student picture removed",
+        openDetailHint: "Tap card to open details & checklist"
       },
       he: {
         appTitle: "טיוטור-פיילוט",
@@ -906,7 +986,7 @@
         markIncomplete: "בטל סימון כנלמד",
         topicsProgress: "התקדמות מושגי יסוד",
         chumashProgress: "התקדמות חומש",
-        
+
         // Add Student Modal
         addStudentModalTitle: "הוספת תלמיד בר מצווה",
         studentNameLabel: "שם התלמיד",
@@ -917,7 +997,7 @@
         studentNotesPlaceholder: "לדוגמה: זקוק לחיזוק בהלכות תפילין, מתעניין במדע ובכדורסל",
         cancel: "ביטול",
         saveStudent: "שמור תלמיד",
-        
+
         // Active Student Workspace
         activeStudentDefault: "תלמיד פעיל",
         studentTrackerInstructions: "סמן את השיעורים שהושלמו למטה כדי לשמור ולסנכרן אוטומטית עם הרב.",
@@ -930,7 +1010,7 @@
         defaultCandidate: "חתן בר מצווה",
         deleteStudentTitle: "מחק תלמיד",
         noNotesText: "אין הערות שמורות",
-        
+
         // Lock Screen
         lockTitle: "פורטל המלמד והרב",
         lockSubtitle: "גישה מורשית בלבד • הזן קוד סודי (770)",
@@ -938,7 +1018,7 @@
         lockError: "קוד שגוי. נסה שוב.",
         lockButton: "כניסה למערכת",
         lockFooter: "תיעוד חסוי של תלמידי בר מצווה",
-        
+
         // Settings Modal
         settingsTitle: "הגדרות מלמד",
         settingsSubtitle: "סנכרון, גיבויים ואבטחה",
@@ -951,7 +1031,7 @@
         settingsBackupDesc: "שמור קובץ JSON למכשיר",
         settingsLockTitle: "נעילת מערכת (קוד 770)",
         settingsLockDesc: "נעילת מסך עד להזנת הקוד",
-        
+
         // Share Modal
         shareModalTitle: "שיתוף התקדמות עם הרב",
         shareModalSubtitle: "חינם לחלוטין • ללא צורך בהתחברות לחשבון",
@@ -961,7 +1041,7 @@
         whatsappBtn: "שלח ב-WhatsApp",
         downloadBackupBtn: "הורד קובץ גיבוי",
         whatsappShareMsg: (url) => "שלום כבוד הרב! הנה מעקב התקדמות תלמידי הבר מצווה המעודכן שלנו:\n\n" + url,
-        
+
         // Cloud Modal
         cloudModalTitle: "סנכרון ענן בין מלמדים",
         cloudModalSubtitle: "באמצעות ענן סופבייס החינמי • מסד נתונים בזמן אמת",
@@ -974,9 +1054,9 @@
         cloudGuideDesc: 'פתח פרויקט חינמי ב-<a href="https://supabase.com" target="_blank" class="text-brand-400 underline">supabase.com</a>, פתח את ה-SQL Editor, הדבק את ה-SQL שהועתק ולחץ Run. לאחר מכן הדבק את כתובת ה-URL והמפתח למעלה.',
         cloudDisconnectBtn: "התנתק מהענן",
         cloudSaveBtn: "שמור והתחבר",
-        
+
         // Toasts & Prompts
-        
+
         // Email OTP Auth Gate
         authTitle: "פורטל המלמד והרב",
         authSubtitle: "גישה מורשית בלבד • דורש דוא״ל מאושר",
@@ -1012,7 +1092,24 @@
         toastCloudConnected: "הענן חובר וסונכרן בהצלחה!",
         toastConfirmDisconnect: "האם להתנתק מענן Supabase? האפליקציה תחזור לאחסון מקומי בלבד.",
         toastCloudDisconnected: "החיבור לענן נותק",
-        toastBackupDownloaded: "קובץ גיבוי התלמידים הורד בהצלחה"
+        toastBackupDownloaded: "קובץ גיבוי התלמידים הורד בהצלחה",
+        moveUp: "הזז למעלה",
+        moveDown: "הזז למטה",
+        changePhoto: "שנה תמונה",
+        removePhoto: "הסר תמונה",
+        uploadPhoto: "העלה תמונה",
+        photoUploadHint: "הקש להעלאה או החלפת תמונת התלמיד",
+        selectParshaPrompt: "-- בחר פרשה (אופציונלי) --",
+        customParshaOption: "פרשה מותאמת אישית / אחר",
+        parshaDropdownLabel: "פרשת בר המצווה",
+        barMitzvahDateLabel: "תאריך או שנת בר המצווה",
+        customParshaPlaceholder: "הזן פרשה או אירוע מותאם",
+        closeDrawer: "סגור",
+        studentDetailsTitle: "מעקב התקדמות ורשימת שיעורים",
+        toastStudentMoved: "סדר התלמידים עודכן",
+        toastPhotoUpdated: "תמונת התלמיד עודכנה בהצלחה!",
+        toastPhotoRemoved: "תמונת התלמיד הוסרה",
+        openDetailHint: "הקש על הכרטיס לפתיחת הפרטים והשיעורים"
       }
     };
 
@@ -1041,8 +1138,8 @@ alter publication supabase_realtime add table public.students_sync;`;
         const btn = document.getElementById('btn-copy-sql');
         if (btn) btn.textContent = t.cloudGuideSqlCopied;
         showToast(t.toastSqlCopied);
-        setTimeout(() => { 
-          if (btn) btn.textContent = t.cloudGuideCopySql; 
+        setTimeout(() => {
+          if (btn) btn.textContent = t.cloudGuideCopySql;
         }, 2000);
       });
     }
@@ -1058,7 +1155,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     function openCloudModal() {
       document.getElementById('supabase-url-input').value = APP_STATE.cloud.url || '';
       document.getElementById('supabase-key-input').value = APP_STATE.cloud.key || '';
-      
+
       const disconnectBtn = document.getElementById('btn-disconnect-cloud');
       if (APP_STATE.cloud.url && APP_STATE.cloud.key) {
         disconnectBtn.classList.remove('hidden');
@@ -1186,15 +1283,23 @@ alter publication supabase_realtime add table public.students_sync;`;
 
         if (data && Array.isArray(data)) {
           if (data.length > 0) {
-            const cloudStudents = data.map(row => ({
-              id: row.id,
-              name: row.name,
-              parshaOrDate: row.parsha_or_date || '',
-              notes: row.notes || '',
-              completedTopics: row.completed_topics || {},
-              completedParshiot: row.completed_parshiot || {},
-              updatedAt: row.updated_at
-            }));
+            const cloudStudents = data.map(row => {
+              const meta = (row.completed_topics && row.completed_topics._meta) || {};
+              const cleanCompletedTopics = { ...(row.completed_topics || {}) };
+              delete cleanCompletedTopics._meta;
+
+              return {
+                id: row.id,
+                name: row.name,
+                parshaOrDate: row.parsha_or_date || '',
+                notes: row.notes || '',
+                avatar: meta.avatar || '',
+                orderIndex: typeof meta.order === 'number' ? meta.order : 0,
+                completedTopics: cleanCompletedTopics,
+                completedParshiot: row.completed_parshiot || {},
+                updatedAt: row.updated_at
+              };
+            });
 
             mergeStudentsWithCloud(cloudStudents);
           } else if (APP_STATE.students.length > 0) {
@@ -1212,11 +1317,14 @@ alter publication supabase_realtime add table public.students_sync;`;
 
     function mergeStudentsWithCloud(cloudStudents) {
       if (!cloudStudents || cloudStudents.length === 0) return;
-      
+
       const cloudMap = new Map();
       cloudStudents.forEach(cs => cloudMap.set(cs.id, cs));
 
       APP_STATE.students = Array.from(cloudMap.values());
+      // Sort by customized orderIndex
+      APP_STATE.students.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
+
       if (!APP_STATE.activeStudentId || !cloudMap.has(APP_STATE.activeStudentId)) {
         APP_STATE.activeStudentId = APP_STATE.students.length > 0 ? APP_STATE.students[0].id : null;
       }
@@ -1228,14 +1336,20 @@ alter publication supabase_realtime add table public.students_sync;`;
     function handleRealtimeEvent(payload) {
       const { eventType, new: newRecord, old: oldRecord } = payload;
       const isHe = APP_STATE.lang === 'he';
-      
+
       if (eventType === 'INSERT' || eventType === 'UPDATE') {
+        const meta = (newRecord.completed_topics && newRecord.completed_topics._meta) || {};
+        const cleanCompletedTopics = { ...(newRecord.completed_topics || {}) };
+        delete cleanCompletedTopics._meta;
+
         const updatedStudent = {
           id: newRecord.id,
           name: newRecord.name,
           parshaOrDate: newRecord.parsha_or_date || '',
           notes: newRecord.notes || '',
-          completedTopics: newRecord.completed_topics || {},
+          avatar: meta.avatar || '',
+          orderIndex: typeof meta.order === 'number' ? meta.order : 0,
+          completedTopics: cleanCompletedTopics,
           completedParshiot: newRecord.completed_parshiot || {},
           updatedAt: newRecord.updated_at
         };
@@ -1246,13 +1360,22 @@ alter publication supabase_realtime add table public.students_sync;`;
         } else {
           APP_STATE.students.push(updatedStudent);
         }
+        // Keep orderIndex sorted
+        APP_STATE.students.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
+
         saveStudentsToStorage(false);
         renderAllViews();
+        if (APP_STATE.activeStudentDrawerId === updatedStudent.id) {
+          renderStudentDrawer(updatedStudent.id);
+        }
         showToast(isHe ? ('סונכרן בזמן אמת: ' + updatedStudent.name) : ('Live update synced: ' + updatedStudent.name));
       } else if (eventType === 'DELETE') {
         APP_STATE.students = APP_STATE.students.filter(s => s.id !== oldRecord.id);
         if (APP_STATE.activeStudentId === oldRecord.id) {
           APP_STATE.activeStudentId = APP_STATE.students.length > 0 ? APP_STATE.students[0].id : null;
+        }
+        if (APP_STATE.activeStudentDrawerId === oldRecord.id) {
+          closeStudentDrawer();
         }
         saveStudentsToStorage(false);
         renderAllViews();
@@ -1264,12 +1387,18 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!APP_STATE.cloud.client) return;
       try {
         updateCloudStatusPill('syncing');
+        const completedTopics = { ...(student.completedTopics || {}) };
+        completedTopics._meta = {
+          avatar: student.avatar || '',
+          order: typeof student.orderIndex === 'number' ? student.orderIndex : 0
+        };
+
         const payload = {
           id: student.id,
           name: student.name,
           parsha_or_date: student.parshaOrDate || '',
           notes: student.notes || '',
-          completed_topics: student.completedTopics || {},
+          completed_topics: completedTopics,
           completed_parshiot: student.completedParshiot || {},
           updated_at: new Date().toISOString()
         };
@@ -1488,7 +1617,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       document.getElementById('auth-step-email').classList.add('hidden');
       document.getElementById('auth-step-code').classList.remove('hidden');
       document.getElementById('auth-code-target-email').textContent = rawEmail;
-      
+
       const codeInput = document.getElementById('auth-code-input');
       codeInput.value = '';
       setTimeout(() => codeInput.focus(), 150);
@@ -1553,7 +1682,7 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       if (verified) {
         errBox.classList.add('hidden');
-        
+
         // Grant 30-Day (1 Month) Session
         const session = {
           email: user.email,
@@ -1596,7 +1725,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       const codeStep = document.getElementById('auth-step-code');
       const errEmail = document.getElementById('auth-email-error');
       const errCode = document.getElementById('auth-code-error');
-      
+
       if (errEmail) errEmail.classList.add('hidden');
       if (errCode) errCode.classList.add('hidden');
       if (codeStep) codeStep.classList.add('hidden');
@@ -1635,7 +1764,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!session) return;
       const isHe = APP_STATE.lang === 'he';
       const name = isHe ? (session.name_he || session.name_en) : session.name_en;
-      
+
       const avatarEl = document.getElementById('settings-user-avatar');
       if (avatarEl) {
         avatarEl.textContent = session.role === 'lead' ? 'S' : 'R';
@@ -1649,7 +1778,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       const daysEl = document.getElementById('settings-session-days');
       if (daysEl && session.expiresAt) {
         const daysLeft = Math.max(1, Math.round((session.expiresAt - Date.now()) / (24 * 3600 * 1000)));
-        daysEl.textContent = isHe 
+        daysEl.textContent = isHe
           ? ("מחובר • נותרו " + daysLeft + " ימים לחודש")
           : ("Session active • " + daysLeft + " days remaining");
       }
@@ -1780,11 +1909,17 @@ alter publication supabase_realtime add table public.students_sync;`;
       const newStudentName = document.getElementById('new-student-name');
       if (newStudentName) newStudentName.placeholder = t.studentNamePlaceholder;
 
+      const lblStudentParsha = document.getElementById('lbl-student-parsha');
+      if (lblStudentParsha) lblStudentParsha.textContent = t.parshaDropdownLabel;
+
+      const customParshaInput = document.getElementById('new-student-parsha-custom');
+      if (customParshaInput) customParshaInput.placeholder = t.customParshaPlaceholder;
+
       const lblStudentDate = document.getElementById('lbl-student-date');
-      if (lblStudentDate) lblStudentDate.textContent = t.studentDateLabel;
+      if (lblStudentDate) lblStudentDate.textContent = t.barMitzvahDateLabel;
 
       const newStudentDate = document.getElementById('new-student-date');
-      if (newStudentDate) newStudentDate.placeholder = t.studentDatePlaceholder;
+      if (newStudentDate) newStudentDate.placeholder = isHe ? "לדוגמה: כ״ח חשון תשפ״ז / נובמבר 2026" : "e.g. Nov 2026 / 15 Cheshvan";
 
       const lblStudentNotes = document.getElementById('lbl-student-notes');
       if (lblStudentNotes) lblStudentNotes.textContent = t.studentNotesLabel;
@@ -1792,11 +1927,22 @@ alter publication supabase_realtime add table public.students_sync;`;
       const newStudentNotes = document.getElementById('new-student-notes');
       if (newStudentNotes) newStudentNotes.placeholder = t.studentNotesPlaceholder;
 
+      const lblAddPhotoText = document.getElementById('lbl-add-photo-text');
+      if (lblAddPhotoText) lblAddPhotoText.textContent = isHe ? "+ העלה תמונה (אופציונלי)" : "+ Add Photo (Optional)";
+
       const btnCancelAddStudent = document.getElementById('btn-cancel-add-student');
       if (btnCancelAddStudent) btnCancelAddStudent.textContent = t.cancel;
 
       const btnSaveAddStudent = document.getElementById('btn-save-add-student');
       if (btnSaveAddStudent) btnSaveAddStudent.textContent = t.saveStudent;
+
+      const drawerBtnCurriculum = document.getElementById('drawer-btn-curriculum-label');
+      if (drawerBtnCurriculum) drawerBtnCurriculum.textContent = t.jumpToCurriculum;
+
+      populateParshaSelectOptions();
+      if (APP_STATE.activeStudentDrawerId) {
+        renderStudentDrawer(APP_STATE.activeStudentDrawerId);
+      }
 
       // Modal: Settings
       const settingsTitle = document.getElementById('settings-title');
@@ -1950,7 +2096,7 @@ alter publication supabase_realtime add table public.students_sync;`;
 
     function switchTab(tabId) {
       APP_STATE.activeTab = tabId;
-      
+
       const tabs = ['topics', 'chumash', 'students'];
       tabs.forEach(t => {
         const btn = document.getElementById(`tab-${t}`);
@@ -2080,7 +2226,7 @@ alter publication supabase_realtime add table public.students_sync;`;
 
         return '<article id="topic-card-' + topic.id + '" class="bg-slate-900/90 border transition-all duration-200 rounded-xl overflow-hidden shadow-md ' +
           (isExpanded ? 'border-amber-500/60 ring-1 ring-amber-500/30' : 'border-slate-800 hover:border-slate-700') + '">' +
-          
+
           '<!-- Collapsed Keyword Row -->' +
           '<div onclick="toggleTopicAccordion(\'' + topic.id + '\')" class="cursor-pointer select-none p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-slate-800/50 transition">' +
             '<div class="flex items-center gap-3 min-w-0">' +
@@ -2098,8 +2244,8 @@ alter publication supabase_realtime add table public.students_sync;`;
               '</div>' +
             '</div>' +
             '<div class="flex items-center gap-2 shrink-0">' +
-              (APP_STATE.activeStudentId ? 
-                '<button onclick="toggleTopicForActiveStudent(\'' + topic.id + '\', event)" class="px-2.5 py-1 text-[11px] rounded-lg border font-medium transition ' + 
+              (APP_STATE.activeStudentId ?
+                '<button onclick="toggleTopicForActiveStudent(\'' + topic.id + '\', event)" class="px-2.5 py-1 text-[11px] rounded-lg border font-medium transition ' +
                 (isCompleted ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300' : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300') + '">' +
                   '<span class="flex items-center gap-1"><i data-lucide="' + (isCompleted ? 'check-circle' : 'circle') + '" class="w-3.5 h-3.5"></i> ' + (isCompleted ? t.markIncomplete : t.markCompleted) + '</span>' +
                 '</button>' : '') +
@@ -2108,9 +2254,9 @@ alter publication supabase_realtime add table public.students_sync;`;
           '</div>' +
 
           '<!-- Expanded Full Cheat Sheet Content -->' +
-          (isExpanded ? 
+          (isExpanded ?
             '<div class="border-t border-slate-800 bg-slate-950/50 p-4 sm:p-5 space-y-4 text-xs sm:text-sm animate-fadeIn">' +
-              
+
               '<!-- Section 1: The Modern Teen Hook -->' +
               '<div class="p-3 sm:p-3.5 rounded-xl bg-gradient-to-r from-amber-950/30 to-slate-900 border border-amber-900/40">' +
                 '<span class="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5 mb-1.5">' +
@@ -2229,7 +2375,7 @@ alter publication supabase_realtime add table public.students_sync;`;
 
         return '<article id="parsha-card-' + parsha.id + '" class="bg-slate-900/90 border transition-all duration-200 rounded-xl overflow-hidden shadow-md ' +
           (isExpanded ? 'border-brand-500/60 ring-1 ring-brand-500/30' : 'border-slate-800 hover:border-slate-700') + '">' +
-          
+
           '<!-- Header Row -->' +
           '<div onclick="toggleParshaAccordion(\'' + parsha.id + '\')" class="cursor-pointer select-none p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-slate-800/50 transition">' +
             '<div class="flex items-center gap-3 min-w-0">' +
@@ -2250,8 +2396,8 @@ alter publication supabase_realtime add table public.students_sync;`;
               '</div>' +
             '</div>' +
             '<div class="flex items-center gap-2 shrink-0">' +
-              (APP_STATE.activeStudentId ? 
-                '<button onclick="toggleParshaForActiveStudent(\'' + parsha.id + '\', event)" class="px-2.5 py-1 text-[11px] rounded-lg border font-medium transition ' + 
+              (APP_STATE.activeStudentId ?
+                '<button onclick="toggleParshaForActiveStudent(\'' + parsha.id + '\', event)" class="px-2.5 py-1 text-[11px] rounded-lg border font-medium transition ' +
                 (isCompleted ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300' : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300') + '">' +
                   '<span class="flex items-center gap-1"><i data-lucide="' + (isCompleted ? 'check-circle' : 'circle') + '" class="w-3.5 h-3.5"></i> ' + (isCompleted ? t.markIncomplete : t.markCompleted) + '</span>' +
                 '</button>' : '') +
@@ -2260,9 +2406,9 @@ alter publication supabase_realtime add table public.students_sync;`;
           '</div>' +
 
           '<!-- Expanded Body -->' +
-          (isExpanded ? 
+          (isExpanded ?
             '<div class="border-t border-slate-800 bg-slate-950/50 p-4 sm:p-5 space-y-4 text-xs sm:text-sm animate-fadeIn">' +
-              
+
               '<!-- Section 1: Big Plot -->' +
               '<div>' +
                 '<span class="text-[11px] font-bold uppercase tracking-wider text-brand-400 flex items-center gap-1.5 mb-2">' +
@@ -2308,262 +2454,206 @@ alter publication supabase_realtime add table public.students_sync;`;
       lucide.createIcons();
     }
 
-    function renderStudents() {
-      const container = document.getElementById('students-list');
-      const emptyState = document.getElementById('students-empty');
-      const badge = document.getElementById('student-badge-count');
-      const workspace = document.getElementById('active-student-workspace');
-      const t = I18N[APP_STATE.lang];
+    // ==============================================
+    // STUDENT TRACKER & CURRICULUM ENGINE
+    // ==============================================
+
+    let notesAutoSaveTimer = null;
+    let currentPhotoTarget = null; // 'new' or studentId
+
+    function populateParshaSelectOptions() {
+      const select = document.getElementById('new-student-parsha-select');
+      if (!select) return;
       const isHe = APP_STATE.lang === 'he';
+      const t = I18N[APP_STATE.lang];
 
-      badge.textContent = APP_STATE.students.length;
-      const mobBadge = document.getElementById('mob-student-badge');
-      if (mobBadge) mobBadge.textContent = APP_STATE.students.length;
+      let html = `<option value="">-- ${t.selectParshaPrompt} --</option>`;
 
-      if (APP_STATE.students.length === 0) {
-        emptyState.classList.remove('hidden');
-        container.innerHTML = '';
-        workspace.classList.add('hidden');
-        return;
+      const berList = window.BEREISHIT_PARSHIOT_DATA || [];
+      if (berList.length > 0) {
+        html += `<optgroup label="${isHe ? 'ספר בראשית (12 פרשיות)' : 'Sefer Bereishit (12 Parshiot)'}">`;
+        berList.forEach(p => {
+          const label = isHe ? p.name_he : p.name_en;
+          html += `<option value="${label}">${label}</option>`;
+        });
+        html += `</optgroup>`;
       }
 
-      emptyState.classList.add('hidden');
-
-      // Default active student to first if not selected
-      if (!APP_STATE.activeStudentId || !APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId)) {
-        APP_STATE.activeStudentId = APP_STATE.students[0].id;
+      const shemList = window.SHEMOT_PARSHIOT_DATA || [];
+      if (shemList.length > 0) {
+        html += `<optgroup label="${isHe ? 'ספר שמות (11 פרשיות)' : 'Sefer Shemot (11 Parshiot)'}">`;
+        shemList.forEach(p => {
+          const label = isHe ? p.name_he : p.name_en;
+          html += `<option value="${label}">${label}</option>`;
+        });
+        html += `</optgroup>`;
       }
 
-      // Render Cards for each student
-      container.innerHTML = APP_STATE.students.map(student => {
-        const isActive = student.id === APP_STATE.activeStudentId;
-        const totalTopics = 13;
-        const totalParshiot = 23;
-        const completedTCount = Object.keys(student.completedTopics || {}).filter(k => student.completedTopics[k]).length;
-        const completedPCount = Object.keys(student.completedParshiot || {}).filter(k => student.completedParshiot[k]).length;
-        const overallPct = Math.round(((completedTCount + completedPCount) / (totalTopics + totalParshiot)) * 100);
-
-        return '<div onclick="selectActiveStudent(\'' + student.id + '\')" class="cursor-pointer rounded-xl p-4 border transition duration-150 flex flex-col justify-between ' +
-          (isActive ? 'bg-slate-800/90 border-brand-500 shadow-md ring-1 ring-brand-500' : 'bg-slate-900/60 border-slate-800 hover:border-slate-700') + '">' +
-            '<div>' +
-              '<div class="flex items-start justify-between gap-2 mb-2">' +
-                '<div class="flex items-center gap-2">' +
-                  '<div class="w-8 h-8 rounded-full bg-brand-600/20 text-brand-400 border border-brand-500/30 flex items-center justify-center font-bold text-xs">' +
-                    student.name.charAt(0).toUpperCase() +
-                  '</div>' +
-                  '<div>' +
-                    '<h4 class="text-sm font-bold text-white">' + student.name + '</h4>' +
-                    '<p class="text-[11px] text-slate-400">' + (student.parshaOrDate || t.defaultCandidate) + '</p>' +
-                  '</div>' +
-                '</div>' +
-                '<span class="text-xs font-mono font-bold ' + (overallPct > 50 ? 'text-emerald-400' : 'text-amber-400') + '">' +
-                  overallPct + '%' +
-                '</span>' +
-              '</div>' +
-
-              '<!-- Progress Bars -->' +
-              '<div class="space-y-2 mt-3">' +
-                '<div>' +
-                  '<div class="flex justify-between text-[10px] text-slate-400 mb-0.5">' +
-                    '<span>' + t.tabTopics + '</span>' +
-                    '<span>' + completedTCount + ' / ' + totalTopics + '</span>' +
-                  '</div>' +
-                  '<div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">' +
-                    '<div class="bg-amber-400 h-1.5 rounded-full" style="width: ' + ((completedTCount/totalTopics)*100) + '%"></div>' +
-                  '</div>' +
-                '</div>' +
-
-                '<div>' +
-                  '<div class="flex justify-between text-[10px] text-slate-400 mb-0.5">' +
-                    '<span>' + t.tabChumash + '</span>' +
-                    '<span>' + completedPCount + ' / ' + totalParshiot + '</span>' +
-                  '</div>' +
-                  '<div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">' +
-                    '<div class="bg-brand-500 h-1.5 rounded-full" style="width: ' + ((completedPCount/totalParshiot)*100) + '%"></div>' +
-                  '</div>' +
-                '</div>' +
-              '</div>' +
-            '</div>' +
-
-            '<div class="mt-4 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">' +
-              '<span class="truncate max-w-[140px] italic">' + (student.notes ? student.notes : t.noNotesText) + '</span>' +
-              '<button onclick="event.stopPropagation(); deleteStudent(\'' + student.id + '\')" title="' + t.deleteStudentTitle + '" class="text-slate-500 hover:text-red-400 p-1">' +
-                '<i data-lucide="trash-2" class="w-3.5 h-3.5"></i>' +
-              '</button>' +
-            '</div>' +
-          '</div>';
-      }).join('');
-
-      renderActiveStudentWorkspace();
-      lucide.createIcons();
+      html += `<option value="custom">${t.customParshaOption}</option>`;
+      select.innerHTML = html;
     }
 
-    function selectActiveStudent(id) {
-      APP_STATE.activeStudentId = id;
+    function handleParshaSelectChange(val) {
+      const customInput = document.getElementById('new-student-parsha-custom');
+      if (!customInput) return;
+      if (val === 'custom') {
+        customInput.classList.remove('hidden');
+        customInput.focus();
+      } else {
+        customInput.classList.add('hidden');
+        customInput.value = '';
+      }
+    }
+
+    function triggerPhotoUpload(target, event) {
+      if (event && event.stopPropagation) event.stopPropagation();
+      currentPhotoTarget = target;
+      const fileInput = document.getElementById('student-photo-file-input');
+      if (fileInput) {
+        fileInput.value = '';
+        fileInput.click();
+      }
+    }
+
+    function handleStudentPhotoSelected(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const maxDim = 120;
+          let width = img.width;
+          let height = img.height;
+
+          let sx = 0, sy = 0, sWidth = width, sHeight = height;
+          if (width > height) {
+            sx = (width - height) / 2;
+            sWidth = height;
+          } else if (height > width) {
+            sy = (height - width) / 2;
+            sHeight = width;
+          }
+
+          canvas.width = maxDim;
+          canvas.height = maxDim;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, maxDim, maxDim);
+
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+
+          if (currentPhotoTarget === 'new') {
+            APP_STATE.newStudentPendingAvatar = compressedDataUrl;
+            const preview = document.getElementById('new-student-avatar-preview');
+            if (preview) {
+              preview.innerHTML = `<img src="${compressedDataUrl}" class="w-full h-full object-cover">`;
+            }
+          } else if (currentPhotoTarget) {
+            const student = APP_STATE.students.find(s => s.id === currentPhotoTarget);
+            if (student) {
+              student.avatar = compressedDataUrl;
+              saveStudentsToStorage(true);
+              if (APP_STATE.cloud.client) pushStudentToCloud(student);
+              renderStudents();
+              if (APP_STATE.activeStudentDrawerId === student.id) {
+                renderStudentDrawer(student.id);
+              }
+              const t = I18N[APP_STATE.lang];
+              showToast(t.toastPhotoUpdated);
+            }
+          }
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeStudentPhoto(studentId, event) {
+      if (event && event.stopPropagation) event.stopPropagation();
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      student.avatar = '';
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud.client) pushStudentToCloud(student);
       renderStudents();
-      renderTopics();
-      renderChumash();
-    }
-
-    function renderActiveStudentWorkspace(force = false) {
-      const workspace = document.getElementById('active-student-workspace');
-      if (!workspace) return;
-      const notesInput = document.getElementById('active-student-notes-input');
-      const isNotesFocused = notesInput && document.activeElement === notesInput;
-      if (isNotesFocused && !force) {
-        return;
+      if (APP_STATE.activeStudentDrawerId === student.id) {
+        renderStudentDrawer(student.id);
       }
-      const student = APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId);
-      if (!student) {
-        workspace.classList.add('hidden');
-        return;
-      }
-      workspace.classList.remove('hidden');
-
-      const isHe = APP_STATE.lang === 'he';
       const t = I18N[APP_STATE.lang];
-      const topics = window.JEWISH_TOPICS_DATA || [];
-      const chumash = [...(window.BEREISHIT_PARSHIOT_DATA || []), ...(window.SHEMOT_PARSHIOT_DATA || [])];
-
-      const totalTopics = topics.length;
-      const totalParshiot = chumash.length;
-      const completedTCount = Object.keys(student.completedTopics || {}).filter(k => student.completedTopics[k]).length;
-      const completedPCount = Object.keys(student.completedParshiot || {}).filter(k => student.completedParshiot[k]).length;
-      const overallPct = Math.round(((completedTCount + completedPCount) / (totalTopics + totalParshiot)) * 100);
-
-      workspace.innerHTML = `
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-          <div>
-            <div class="flex items-center gap-2">
-              <h3 class="text-lg font-bold text-white">${student.name}</h3>
-              <span class="text-xs px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 font-mono">${student.parshaOrDate || t.activeStudentDefault}</span>
-            </div>
-            <p class="text-xs text-slate-400 mt-0.5">${t.studentTrackerInstructions}</p>
-          </div>
-
-          <!-- Quick Actions -->
-          <div class="flex items-center gap-2">
-            <button onclick="switchTab('topics')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-lg font-medium transition flex items-center gap-1.5">
-              <i data-lucide="book-open" class="w-3.5 h-3.5"></i> ${t.jumpToCurriculum}
-            </button>
-          </div>
-        </div>
-
-        <!-- Student Notes Editor -->
-        <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 space-y-2">
-          <label class="block text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-            <i data-lucide="file-text" class="w-3.5 h-3.5 text-amber-400"></i>
-            ${t.collaborativeNotesTitle}
-          </label>
-          <div class="flex gap-2">
-            <textarea 
-              id="active-student-notes-input" oninput="handleNotesInput(this.value)" 
-              rows="2" 
-              placeholder="${t.notesPlaceholder}" 
-              class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-            >${student.notes || ''}</textarea>
-            <button 
-              onclick="saveActiveStudentNotes()"
-              class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-lg self-end active:scale-95 transition"
-            >
-              ${t.saveNotes}
-            </button>
-          </div>
-        </div>
-
-        <!-- Filter View Toggle for Cleaner Tracking -->
-        <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
-          <div class="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
-            <button onclick="setTrackerFilter('all')" id="track-filter-all" class="px-3 py-1.5 rounded-lg ${APP_STATE.trackerFilter === 'all' ? 'bg-brand-600 text-white font-semibold' : 'text-slate-400 hover:text-white'} transition">
-              ${t.filterAllLessons} (${totalTopics + totalParshiot})
-            </button>
-            <button onclick="setTrackerFilter('topics')" id="track-filter-topics" class="px-3 py-1.5 rounded-lg ${APP_STATE.trackerFilter === 'topics' ? 'bg-amber-600 text-white font-semibold' : 'text-slate-400 hover:text-white'} transition">
-              ${t.filterConcepts} (${completedTCount}/${totalTopics})
-            </button>
-            <button onclick="setTrackerFilter('chumash')" id="track-filter-chumash" class="px-3 py-1.5 rounded-lg ${APP_STATE.trackerFilter === 'chumash' ? 'bg-cyan-600 text-white font-semibold' : 'text-slate-400 hover:text-white'} transition">
-              ${t.filterChumash} (${completedPCount}/${totalParshiot})
-            </button>
-          </div>
-          
-          <span class="text-xs font-mono font-bold text-emerald-400 hidden sm:inline">
-            ${overallPct}% ${t.pctCompleted}
-          </span>
-        </div>
-
-        <!-- Checklist Grid: 13 Topics -->
-        ${APP_STATE.trackerFilter !== 'chumash' ? `
-        <div class="space-y-3">
-          <div class="flex items-center justify-between">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-              ${t.topicsProgress} (${completedTCount} / 13)
-            </h4>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-            ${topics.map(topic => {
-              const checked = isTopicCompleted(student.id, topic.id);
-              const title = isHe ? topic.title_he : topic.title_en;
-              return `
-                <div 
-                  onclick="toggleTopicForActiveStudent('${topic.id}', event)"
-                  class="cursor-pointer select-none px-3.5 py-2.5 rounded-xl border text-xs flex items-center justify-between gap-2.5 transition active:scale-98 ${
-                    checked 
-                      ? 'bg-emerald-950/50 border-emerald-500/50 text-emerald-200 shadow-sm' 
-                      : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
-                  }"
-                >
-                  <span class="truncate font-medium">${title}</span>
-                  <i data-lucide="${checked ? 'check-circle-2' : 'circle'}" class="w-4 h-4 shrink-0 ${checked ? 'text-emerald-400' : 'text-slate-600'}"></i>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-        ` : ''}
-
-        <!-- Checklist Grid: 23 Parshiot -->
-        ${APP_STATE.trackerFilter !== 'topics' ? `
-        <div class="space-y-3 pt-2">
-          <div class="flex items-center justify-between">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-              <i data-lucide="book" class="w-3.5 h-3.5"></i>
-              ${t.chumashProgress} (${completedPCount} / 23)
-            </h4>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-            ${chumash.map(parsha => {
-              const checked = isParshaCompleted(student.id, parsha.id);
-              const title = isHe ? parsha.name_he : parsha.name_en;
-              const isBereishit = parsha.book === 'bereishit';
-              return `
-                <div 
-                  onclick="toggleParshaForActiveStudent('${parsha.id}', event)"
-                  class="cursor-pointer select-none px-3.5 py-2.5 rounded-xl border text-xs flex items-center justify-between gap-2.5 transition active:scale-98 ${
-                    checked 
-                      ? 'bg-emerald-950/50 border-emerald-500/50 text-emerald-200 shadow-sm' 
-                      : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
-                  }"
-                >
-                  <div class="truncate flex items-center gap-1.5">
-                    <span class="text-[9px] px-1 rounded ${isBereishit ? 'bg-brand-500/20 text-brand-300' : 'bg-cyan-500/20 text-cyan-300'} font-mono">
-                      ${isBereishit ? (isHe ? 'בראשית' : 'Ber') : (isHe ? 'שמות' : 'Shem')}
-                    </span>
-                    <span class="truncate font-medium">${title}</span>
-                  </div>
-                  <i data-lucide="${checked ? 'check-circle-2' : 'circle'}" class="w-4 h-4 shrink-0 ${checked ? 'text-emerald-400' : 'text-slate-600'}"></i>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-        ` : ''}
-      `;
-      lucide.createIcons();
+      showToast(t.toastPhotoRemoved);
     }
 
-    function handleNotesInput(val) {
-      if (!APP_STATE.activeStudentId) return;
-      const student = APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId);
+    function moveStudentUp(studentId, event) {
+      if (event && event.stopPropagation) event.stopPropagation();
+      const idx = APP_STATE.students.findIndex(s => s.id === studentId);
+      if (idx <= 0) return;
+
+      const curr = APP_STATE.students[idx];
+      const prev = APP_STATE.students[idx - 1];
+
+      APP_STATE.students[idx] = prev;
+      APP_STATE.students[idx - 1] = curr;
+      APP_STATE.students.forEach((s, i) => { s.orderIndex = i; });
+
+      saveStudentsToStorage(false);
+      if (APP_STATE.cloud.client) {
+        pushStudentToCloud(curr);
+        pushStudentToCloud(prev);
+      }
+      renderStudents();
+      const t = I18N[APP_STATE.lang];
+      showToast(t.toastStudentMoved);
+    }
+
+    function moveStudentDown(studentId, event) {
+      if (event && event.stopPropagation) event.stopPropagation();
+      const idx = APP_STATE.students.findIndex(s => s.id === studentId);
+      if (idx === -1 || idx >= APP_STATE.students.length - 1) return;
+
+      const curr = APP_STATE.students[idx];
+      const next = APP_STATE.students[idx + 1];
+
+      APP_STATE.students[idx] = next;
+      APP_STATE.students[idx + 1] = curr;
+      APP_STATE.students.forEach((s, i) => { s.orderIndex = i; });
+
+      saveStudentsToStorage(false);
+      if (APP_STATE.cloud.client) {
+        pushStudentToCloud(curr);
+        pushStudentToCloud(next);
+      }
+      renderStudents();
+      const t = I18N[APP_STATE.lang];
+      showToast(t.toastStudentMoved);
+    }
+
+    function openStudentDrawer(studentId) {
+      APP_STATE.activeStudentDrawerId = studentId;
+      APP_STATE.activeStudentId = studentId;
+      const drawer = document.getElementById('drawer-student-detail');
+      if (drawer) {
+        drawer.classList.remove('hidden');
+        renderStudentDrawer(studentId, true);
+      }
+    }
+
+    function closeStudentDrawer() {
+      APP_STATE.activeStudentDrawerId = null;
+      const drawer = document.getElementById('drawer-student-detail');
+      if (drawer) drawer.classList.add('hidden');
+    }
+
+    function setDrawerTrackerFilter(filter) {
+      APP_STATE.trackerFilter = filter;
+      if (APP_STATE.activeStudentDrawerId) {
+        renderStudentDrawer(APP_STATE.activeStudentDrawerId, true);
+      }
+    }
+
+    function handleDrawerNotesInput(studentId, val) {
+      const student = APP_STATE.students.find(s => s.id === studentId);
       if (student) {
         student.notes = val;
         clearTimeout(notesAutoSaveTimer);
@@ -2575,9 +2665,197 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
-    function setTrackerFilter(filter) {
-      APP_STATE.trackerFilter = filter;
-      renderActiveStudentWorkspace();
+    function saveDrawerStudentNotes(studentId) {
+      const input = document.getElementById('drawer-student-notes-input');
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (student && input) {
+        student.notes = input.value.trim();
+        saveStudentsToStorage(true);
+        if (APP_STATE.cloud.client) pushStudentToCloud(student);
+        renderStudents();
+        const t = I18N[APP_STATE.lang];
+        showToast(t.toastNoteSaved(student.name));
+      }
+    }
+
+    function renderStudentDrawer(studentId, force = false) {
+      const drawer = document.getElementById('drawer-student-detail');
+      if (!drawer || drawer.classList.contains('hidden')) return;
+
+      const student = APP_STATE.students.find(s => s.id === (studentId || APP_STATE.activeStudentDrawerId));
+      if (!student) {
+        closeStudentDrawer();
+        return;
+      }
+
+      const notesInput = document.getElementById('drawer-student-notes-input');
+      const isNotesFocused = notesInput && document.activeElement === notesInput;
+      if (isNotesFocused && !force) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      const t = I18N[APP_STATE.lang];
+      const topics = window.JEWISH_TOPICS_DATA || [];
+      const chumash = [...(window.BEREISHIT_PARSHIOT_DATA || []), ...(window.SHEMOT_PARSHIOT_DATA || [])];
+
+      const totalTopics = topics.length;
+      const totalParshiot = chumash.length;
+      const completedTCount = Object.keys(student.completedTopics || {}).filter(k => k !== '_meta' && student.completedTopics[k]).length;
+      const completedPCount = Object.keys(student.completedParshiot || {}).filter(k => student.completedParshiot[k]).length;
+      const overallPct = Math.round(((completedTCount + completedPCount) / (totalTopics + totalParshiot)) * 100);
+
+      // Render Header
+      const header = document.getElementById('drawer-header-content');
+      if (header) {
+        const avatarHtml = student.avatar
+          ? `<img src="${student.avatar}" class="w-12 h-12 rounded-full object-cover border-2 border-brand-500 shadow-sm shrink-0">`
+          : `<div class="w-12 h-12 rounded-full bg-brand-600/20 text-brand-400 border border-brand-500/30 flex items-center justify-center font-bold text-base shrink-0">
+              ${student.name.charAt(0).toUpperCase()}
+            </div>`;
+
+        header.innerHTML = `
+          <div class="relative group cursor-pointer" onclick="triggerPhotoUpload('${student.id}', event)" title="${t.photoUploadHint}">
+            ${avatarHtml}
+            <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+              <i data-lucide="camera" class="w-4 h-4 text-white"></i>
+            </div>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="text-base sm:text-lg font-bold text-white truncate">${student.name}</h3>
+              <span class="text-xs px-2 py-0.5 rounded-md bg-brand-500/20 text-brand-300 font-mono">${student.parshaOrDate || t.activeStudentDefault}</span>
+              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded-md ${overallPct > 50 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
+                ${overallPct}%
+              </span>
+            </div>
+            <div class="flex items-center gap-2 mt-0.5 text-[11px] text-slate-400">
+              <button onclick="triggerPhotoUpload('${student.id}', event)" class="hover:text-brand-300 underline font-medium">
+                ${student.avatar ? t.changePhoto : t.uploadPhoto}
+              </button>
+              ${student.avatar ? `
+                <span>•</span>
+                <button onclick="removeStudentPhoto('${student.id}', event)" class="hover:text-red-400 underline font-medium">
+                  ${t.removePhoto}
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      // Render Body
+      const body = document.getElementById('drawer-body-content');
+      if (body) {
+        body.innerHTML = `
+          <!-- Collaborative Notes Editor -->
+          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2">
+            <label class="block text-xs font-semibold text-slate-300 flex items-center justify-between">
+              <span class="flex items-center gap-1.5">
+                <i data-lucide="file-text" class="w-3.5 h-3.5 text-amber-400"></i>
+                ${t.collaborativeNotesTitle}
+              </span>
+              <span class="text-[10px] text-slate-500 font-normal">Auto-saves to cloud</span>
+            </label>
+            <div class="flex gap-2">
+              <textarea
+                id="drawer-student-notes-input" oninput="handleDrawerNotesInput('${student.id}', this.value)"
+                rows="2"
+                placeholder="${t.notesPlaceholder}"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+              >${student.notes || ''}</textarea>
+              <button
+                onclick="saveDrawerStudentNotes('${student.id}')"
+                class="px-3.5 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-lg self-end active:scale-95 transition whitespace-nowrap"
+              >
+                ${t.saveNotes}
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter View Toggle -->
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+            <div class="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+              <button onclick="setDrawerTrackerFilter('all')" class="px-3 py-1.5 rounded-lg ${APP_STATE.trackerFilter === 'all' ? 'bg-brand-600 text-white font-semibold' : 'text-slate-400 hover:text-white'} transition">
+                ${t.filterAllLessons} (${totalTopics + totalParshiot})
+              </button>
+              <button onclick="setDrawerTrackerFilter('topics')" class="px-3 py-1.5 rounded-lg ${APP_STATE.trackerFilter === 'topics' ? 'bg-amber-600 text-white font-semibold' : 'text-slate-400 hover:text-white'} transition">
+                ${t.filterConcepts} (${completedTCount}/${totalTopics})
+              </button>
+              <button onclick="setDrawerTrackerFilter('chumash')" class="px-3 py-1.5 rounded-lg ${APP_STATE.trackerFilter === 'chumash' ? 'bg-cyan-600 text-white font-semibold' : 'text-slate-400 hover:text-white'} transition">
+                ${t.filterChumash} (${completedPCount}/${totalParshiot})
+              </button>
+            </div>
+            <span class="text-xs font-mono font-bold text-emerald-400 hidden sm:inline">
+              ${overallPct}% ${t.pctCompleted}
+            </span>
+          </div>
+
+          <!-- Checklist: 13 Topics -->
+          ${APP_STATE.trackerFilter !== 'chumash' ? `
+          <div class="space-y-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              ${t.topicsProgress} (${completedTCount} / 13)
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              ${topics.map(topic => {
+                const checked = isTopicCompleted(student.id, topic.id);
+                const title = isHe ? topic.title_he : topic.title_en;
+                return `
+                  <div
+                    onclick="toggleTopicForStudent('${student.id}', '${topic.id}', event)"
+                    class="cursor-pointer select-none px-3.5 py-2.5 rounded-xl border text-xs flex items-center justify-between gap-2.5 transition active:scale-98 ${
+                      checked
+                        ? 'bg-emerald-950/50 border-emerald-500/50 text-emerald-200 shadow-sm'
+                        : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
+                    }"
+                  >
+                    <span class="truncate font-medium">${title}</span>
+                    <i data-lucide="${checked ? 'check-circle-2' : 'circle'}" class="w-4 h-4 shrink-0 ${checked ? 'text-emerald-400' : 'text-slate-600'}"></i>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+          ` : ''}
+
+          <!-- Checklist: 23 Parshiot -->
+          ${APP_STATE.trackerFilter !== 'topics' ? `
+          <div class="space-y-3 pt-2">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+              <i data-lucide="book" class="w-3.5 h-3.5"></i>
+              ${t.chumashProgress} (${completedPCount} / 23)
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              ${chumash.map(parsha => {
+                const checked = isParshaCompleted(student.id, parsha.id);
+                const title = isHe ? parsha.name_he : parsha.name_en;
+                const isBereishit = parsha.book === 'bereishit';
+                return `
+                  <div
+                    onclick="toggleParshaForStudent('${student.id}', '${parsha.id}', event)"
+                    class="cursor-pointer select-none px-3.5 py-2.5 rounded-xl border text-xs flex items-center justify-between gap-2.5 transition active:scale-98 ${
+                      checked
+                        ? 'bg-emerald-950/50 border-emerald-500/50 text-emerald-200 shadow-sm'
+                        : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
+                    }"
+                  >
+                    <div class="truncate flex items-center gap-1.5">
+                      <span class="text-[9px] px-1 rounded ${isBereishit ? 'bg-brand-500/20 text-brand-300' : 'bg-cyan-500/20 text-cyan-300'} font-mono">
+                        ${isBereishit ? (isHe ? 'בראשית' : 'Ber') : (isHe ? 'שמות' : 'Shem')}
+                      </span>
+                      <span class="truncate font-medium">${title}</span>
+                    </div>
+                    <i data-lucide="${checked ? 'check-circle-2' : 'circle'}" class="w-4 h-4 shrink-0 ${checked ? 'text-emerald-400' : 'text-slate-600'}"></i>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+          ` : ''}
+        `;
+      }
+
+      lucide.createIcons();
     }
 
     function isTopicCompleted(studentId, topicId) {
@@ -2590,50 +2868,205 @@ alter publication supabase_realtime add table public.students_sync;`;
       return !!(student && student.completedParshiot && student.completedParshiot[parshaId]);
     }
 
-    function toggleTopicForActiveStudent(topicId, e) {
+    function toggleTopicForStudent(studentId, topicId, e) {
       if (e && e.stopPropagation) e.stopPropagation();
-      if (!APP_STATE.activeStudentId) return;
-      const student = APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId);
+      const student = APP_STATE.students.find(s => s.id === studentId);
       if (!student) return;
       if (!student.completedTopics) student.completedTopics = {};
       student.completedTopics[topicId] = !student.completedTopics[topicId];
       saveStudentsToStorage(true);
       if (APP_STATE.cloud.client) pushStudentToCloud(student);
       renderAllViews();
+      if (APP_STATE.activeStudentDrawerId === studentId) {
+        renderStudentDrawer(studentId, true);
+      }
       const isHe = APP_STATE.lang === 'he';
-      showToast(student.completedTopics[topicId] ? 
-        (isHe ? "שיעור סומן כנלמד" : "Lesson marked as taught") : 
+      showToast(student.completedTopics[topicId] ?
+        (isHe ? "שיעור סומן כנלמד" : "Lesson marked as taught") :
         (isHe ? "סימון השיעור בוטל" : "Lesson unchecked"));
     }
 
-    function toggleParshaForActiveStudent(parshaId, e) {
+    function toggleParshaForStudent(studentId, parshaId, e) {
       if (e && e.stopPropagation) e.stopPropagation();
-      if (!APP_STATE.activeStudentId) return;
-      const student = APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId);
+      const student = APP_STATE.students.find(s => s.id === studentId);
       if (!student) return;
       if (!student.completedParshiot) student.completedParshiot = {};
       student.completedParshiot[parshaId] = !student.completedParshiot[parshaId];
       saveStudentsToStorage(true);
       if (APP_STATE.cloud.client) pushStudentToCloud(student);
       renderAllViews();
+      if (APP_STATE.activeStudentDrawerId === studentId) {
+        renderStudentDrawer(studentId, true);
+      }
       const isHe = APP_STATE.lang === 'he';
-      showToast(student.completedParshiot[parshaId] ? 
-        (isHe ? "פרשה סומנה כנלמדה" : "Parsha marked as taught") : 
+      showToast(student.completedParshiot[parshaId] ?
+        (isHe ? "פרשה סומנה כנלמדה" : "Parsha marked as taught") :
         (isHe ? "סימון הפרשה בוטל" : "Parsha unchecked"));
     }
 
-    function saveActiveStudentNotes() {
+    function toggleTopicForActiveStudent(topicId, e) {
       if (!APP_STATE.activeStudentId) return;
-      const t = I18N[APP_STATE.lang];
-      const input = document.getElementById('active-student-notes-input');
-      const student = APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId);
-      if (student && input) {
-        student.notes = input.value.trim();
-        saveStudentsToStorage(true);
-        if (APP_STATE.cloud.client) pushStudentToCloud(student);
-        renderStudents();
-        showToast(t.toastNoteSaved(student.name));
+      toggleTopicForStudent(APP_STATE.activeStudentId, topicId, e);
+    }
+
+    function toggleParshaForActiveStudent(parshaId, e) {
+      if (!APP_STATE.activeStudentId) return;
+      toggleParshaForStudent(APP_STATE.activeStudentId, parshaId, e);
+    }
+
+    function selectActiveStudent(id) {
+      APP_STATE.activeStudentId = id;
+      openStudentDrawer(id);
+      renderStudents();
+      renderTopics();
+      renderChumash();
+    }
+
+    function renderActiveStudentWorkspace(force = false) {
+      if (APP_STATE.activeStudentDrawerId) {
+        renderStudentDrawer(APP_STATE.activeStudentDrawerId, force);
       }
+    }
+
+    function renderStudents() {
+      const container = document.getElementById('students-list');
+      const emptyState = document.getElementById('students-empty');
+      const badge = document.getElementById('student-badge-count');
+      const t = I18N[APP_STATE.lang];
+      const isHe = APP_STATE.lang === 'he';
+
+      badge.textContent = APP_STATE.students.length;
+      const mobBadge = document.getElementById('mob-student-badge');
+      if (mobBadge) mobBadge.textContent = APP_STATE.students.length;
+
+      if (APP_STATE.students.length === 0) {
+        emptyState.classList.remove('hidden');
+        container.innerHTML = '';
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+
+      // Keep orderIndex sorted
+      APP_STATE.students.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
+
+      // Default active student to first if not selected
+      if (!APP_STATE.activeStudentId || !APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId)) {
+        APP_STATE.activeStudentId = APP_STATE.students[0].id;
+      }
+
+      // Render Cards for each student
+      container.innerHTML = APP_STATE.students.map((student, idx) => {
+        const isActive = student.id === APP_STATE.activeStudentId;
+        const totalTopics = 13;
+        const totalParshiot = 23;
+        const completedTCount = Object.keys(student.completedTopics || {}).filter(k => k !== '_meta' && student.completedTopics[k]).length;
+        const completedPCount = Object.keys(student.completedParshiot || {}).filter(k => student.completedParshiot[k]).length;
+        const overallPct = Math.round(((completedTCount + completedPCount) / (totalTopics + totalParshiot)) * 100);
+
+        const avatarHtml = student.avatar
+          ? `<img src="${student.avatar}" class="w-10 h-10 rounded-full object-cover border border-brand-500/40 shrink-0 shadow-sm">`
+          : `<div class="w-10 h-10 rounded-full bg-brand-600/20 text-brand-400 border border-brand-500/30 flex items-center justify-center font-bold text-sm shrink-0">
+              ${student.name.charAt(0).toUpperCase()}
+            </div>`;
+
+        return `
+          <div
+            onclick="selectActiveStudent('${student.id}')"
+            class="cursor-pointer rounded-2xl p-4 sm:p-5 border transition duration-150 flex flex-col justify-between hover:shadow-lg active:scale-[0.99] group ${
+              isActive
+                ? 'bg-slate-850/90 border-brand-500/80 shadow-md ring-1 ring-brand-500/50'
+                : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
+            }"
+          >
+            <div>
+              <!-- Header: Avatar, Name, Reorder Buttons & Percentage -->
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div onclick="triggerPhotoUpload('${student.id}', event)" title="${t.changePhoto}" class="relative group/avatar">
+                    ${avatarHtml}
+                    <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition">
+                      <i data-lucide="camera" class="w-3.5 h-3.5 text-white"></i>
+                    </div>
+                  </div>
+                  <div class="min-w-0">
+                    <h4 class="text-sm sm:text-base font-bold text-white truncate group-hover:text-brand-300 transition">${student.name}</h4>
+                    <p class="text-[11px] text-slate-400 truncate">${student.parshaOrDate || t.defaultCandidate}</p>
+                  </div>
+                </div>
+
+                <!-- Reorder and Progress Badge -->
+                <div class="flex items-center gap-1.5 shrink-0" onclick="event.stopPropagation()">
+                  <div class="flex items-center bg-slate-950/80 border border-slate-800 rounded-lg p-0.5">
+                    <button
+                      onclick="moveStudentUp('${student.id}', event)"
+                      ${idx === 0 ? 'disabled' : ''}
+                      title="${t.moveUp}"
+                      class="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-20 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition"
+                    >
+                      <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <button
+                      onclick="moveStudentDown('${student.id}', event)"
+                      ${idx === APP_STATE.students.length - 1 ? 'disabled' : ''}
+                      title="${t.moveDown}"
+                      class="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-20 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition"
+                    >
+                      <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
+                    </button>
+                  </div>
+
+                  <span class="text-xs font-mono font-bold px-2 py-1 rounded-lg ${
+                    overallPct > 50 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                  }">
+                    ${overallPct}%
+                  </span>
+                </div>
+              </div>
+
+              <!-- Progress Bars -->
+              <div class="space-y-2 mt-2">
+                <div>
+                  <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                    <span>${t.tabTopics}</span>
+                    <span class="font-mono">${completedTCount} / ${totalTopics}</span>
+                  </div>
+                  <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
+                    <div class="bg-amber-400 h-1.5 rounded-full transition-all duration-300" style="width: ${((completedTCount/totalTopics)*100)}%"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                    <span>${t.tabChumash}</span>
+                    <span class="font-mono">${completedPCount} / ${totalParshiot}</span>
+                  </div>
+                  <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
+                    <div class="bg-cyan-500 h-1.5 rounded-full transition-all duration-300" style="width: ${((completedPCount/totalParshiot)*100)}%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer: Notes preview and details action -->
+            <div class="mt-4 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+              <span class="truncate max-w-[170px] italic text-slate-400">
+                ${student.notes ? student.notes : t.noNotesText}
+              </span>
+              <div class="flex items-center gap-1">
+                <span class="text-[10px] text-brand-400 font-medium group-hover:underline flex items-center gap-0.5">
+                  ${isHe ? 'לצפייה בפרטים' : 'View details'} <i data-lucide="${isHe ? 'chevron-left' : 'chevron-right'}" class="w-3 h-3"></i>
+                </span>
+                <button onclick="event.stopPropagation(); deleteStudent('${student.id}')" title="${t.deleteStudentTitle}" class="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-slate-800 transition">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
     }
 
     function loadStudentsFromStorage() {
@@ -2641,13 +3074,19 @@ alter publication supabase_realtime add table public.students_sync;`;
         const raw = localStorage.getItem('tutor_students_v1');
         if (raw) {
           APP_STATE.students = JSON.parse(raw);
+          APP_STATE.students.forEach((s, idx) => {
+            if (typeof s.orderIndex !== 'number') s.orderIndex = idx;
+            if (!s.avatar) s.avatar = '';
+          });
+          APP_STATE.students.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
         } else {
-          // Pre-populate with 2 realistic sample students for immediate readiness
           APP_STATE.students = [
             {
               id: "stu_" + Date.now(),
               name: "David Goldstein",
               parshaOrDate: "Parshat Lech Lecha (Nov 2026)",
+              avatar: "",
+              orderIndex: 0,
               notes: "Great curiosity! Loves basketball analogies. Completed Tefillin and Shabbat basics.",
               completedTopics: { shabbat: true, tefillin: true, kashrut: true },
               completedParshiot: { lech_lecha: true, bereishit: true }
@@ -2656,12 +3095,14 @@ alter publication supabase_realtime add table public.students_sync;`;
               id: "stu_" + (Date.now() + 1),
               name: "Ethan Miller",
               parshaOrDate: "Parshat Beshalach (Jan 2027)",
+              avatar: "",
+              orderIndex: 1,
               notes: "Introductory lessons. Focused on Bar Mitzvah responsibility.",
               completedTopics: { bar_mitzvah: true, ahavat_yisrael: true },
               completedParshiot: { shemot: true }
             }
           ];
-          saveStudentsToStorage();
+          saveStudentsToStorage(false);
         }
       } catch (e) {
         console.error("Storage error:", e);
@@ -2672,7 +3113,6 @@ alter publication supabase_realtime add table public.students_sync;`;
     function saveStudentsToStorage(pushToCloud = true) {
       try {
         localStorage.setItem('tutor_students_v1', JSON.stringify(APP_STATE.students));
-        // If pushing to cloud is active and a student was modified
         if (pushToCloud && APP_STATE.cloud.client && APP_STATE.activeStudentId) {
           const student = APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId);
           if (student) pushStudentToCloud(student);
@@ -2682,32 +3122,45 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
-    // Create New Student
     function openAddStudentModal() {
       const form = document.getElementById('add-student-form');
       if (form) form.reset();
 
+      APP_STATE.newStudentPendingAvatar = '';
+      const avatarPreview = document.getElementById('new-student-avatar-preview');
+      if (avatarPreview) {
+        avatarPreview.innerHTML = '<i data-lucide="camera" class="w-6 h-6"></i>';
+      }
+
       const nameInput = document.getElementById('new-student-name');
       const dateInput = document.getElementById('new-student-date');
       const notesInput = document.getElementById('new-student-notes');
+      const parshaCustom = document.getElementById('new-student-parsha-custom');
       const t = I18N[APP_STATE.lang];
 
+      populateParshaSelectOptions();
+
+      if (parshaCustom) {
+        parshaCustom.classList.add('hidden');
+        parshaCustom.value = '';
+      }
+
       const salt = Date.now();
-      if (nameInput) { 
-        nameInput.value = ''; 
-        nameInput.setAttribute('value', ''); 
+      if (nameInput) {
+        nameInput.value = '';
+        nameInput.setAttribute('value', '');
         nameInput.name = 'student_name_fresh_' + salt;
         nameInput.placeholder = t.studentNamePlaceholder;
       }
-      if (dateInput) { 
-        dateInput.value = ''; 
-        dateInput.setAttribute('value', ''); 
+      if (dateInput) {
+        dateInput.value = '';
+        dateInput.setAttribute('value', '');
         dateInput.name = 'student_date_fresh_' + salt;
-        dateInput.placeholder = t.studentDatePlaceholder;
+        dateInput.placeholder = APP_STATE.lang === 'he' ? "לדוגמה: כ״ח חשון תשפ״ז / נובמבר 2026" : "e.g. Nov 2026 / 15 Cheshvan";
       }
-      if (notesInput) { 
-        notesInput.value = ''; 
-        notesInput.innerHTML = ''; 
+      if (notesInput) {
+        notesInput.value = '';
+        notesInput.innerHTML = '';
         notesInput.name = 'student_notes_fresh_' + salt;
         notesInput.placeholder = t.studentNotesPlaceholder;
       }
@@ -2720,6 +3173,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (titleTxt) titleTxt.textContent = t.addStudentModalTitle;
 
       document.getElementById('modal-add-student').classList.remove('hidden');
+      lucide.createIcons();
       if (nameInput) setTimeout(() => nameInput.focus(), 120);
     }
 
@@ -2728,19 +3182,32 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (modal) modal.classList.add('hidden');
       const form = document.getElementById('add-student-form');
       if (form) form.reset();
+      APP_STATE.newStudentPendingAvatar = '';
+      const avatarPreview = document.getElementById('new-student-avatar-preview');
+      if (avatarPreview) {
+        avatarPreview.innerHTML = '<i data-lucide="camera" class="w-6 h-6"></i>';
+        lucide.createIcons();
+      }
       const nameInput = document.getElementById('new-student-name');
       const dateInput = document.getElementById('new-student-date');
       const notesInput = document.getElementById('new-student-notes');
+      const parshaCustom = document.getElementById('new-student-parsha-custom');
       if (nameInput) { nameInput.value = ''; nameInput.removeAttribute('value'); }
       if (dateInput) { dateInput.value = ''; dateInput.removeAttribute('value'); }
       if (notesInput) { notesInput.value = ''; notesInput.innerHTML = ''; }
+      if (parshaCustom) { parshaCustom.value = ''; parshaCustom.classList.add('hidden'); }
     }
 
     function handleCreateStudent(e) {
       e.preventDefault();
       const t = I18N[APP_STATE.lang];
       const name = document.getElementById('new-student-name').value.trim();
-      const parsha = document.getElementById('new-student-date').value.trim();
+
+      const selectVal = document.getElementById('new-student-parsha-select').value;
+      const customVal = document.getElementById('new-student-parsha-custom').value.trim();
+      const selectedParsha = selectVal === 'custom' ? customVal : selectVal;
+
+      const dateVal = document.getElementById('new-student-date').value.trim();
       const notes = document.getElementById('new-student-notes').value.trim();
 
       if (!name) {
@@ -2748,10 +3215,17 @@ alter publication supabase_realtime add table public.students_sync;`;
         return;
       }
 
+      let parshaOrDate = selectedParsha;
+      if (dateVal) {
+        parshaOrDate = parshaOrDate ? (parshaOrDate + ' (' + dateVal + ')') : dateVal;
+      }
+
       const newStudent = {
         id: "stu_" + Date.now(),
         name: name,
-        parshaOrDate: parsha,
+        parshaOrDate: parshaOrDate,
+        avatar: APP_STATE.newStudentPendingAvatar || '',
+        orderIndex: APP_STATE.students.length,
         notes: notes,
         completedTopics: {},
         completedParshiot: {}
@@ -2763,6 +3237,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (APP_STATE.cloud.client) pushStudentToCloud(newStudent);
       closeAddStudentModal();
       renderAllViews();
+      openStudentDrawer(newStudent.id);
       showToast(t.toastStudentAdded(name));
     }
 
@@ -2776,6 +3251,10 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (APP_STATE.activeStudentId === id) {
         APP_STATE.activeStudentId = APP_STATE.students.length > 0 ? APP_STATE.students[0].id : null;
       }
+      if (APP_STATE.activeStudentDrawerId === id) {
+        closeStudentDrawer();
+      }
+      APP_STATE.students.forEach((s, idx) => { s.orderIndex = idx; });
       saveStudentsToStorage(false);
       if (APP_STATE.cloud.client) deleteStudentFromCloud(id);
       renderAllViews();
@@ -2813,11 +3292,11 @@ alter publication supabase_realtime add table public.students_sync;`;
         timestamp: Date.now(),
         students: APP_STATE.students
       };
-      
+
       const jsonStr = JSON.stringify(payload);
       // Safe base64 encoding with UTF-8 support
       const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
-      
+
       const shareUrl = `${window.location.origin}${window.location.pathname}#sync=${b64}`;
       const input = document.getElementById('share-link-input');
       input.value = shareUrl;
@@ -2929,7 +3408,7 @@ alter publication supabase_realtime add table public.students_sync;`;
   <!-- ============================================== -->
   <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-nav border-t border-slate-800/90 mobile-safe-bottom px-3 pt-2">
     <div class="flex items-center justify-around max-w-md mx-auto">
-      
+
       <button onclick="switchTab('topics')" id="mob-tab-topics" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition text-brand-400 font-semibold">
         <i data-lucide="sparkles" class="w-5 h-5"></i>
         <span class="text-[10px] tracking-tight" id="mob-lbl-topics">Concepts</span>
