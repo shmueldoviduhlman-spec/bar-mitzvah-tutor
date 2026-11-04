@@ -185,7 +185,9 @@ window.JEWISH_TOPICS_DATA = [
     life_app_en: "The words you text or say in a group chat can build someone's confidence for weeks, or destroy their day in seconds. Words are physical power.",
     life_app_he: "משפט אחד שאתה שולח בקבוצת וואטסאפ יכול לבנות לחבר ביטחון לשבועות, או לרסק לו את המצב רוח בשנייה. מילים הן נשק חם.",
     midrash_en: "King Solomon said: 'Death and life are in the power of the tongue' (Proverbs 18:21). Like an arrow released from a bow, once a word leaves your lips, you cannot bring it back.",
-    midrash_he: "שלמה המלך אמר: 'מוות וחיים ביד לשון'. כמו חץ שנורה מהקשת, ברגע שמילה יצאה מהפה אי אפשר להחזיר אותה."
+    midrash_he: "שלמה המלך אמר: 'מוות וחיים ביד לשון'. כמו חץ שנורה מהקשת, ברגע שמילה יצאה מהפה אי אפשר להחזיר אותה.",
+    discussion_en: "Has someone ever said something that changed how you felt about yourself for days? How do you choose what words you type online?",
+    discussion_he: "האם מישהו אמר לך פעם משהו שגרם לך להרגיש שונה לגמרי לגבי עצמך? איך אתה בוחר אילו מילים לכתוב ברשתות או בוואטסאפ?"
   },
   {
     id: "kiddush_hashem",
@@ -210,7 +212,8 @@ window.JEWISH_TOPICS_DATA = [
     life_app_he: "כשאתה מתנהג בג'נטלמניות ובסבלנות במגרש או בכיתה, אתה מרוויח כבוד עצום לעצמך ולמשפחה שלך בלי צורך להטיף מוסר לאף אחד.",
     midrash_en: "Rabbi Shimon ben Shetach bought a donkey from an Arab merchant and found a precious diamond hanging from its neck. He immediately returned it. The merchant cried out: 'Blessed is the God of Shimon ben Shetach!'",
     midrash_he: "רבי שמעון בן שטח קנה חמור מסוחר נוכרי ומצא יהלום יקר בצווארו. מיד רץ והחזיר לו. זעק הסוחר: 'ברוך אלוהי שמעון בן שטח!'",
-    discussion_en: "Think of a time someone did the right thing even though they could have cheated and gotten away with it. How did you feel about them?"
+    discussion_en: "Think of a time someone did the right thing even though they could have cheated and gotten away with it. How did you feel about them?",
+    discussion_he: "חשוב על פעם שראית מישהו שנהג ביושר מוחלט אפילו כשיכל לרמות בקלות ואף אחד לא היה יודע. מה חשבת עליו באותו רגע?"
   },
   {
     id: "ahavat_yisrael",
@@ -234,7 +237,9 @@ window.JEWISH_TOPICS_DATA = [
     life_app_en: "Spotting the kid sitting alone at lunch or getting left out of the group chat and pulling them in isn't just nice — it is the core DNA of being a Jew.",
     life_app_he: "לראות את הילד שיושב לבד בהפסקה או שלא צורף לקבוצה ולגשת אליו — זה לא סתם מעשה נחמד, זה הלב של היותך יהודי.",
     midrash_en: "The Beit HaMikdash (Temple) was destroyed because of Sinat Chinam (baseless hatred). It will only be rebuilt through Ahavat Chinam (unconditional love).",
-    midrash_he: "בית המקדש חרב בעוון שנאת חינם. הוא ייבנה מחדש אך ורק בזכות אהבת חינם."
+    midrash_he: "בית המקדש חרב בעוון שנאת חינם. הוא ייבנה מחדש אך ורק בזכות אהבת חינם.",
+    discussion_en: "Why is it sometimes harder to be patient and kind with people closest to us than with complete strangers?",
+    discussion_he: "למה לפעמים הרבה יותר קשה להיות סבלניים ונחמדים דווקא לאנשים הכי קרובים אלינו מאשר לאנשים זרים ברחוב?"
   },
   {
     id: "jewish_holidays",
@@ -260,7 +265,9 @@ window.JEWISH_TOPICS_DATA = [
     life_app_en: "Life isn't a flat circle where each year repeats identically; it is a spiral staircase. Each holiday you meet gives you an opportunity to climb one level higher.",
     life_app_he: "החיים אינם מעגל שטוח שחוזר על עצמו; הם מדרגות ספירלה. בכל חג שמגיע אתה מקבל הזדמנות לעלות עוד קומה באישיות שלך.",
     midrash_en: "The word for year in Hebrew is 'Shanah' (which shares a root with Shinui - change, and Sheninah - repetition). You either repeat your old habits, or you transform.",
-    midrash_he: "המילה 'שנה' מגיעה משני שורשים: שינון (חזרה על הישן) או שינוי (התחדשות וצמיחה). הבחירה בידיך."
+    midrash_he: "המילה 'שנה' מגיעה משני שורשים: שינון (חזרה על הישן) או שינוי (התחדשות וצמיחה). הבחירה בידיך.",
+    discussion_en: "Which Jewish holiday is your favorite to celebrate with family, and what special feeling does it give you that ordinary days don't?",
+    discussion_he: "איזה חג יהודי אתה הכי אוהב לחגוג עם המשפחה, ואיזו תחושה מיוחדת הוא מעניק לך שאין בימים רגילים?"
   },
   {
     id: "jewish_identity",
@@ -284,7 +291,9 @@ window.JEWISH_TOPICS_DATA = [
     life_app_en: "Whenever you doubt yourself, feel insecure, or compare your social media likes to other kids, remember: your worth is infinite and unconditional.",
     life_app_he: "כשאתה מתלבט לגבי עצמך, משווה לייקים או מרגיש חסר ביטחון, תזכור: הערך שלך לא תלוי במה שאחרים חושבים, הוא אינסופי מלידה.",
     midrash_en: "The Baal Shem Tov taught: God loves every single Jew more than elderly parents love their only child born in their old age.",
-    midrash_he: "הבעל שם טוב אמר: הקב״ה אוהב כל יהודי יותר ממה שהורים מבוגרים אוהבים את בן זקוניהם היחיד."
+    midrash_he: "הבעל שם טוב אמר: הקב״ה אוהב כל יהודי יותר ממה שהורים מבוגרים אוהבים את בן זקוניהם היחיד.",
+    discussion_en: "What makes you feel most proud to be Jewish, especially when standing out among friends who have different backgrounds?",
+    discussion_he: "מה גורם לך להרגיש הכי גאה בזהות היהודית שלך, במיוחד כשאתה נמצא בסביבה מגוונת עם חברים בעלי רקע שונה?"
   },
   {
     id: "bar_mitzvah",
@@ -310,7 +319,9 @@ window.JEWISH_TOPICS_DATA = [
     life_app_en: "Maturity isn't shaving or growing taller; maturity is taking responsibility when you mess up, instead of blaming parents, teachers, or referees.",
     life_app_he: "בגרות היא לא רק גובה או גילוח; בגרות היא היכולת לקחת אחריות כשאתה טועה, במקום להאשים את ההורים או את השופט במגרש.",
     midrash_en: "King Solomon was called 'Kohelet' because he gathered wisdom. At your Bar Mitzvah, you gather the strength of all your ancestors to write your own chapter.",
-    midrash_he: "חז״ל אומרים שביום הבר מצווה האדם הופך לעץ שעומד בפני עצמו ומוציא פירות."
+    midrash_he: "חז״ל אומרים שביום הבר מצווה האדם הופך לעץ שעומד בפני עצמו ומוציא פירות.",
+    discussion_en: "Now that you are turning 13, what is one major area of your life where you want to make your own decisions and take full responsibility?",
+    discussion_he: "כעת כשאתה מגיע לגיל 13, מהו התחום הראשון בחייך שבו אתה רוצה לקבל החלטות עצמאיות ולקחת אחריות מלאה של בוגר?"
   },
   {
     id: "tefillah",
@@ -334,6 +345,8 @@ window.JEWISH_TOPICS_DATA = [
     life_app_en: "Prayer isn't just asking for things like an Amazon wish list. It's taking 5 minutes to breathe, center your mind, express gratitude for health, and ask for strength before an exam or game.",
     life_app_he: "תפילה היא לא רשימת קניות של אמזון. היא הרגע שלך לעצור, להודות על החיים והבריאות, ולבקש כוח אמיתי לפני מבחן או אתגר בחיים.",
     midrash_en: "Rabbi Yehoshua taught: Even if a sharp sword rests upon a person's neck, they should never despair of Hashem's mercy and the power of sincere prayer.",
-    midrash_he: "אמרו חז״ל: אפילו חרב חדה מונחת על צווארו של אדם, אל ימנע עצמו מן הרחמים."
+    midrash_he: "אמרו חז״ל: אפילו חרב חדה מונחת על צווארו של אדם, אל ימנע עצמו מן הרחמים.",
+    discussion_en: "If you could have a direct one-on-one conversation with Hashem right now, what is the single most important thing you would talk about?",
+    discussion_he: "אם הייתה לך עכשיו שיחה ישירה של אחד על אחד עם בורא עולם, מהו הדבר הכי חשוב שהיית רוצה לדבר עליו או לבקש?"
   }
 ];

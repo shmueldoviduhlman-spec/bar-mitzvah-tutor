@@ -224,15 +224,18 @@
       <!-- Upper Row: Brand + Status + Actions -->
       <div class="flex items-center justify-between gap-2">
         
-        <!-- Left: Logo & Title -->
-        <div class="flex items-center gap-2.5 min-w-0">
+        <!-- Left: Logo & Title & Cloud Sync Pill -->
+        <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
           <div class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center text-white shadow-md badge-glow">
             <i data-lucide="scroll" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
-          <div class="truncate">
-            <div class="flex items-center gap-1.5">
-              <span id="app-title" class="text-base sm:text-lg font-bold text-white tracking-tight truncate">TutorPilot</span>
-              <span id="cloud-status-dot" class="w-2 h-2 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" title="Live Synced"></span>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5 sm:gap-2">
+              <span id="app-title" class="text-sm sm:text-base font-bold text-white tracking-tight truncate">TutorPilot</span>
+              <button onclick="openCloudModal()" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition active:scale-95 shrink-0" title="Cloud Sync Status">
+                <span id="cloud-status-dot" class="w-2 h-2 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]"></span>
+                <span id="cloud-status-text" class="text-[10px] sm:text-xs text-emerald-300 font-semibold truncate">Synced with Rabbi</span>
+              </button>
             </div>
             <p id="app-subtitle" class="text-[10px] text-slate-400 truncate hidden sm:block">Bar Mitzvah Tutor Companion & Tracker</p>
           </div>
@@ -1069,28 +1072,65 @@ alter publication supabase_realtime add table public.students_sync;`;
       document.getElementById('modal-cloud').classList.add('hidden');
     }
 
-    function updateCloudStatusPill(status, label) {
-      APP_STATE.cloud.status = status;
+    function updateCloudStatusPill(status, customLabel) {
+      if (status) APP_STATE.cloud.status = status;
+      const currentStatus = APP_STATE.cloud.status;
       const dot = document.getElementById('cloud-status-dot');
       const text = document.getElementById('cloud-status-text');
-      if (!dot || !text) return;
+      const settingsDot = document.getElementById('cloud-status-dot-settings');
+      const settingsBadge = document.getElementById('settings-sync-badge');
+      const isHe = APP_STATE.lang === 'he';
 
-      if (status === 'connected') {
-        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]';
-        text.textContent = label || 'Cloud Live';
-        text.className = 'hidden sm:inline text-emerald-300 font-medium';
-      } else if (status === 'syncing') {
-        dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
-        text.textContent = label || 'Syncing...';
-        text.className = 'hidden sm:inline text-amber-300 font-medium';
-      } else if (status === 'offline') {
-        dot.className = 'w-2 h-2 rounded-full bg-amber-500';
-        text.textContent = label || 'Offline (Cached)';
-        text.className = 'hidden sm:inline text-amber-400 font-medium';
-      } else {
-        dot.className = 'w-2 h-2 rounded-full bg-slate-500';
-        text.textContent = label || 'Local Only';
-        text.className = 'hidden sm:inline text-slate-400 font-medium';
+      let label = customLabel;
+      if (!label) {
+        if (currentStatus === 'connected') {
+          label = isHe ? 'מסונכרן עם הרב' : 'Synced with Rabbi';
+        } else if (currentStatus === 'syncing') {
+          label = isHe ? 'מסנכרן...' : 'Syncing...';
+        } else if (currentStatus === 'offline') {
+          label = isHe ? 'מצב לא מקוון' : 'Offline (Cached)';
+        } else {
+          label = isHe ? 'מקומי בלבד' : 'Local Only';
+        }
+      }
+
+      if (dot) {
+        if (currentStatus === 'connected') {
+          dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]';
+        } else if (currentStatus === 'syncing') {
+          dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+        } else if (currentStatus === 'offline') {
+          dot.className = 'w-2 h-2 rounded-full bg-amber-500';
+        } else {
+          dot.className = 'w-2 h-2 rounded-full bg-slate-500';
+        }
+      }
+
+      if (text) {
+        text.textContent = label;
+        if (currentStatus === 'connected') {
+          text.className = 'text-[10px] sm:text-xs text-emerald-300 font-semibold truncate';
+        } else if (currentStatus === 'syncing') {
+          text.className = 'text-[10px] sm:text-xs text-amber-300 font-semibold truncate';
+        } else if (currentStatus === 'offline') {
+          text.className = 'text-[10px] sm:text-xs text-amber-400 font-semibold truncate';
+        } else {
+          text.className = 'text-[10px] sm:text-xs text-slate-400 font-semibold truncate';
+        }
+      }
+
+      if (settingsDot) {
+        if (currentStatus === 'connected') {
+          settingsDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]';
+        } else if (currentStatus === 'syncing') {
+          settingsDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
+        } else {
+          settingsDot.className = 'w-2.5 h-2.5 rounded-full bg-slate-500';
+        }
+      }
+
+      if (settingsBadge) {
+        settingsBadge.textContent = currentStatus === 'connected' ? (isHe ? 'פעיל' : 'Live') : (isHe ? 'מנותק' : 'Off');
       }
     }
 
@@ -1099,12 +1139,12 @@ alter publication supabase_realtime add table public.students_sync;`;
       const key = APP_STATE.cloud.key;
 
       if (!url || !key || typeof window.supabase === 'undefined') {
-        updateCloudStatusPill('disconnected', 'Local Only');
+        updateCloudStatusPill('disconnected');
         return;
       }
 
       try {
-        updateCloudStatusPill('syncing', 'Connecting...');
+        updateCloudStatusPill('syncing');
         APP_STATE.cloud.client = window.supabase.createClient(url, key);
 
         // Fetch current cloud students and merge with local
@@ -1122,15 +1162,15 @@ alter publication supabase_realtime add table public.students_sync;`;
           })
           .subscribe(status => {
             if (status === 'SUBSCRIBED') {
-              updateCloudStatusPill('connected', 'Cloud Live');
+              updateCloudStatusPill('connected');
             } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
-              updateCloudStatusPill('offline', 'Offline');
+              updateCloudStatusPill('offline');
             }
           });
 
       } catch (err) {
         console.error('Supabase init error:', err);
-        updateCloudStatusPill('offline', 'Offline (Local)');
+        updateCloudStatusPill('offline');
       }
     }
 
@@ -1145,7 +1185,6 @@ alter publication supabase_realtime add table public.students_sync;`;
         if (error) throw error;
 
         if (data && Array.isArray(data)) {
-          // If cloud has data, merge into local
           if (data.length > 0) {
             const cloudStudents = data.map(row => ({
               id: row.id,
@@ -1157,38 +1196,38 @@ alter publication supabase_realtime add table public.students_sync;`;
               updatedAt: row.updated_at
             }));
 
-            // Smart merge with local
             mergeStudentsWithCloud(cloudStudents);
           } else if (APP_STATE.students.length > 0) {
-            // Cloud is empty, push existing local students to cloud
             for (const s of APP_STATE.students) {
               await pushStudentToCloud(s);
             }
           }
         }
-        updateCloudStatusPill('connected', 'Cloud Live');
+        updateCloudStatusPill('connected');
       } catch (e) {
         console.error('Fetch cloud error:', e);
-        updateCloudStatusPill('offline', 'Offline (Local)');
+        updateCloudStatusPill('offline');
       }
     }
 
     function mergeStudentsWithCloud(cloudStudents) {
-      const studentMap = new Map();
-      // Put existing local
-      APP_STATE.students.forEach(s => studentMap.set(s.id, s));
-      // Overwrite/insert with cloud
-      cloudStudents.forEach(cs => studentMap.set(cs.id, cs));
+      if (!cloudStudents || cloudStudents.length === 0) return;
+      
+      const cloudMap = new Map();
+      cloudStudents.forEach(cs => cloudMap.set(cs.id, cs));
 
-      APP_STATE.students = Array.from(studentMap.values());
-      saveStudentsToStorage(false); // don't re-trigger cloud push
-      renderStudents();
-      renderTopics();
-      renderChumash();
+      APP_STATE.students = Array.from(cloudMap.values());
+      if (!APP_STATE.activeStudentId || !cloudMap.has(APP_STATE.activeStudentId)) {
+        APP_STATE.activeStudentId = APP_STATE.students.length > 0 ? APP_STATE.students[0].id : null;
+      }
+
+      saveStudentsToStorage(false);
+      renderAllViews();
     }
 
     function handleRealtimeEvent(payload) {
       const { eventType, new: newRecord, old: oldRecord } = payload;
+      const isHe = APP_STATE.lang === 'he';
       
       if (eventType === 'INSERT' || eventType === 'UPDATE') {
         const updatedStudent = {
@@ -1208,26 +1247,23 @@ alter publication supabase_realtime add table public.students_sync;`;
           APP_STATE.students.push(updatedStudent);
         }
         saveStudentsToStorage(false);
-        renderStudents();
-        renderTopics();
-        renderChumash();
-        showToast('Live update synced: ' + updatedStudent.name);
+        renderAllViews();
+        showToast(isHe ? ('סונכרן בזמן אמת: ' + updatedStudent.name) : ('Live update synced: ' + updatedStudent.name));
       } else if (eventType === 'DELETE') {
         APP_STATE.students = APP_STATE.students.filter(s => s.id !== oldRecord.id);
         if (APP_STATE.activeStudentId === oldRecord.id) {
           APP_STATE.activeStudentId = APP_STATE.students.length > 0 ? APP_STATE.students[0].id : null;
         }
         saveStudentsToStorage(false);
-        renderStudents();
-        renderTopics();
-        renderChumash();
-        showToast('Student removed by another tutor');
+        renderAllViews();
+        showToast(isHe ? 'תלמיד נמחק' : 'Student removed');
       }
     }
 
     async function pushStudentToCloud(student) {
       if (!APP_STATE.cloud.client) return;
       try {
+        updateCloudStatusPill('syncing');
         const payload = {
           id: student.id,
           name: student.name,
@@ -1242,9 +1278,15 @@ alter publication supabase_realtime add table public.students_sync;`;
           .from('students_sync')
           .upsert(payload);
 
-        if (error) console.error('Cloud upsert error:', error);
+        if (error) {
+          console.error('Cloud upsert error:', error);
+          updateCloudStatusPill('offline');
+        } else {
+          updateCloudStatusPill('connected');
+        }
       } catch (err) {
         console.error('Failed to push student to cloud:', err);
+        updateCloudStatusPill('offline');
       }
     }
 
@@ -1903,6 +1945,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (btnLogoutLabel) btnLogoutLabel.textContent = t.authLogout;
 
       if (APP_STATE.currentUser) updateUserSessionDisplay(APP_STATE.currentUser);
+      updateCloudStatusPill();
     }
 
     function switchTab(tabId) {
@@ -2362,8 +2405,14 @@ alter publication supabase_realtime add table public.students_sync;`;
       renderChumash();
     }
 
-    function renderActiveStudentWorkspace() {
+    function renderActiveStudentWorkspace(force = false) {
       const workspace = document.getElementById('active-student-workspace');
+      if (!workspace) return;
+      const notesInput = document.getElementById('active-student-notes-input');
+      const isNotesFocused = notesInput && document.activeElement === notesInput;
+      if (isNotesFocused && !force) {
+        return;
+      }
       const student = APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId);
       if (!student) {
         workspace.classList.add('hidden');
@@ -2456,7 +2505,7 @@ alter publication supabase_realtime add table public.students_sync;`;
               const title = isHe ? topic.title_he : topic.title_en;
               return `
                 <div 
-                  onclick="toggleTopicForActiveStudent('${topic.id}')"
+                  onclick="toggleTopicForActiveStudent('${topic.id}', event)"
                   class="cursor-pointer select-none px-3.5 py-2.5 rounded-xl border text-xs flex items-center justify-between gap-2.5 transition active:scale-98 ${
                     checked 
                       ? 'bg-emerald-950/50 border-emerald-500/50 text-emerald-200 shadow-sm' 
@@ -2488,7 +2537,7 @@ alter publication supabase_realtime add table public.students_sync;`;
               const isBereishit = parsha.book === 'bereishit';
               return `
                 <div 
-                  onclick="toggleParshaForActiveStudent('${parsha.id}')"
+                  onclick="toggleParshaForActiveStudent('${parsha.id}', event)"
                   class="cursor-pointer select-none px-3.5 py-2.5 rounded-xl border text-xs flex items-center justify-between gap-2.5 transition active:scale-98 ${
                     checked 
                       ? 'bg-emerald-950/50 border-emerald-500/50 text-emerald-200 shadow-sm' 
@@ -2520,6 +2569,8 @@ alter publication supabase_realtime add table public.students_sync;`;
         clearTimeout(notesAutoSaveTimer);
         notesAutoSaveTimer = setTimeout(() => {
           saveStudentsToStorage(true);
+          if (APP_STATE.cloud.client) pushStudentToCloud(student);
+          renderStudents();
         }, 600);
       }
     }
@@ -2539,28 +2590,36 @@ alter publication supabase_realtime add table public.students_sync;`;
       return !!(student && student.completedParshiot && student.completedParshiot[parshaId]);
     }
 
-    function toggleTopicForActiveStudent(topicId) {
+    function toggleTopicForActiveStudent(topicId, e) {
+      if (e && e.stopPropagation) e.stopPropagation();
       if (!APP_STATE.activeStudentId) return;
       const student = APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId);
       if (!student) return;
       if (!student.completedTopics) student.completedTopics = {};
       student.completedTopics[topicId] = !student.completedTopics[topicId];
-      saveStudentsToStorage();
-      renderStudents();
-      renderTopics();
-      showToast(student.completedTopics[topicId] ? "Lesson marked as taught" : "Lesson unchecked");
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderAllViews();
+      const isHe = APP_STATE.lang === 'he';
+      showToast(student.completedTopics[topicId] ? 
+        (isHe ? "שיעור סומן כנלמד" : "Lesson marked as taught") : 
+        (isHe ? "סימון השיעור בוטל" : "Lesson unchecked"));
     }
 
-    function toggleParshaForActiveStudent(parshaId) {
+    function toggleParshaForActiveStudent(parshaId, e) {
+      if (e && e.stopPropagation) e.stopPropagation();
       if (!APP_STATE.activeStudentId) return;
       const student = APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId);
       if (!student) return;
       if (!student.completedParshiot) student.completedParshiot = {};
       student.completedParshiot[parshaId] = !student.completedParshiot[parshaId];
-      saveStudentsToStorage();
-      renderStudents();
-      renderChumash();
-      showToast(student.completedParshiot[parshaId] ? "Parsha marked as taught" : "Parsha unchecked");
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderAllViews();
+      const isHe = APP_STATE.lang === 'he';
+      showToast(student.completedParshiot[parshaId] ? 
+        (isHe ? "פרשה סומנה כנלמדה" : "Parsha marked as taught") : 
+        (isHe ? "סימון הפרשה בוטל" : "Parsha unchecked"));
     }
 
     function saveActiveStudentNotes() {
@@ -2665,7 +2724,16 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     function closeAddStudentModal() {
-      document.getElementById('modal-add-student').classList.add('hidden');
+      const modal = document.getElementById('modal-add-student');
+      if (modal) modal.classList.add('hidden');
+      const form = document.getElementById('add-student-form');
+      if (form) form.reset();
+      const nameInput = document.getElementById('new-student-name');
+      const dateInput = document.getElementById('new-student-date');
+      const notesInput = document.getElementById('new-student-notes');
+      if (nameInput) { nameInput.value = ''; nameInput.removeAttribute('value'); }
+      if (dateInput) { dateInput.value = ''; dateInput.removeAttribute('value'); }
+      if (notesInput) { notesInput.value = ''; notesInput.innerHTML = ''; }
     }
 
     function handleCreateStudent(e) {
@@ -2694,7 +2762,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       saveStudentsToStorage(true);
       if (APP_STATE.cloud.client) pushStudentToCloud(newStudent);
       closeAddStudentModal();
-      renderStudents();
+      renderAllViews();
       showToast(t.toastStudentAdded(name));
     }
 
@@ -2710,9 +2778,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
       saveStudentsToStorage(false);
       if (APP_STATE.cloud.client) deleteStudentFromCloud(id);
-      renderStudents();
-      renderTopics();
-      renderChumash();
+      renderAllViews();
       showToast(t.toastStudentDeleted);
     }
 
@@ -2720,6 +2786,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       renderTopics();
       renderChumash();
       renderStudents();
+      renderActiveStudentWorkspace(true);
     }
 
     // Toast Utility
@@ -2835,6 +2902,26 @@ alter publication supabase_realtime add table public.students_sync;`;
         }
       }
     }
+
+    // Auto-resync whenever the tutor or Rabbi switches back to the app or unlocks their phone
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && APP_STATE.cloud.client) {
+        fetchCloudStudents();
+      }
+    });
+
+    window.addEventListener('focus', () => {
+      if (APP_STATE.cloud.client) {
+        fetchCloudStudents();
+      }
+    });
+
+    // 15-second background sync interval to guarantee both tutors always see identical state
+    setInterval(() => {
+      if (APP_STATE.cloud.client && document.visibilityState === 'visible') {
+        fetchCloudStudents();
+      }
+    }, 15000);
   </script>
 
   <!-- ============================================== -->
