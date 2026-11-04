@@ -4,8 +4,8 @@ window.SHEMOT_PARSHIOT_DATA = [
   {
     id: "shemot",
     book: "shemot",
-    name_en: "Shemot (Names, Slavery & The Burning Bush)",
-    name_he: "שמות (השעבוד, משה והסנה הבוער)",
+    name_en: "Shemot",
+    name_he: "שמות",
     plot_en: [
       "A new Pharaoh rises who 'did not know Yosef'; enslaves the Hebrews with brutal hard labor; decrees drowning baby boys in the Nile.",
       "Shiphrah & Puah (heroic midwives) defy Pharaoh; Moshe is born, hidden for 3 months, placed in a basket in the Nile reed.",
@@ -46,8 +46,8 @@ window.SHEMOT_PARSHIOT_DATA = [
   {
     id: "vaera",
     book: "shemot",
-    name_en: "Va'era (The Covenant & The First 7 Plagues)",
-    name_he: "וארא (הברית ושבע המכות הראשונות)",
+    name_en: "Va'era",
+    name_he: "וארא",
     plot_en: [
       "Hashem reveals His four-letter essential name (Havayah) and confirms the Covenant with the Patriarchs.",
       "The 4 Expressions of Freedom: 'V'Hotzeiti, V'Hitzalti, V'Ga'alti, V'Lakachti' (foundation for the 4 cups of wine on Pesach).",
@@ -88,8 +88,8 @@ window.SHEMOT_PARSHIOT_DATA = [
   {
     id: "bo",
     book: "shemot",
-    name_en: "Bo (Come to Pharaoh, Final Plagues & Exodus)",
-    name_he: "בא (המכות האחרונות, קורבן פסח ויציאת מצרים)",
+    name_en: "Bo",
+    name_he: "בא",
     plot_en: [
       "Final 3 Plagues: Locusts (Arbeh) devour remaining crops; Thick tangible Darkness (Choshech) paralyzes Egypt for 6 days.",
       "First National Mitzvah: Rosh Chodesh (New Moon lunar calendar); taking a lamb on the 10th of Nisan and inspecting it.",
@@ -130,8 +130,8 @@ window.SHEMOT_PARSHIOT_DATA = [
   {
     id: "beshalach",
     book: "shemot",
-    name_en: "Beshalach (The Splitting of the Sea & The Manna)",
-    name_he: "בשלח (קריעת ים סוף ושירת הים)",
+    name_en: "Beshalach",
+    name_he: "בשלח",
     plot_en: [
       "Pharaoh regrets letting the people go; pursues with 600 elite chariots; Jews trapped between the stormy Sea and Egyptian army.",
       "Nachshon ben Aminadav jumps into the raging waters first; Hashem splits the Sea of Reeds; Israel walks on dry seabed.",
@@ -172,8 +172,8 @@ window.SHEMOT_PARSHIOT_DATA = [
   {
     id: "yitro",
     book: "shemot",
-    name_en: "Yitro (The Delegation Advice & Mount Sinai)",
-    name_he: "יתרו (עצת יתרו ועשרת הדיברות במעמד סיני)",
+    name_en: "Yitro",
+    name_he: "יתרו",
     plot_en: [
       "Yitro, high priest of Midian and Moshe's father-in-law, hears of the Exodus and arrives at the camp with Tzipporah and Moshe's sons.",
       "Yitro observes Moshe judging the entire people from morning to night; warns him of burnout and advises establishing a hierarchy of judges (heads of thousands, hundreds, fifties, tens).",
@@ -214,8 +214,8 @@ window.SHEMOT_PARSHIOT_DATA = [
   {
     id: "mishpatim",
     book: "shemot",
-    name_en: "Mishpatim (Civil Justice & The Moral Society)",
-    name_he: "משפטים (דיני ממונות, צדק חברתי ו'נעשה ונשמע')",
+    name_en: "Mishpatim",
+    name_he: "משפטים",
     plot_en: [
       "Immediately following Mount Sinai, 53 detailed civil and criminal laws are given.",
       "Laws of the Hebrew Servant (Eved Ivri); protection for bodily injury, property damage, and pit safety.",
@@ -256,8 +256,8 @@ window.SHEMOT_PARSHIOT_DATA = [
   {
     id: "terumah",
     book: "shemot",
-    name_en: "Terumah (The Blueprint of the Sanctuary)",
-    name_he: "תרומה (תוכנית המשכן וכלי הקודש)",
+    name_en: "Terumah",
+    name_he: "תרומה",
     plot_en: [
       "Hashem commands Moshe: 'Take for Me an offering from every person whose heart inspires him to give.'",
       "15 construction materials gathered: Gold, silver, copper, blue/purple/scarlet wool, linen, goat hair, rams' skins, acacia wood, oil, spices, and precious stones.",
@@ -298,8 +298,8 @@ window.SHEMOT_PARSHIOT_DATA = [
   {
     id: "tetzaveh",
     book: "shemot",
-    name_en: "Tetzaveh (The Holy Vestments & The Eternal Flame)",
-    name_he: "תצווה (בגדי כהונה ונר התמיד)",
+    name_en: "Tetzaveh",
+    name_he: "תצווה",
     plot_en: [
       "Commandment to take pure crushed olive oil to kindle the Menorah as an eternal flame (Ner Tamid).",
       "Moshe is commanded to appoint Aaron and his sons as Kohanim (Priests).",
@@ -340,8 +340,8 @@ window.SHEMOT_PARSHIOT_DATA = [
   {
     id: "ki_tisa",
     book: "shemot",
-    name_en: "Ki Tisa (The Golden Calf & The 13 Attributes)",
-    name_he: "כי תשא (חטא העגל ושלוש עשרה מידות הרחמים)",
+    name_en: "Ki Tisa",
+    name_he: "כי תשא",
     plot_en: [
       "Census through the Half-Shekel (Machatzit HaShekel) coin; the Copper Laver (Kiyor); Shabbat rest reiteration.",
       "Moshe delays returning from Mount Sinai by a few hours; the mixed multitude panics and creates the Golden Calf (Egel HaZahav).",
@@ -382,8 +382,8 @@ window.SHEMOT_PARSHIOT_DATA = [
   {
     id: "vayakhel",
     book: "shemot",
-    name_en: "Vayakhel (Community Assembled & The Generous Heart)",
-    name_he: "ויקהל (הקהלת העדה ונדיבות הלב)",
+    name_en: "Vayakhel",
+    name_he: "ויקהל",
     plot_en: [
       "Moshe gathers the entire congregation of Israel the day after Yom Kippur; commands Shabbat observance before Mishkan construction.",
       "Call for voluntary donations of materials, jewelry, and skills; men and women bring overwhelming contributions.",
@@ -424,8 +424,8 @@ window.SHEMOT_PARSHIOT_DATA = [
   {
     id: "pekudei",
     book: "shemot",
-    name_en: "Pekudei (The Exact Accounting & The Divine Presence)",
-    name_he: "פקודי (חשבון המשכן והשראת השכינה)",
+    name_en: "Pekudei",
+    name_he: "פקודי",
     plot_en: [
       "Moshe presents a complete, transparent financial audit of every ounce of gold, silver, and copper used in the Mishkan.",
       "The priestly garments are completed exactly 'as Hashem commanded Moshe' (repeated 18 times for perfection).",

@@ -1995,6 +1995,38 @@ alter publication supabase_realtime add table public.students_sync;`;
       });
     }
 
+    function cleanCurriculumName(str) {
+      if (!str) return '';
+      return String(str).replace(/\s*\([^)]*\)/g, '').trim();
+    }
+
+    function getStudentParshaAndDate(student) {
+      if (!student) return { parsha: '', date: '' };
+      let date = student.barMitzvahDate || student.date || '';
+      let parsha = (student.skills && student.skills.parshaReading && student.skills.parshaReading.parshaName) || student.parsha || '';
+
+      const raw = student.parshaOrDate || '';
+      if (!parsha && raw) {
+        const match = raw.match(/^(.*?)(?:\s*\(([^)]+)\))?$/);
+        if (match) {
+          parsha = cleanCurriculumName(match[1] || '');
+          if (!date && match[2]) {
+            date = match[2].trim();
+          }
+        } else {
+          parsha = cleanCurriculumName(raw);
+        }
+      } else if (raw && !date) {
+        const match = raw.match(/\(([^)]+)\)$/);
+        if (match) {
+          date = match[1].trim();
+        }
+      }
+
+      parsha = cleanCurriculumName(parsha || raw);
+      return { parsha, date };
+    }
+
     function getDefaultStudentSkills() {
       return {
         hebrewReading: {
@@ -2045,9 +2077,10 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!student.skills.hebrewReading.booklet || student.skills.hebrewReading.booklet === 'Booklet 1') {
         student.skills.hebrewReading.booklet = 'Red Booklet';
       }
+      const info = getStudentParshaAndDate(student);
       if (!student.skills.parshaReading) {
         student.skills.parshaReading = {
-          parshaName: student.parshaOrDate || '',
+          parshaName: info.parsha,
           aliyah: 'Aliyah 1',
           linesLearned: '',
           currentLine: '',
@@ -2058,8 +2091,10 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!Array.isArray(student.skills.parshaReading.recordings)) {
         student.skills.parshaReading.recordings = [];
       }
-      if (typeof student.skills.parshaReading.parshaName !== 'string') {
-        student.skills.parshaReading.parshaName = student.parshaOrDate || '';
+      if (typeof student.skills.parshaReading.parshaName !== 'string' || !student.skills.parshaReading.parshaName) {
+        student.skills.parshaReading.parshaName = info.parsha;
+      } else {
+        student.skills.parshaReading.parshaName = cleanCurriculumName(student.skills.parshaReading.parshaName);
       }
       if (!student.skills.shemaReading) student.skills.shemaReading = { section: 'Passuk 1 & V\'Ahavta', status: 'Learning with vowels' };
       if (!student.skills.dvarTorah) {
@@ -2265,12 +2300,15 @@ alter publication supabase_realtime add table public.students_sync;`;
       const student = APP_STATE.students.find(s => s.id === studentId);
       if (!student) return;
       ensureStudentSkills(student);
-      student.skills.parshaReading.parshaName = newParsha;
-      student.parshaOrDate = newParsha;
+      const cleanP = cleanCurriculumName(newParsha);
+      student.skills.parshaReading.parshaName = cleanP;
+      student.parsha = cleanP;
+      student.parshaOrDate = cleanP + (student.barMitzvahDate ? ` (${student.barMitzvahDate})` : '');
 
-      const headerParshaEl = document.getElementById('drawer-header-parsha-badge');
-      if (headerParshaEl) {
-        headerParshaEl.textContent = newParsha || (APP_STATE.translations[APP_STATE.lang] || APP_STATE.translations.en).activeStudentDefault;
+      const isHe = APP_STATE.lang === 'he';
+      const headerParshaBadge = document.getElementById('drawer-header-parsha-badge-text');
+      if (headerParshaBadge) {
+        headerParshaBadge.textContent = cleanP || (isHe ? 'ללא פרשה' : 'No Parsha');
       }
 
       clearTimeout(skillAutoSaveTimer);
@@ -4097,7 +4135,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       const topic = topics.find(t => t.id === targetId);
       if (topic) {
         return {
-          title: isHe ? topic.title_he : topic.title_en,
+          title: cleanCurriculumName(isHe ? topic.title_he : topic.title_en),
           type: 'concept',
           typeName: isHe ? 'מושג' : 'Concept'
         };
@@ -4108,7 +4146,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       const parsha = [...ber, ...shem].find(p => p.id === targetId);
       if (parsha) {
         return {
-          title: isHe ? parsha.name_he : parsha.name_en,
+          title: cleanCurriculumName(isHe ? parsha.name_he : parsha.name_en),
           type: 'parsha',
           typeName: isHe ? (parsha.book === 'bereishit' ? 'פרשת בראשית' : 'פרשת שמות') : (parsha.book === 'bereishit' ? 'Bereishit Parsha' : 'Shemot Parsha')
         };
@@ -4269,7 +4307,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
 
       container.innerHTML = filtered.map((topic, idx) => {
-        const title = isHe ? topic.title_he : topic.title_en;
+        const title = cleanCurriculumName(isHe ? topic.title_he : topic.title_en);
         const hook = isHe ? topic.hook_he : topic.hook_en;
         const nuggets = isHe ? topic.nuggets_he : topic.nuggets_en;
         const lifeApp = isHe ? topic.life_app_he : topic.life_app_en;
@@ -4440,7 +4478,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
 
       container.innerHTML = filtered.map((parsha, idx) => {
-        const title = isHe ? parsha.name_he : parsha.name_en;
+        const title = cleanCurriculumName(isHe ? parsha.name_he : parsha.name_en);
         const plot = isHe ? parsha.plot_he : parsha.plot_en;
         const keyTopics = isHe ? parsha.key_topics_he : parsha.key_topics_en;
         const rashiGems = isHe ? parsha.rashi_midrash_he : parsha.rashi_midrash_en;
@@ -4586,7 +4624,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (berList.length > 0) {
         html += `<optgroup label="${isHe ? 'ספר בראשית (12 פרשיות)' : 'Sefer Bereishit (12 Parshiot)'}">`;
         berList.forEach(p => {
-          const label = isHe ? p.name_he : p.name_en;
+          const label = cleanCurriculumName(isHe ? p.name_he : p.name_en);
           html += `<option value="${label}">${label}</option>`;
         });
         html += `</optgroup>`;
@@ -4596,7 +4634,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (shemList.length > 0) {
         html += `<optgroup label="${isHe ? 'ספר שמות (11 פרשיות)' : 'Sefer Shemot (11 Parshiot)'}">`;
         shemList.forEach(p => {
-          const label = isHe ? p.name_he : p.name_en;
+          const label = cleanCurriculumName(isHe ? p.name_he : p.name_en);
           html += `<option value="${label}">${label}</option>`;
         });
         html += `</optgroup>`;
@@ -4815,6 +4853,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       const completedTCount = Object.keys(student.completedTopics || {}).filter(k => k !== '_meta' && student.completedTopics[k]).length;
       const completedPCount = Object.keys(student.completedParshiot || {}).filter(k => student.completedParshiot[k]).length;
       const overallPct = Math.round(((completedTCount + completedPCount) / (totalTopics + totalParshiot)) * 100);
+      const { parsha: studentParsha, date: studentDate } = getStudentParshaAndDate(student);
 
       // Render Header
       const header = document.getElementById('drawer-header-content');
@@ -4832,21 +4871,29 @@ alter publication supabase_realtime add table public.students_sync;`;
               <i data-lucide="camera" class="w-4 h-4 text-white"></i>
             </div>
           </div>
-          <div class="min-w-0">
+          <div class="min-w-0 space-y-1">
             <div class="flex items-center gap-2 flex-wrap">
-              <h3 class="text-base sm:text-lg font-bold text-white truncate">${student.name}</h3>
-              <span id="drawer-header-parsha-badge" class="text-xs px-2 py-0.5 rounded-md bg-brand-500/20 text-brand-300 font-mono">${student.parshaOrDate || t.activeStudentDefault}</span>
+              <h3 class="text-base sm:text-lg font-bold text-white tracking-tight">${student.name}</h3>
               <span class="text-xs font-mono font-bold px-2 py-0.5 rounded-md ${overallPct > 50 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
                 ${overallPct}%
               </span>
             </div>
-            <div class="flex items-center gap-2 mt-0.5 text-[11px] text-slate-400">
-              <button onclick="triggerPhotoUpload('${student.id}', event)" class="hover:text-brand-300 underline font-medium">
+            <div class="flex items-center gap-2 flex-wrap text-xs">
+              <span id="drawer-header-parsha-badge" class="px-2.5 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-medium flex items-center gap-1.5 text-xs">
+                <i data-lucide="scroll" class="w-3.5 h-3.5 text-cyan-400"></i>
+                <span id="drawer-header-parsha-badge-text">${studentParsha || (isHe ? 'ללא פרשה' : 'No Parsha')}</span>
+              </span>
+              ${studentDate ? `
+                <span class="px-2.5 py-0.5 rounded-md bg-slate-900 text-slate-300 border border-slate-700/80 font-mono text-[11px] flex items-center gap-1.5">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+                  <span>${studentDate}</span>
+                </span>
+              ` : ''}
+              <button onclick="triggerPhotoUpload('${student.id}', event)" class="hover:text-brand-300 underline font-medium text-[11px] text-slate-400 ml-1">
                 ${student.avatar ? t.changePhoto : t.uploadPhoto}
               </button>
               ${student.avatar ? `
-                <span>•</span>
-                <button onclick="removeStudentPhoto('${student.id}', event)" class="hover:text-red-400 underline font-medium">
+                <button onclick="removeStudentPhoto('${student.id}', event)" class="hover:text-red-400 underline font-medium text-[11px] text-slate-500">
                   ${t.removePhoto}
                 </button>
               ` : ''}
@@ -4935,63 +4982,44 @@ alter publication supabase_realtime add table public.students_sync;`;
 
             <!-- 2-Column Skills Cards Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <!-- Card 1: Hebrew Reading & Booklets (Red, Orange, Yellow, Green) -->
+              <!-- Card 1: Hebrew Reading & Booklets (Simplified & Clean) -->
               <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
                 <div class="flex items-center justify-between">
                   <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
                     <i data-lucide="book-marked" class="w-3.5 h-3.5"></i>
                     <span>${t.hebrewReadingTitle}</span>
                   </span>
-                  <span class="text-[10px] text-slate-500 font-mono">Auto-saves</span>
+                  <span class="text-[10px] text-slate-500 font-mono">Booklet Level</span>
                 </div>
 
-                <!-- 4 Leveled Booklets by Color -->
-                <div class="space-y-1.5">
-                  <div class="flex items-center justify-between text-[11px] text-slate-300 font-semibold">
-                    <span>${t.hebrewBookletLabel} (4 Colors)</span>
-                    <span class="text-[10px] text-amber-400 font-mono font-normal">${escapeHtml(hr.booklet || 'Red Booklet')}</span>
-                  </div>
-                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                    <button
-                      type="button"
-                      onclick="setStudentBooklet('${student.id}', 'Red Booklet')"
-                      class="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95 ${hr.booklet && (hr.booklet.includes('Red') || hr.booklet.includes('אדומ')) ? 'bg-red-600 text-white ring-2 ring-red-400 shadow-md font-bold' : 'bg-red-950/50 text-red-300 border border-red-500/30 hover:bg-red-900/50'}"
-                    >
-                      <span class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm"></span>
-                      <span>${isHe ? 'אדומה' : 'Red'}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onclick="setStudentBooklet('${student.id}', 'Orange Booklet')"
-                      class="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95 ${hr.booklet && (hr.booklet.includes('Orange') || hr.booklet.includes('כתו')) ? 'bg-orange-600 text-white ring-2 ring-orange-400 shadow-md font-bold' : 'bg-orange-950/50 text-orange-300 border border-orange-500/30 hover:bg-orange-900/50'}"
-                    >
-                      <span class="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-sm"></span>
-                      <span>${isHe ? 'כתומה' : 'Orange'}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onclick="setStudentBooklet('${student.id}', 'Yellow Booklet')"
-                      class="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95 ${hr.booklet && (hr.booklet.includes('Yellow') || hr.booklet.includes('צהו')) ? 'bg-amber-500 text-slate-950 ring-2 ring-amber-300 shadow-md font-bold' : 'bg-amber-950/50 text-amber-300 border border-amber-400/30 hover:bg-amber-900/50'}"
-                    >
-                      <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm"></span>
-                      <span>${isHe ? 'צהובה' : 'Yellow'}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onclick="setStudentBooklet('${student.id}', 'Green Booklet')"
-                      class="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95 ${hr.booklet && (hr.booklet.includes('Green') || hr.booklet.includes('ירוק')) ? 'bg-emerald-600 text-white ring-2 ring-emerald-400 shadow-md font-bold' : 'bg-emerald-950/50 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-900/50'}"
-                    >
-                      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm"></span>
-                      <span>${isHe ? 'ירוקה' : 'Green'}</span>
-                    </button>
-                  </div>
+                <!-- 4 Leveled Booklets by Color (Clean Segmented Control) -->
+                <div class="grid grid-cols-4 gap-1 p-1 bg-slate-900 rounded-xl border border-slate-800 text-xs">
+                  ${[
+                    { id: 'Red Booklet', label: isHe ? 'אדומה' : 'Red', dot: 'bg-red-500', active: 'bg-red-600/30 text-red-200 border-red-500/50 shadow-sm' },
+                    { id: 'Orange Booklet', label: isHe ? 'כתומה' : 'Orange', dot: 'bg-orange-500', active: 'bg-orange-600/30 text-orange-200 border-orange-500/50 shadow-sm' },
+                    { id: 'Yellow Booklet', label: isHe ? 'צהובה' : 'Yellow', dot: 'bg-amber-400', active: 'bg-amber-500/30 text-amber-200 border-amber-400/50 shadow-sm' },
+                    { id: 'Green Booklet', label: isHe ? 'ירוקה' : 'Green', dot: 'bg-emerald-500', active: 'bg-emerald-600/30 text-emerald-200 border-emerald-500/50 shadow-sm' }
+                  ].map(b => {
+                    const isSelected = hr.booklet && (hr.booklet.includes(b.id.split(' ')[0]) || (isHe && hr.booklet.includes(b.label)));
+                    return `
+                      <button
+                        type="button"
+                        onclick="setStudentBooklet('${student.id}', '${b.id}')"
+                        class="py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition border ${
+                          isSelected
+                            ? b.active + ' font-bold'
+                            : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                        }"
+                      >
+                        <span class="w-2 h-2 rounded-full ${b.dot} shrink-0"></span>
+                        <span>${b.label}</span>
+                      </button>
+                    `;
+                  }).join('')}
                 </div>
 
-                <!-- Page Number, Letter Selector, and Vowel Selector -->
-                <div class="grid grid-cols-3 gap-2 pt-1">
+                <!-- Page Number, Letter Selector, and Vowel Selector in Clean Grid -->
+                <div class="grid grid-cols-3 gap-2">
                   <!-- Page Number -->
                   <div class="space-y-1">
                     <label class="text-[11px] text-slate-400 block">${t.hebrewPageLabel}</label>
@@ -5000,7 +5028,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                       value="${escapeHtml(hr.currentPage || '')}"
                       onchange="handleSkillFieldChange('${student.id}', 'hebrewReading', 'currentPage', this.value)"
                       placeholder="e.g. 14"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
+                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
                     />
                   </div>
 
@@ -5009,7 +5037,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                     <label class="text-[11px] text-slate-400 block">${isHe ? 'אות' : 'Letter'}</label>
                     <select
                       onchange="selectStudentLetter('${student.id}', this.value)"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-1.5 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium truncate"
+                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium truncate"
                     >
                       <option value="">-- ${isHe ? 'ללא אות' : 'None'} --</option>
                       ${HEBREW_LETTERS_LIST.map(lt => `
@@ -5025,7 +5053,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                     <label class="text-[11px] text-slate-400 block">${isHe ? 'ניקוד' : 'Vowel'}</label>
                     <select
                       onchange="selectStudentVowel('${student.id}', this.value)"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-1.5 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium truncate"
+                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium truncate"
                     >
                       <option value="">-- ${isHe ? 'ללא ניקוד' : 'None'} --</option>
                       ${HEBREW_VOWELS_LIST.map(vw => `
@@ -5037,30 +5065,10 @@ alter publication supabase_realtime add table public.students_sync;`;
                   </div>
                 </div>
 
-                <!-- Quick Vowel Tap Pills -->
-                <div class="space-y-1 pt-1">
-                  <div class="flex items-center justify-between text-[10px] text-slate-400">
-                    <span>${isHe ? 'בחירה מהירה בניקוד:' : 'Quick Vowel Pills:'}</span>
-                    <span class="text-slate-500 font-mono text-[9px]">${hr.vowel || (isHe ? 'ללא' : 'None')}</span>
-                  </div>
-                  <div class="flex items-center gap-1 flex-wrap">
-                    ${HEBREW_VOWELS_LIST.map(vw => `
-                      <button
-                        type="button"
-                        onclick="selectStudentVowel('${student.id}', '${vw.display}')"
-                        class="px-2 py-0.5 rounded text-[11px] font-semibold transition active:scale-95 ${hr.vowel === vw.display ? 'bg-amber-500 text-slate-950 font-bold ring-1 ring-amber-300' : 'bg-slate-900 hover:bg-slate-800 text-amber-200 border border-slate-700'}"
-                        title="${vw.name}"
-                      >
-                        ${vw.he} ${vw.symbol}
-                      </button>
-                    `).join('')}
-                  </div>
-                </div>
-
                 <!-- Live Status Holding Pill -->
                 <div class="text-[11px] text-amber-200/90 font-mono bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800 flex items-center justify-between gap-2">
                   <span class="truncate">
-                    📖 ${escapeHtml(hr.booklet || (isHe ? 'חוברת אדומה' : 'Red Booklet'))} ${hr.currentPage ? ('• ' + (isHe ? 'עמ׳ ' : 'p. ') + escapeHtml(hr.currentPage)) : ''} ${hr.letterOrVowel ? ('(' + escapeHtml(hr.letterOrVowel) + ')') : ''}
+                    📖 ${escapeHtml(hr.booklet || (isHe ? 'חוברת אדומה' : 'Red Booklet'))} ${hr.currentPage ? ('• ' + (isHe ? 'עמ׳ ' : 'p. ') + escapeHtml(hr.currentPage)) : ''} ${hr.letterOrVowel ? ('• ' + escapeHtml(hr.letterOrVowel)) : ''}
                   </span>
                   <span class="text-[9px] text-emerald-400 font-sans font-bold shrink-0">✓ Live</span>
                 </div>
@@ -5407,7 +5415,7 @@ alter publication supabase_realtime add table public.students_sync;`;
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
               ${topics.map(topic => {
                 const checked = isTopicCompleted(student.id, topic.id);
-                const title = isHe ? topic.title_he : topic.title_en;
+                const title = cleanCurriculumName(isHe ? topic.title_he : topic.title_en);
                 return `
                   <div
                     onclick="toggleTopicForStudent('${student.id}', '${topic.id}', event)"
@@ -5436,7 +5444,7 @@ alter publication supabase_realtime add table public.students_sync;`;
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
               ${chumash.map(parsha => {
                 const checked = isParshaCompleted(student.id, parsha.id);
-                const title = isHe ? parsha.name_he : parsha.name_en;
+                const title = cleanCurriculumName(isHe ? parsha.name_he : parsha.name_en);
                 const isBereishit = parsha.book === 'bereishit';
                 return `
                   <div
@@ -5582,6 +5590,8 @@ alter publication supabase_realtime add table public.students_sync;`;
               ${student.name.charAt(0).toUpperCase()}
             </div>`;
 
+        const { parsha: cardParsha, date: cardDate } = getStudentParshaAndDate(student);
+
         return `
           <div
             onclick="selectActiveStudent('${student.id}')"
@@ -5601,9 +5611,20 @@ alter publication supabase_realtime add table public.students_sync;`;
                       <i data-lucide="camera" class="w-3.5 h-3.5 text-white"></i>
                     </div>
                   </div>
-                  <div class="min-w-0">
+                  <div class="min-w-0 space-y-1">
                     <h4 class="text-sm sm:text-base font-bold text-white truncate group-hover:text-brand-300 transition">${student.name}</h4>
-                    <p class="text-[11px] text-slate-400 truncate">${student.parshaOrDate || t.defaultCandidate}</p>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-[11px] font-medium">
+                        <i data-lucide="scroll" class="w-3 h-3 text-cyan-400"></i>
+                        <span class="truncate">${cardParsha || (isHe ? 'ללא פרשה' : 'No Parsha')}</span>
+                      </span>
+                      ${cardDate ? `
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-950 text-slate-300 border border-slate-800 text-[11px] font-mono">
+                          <i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i>
+                          <span class="truncate">${cardDate}</span>
+                        </span>
+                      ` : ''}
+                    </div>
                   </div>
                 </div>
 
@@ -5690,6 +5711,9 @@ alter publication supabase_realtime add table public.students_sync;`;
             if (typeof s.orderIndex !== 'number') s.orderIndex = idx;
             if (!s.avatar) s.avatar = '';
             if (!Array.isArray(s.schedule)) s.schedule = [];
+            const info = getStudentParshaAndDate(s);
+            if (!s.parsha) s.parsha = info.parsha;
+            if (!s.barMitzvahDate) s.barMitzvahDate = info.date;
             ensureStudentSkills(s);
           });
           APP_STATE.students.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
@@ -5698,6 +5722,8 @@ alter publication supabase_realtime add table public.students_sync;`;
             {
               id: "stu_" + Date.now(),
               name: "David Goldstein",
+              parsha: "Parshat Lech Lecha",
+              barMitzvahDate: "Nov 2026",
               parshaOrDate: "Parshat Lech Lecha (Nov 2026)",
               avatar: "",
               orderIndex: 0,
@@ -5718,6 +5744,8 @@ alter publication supabase_realtime add table public.students_sync;`;
             {
               id: "stu_" + (Date.now() + 1),
               name: "Ethan Miller",
+              parsha: "Parshat Beshalach",
+              barMitzvahDate: "Jan 2027",
               parshaOrDate: "Parshat Beshalach (Jan 2027)",
               avatar: "",
               orderIndex: 1,
@@ -5839,7 +5867,7 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       const selectVal = document.getElementById('new-student-parsha-select').value;
       const customVal = document.getElementById('new-student-parsha-custom').value.trim();
-      const selectedParsha = selectVal === 'custom' ? customVal : selectVal;
+      const selectedParsha = cleanCurriculumName(selectVal === 'custom' ? customVal : selectVal);
 
       const dateVal = document.getElementById('new-student-date').value.trim();
       const notes = document.getElementById('new-student-notes').value.trim();
@@ -5857,6 +5885,8 @@ alter publication supabase_realtime add table public.students_sync;`;
       const newStudent = {
         id: "stu_" + Date.now(),
         name: name,
+        parsha: selectedParsha,
+        barMitzvahDate: dateVal,
         parshaOrDate: parshaOrDate,
         avatar: APP_STATE.newStudentPendingAvatar || '',
         orderIndex: APP_STATE.students.length,
@@ -5866,6 +5896,9 @@ alter publication supabase_realtime add table public.students_sync;`;
         completedTopics: {},
         completedParshiot: {}
       };
+      if (newStudent.skills && newStudent.skills.parshaReading) {
+        newStudent.skills.parshaReading.parshaName = selectedParsha;
+      }
 
       APP_STATE.students.push(newStudent);
       APP_STATE.activeStudentId = newStudent.id;
@@ -6083,6 +6116,7 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       const sessions = [];
       (APP_STATE.students || []).forEach(student => {
+        const parshaInfo = getStudentParshaAndDate(student);
         (student.schedule || []).forEach(s => {
           if (s.repeatWeekly && s.dayOfWeek === dayOfWeek) {
             sessions.push({
@@ -6090,7 +6124,8 @@ alter publication supabase_realtime add table public.students_sync;`;
               studentId: student.id,
               studentName: student.name,
               studentAvatar: student.avatar,
-              studentParsha: student.parshaOrDate || '',
+              studentParsha: parshaInfo.parsha,
+              studentDate: parshaInfo.date,
               studentNotes: student.notes || ''
             });
           } else if (!s.repeatWeekly && s.dateStr === dateStr) {
@@ -6099,7 +6134,8 @@ alter publication supabase_realtime add table public.students_sync;`;
               studentId: student.id,
               studentName: student.name,
               studentAvatar: student.avatar,
-              studentParsha: student.parshaOrDate || '',
+              studentParsha: parshaInfo.parsha,
+              studentDate: parshaInfo.date,
               studentNotes: student.notes || ''
             });
           }
@@ -6443,7 +6479,10 @@ alter publication supabase_realtime add table public.students_sync;`;
                       <span class="text-white font-bold text-xs sm:text-sm block truncate group-hover:text-brand-300 transition">
                         ${escapeHtml(s.studentName)}
                       </span>
-                      ${s.studentParsha ? `<span class="text-[11px] text-slate-400 truncate block">${escapeHtml(s.studentParsha)}</span>` : ''}
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        ${s.studentParsha ? `<span class="text-[11px] text-cyan-300 font-medium truncate block">${escapeHtml(s.studentParsha)}</span>` : ''}
+                        ${s.studentDate ? `<span class="text-[10px] text-slate-400 font-mono">(${escapeHtml(s.studentDate)})</span>` : ''}
+                      </div>
                     </div>
                   </div>
 

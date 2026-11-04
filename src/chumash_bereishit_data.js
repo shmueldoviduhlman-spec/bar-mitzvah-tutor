@@ -4,8 +4,8 @@ window.BEREISHIT_PARSHIOT_DATA = [
   {
     id: "bereishit",
     book: "bereishit",
-    name_en: "Bereishit (In the Beginning)",
-    name_he: "בראשית (בריאת העולם)",
+    name_en: "Bereishit",
+    name_he: "בראשית",
     plot_en: [
       "Creation in 6 days out of absolute nothingness ('Yesh Me'Ayin'); Hashem rests on the 7th day, creating Shabbat.",
       "Adam & Chava placed in Gan Eden; the Tree of Knowledge test; eating the fruit and experiencing vulnerability/hiding.",
@@ -45,9 +45,9 @@ window.BEREISHIT_PARSHIOT_DATA = [
   },
   {
     id: "noach",
-    name_en: "Noach (The Great Flood & The Ark)",
+    name_en: "Noach",
     book: "bereishit",
-    name_he: "נח (המבול והתיבה)",
+    name_he: "נח",
     plot_en: [
       "The world is filled with violence and theft (Chamas); Hashem decides to reset creation.",
       "Noach is commanded to build a massive Tevah (Ark) for 120 years; pairs of animals enter.",
@@ -87,9 +87,9 @@ window.BEREISHIT_PARSHIOT_DATA = [
   },
   {
     id: "lech_lecha",
-    name_en: "Lech Lecha (Go to Yourself)",
+    name_en: "Lech Lecha",
     book: "bereishit",
-    name_he: "לך לך (המסע אל עצמך)",
+    name_he: "לך לך",
     plot_en: [
       "God calls 75-year-old Avram: 'Leave your land, birthplace, and father's house to the land I will show you.'",
       "Famine in Canaan forces descent to Egypt; Sarai's protection from Pharaoh.",
@@ -129,9 +129,9 @@ window.BEREISHIT_PARSHIOT_DATA = [
   },
   {
     id: "vayera",
-    name_en: "Vayera (Vision, Hospitality & The Test)",
+    name_en: "Vayera",
     book: "bereishit",
-    name_he: "וירא (הכנסת אורחים ועקדת יצחק)",
+    name_he: "וירא",
     plot_en: [
       "Abraham recovering from Brit Milah sits at his tent door in the heat; runs to welcome 3 stranger guests (angels).",
       "Angels bring prophecy that 89-year-old Sarah will give birth to Yitzchak; Sarah laughs in amazement.",
@@ -171,9 +171,9 @@ window.BEREISHIT_PARSHIOT_DATA = [
   },
   {
     id: "chayei_sarah",
-    name_en: "Chayei Sarah (Life of Sarah & The Soulmate Mission)",
+    name_en: "Chayei Sarah",
     book: "bereishit",
-    name_he: "חיי שרה (מערת המכפלה ושליחות אליעזר)",
+    name_he: "חיי שרה",
     plot_en: [
       "Sarah passes away at age 127; Abraham negotiates with Ephron the Hittite to buy the Cave of Machpelah in Hebron.",
       "Abraham charges his servant Eliezer with a solemn oath to find a wife for Yitzchak from his family, not Canaanites.",
@@ -213,9 +213,9 @@ window.BEREISHIT_PARSHIOT_DATA = [
   },
   {
     id: "toldot",
-    name_en: "Toldot (Generations & Two Paths)",
+    name_en: "Toldot",
     book: "bereishit",
-    name_he: "תולדות (יעקב ועשו, שתי דרכים)",
+    name_he: "תולדות",
     plot_en: [
       "Yitzchak & Rivka pray for children; twin boys wrestle in the womb; prophecy that 'the elder shall serve the younger.'",
       "Birth of Esav (red, hairy hunter) and Yaakov (holding Esav's heel, simple dweller of tents).",
@@ -255,9 +255,9 @@ window.BEREISHIT_PARSHIOT_DATA = [
   },
   {
     id: "vayetzei",
-    name_en: "Vayetzei (The Dream Ladder & Endurance)",
+    name_en: "Vayetzei",
     book: "bereishit",
-    name_he: "ויצא (סולם החלומות ועמל יעקב)",
+    name_he: "ויצא",
     plot_en: [
       "Yaakov leaves Be'er Sheva toward Charan; sleeps on stones on Mount Moriah and dreams of a ladder reaching heaven.",
       "Hashem promises to guard him and give him the Land; Yaakov vows that Hashem will be his God and erects a monument.",
@@ -297,9 +297,9 @@ window.BEREISHIT_PARSHIOT_DATA = [
   },
   {
     id: "vayishlach",
-    name_en: "Vayishlach (The Midnight Battle & Becoming Yisrael)",
+    name_en: "Vayishlach",
     book: "bereishit",
-    name_he: "וישלח (המאבק הלילי והשם 'ישראל')",
+    name_he: "וישלח",
     plot_en: [
       "Yaakov prepares to meet Esav who approaches with 400 armed warriors; Yaakov prepares 3 strategies: gifts, prayer, and war.",
       "Yaakov crosses the Yabok stream alone; wrestles all night with an angelic adversary; his hip socket is dislocated at dawn.",
@@ -339,9 +339,9 @@ window.BEREISHIT_PARSHIOT_DATA = [
   },
   {
     id: "vayeshev",
-    name_en: "Vayeshev (Dreams, The Pit & Potiphar's House)",
+    name_en: "Vayeshev",
     book: "bereishit",
-    name_he: "וישב (חלומות יוסף, הבור ובית פוטיפר)",
+    name_he: "וישב",
     plot_en: [
       "Yaakov favors 17-year-old Yosef, making him a coat of many colors; Yosef dreams of sheaves and stars bowing down to him.",
       "Brothers become jealous and bitter; when Yosef visits them in Dotan, they throw him into an empty pit and sell him to Midianites.",
@@ -381,9 +381,9 @@ window.BEREISHIT_PARSHIOT_DATA = [
   },
   {
     id: "miketz",
-    name_en: "Miketz (Pharaoh's Dreams & The Rise to Power)",
+    name_en: "Miketz",
     book: "bereishit",
-    name_he: "מקץ (חלומות פרעה והעלייה לשלטון)",
+    name_he: "מקץ",
     plot_en: [
       "2 full years pass; Pharaoh has twin dreams of fat vs thin cows, and healthy vs withered stalks of wheat; no wise man can interpret.",
       "Cupbearer finally remembers Yosef; Yosef is rushed from dungeon, shaved, dressed, and stands before Pharaoh.",
@@ -423,9 +423,9 @@ window.BEREISHIT_PARSHIOT_DATA = [
   },
   {
     id: "vayigash",
-    name_en: "Vayigash (Judah Steps Up & The Grand Reunion)",
+    name_en: "Vayigash",
     book: "bereishit",
-    name_he: "ויגש (ערבות יהודה והאיחוד המרגש)",
+    name_he: "ויגש",
     plot_en: [
       "Judah steps forward courageously to confront the Viceroy of Egypt, offering himself as a lifelong slave instead of Binyamin.",
       "Yosef cannot contain himself any longer, orders Egyptian guards out, and weeps aloud: 'Ani Yosef! Ha'Od Avi Chai?'",
@@ -465,9 +465,9 @@ window.BEREISHIT_PARSHIOT_DATA = [
   },
   {
     id: "vayechi",
-    name_en: "Vayechi (Jacob's Blessings & The Eternal Vision)",
+    name_en: "Vayechi",
     book: "bereishit",
-    name_he: "ויחי (ברכות יעקב וחותם בראשית)",
+    name_he: "ויחי",
     plot_en: [
       "Jacob lives his best 17 years peacefully in Egypt; approaches the end of his life at age 147.",
       "Jacob blesses Yosef's sons Menashe and Ephraim, crossing his hands to place the right hand on younger Ephraim.",
