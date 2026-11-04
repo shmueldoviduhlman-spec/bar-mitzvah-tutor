@@ -109,16 +109,17 @@
       scrollbar-width: none;
     }
 
-    /* Mobile-first bottom safe area support */
+    /* Mobile-first bottom safe area support with ample home bar clearance */
     .mobile-safe-bottom {
-      padding-bottom: 0.75rem;
+      padding-bottom: 1.5rem !important;
+      padding-bottom: max(1.5rem, calc(0.85rem + env(safe-area-inset-bottom))) !important;
     }
     @supports (padding-bottom: env(safe-area-inset-bottom)) {
       .mobile-safe-bottom {
-        padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+        padding-bottom: max(1.5rem, calc(0.85rem + env(safe-area-inset-bottom))) !important;
       }
       body {
-        padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+        padding-bottom: max(7.5rem, calc(6.5rem + env(safe-area-inset-bottom))) !important;
       }
     }
   </style>
@@ -295,19 +296,17 @@
 
       <!-- Navigation Tab Row (Responsive & Fitted for Mobile + Desktop - strictly 3 tabs) -->
       <div class="flex items-center gap-1.5 sm:gap-2 pt-0.5 overflow-x-auto no-scrollbar w-full pb-0.5">
-        <button id="tab-study" onclick="switchTab('study')" class="tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs font-semibold transition whitespace-nowrap bg-brand-600 text-white shadow-sm shrink-0">
+        <button id="tab-study" onclick="switchTab('study')" class="tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-lg text-xs font-semibold transition whitespace-nowrap bg-brand-600 text-white shadow-sm shrink-0">
           <i data-lucide="book-open" class="w-3.5 h-3.5 shrink-0"></i>
           <span id="tab-study-label">Study</span>
-          <span class="text-[10px] bg-brand-800/80 px-1.5 py-0.2 rounded-full font-mono shrink-0">36</span>
         </button>
 
-        <button id="tab-students" onclick="switchTab('students')" class="tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap shrink-0 relative">
+        <button id="tab-students" onclick="switchTab('students')" class="tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap shrink-0">
           <i data-lucide="users" class="w-3.5 h-3.5 shrink-0"></i>
-          <span id="tab-students-label">Student Tracker</span>
-          <span id="student-badge-count" class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded-full font-mono border border-amber-500/30 shrink-0">0</span>
+          <span id="tab-students-label">Students</span>
         </button>
 
-        <button id="tab-calendar" onclick="switchTab('calendar')" class="tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap shrink-0">
+        <button id="tab-calendar" onclick="switchTab('calendar')" class="tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap shrink-0">
           <i data-lucide="calendar" class="w-3.5 h-3.5 shrink-0"></i>
           <span id="tab-calendar-label">Calendar</span>
         </button>
@@ -376,9 +375,9 @@
         </div>
       </div>
 
-      <!-- Sub-Section 2: Chumash Grid -->
+      <!-- Sub-Section 2: Chumash Grid (Unified Continuous 23 Parshiot) -->
       <div id="study-section-chumash" class="space-y-6 hidden">
-        <!-- Section Header + Book Filter -->
+        <!-- Section Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
           <div>
             <h2 id="chumash-head-title" class="text-xl font-bold text-white flex items-center gap-2">
@@ -389,17 +388,10 @@
             </p>
           </div>
 
-          <!-- Book Filter Toggle -->
-          <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg p-1 text-xs">
-            <button id="filter-all-books" onclick="filterChumashBook('all')" class="px-3 py-1 rounded bg-brand-600 text-white font-medium transition">
-              <span id="btn-all-books">All (23)</span>
-            </button>
-            <button id="filter-bereishit" onclick="filterChumashBook('bereishit')" class="px-3 py-1 rounded text-slate-400 hover:text-white font-medium transition">
-              <span id="btn-bereishit">Bereishit (12)</span>
-            </button>
-            <button id="filter-shemot" onclick="filterChumashBook('shemot')" class="px-3 py-1 rounded text-slate-400 hover:text-white font-medium transition">
-              <span id="btn-shemot">Shemot (11)</span>
-            </button>
+          <div class="flex items-center gap-2">
+            <div class="text-xs text-slate-400 font-mono hidden sm:block">
+              <span id="chumash-count-display">Showing 23 of 23</span>
+            </div>
           </div>
         </div>
 
@@ -412,7 +404,7 @@
     </section>
 
     <!-- ============================================== -->
-    <!-- VIEW 3: STUDENT TRACKER & RABBI SYNC          -->
+    <!-- VIEW 2: STUDENTS & RABBI SYNC                 -->
     <!-- ============================================== -->
     <section id="view-students" class="space-y-6 hidden">
 
@@ -420,10 +412,12 @@
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-4">
         <div>
           <h2 id="tracker-head-title" class="text-xl font-bold text-white flex items-center gap-2">
-            <span class="text-emerald-400">👥</span> Student Progress Tracker
+            <span class="text-emerald-400">👥</span>
+            <span id="tracker-head-text">Students</span>
+            <span id="students-total-count" class="text-xs font-mono text-slate-400 font-normal"></span>
           </h2>
           <p id="tracker-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
-            Check off lessons you or the Rabbi taught, log private student notes, and share live via QR/link.
+            Track student progress, log collaborative notes, and view curriculum checklists.
           </p>
         </div>
 
@@ -974,12 +968,12 @@
         tabStudy: "Study",
         tabTopics: "Jewish Concepts",
         tabChumash: "Chumash",
-        tabStudents: "Student Tracker",
+        tabStudents: "Students",
         tabCalendar: "Calendar",
         mobStudy: "Study",
         mobTopics: "Concepts",
         mobChumash: "Chumash",
-        mobStudents: "Tracker",
+        mobStudents: "Students",
         mobCalendar: "Calendar",
         subStudyConcepts: "Concepts",
         subStudyChumash: "Chumash",
@@ -995,7 +989,7 @@
         allBooks: "All (23)",
         bereishitBook: "Bereishit (12)",
         shemotBook: "Shemot (11)",
-        trackerTitle: "Student Progress Tracker",
+        trackerTitle: "Students",
         trackerDesc: "Check off lessons you or the Rabbi taught, log private student notes, and share live via QR/link.",
         addStudent: "+ Add New Student",
         noStudentsTitle: "No Students Added Yet",
@@ -1175,7 +1169,7 @@
         tabStudy: "לימוד",
         tabTopics: "מושגי יסוד",
         tabChumash: "חומש",
-        tabStudents: "מעקב תלמידים",
+        tabStudents: "תלמידים",
         tabCalendar: "לוח שנה",
         mobStudy: "לימוד",
         mobTopics: "מושגים",
@@ -1196,7 +1190,7 @@
         allBooks: "הכל (23)",
         bereishitBook: "בראשית (12)",
         shemotBook: "שמות (11)",
-        trackerTitle: "מעקב התקדמות תלמידים",
+        trackerTitle: "תלמידים",
         trackerDesc: "סמן שיעורים שלימדת אתה או הרב, כתוב הערות מעקב פרטיות ושתף בזמן אמת באמצעות קוד QR או קישור.",
         addStudent: "+ הוסף תלמיד חדש",
         noStudentsTitle: "עדיין לא נוספו תלמידים",
@@ -2147,9 +2141,14 @@ alter publication supabase_realtime add table public.students_sync;`;
       const btnShemot = document.getElementById('btn-shemot');
       if (btnShemot) btnShemot.textContent = t.shemotBook;
 
-      // Section: Tracker Head
-      const trackerHeadTitle = document.getElementById('tracker-head-title');
-      if (trackerHeadTitle) trackerHeadTitle.innerHTML = '<span class="text-emerald-400">👥</span> ' + t.trackerTitle;
+      // Section: Students Head
+      const trackerHeadText = document.getElementById('tracker-head-text');
+      if (trackerHeadText) {
+        trackerHeadText.textContent = t.trackerTitle;
+      } else {
+        const trackerHeadTitle = document.getElementById('tracker-head-title');
+        if (trackerHeadTitle) trackerHeadTitle.innerHTML = '<span class="text-emerald-400">👥</span> ' + t.trackerTitle;
+      }
 
       const trackerHeadDesc = document.getElementById('tracker-head-desc');
       if (trackerHeadDesc) trackerHeadDesc.textContent = t.trackerDesc;
@@ -2561,14 +2560,6 @@ alter publication supabase_realtime add table public.students_sync;`;
 
         const isExpanded = APP_STATE.expandedTopicId === topic.id || (q && q.length > 1);
 
-        let isCompleted = false;
-        if (APP_STATE.activeStudentId) {
-          const student = APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId);
-          if (student && student.completedTopics && student.completedTopics[topic.id]) {
-            isCompleted = true;
-          }
-        }
-
         return '<article id="topic-card-' + topic.id + '" class="bg-slate-900/90 border transition-all duration-200 rounded-xl overflow-hidden shadow-md ' +
           (isExpanded ? 'border-amber-500/60 ring-1 ring-amber-500/30' : 'border-slate-800 hover:border-slate-700') + '">' +
 
@@ -2579,21 +2570,13 @@ alter publication supabase_realtime add table public.students_sync;`;
                 (idx + 1) +
               '</div>' +
               '<div class="min-w-0">' +
-                '<div class="flex items-center gap-2">' +
-                  '<h3 class="text-sm sm:text-base font-bold text-white truncate">' +
-                    title +
-                  '</h3>' +
-                  (isCompleted ? '<span class="shrink-0 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-semibold flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> ' + t.completedTag + '</span>' : '') +
-                '</div>' +
+                '<h3 class="text-sm sm:text-base font-bold text-white truncate">' +
+                  title +
+                '</h3>' +
                 '<p class="text-xs text-slate-400 truncate mt-0.5">' + (nuggets ? nuggets.slice(0, 2).join(' • ') : '') + '</p>' +
               '</div>' +
             '</div>' +
             '<div class="flex items-center gap-2 shrink-0">' +
-              (APP_STATE.activeStudentId ?
-                '<button onclick="toggleTopicForActiveStudent(\'' + topic.id + '\', event)" class="px-2.5 py-1 text-[11px] rounded-lg border font-medium transition ' +
-                (isCompleted ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300' : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300') + '">' +
-                  '<span class="flex items-center gap-1"><i data-lucide="' + (isCompleted ? 'check-circle' : 'circle') + '" class="w-3.5 h-3.5"></i> ' + (isCompleted ? t.markIncomplete : t.markCompleted) + '</span>' +
-                '</button>' : '') +
               '<i data-lucide="' + (isExpanded ? 'chevron-up' : 'chevron-down') + '" class="w-4 h-4 text-slate-400"></i>' +
             '</div>' +
           '</div>' +
@@ -2667,7 +2650,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
-    // Render Chumash View (Collapsed keyword view by default)
+    // Render Chumash View (Collapsed keyword view by default - Unified 23 Parshiot)
     function renderChumash() {
       const container = document.getElementById('chumash-grid');
       const isHe = APP_STATE.lang === 'he';
@@ -2676,21 +2659,18 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       const bereishit = window.BEREISHIT_PARSHIOT_DATA || [];
       const shemot = window.SHEMOT_PARSHIOT_DATA || [];
-      let allParshiot = [];
-
-      if (APP_STATE.chumashFilter === 'all') {
-        allParshiot = [...bereishit, ...shemot];
-      } else if (APP_STATE.chumashFilter === 'bereishit') {
-        allParshiot = [...bereishit];
-      } else {
-        allParshiot = [...shemot];
-      }
+      const allParshiot = [...bereishit, ...shemot];
 
       const filtered = allParshiot.filter(item => {
         if (!q) return true;
         const text = (item.name_en + ' ' + item.name_he + ' ' + item.plot_en.join(' ') + ' ' + item.plot_he.join(' ') + ' ' + item.key_topics_en.join(' ') + ' ' + item.key_topics_he.join(' ') + ' ' + item.rashi_midrash_en.join(' ') + ' ' + item.rashi_midrash_he.join(' ') + ' ' + item.life_app_en + ' ' + item.life_app_he).toLowerCase();
         return text.includes(q);
       });
+
+      const countDisplay = document.getElementById('chumash-count-display');
+      if (countDisplay) {
+        countDisplay.textContent = t.chumashCount(filtered.length, allParshiot.length);
+      }
 
       if (filtered.length === 0) {
         container.innerHTML = '<div class="py-12 text-center text-slate-500"><i data-lucide="search-x" class="w-8 h-8 mx-auto mb-2 opacity-50"></i><p>' + t.chumashEmptySearch(q) + '</p></div>';
@@ -2707,15 +2687,6 @@ alter publication supabase_realtime add table public.students_sync;`;
         const isBereishit = parsha.book === 'bereishit';
 
         const isExpanded = APP_STATE.expandedParshaId === parsha.id || (q && q.length > 1);
-
-        let isCompleted = false;
-        if (APP_STATE.activeStudentId) {
-          const student = APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId);
-          if (student && student.completedParshiot && student.completedParshiot[parsha.id]) {
-            isCompleted = true;
-          }
-        }
-
         const previewText = keyTopics.slice(0, 2).join(' • ');
 
         return '<article id="parsha-card-' + parsha.id + '" class="bg-slate-900/90 border transition-all duration-200 rounded-xl overflow-hidden shadow-md ' +
@@ -2735,17 +2706,11 @@ alter publication supabase_realtime add table public.students_sync;`;
                   '<span class="text-[10px] px-2 py-0.5 rounded font-mono ' + (isBereishit ? 'bg-amber-500/10 text-amber-300' : 'bg-cyan-500/10 text-cyan-300') + '">' +
                     (isBereishit ? (isHe ? 'בראשית' : 'Bereishit') : (isHe ? 'שמות' : 'Shemot')) +
                   '</span>' +
-                  (isCompleted ? '<span class="shrink-0 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-semibold flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> ' + t.completedTag + '</span>' : '') +
                 '</div>' +
                 '<p class="text-xs text-slate-400 truncate mt-0.5">' + previewText + '</p>' +
               '</div>' +
             '</div>' +
             '<div class="flex items-center gap-2 shrink-0">' +
-              (APP_STATE.activeStudentId ?
-                '<button onclick="toggleParshaForActiveStudent(\'' + parsha.id + '\', event)" class="px-2.5 py-1 text-[11px] rounded-lg border font-medium transition ' +
-                (isCompleted ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300' : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300') + '">' +
-                  '<span class="flex items-center gap-1"><i data-lucide="' + (isCompleted ? 'check-circle' : 'circle') + '" class="w-3.5 h-3.5"></i> ' + (isCompleted ? t.markIncomplete : t.markCompleted) + '</span>' +
-                '</button>' : '') +
               '<i data-lucide="' + (isExpanded ? 'chevron-up' : 'chevron-down') + '" class="w-4 h-4 text-slate-400"></i>' +
             '</div>' +
           '</div>' +
@@ -3277,12 +3242,16 @@ alter publication supabase_realtime add table public.students_sync;`;
       const container = document.getElementById('students-list');
       const emptyState = document.getElementById('students-empty');
       const badge = document.getElementById('student-badge-count');
+      const mobBadge = document.getElementById('mob-student-badge');
+      const headerCount = document.getElementById('students-total-count');
       const t = I18N[APP_STATE.lang];
       const isHe = APP_STATE.lang === 'he';
 
-      badge.textContent = APP_STATE.students.length;
-      const mobBadge = document.getElementById('mob-student-badge');
+      if (badge) badge.textContent = APP_STATE.students.length;
       if (mobBadge) mobBadge.textContent = APP_STATE.students.length;
+      if (headerCount) {
+        headerCount.textContent = ' (' + APP_STATE.students.length + ')';
+      }
 
       if (APP_STATE.students.length === 0) {
         emptyState.classList.remove('hidden');
@@ -4245,23 +4214,20 @@ alter publication supabase_realtime add table public.students_sync;`;
   <!-- ============================================== -->
   <!-- MOBILE BOTTOM DOCK (Clean Phone Mode - 3 Tabs) -->
   <!-- ============================================== -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-nav border-t border-slate-800/90 mobile-safe-bottom px-2 pt-1.5 pb-1">
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-nav border-t border-slate-800/90 mobile-safe-bottom px-3 pt-2">
     <div class="grid grid-cols-3 items-center w-full max-w-md mx-auto gap-1">
 
-      <button onclick="switchTab('study')" id="mob-tab-study" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-brand-400 font-bold bg-brand-500/10 w-full">
+      <button onclick="switchTab('study')" id="mob-tab-study" class="flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl transition text-brand-400 font-bold bg-brand-500/10 w-full">
         <i data-lucide="book-open" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         <span class="text-[11px] tracking-tight truncate w-full text-center" id="mob-lbl-study">Study</span>
       </button>
 
-      <button onclick="switchTab('students')" id="mob-tab-students" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 relative w-full">
-        <div class="relative inline-flex items-center justify-center">
-          <i data-lucide="users" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-          <span id="mob-student-badge" class="absolute -top-1 -right-2 w-3.5 h-3.5 rounded-full bg-amber-500 text-slate-950 font-bold text-[8px] flex items-center justify-center">0</span>
-        </div>
-        <span class="text-[11px] tracking-tight truncate w-full text-center" id="mob-lbl-students">Tracker</span>
+      <button onclick="switchTab('students')" id="mob-tab-students" class="flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 w-full">
+        <i data-lucide="users" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+        <span class="text-[11px] tracking-tight truncate w-full text-center" id="mob-lbl-students">Students</span>
       </button>
 
-      <button onclick="switchTab('calendar')" id="mob-tab-calendar" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 w-full">
+      <button onclick="switchTab('calendar')" id="mob-tab-calendar" class="flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 w-full">
         <i data-lucide="calendar" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         <span class="text-[11px] tracking-tight truncate w-full text-center" id="mob-lbl-calendar">Calendar</span>
       </button>
