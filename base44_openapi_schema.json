@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "TutorPilot Bar Mitzvah Companion Database API",
-    "description": "REST API interface for Rabbi Closter's Base44 AI Agent to create, update, and manage Bar Mitzvah students, scheduled lessons, and custom study materials in real time.",
-    "version": "1.0.0"
+    "description": "REST API interface for Rabbi Closter's Base44 AI Agent to schedule lessons, log debriefs, auto-check off completed curriculum topics across the 36 lessons, plan upcoming classes with preparation notes, and enrich study materials in real time.",
+    "version": "1.1.0"
   },
   "servers": [
     {
@@ -15,7 +15,7 @@
     "/students_sync": {
       "get": {
         "summary": "List all Bar Mitzvah students, calendar lessons, and curriculum additions",
-        "description": "Retrieves all synced student records and custom study materials from the database. Each record contains the student profile, lessons schedule in completed_topics._meta.lessons, and curriculum progress.",
+        "description": "Retrieves all synced student records and custom study materials from the database. Each record contains the student profile, lessons schedule in completed_topics._meta.schedule, and curriculum progress in completed_topics and completed_parshiot.",
         "operationId": "listStudentsAndSchedule",
         "parameters": [
           {
@@ -36,6 +36,15 @@
               "type": "string"
             },
             "description": "Filter by student ID or pass eq.__study_materials__ for custom lesson additions"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by student name using PostgREST ilike pattern e.g. ilike.*Ethan*"
           }
         ],
         "responses": {
@@ -55,8 +64,8 @@
         }
       },
       "post": {
-        "summary": "Upsert student profile, schedule a lesson, or add study materials",
-        "description": "Creates a new student or updates an existing student. To schedule a lesson, include the lesson object inside completed_topics._meta.lessons array.",
+        "summary": "Upsert student profile, schedule a lesson, log debrief, or add study materials",
+        "description": "Creates or updates a student profile, calendar schedule, completed topics checklist, or curriculum additions under __study_materials__.",
         "operationId": "upsertStudentRecord",
         "parameters": [
           {
@@ -135,8 +144,8 @@
           },
           "name": {
             "type": "string",
-            "description": "Full name of the Bar Mitzvah student",
-            "example": "Ariel Ben David"
+            "description": "Full name of the Bar Mitzvah student or SYSTEM_STUDY_MATERIALS",
+            "example": "Ethan Miller"
           },
           "parsha_or_date": {
             "type": "string",
@@ -145,21 +154,36 @@
           },
           "notes": {
             "type": "string",
-            "description": "Tutor notes and progress remarks",
-            "example": "Working on Haftarah trope and Shema blessing"
+            "description": "Tutor notes, progress remarks, and lesson debrief summaries",
+            "example": "Completed Tefillin wrapping test. Working on Haftarah blessings."
           },
           "completed_topics": {
             "type": "object",
-            "description": "Mastery checklist and metadata container including lessons array",
+            "description": "Mastery checklist for 13 Jewish concepts (key: boolean) and metadata container for calendar lessons. When id is __study_materials__, contains custom notes per lesson key.",
             "properties": {
               "_meta": {
                 "type": "object",
                 "properties": {
                   "parsha": { "type": "string" },
                   "barMitzvahDate": { "type": "string" },
+                  "schedule": {
+                    "type": "array",
+                    "description": "Calendar tutoring sessions matching portal calendar day view",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "example": "les_1793800000000" },
+                        "dateStr": { "type": "string", "example": "2026-11-12" },
+                        "dayOfWeek": { "type": "integer", "example": 4 },
+                        "time": { "type": "string", "example": "4:30 PM" },
+                        "repeatWeekly": { "type": "boolean", "default": false },
+                        "topic": { "type": "string", "example": "Next to teach: Kashrut (Meat & dairy separation rules)" }
+                      }
+                    }
+                  },
                   "lessons": {
                     "type": "array",
-                    "description": "Scheduled calendar tutoring lessons (friendly format)",
+                    "description": "Mirror array for compatibility",
                     "items": {
                       "type": "object",
                       "properties": {
@@ -170,21 +194,6 @@
                         "notes": { "type": "string" }
                       }
                     }
-                  },
-                  "schedule": {
-                    "type": "array",
-                    "description": "Internal calendar sessions matching portal calendar grid",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": { "type": "string" },
-                        "dateStr": { "type": "string", "example": "2026-11-12" },
-                        "dayOfWeek": { "type": "integer", "example": 4 },
-                        "time": { "type": "string", "example": "4:30 PM" },
-                        "repeatWeekly": { "type": "boolean", "default": false },
-                        "topic": { "type": "string", "example": "Bar Mitzvah Tutoring" }
-                      }
-                    }
                   }
                 }
               }
@@ -192,7 +201,7 @@
           },
           "completed_parshiot": {
             "type": "object",
-            "description": "Record of Chumash parshiot completed by the student"
+            "description": "Mastery checklist for Chumash parshiot (key: boolean)"
           },
           "updated_at": {
             "type": "string",
