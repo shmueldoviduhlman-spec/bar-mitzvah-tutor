@@ -155,14 +155,22 @@
         <form onsubmit="handleSendAuthOtp(event)" class="space-y-3">
           <div class="relative">
             <input
-              type="email"
+              type="text"
               id="auth-email-input"
-              placeholder="Enter approved email (e.g. name@gmail.com)"
+              placeholder="Enter email or Master PIN 770"
               autocomplete="email"
               class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 px-4 text-center text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
               required
               autofocus
             >
+          </div>
+
+          <!-- Helpful list of approved emails -->
+          <div class="text-[11px] text-slate-500 text-center space-y-0.5">
+            <p class="font-medium text-slate-400">Approved Accounts:</p>
+            <p class="font-mono text-[10px] text-brand-300/90 truncate">shmueldoviduhlman@gmail.com</p>
+            <p class="font-mono text-[10px] text-brand-300/90 truncate">shmueluhlman@gmail.com</p>
+            <p class="font-mono text-[10px] text-brand-300/90 truncate">rabbiycloster@gmail.com</p>
           </div>
 
           <div id="auth-email-error" class="hidden text-xs text-rose-400 font-medium flex items-center justify-center gap-1.5 text-center px-1">
@@ -181,8 +189,9 @@
         </form>
 
         <div class="pt-1 text-center">
-          <button type="button" onclick="showMasterPinPrompt()" id="btn-master-pin-toggle" class="text-[11px] text-slate-500 hover:text-slate-300 underline">
-            Or unlock with Master PIN (770)
+          <button type="button" onclick="showMasterPinPrompt()" id="btn-master-pin-toggle" class="text-xs text-brand-400 hover:text-brand-300 font-semibold underline flex items-center justify-center gap-1.5 mx-auto">
+            <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
+            <span>Instant Unlock with Master PIN (770)</span>
           </button>
         </div>
       </div>
@@ -192,6 +201,7 @@
         <div class="text-center px-2">
           <span class="text-xs text-slate-400" id="auth-code-prompt-text">Verification code sent to:</span>
           <div id="auth-code-target-email" class="font-mono text-xs font-bold text-brand-300 mt-0.5 truncate"></div>
+          <p class="text-[10px] text-slate-500 mt-1">Enter email code or Master PIN 770</p>
         </div>
 
         <form onsubmit="handleVerifyAuthOtp(event)" class="space-y-3">
@@ -412,55 +422,37 @@
     <!-- ============================================== -->
     <!-- VIEW 4: DUAL HEBREW & SECULAR CALENDAR         -->
     <!-- ============================================== -->
-    <section id="view-calendar" class="space-y-4 hidden">
+    <section id="view-calendar" class="space-y-3 hidden">
 
-      <!-- Section Header & Month Controls -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-        <div>
-          <h2 id="calendar-head-title" class="text-xl font-bold text-white flex items-center gap-2">
-            <i data-lucide="calendar" class="w-5 h-5 text-brand-400"></i>
-            <span id="calendar-title-text">Tutoring Schedule & Calendar</span>
-          </h2>
-          <p id="calendar-desc-text" class="text-xs text-slate-400 mt-1">
-            7-day week schedule from Sunday to Saturday with dual Hebrew and secular dates, lesson planning, and direct student portfolio links.
-          </p>
-        </div>
-
-        <!-- Month Navigation Toolbar -->
-        <div class="flex items-center gap-2 self-start sm:self-auto">
-          <button onclick="changeCalendarMonth(-1)" class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white transition active:scale-95" title="Previous Month">
+      <!-- Month & Hebrew Year Display Banner with Interactive Month/Year Dropdown -->
+      <div class="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-sm flex-wrap gap-2">
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          <!-- Previous Month Button -->
+          <button onclick="changeCalendarMonth(-1)" class="p-1.5 sm:p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition active:scale-95" title="Previous Month">
             <i data-lucide="chevron-left" class="w-4 h-4 rtl:rotate-180"></i>
           </button>
 
-          <button onclick="resetCalendarToToday()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-semibold text-brand-400 hover:text-brand-300 transition active:scale-95">
-            <span id="calendar-today-btn-label">Today</span>
+          <!-- Clickable Month & Year Dropdown Trigger -->
+          <button onclick="openMonthPickerModal()" id="btn-month-picker-toggle" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm border border-slate-700 transition active:scale-95 shadow-sm group">
+            <span id="calendar-secular-month-year">November 2026</span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-brand-400 group-hover:text-brand-300 transition-transform"></i>
           </button>
 
-          <button onclick="changeCalendarMonth(1)" class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white transition active:scale-95" title="Next Month">
+          <!-- Next Month Button -->
+          <button onclick="changeCalendarMonth(1)" class="p-1.5 sm:p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition active:scale-95" title="Next Month">
             <i data-lucide="chevron-right" class="w-4 h-4 rtl:rotate-180"></i>
           </button>
 
-          <button onclick="openScheduleModalForToday()" class="px-3.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-semibold shadow-md active:scale-95 transition flex items-center gap-1.5">
-            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-            <span id="calendar-quick-schedule-btn">+ Schedule Lesson</span>
-          </button>
+          <!-- Hebrew Month & Year Badge -->
+          <span id="calendar-hebrew-month-year" class="text-xs font-semibold text-brand-400 font-mono px-2 py-1 rounded-lg bg-brand-500/10 border border-brand-500/20">מרחשון תשפ״ז</span>
         </div>
-      </div>
 
-      <!-- Month & Hebrew Year Display Banner -->
-      <div class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
-        <div class="flex items-center gap-2 flex-wrap">
-          <span id="calendar-secular-month-year" class="text-sm font-bold text-white">November 2026</span>
-          <span class="text-slate-600">•</span>
-          <span id="calendar-hebrew-month-year" class="text-xs font-semibold text-brand-400 font-mono">מרחשון תשפ״ז</span>
-        </div>
-        <div class="text-[11px] text-slate-400 flex items-center gap-2">
-          <span class="inline-flex items-center gap-1.5 font-medium">
-            <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
-            <span id="lbl-cal-today-indicator">Today</span>
-          </span>
-          <span class="text-slate-600 hidden sm:inline">•</span>
-          <span class="italic text-[10px] text-slate-400 hidden sm:inline" id="lbl-cal-hint">Tap day to schedule • Tap student for portfolio</span>
+        <div class="flex items-center gap-2">
+          <!-- Today Quick Button -->
+          <button onclick="resetCalendarToToday()" class="px-2.5 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-semibold transition active:scale-95 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
+            <span id="calendar-today-btn-label">Today</span>
+          </button>
         </div>
       </div>
 
@@ -536,6 +528,52 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: MONTH & YEAR PICKER                     -->
+  <!-- ============================================== -->
+  <div id="modal-month-picker" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 hidden backdrop-blur-sm transition-opacity duration-200" onclick="closeMonthPickerModal()">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-sm w-full p-5 sm:p-6 shadow-2xl relative space-y-4" onclick="event.stopPropagation()">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-brand-500/20 text-brand-400 border border-brand-500/30 flex items-center justify-center">
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 id="modal-month-picker-title" class="text-sm sm:text-base font-bold text-white">Select Month & Year</h3>
+            <p id="modal-month-picker-sub" class="text-[11px] text-slate-400">Current and coming year calendar</p>
+          </div>
+        </div>
+        <button onclick="closeMonthPickerModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Year Selector Tabs -->
+      <div class="flex items-center justify-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 w-full" id="month-picker-year-tabs">
+        <!-- Rendered dynamically e.g. 2026, 2027, 2028 -->
+      </div>
+
+      <!-- 12-Month Grid -->
+      <div class="grid grid-cols-3 gap-2" id="month-picker-months-grid">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 text-xs">
+        <button onclick="resetCalendarToToday(); closeMonthPickerModal();" class="text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1.5 transition">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+          <span id="modal-month-picker-today-btn">Jump to Current Month</span>
+        </button>
+        <button onclick="closeMonthPickerModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-medium transition">
+          Close
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -1119,7 +1157,9 @@
         weeklyBadge: "Weekly",
         oneTimeBadge: "Single",
         jumpToPortfolioHint: "Click student to open portfolio",
-        quickScheduleBtn: "+ Schedule Lesson"
+        quickScheduleBtn: "+ Schedule Lesson",
+        selectMonthYear: "Select Month & Year",
+        jumpToCurrentMonth: "Jump to Current Month"
       },
       he: {
         appTitle: "טיוטור-פיילוט",
@@ -1320,7 +1360,9 @@
         weeklyBadge: "שבועי",
         oneTimeBadge: "חד פעמי",
         jumpToPortfolioHint: "הקש על התלמיד לפתיחת תיק ההתקדמות",
-        quickScheduleBtn: "+ קבע שיעור"
+        quickScheduleBtn: "+ קבע שיעור",
+        selectMonthYear: "בחר חודש ושנה",
+        jumpToCurrentMonth: "חזרה לחודש הנוכחי"
       }
     };
 
@@ -1697,8 +1739,20 @@ alter publication supabase_realtime add table public.students_sync;`;
         name_en: "Shmuel Dovid Uhlman (Lead Tutor)",
         name_he: "שמואל דוד אולמן (מלמד ראשי)"
       },
+      "shmueluhlman@gmail.com": {
+        email: "shmueluhlman@gmail.com",
+        role: "lead",
+        name_en: "Shmuel Dovid Uhlman (Lead Tutor)",
+        name_he: "שמואל דוד אולמן (מלמד ראשי)"
+      },
       "rabbiycloster@gmail.com": {
         email: "rabbiycloster@gmail.com",
+        role: "rabbi",
+        name_en: "Rabbi Closter",
+        name_he: "הרב קלוסטר"
+      },
+      "rycloster@gmail.com": {
+        email: "rycloster@gmail.com",
         role: "rabbi",
         name_en: "Rabbi Closter",
         name_he: "הרב קלוסטר"
@@ -1706,6 +1760,34 @@ alter publication supabase_realtime add table public.students_sync;`;
     };
 
     let pendingAuthEmail = "";
+
+    function grantAuthSession(email) {
+      const normalizedEmail = (email || '').toLowerCase().trim();
+      const user = APPROVED_USERS[normalizedEmail] || APPROVED_USERS["shmueldoviduhlman@gmail.com"];
+      const session = {
+        email: user.email,
+        role: user.role,
+        name_en: user.name_en,
+        name_he: user.name_he,
+        expiresAt: Date.now() + ONE_MONTH_MS
+      };
+      localStorage.setItem('tutor_auth_session', JSON.stringify(session));
+      localStorage.setItem('tutor_auth_unlocked', 'true');
+      APP_STATE.currentUser = session;
+      updateUserSessionDisplay(session);
+
+      const lockScreen = document.getElementById('lock-screen');
+      if (lockScreen) {
+        lockScreen.classList.add('opacity-0', 'pointer-events-none');
+        setTimeout(() => {
+          lockScreen.classList.add('hidden');
+        }, 300);
+      }
+
+      const t = I18N[APP_STATE.lang];
+      const displayName = APP_STATE.lang === 'he' ? user.name_he : user.name_en;
+      showToast(t.authWelcomeToast(displayName));
+    }
 
     function getSupabaseAuthClient() {
       if (APP_STATE.cloud.client) return APP_STATE.cloud.client;
@@ -1770,7 +1852,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     async function handleSendAuthOtp(e) {
-      e.preventDefault();
+      if (e && e.preventDefault) e.preventDefault();
       const t = I18N[APP_STATE.lang];
       const emailInput = document.getElementById('auth-email-input');
       const errBox = document.getElementById('auth-email-error');
@@ -1778,7 +1860,15 @@ alter publication supabase_realtime add table public.students_sync;`;
       const sendBtn = document.getElementById('btn-auth-send');
       const sendBtnText = document.getElementById('btn-auth-send-text');
 
-      const rawEmail = (emailInput.value || '').trim().toLowerCase();
+      const rawInput = (emailInput.value || '').trim();
+      const rawEmail = rawInput.toLowerCase();
+
+      // Master PIN 770 direct bypass in the email input box!
+      if (rawInput === TUTOR_PASSCODE || rawInput === '770') {
+        grantAuthSession("shmueldoviduhlman@gmail.com");
+        return;
+      }
+
       if (!rawEmail || !rawEmail.includes('@')) {
         errText.textContent = t.authInvalidEmail;
         errBox.classList.remove('hidden');
@@ -1839,7 +1929,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     async function handleVerifyAuthOtp(e) {
-      e.preventDefault();
+      if (e && e.preventDefault) e.preventDefault();
       const t = I18N[APP_STATE.lang];
       const codeInput = document.getElementById('auth-code-input');
       const errBox = document.getElementById('auth-code-error');
@@ -1849,7 +1939,6 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       const code = (codeInput.value || '').trim();
       const email = pendingAuthEmail || "shmueldoviduhlman@gmail.com";
-      const user = APPROVED_USERS[email] || APPROVED_USERS["shmueldoviduhlman@gmail.com"];
 
       if (!code) return;
 
@@ -1859,7 +1948,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       let verified = false;
 
       // 1. Check Master Bypass PIN (770)
-      if (code === TUTOR_PASSCODE) {
+      if (code === TUTOR_PASSCODE || code === '770') {
         verified = true;
       } else {
         // 2. Verify with Supabase Auth OTP
@@ -1896,28 +1985,7 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       if (verified) {
         errBox.classList.add('hidden');
-
-        // Grant 30-Day (1 Month) Session
-        const session = {
-          email: user.email,
-          role: user.role,
-          name_en: user.name_en,
-          name_he: user.name_he,
-          expiresAt: Date.now() + ONE_MONTH_MS
-        };
-        localStorage.setItem('tutor_auth_session', JSON.stringify(session));
-        localStorage.setItem('tutor_auth_unlocked', 'true');
-        APP_STATE.currentUser = session;
-        updateUserSessionDisplay(session);
-
-        const lockScreen = document.getElementById('lock-screen');
-        lockScreen.classList.add('opacity-0', 'pointer-events-none');
-        setTimeout(() => {
-          lockScreen.classList.add('hidden');
-        }, 300);
-
-        const displayName = APP_STATE.lang === 'he' ? user.name_he : user.name_en;
-        showToast(t.authWelcomeToast(displayName));
+        grantAuthSession(email);
       } else {
         errText.textContent = t.authInvalidCode;
         errBox.classList.remove('hidden');
@@ -1953,13 +2021,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     function showMasterPinPrompt() {
-      pendingAuthEmail = "shmueldoviduhlman@gmail.com";
-      document.getElementById('auth-step-email').classList.add('hidden');
-      document.getElementById('auth-step-code').classList.remove('hidden');
-      document.getElementById('auth-code-target-email').textContent = "shmueldoviduhlman@gmail.com (Master PIN 770)";
-      const codeInput = document.getElementById('auth-code-input');
-      codeInput.value = '';
-      setTimeout(() => codeInput.focus(), 150);
+      grantAuthSession("shmueldoviduhlman@gmail.com");
     }
 
     function logoutAuth() {
@@ -2320,23 +2382,18 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (btnLogoutLabel) btnLogoutLabel.textContent = t.authLogout;
 
       // Calendar Header Localizations
-      const calHeadTitle = document.getElementById('calendar-title-text');
-      if (calHeadTitle) calHeadTitle.textContent = t.calendarTitle;
-
-      const calDescText = document.getElementById('calendar-desc-text');
-      if (calDescText) calDescText.textContent = t.calendarSubtitle;
-
       const calTodayBtn = document.getElementById('calendar-today-btn-label');
       if (calTodayBtn) calTodayBtn.textContent = t.todayBtn;
 
-      const calQuickSched = document.getElementById('calendar-quick-schedule-btn');
-      if (calQuickSched) calQuickSched.textContent = t.quickScheduleBtn;
+      // Month & Year Picker Localizations
+      const pickerTitle = document.getElementById('modal-month-picker-title');
+      if (pickerTitle) pickerTitle.textContent = t.selectMonthYear;
 
-      const calTodayInd = document.getElementById('lbl-cal-today-indicator');
-      if (calTodayInd) calTodayInd.textContent = t.todayBtn;
+      const pickerSub = document.getElementById('modal-month-picker-sub');
+      if (pickerSub) pickerSub.textContent = isHe ? "לוח שנה לשנה הנוכחית והשנה הבאה" : "Current and coming year calendar";
 
-      const calHint = document.getElementById('lbl-cal-hint');
-      if (calHint) calHint.textContent = isHe ? "הקש על יום לקביעת שיעור • הקש על תלמיד לפתיחת תיק" : "Tap day to schedule • Tap student for portfolio";
+      const pickerTodayBtn = document.getElementById('modal-month-picker-today-btn');
+      if (pickerTodayBtn) pickerTodayBtn.textContent = t.jumpToCurrentMonth;
 
       if (APP_STATE.currentUser) updateUserSessionDisplay(APP_STATE.currentUser);
       updateCloudStatusPill();
@@ -3597,6 +3654,106 @@ alter publication supabase_realtime add table public.students_sync;`;
       } catch (e) {
         return { dayNum: 1, dayHebrewNumeral: "א׳", monthName: "חשון", yearNum: 5787, yearHebrewNumeral: "תשפ״ז" };
       }
+    }
+
+    // ==============================================
+    // MONTH & YEAR PICKER ENGINE (Current & Coming Year)
+    // ==============================================
+    let pickerSelectedYear = new Date().getFullYear();
+
+    function openMonthPickerModal() {
+      const modal = document.getElementById('modal-month-picker');
+      if (!modal) return;
+      pickerSelectedYear = APP_STATE.calendar.year || new Date().getFullYear();
+      renderMonthPicker();
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeMonthPickerModal() {
+      const modal = document.getElementById('modal-month-picker');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function setMonthPickerYear(y) {
+      pickerSelectedYear = y;
+      renderMonthPicker();
+    }
+
+    function selectMonthFromPicker(m) {
+      APP_STATE.calendar.year = pickerSelectedYear;
+      APP_STATE.calendar.month = m;
+      renderCalendar();
+      closeMonthPickerModal();
+    }
+
+    function renderMonthPicker() {
+      const yearTabsContainer = document.getElementById('month-picker-year-tabs');
+      const monthsGrid = document.getElementById('month-picker-months-grid');
+      if (!yearTabsContainer || !monthsGrid) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      const secularMonthNamesEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const secularMonthNamesHe = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
+
+      const baseYear = new Date().getFullYear();
+      const years = [baseYear, baseYear + 1, baseYear + 2];
+
+      // Render Year Tabs
+      yearTabsContainer.innerHTML = years.map(y => {
+        const isSelected = y === pickerSelectedYear;
+        const isComingYear = y === baseYear + 1;
+        return `
+          <button
+            type="button"
+            onclick="setMonthPickerYear(${y})"
+            class="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 ${
+              isSelected
+                ? 'bg-brand-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }"
+          >
+            <span>${y}</span>
+            ${isComingYear ? '<span class="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">★</span>' : ''}
+          </button>
+        `;
+      }).join('');
+
+      // Render 12 Months
+      const today = new Date();
+      const todayY = today.getFullYear();
+      const todayM = today.getMonth();
+
+      let monthsHtml = '';
+      for (let m = 0; m < 12; m++) {
+        const isCurrentActive = APP_STATE.calendar.year === pickerSelectedYear && APP_STATE.calendar.month === m;
+        const isRealToday = todayY === pickerSelectedYear && todayM === m;
+        const sampleDate = new Date(pickerSelectedYear, m, 15);
+        const hebrewInfo = getHebrewDateInfo(sampleDate);
+
+        let btnClass = "flex flex-col items-center justify-center p-2 rounded-xl text-center border transition active:scale-95 ";
+        if (isCurrentActive) {
+          btnClass += "bg-brand-600 border-brand-500 text-white font-bold ring-2 ring-brand-400/50 shadow-md";
+        } else if (isRealToday) {
+          btnClass += "bg-amber-500/10 border-amber-500/40 text-amber-300 font-semibold hover:bg-amber-500/20";
+        } else {
+          btnClass += "bg-slate-950/70 border-slate-800 text-slate-200 hover:bg-slate-800 hover:border-slate-700";
+        }
+
+        monthsHtml += `
+          <button
+            type="button"
+            onclick="selectMonthFromPicker(${m})"
+            class="${btnClass}"
+          >
+            <span class="text-xs font-bold">${isHe ? secularMonthNamesHe[m] : secularMonthNamesEn[m]}</span>
+            <span class="text-[10px] font-mono mt-0.5 truncate w-full opacity-80 ${isCurrentActive ? 'text-brand-100' : 'text-slate-400'}">${hebrewInfo.monthName}</span>
+          </button>
+        `;
+      }
+
+      monthsGrid.innerHTML = monthsHtml;
+      lucide.createIcons();
     }
 
     function changeCalendarMonth(delta) {
