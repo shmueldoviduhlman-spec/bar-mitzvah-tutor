@@ -286,23 +286,30 @@
     <!-- ============================================== -->
     <section id="view-study" class="space-y-6">
 
-      <!-- Study Sub-Section Switcher (Centered Segmented Switcher) -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 shadow-lg backdrop-blur flex items-center justify-center">
+      <!-- Study Sub-Section Switcher (Centered Segmented Switcher & Custom Materials Review) -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 sm:p-2.5 shadow-lg backdrop-blur flex flex-col sm:flex-row items-center justify-between gap-2 max-w-4xl mx-auto">
         
         <!-- Segmented Buttons: Concepts vs Chumash -->
-        <div class="flex items-center bg-slate-950/80 p-1 rounded-xl border border-slate-800/80 w-full sm:w-auto max-w-md mx-auto">
-          <button id="sub-study-concepts" onclick="switchStudySection('concepts')" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 rounded-lg text-xs sm:text-sm font-bold bg-brand-600 text-white shadow transition">
+        <div class="flex items-center bg-slate-950/80 p-1 rounded-xl border border-slate-800/80 w-full sm:w-auto">
+          <button id="sub-study-concepts" onclick="switchStudySection('concepts')" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 sm:px-7 py-2 rounded-lg text-xs sm:text-sm font-bold bg-brand-600 text-white shadow transition">
             <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
             <span id="lbl-study-concepts">Concepts</span>
             <span class="text-[10px] bg-brand-800/80 px-1.5 py-0.5 rounded-full font-mono">13</span>
           </button>
 
-          <button id="sub-study-chumash" onclick="switchStudySection('chumash')" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 rounded-lg text-xs sm:text-sm font-medium text-slate-400 hover:text-slate-200 transition">
+          <button id="sub-study-chumash" onclick="switchStudySection('chumash')" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 sm:px-7 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-400 hover:text-slate-200 transition">
             <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400"></i>
             <span id="lbl-study-chumash">Chumash</span>
             <span class="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded-full font-mono">23</span>
           </button>
         </div>
+
+        <!-- Review Added Materials Button -->
+        <button onclick="openReviewStudyMaterialsModal()" id="btn-review-study-materials" class="flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-950/80 hover:bg-slate-800/80 text-amber-300 border border-amber-500/30 text-xs font-semibold transition active:scale-95 w-full sm:w-auto shrink-0 shadow-sm" title="Review custom added materials across all lessons">
+          <i data-lucide="bookmark-check" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span id="lbl-review-study-materials">Custom Materials</span>
+          <span id="badge-total-study-materials" class="hidden px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-amber-500/20 text-amber-200 border border-amber-500/40">0</span>
+        </button>
 
       </div>
 
@@ -455,6 +462,114 @@
     </section>
 
   </main>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADD CUSTOM STUDY MATERIAL               -->
+  <!-- ============================================== -->
+  <div id="modal-add-study-material" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <i data-lucide="bookmark-plus" class="w-5 h-5 text-amber-400"></i>
+            <span id="txt-add-material-modal-title">Add Material to Lesson</span>
+          </h3>
+          <p id="add-material-target-title" class="text-xs text-amber-300 font-semibold mt-0.5"></p>
+        </div>
+        <button type="button" onclick="closeAddStudyMaterialModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleSaveStudyMaterial(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-add-material-title">Title / Topic (Optional)</label>
+          <input
+            type="text"
+            id="add-material-title-input"
+            placeholder="e.g. Story, Key Question, Halacha Point"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+          >
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-add-material-content">Content / Teaching Notes</label>
+          <textarea
+            id="add-material-content-input"
+            rows="5"
+            placeholder="Type your notes, stories, explanation points, or discussion questions to add to this lesson..."
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed"
+            required
+          ></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onclick="closeAddStudyMaterialModal()"
+            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
+            id="btn-add-material-cancel"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition flex items-center gap-1.5 shadow-md active:scale-95"
+            id="btn-add-material-save"
+          >
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span id="btn-add-material-save-text">Save to Lesson</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: REVIEW ALL ADDED STUDY MATERIALS         -->
+  <!-- ============================================== -->
+  <div id="modal-review-study-materials" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
+    <div class="max-w-2xl w-full max-h-[85vh] bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <i data-lucide="book-marked" class="w-5 h-5 text-amber-400"></i>
+            <span id="txt-review-materials-title">Custom Study Materials</span>
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">
+            <span id="review-materials-total-count" class="font-bold text-amber-300">0</span>
+            <span id="txt-review-materials-sub">materials added across all lessons</span>
+          </p>
+        </div>
+        <button type="button" onclick="closeReviewStudyMaterialsModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Action Banner: Copy for AI -->
+      <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="text-xs text-slate-300">
+          <span class="font-bold text-amber-300 block mb-0.5" id="txt-review-materials-ready-title">Ready to make these permanent?</span>
+          <span id="txt-review-materials-ready-desc">Copy all notes or tell the AI to incorporate them into the official curriculum.</span>
+        </div>
+        <button type="button" onclick="copyStudyMaterialsForAI()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shrink-0 shadow-sm">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          <span id="txt-review-materials-copy-btn">Copy for AI</span>
+        </button>
+      </div>
+
+      <!-- Scrollable List of Materials Grouped by Lesson -->
+      <div id="review-materials-list-container" class="flex-1 overflow-y-auto space-y-3 pr-1 min-h-[160px] max-h-[50vh]">
+        <!-- Rendered dynamically via renderReviewMaterialsList -->
+      </div>
+
+      <div class="pt-2 border-t border-slate-800 flex justify-end">
+        <button type="button" onclick="closeReviewStudyMaterialsModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ============================================== -->
   <!-- MODAL: ADD STUDENT (Clean & Simple)            -->
@@ -922,6 +1037,7 @@
       searchQuery: '',
       expandedTopicIds: {},
       expandedParshaIds: {},
+      studyAdditions: {},
       trackerFilter: 'all', // 'all', 'topics', 'chumash'
       students: [],
       activeStudentId: null,
@@ -1144,7 +1260,26 @@
         jumpToPortfolioHint: "Click student to open portfolio",
         quickScheduleBtn: "+ Schedule Lesson",
         selectMonthYear: "Select Month & Year",
-        jumpToCurrentMonth: "Jump to Current Month"
+        jumpToCurrentMonth: "Jump to Current Month",
+        customMaterialsSectionTitle: "Custom Notes & Materials",
+        addMaterialBtn: "Add Material",
+        addMaterialModalTitle: "Add Material to Lesson",
+        addMaterialTitleLabel: "Title / Topic (Optional)",
+        addMaterialTitlePlaceholder: "e.g. Story, Key Question, Halacha Point",
+        addMaterialContentLabel: "Content / Teaching Notes",
+        addMaterialContentPlaceholder: "Type your notes, stories, explanation points, or discussion questions to add to this lesson...",
+        saveToLessonBtn: "Save to Lesson",
+        reviewMaterialsBtn: "Custom Materials",
+        reviewMaterialsModalTitle: "Custom Study Materials",
+        reviewMaterialsSubText: "materials added across all lessons",
+        reviewMaterialsCopyBtn: "Copy for AI",
+        reviewMaterialsReadyPrompt: "Ready to make these permanent?",
+        reviewMaterialsReadyDesc: "Copy all notes or tell the AI to incorporate them into the official curriculum.",
+        noCustomMaterialsYet: "No custom materials added yet. Tap <strong>+ Add Material</strong> to add notes, questions, or teaching points.",
+        toastMaterialAdded: "Teaching material added!",
+        toastMaterialDeleted: "Material removed",
+        toastMaterialsCopied: "Materials copied to clipboard for AI!",
+        confirmDeleteMaterial: "Are you sure you want to remove this item?"
       },
       he: {
         appTitle: "טיוטור-פיילוט",
@@ -1346,7 +1481,26 @@
         jumpToPortfolioHint: "הקש על התלמיד לפתיחת תיק ההתקדמות",
         quickScheduleBtn: "+ קבע שיעור",
         selectMonthYear: "בחר חודש ושנה",
-        jumpToCurrentMonth: "חזרה לחודש הנוכחי"
+        jumpToCurrentMonth: "חזרה לחודש הנוכחי",
+        customMaterialsSectionTitle: "תוספות וחומרי לימוד",
+        addMaterialBtn: "הוסף חומר",
+        addMaterialModalTitle: "הוספת חומר לשיעור",
+        addMaterialTitleLabel: "כותרת / נושא (אופציונלי)",
+        addMaterialTitlePlaceholder: "למשל: סיפור, שאלת מפתח, נקודת הלכה",
+        addMaterialContentLabel: "תוכן / נקודות לימוד והסבר",
+        addMaterialContentPlaceholder: "הזן הערות, סיפורים, נקודות הסבר או שאלות לשיעור זה...",
+        saveToLessonBtn: "שמור לשיעור",
+        reviewMaterialsBtn: "חומרים שהוספת",
+        reviewMaterialsModalTitle: "חומרי לימוד מותאמים אישית",
+        reviewMaterialsSubText: "חומרים נוספו בכלל השיעורים",
+        reviewMaterialsCopyBtn: "העתק עבור הבינה המלאכותית",
+        reviewMaterialsReadyPrompt: "רוצה להפוך את התוספות לקבועות?",
+        reviewMaterialsReadyDesc: "העתק את כל החומרים או בקש מהבינה המלאכותית לשלבם בתוכנית הלימודים הקבועה.",
+        noCustomMaterialsYet: "אין תוספות עדיין. הקש <strong>+ הוסף חומר</strong> להוספת הערות, שאלות או נקודות לימוד.",
+        toastMaterialAdded: "חומר הלימוד נוסף בהצלחה!",
+        toastMaterialDeleted: "הפריט הוסר",
+        toastMaterialsCopied: "החומרים הועתקו ללוח בהצלחה!",
+        confirmDeleteMaterial: "האם אתה בטוח שברצונך להסיר פריט זה?"
       }
     };
 
@@ -1519,8 +1673,16 @@ alter publication supabase_realtime add table public.students_sync;`;
         if (error) throw error;
 
         if (data && Array.isArray(data)) {
-          if (data.length > 0) {
-            const cloudStudents = data.map(row => {
+          // Check for study materials system record
+          const studyRecord = data.find(row => row.id === '__study_materials__');
+          if (studyRecord && studyRecord.completed_topics) {
+            mergeStudyMaterialsWithCloud(studyRecord.completed_topics);
+          }
+
+          // Filter out internal system records from student roster
+          const actualStudentRows = data.filter(row => !row.id.startsWith('__'));
+          if (actualStudentRows.length > 0) {
+            const cloudStudents = actualStudentRows.map(row => {
               const meta = (row.completed_topics && row.completed_topics._meta) || {};
               const cleanCompletedTopics = { ...(row.completed_topics || {}) };
               delete cleanCompletedTopics._meta;
@@ -1574,6 +1736,20 @@ alter publication supabase_realtime add table public.students_sync;`;
     function handleRealtimeEvent(payload) {
       const { eventType, new: newRecord, old: oldRecord } = payload;
       const isHe = APP_STATE.lang === 'he';
+
+      // Intercept study materials cloud synchronization
+      if (newRecord && newRecord.id === '__study_materials__') {
+        if (newRecord.completed_topics) {
+          mergeStudyMaterialsWithCloud(newRecord.completed_topics);
+          renderTopics();
+          renderChumash();
+          updateStudyMaterialsBadge();
+        }
+        return;
+      }
+      if (oldRecord && oldRecord.id === '__study_materials__') {
+        return;
+      }
 
       if (eventType === 'INSERT' || eventType === 'UPDATE') {
         const meta = (newRecord.completed_topics && newRecord.completed_topics._meta) || {};
@@ -1668,6 +1844,26 @@ alter publication supabase_realtime add table public.students_sync;`;
           .eq('id', id);
       } catch (err) {
         console.error('Failed to delete student from cloud:', err);
+      }
+    }
+
+    async function pushStudyMaterialsToCloud() {
+      if (!APP_STATE.cloud.client) return;
+      try {
+        const payload = {
+          id: '__study_materials__',
+          name: 'SYSTEM_STUDY_MATERIALS',
+          parsha_or_date: 'system',
+          notes: 'Custom curriculum additions by tutors',
+          completed_topics: APP_STATE.studyAdditions || {},
+          completed_parshiot: {},
+          updated_at: new Date().toISOString()
+        };
+        await APP_STATE.cloud.client
+          .from('students_sync')
+          .upsert(payload);
+      } catch (err) {
+        console.error('Failed to push study materials to cloud:', err);
       }
     }
 
@@ -2092,6 +2288,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     document.addEventListener('DOMContentLoaded', () => {
       checkPasscodeAuth();
       loadStudentsFromStorage();
+      loadStudyMaterialsFromStorage();
       checkUrlHashSync();
       applyLanguageDirection();
       renderAllViews();
@@ -2420,6 +2617,48 @@ alter publication supabase_realtime add table public.students_sync;`;
       const pickerTodayBtn = document.getElementById('modal-month-picker-today-btn');
       if (pickerTodayBtn) pickerTodayBtn.textContent = t.jumpToCurrentMonth;
 
+      // Custom Study Materials Localizations
+      const lblReviewBtn = document.getElementById('lbl-review-study-materials');
+      if (lblReviewBtn) lblReviewBtn.textContent = t.reviewMaterialsBtn;
+
+      const txtAddModalTitle = document.getElementById('txt-add-material-modal-title');
+      if (txtAddModalTitle) txtAddModalTitle.textContent = t.addMaterialModalTitle;
+
+      const lblAddTitle = document.getElementById('lbl-add-material-title');
+      if (lblAddTitle) lblAddTitle.textContent = t.addMaterialTitleLabel;
+
+      const addTitleInput = document.getElementById('add-material-title-input');
+      if (addTitleInput) addTitleInput.placeholder = t.addMaterialTitlePlaceholder;
+
+      const lblAddContent = document.getElementById('lbl-add-material-content');
+      if (lblAddContent) lblAddContent.textContent = t.addMaterialContentLabel;
+
+      const addContentInput = document.getElementById('add-material-content-input');
+      if (addContentInput) addContentInput.placeholder = t.addMaterialContentPlaceholder;
+
+      const btnAddCancel = document.getElementById('btn-add-material-cancel');
+      if (btnAddCancel) btnAddCancel.textContent = t.cancel;
+
+      const btnAddSaveText = document.getElementById('btn-add-material-save-text');
+      if (btnAddSaveText) btnAddSaveText.textContent = t.saveToLessonBtn;
+
+      const txtRevTitle = document.getElementById('txt-review-materials-title');
+      if (txtRevTitle) txtRevTitle.textContent = t.reviewMaterialsModalTitle;
+
+      const txtRevSub = document.getElementById('txt-review-materials-sub');
+      if (txtRevSub) txtRevSub.textContent = t.reviewMaterialsSubText;
+
+      const txtRevReadyTitle = document.getElementById('txt-review-materials-ready-title');
+      if (txtRevReadyTitle) txtRevReadyTitle.textContent = t.reviewMaterialsReadyPrompt;
+
+      const txtRevReadyDesc = document.getElementById('txt-review-materials-ready-desc');
+      if (txtRevReadyDesc) txtRevReadyDesc.textContent = t.reviewMaterialsReadyDesc;
+
+      const txtRevCopyBtn = document.getElementById('txt-review-materials-copy-btn');
+      if (txtRevCopyBtn) txtRevCopyBtn.textContent = t.reviewMaterialsCopyBtn;
+
+      updateStudyMaterialsBadge();
+
       if (APP_STATE.currentUser) updateUserSessionDisplay(APP_STATE.currentUser);
       updateCloudStatusPill();
     }
@@ -2564,6 +2803,375 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
+    // ==============================================
+    // CUSTOM STUDY MATERIALS (PERSISTENCE & SYNC)
+    // ==============================================
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function loadStudyMaterialsFromStorage() {
+      try {
+        const stored = localStorage.getItem('tutor_study_additions');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed === 'object') {
+            APP_STATE.studyAdditions = parsed;
+          }
+        }
+      } catch (e) {
+        console.error('Failed to parse tutor_study_additions from localStorage:', e);
+      }
+      if (!APP_STATE.studyAdditions) {
+        APP_STATE.studyAdditions = {};
+      }
+      updateStudyMaterialsBadge();
+    }
+
+    function saveStudyMaterialsToStorage(syncCloud) {
+      if (syncCloud === undefined) syncCloud = true;
+      try {
+        localStorage.setItem('tutor_study_additions', JSON.stringify(APP_STATE.studyAdditions || {}));
+      } catch (e) {
+        console.error('Failed to save tutor_study_additions to localStorage:', e);
+      }
+      updateStudyMaterialsBadge();
+      if (syncCloud) {
+        pushStudyMaterialsToCloud();
+      }
+    }
+
+    function mergeStudyMaterialsWithCloud(cloudMaterials) {
+      if (!cloudMaterials || typeof cloudMaterials !== 'object') return;
+      if (!APP_STATE.studyAdditions) APP_STATE.studyAdditions = {};
+
+      let hasNewData = false;
+      Object.keys(cloudMaterials).forEach(key => {
+        const cloudItems = cloudMaterials[key];
+        if (!Array.isArray(cloudItems)) return;
+
+        if (!APP_STATE.studyAdditions[key]) {
+          APP_STATE.studyAdditions[key] = [...cloudItems];
+          hasNewData = true;
+        } else {
+          const existingIds = new Set(APP_STATE.studyAdditions[key].map(it => it.id));
+          cloudItems.forEach(cloudItem => {
+            if (!existingIds.has(cloudItem.id)) {
+              APP_STATE.studyAdditions[key].push(cloudItem);
+              existingIds.add(cloudItem.id);
+              hasNewData = true;
+            }
+          });
+        }
+      });
+
+      if (hasNewData) {
+        saveStudyMaterialsToStorage(false);
+      }
+    }
+
+    function updateStudyMaterialsBadge() {
+      const badge = document.getElementById('badge-total-study-materials');
+      const reviewCountEl = document.getElementById('review-materials-total-count');
+      if (!APP_STATE.studyAdditions) return;
+
+      let total = 0;
+      Object.values(APP_STATE.studyAdditions).forEach(arr => {
+        if (Array.isArray(arr)) total += arr.length;
+      });
+
+      if (badge) {
+        if (total > 0) {
+          badge.textContent = total;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+
+      if (reviewCountEl) {
+        reviewCountEl.textContent = total;
+      }
+    }
+
+    let activeStudyMaterialTarget = null; // { id, type, title }
+
+    function openAddStudyMaterialModal(targetId, targetType, targetTitle) {
+      activeStudyMaterialTarget = {
+        id: targetId,
+        type: targetType,
+        title: targetTitle || targetId
+      };
+
+      const titleEl = document.getElementById('add-material-target-title');
+      if (titleEl) {
+        titleEl.textContent = activeStudyMaterialTarget.title;
+      }
+
+      const titleInput = document.getElementById('add-material-title-input');
+      const contentInput = document.getElementById('add-material-content-input');
+      if (titleInput) titleInput.value = '';
+      if (contentInput) contentInput.value = '';
+
+      const modal = document.getElementById('modal-add-study-material');
+      if (modal) {
+        modal.classList.remove('hidden');
+        if (contentInput) {
+          setTimeout(() => contentInput.focus(), 100);
+        }
+      }
+      lucide.createIcons();
+    }
+
+    function closeAddStudyMaterialModal() {
+      const modal = document.getElementById('modal-add-study-material');
+      if (modal) modal.classList.add('hidden');
+      activeStudyMaterialTarget = null;
+    }
+
+    function handleSaveStudyMaterial(e) {
+      e.preventDefault();
+      if (!activeStudyMaterialTarget || !activeStudyMaterialTarget.id) {
+        closeAddStudyMaterialModal();
+        return;
+      }
+
+      const t = I18N[APP_STATE.lang];
+      const titleInput = document.getElementById('add-material-title-input');
+      const contentInput = document.getElementById('add-material-content-input');
+
+      const titleVal = titleInput ? titleInput.value.trim() : '';
+      const contentVal = contentInput ? contentInput.value.trim() : '';
+
+      if (!contentVal) return;
+
+      if (!APP_STATE.studyAdditions) {
+        APP_STATE.studyAdditions = {};
+      }
+      if (!Array.isArray(APP_STATE.studyAdditions[activeStudyMaterialTarget.id])) {
+        APP_STATE.studyAdditions[activeStudyMaterialTarget.id] = [];
+      }
+
+      const userSession = JSON.parse(localStorage.getItem('tutor_auth_session') || '{}');
+      const authorName = (APP_STATE.lang === 'he' ? userSession.name_he : userSession.name_en) || userSession.email || 'Tutor';
+
+      const newMaterial = {
+        id: 'mat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        title: titleVal,
+        content: contentVal,
+        createdAt: new Date().toISOString(),
+        author: authorName,
+        targetType: activeStudyMaterialTarget.type,
+        targetTitle: activeStudyMaterialTarget.title
+      };
+
+      APP_STATE.studyAdditions[activeStudyMaterialTarget.id].push(newMaterial);
+      saveStudyMaterialsToStorage(true);
+
+      const targetType = activeStudyMaterialTarget.type;
+      closeAddStudyMaterialModal();
+
+      if (targetType === 'concept') {
+        renderTopics();
+      } else {
+        renderChumash();
+      }
+
+      showToast(t.toastMaterialAdded || 'Study material added successfully!');
+      lucide.createIcons();
+    }
+
+    function deleteStudyMaterial(targetId, materialId) {
+      const t = I18N[APP_STATE.lang];
+      if (!confirm(t.confirmDeleteMaterial || 'Are you sure you want to remove this material?')) {
+        return;
+      }
+
+      if (APP_STATE.studyAdditions && Array.isArray(APP_STATE.studyAdditions[targetId])) {
+        APP_STATE.studyAdditions[targetId] = APP_STATE.studyAdditions[targetId].filter(m => m.id !== materialId);
+        if (APP_STATE.studyAdditions[targetId].length === 0) {
+          delete APP_STATE.studyAdditions[targetId];
+        }
+        saveStudyMaterialsToStorage(true);
+        renderTopics();
+        renderChumash();
+        renderReviewMaterialsList();
+        showToast(t.toastMaterialDeleted || 'Material removed');
+        lucide.createIcons();
+      }
+    }
+
+    function openReviewStudyMaterialsModal() {
+      renderReviewMaterialsList();
+      const modal = document.getElementById('modal-review-study-materials');
+      if (modal) modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeReviewStudyMaterialsModal() {
+      const modal = document.getElementById('modal-review-study-materials');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function getLessonMetadata(targetId) {
+      const isHe = APP_STATE.lang === 'he';
+      const topics = window.JEWISH_TOPICS_DATA || [];
+      const topic = topics.find(t => t.id === targetId);
+      if (topic) {
+        return {
+          title: isHe ? topic.title_he : topic.title_en,
+          type: 'concept',
+          typeName: isHe ? 'מושג' : 'Concept'
+        };
+      }
+
+      const ber = window.BEREISHIT_PARSHIOT_DATA || [];
+      const shem = window.SHEMOT_PARSHIOT_DATA || [];
+      const parsha = [...ber, ...shem].find(p => p.id === targetId);
+      if (parsha) {
+        return {
+          title: isHe ? parsha.name_he : parsha.name_en,
+          type: 'parsha',
+          typeName: isHe ? (parsha.book === 'bereishit' ? 'פרשת בראשית' : 'פרשת שמות') : (parsha.book === 'bereishit' ? 'Bereishit Parsha' : 'Shemot Parsha')
+        };
+      }
+
+      return {
+        title: targetId,
+        type: 'unknown',
+        typeName: 'Lesson'
+      };
+    }
+
+    function renderReviewMaterialsList() {
+      const container = document.getElementById('review-materials-list-container');
+      if (!container) return;
+
+      const additions = APP_STATE.studyAdditions || {};
+      const targetIds = Object.keys(additions).filter(key => Array.isArray(additions[key]) && additions[key].length > 0);
+      const isHe = APP_STATE.lang === 'he';
+      const t = I18N[APP_STATE.lang];
+
+      let totalCount = 0;
+      targetIds.forEach(id => totalCount += additions[id].length);
+      const countEl = document.getElementById('review-materials-total-count');
+      if (countEl) countEl.textContent = totalCount;
+
+      if (targetIds.length === 0) {
+        container.innerHTML = `
+          <div class="py-12 text-center text-slate-500 space-y-2">
+            <i data-lucide="inbox" class="w-10 h-10 mx-auto text-slate-600"></i>
+            <p class="text-xs sm:text-sm text-slate-400 font-medium">${t.noCustomMaterialsYet || 'No custom additions yet.'}</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      let html = '';
+      targetIds.forEach(targetId => {
+        const items = additions[targetId];
+        const meta = getLessonMetadata(targetId);
+
+        html += `
+          <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-3.5 sm:p-4 space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded ${meta.type === 'concept' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20'}">
+                  ${meta.typeName}
+                </span>
+                <h4 class="text-xs sm:text-sm font-bold text-white">${escapeHtml(meta.title)}</h4>
+              </div>
+              <span class="text-[10px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded-full border border-slate-800">
+                ${items.length} ${items.length === 1 ? 'item' : 'items'}
+              </span>
+            </div>
+            <div class="space-y-2">
+        `;
+
+        items.forEach(item => {
+          const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString(isHe ? 'he-IL' : 'en-US', { month: 'short', day: 'numeric' }) : '';
+          html += `
+            <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex items-start justify-between gap-3 text-xs">
+              <div class="space-y-1 min-w-0 flex-1">
+                ${item.title ? `<div class="font-bold text-amber-300 text-xs">${escapeHtml(item.title)}</div>` : ''}
+                <div class="text-slate-200 whitespace-pre-wrap leading-relaxed">${escapeHtml(item.content)}</div>
+                <div class="text-[10px] text-slate-500 font-mono flex items-center gap-2 pt-0.5">
+                  ${item.author ? `<span>${escapeHtml(item.author)}</span>` : ''}
+                  ${dateStr ? `<span>• ${dateStr}</span>` : ''}
+                </div>
+              </div>
+              <button
+                type="button"
+                onclick="deleteStudyMaterial('${targetId}', '${item.id}')"
+                class="text-slate-500 hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition shrink-0"
+                title="${t.confirmDeleteMaterial || 'Remove'}"
+              >
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          `;
+        });
+
+        html += `
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function copyStudyMaterialsForAI() {
+      const additions = APP_STATE.studyAdditions || {};
+      const targetIds = Object.keys(additions).filter(key => Array.isArray(additions[key]) && additions[key].length > 0);
+      const t = I18N[APP_STATE.lang];
+
+      if (targetIds.length === 0) {
+        showToast(t.noCustomMaterialsYet || 'No custom additions to copy');
+        return;
+      }
+
+      let markdown = `# Custom Bar Mitzvah Tutor Materials To Permanently Integrate\n\n`;
+      markdown += `*Generated: ${new Date().toISOString()}*\n\n`;
+      markdown += `Tutor instructions: Please incorporate the following custom additions permanently into the official curriculum data structures (\`JEWISH_TOPICS_DATA\`, \`BEREISHIT_PARSHIOT_DATA\`, or \`SHEMOT_PARSHIOT_DATA\`) in \`index.html\`:\n\n`;
+
+      targetIds.forEach(targetId => {
+        const items = additions[targetId];
+        const meta = getLessonMetadata(targetId);
+        markdown += `## ${meta.title} (${targetId})\n`;
+        markdown += `- **Type**: ${meta.typeName}\n`;
+        markdown += `- **Count**: ${items.length}\n\n`;
+
+        items.forEach((item, idx) => {
+          markdown += `### Item ${idx + 1}${item.title ? ': ' + item.title : ''}\n`;
+          if (item.author) markdown += `- **Author**: ${item.author}\n`;
+          if (item.createdAt) markdown += `- **Date**: ${item.createdAt}\n`;
+          markdown += `\n${item.content}\n\n`;
+        });
+        markdown += `---\n\n`;
+      });
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(markdown).then(() => {
+          showToast(t.toastMaterialsCopied || 'Study materials copied to clipboard!');
+        }).catch(err => {
+          console.error('Clipboard write error:', err);
+          prompt('Copy the materials below:', markdown);
+        });
+      } else {
+        prompt('Copy the materials below:', markdown);
+      }
+    }
+
     // Render Jewish Topics View (Clean list view with name only - no descriptions)
     function renderTopics() {
       const container = document.getElementById('topics-grid');
@@ -2597,6 +3205,8 @@ alter publication supabase_realtime add table public.students_sync;`;
         const midrash = isHe ? topic.midrash_he : topic.midrash_en;
         const discussion = isHe ? topic.discussion_he : topic.discussion_en;
         const isExpanded = !!(APP_STATE.expandedTopicIds && APP_STATE.expandedTopicIds[topic.id]);
+        const additions = (APP_STATE.studyAdditions && APP_STATE.studyAdditions[topic.id]) || [];
+        const additionsCount = additions.length;
 
         return '<article id="topic-card-' + topic.id + '" class="bg-slate-900/90 border transition-all duration-200 rounded-xl overflow-hidden shadow-sm ' +
           (isExpanded ? 'border-amber-500/60 ring-1 ring-amber-500/30' : 'border-slate-800 hover:border-slate-700') + '">' +
@@ -2614,6 +3224,11 @@ alter publication supabase_realtime add table public.students_sync;`;
               '</div>' +
             '</div>' +
             '<div class="flex items-center gap-2 shrink-0">' +
+              (additionsCount > 0 ?
+                '<span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1" title="' + additionsCount + ' custom materials added">' +
+                  '<i data-lucide="bookmark" class="w-3 h-3"></i>' +
+                  additionsCount +
+                '</span>' : '') +
               '<i data-lucide="' + (isExpanded ? 'chevron-up' : 'chevron-down') + '" class="w-4 h-4 text-slate-400"></i>' +
             '</div>' +
           '</div>' +
@@ -2663,6 +3278,46 @@ alter publication supabase_realtime add table public.students_sync;`;
                   '<span class="text-[11px] font-bold text-emerald-400 block mb-0.5">' + t.discussionPrompt + '</span>' +
                   '<p class="text-slate-200">' + discussion + '</p>' +
                 '</div>' +
+              '</div>' +
+
+              '<!-- Section 6: Custom Notes & Materials -->' +
+              '<div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/90 border border-amber-500/30 space-y-3">' +
+                '<div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">' +
+                  '<div class="flex items-center gap-2">' +
+                    '<i data-lucide="bookmark-plus" class="w-4 h-4 text-amber-400"></i>' +
+                    '<span class="text-[11px] font-bold uppercase tracking-wider text-amber-300">' +
+                      t.customMaterialsSectionTitle +
+                    '</span>' +
+                    (additionsCount > 0 ?
+                      '<span class="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-200 border border-amber-500/40">' + additionsCount + '</span>' : '') +
+                  '</div>' +
+                  '<button type="button" onclick="event.stopPropagation(); openAddStudyMaterialModal(\'' + topic.id + '\', \'concept\', \'' + escapeHtml(title).replace(/'/g, "\\'") + '\')" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold transition active:scale-95">' +
+                    '<i data-lucide="plus" class="w-3 h-3"></i>' +
+                    '<span>' + t.addMaterialBtn + '</span>' +
+                  '</button>' +
+                '</div>' +
+
+                (additionsCount > 0 ?
+                  '<div class="space-y-2.5">' +
+                    additions.map(item => {
+                      const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString(isHe ? 'he-IL' : 'en-US', { month: 'short', day: 'numeric' }) : '';
+                      return '<div class="p-3 rounded-lg bg-slate-950/70 border border-slate-800 text-xs flex items-start justify-between gap-2.5">' +
+                        '<div class="space-y-1 min-w-0 flex-1">' +
+                          (item.title ? '<div class="font-bold text-amber-300">' + escapeHtml(item.title) + '</div>' : '') +
+                          '<div class="text-slate-200 whitespace-pre-wrap leading-relaxed">' + escapeHtml(item.content) + '</div>' +
+                          '<div class="text-[10px] text-slate-500 font-mono flex items-center gap-2 pt-0.5">' +
+                            (item.author ? '<span>' + escapeHtml(item.author) + '</span>' : '') +
+                            (dateStr ? '<span>• ' + dateStr + '</span>' : '') +
+                          '</div>' +
+                        '</div>' +
+                        '<button type="button" onclick="event.stopPropagation(); deleteStudyMaterial(\'' + topic.id + '\', \'' + item.id + '\')" class="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-red-500/10 transition shrink-0" title="Delete">' +
+                          '<i data-lucide="trash-2" class="w-3.5 h-3.5"></i>' +
+                        '</button>' +
+                      '</div>';
+                    }).join('') +
+                  '</div>' :
+                  '<p class="text-xs text-slate-400 italic">' + t.noCustomMaterialsYet + '</p>'
+                ) +
               '</div>' +
 
             '</div>' : '') +
@@ -2721,6 +3376,8 @@ alter publication supabase_realtime add table public.students_sync;`;
         const lifeApp = isHe ? parsha.life_app_he : parsha.life_app_en;
         const isBereishit = parsha.book === 'bereishit';
         const isExpanded = !!(APP_STATE.expandedParshaIds && APP_STATE.expandedParshaIds[parsha.id]);
+        const additions = (APP_STATE.studyAdditions && APP_STATE.studyAdditions[parsha.id]) || [];
+        const additionsCount = additions.length;
 
         return '<article id="parsha-card-' + parsha.id + '" class="bg-slate-900/90 border transition-all duration-200 rounded-xl overflow-hidden shadow-sm ' +
           (isExpanded ? 'border-brand-500/60 ring-1 ring-brand-500/30' : 'border-slate-800 hover:border-slate-700') + '">' +
@@ -2741,6 +3398,11 @@ alter publication supabase_realtime add table public.students_sync;`;
               '</div>' +
             '</div>' +
             '<div class="flex items-center gap-2 shrink-0">' +
+              (additionsCount > 0 ?
+                '<span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center gap-1" title="' + additionsCount + ' custom materials added">' +
+                  '<i data-lucide="bookmark" class="w-3 h-3"></i>' +
+                  additionsCount +
+                '</span>' : '') +
               '<i data-lucide="' + (isExpanded ? 'chevron-up' : 'chevron-down') + '" class="w-4 h-4 text-slate-400"></i>' +
             '</div>' +
           '</div>' +
@@ -2785,6 +3447,46 @@ alter publication supabase_realtime add table public.students_sync;`;
                   '<i data-lucide="target" class="w-3.5 h-3.5"></i> ' + t.lifeApplication +
                 '</span>' +
                 '<p class="text-slate-300 leading-relaxed">' + lifeApp + '</p>' +
+              '</div>' +
+
+              '<!-- Section 5: Custom Notes & Materials -->' +
+              '<div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/90 border border-cyan-500/30 space-y-3">' +
+                '<div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">' +
+                  '<div class="flex items-center gap-2">' +
+                    '<i data-lucide="bookmark-plus" class="w-4 h-4 text-cyan-400"></i>' +
+                    '<span class="text-[11px] font-bold uppercase tracking-wider text-cyan-300">' +
+                      t.customMaterialsSectionTitle +
+                    '</span>' +
+                    (additionsCount > 0 ?
+                      '<span class="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-cyan-500/20 text-cyan-200 border border-cyan-500/40">' + additionsCount + '</span>' : '') +
+                  '</div>' +
+                  '<button type="button" onclick="event.stopPropagation(); openAddStudyMaterialModal(\'' + parsha.id + '\', \'parsha\', \'' + escapeHtml(title).replace(/'/g, "\\'") + '\')" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-semibold transition active:scale-95">' +
+                    '<i data-lucide="plus" class="w-3 h-3"></i>' +
+                    '<span>' + t.addMaterialBtn + '</span>' +
+                  '</button>' +
+                '</div>' +
+
+                (additionsCount > 0 ?
+                  '<div class="space-y-2.5">' +
+                    additions.map(item => {
+                      const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString(isHe ? 'he-IL' : 'en-US', { month: 'short', day: 'numeric' }) : '';
+                      return '<div class="p-3 rounded-lg bg-slate-950/70 border border-slate-800 text-xs flex items-start justify-between gap-2.5">' +
+                        '<div class="space-y-1 min-w-0 flex-1">' +
+                          (item.title ? '<div class="font-bold text-cyan-300">' + escapeHtml(item.title) + '</div>' : '') +
+                          '<div class="text-slate-200 whitespace-pre-wrap leading-relaxed">' + escapeHtml(item.content) + '</div>' +
+                          '<div class="text-[10px] text-slate-500 font-mono flex items-center gap-2 pt-0.5">' +
+                            (item.author ? '<span>' + escapeHtml(item.author) + '</span>' : '') +
+                            (dateStr ? '<span>• ' + dateStr + '</span>' : '') +
+                          '</div>' +
+                        '</div>' +
+                        '<button type="button" onclick="event.stopPropagation(); deleteStudyMaterial(\'' + parsha.id + '\', \'' + item.id + '\')" class="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-red-500/10 transition shrink-0" title="Delete">' +
+                          '<i data-lucide="trash-2" class="w-3.5 h-3.5"></i>' +
+                        '</button>' +
+                      '</div>';
+                    }).join('') +
+                  '</div>' :
+                  '<p class="text-xs text-slate-400 italic">' + t.noCustomMaterialsYet + '</p>'
+                ) +
               '</div>' +
 
             '</div>' : '') +
@@ -4204,6 +4906,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       renderStudents();
       renderCalendar();
       renderActiveStudentWorkspace(true);
+      updateStudyMaterialsBadge();
     }
 
     // Toast Utility
