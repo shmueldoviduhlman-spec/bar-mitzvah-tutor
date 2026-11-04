@@ -293,27 +293,21 @@
         </button>
       </div>
 
-      <!-- Navigation Tab Row (Responsive & Fitted for Mobile + Desktop) -->
-      <div class="flex items-center gap-1 sm:gap-1.5 pt-0.5 overflow-x-auto no-scrollbar w-full pb-0.5">
-        <button id="tab-topics" onclick="switchTab('topics')" class="tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition whitespace-nowrap bg-brand-600 text-white shadow-sm shrink-0">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5 shrink-0"></i>
-          <span id="tab-topics-label">Jewish Concepts</span>
-          <span class="text-[10px] bg-brand-800/80 px-1.5 py-0.2 rounded-full font-mono shrink-0">13</span>
-        </button>
-
-        <button id="tab-chumash" onclick="switchTab('chumash')" class="tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap shrink-0">
+      <!-- Navigation Tab Row (Responsive & Fitted for Mobile + Desktop - strictly 3 tabs) -->
+      <div class="flex items-center gap-1.5 sm:gap-2 pt-0.5 overflow-x-auto no-scrollbar w-full pb-0.5">
+        <button id="tab-study" onclick="switchTab('study')" class="tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs font-semibold transition whitespace-nowrap bg-brand-600 text-white shadow-sm shrink-0">
           <i data-lucide="book-open" class="w-3.5 h-3.5 shrink-0"></i>
-          <span id="tab-chumash-label">Chumash</span>
-          <span class="text-[10px] bg-slate-800 px-1.5 py-0.2 rounded-full font-mono shrink-0">23</span>
+          <span id="tab-study-label">Study</span>
+          <span class="text-[10px] bg-brand-800/80 px-1.5 py-0.2 rounded-full font-mono shrink-0">36</span>
         </button>
 
-        <button id="tab-students" onclick="switchTab('students')" class="tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap shrink-0 relative">
+        <button id="tab-students" onclick="switchTab('students')" class="tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap shrink-0 relative">
           <i data-lucide="users" class="w-3.5 h-3.5 shrink-0"></i>
           <span id="tab-students-label">Student Tracker</span>
           <span id="student-badge-count" class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded-full font-mono border border-amber-500/30 shrink-0">0</span>
         </button>
 
-        <button id="tab-calendar" onclick="switchTab('calendar')" class="tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap shrink-0">
+        <button id="tab-calendar" onclick="switchTab('calendar')" class="tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap shrink-0">
           <i data-lucide="calendar" class="w-3.5 h-3.5 shrink-0"></i>
           <span id="tab-calendar-label">Calendar</span>
         </button>
@@ -326,74 +320,95 @@
   <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-1">
 
     <!-- ============================================== -->
-    <!-- VIEW 1: GENERAL JEWISH CONCEPTS (13 Topics)   -->
+    <!-- VIEW 1: STUDY CURRICULUM (Concepts & Chumash)  -->
     <!-- ============================================== -->
-    <section id="view-topics" class="space-y-6">
+    <section id="view-study" class="space-y-6">
 
-      <!-- Section Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
-        <div>
-          <h2 id="topics-head-title" class="text-xl font-bold text-white flex items-center gap-2">
-            <span class="text-amber-400">✦</span> 13 Core Jewish Concepts
-          </h2>
-          <p id="topics-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
-            Tailored hooks, high-density memory points, and relatable teen analogies for 12-13 year olds.
-          </p>
+      <!-- Study Sub-Section Switcher (Segmented Switcher) -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 shadow-lg backdrop-blur flex flex-col sm:flex-row items-center justify-between gap-3">
+        
+        <!-- Segmented Buttons: Concepts vs Chumash -->
+        <div class="flex items-center bg-slate-950/80 p-1 rounded-xl border border-slate-800/80 w-full sm:w-auto">
+          <button id="sub-study-concepts" onclick="switchStudySection('concepts')" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-bold bg-brand-600 text-white shadow transition">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
+            <span id="lbl-study-concepts">Concepts</span>
+            <span class="text-[10px] bg-brand-800/80 px-1.5 py-0.5 rounded-full font-mono">13</span>
+          </button>
+
+          <button id="sub-study-chumash" onclick="switchStudySection('chumash')" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-400 hover:text-slate-200 transition">
+            <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400"></i>
+            <span id="lbl-study-chumash">Chumash</span>
+            <span class="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded-full font-mono">23</span>
+          </button>
         </div>
-        <div class="flex items-center gap-2">
-          <div class="text-xs text-slate-400 font-mono hidden sm:block">
-            <span id="topics-count-display">Showing 13 of 13</span>
+
+        <!-- Quick Action: Collapse All -->
+        <div class="flex items-center gap-2 self-end sm:self-auto">
+          <button onclick="handleStudyCollapseAll()" id="btn-collapse-study" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition active:scale-95">
+            <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5"></i>
+            <span id="lbl-study-collapse">Collapse All</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sub-Section 1: Concepts Grid -->
+      <div id="study-section-concepts" class="space-y-6">
+        <!-- Section Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
+          <div>
+            <h2 id="topics-head-title" class="text-xl font-bold text-white flex items-center gap-2">
+              <span class="text-amber-400">✦</span> 13 Core Jewish Concepts
+            </h2>
+            <p id="topics-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
+              Tailored hooks, high-density memory points, and relatable teen analogies for 12-13 year olds.
+            </p>
           </div>
-          <button onclick="collapseAllTopics()" id="btn-collapse-topics" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
-            Collapse All
-          </button>
+          <div class="flex items-center gap-2">
+            <div class="text-xs text-slate-400 font-mono hidden sm:block">
+              <span id="topics-count-display">Showing 13 of 13</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Topics Cards Grid -->
+        <div id="topics-grid" class="space-y-3 max-w-4xl mx-auto">
+          <!-- Rendered via JS -->
         </div>
       </div>
 
-      <!-- Topics Cards Grid -->
-      <div id="topics-grid" class="space-y-3 max-w-4xl mx-auto">
-        <!-- Rendered via JS -->
-      </div>
-    </section>
+      <!-- Sub-Section 2: Chumash Grid -->
+      <div id="study-section-chumash" class="space-y-6 hidden">
+        <!-- Section Header + Book Filter -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+          <div>
+            <h2 id="chumash-head-title" class="text-xl font-bold text-white flex items-center gap-2">
+              <span class="text-brand-400">📜</span> Chumash: Bereishit & Shemot
+            </h2>
+            <p id="chumash-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
+              Key plot lines, dense memory triggers, Rashi/Midrash gems, and bar mitzvah real-world angles.
+            </p>
+          </div>
 
-    <!-- ============================================== -->
-    <!-- VIEW 2: CHUMASH (23 Parshiot)                 -->
-    <!-- ============================================== -->
-    <section id="view-chumash" class="space-y-6 hidden">
-
-      <!-- Section Header + Book Filter -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-        <div>
-          <h2 id="chumash-head-title" class="text-xl font-bold text-white flex items-center gap-2">
-            <span class="text-brand-400">📜</span> Chumash: Bereishit & Shemot
-          </h2>
-          <p id="chumash-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
-            Key plot lines, dense memory triggers, Rashi/Midrash gems, and bar mitzvah real-world angles.
-          </p>
-        </div>
-
-        <!-- Book Filter Toggle -->
-        <div class="flex items-center gap-2 flex-wrap">
-          <button onclick="collapseAllChumash()" id="btn-collapse-chumash" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
-            Collapse All
-          </button>
+          <!-- Book Filter Toggle -->
           <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg p-1 text-xs">
-          <button id="filter-all-books" onclick="filterChumashBook('all')" class="px-3 py-1 rounded bg-brand-600 text-white font-medium transition">
-            <span id="btn-all-books">All (23)</span>
-          </button>
-          <button id="filter-bereishit" onclick="filterChumashBook('bereishit')" class="px-3 py-1 rounded text-slate-400 hover:text-white font-medium transition">
-            <span id="btn-bereishit">Bereishit (12)</span>
-          </button>
-          <button id="filter-shemot" onclick="filterChumashBook('shemot')" class="px-3 py-1 rounded text-slate-400 hover:text-white font-medium transition">
-            <span id="btn-shemot">Shemot (11)</span>
-          </button>
+            <button id="filter-all-books" onclick="filterChumashBook('all')" class="px-3 py-1 rounded bg-brand-600 text-white font-medium transition">
+              <span id="btn-all-books">All (23)</span>
+            </button>
+            <button id="filter-bereishit" onclick="filterChumashBook('bereishit')" class="px-3 py-1 rounded text-slate-400 hover:text-white font-medium transition">
+              <span id="btn-bereishit">Bereishit (12)</span>
+            </button>
+            <button id="filter-shemot" onclick="filterChumashBook('shemot')" class="px-3 py-1 rounded text-slate-400 hover:text-white font-medium transition">
+              <span id="btn-shemot">Shemot (11)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Chumash Parshiot Grid -->
+        <div id="chumash-grid" class="space-y-3 max-w-4xl mx-auto">
+          <!-- Rendered via JS -->
         </div>
       </div>
 
-      <!-- Chumash Parshiot Grid -->
-      <div id="chumash-grid" class="space-y-3 max-w-4xl mx-auto">
-        <!-- Rendered via JS -->
-      </div>
     </section>
 
     <!-- ============================================== -->
@@ -678,7 +693,7 @@
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
-          <button onclick="switchTab('topics'); closeStudentDrawer();" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-lg font-medium transition">
+          <button onclick="switchTab('study'); closeStudentDrawer();" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-lg font-medium transition">
             <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400"></i>
             <span id="drawer-btn-curriculum-label">Curriculum</span>
           </button>
@@ -923,7 +938,8 @@
     // Application State
     const APP_STATE = {
       lang: localStorage.getItem('tutor_lang') || 'en', // 'en' or 'he'
-      activeTab: 'topics', // 'topics', 'chumash', 'students'
+      activeTab: 'study', // 'study', 'students', 'calendar'
+      studySection: 'concepts', // 'concepts' or 'chumash'
       chumashFilter: 'all', // 'all', 'bereishit', 'shemot'
       searchQuery: '',
       expandedTopicId: null,
@@ -955,12 +971,18 @@
         appSubtitle: "Bar Mitzvah Tutor Companion & Tracker",
         shareRabbi: "Share with Rabbi",
         searchPlaceholder: "Search topics, Rashis, stories, keywords...",
+        tabStudy: "Study",
         tabTopics: "Jewish Concepts",
         tabChumash: "Chumash",
         tabStudents: "Student Tracker",
+        tabCalendar: "Calendar",
+        mobStudy: "Study",
         mobTopics: "Concepts",
         mobChumash: "Chumash",
         mobStudents: "Tracker",
+        mobCalendar: "Calendar",
+        subStudyConcepts: "Concepts",
+        subStudyChumash: "Chumash",
         collapseAll: "Collapse All",
         topicsTitle: "13 Core Jewish Concepts",
         topicsDesc: "Tailored hooks, high-density memory points, and relatable teen analogies for 12-13 year olds.",
@@ -1150,12 +1172,18 @@
         appSubtitle: "מלווה מלמדי בר מצווה ומעקב תלמידים",
         shareRabbi: "שתף עם הרב",
         searchPlaceholder: "חיפוש מושגים, רש״י, סיפורים, מילות מפתח...",
+        tabStudy: "לימוד",
         tabTopics: "מושגי יסוד",
         tabChumash: "חומש",
         tabStudents: "מעקב תלמידים",
+        tabCalendar: "לוח שנה",
+        mobStudy: "לימוד",
         mobTopics: "מושגים",
         mobChumash: "חומש",
         mobStudents: "תלמידים",
+        mobCalendar: "יומן",
+        subStudyConcepts: "מושגים",
+        subStudyChumash: "חומש",
         collapseAll: "כווץ הכל",
         topicsTitle: "13 מושגי יסוד ביהדות",
         topicsDesc: "פתיחות מרתקות, עוגני זיכרון ממוקדים, וחיבור מעשי לעולמו של נער בן 12-13.",
@@ -2060,12 +2088,9 @@ alter publication supabase_realtime add table public.students_sync;`;
       const searchInput = document.getElementById('search-input');
       if (searchInput) searchInput.placeholder = t.searchPlaceholder;
 
-      // Navigation Desktop Tabs
-      const tabTopics = document.getElementById('tab-topics-label');
-      if (tabTopics) tabTopics.textContent = t.tabTopics;
-
-      const tabChumash = document.getElementById('tab-chumash-label');
-      if (tabChumash) tabChumash.textContent = t.tabChumash;
+      // Navigation Desktop Tabs (3 Tabs: Study, Student Tracker, Calendar)
+      const tabStudy = document.getElementById('tab-study-label');
+      if (tabStudy) tabStudy.textContent = t.tabStudy;
 
       const tabStudents = document.getElementById('tab-students-label');
       if (tabStudents) tabStudents.textContent = t.tabStudents;
@@ -2074,17 +2099,24 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (tabCalendar) tabCalendar.textContent = t.tabCalendar;
 
       // Navigation Mobile Dock Labels
-      const mobTopics = document.getElementById('mob-lbl-topics');
-      if (mobTopics) mobTopics.textContent = t.mobTopics;
-
-      const mobChumash = document.getElementById('mob-lbl-chumash');
-      if (mobChumash) mobChumash.textContent = t.mobChumash;
+      const mobStudy = document.getElementById('mob-lbl-study');
+      if (mobStudy) mobStudy.textContent = t.mobStudy;
 
       const mobStudents = document.getElementById('mob-lbl-students');
       if (mobStudents) mobStudents.textContent = t.mobStudents;
 
       const mobCalendar = document.getElementById('mob-lbl-calendar');
       if (mobCalendar) mobCalendar.textContent = t.mobCalendar;
+
+      // Study Sub-Section Switcher Pills & Collapse
+      const subStudyConcepts = document.getElementById('lbl-study-concepts');
+      if (subStudyConcepts) subStudyConcepts.textContent = t.subStudyConcepts;
+
+      const subStudyChumash = document.getElementById('lbl-study-chumash');
+      if (subStudyChumash) subStudyChumash.textContent = t.subStudyChumash;
+
+      const btnCollapseStudy = document.getElementById('lbl-study-collapse');
+      if (btnCollapseStudy) btnCollapseStudy.textContent = t.collapseAll;
 
       // Section: Topics Head
       const topicsHeadTitle = document.getElementById('topics-head-title');
@@ -2352,30 +2384,83 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     function switchTab(tabId) {
+      // Compatibility aliases
+      if (tabId === 'topics') {
+        tabId = 'study';
+        switchStudySection('concepts');
+      } else if (tabId === 'chumash') {
+        tabId = 'study';
+        switchStudySection('chumash');
+      }
+
       APP_STATE.activeTab = tabId;
 
-      const tabs = ['topics', 'chumash', 'students', 'calendar'];
+      const tabs = ['study', 'students', 'calendar'];
       tabs.forEach(t => {
         const btn = document.getElementById(`tab-${t}`);
         const view = document.getElementById(`view-${t}`);
         const mobBtn = document.getElementById(`mob-tab-${t}`);
 
         if (t === tabId) {
-          if (btn) btn.className = "tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition whitespace-nowrap bg-brand-600 text-white shadow-sm shrink-0";
+          if (btn) btn.className = "tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs font-semibold transition whitespace-nowrap bg-brand-600 text-white shadow-sm shrink-0";
           if (view) view.classList.remove('hidden');
           if (mobBtn) mobBtn.className = "flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-brand-400 font-bold bg-brand-500/10 w-full";
         } else {
-          if (btn) btn.className = "tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap shrink-0";
+          if (btn) btn.className = "tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap shrink-0";
           if (view) view.classList.add('hidden');
           if (mobBtn) mobBtn.className = "flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 w-full";
         }
       });
+      if (tabId === 'study') {
+        if (!APP_STATE.studySection) APP_STATE.studySection = 'concepts';
+        switchStudySection(APP_STATE.studySection);
+      }
       if (tabId === 'calendar') {
         renderCalendar();
       }
       // Scroll to top of view smoothly on tab switch
       window.scrollTo({ top: 0, behavior: 'smooth' });
       lucide.createIcons();
+    }
+
+    function switchStudySection(section) {
+      APP_STATE.studySection = section;
+
+      const btnConcepts = document.getElementById('sub-study-concepts');
+      const btnChumash = document.getElementById('sub-study-chumash');
+      const secConcepts = document.getElementById('study-section-concepts');
+      const secChumash = document.getElementById('study-section-chumash');
+
+      if (section === 'concepts') {
+        if (btnConcepts) {
+          btnConcepts.className = "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-bold bg-brand-600 text-white shadow transition";
+        }
+        if (btnChumash) {
+          btnChumash.className = "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-400 hover:text-slate-200 transition";
+        }
+        if (secConcepts) secConcepts.classList.remove('hidden');
+        if (secChumash) secChumash.classList.add('hidden');
+        renderTopics();
+      } else {
+        if (btnChumash) {
+          btnChumash.className = "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-bold bg-brand-600 text-white shadow transition";
+        }
+        if (btnConcepts) {
+          btnConcepts.className = "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-400 hover:text-slate-200 transition";
+        }
+        if (secChumash) secChumash.classList.remove('hidden');
+        if (secConcepts) secConcepts.classList.add('hidden');
+        renderChumash();
+      }
+      lucide.createIcons();
+    }
+
+    function handleStudyCollapseAll() {
+      if (APP_STATE.studySection === 'chumash') {
+        collapseAllChumash();
+      } else {
+        collapseAllTopics();
+      }
     }
 
     // Filter Chumash Books
@@ -4158,19 +4243,14 @@ alter publication supabase_realtime add table public.students_sync;`;
   </script>
 
   <!-- ============================================== -->
-  <!-- MOBILE BOTTOM DOCK (Clean Phone Mode)          -->
+  <!-- MOBILE BOTTOM DOCK (Clean Phone Mode - 3 Tabs) -->
   <!-- ============================================== -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-nav border-t border-slate-800/90 mobile-safe-bottom px-1 pt-1.5 pb-1">
-    <div class="grid grid-cols-4 items-center w-full max-w-md mx-auto gap-0.5">
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-nav border-t border-slate-800/90 mobile-safe-bottom px-2 pt-1.5 pb-1">
+    <div class="grid grid-cols-3 items-center w-full max-w-md mx-auto gap-1">
 
-      <button onclick="switchTab('topics')" id="mob-tab-topics" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-brand-400 font-bold bg-brand-500/10 w-full">
-        <i data-lucide="sparkles" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-        <span class="text-[10px] tracking-tight truncate w-full text-center" id="mob-lbl-topics">Concepts</span>
-      </button>
-
-      <button onclick="switchTab('chumash')" id="mob-tab-chumash" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 w-full">
+      <button onclick="switchTab('study')" id="mob-tab-study" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-brand-400 font-bold bg-brand-500/10 w-full">
         <i data-lucide="book-open" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-        <span class="text-[10px] tracking-tight truncate w-full text-center" id="mob-lbl-chumash">Chumash</span>
+        <span class="text-[11px] tracking-tight truncate w-full text-center" id="mob-lbl-study">Study</span>
       </button>
 
       <button onclick="switchTab('students')" id="mob-tab-students" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 relative w-full">
@@ -4178,12 +4258,12 @@ alter publication supabase_realtime add table public.students_sync;`;
           <i data-lucide="users" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           <span id="mob-student-badge" class="absolute -top-1 -right-2 w-3.5 h-3.5 rounded-full bg-amber-500 text-slate-950 font-bold text-[8px] flex items-center justify-center">0</span>
         </div>
-        <span class="text-[10px] tracking-tight truncate w-full text-center" id="mob-lbl-students">Tracker</span>
+        <span class="text-[11px] tracking-tight truncate w-full text-center" id="mob-lbl-students">Tracker</span>
       </button>
 
       <button onclick="switchTab('calendar')" id="mob-tab-calendar" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 w-full">
         <i data-lucide="calendar" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-        <span class="text-[10px] tracking-tight truncate w-full text-center" id="mob-lbl-calendar">Calendar</span>
+        <span class="text-[11px] tracking-tight truncate w-full text-center" id="mob-lbl-calendar">Calendar</span>
       </button>
 
     </div>
