@@ -204,11 +204,26 @@
                           }
                         }
                       },
-                      "shemaReading": {
+                      "dvarTorah": {
                         "type": "object",
                         "properties": {
-                          "section": { "type": "string", "example": "Passuk 1 & V'Ahavta" },
-                          "status": { "type": "string", "example": "Learning with vowels" }
+                          "topic": { "type": "string", "example": "Parshat Noach - The Responsibility of Growing Up" },
+                          "stage": { "type": "string", "enum": ["Outline & Ideas", "Drafting Speech", "Editing & Polishing", "Practicing Delivery & Speed", "Mastered & Ready"], "example": "Drafting Speech" },
+                          "text": { "type": "string", "example": "Shalom to all guests. In this week's Parsha..." },
+                          "notes": { "type": "string", "example": "Practice eye contact and pause after opening joke" },
+                          "attachments": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": { "type": "string", "example": "att_123" },
+                                "name": { "type": "string", "example": "Dvar_Torah_Draft.docx" },
+                                "url": { "type": "string", "example": "data:application/pdf;base64,..." },
+                                "size": { "type": "string", "example": "24 KB" },
+                                "date": { "type": "string", "example": "2026-11-04" }
+                              }
+                            }
+                          }
                         }
                       },
                       "homework": {
