@@ -184,10 +184,24 @@
                       "parshaReading": {
                         "type": "object",
                         "properties": {
+                          "parshaName": { "type": "string", "example": "Parshat Noach" },
                           "aliyah": { "type": "string", "example": "Aliyah 1" },
                           "linesLearned": { "type": "string", "example": "Lines 1-8" },
                           "currentLine": { "type": "string", "example": "Line 9" },
-                          "notes": { "type": "string", "example": "Practice Sof Pasuk trope" }
+                          "notes": { "type": "string", "example": "Practice Sof Pasuk trope" },
+                          "recordings": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": { "type": "string", "example": "rec_123" },
+                                "title": { "type": "string", "example": "Aliyah 1 Trope Practice" },
+                                "url": { "type": "string", "example": "data:audio/mp3;base64,..." },
+                                "type": { "type": "string", "enum": ["audio", "link"], "example": "audio" },
+                                "date": { "type": "string", "example": "2026-11-04" }
+                              }
+                            }
+                          }
                         }
                       },
                       "shemaReading": {
