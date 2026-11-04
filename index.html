@@ -896,8 +896,8 @@
       studySection: 'concepts', // 'concepts' or 'chumash'
       chumashFilter: 'all', // 'all', 'bereishit', 'shemot'
       searchQuery: '',
-      expandedTopicId: null,
-      expandedParshaId: null,
+      expandedTopicIds: {},
+      expandedParshaIds: {},
       trackerFilter: 'all', // 'all', 'topics', 'chumash'
       students: [],
       activeStudentId: null,
@@ -2458,26 +2458,23 @@ alter publication supabase_realtime add table public.students_sync;`;
 
     // Collapse All Controls
     function collapseAllTopics() {
-      APP_STATE.expandedTopicId = null;
+      APP_STATE.expandedTopicIds = {};
       renderTopics();
       showToast("All topics collapsed");
     }
 
     function collapseAllChumash() {
-      APP_STATE.expandedParshaId = null;
+      APP_STATE.expandedParshaIds = {};
       renderChumash();
       showToast("All parshiot collapsed");
     }
 
-    // Toggle Topic Accordion
+    // Toggle Topic Accordion (Independent Multi-Expand - Never collapses other items)
     function toggleTopicAccordion(topicId) {
-      if (APP_STATE.expandedTopicId === topicId) {
-        APP_STATE.expandedTopicId = null;
-      } else {
-        APP_STATE.expandedTopicId = topicId;
-      }
+      if (!APP_STATE.expandedTopicIds) APP_STATE.expandedTopicIds = {};
+      APP_STATE.expandedTopicIds[topicId] = !APP_STATE.expandedTopicIds[topicId];
       renderTopics();
-      if (APP_STATE.expandedTopicId) {
+      if (APP_STATE.expandedTopicIds[topicId]) {
         setTimeout(() => {
           const el = document.getElementById('topic-card-' + topicId);
           if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -2485,7 +2482,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
-    // Render Jewish Topics View (Collapsed keyword view by default)
+    // Render Jewish Topics View (Clean list view with name only - no descriptions)
     function renderTopics() {
       const container = document.getElementById('topics-grid');
       const isHe = APP_STATE.lang === 'he';
@@ -2517,83 +2514,88 @@ alter publication supabase_realtime add table public.students_sync;`;
         const lifeApp = isHe ? topic.life_app_he : topic.life_app_en;
         const midrash = isHe ? topic.midrash_he : topic.midrash_en;
         const discussion = isHe ? topic.discussion_he : topic.discussion_en;
+        const isExpanded = !!(APP_STATE.expandedTopicIds && APP_STATE.expandedTopicIds[topic.id]);
 
-        return '<article id="topic-card-' + topic.id + '" class="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-lg transition">' +
+        return '<article id="topic-card-' + topic.id + '" class="bg-slate-900/90 border transition-all duration-200 rounded-xl overflow-hidden shadow-sm ' +
+          (isExpanded ? 'border-amber-500/60 ring-1 ring-amber-500/30' : 'border-slate-800 hover:border-slate-700') + '">' +
 
-          '<!-- Topic Header -->' +
-          '<div class="p-4 sm:p-5 flex items-center gap-3 border-b border-slate-800 bg-slate-900/60">' +
-            '<div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-mono text-sm font-bold shrink-0">' +
-              (idx + 1) +
-            '</div>' +
-            '<div class="min-w-0">' +
-              '<h3 class="text-base sm:text-lg font-bold text-white truncate">' +
-                title +
-              '</h3>' +
-              '<p class="text-xs text-slate-400 truncate mt-0.5">' + (nuggets ? nuggets.slice(0, 2).join(' • ') : '') + '</p>' +
-            '</div>' +
-          '</div>' +
-
-          '<!-- Full Cheat Sheet Content (Always Open) -->' +
-          '<div class="p-4 sm:p-6 space-y-4 text-xs sm:text-sm bg-slate-950/40">' +
-
-            '<!-- Section 1: The Modern Teen Hook -->' +
-            '<div class="p-3.5 sm:p-4 rounded-xl bg-gradient-to-r from-amber-950/30 to-slate-900 border border-amber-900/40">' +
-              '<span class="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5 mb-1.5">' +
-                '<i data-lucide="zap" class="w-3.5 h-3.5"></i> ' + t.modernHook +
-              '</span>' +
-              '<p class="text-slate-200 leading-relaxed font-normal">' + hook + '</p>' +
-            '</div>' +
-
-            '<!-- Section 2: Core Knowledge Anchors -->' +
-            '<div>' +
-              '<span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-2">' +
-                '<i data-lucide="compass" class="w-3.5 h-3.5 text-cyan-400"></i> ' + t.coreNuggets +
-              '</span>' +
-              '<ul class="space-y-1.5 list-none pl-0">' +
-                nuggets.map(n => '<li class="flex items-start gap-2 text-slate-300"><span class="text-brand-400 mt-1">▸</span><span>' + n + '</span></li>').join('') +
-              '</ul>' +
-            '</div>' +
-
-            '<!-- Section 3: Bar Mitzvah Life Angle -->' +
-            '<div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/80 border border-slate-800">' +
-              '<span class="text-[11px] font-bold uppercase tracking-wider text-brand-400 flex items-center gap-1.5 mb-1">' +
-                '<i data-lucide="target" class="w-3.5 h-3.5"></i> ' + t.lifeApplication +
-              '</span>' +
-              '<p class="text-slate-300 leading-relaxed">' + lifeApp + '</p>' +
-            '</div>' +
-
-            '<!-- Section 4: Midrash / Story Gem -->' +
-            '<div class="p-3.5 sm:p-4 rounded-xl bg-purple-950/20 border border-purple-900/30">' +
-              '<span class="text-[11px] font-bold uppercase tracking-wider text-purple-300 flex items-center gap-1.5 mb-1">' +
-                '<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ' + t.midrashGem +
-              '</span>' +
-              '<p class="text-slate-300 leading-relaxed italic">"' + midrash + '"</p>' +
-            '</div>' +
-
-            '<!-- Section 5: Discussion Spark -->' +
-            '<div class="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-900/30 flex items-start gap-2.5">' +
-              '<i data-lucide="message-circle-question" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>' +
-              '<div>' +
-                '<span class="text-[11px] font-bold text-emerald-400 block mb-0.5">' + t.discussionPrompt + '</span>' +
-                '<p class="text-slate-200">' + discussion + '</p>' +
+          '<!-- Clean List Row (Name Only - No Description) -->' +
+          '<div onclick="toggleTopicAccordion(\'' + topic.id + '\')" class="cursor-pointer select-none p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-slate-800/40 transition">' +
+            '<div class="flex items-center gap-3 min-w-0">' +
+              '<div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center font-mono text-xs font-bold shrink-0">' +
+                (idx + 1) +
+              '</div>' +
+              '<div class="min-w-0">' +
+                '<h3 class="text-sm sm:text-base font-semibold text-white truncate">' +
+                  title +
+                '</h3>' +
               '</div>' +
             '</div>' +
-
+            '<div class="flex items-center gap-2 shrink-0">' +
+              '<i data-lucide="' + (isExpanded ? 'chevron-up' : 'chevron-down') + '" class="w-4 h-4 text-slate-400"></i>' +
+            '</div>' +
           '</div>' +
+
+          '<!-- Expanded Full Cheat Sheet Content -->' +
+          (isExpanded ?
+            '<div class="border-t border-slate-800 bg-slate-950/50 p-4 sm:p-5 space-y-4 text-xs sm:text-sm animate-fadeIn">' +
+
+              '<!-- Section 1: The Modern Teen Hook -->' +
+              '<div class="p-3 sm:p-3.5 rounded-xl bg-gradient-to-r from-amber-950/30 to-slate-900 border border-amber-900/40">' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5 mb-1.5">' +
+                  '<i data-lucide="zap" class="w-3.5 h-3.5"></i> ' + t.modernHook +
+                '</span>' +
+                '<p class="text-slate-200 leading-relaxed font-normal">' + hook + '</p>' +
+              '</div>' +
+
+              '<!-- Section 2: Core Knowledge Anchors -->' +
+              '<div>' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-2">' +
+                  '<i data-lucide="compass" class="w-3.5 h-3.5 text-cyan-400"></i> ' + t.coreNuggets +
+                '</span>' +
+                '<ul class="space-y-1.5 list-none pl-0">' +
+                  nuggets.map(n => '<li class="flex items-start gap-2 text-slate-300"><span class="text-brand-400 mt-1">▸</span><span>' + n + '</span></li>').join('') +
+                '</ul>' +
+              '</div>' +
+
+              '<!-- Section 3: Bar Mitzvah Life Angle -->' +
+              '<div class="p-3 sm:p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-brand-400 flex items-center gap-1.5 mb-1">' +
+                  '<i data-lucide="target" class="w-3.5 h-3.5"></i> ' + t.lifeApplication +
+                '</span>' +
+                '<p class="text-slate-300 leading-relaxed">' + lifeApp + '</p>' +
+              '</div>' +
+
+              '<!-- Section 4: Midrash / Story Gem -->' +
+              '<div class="p-3 sm:p-3.5 rounded-xl bg-purple-950/20 border border-purple-900/30">' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-purple-300 flex items-center gap-1.5 mb-1">' +
+                  '<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ' + t.midrashGem +
+                '</span>' +
+                '<p class="text-slate-300 leading-relaxed italic">"' + midrash + '"</p>' +
+              '</div>' +
+
+              '<!-- Section 5: Discussion Spark -->' +
+              '<div class="p-3 rounded-xl bg-emerald-950/20 border border-emerald-900/30 flex items-start gap-2.5">' +
+                '<i data-lucide="message-circle-question" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>' +
+                '<div>' +
+                  '<span class="text-[11px] font-bold text-emerald-400 block mb-0.5">' + t.discussionPrompt + '</span>' +
+                  '<p class="text-slate-200">' + discussion + '</p>' +
+                '</div>' +
+              '</div>' +
+
+            '</div>' : '') +
         '</article>';
       }).join('');
 
       lucide.createIcons();
     }
 
+    // Toggle Parsha Accordion (Independent Multi-Expand - Never collapses other items)
     function toggleParshaAccordion(parshaId) {
-      if (APP_STATE.expandedParshaId === parshaId) {
-        APP_STATE.expandedParshaId = null;
-      } else {
-        APP_STATE.expandedParshaId = parshaId;
-      }
+      if (!APP_STATE.expandedParshaIds) APP_STATE.expandedParshaIds = {};
+      APP_STATE.expandedParshaIds[parshaId] = !APP_STATE.expandedParshaIds[parshaId];
       renderChumash();
-      if (APP_STATE.expandedParshaId) {
+      if (APP_STATE.expandedParshaIds[parshaId]) {
         setTimeout(() => {
           const el = document.getElementById('parsha-card-' + parshaId);
           if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -2601,7 +2603,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
-    // Render Chumash View (Collapsed keyword view by default - Unified 23 Parshiot)
+    // Render Chumash View (Clean list view with name only - no descriptions)
     function renderChumash() {
       const container = document.getElementById('chumash-grid');
       const isHe = APP_STATE.lang === 'he';
@@ -2636,70 +2638,74 @@ alter publication supabase_realtime add table public.students_sync;`;
         const rashiGems = isHe ? parsha.rashi_midrash_he : parsha.rashi_midrash_en;
         const lifeApp = isHe ? parsha.life_app_he : parsha.life_app_en;
         const isBereishit = parsha.book === 'bereishit';
-        const previewText = keyTopics.slice(0, 2).join(' • ');
+        const isExpanded = !!(APP_STATE.expandedParshaIds && APP_STATE.expandedParshaIds[parsha.id]);
 
-        return '<article id="parsha-card-' + parsha.id + '" class="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-lg transition">' +
+        return '<article id="parsha-card-' + parsha.id + '" class="bg-slate-900/90 border transition-all duration-200 rounded-xl overflow-hidden shadow-sm ' +
+          (isExpanded ? 'border-brand-500/60 ring-1 ring-brand-500/30' : 'border-slate-800 hover:border-slate-700') + '">' +
 
-          '<!-- Header Row -->' +
-          '<div class="p-4 sm:p-5 flex items-center gap-3 border-b border-slate-800 bg-slate-900/60">' +
-            '<div class="w-9 h-9 rounded-xl ' + (isBereishit ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400') + ' border flex items-center justify-center font-mono text-sm font-bold shrink-0">' +
-              (idx + 1) +
-            '</div>' +
-            '<div class="min-w-0">' +
-              '<div class="flex items-center gap-2">' +
-                '<h3 class="text-base sm:text-lg font-bold text-white truncate">' +
+          '<!-- Clean List Row (Name Only - No Description) -->' +
+          '<div onclick="toggleParshaAccordion(\'' + parsha.id + '\')" class="cursor-pointer select-none p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-slate-800/40 transition">' +
+            '<div class="flex items-center gap-3 min-w-0">' +
+              '<div class="w-8 h-8 rounded-lg ' + (isBereishit ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400') + ' border flex items-center justify-center font-mono text-xs font-bold shrink-0">' +
+                (idx + 1) +
+              '</div>' +
+              '<div class="flex items-center gap-2 min-w-0">' +
+                '<h3 class="text-sm sm:text-base font-semibold text-white truncate">' +
                   title +
                 '</h3>' +
-                '<span class="text-[10px] px-2 py-0.5 rounded font-mono ' + (isBereishit ? 'bg-amber-500/10 text-amber-300' : 'bg-cyan-500/10 text-cyan-300') + '">' +
+                '<span class="text-[10px] px-2 py-0.5 rounded font-mono shrink-0 ' + (isBereishit ? 'bg-amber-500/10 text-amber-300' : 'bg-cyan-500/10 text-cyan-300') + '">' +
                   (isBereishit ? (isHe ? 'בראשית' : 'Bereishit') : (isHe ? 'שמות' : 'Shemot')) +
                 '</span>' +
               '</div>' +
-              '<p class="text-xs text-slate-400 truncate mt-0.5">' + previewText + '</p>' +
+            '</div>' +
+            '<div class="flex items-center gap-2 shrink-0">' +
+              '<i data-lucide="' + (isExpanded ? 'chevron-up' : 'chevron-down') + '" class="w-4 h-4 text-slate-400"></i>' +
             '</div>' +
           '</div>' +
 
-          '<!-- Full Content (Always Open) -->' +
-          '<div class="p-4 sm:p-6 space-y-4 text-xs sm:text-sm bg-slate-950/40">' +
+          '<!-- Expanded Full Content -->' +
+          (isExpanded ?
+            '<div class="border-t border-slate-800 bg-slate-950/50 p-4 sm:p-5 space-y-4 text-xs sm:text-sm animate-fadeIn">' +
 
-            '<!-- Section 1: Big Plot -->' +
-            '<div>' +
-              '<span class="text-[11px] font-bold uppercase tracking-wider text-brand-400 flex items-center gap-1.5 mb-2">' +
-                '<i data-lucide="film" class="w-3.5 h-3.5"></i> ' + t.bigPlot +
-              '</span>' +
-              '<ul class="space-y-1.5 list-none pl-0">' +
-                plot.map(p => '<li class="flex items-start gap-2 text-slate-300"><span class="text-brand-400 mt-1">▸</span><span>' + p + '</span></li>').join('') +
-              '</ul>' +
-            '</div>' +
-
-            '<!-- Section 2: Key Topics -->' +
-            '<div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/80 border border-slate-800">' +
-              '<span class="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5 mb-2">' +
-                '<i data-lucide="key" class="w-3.5 h-3.5"></i> ' + t.keyTopics +
-              '</span>' +
-              '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">' +
-                keyTopics.map(k => '<div class="flex items-start gap-2 text-slate-300"><span class="text-amber-400">✦</span><span>' + k + '</span></div>').join('') +
+              '<!-- Section 1: Big Plot -->' +
+              '<div>' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-brand-400 flex items-center gap-1.5 mb-2">' +
+                  '<i data-lucide="film" class="w-3.5 h-3.5"></i> ' + t.bigPlot +
+                '</span>' +
+                '<ul class="space-y-1.5 list-none pl-0">' +
+                  plot.map(p => '<li class="flex items-start gap-2 text-slate-300"><span class="text-brand-400 mt-1">▸</span><span>' + p + '</span></li>').join('') +
+                '</ul>' +
               '</div>' +
-            '</div>' +
 
-            '<!-- Section 3: Rashi & Midrash Pearls -->' +
-            '<div class="p-3.5 sm:p-4 rounded-xl bg-indigo-950/20 border border-indigo-900/30">' +
-              '<span class="text-[11px] font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5 mb-2">' +
-                '<i data-lucide="gem" class="w-3.5 h-3.5"></i> ' + t.rashiPearls +
-              '</span>' +
-              '<ul class="space-y-2 list-none pl-0">' +
-                rashiGems.map(r => '<li class="text-slate-300 border-l-2 rtl:border-l-0 rtl:border-r-2 border-indigo-500/50 pl-2.5 rtl:pl-0 rtl:pr-2.5 py-0.5 leading-relaxed">' + r + '</li>').join('') +
-              '</ul>' +
-            '</div>' +
+              '<!-- Section 2: Key Topics -->' +
+              '<div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/80 border border-slate-800">' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5 mb-2">' +
+                  '<i data-lucide="key" class="w-3.5 h-3.5"></i> ' + t.keyTopics +
+                '</span>' +
+                '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">' +
+                  keyTopics.map(k => '<div class="flex items-start gap-2 text-slate-300"><span class="text-amber-400">✦</span><span>' + k + '</span></div>').join('') +
+                '</div>' +
+              '</div>' +
 
-            '<!-- Section 4: Bar Mitzvah Life Angle -->' +
-            '<div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/80 border border-slate-800">' +
-              '<span class="text-[11px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5 mb-1">' +
-                '<i data-lucide="target" class="w-3.5 h-3.5"></i> ' + t.lifeApplication +
-              '</span>' +
-              '<p class="text-slate-300 leading-relaxed">' + lifeApp + '</p>' +
-            '</div>' +
+              '<!-- Section 3: Rashi & Midrash Pearls -->' +
+              '<div class="p-3.5 sm:p-4 rounded-xl bg-indigo-950/20 border border-indigo-900/30">' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5 mb-2">' +
+                  '<i data-lucide="gem" class="w-3.5 h-3.5"></i> ' + t.rashiPearls +
+                '</span>' +
+                '<ul class="space-y-2 list-none pl-0">' +
+                  rashiGems.map(r => '<li class="text-slate-300 border-l-2 rtl:border-l-0 rtl:border-r-2 border-indigo-500/50 pl-2.5 rtl:pl-0 rtl:pr-2.5 py-0.5 leading-relaxed">' + r + '</li>').join('') +
+                '</ul>' +
+              '</div>' +
 
-          '</div>' +
+              '<!-- Section 4: Bar Mitzvah Life Angle -->' +
+              '<div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/80 border border-slate-800">' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5 mb-1">' +
+                  '<i data-lucide="target" class="w-3.5 h-3.5"></i> ' + t.lifeApplication +
+                '</span>' +
+                '<p class="text-slate-300 leading-relaxed">' + lifeApp + '</p>' +
+              '</div>' +
+
+            '</div>' : '') +
         '</article>';
       }).join('');
 
