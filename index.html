@@ -109,22 +109,22 @@
       scrollbar-width: none;
     }
 
-    /* Mobile-first bottom safe area support with ample home bar clearance */
+    /* Mobile-first bottom safe area support calibrated to 40% elevation */
     .mobile-safe-bottom {
-      padding-bottom: 1.5rem !important;
-      padding-bottom: max(1.5rem, calc(0.85rem + env(safe-area-inset-bottom))) !important;
+      padding-bottom: 0.6rem !important;
+      padding-bottom: max(0.6rem, env(safe-area-inset-bottom)) !important;
     }
     @supports (padding-bottom: env(safe-area-inset-bottom)) {
       .mobile-safe-bottom {
-        padding-bottom: max(1.5rem, calc(0.85rem + env(safe-area-inset-bottom))) !important;
+        padding-bottom: max(0.6rem, env(safe-area-inset-bottom)) !important;
       }
       body {
-        padding-bottom: max(7.5rem, calc(6.5rem + env(safe-area-inset-bottom))) !important;
+        padding-bottom: max(4.5rem, calc(3.8rem + env(safe-area-inset-bottom))) !important;
       }
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col pb-28 antialiased selection:bg-brand-600 selection:text-white overflow-x-hidden w-full">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col pb-16 antialiased selection:bg-brand-600 selection:text-white overflow-x-hidden w-full">
 
   <!-- ============================================== -->
   <!-- TUTOR PASSCODE & EMAIL OTP GATE (Security Gate) -->
@@ -4156,20 +4156,20 @@ alter publication supabase_realtime add table public.students_sync;`;
   <!-- ============================================== -->
   <!-- BOTTOM DOCK (Unified Navigation - 3 Tabs)      -->
   <!-- ============================================== -->
-  <nav class="fixed bottom-0 left-0 right-0 z-40 glass-nav border-t border-slate-800/90 mobile-safe-bottom px-3 pt-2">
+  <nav class="fixed bottom-0 left-0 right-0 z-40 glass-nav border-t border-slate-800/90 mobile-safe-bottom px-3 pt-1.5">
     <div class="grid grid-cols-3 items-center w-full max-w-md mx-auto gap-1">
 
-      <button onclick="switchTab('study')" id="mob-tab-study" class="flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl transition text-brand-400 font-bold bg-brand-500/10 w-full">
+      <button onclick="switchTab('study')" id="mob-tab-study" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-brand-400 font-bold bg-brand-500/10 w-full">
         <i data-lucide="book-open" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         <span class="text-[11px] tracking-tight truncate w-full text-center" id="mob-lbl-study">Study</span>
       </button>
 
-      <button onclick="switchTab('students')" id="mob-tab-students" class="flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 w-full">
+      <button onclick="switchTab('students')" id="mob-tab-students" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 w-full">
         <i data-lucide="users" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         <span class="text-[11px] tracking-tight truncate w-full text-center" id="mob-lbl-students">Students</span>
       </button>
 
-      <button onclick="switchTab('calendar')" id="mob-tab-calendar" class="flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 w-full">
+      <button onclick="switchTab('calendar')" id="mob-tab-calendar" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 w-full">
         <i data-lucide="calendar" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         <span class="text-[11px] tracking-tight truncate w-full text-center" id="mob-lbl-calendar">Calendar</span>
       </button>
