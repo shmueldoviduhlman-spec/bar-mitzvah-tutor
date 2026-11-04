@@ -1962,8 +1962,10 @@ alter publication supabase_realtime add table public.students_sync;`;
     function getDefaultStudentSkills() {
       return {
         hebrewReading: {
-          booklet: 'Booklet 1',
+          booklet: 'Red Booklet',
           currentPage: '',
+          letter: '',
+          vowel: '',
           letterOrVowel: '',
           nextTarget: ''
         },
@@ -1992,7 +1994,12 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!student.skills || typeof student.skills !== 'object') {
         student.skills = getDefaultStudentSkills();
       }
-      if (!student.skills.hebrewReading) student.skills.hebrewReading = { booklet: 'Booklet 1', currentPage: '', letterOrVowel: '', nextTarget: '' };
+      if (!student.skills.hebrewReading) {
+        student.skills.hebrewReading = { booklet: 'Red Booklet', currentPage: '', letter: '', vowel: '', letterOrVowel: '', nextTarget: '' };
+      }
+      if (!student.skills.hebrewReading.booklet || student.skills.hebrewReading.booklet === 'Booklet 1') {
+        student.skills.hebrewReading.booklet = 'Red Booklet';
+      }
       if (!student.skills.parshaReading) student.skills.parshaReading = { aliyah: 'Aliyah 1', linesLearned: '', currentLine: '', notes: '' };
       if (!student.skills.shemaReading) student.skills.shemaReading = { section: 'Passuk 1 & V\'Ahavta', status: 'Learning with vowels' };
       if (!student.skills.homework) student.skills.homework = { task: '', assignedDate: '', completed: false };
@@ -2013,15 +2020,80 @@ alter publication supabase_realtime add table public.students_sync;`;
       }, 400);
     }
 
+    const HEBREW_LETTERS_LIST = [
+      { id: 'aleph', he: 'א', name: 'Aleph (א)' },
+      { id: 'bet', he: 'ב', name: 'Bet (בּ/ב)' },
+      { id: 'gimel', he: 'ג', name: 'Gimel (ג)' },
+      { id: 'dalet', he: 'ד', name: 'Dalet (ד)' },
+      { id: 'hey', he: 'ה', name: 'Hey (ה)' },
+      { id: 'vav', he: 'ו', name: 'Vav (ו)' },
+      { id: 'zayin', he: 'ז', name: 'Zayin (ז)' },
+      { id: 'chet', he: 'ח', name: 'Chet (ח)' },
+      { id: 'tet', he: 'ט', name: 'Tet (ט)' },
+      { id: 'yud', he: 'י', name: 'Yud (י)' },
+      { id: 'chaf', he: 'כ', name: 'Kaf/Chaf (כּ/כ/ך)' },
+      { id: 'lamed', he: 'ל', name: 'Lamed (ל)' },
+      { id: 'mem', he: 'מ', name: 'Mem (מ/ם)' },
+      { id: 'nun', he: 'נ', name: 'Nun (נ/ן)' },
+      { id: 'samech', he: 'ס', name: 'Samech (ס)' },
+      { id: 'ayin', he: 'ע', name: 'Ayin (ע)' },
+      { id: 'pey', he: 'פ', name: 'Pey/Fey (פּ/פ/ף)' },
+      { id: 'tzadi', he: 'צ', name: 'Tzadi (צ/ץ)' },
+      { id: 'kuf', he: 'ק', name: 'Kuf (ק)' },
+      { id: 'reish', he: 'ר', name: 'Reish (ר)' },
+      { id: 'shin', he: 'ש', name: 'Shin/Sin (שׁ/שׂ)' },
+      { id: 'tav', he: 'ת', name: 'Tav (תּ/ת)' }
+    ];
+
+    const HEBREW_VOWELS_LIST = [
+      { id: 'kamatz', he: 'קמץ', symbol: 'ָ', display: 'קמץ (ָ)' },
+      { id: 'patach', he: 'פתח', symbol: 'ַ', display: 'פתח (ַ)' },
+      { id: 'tzere', he: 'צירה', symbol: 'ֵ', display: 'צירה (ֵ)' },
+      { id: 'segol', he: 'סגול', symbol: 'ֶ', display: 'סגול (ֶ)' },
+      { id: 'shva', he: 'שווא', symbol: 'ְ', display: 'שווא (ְ)' },
+      { id: 'chirik', he: 'חיריק', symbol: 'ִ', display: 'חיריק (ִ)' },
+      { id: 'cholam', he: 'חולם', symbol: 'ֹ', display: 'חולם (ֹ)' },
+      { id: 'shuruk', he: 'שורוק / קובוץ', symbol: 'וּ / ֻ', display: 'שורוק (וּ/ֻ)' }
+    ];
+
+    function selectStudentLetter(studentId, letterVal) {
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      ensureStudentSkills(student);
+      student.skills.hebrewReading.letter = letterVal;
+      updateCombinedLetterVowel(student);
+      saveStudentsToStorage(false);
+      if (APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderStudentDrawer(studentId, true);
+    }
+
+    function selectStudentVowel(studentId, vowelVal) {
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      ensureStudentSkills(student);
+      student.skills.hebrewReading.vowel = vowelVal;
+      updateCombinedLetterVowel(student);
+      saveStudentsToStorage(false);
+      if (APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderStudentDrawer(studentId, true);
+    }
+
+    function updateCombinedLetterVowel(student) {
+      const hr = student.skills.hebrewReading;
+      const parts = [];
+      if (hr.vowel) parts.push(hr.vowel);
+      if (hr.letter) parts.push(hr.letter);
+      hr.letterOrVowel = parts.join(' - ');
+    }
+
     function setStudentBooklet(studentId, bookletName) {
       const student = APP_STATE.students.find(s => s.id === studentId);
       if (!student) return;
       ensureStudentSkills(student);
       student.skills.hebrewReading.booklet = bookletName;
-      const input = document.getElementById('input-hebrew-booklet-' + studentId);
-      if (input) input.value = bookletName;
       saveStudentsToStorage(false);
       if (APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderStudentDrawer(studentId, true);
       const isHe = APP_STATE.lang === 'he';
       showToast(isHe ? ('עודכן: ' + bookletName) : ('Set to ' + bookletName));
     }
@@ -4538,38 +4610,64 @@ alter publication supabase_realtime add table public.students_sync;`;
 
             <!-- 2-Column Skills Cards Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <!-- Card 1: Hebrew Reading & Booklets -->
-              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
+              <!-- Card 1: Hebrew Reading & Booklets (Red, Orange, Yellow, Green) -->
+              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
                 <div class="flex items-center justify-between">
                   <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
                     <i data-lucide="book-marked" class="w-3.5 h-3.5"></i>
                     <span>${t.hebrewReadingTitle}</span>
                   </span>
-                  <span class="text-[10px] text-slate-500 font-mono">Booklet</span>
+                  <span class="text-[10px] text-slate-500 font-mono">Auto-saves</span>
                 </div>
 
+                <!-- 4 Leveled Booklets by Color -->
                 <div class="space-y-1.5">
-                  <div class="flex items-center justify-between text-[11px] text-slate-400">
-                    <span>${t.hebrewBookletLabel}</span>
-                    <div class="flex items-center gap-1 flex-wrap justify-end">
-                      <span class="text-[9px] text-slate-500">Quick:</span>
-                      <button type="button" onclick="setStudentBooklet('${student.id}', 'Booklet 1')" class="px-1.5 py-0.5 rounded text-[10px] bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700">B1</button>
-                      <button type="button" onclick="setStudentBooklet('${student.id}', 'Booklet 2')" class="px-1.5 py-0.5 rounded text-[10px] bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700">B2</button>
-                      <button type="button" onclick="setStudentBooklet('${student.id}', 'Aleph Champ')" class="px-1.5 py-0.5 rounded text-[10px] bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700">Champ</button>
-                      <button type="button" onclick="setStudentBooklet('${student.id}', 'Reshit Chochma')" class="px-1.5 py-0.5 rounded text-[10px] bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700">Reshit</button>
-                    </div>
+                  <div class="flex items-center justify-between text-[11px] text-slate-300 font-semibold">
+                    <span>${t.hebrewBookletLabel} (4 Colors)</span>
+                    <span class="text-[10px] text-amber-400 font-mono font-normal">${escapeHtml(hr.booklet || 'Red Booklet')}</span>
                   </div>
-                  <input
-                    type="text"
-                    id="input-hebrew-booklet-${student.id}"
-                    value="${escapeHtml(hr.booklet || '')}"
-                    onchange="handleSkillFieldChange('${student.id}', 'hebrewReading', 'booklet', this.value)"
-                    placeholder="e.g. Booklet 1, Aleph Champ..."
-                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  />
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                    <button
+                      type="button"
+                      onclick="setStudentBooklet('${student.id}', 'Red Booklet')"
+                      class="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95 ${hr.booklet && (hr.booklet.includes('Red') || hr.booklet.includes('אדומ')) ? 'bg-red-600 text-white ring-2 ring-red-400 shadow-md font-bold' : 'bg-red-950/50 text-red-300 border border-red-500/30 hover:bg-red-900/50'}"
+                    >
+                      <span class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm"></span>
+                      <span>${isHe ? 'אדומה' : 'Red'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onclick="setStudentBooklet('${student.id}', 'Orange Booklet')"
+                      class="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95 ${hr.booklet && (hr.booklet.includes('Orange') || hr.booklet.includes('כתו')) ? 'bg-orange-600 text-white ring-2 ring-orange-400 shadow-md font-bold' : 'bg-orange-950/50 text-orange-300 border border-orange-500/30 hover:bg-orange-900/50'}"
+                    >
+                      <span class="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-sm"></span>
+                      <span>${isHe ? 'כתומה' : 'Orange'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onclick="setStudentBooklet('${student.id}', 'Yellow Booklet')"
+                      class="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95 ${hr.booklet && (hr.booklet.includes('Yellow') || hr.booklet.includes('צהו')) ? 'bg-amber-500 text-slate-950 ring-2 ring-amber-300 shadow-md font-bold' : 'bg-amber-950/50 text-amber-300 border border-amber-400/30 hover:bg-amber-900/50'}"
+                    >
+                      <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm"></span>
+                      <span>${isHe ? 'צהובה' : 'Yellow'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onclick="setStudentBooklet('${student.id}', 'Green Booklet')"
+                      class="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95 ${hr.booklet && (hr.booklet.includes('Green') || hr.booklet.includes('ירוק')) ? 'bg-emerald-600 text-white ring-2 ring-emerald-400 shadow-md font-bold' : 'bg-emerald-950/50 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-900/50'}"
+                    >
+                      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm"></span>
+                      <span>${isHe ? 'ירוקה' : 'Green'}</span>
+                    </button>
+                  </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
+                <!-- Page Number, Letter Selector, and Vowel Selector -->
+                <div class="grid grid-cols-3 gap-2 pt-1">
+                  <!-- Page Number -->
                   <div class="space-y-1">
                     <label class="text-[11px] text-slate-400 block">${t.hebrewPageLabel}</label>
                     <input
@@ -4577,19 +4675,69 @@ alter publication supabase_realtime add table public.students_sync;`;
                       value="${escapeHtml(hr.currentPage || '')}"
                       onchange="handleSkillFieldChange('${student.id}', 'hebrewReading', 'currentPage', this.value)"
                       placeholder="e.g. 14"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
+                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
                     />
                   </div>
+
+                  <!-- Hebrew Letter Picker -->
                   <div class="space-y-1">
-                    <label class="text-[11px] text-slate-400 block">${t.hebrewVowelLabel}</label>
-                    <input
-                      type="text"
-                      value="${escapeHtml(hr.letterOrVowel || '')}"
-                      onchange="handleSkillFieldChange('${student.id}', 'hebrewReading', 'letterOrVowel', this.value)"
-                      placeholder="e.g. Patach / Shin"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                    />
+                    <label class="text-[11px] text-slate-400 block">${isHe ? 'אות' : 'Letter'}</label>
+                    <select
+                      onchange="selectStudentLetter('${student.id}', this.value)"
+                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-1.5 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium truncate"
+                    >
+                      <option value="">-- ${isHe ? 'ללא אות' : 'None'} --</option>
+                      ${HEBREW_LETTERS_LIST.map(lt => `
+                        <option value="${lt.name}" ${(hr.letter === lt.name || hr.letter === lt.he) ? 'selected' : ''}>
+                          ${lt.name}
+                        </option>
+                      `).join('')}
+                    </select>
                   </div>
+
+                  <!-- Hebrew Vowel Picker -->
+                  <div class="space-y-1">
+                    <label class="text-[11px] text-slate-400 block">${isHe ? 'ניקוד' : 'Vowel'}</label>
+                    <select
+                      onchange="selectStudentVowel('${student.id}', this.value)"
+                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-1.5 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium truncate"
+                    >
+                      <option value="">-- ${isHe ? 'ללא ניקוד' : 'None'} --</option>
+                      ${HEBREW_VOWELS_LIST.map(vw => `
+                        <option value="${vw.display}" ${(hr.vowel === vw.display || hr.vowel === vw.he) ? 'selected' : ''}>
+                          ${vw.display}
+                        </option>
+                      `).join('')}
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Quick Vowel Tap Pills -->
+                <div class="space-y-1 pt-1">
+                  <div class="flex items-center justify-between text-[10px] text-slate-400">
+                    <span>${isHe ? 'בחירה מהירה בניקוד:' : 'Quick Vowel Pills:'}</span>
+                    <span class="text-slate-500 font-mono text-[9px]">${hr.vowel || (isHe ? 'ללא' : 'None')}</span>
+                  </div>
+                  <div class="flex items-center gap-1 flex-wrap">
+                    ${HEBREW_VOWELS_LIST.map(vw => `
+                      <button
+                        type="button"
+                        onclick="selectStudentVowel('${student.id}', '${vw.display}')"
+                        class="px-2 py-0.5 rounded text-[11px] font-semibold transition active:scale-95 ${hr.vowel === vw.display ? 'bg-amber-500 text-slate-950 font-bold ring-1 ring-amber-300' : 'bg-slate-900 hover:bg-slate-800 text-amber-200 border border-slate-700'}"
+                        title="${vw.name}"
+                      >
+                        ${vw.he} ${vw.symbol}
+                      </button>
+                    `).join('')}
+                  </div>
+                </div>
+
+                <!-- Live Status Holding Pill -->
+                <div class="text-[11px] text-amber-200/90 font-mono bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800 flex items-center justify-between gap-2">
+                  <span class="truncate">
+                    📖 ${escapeHtml(hr.booklet || (isHe ? 'חוברת אדומה' : 'Red Booklet'))} ${hr.currentPage ? ('• ' + (isHe ? 'עמ׳ ' : 'p. ') + escapeHtml(hr.currentPage)) : ''} ${hr.letterOrVowel ? ('(' + escapeHtml(hr.letterOrVowel) + ')') : ''}
+                  </span>
+                  <span class="text-[9px] text-emerald-400 font-sans font-bold shrink-0">✓ Live</span>
                 </div>
               </div>
 
@@ -7055,11 +7203,19 @@ KEYWORD 1: SCHEDULE (or BOOK, CALENDAR, קבע שיעור)
 
 KEYWORD 2: DEBRIEF (or FINISHED CLASS, TODAY'S LESSON, סיכום שיעור)
 • When to use: The tutor finished a class and explains what was gone over, taught, tested, or assigned today.
-• Syntax: DEBRIEF [Student Name]: [Summary of Hebrew booklet page/vowel, Parsha lines, Shema, homework, and concepts covered].
+• Syntax: DEBRIEF [Student Name]: [Summary of Hebrew booklet color & page, letter/vowel, Parsha lines, Shema, homework, and concepts covered].
+• Note on Booklets: We use 4 leveled booklets: Red Booklet (חוברת אדומה), Orange Booklet (חוברת כתומה), Yellow Booklet (חוברת צהובה), and Green Booklet (חוברת ירוקה).
 • Action:
   1. Fetch student record from /students_sync.
   2. Parse and update student.completed_topics._meta.skills:
-     • skills.hebrewReading: { booklet, currentPage, letterOrVowel, nextTarget }
+     • skills.hebrewReading: {
+         booklet: "Red Booklet" | "Orange Booklet" | "Yellow Booklet" | "Green Booklet",
+         currentPage: "[Page Number]",
+         letter: "[Hebrew Letter e.g. Bet, Shin]",
+         vowel: "[Hebrew Vowel e.g. Kamatz, Patach, Tzere, Segol, Shva, Chirik, Cholam, Shuruk]",
+         letterOrVowel: "[Combined description]",
+         nextTarget: "[Next step]"
+       }
      • skills.parshaReading: { aliyah, linesLearned, currentLine, notes }
      • skills.shemaReading: { section, status }
      • skills.homework: { task: "[Assigned task]", assignedDate: "YYYY-MM-DD", completed: false }
@@ -7069,7 +7225,7 @@ KEYWORD 2: DEBRIEF (or FINISHED CLASS, TODAY'S LESSON, סיכום שיעור)
   4. Post upsert to /students_sync.
   5. Reply in WhatsApp with:
      • Debrief summary logged to profile.
-     • Core skills holding: Hebrew booklet & page, Parsha lines holding, active homework assigned.
+     • Core skills holding: Booklet color & page, Letter & Vowel holding, Parsha lines holding, active homework assigned.
      • Topics checked off as completed (e.g. "Checked off: Tefillin").
      • List of remaining topics the student still needs to learn.
 

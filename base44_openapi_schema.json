@@ -173,9 +173,11 @@
                       "hebrewReading": {
                         "type": "object",
                         "properties": {
-                          "booklet": { "type": "string", "example": "Booklet 1" },
+                          "booklet": { "type": "string", "enum": ["Red Booklet", "Orange Booklet", "Yellow Booklet", "Green Booklet"], "example": "Red Booklet" },
                           "currentPage": { "type": "string", "example": "14" },
-                          "letterOrVowel": { "type": "string", "example": "Patach with Shin" },
+                          "letter": { "type": "string", "example": "Shin (ש)" },
+                          "vowel": { "type": "string", "example": "Patach (ַ)" },
+                          "letterOrVowel": { "type": "string", "example": "Patach (ַ) - Shin (ש)" },
                           "nextTarget": { "type": "string", "example": "Page 15 (Tzere)" }
                         }
                       },
