@@ -159,7 +159,7 @@
                   "barMitzvahDate": { "type": "string" },
                   "lessons": {
                     "type": "array",
-                    "description": "Scheduled calendar tutoring lessons",
+                    "description": "Scheduled calendar tutoring lessons (friendly format)",
                     "items": {
                       "type": "object",
                       "properties": {
@@ -168,6 +168,21 @@
                         "timeSlot": { "type": "string", "example": "4:30 PM" },
                         "subject": { "type": "string" },
                         "notes": { "type": "string" }
+                      }
+                    }
+                  },
+                  "schedule": {
+                    "type": "array",
+                    "description": "Internal calendar sessions matching portal calendar grid",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "dateStr": { "type": "string", "example": "2026-11-12" },
+                        "dayOfWeek": { "type": "integer", "example": 4 },
+                        "time": { "type": "string", "example": "4:30 PM" },
+                        "repeatWeekly": { "type": "boolean", "default": false },
+                        "topic": { "type": "string", "example": "Bar Mitzvah Tutoring" }
                       }
                     }
                   }

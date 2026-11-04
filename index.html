@@ -2011,12 +2011,12 @@ alter publication supabase_realtime add table public.students_sync;`;
           const settingsRecord = data.find(row => row.id === '__portal_settings__');
           if (settingsRecord && settingsRecord.completed_topics) {
             const cloudKey = settingsRecord.completed_topics.gemini_api_key;
-            if (cloudKey && !APP_STATE.geminiApiKey) {
+            if (cloudKey) {
               APP_STATE.geminiApiKey = cloudKey;
               localStorage.setItem('tutor_gemini_key', cloudKey);
             }
             const cloudModel = settingsRecord.completed_topics.gemini_model;
-            if (cloudModel && !APP_STATE.geminiModel) {
+            if (cloudModel) {
               APP_STATE.geminiModel = cloudModel;
               localStorage.setItem('tutor_gemini_model', cloudModel);
             }
@@ -2037,6 +2037,18 @@ alter publication supabase_realtime add table public.students_sync;`;
               const cleanCompletedTopics = { ...(row.completed_topics || {}) };
               delete cleanCompletedTopics._meta;
 
+              let scheduleList = Array.isArray(meta.schedule) ? meta.schedule : [];
+              if (scheduleList.length === 0 && Array.isArray(meta.lessons)) {
+                scheduleList = meta.lessons.map(l => ({
+                  id: l.id || ('les_' + Date.now() + Math.random().toString(36).substr(2, 4)),
+                  dateStr: l.date || l.dateStr || '',
+                  dayOfWeek: l.date ? (new Date(l.date + 'T12:00:00')).getDay() : (l.dayOfWeek || 0),
+                  time: l.timeSlot || l.time || '4:30 PM',
+                  repeatWeekly: !!l.repeatWeekly,
+                  topic: l.subject || l.topic || (APP_STATE.lang === 'he' ? 'שיעור בר מצווה' : 'Bar Mitzvah Tutoring')
+                }));
+              }
+
               return {
                 id: row.id,
                 name: row.name,
@@ -2044,7 +2056,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                 notes: row.notes || '',
                 avatar: meta.avatar || '',
                 orderIndex: typeof meta.order === 'number' ? meta.order : 0,
-                schedule: Array.isArray(meta.schedule) ? meta.schedule : [],
+                schedule: scheduleList,
                 completedTopics: cleanCompletedTopics,
                 completedParshiot: row.completed_parshiot || {},
                 updatedAt: row.updated_at
@@ -2127,6 +2139,18 @@ alter publication supabase_realtime add table public.students_sync;`;
         const cleanCompletedTopics = { ...(newRecord.completed_topics || {}) };
         delete cleanCompletedTopics._meta;
 
+        let scheduleList = Array.isArray(meta.schedule) ? meta.schedule : [];
+        if (scheduleList.length === 0 && Array.isArray(meta.lessons)) {
+          scheduleList = meta.lessons.map(l => ({
+            id: l.id || ('les_' + Date.now() + Math.random().toString(36).substr(2, 4)),
+            dateStr: l.date || l.dateStr || '',
+            dayOfWeek: l.date ? (new Date(l.date + 'T12:00:00')).getDay() : (l.dayOfWeek || 0),
+            time: l.timeSlot || l.time || '4:30 PM',
+            repeatWeekly: !!l.repeatWeekly,
+            topic: l.subject || l.topic || (isHe ? 'שיעור בר מצווה' : 'Bar Mitzvah Tutoring')
+          }));
+        }
+
         const updatedStudent = {
           id: newRecord.id,
           name: newRecord.name,
@@ -2134,7 +2158,7 @@ alter publication supabase_realtime add table public.students_sync;`;
           notes: newRecord.notes || '',
           avatar: meta.avatar || '',
           orderIndex: typeof meta.order === 'number' ? meta.order : 0,
-          schedule: Array.isArray(meta.schedule) ? meta.schedule : [],
+          schedule: scheduleList,
           completedTopics: cleanCompletedTopics,
           completedParshiot: newRecord.completed_parshiot || {},
           updatedAt: newRecord.updated_at
@@ -2174,10 +2198,18 @@ alter publication supabase_realtime add table public.students_sync;`;
       try {
         updateCloudStatusPill('syncing');
         const completedTopics = { ...(student.completedTopics || {}) };
+        const cleanSchedule = Array.isArray(student.schedule) ? student.schedule : [];
         completedTopics._meta = {
           avatar: student.avatar || '',
           order: typeof student.orderIndex === 'number' ? student.orderIndex : 0,
-          schedule: Array.isArray(student.schedule) ? student.schedule : []
+          schedule: cleanSchedule,
+          lessons: cleanSchedule.map(s => ({
+            id: s.id,
+            date: s.dateStr,
+            timeSlot: s.time,
+            subject: s.topic,
+            notes: s.topic
+          }))
         };
 
         const payload = {
@@ -5938,34 +5970,35 @@ Guidelines:
           student = {
             id: 'stu_' + Date.now(),
             name: cleanName,
-            parsha_or_date: '',
+            parshaOrDate: '',
             notes: isHe ? 'נוסף אוטומטית בעת קביעת שיעור' : 'Added automatically when scheduling lesson',
-            completed_topics: {
-              _meta: {
-                lessons: []
-              }
-            },
-            completed_parshiot: {}
+            schedule: [],
+            completedTopics: {},
+            completedParshiot: {}
           };
           APP_STATE.students.push(student);
           createdOnTheFly = true;
         }
 
-        if (!student.completed_topics) student.completed_topics = {};
-        if (!student.completed_topics._meta) student.completed_topics._meta = {};
-        if (!Array.isArray(student.completed_topics._meta.lessons)) student.completed_topics._meta.lessons = [];
-
+        const lessonDate = args.date || new Date().toISOString().split('T')[0];
+        const dateObj = new Date(lessonDate + 'T12:00:00');
+        const dayOfWeek = isNaN(dateObj.getDay()) ? 0 : dateObj.getDay();
         const formattedTime = formatFriendlyTimeSlot(args.timeSlot);
-        const lesson = {
+
+        if (!Array.isArray(student.schedule)) student.schedule = [];
+
+        const newSession = {
           id: 'les_' + Date.now(),
-          date: args.date || new Date().toISOString().split('T')[0],
-          timeSlot: formattedTime,
-          subject: args.subject || (isHe ? 'שיעור בר מצווה' : 'Bar Mitzvah Tutoring'),
-          notes: args.subject || ''
+          dateStr: lessonDate,
+          dayOfWeek: dayOfWeek,
+          time: formattedTime,
+          repeatWeekly: false,
+          topic: args.subject || (isHe ? 'שיעור בר מצווה' : 'Bar Mitzvah Tutoring')
         };
 
-        student.completed_topics._meta.lessons.push(lesson);
-        saveStudentsToStorage();
+        student.schedule.push(newSession);
+
+        saveStudentsToStorage(true);
         pushStudentToCloud(student);
         renderStudents();
         renderCalendar();
@@ -5976,13 +6009,13 @@ Guidelines:
 
         return {
           success: true,
-          lessonId: lesson.id,
+          lessonId: newSession.id,
           studentName: student.name,
-          date: lesson.date,
-          timeSlot: lesson.timeSlot,
+          date: newSession.dateStr,
+          timeSlot: newSession.time,
           message: isHe
-            ? `שיעור נקבע עבור ${student.name} בתאריך ${lesson.date} (${lesson.timeSlot})${createdNote}`
-            : `Scheduled lesson for ${student.name} on ${lesson.date} (${lesson.timeSlot})${createdNote}`
+            ? `שיעור נקבע עבור ${student.name} בתאריך ${newSession.dateStr} (${newSession.time})${createdNote}`
+            : `Scheduled lesson for ${student.name} on ${newSession.dateStr} (${newSession.time})${createdNote}`
         };
       }
 
@@ -5990,9 +6023,9 @@ Guidelines:
         const student = findStudentFlexible(args.studentNameOrId);
         if (!student) return { success: false, error: `Student not found: ${args.studentNameOrId}` };
 
-        if (student.completed_topics?._meta?.lessons) {
-          student.completed_topics._meta.lessons = student.completed_topics._meta.lessons.filter(l => l.date !== args.date);
-          saveStudentsToStorage();
+        if (Array.isArray(student.schedule)) {
+          student.schedule = student.schedule.filter(l => l.dateStr !== args.date && l.id !== args.lessonId);
+          saveStudentsToStorage(true);
           pushStudentToCloud(student);
           renderCalendar();
         }
