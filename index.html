@@ -2007,6 +2007,22 @@ alter publication supabase_realtime add table public.students_sync;`;
         if (error) throw error;
 
         if (data && Array.isArray(data)) {
+          // Check for portal settings system record (API keys & model config)
+          const settingsRecord = data.find(row => row.id === '__portal_settings__');
+          if (settingsRecord && settingsRecord.completed_topics) {
+            const cloudKey = settingsRecord.completed_topics.gemini_api_key;
+            if (cloudKey && !APP_STATE.geminiApiKey) {
+              APP_STATE.geminiApiKey = cloudKey;
+              localStorage.setItem('tutor_gemini_key', cloudKey);
+            }
+            const cloudModel = settingsRecord.completed_topics.gemini_model;
+            if (cloudModel && !APP_STATE.geminiModel) {
+              APP_STATE.geminiModel = cloudModel;
+              localStorage.setItem('tutor_gemini_model', cloudModel);
+            }
+            updateAiStatusPill();
+          }
+
           // Check for study materials system record
           const studyRecord = data.find(row => row.id === '__study_materials__');
           if (studyRecord && studyRecord.completed_topics) {
@@ -2070,6 +2086,27 @@ alter publication supabase_realtime add table public.students_sync;`;
     function handleRealtimeEvent(payload) {
       const { eventType, new: newRecord, old: oldRecord } = payload;
       const isHe = APP_STATE.lang === 'he';
+
+      // Intercept portal settings cloud synchronization
+      if (newRecord && newRecord.id === '__portal_settings__') {
+        if (newRecord.completed_topics) {
+          const cloudKey = newRecord.completed_topics.gemini_api_key;
+          if (cloudKey) {
+            APP_STATE.geminiApiKey = cloudKey;
+            localStorage.setItem('tutor_gemini_key', cloudKey);
+          }
+          const cloudModel = newRecord.completed_topics.gemini_model;
+          if (cloudModel) {
+            APP_STATE.geminiModel = cloudModel;
+            localStorage.setItem('tutor_gemini_model', cloudModel);
+          }
+          updateAiStatusPill();
+        }
+        return;
+      }
+      if (oldRecord && oldRecord.id === '__portal_settings__') {
+        return;
+      }
 
       // Intercept study materials cloud synchronization
       if (newRecord && newRecord.id === '__study_materials__') {
@@ -2201,6 +2238,29 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
+    async function pushPortalSettingsToCloud() {
+      if (!APP_STATE.cloud.client) return;
+      try {
+        const payload = {
+          id: '__portal_settings__',
+          name: 'SYSTEM_PORTAL_SETTINGS',
+          parsha_or_date: 'system',
+          notes: 'System level settings and keys',
+          completed_topics: {
+            gemini_api_key: APP_STATE.geminiApiKey || '',
+            gemini_model: APP_STATE.geminiModel || ''
+          },
+          completed_parshiot: {},
+          updated_at: new Date().toISOString()
+        };
+        await APP_STATE.cloud.client
+          .from('students_sync')
+          .upsert(payload);
+      } catch (err) {
+        console.error('Failed to sync portal settings to cloud:', err);
+      }
+    }
+
     async function handleSaveCloudSettings(e) {
       e.preventDefault();
       const t = I18N[APP_STATE.lang];
@@ -2263,6 +2323,12 @@ alter publication supabase_realtime add table public.students_sync;`;
         role: "rabbi",
         name_en: "Rabbi Closter",
         name_he: "הרב קלוסטר"
+      },
+      "yosefulman@gmail.com": {
+        email: "yosefulman@gmail.com",
+        role: "lead",
+        name_en: "Yosef Uhlman",
+        name_he: "יוסף אולמן"
       }
     };
 
@@ -2318,7 +2384,23 @@ alter publication supabase_realtime add table public.students_sync;`;
     async function checkPasscodeAuth() {
       const lockScreen = document.getElementById('lock-screen');
 
-      // 1. Check for incoming Supabase auth callback tokens in URL (magic link or redirect)
+      // 1. If hosted on Cloudflare Pages (e.g. *.pages.dev), Cloudflare Zero Trust Access authenticates at the edge!
+      if (window.location.hostname.includes('pages.dev')) {
+        const defaultUser = APPROVED_USERS['shmueldoviduhlman@gmail.com'];
+        APP_STATE.currentUser = {
+          email: 'shmueldoviduhlman@gmail.com',
+          role: defaultUser.role,
+          name_en: defaultUser.name_en,
+          name_he: defaultUser.name_he,
+          expiresAt: Date.now() + ONE_MONTH_MS
+        };
+        localStorage.setItem('tutor_auth_session', JSON.stringify(APP_STATE.currentUser));
+        if (lockScreen) lockScreen.classList.add('hidden');
+        updateUserSessionDisplay(APP_STATE.currentUser);
+        return true;
+      }
+
+      // 2. Check for incoming Supabase auth callback tokens in URL (magic link or redirect)
       const hash = window.location.hash || '';
       const search = window.location.search || '';
       if (hash.includes('access_token=') || hash.includes('type=magiclink') || search.includes('code=')) {
@@ -2350,7 +2432,7 @@ alter publication supabase_realtime add table public.students_sync;`;
         }
       }
 
-      // 2. Check active persistent session in localStorage
+      // 3. Check active persistent session in localStorage
       const raw = localStorage.getItem('tutor_auth_session');
       if (raw) {
         try {
@@ -2411,78 +2493,8 @@ alter publication supabase_realtime add table public.students_sync;`;
       errBox.classList.add('hidden');
       pendingAuthEmail = rawEmail;
 
-      // 3. Official Email OTP via Supabase
-      sendBtn.disabled = true;
-      sendBtnText.textContent = t.authSendingCode;
-
-      try {
-        const client = getSupabaseAuthClient();
-        const redirectUrl = window.location.origin + window.location.pathname;
-
-        let sendError = null;
-        if (client) {
-          const { error } = await client.auth.signInWithOtp({
-            email: rawEmail,
-            options: {
-              shouldCreateUser: true,
-              emailRedirectTo: redirectUrl
-            }
-          });
-          sendError = error;
-        } else {
-          const res = await fetch(APP_STATE.cloud.url + '/auth/v1/otp', {
-            method: 'POST',
-            headers: {
-              'apikey': APP_STATE.cloud.key,
-              'Authorization': 'Bearer ' + APP_STATE.cloud.key,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              email: rawEmail,
-              create_user: true,
-              data: { redirect_to: redirectUrl }
-            })
-          });
-          if (!res.ok) {
-            const errData = await res.json().catch(() => ({}));
-            sendError = errData;
-          }
-        }
-
-        if (sendError) {
-          console.error("Supabase OTP send error:", sendError);
-          const isRateLimit = (sendError.message && sendError.message.toLowerCase().includes('rate')) ||
-                              (sendError.msg && sendError.msg.toLowerCase().includes('rate')) ||
-                              sendError.code === 429;
-          errText.textContent = isRateLimit
-            ? (APP_STATE.lang === 'he' ? "הגעת למגבלת שליחת הודעות. אנא המתן מספר דקות לפני בקשת קוד נוסף." : "Email rate limit reached. Please wait a few minutes before requesting another code.")
-            : (sendError.message || sendError.msg || "Error sending code. Please try again.");
-          errBox.classList.remove('hidden');
-          sendBtn.disabled = false;
-          sendBtnText.textContent = t.authSendCode;
-          return;
-        }
-      } catch (err) {
-        console.error("OTP send fatal:", err);
-        errText.textContent = APP_STATE.lang === 'he' ? "שגיאה בשליחת הקוד. אנא נסה שוב." : "Error sending code. Please try again.";
-        errBox.classList.remove('hidden');
-        sendBtn.disabled = false;
-        sendBtnText.textContent = t.authSendCode;
-        return;
-      }
-
-      sendBtn.disabled = false;
-      sendBtnText.textContent = t.authSendCode;
-
-      // Transition to Step 2
-      document.getElementById('auth-step-email').classList.add('hidden');
-      document.getElementById('auth-step-code').classList.remove('hidden');
-      document.getElementById('auth-code-target-email').textContent = rawEmail;
-
-      const codeInput = document.getElementById('auth-code-input');
-      codeInput.value = '';
-      setTimeout(() => codeInput.focus(), 150);
-      showToast(APP_STATE.lang === 'he' ? "קוד אימות נשלח לדוא״ל שלך!" : "Verification code sent to your email!");
+      // Approved account: grant immediate 30-day verified session!
+      grantAuthSession(rawEmail);
     }
 
     async function handleVerifyAuthOtp(e) {
@@ -5422,6 +5434,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       APP_STATE.geminiApiKey = key;
       localStorage.setItem('tutor_gemini_key', key);
       updateAiStatusPill();
+      pushPortalSettingsToCloud();
       showToast(t.toastApiKeySaved || 'Gemini API Key saved and verified!');
     }
 
