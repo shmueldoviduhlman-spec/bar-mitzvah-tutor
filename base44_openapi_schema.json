@@ -1,0 +1,197 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "TutorPilot Bar Mitzvah Companion Database API",
+    "description": "REST API interface for Rabbi Closter's Base44 AI Agent to create, update, and manage Bar Mitzvah students, scheduled lessons, and custom study materials in real time.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://bpkwnqbabokesuesvkex.supabase.co/rest/v1",
+      "description": "Production Supabase Database REST API"
+    }
+  ],
+  "paths": {
+    "/students_sync": {
+      "get": {
+        "summary": "List all Bar Mitzvah students, calendar lessons, and curriculum additions",
+        "description": "Retrieves all synced student records and custom study materials from the database. Each record contains the student profile, lessons schedule in completed_topics._meta.lessons, and curriculum progress.",
+        "operationId": "listStudentsAndSchedule",
+        "parameters": [
+          {
+            "name": "select",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "*"
+            },
+            "description": "PostgREST columns selection string"
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by student ID or pass eq.__study_materials__ for custom lesson additions"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of student and schedule records returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StudentSyncRecord"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Upsert student profile, schedule a lesson, or add study materials",
+        "description": "Creates a new student or updates an existing student. To schedule a lesson, include the lesson object inside completed_topics._meta.lessons array.",
+        "operationId": "upsertStudentRecord",
+        "parameters": [
+          {
+            "name": "Prefer",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "resolution=merge-duplicates"
+            },
+            "description": "Instructs Supabase to perform an upsert based on the primary key id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudentSyncRecord"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Record upserted successfully and broadcast via Supabase Realtime"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a student record",
+        "description": "Removes a student profile from the database",
+        "operationId": "deleteStudentRecord",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "e.g. eq.stu_1793736006299"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Record deleted successfully"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "apikey",
+        "description": "Supabase Publishable Anon API Key"
+      },
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Supabase Bearer Token (same as apikey)"
+      }
+    },
+    "schemas": {
+      "StudentSyncRecord": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier prefixed with stu_ or __study_materials__ for curriculum materials",
+            "example": "stu_1793800000000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name of the Bar Mitzvah student",
+            "example": "Ariel Ben David"
+          },
+          "parsha_or_date": {
+            "type": "string",
+            "description": "Torah Parsha or Bar Mitzvah Date",
+            "example": "Parshat Lech Lecha"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Tutor notes and progress remarks",
+            "example": "Working on Haftarah trope and Shema blessing"
+          },
+          "completed_topics": {
+            "type": "object",
+            "description": "Mastery checklist and metadata container including lessons array",
+            "properties": {
+              "_meta": {
+                "type": "object",
+                "properties": {
+                  "parsha": { "type": "string" },
+                  "barMitzvahDate": { "type": "string" },
+                  "lessons": {
+                    "type": "array",
+                    "description": "Scheduled calendar tutoring lessons",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "date": { "type": "string", "example": "2026-11-12" },
+                        "timeSlot": { "type": "string", "example": "4:30 PM" },
+                        "subject": { "type": "string" },
+                        "notes": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "completed_parshiot": {
+            "type": "object",
+            "description": "Record of Chumash parshiot completed by the student"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO timestamp of last update"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "apiKeyHeader": [],
+      "bearerAuth": []
+    }
+  ]
+}

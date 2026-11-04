@@ -461,6 +461,139 @@
 
     </section>
 
+    <!-- ============================================== -->
+    <!-- VIEW 4: AI TUTOR ASSISTANT (Gemini + Base44)   -->
+    <!-- ============================================== -->
+    <section id="view-ai" class="space-y-4 max-w-4xl mx-auto hidden pb-16">
+
+      <!-- AI Control Bar -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 sm:p-4 shadow-lg backdrop-blur flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-amber-500 flex items-center justify-center text-white shadow-md shrink-0">
+            <i data-lucide="sparkles" class="w-5 h-5 text-amber-200"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h2 id="lbl-ai-view-title" class="text-sm sm:text-base font-bold text-white tracking-tight">AI Tutor Assistant</h2>
+              <span id="ai-status-pill" class="px-2 py-0.5 rounded-full text-[10px] font-mono border font-semibold flex items-center gap-1 bg-amber-500/10 text-amber-300 border-amber-500/30">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                <span id="lbl-ai-status-text">Needs API Key</span>
+              </span>
+            </div>
+            <p id="lbl-ai-view-subtitle" class="text-xs text-slate-400 truncate">Manage students, schedule lessons, add study notes, or ask curriculum questions</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
+          <!-- Base44 Integration Modal Trigger -->
+          <button onclick="openBase44Modal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 text-xs font-semibold transition active:scale-95 shadow-sm" title="Rabbi's Base44 AI Setup">
+            <i data-lucide="bot" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span id="lbl-ai-btn-base44">Base44 Setup</span>
+          </button>
+
+          <!-- Clear Chat -->
+          <button onclick="clearAiChat()" class="flex items-center justify-center gap-1 p-2 rounded-xl bg-slate-950/80 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-xs transition active:scale-95" title="Clear chat history">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- API Key Setup Banner (Visible if Key Missing) -->
+      <div id="ai-api-key-banner" class="bg-gradient-to-r from-amber-950/40 via-slate-900 to-indigo-950/40 border border-amber-500/30 rounded-2xl p-4 shadow-md space-y-3">
+        <div class="flex items-start justify-between gap-3">
+          <div class="space-y-1">
+            <h3 class="text-xs sm:text-sm font-bold text-amber-300 flex items-center gap-1.5">
+              <i data-lucide="key" class="w-4 h-4"></i>
+              <span id="lbl-ai-key-banner-title">Connect Google Gemini API</span>
+            </h3>
+            <p class="text-xs text-slate-300 leading-relaxed" id="lbl-ai-key-banner-desc">
+              To activate the in-app AI assistant, enter your free Google Gemini API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-amber-400 underline font-semibold">Google AI Studio</a>. It saves securely in your browser storage.
+            </p>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row items-center gap-2 pt-1">
+          <input
+            type="password"
+            id="ai-gemini-key-input"
+            placeholder="AIzaSy..."
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
+          >
+          <button
+            type="button"
+            onclick="saveGeminiApiKeyFromView()"
+            class="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition active:scale-95 shrink-0 shadow flex items-center justify-center gap-1.5"
+          >
+            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            <span id="lbl-ai-btn-save-key">Save & Connect</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat History Container -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-lg flex flex-col space-y-4 min-h-[420px] max-h-[65vh] flex-1">
+        
+        <!-- Messages Scroll Container -->
+        <div id="ai-chat-messages" class="flex-1 overflow-y-auto space-y-3.5 pr-1 min-h-[300px]">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Quick Prompt Chips -->
+        <div class="pt-2 border-t border-slate-800/80 flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <button onclick="applyAiQuickPrompt('add_student')" class="px-2.5 py-1 rounded-lg bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-medium whitespace-nowrap transition active:scale-95 flex items-center gap-1">
+            <span>👤</span>
+            <span id="lbl-ai-chip-add-student">Add student</span>
+          </button>
+          <button onclick="applyAiQuickPrompt('schedule_lesson')" class="px-2.5 py-1 rounded-lg bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-medium whitespace-nowrap transition active:scale-95 flex items-center gap-1">
+            <span>📅</span>
+            <span id="lbl-ai-chip-schedule">Schedule lesson</span>
+          </button>
+          <button onclick="applyAiQuickPrompt('add_note')" class="px-2.5 py-1 rounded-lg bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-medium whitespace-nowrap transition active:scale-95 flex items-center gap-1">
+            <span>📝</span>
+            <span id="lbl-ai-chip-add-note">Add note to lesson</span>
+          </button>
+          <button onclick="applyAiQuickPrompt('summarize_roster')" class="px-2.5 py-1 rounded-lg bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-medium whitespace-nowrap transition active:scale-95 flex items-center gap-1">
+            <span>📊</span>
+            <span id="lbl-ai-chip-summarize">Summarize roster</span>
+          </button>
+        </div>
+
+        <!-- Chat Input Form -->
+        <form onsubmit="handleSendAiMessage(event)" class="relative flex items-center gap-2 pt-1">
+          <div class="relative flex-1">
+            <textarea
+              id="ai-chat-input"
+              rows="1"
+              placeholder="Ask anything or give a command (Hebrew or English)..."
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 pl-3 pr-10 rtl:pr-3 rtl:pl-10 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none max-h-32"
+              onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); handleSendAiMessage(event); }"
+            ></textarea>
+            
+            <!-- Voice Dictation Button -->
+            <button
+              type="button"
+              id="ai-mic-btn"
+              onclick="toggleVoiceInput()"
+              class="absolute right-2.5 rtl:right-auto rtl:left-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-400 p-1 rounded-lg transition"
+              title="Voice Dictation"
+            >
+              <i data-lucide="mic" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <button
+            type="submit"
+            id="ai-send-btn"
+            class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs transition active:scale-95 shadow shrink-0 flex items-center justify-center gap-1.5 h-10"
+          >
+            <span id="lbl-ai-btn-send">Send</span>
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          </button>
+        </form>
+
+      </div>
+
+    </section>
+
   </main>
 
   <!-- ============================================== -->
@@ -565,6 +698,129 @@
 
       <div class="pt-2 border-t border-slate-800 flex justify-end">
         <button type="button" onclick="closeReviewStudyMaterialsModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: BASE44 & EXTERNAL AI INTEGRATION         -->
+  <!-- ============================================== -->
+  <div id="modal-base44-integration" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
+    <div class="max-w-2xl w-full max-h-[90vh] bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+            <i data-lucide="bot" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-white" id="txt-base44-modal-title">Base44 & External AI Integration</h3>
+            <p class="text-xs text-slate-400" id="txt-base44-modal-subtitle">Connect Rabbi Closter's Base44 AI agent directly to TutorPilot in real time</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeBase44Modal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-4 pr-1 min-h-[220px]">
+
+        <!-- Card 1: API Endpoint & Key -->
+        <div class="p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+          <h4 class="text-xs font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5" id="lbl-base44-creds-title">
+            <i data-lucide="database" class="w-3.5 h-3.5"></i>
+            1. Supabase REST API Credentials
+          </h4>
+          <div class="space-y-2 text-xs">
+            <div>
+              <span class="text-slate-400 text-[11px] block mb-0.5">REST API URL (Table: students_sync)</span>
+              <div class="flex items-center gap-2">
+                <input
+                  type="text"
+                  readonly
+                  value="https://bpkwnqbabokesuesvkex.supabase.co/rest/v1/students_sync"
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-slate-300"
+                >
+                <button
+                  type="button"
+                  onclick="copyToClipboardText('https://bpkwnqbabokesuesvkex.supabase.co/rest/v1/students_sync', 'API URL Copied!')"
+                  class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold shrink-0"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <span class="text-slate-400 text-[11px] block mb-0.5">Publishable Anon API Key</span>
+              <div class="flex items-center gap-2">
+                <input
+                  type="text"
+                  readonly
+                  value="sb_publishable_hVy0YYOOT9k_LD_ZMe24zg_iuqTC538"
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-slate-300"
+                >
+                <button
+                  type="button"
+                  onclick="copyToClipboardText('sb_publishable_hVy0YYOOT9k_LD_ZMe24zg_iuqTC538', 'API Key Copied!')"
+                  class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold shrink-0"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Ready to Paste Base44 Prompt -->
+        <div class="p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5" id="lbl-base44-prompt-title">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              2. Base44 AI Agent System Prompt
+            </h4>
+            <button
+              type="button"
+              onclick="copyBase44Prompt()"
+              class="px-3 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition active:scale-95 flex items-center gap-1 shadow-sm"
+            >
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              <span id="lbl-base44-btn-copy-prompt">Copy Prompt</span>
+            </button>
+          </div>
+          <p class="text-xs text-slate-400" id="lbl-base44-prompt-desc">Paste this prompt into Rabbi Closter's Base44 AI agent configuration so it knows the exact database schema and operations:</p>
+          <textarea
+            id="base44-prompt-textarea"
+            readonly
+            rows="6"
+            class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-[11px] font-mono text-slate-300 leading-relaxed"
+          ></textarea>
+        </div>
+
+        <!-- Card 3: Download OpenAPI Schema -->
+        <div class="p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 flex items-center justify-between gap-3">
+          <div>
+            <h4 class="text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1.5" id="lbl-base44-schema-title">
+              <i data-lucide="file-json" class="w-3.5 h-3.5"></i>
+              3. Download OpenAPI 3.0 Schema
+            </h4>
+            <p class="text-xs text-slate-400 mt-0.5" id="lbl-base44-schema-desc">Import base44_openapi_schema.json directly into Base44 Actions for one-click tool setup.</p>
+          </div>
+          <button
+            type="button"
+            onclick="downloadBase44Schema()"
+            class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition active:scale-95 shrink-0 flex items-center gap-1.5 shadow-sm"
+          >
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span id="lbl-base44-btn-download">Download Schema</span>
+          </button>
+        </div>
+
+      </div>
+
+      <div class="pt-2 border-t border-slate-800 flex justify-end">
+        <button type="button" onclick="closeBase44Modal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
           Close
         </button>
       </div>
@@ -987,6 +1243,30 @@
           <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
         </button>
 
+        <!-- Base44 & External AI Integration Tile -->
+        <button onclick="closeSettingsModal(); openBase44Modal();" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-cyan-700/50 transition active:scale-98 text-left">
+          <div class="flex items-center gap-3">
+            <i data-lucide="bot" class="w-4 h-4 text-cyan-400"></i>
+            <div>
+              <div id="settings-base44-title" class="text-xs font-bold text-white">Base44 & External AI</div>
+              <p id="settings-base44-desc" class="text-[11px] text-slate-400 mt-0.5">Prompt, keys, and OpenAPI schema for Rabbi's AI</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+        </button>
+
+        <!-- Google Gemini API Key Tile -->
+        <button onclick="closeSettingsModal(); switchTab('ai');" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-amber-700/50 transition active:scale-98 text-left">
+          <div class="flex items-center gap-3">
+            <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+            <div>
+              <div id="settings-gemini-title" class="text-xs font-bold text-white">AI Assistant & Gemini Key</div>
+              <p id="settings-gemini-desc" class="text-[11px] text-slate-400 mt-0.5">Configure in-app AI conversational assistant</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+        </button>
+
         <!-- Download Backup Tile -->
         <button onclick="exportDataJson()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition active:scale-98 text-left">
           <div class="flex items-center gap-3">
@@ -1038,6 +1318,9 @@
       expandedTopicIds: {},
       expandedParshaIds: {},
       studyAdditions: {},
+      geminiApiKey: localStorage.getItem('tutor_gemini_key') || '',
+      aiMessages: [],
+      aiIsThinking: false,
       trackerFilter: 'all', // 'all', 'topics', 'chumash'
       students: [],
       activeStudentId: null,
@@ -1279,7 +1562,32 @@
         toastMaterialAdded: "Teaching material added!",
         toastMaterialDeleted: "Material removed",
         toastMaterialsCopied: "Materials copied to clipboard for AI!",
-        confirmDeleteMaterial: "Are you sure you want to remove this item?"
+        confirmDeleteMaterial: "Are you sure you want to remove this item?",
+        tabAi: "AI",
+        mobAi: "AI",
+        aiViewTitle: "AI Tutor Assistant",
+        aiViewSubtitle: "Manage students, schedule lessons, add study notes, or ask curriculum questions",
+        aiStatusConnected: "Ready (Gemini)",
+        aiStatusNeedsKey: "Needs API Key",
+        aiKeyBannerTitle: "Connect Google Gemini API",
+        aiKeyBannerDesc: "To activate the in-app AI assistant, enter your free Google Gemini API key from Google AI Studio. It saves securely in your browser storage.",
+        aiSaveKeyBtn: "Save & Connect",
+        aiClearChat: "Clear Chat",
+        aiPlaceholder: "Ask anything or give a command (Hebrew or English)...",
+        aiSendBtn: "Send",
+        aiChipAddStudent: "Add student",
+        aiChipSchedule: "Schedule lesson",
+        aiChipAddNote: "Add note to lesson",
+        aiChipSummarize: "Summarize roster",
+        base44BtnSetup: "Base44 Setup",
+        base44ModalTitle: "Base44 & External AI Integration",
+        base44ModalSubtitle: "Connect Rabbi Closter's Base44 AI agent directly to TutorPilot in real time",
+        base44CopyPromptBtn: "Copy Prompt",
+        base44DownloadSchemaBtn: "Download Schema",
+        toastApiKeySaved: "Gemini API Key saved and verified!",
+        toastApiKeyInvalid: "Please enter a valid Gemini API Key",
+        toastChatCleared: "Chat cleared",
+        toastPromptCopied: "Base44 System Prompt copied to clipboard!"
       },
       he: {
         appTitle: "טיוטור-פיילוט",
@@ -1500,7 +1808,32 @@
         toastMaterialAdded: "חומר הלימוד נוסף בהצלחה!",
         toastMaterialDeleted: "הפריט הוסר",
         toastMaterialsCopied: "החומרים הועתקו ללוח בהצלחה!",
-        confirmDeleteMaterial: "האם אתה בטוח שברצונך להסיר פריט זה?"
+        confirmDeleteMaterial: "האם אתה בטוח שברצונך להסיר פריט זה?",
+        tabAi: "AI",
+        mobAi: "עוזר AI",
+        aiViewTitle: "עוזר הוראה AI",
+        aiViewSubtitle: "ניהול תלמידים, קביעת שיעורים, הוספת חומרי לימוד ומענה על שאלות",
+        aiStatusConnected: "מוכן (Gemini)",
+        aiStatusNeedsKey: "נדרש מפתח API",
+        aiKeyBannerTitle: "חיבור מפתח Google Gemini API",
+        aiKeyBannerDesc: "להפעלת העוזר, הזן מפתח Gemini חינמי מ-Google AI Studio. המפתח נשמר בדפדפן שלך.",
+        aiSaveKeyBtn: "שמור והתחבר",
+        aiClearChat: "נקה שיחה",
+        aiPlaceholder: "שאל כל שאלה או תן פקודה (עברית או אנגלית)...",
+        aiSendBtn: "שלח",
+        aiChipAddStudent: "הוסף תלמיד",
+        aiChipSchedule: "קבע שיעור",
+        aiChipAddNote: "הוסף הערה לשיעור",
+        aiChipSummarize: "סיכום תלמידים",
+        base44BtnSetup: "חיבור Base44",
+        base44ModalTitle: "אינטגרציית Base44 ובינה מלאכותית",
+        base44ModalSubtitle: "חיבור סוכן ה-AI של הרב קלוסטר ב-Base44 ישירות למערכת בזמן אמת",
+        base44CopyPromptBtn: "העתק הנחיות",
+        base44DownloadSchemaBtn: "הורד סכימה",
+        toastApiKeySaved: "מפתח Gemini נשמר בהצלחה!",
+        toastApiKeyInvalid: "אנא הזן מפתח Gemini תקין",
+        toastChatCleared: "השיחה נוקתה",
+        toastPromptCopied: "הנחיות Base44 הועתקו ללוח!"
       }
     };
 
@@ -2349,6 +2682,9 @@ alter publication supabase_realtime add table public.students_sync;`;
       const mobCalendar = document.getElementById('mob-lbl-calendar');
       if (mobCalendar) mobCalendar.textContent = t.mobCalendar;
 
+      const mobAi = document.getElementById('mob-lbl-ai');
+      if (mobAi) mobAi.textContent = t.mobAi;
+
       // Study Sub-Section Switcher Pills & Collapse
       const subStudyConcepts = document.getElementById('lbl-study-concepts');
       if (subStudyConcepts) subStudyConcepts.textContent = t.subStudyConcepts;
@@ -2657,7 +2993,58 @@ alter publication supabase_realtime add table public.students_sync;`;
       const txtRevCopyBtn = document.getElementById('txt-review-materials-copy-btn');
       if (txtRevCopyBtn) txtRevCopyBtn.textContent = t.reviewMaterialsCopyBtn;
 
+      // AI View Localizations
+      const lblAiTitle = document.getElementById('lbl-ai-view-title');
+      if (lblAiTitle) lblAiTitle.textContent = t.aiViewTitle;
+
+      const lblAiSub = document.getElementById('lbl-ai-view-subtitle');
+      if (lblAiSub) lblAiSub.textContent = t.aiViewSubtitle;
+
+      const lblAiBase44 = document.getElementById('lbl-ai-btn-base44');
+      if (lblAiBase44) lblAiBase44.textContent = t.base44BtnSetup;
+
+      const lblKeyTitle = document.getElementById('lbl-ai-key-banner-title');
+      if (lblKeyTitle) lblKeyTitle.textContent = t.aiKeyBannerTitle;
+
+      const lblKeyDesc = document.getElementById('lbl-ai-key-banner-desc');
+      if (lblKeyDesc) lblKeyDesc.textContent = t.aiKeyBannerDesc;
+
+      const lblKeySave = document.getElementById('lbl-ai-btn-save-key');
+      if (lblKeySave) lblKeySave.textContent = t.aiSaveKeyBtn;
+
+      const chatInput = document.getElementById('ai-chat-input');
+      if (chatInput) chatInput.placeholder = t.aiPlaceholder;
+
+      const lblSend = document.getElementById('lbl-ai-btn-send');
+      if (lblSend) lblSend.textContent = t.aiSendBtn;
+
+      const chipAddStu = document.getElementById('lbl-ai-chip-add-student');
+      if (chipAddStu) chipAddStu.textContent = t.aiChipAddStudent;
+
+      const chipSched = document.getElementById('lbl-ai-chip-schedule');
+      if (chipSched) chipSched.textContent = t.aiChipSchedule;
+
+      const chipNote = document.getElementById('lbl-ai-chip-add-note');
+      if (chipNote) chipNote.textContent = t.aiChipAddNote;
+
+      const chipSum = document.getElementById('lbl-ai-chip-summarize');
+      if (chipSum) chipSum.textContent = t.aiChipSummarize;
+
+      // Base44 Modal Localizations
+      const txtB44Title = document.getElementById('txt-base44-modal-title');
+      if (txtB44Title) txtB44Title.textContent = t.base44ModalTitle;
+
+      const txtB44Sub = document.getElementById('txt-base44-modal-subtitle');
+      if (txtB44Sub) txtB44Sub.textContent = t.base44ModalSubtitle;
+
+      const btnCopyB44 = document.getElementById('lbl-base44-btn-copy-prompt');
+      if (btnCopyB44) btnCopyB44.textContent = t.base44CopyPromptBtn;
+
+      const btnDlB44 = document.getElementById('lbl-base44-btn-download');
+      if (btnDlB44) btnDlB44.textContent = t.base44DownloadSchemaBtn;
+
       updateStudyMaterialsBadge();
+      updateAiStatusPill();
 
       if (APP_STATE.currentUser) updateUserSessionDisplay(APP_STATE.currentUser);
       updateCloudStatusPill();
@@ -2675,7 +3062,7 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       APP_STATE.activeTab = tabId;
 
-      const tabs = ['study', 'students', 'calendar'];
+      const tabs = ['study', 'students', 'calendar', 'ai'];
       tabs.forEach(t => {
         const btn = document.getElementById(`tab-${t}`);
         const view = document.getElementById(`view-${t}`);
@@ -2684,7 +3071,11 @@ alter publication supabase_realtime add table public.students_sync;`;
         if (t === tabId) {
           if (btn) btn.className = "tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs font-semibold transition whitespace-nowrap bg-brand-600 text-white shadow-sm shrink-0";
           if (view) view.classList.remove('hidden');
-          if (mobBtn) mobBtn.className = "flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-brand-400 font-bold bg-brand-500/10 w-full";
+          if (mobBtn) {
+            mobBtn.className = t === 'ai'
+              ? "flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-amber-400 font-bold bg-amber-500/10 w-full"
+              : "flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-brand-400 font-bold bg-brand-500/10 w-full";
+          }
         } else {
           if (btn) btn.className = "tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap shrink-0";
           if (view) view.classList.add('hidden');
@@ -2697,6 +3088,9 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
       if (tabId === 'calendar') {
         renderCalendar();
+      }
+      if (tabId === 'ai') {
+        renderAiView();
       }
       // Scroll to top of view smoothly on tab switch
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4900,6 +5294,853 @@ alter publication supabase_realtime add table public.students_sync;`;
       lucide.createIcons();
     }
 
+    // ==============================================
+    // AI TUTOR ASSISTANT & BASE44 INTEGRATION ENGINE
+    // ==============================================
+
+    let voiceRecognition = null;
+    let isVoiceListening = false;
+
+    function updateAiStatusPill() {
+      const pill = document.getElementById('ai-status-pill');
+      const text = document.getElementById('lbl-ai-status-text');
+      const banner = document.getElementById('ai-api-key-banner');
+      const keyInput = document.getElementById('ai-gemini-key-input');
+      const t = I18N[APP_STATE.lang];
+
+      const hasKey = !!APP_STATE.geminiApiKey;
+
+      if (keyInput && hasKey) {
+        keyInput.value = APP_STATE.geminiApiKey;
+      }
+
+      if (hasKey) {
+        if (banner) banner.classList.add('hidden');
+        if (pill) {
+          pill.className = "px-2 py-0.5 rounded-full text-[10px] font-mono border font-semibold flex items-center gap-1 bg-emerald-500/10 text-emerald-300 border-emerald-500/30";
+          pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span id="lbl-ai-status-text">${t.aiStatusConnected || 'Ready (Gemini)'}</span>`;
+        }
+      } else {
+        if (banner) banner.classList.remove('hidden');
+        if (pill) {
+          pill.className = "px-2 py-0.5 rounded-full text-[10px] font-mono border font-semibold flex items-center gap-1 bg-amber-500/10 text-amber-300 border-amber-500/30";
+          pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span id="lbl-ai-status-text">${t.aiStatusNeedsKey || 'Needs API Key'}</span>`;
+        }
+      }
+    }
+
+    function renderAiView() {
+      updateAiStatusPill();
+      renderAiMessages();
+      populateBase44PromptTextarea();
+    }
+
+    function renderAiMessages() {
+      const container = document.getElementById('ai-chat-messages');
+      if (!container) return;
+
+      const isHe = APP_STATE.lang === 'he';
+
+      if (!APP_STATE.aiMessages || APP_STATE.aiMessages.length === 0) {
+        container.innerHTML = `
+          <div class="py-10 text-center space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-amber-500 flex items-center justify-center text-white mx-auto shadow-lg shadow-brand-500/20">
+              <i data-lucide="bot" class="w-6 h-6"></i>
+            </div>
+            <div class="space-y-1">
+              <h3 class="text-sm font-bold text-white">${isHe ? 'שלום! אני עוזר ה-AI שלך להוראת בר מצווה' : 'Welcome to your AI Bar Mitzvah Tutor Assistant'}</h3>
+              <p class="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
+                ${isHe
+                  ? 'אני יכול להוסיף תלמידים, לשנות שמות, לקבוע שיעורים ביומן, לסמן התקדמות ולהוסיף הערות וסיפורים לכרטיסי הלימוד.'
+                  : 'I can add students, update names, schedule lessons on the calendar, track mastery, and add custom notes and stories to any lesson card.'}
+              </p>
+            </div>
+            <div class="text-[11px] text-amber-300/80 font-mono">
+              ${isHe ? 'בחר הצעה למטה או הקלד פקודה חופשית בעברית או באנגלית' : 'Tap a suggestion below or type any command in English or Hebrew'}
+            </div>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      let html = '';
+      APP_STATE.aiMessages.forEach((msg) => {
+        const isUser = msg.role === 'user';
+        html += `
+          <div class="flex items-start gap-2.5 ${isUser ? 'flex-row-reverse' : 'flex-row'}">
+            <div class="w-7 h-7 rounded-xl ${isUser ? 'bg-brand-600 text-white' : 'bg-gradient-to-tr from-indigo-600 to-amber-500 text-white'} flex items-center justify-center shrink-0 text-xs font-bold shadow-sm">
+              ${isUser ? '<i data-lucide="user" class="w-3.5 h-3.5"></i>' : '<i data-lucide="sparkles" class="w-3.5 h-3.5"></i>'}
+            </div>
+            <div class="max-w-[85%] sm:max-w-[80%] rounded-2xl p-3 text-xs leading-relaxed ${isUser ? 'bg-brand-600 text-white rounded-tr-none' : 'bg-slate-950/80 border border-slate-800 text-slate-200 rounded-tl-none'} space-y-1.5">
+              ${msg.actionBadges ? `<div class="space-y-1">${msg.actionBadges.map(b => `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono mr-1 mb-1"><i data-lucide="check" class="w-3 h-3"></i>${escapeHtml(b)}</span>`).join('')}</div>` : ''}
+              <div class="whitespace-pre-wrap">${formatAiMarkdown(msg.content)}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      if (APP_STATE.aiIsThinking) {
+        html += `
+          <div class="flex items-start gap-2.5">
+            <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-indigo-600 to-amber-500 text-white flex items-center justify-center shrink-0 text-xs font-bold shadow-sm animate-pulse">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            </div>
+            <div class="bg-slate-950/80 border border-slate-800 rounded-2xl rounded-tl-none p-3 text-xs text-amber-300 flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></div>
+              <span>${isHe ? 'חושב ומבצע...' : 'Thinking and executing...'}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+      container.scrollTop = container.scrollHeight;
+      lucide.createIcons();
+    }
+
+    function formatAiMarkdown(text) {
+      if (!text) return '';
+      return escapeHtml(text)
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code class="bg-slate-900 px-1 py-0.5 rounded text-[11px] font-mono text-amber-300">$1</code>')
+        .replace(/\n/g, '<br>');
+    }
+
+    function saveGeminiApiKeyFromView() {
+      const input = document.getElementById('ai-gemini-key-input');
+      const key = input ? input.value.trim() : '';
+      const t = I18N[APP_STATE.lang];
+
+      if (!key) {
+        showToast(t.toastApiKeyInvalid || 'Please enter a valid Gemini API Key');
+        return;
+      }
+
+      APP_STATE.geminiApiKey = key;
+      localStorage.setItem('tutor_gemini_key', key);
+      updateAiStatusPill();
+      showToast(t.toastApiKeySaved || 'Gemini API Key saved and verified!');
+    }
+
+    function clearAiChat() {
+      const t = I18N[APP_STATE.lang];
+      APP_STATE.aiMessages = [];
+      APP_STATE.aiIsThinking = false;
+      renderAiMessages();
+      showToast(t.toastChatCleared || 'Chat cleared');
+    }
+
+    function applyAiQuickPrompt(promptKey) {
+      const input = document.getElementById('ai-chat-input');
+      if (!input) return;
+      const isHe = APP_STATE.lang === 'he';
+
+      const prompts = {
+        add_student: isHe ? 'הוסף תלמיד חדש בשם אריאל כהן לפרשת נח' : 'Add a new student named Ariel Cohen learning Parshat Noach',
+        schedule_lesson: isHe ? 'קבע שיעור לאריאל כהן ליום חמישי הקרוב בשעה 4:30 אחה״צ בנושא תפילין' : 'Schedule a lesson for Ariel Cohen on Thursday at 4:30 PM reviewing Tefillin',
+        add_note: isHe ? 'הוסף לכרטיס לימוד תפילין סיפור על חייל בכותל המערבי במלחמת ששת הימים' : 'Add this story to the Tefillin lesson: The story of the soldier putting on Tefillin at the Western Wall in 1967',
+        summarize_roster: isHe ? 'סכם לי את כל התלמידים והשיעורים הקרובים שלהם' : 'Summarize all current students and their upcoming scheduled lessons'
+      };
+
+      input.value = prompts[promptKey] || '';
+      input.focus();
+    }
+
+    function toggleVoiceInput() {
+      const micBtn = document.getElementById('ai-mic-btn');
+      const input = document.getElementById('ai-chat-input');
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (!SpeechRecognition) {
+        showToast('Voice dictation is not supported in this browser.');
+        return;
+      }
+
+      if (isVoiceListening && voiceRecognition) {
+        voiceRecognition.stop();
+        isVoiceListening = false;
+        if (micBtn) micBtn.classList.remove('text-red-500', 'animate-pulse');
+        return;
+      }
+
+      try {
+        voiceRecognition = new SpeechRecognition();
+        voiceRecognition.lang = APP_STATE.lang === 'he' ? 'he-IL' : 'en-US';
+        voiceRecognition.interimResults = false;
+        voiceRecognition.maxAlternatives = 1;
+
+        voiceRecognition.onstart = () => {
+          isVoiceListening = true;
+          if (micBtn) micBtn.classList.add('text-red-500', 'animate-pulse');
+          showToast(APP_STATE.lang === 'he' ? 'מקשיב... דבר עכשיו' : 'Listening... Speak now');
+        };
+
+        voiceRecognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          if (input) {
+            input.value = (input.value ? input.value + ' ' : '') + transcript;
+            input.focus();
+          }
+        };
+
+        voiceRecognition.onerror = (e) => {
+          console.error('Speech recognition error:', e);
+          isVoiceListening = false;
+          if (micBtn) micBtn.classList.remove('text-red-500', 'animate-pulse');
+        };
+
+        voiceRecognition.onend = () => {
+          isVoiceListening = false;
+          if (micBtn) micBtn.classList.remove('text-red-500', 'animate-pulse');
+        };
+
+        voiceRecognition.start();
+      } catch (err) {
+        console.error('Failed to start speech recognition:', err);
+        isVoiceListening = false;
+        if (micBtn) micBtn.classList.remove('text-red-500', 'animate-pulse');
+      }
+    }
+
+    function buildGeminiToolsDeclaration() {
+      return [{
+        functionDeclarations: [
+          {
+            name: "add_student",
+            description: "Add a new Bar Mitzvah student to the roster",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                name: { type: "STRING", description: "Student full name" },
+                parsha: { type: "STRING", description: "Torah Parsha for Bar Mitzvah" },
+                barMitzvahDate: { type: "STRING", description: "Hebrew or secular date of Bar Mitzvah" },
+                notes: { type: "STRING", description: "Initial tutor notes" }
+              },
+              required: ["name"]
+            }
+          },
+          {
+            name: "update_student",
+            description: "Update an existing student's name, notes, or parsha",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                studentNameOrId: { type: "STRING", description: "Existing student name or student ID" },
+                newName: { type: "STRING", description: "New name if changing student name" },
+                notes: { type: "STRING", description: "Updated tutor notes" },
+                parsha: { type: "STRING", description: "Updated Torah parsha" }
+              },
+              required: ["studentNameOrId"]
+            }
+          },
+          {
+            name: "schedule_lesson",
+            description: "Schedule a tutoring lesson on the calendar for a student",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                studentNameOrId: { type: "STRING", description: "Student name or ID" },
+                date: { type: "STRING", description: "YYYY-MM-DD date of lesson" },
+                timeSlot: { type: "STRING", description: "Lesson time e.g. 4:30 PM, 5:00 PM" },
+                subject: { type: "STRING", description: "Lesson topic focus or review notes" }
+              },
+              required: ["studentNameOrId", "date"]
+            }
+          },
+          {
+            name: "cancel_lesson",
+            description: "Cancel a scheduled calendar tutoring lesson",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                studentNameOrId: { type: "STRING", description: "Student name or ID" },
+                date: { type: "STRING", description: "Date of lesson to cancel (YYYY-MM-DD)" }
+              },
+              required: ["studentNameOrId"]
+            }
+          },
+          {
+            name: "mark_topic_progress",
+            description: "Mark a Jewish Concept as completed or uncompleted for a student",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                studentNameOrId: { type: "STRING", description: "Student name or ID" },
+                topicId: { type: "STRING", description: "Concept ID e.g. tefillin, shabbat, kashrut, tefillah, etc." },
+                completed: { type: "BOOLEAN", description: "true if completed, false if reset" }
+              },
+              required: ["studentNameOrId", "topicId", "completed"]
+            }
+          },
+          {
+            name: "mark_parsha_progress",
+            description: "Mark a Chumash Parsha as completed or uncompleted for a student",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                studentNameOrId: { type: "STRING", description: "Student name or ID" },
+                parshaId: { type: "STRING", description: "Parsha ID e.g. bereishit, noach, lech_lecha, etc." },
+                completed: { type: "BOOLEAN", description: "true if completed, false if reset" }
+              },
+              required: ["studentNameOrId", "parshaId", "completed"]
+            }
+          },
+          {
+            name: "add_study_material",
+            description: "Add a custom note, story, or teaching point to a specific concept or parsha curriculum card",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                targetNameOrId: { type: "STRING", description: "Name or ID of concept (e.g. Tefillin, Shabbat) or Parsha (e.g. Bereishit, Noach)" },
+                title: { type: "STRING", description: "Optional headline or story title" },
+                content: { type: "STRING", description: "Teaching notes, stories, explanation points, or discussion questions" }
+              },
+              required: ["targetNameOrId", "content"]
+            }
+          },
+          {
+            name: "get_portal_data",
+            description: "Retrieve all current students, upcoming calendar lessons, and curriculum items from the database",
+            parameters: {
+              type: "OBJECT",
+              properties: {}
+            }
+          }
+        ]
+      }];
+    }
+
+    async function handleSendAiMessage(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('ai-chat-input');
+      if (!input) return;
+
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      if (!APP_STATE.geminiApiKey) {
+        showToast(I18N[APP_STATE.lang].toastApiKeyInvalid || 'Please enter a Gemini API Key first');
+        const keyInput = document.getElementById('ai-gemini-key-input');
+        if (keyInput) keyInput.focus();
+        return;
+      }
+
+      input.value = '';
+      APP_STATE.aiMessages.push({ role: 'user', content: userText });
+      APP_STATE.aiIsThinking = true;
+      renderAiMessages();
+
+      await sendAiPromptToGemini(userText);
+    }
+
+    async function sendAiPromptToGemini(userText) {
+      const apiKey = APP_STATE.geminiApiKey;
+      const portalContext = getPortalContextData();
+
+      const systemInstruction = `You are TutorPilot AI, the intelligent assistant for the Bar Mitzvah Tutor Companion web portal.
+The portal is used by tutors and Rabbi Closter to prepare Bar Mitzvah boys.
+
+Portal Capabilities & Your Authorized Tools:
+1. add_student: Add a new student to the database.
+2. update_student: Rename a student, update their notes, or set their parsha.
+3. schedule_lesson: Schedule a calendar tutoring session (date YYYY-MM-DD, time slot e.g. "4:30 PM", subject).
+4. cancel_lesson: Remove a scheduled lesson.
+5. mark_topic_progress: Mark a Jewish Concept as completed or incomplete.
+6. mark_parsha_progress: Mark a Chumash Parsha as completed or incomplete.
+7. add_study_material: Add custom teaching notes, stories, explanation points, or discussion questions to a concept or parsha curriculum card.
+8. get_portal_data: Retrieve the live student roster and calendar schedule.
+
+Current Database State:
+${JSON.stringify(portalContext)}
+
+Guidelines:
+- When the user asks you to add a student, update a name, schedule a session, or add a study note, ALWAYS call the corresponding function tool.
+- Respond in the user's language (Hebrew if they write in Hebrew, English if they write in English).
+- Be supportive, concise, accurate, and respectful.`;
+
+      const contents = [];
+      const history = APP_STATE.aiMessages.slice(-6);
+      history.forEach(m => {
+        contents.push({
+          role: m.role === 'user' ? 'user' : 'model',
+          parts: [{ text: m.content }]
+        });
+      });
+
+      const requestPayload = {
+        contents,
+        systemInstruction: {
+          parts: [{ text: systemInstruction }]
+        },
+        tools: buildGeminiToolsDeclaration()
+      };
+
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestPayload)
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error?.message || `API error ${response.status}`);
+        }
+
+        const data = await response.json();
+        const candidate = data.candidates?.[0]?.content;
+        const parts = candidate?.parts || [];
+
+        let modelText = '';
+        const actionBadges = [];
+        const functionResponses = [];
+
+        for (const part of parts) {
+          if (part.text) {
+            modelText += part.text;
+          }
+          if (part.functionCall) {
+            const result = executeAiToolCall(part.functionCall);
+            if (result && result.message) {
+              actionBadges.push(result.message);
+            }
+            functionResponses.push({
+              functionResponse: {
+                name: part.functionCall.name,
+                response: result
+              }
+            });
+          }
+        }
+
+        if (functionResponses.length > 0 && !modelText) {
+          const secondPayload = {
+            contents: [
+              ...contents,
+              { role: 'model', parts },
+              { role: 'user', parts: functionResponses }
+            ],
+            systemInstruction: {
+              parts: [{ text: systemInstruction }]
+            }
+          };
+
+          try {
+            const secondResp = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(secondPayload)
+            });
+            if (secondResp.ok) {
+              const secondData = await secondResp.json();
+              const secondParts = secondData.candidates?.[0]?.content?.parts || [];
+              modelText = secondParts.map(p => p.text || '').join('');
+            }
+          } catch (e) {
+            console.warn('Second turn warning:', e);
+          }
+
+          if (!modelText) {
+            modelText = actionBadges.join('\n');
+          }
+        }
+
+        APP_STATE.aiIsThinking = false;
+        APP_STATE.aiMessages.push({
+          role: 'model',
+          content: modelText || (APP_STATE.lang === 'he' ? 'הפעולה הושלמה בהצלחה!' : 'Operation executed successfully!'),
+          actionBadges: actionBadges.length > 0 ? actionBadges : null
+        });
+        renderAiMessages();
+        renderAllViews();
+
+      } catch (err) {
+        console.error('Gemini API Error:', err);
+        APP_STATE.aiIsThinking = false;
+        APP_STATE.aiMessages.push({
+          role: 'model',
+          content: (APP_STATE.lang === 'he' ? 'שגיאה בהתחברות ל-Gemini: ' : 'Error communicating with Gemini: ') + err.message
+        });
+        renderAiMessages();
+      }
+    }
+
+    function executeAiToolCall(functionCall) {
+      const { name, args } = functionCall;
+      const isHe = APP_STATE.lang === 'he';
+
+      if (name === 'add_student') {
+        const studentName = (args.name || '').trim();
+        if (!studentName) return { success: false, error: 'Student name required' };
+
+        const newStudent = {
+          id: 'stu_' + Date.now(),
+          name: studentName,
+          parsha_or_date: (args.parsha || args.barMitzvahDate || '').trim(),
+          notes: (args.notes || '').trim(),
+          completed_topics: {
+            _meta: {
+              parsha: (args.parsha || '').trim(),
+              barMitzvahDate: (args.barMitzvahDate || '').trim(),
+              lessons: []
+            }
+          },
+          completed_parshiot: {}
+        };
+
+        APP_STATE.students.push(newStudent);
+        saveStudentsToStorage();
+        pushStudentToCloud(newStudent);
+        renderStudents();
+        renderCalendar();
+
+        return {
+          success: true,
+          studentId: newStudent.id,
+          name: newStudent.name,
+          message: isHe ? `תלמיד נוסף: ${newStudent.name}` : `Student added: ${newStudent.name}`
+        };
+      }
+
+      if (name === 'update_student') {
+        const target = (args.studentNameOrId || '').toLowerCase().trim();
+        const student = APP_STATE.students.find(s => s.id === target || s.name.toLowerCase().includes(target));
+        if (!student) return { success: false, error: `Student not found: ${args.studentNameOrId}` };
+
+        if (args.newName) student.name = args.newName.trim();
+        if (args.notes !== undefined) student.notes = args.notes.trim();
+        if (args.parsha) {
+          student.parsha_or_date = args.parsha.trim();
+          if (student.completed_topics && student.completed_topics._meta) {
+            student.completed_topics._meta.parsha = args.parsha.trim();
+          }
+        }
+
+        saveStudentsToStorage();
+        pushStudentToCloud(student);
+        renderStudents();
+        renderCalendar();
+
+        return {
+          success: true,
+          studentId: student.id,
+          name: student.name,
+          message: isHe ? `תלמיד עודכן: ${student.name}` : `Student updated: ${student.name}`
+        };
+      }
+
+      if (name === 'schedule_lesson') {
+        const target = (args.studentNameOrId || '').toLowerCase().trim();
+        const student = APP_STATE.students.find(s => s.id === target || s.name.toLowerCase().includes(target));
+        if (!student) return { success: false, error: `Student not found: ${args.studentNameOrId}` };
+
+        if (!student.completed_topics) student.completed_topics = {};
+        if (!student.completed_topics._meta) student.completed_topics._meta = {};
+        if (!Array.isArray(student.completed_topics._meta.lessons)) student.completed_topics._meta.lessons = [];
+
+        const lesson = {
+          id: 'les_' + Date.now(),
+          date: args.date || new Date().toISOString().split('T')[0],
+          timeSlot: args.timeSlot || '4:30 PM',
+          subject: args.subject || (isHe ? 'שיעור בר מצווה' : 'Bar Mitzvah Tutoring'),
+          notes: args.subject || ''
+        };
+
+        student.completed_topics._meta.lessons.push(lesson);
+        saveStudentsToStorage();
+        pushStudentToCloud(student);
+        renderCalendar();
+
+        return {
+          success: true,
+          lessonId: lesson.id,
+          message: isHe
+            ? `שיעור נקבע עבור ${student.name} בתאריך ${lesson.date} (${lesson.timeSlot})`
+            : `Scheduled lesson for ${student.name} on ${lesson.date} (${lesson.timeSlot})`
+        };
+      }
+
+      if (name === 'cancel_lesson') {
+        const target = (args.studentNameOrId || '').toLowerCase().trim();
+        const student = APP_STATE.students.find(s => s.id === target || s.name.toLowerCase().includes(target));
+        if (!student) return { success: false, error: `Student not found: ${args.studentNameOrId}` };
+
+        if (student.completed_topics?._meta?.lessons) {
+          student.completed_topics._meta.lessons = student.completed_topics._meta.lessons.filter(l => l.date !== args.date);
+          saveStudentsToStorage();
+          pushStudentToCloud(student);
+          renderCalendar();
+        }
+
+        return {
+          success: true,
+          message: isHe ? `שיעור בוטל עבור ${student.name}` : `Cancelled lesson for ${student.name}`
+        };
+      }
+
+      if (name === 'mark_topic_progress') {
+        const target = (args.studentNameOrId || '').toLowerCase().trim();
+        const student = APP_STATE.students.find(s => s.id === target || s.name.toLowerCase().includes(target));
+        if (!student) return { success: false, error: `Student not found: ${args.studentNameOrId}` };
+
+        if (!student.completed_topics) student.completed_topics = {};
+        student.completed_topics[args.topicId] = !!args.completed;
+
+        saveStudentsToStorage();
+        pushStudentToCloud(student);
+        renderStudents();
+
+        return {
+          success: true,
+          message: isHe
+            ? `סומן ${args.topicId} עבור ${student.name}`
+            : `Marked topic ${args.topicId} for ${student.name}`
+        };
+      }
+
+      if (name === 'mark_parsha_progress') {
+        const target = (args.studentNameOrId || '').toLowerCase().trim();
+        const student = APP_STATE.students.find(s => s.id === target || s.name.toLowerCase().includes(target));
+        if (!student) return { success: false, error: `Student not found: ${args.studentNameOrId}` };
+
+        if (!student.completed_parshiot) student.completed_parshiot = {};
+        student.completed_parshiot[args.parshaId] = !!args.completed;
+
+        saveStudentsToStorage();
+        pushStudentToCloud(student);
+        renderStudents();
+
+        return {
+          success: true,
+          message: isHe
+            ? `סומנה פרשת ${args.parshaId} עבור ${student.name}`
+            : `Marked parsha ${args.parshaId} for ${student.name}`
+        };
+      }
+
+      if (name === 'add_study_material') {
+        const rawTarget = (args.targetNameOrId || '').toLowerCase().trim();
+        const topics = window.JEWISH_TOPICS_DATA || [];
+        const ber = window.BEREISHIT_PARSHIOT_DATA || [];
+        const shem = window.SHEMOT_PARSHIOT_DATA || [];
+        const allParshiot = [...ber, ...shem];
+
+        let matchedId = null;
+        let matchedTitle = args.targetNameOrId;
+        let isTopic = true;
+
+        const foundTopic = topics.find(t => t.id === rawTarget || t.title_en.toLowerCase().includes(rawTarget) || t.title_he.includes(rawTarget));
+        if (foundTopic) {
+          matchedId = foundTopic.id;
+          matchedTitle = APP_STATE.lang === 'he' ? foundTopic.title_he : foundTopic.title_en;
+          isTopic = true;
+        } else {
+          const foundParsha = allParshiot.find(p => p.id === rawTarget || p.name_en.toLowerCase().includes(rawTarget) || p.name_he.includes(rawTarget));
+          if (foundParsha) {
+            matchedId = foundParsha.id;
+            matchedTitle = APP_STATE.lang === 'he' ? foundParsha.name_he : foundParsha.name_en;
+            isTopic = false;
+          }
+        }
+
+        if (!matchedId) {
+          matchedId = rawTarget.replace(/\s+/g, '_');
+        }
+
+        if (!APP_STATE.studyAdditions) APP_STATE.studyAdditions = {};
+        if (!Array.isArray(APP_STATE.studyAdditions[matchedId])) APP_STATE.studyAdditions[matchedId] = [];
+
+        const newMat = {
+          id: 'mat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+          title: (args.title || '').trim(),
+          content: (args.content || '').trim(),
+          createdAt: new Date().toISOString(),
+          author: 'AI Assistant',
+          targetType: isTopic ? 'concept' : 'parsha',
+          targetTitle: matchedTitle
+        };
+
+        APP_STATE.studyAdditions[matchedId].push(newMat);
+        saveStudyMaterialsToStorage(true);
+        renderTopics();
+        renderChumash();
+
+        return {
+          success: true,
+          targetId: matchedId,
+          targetTitle: matchedTitle,
+          message: isHe ? `נוסף חומר לימוד ל-${matchedTitle}` : `Added material to ${matchedTitle}`
+        };
+      }
+
+      if (name === 'get_portal_data') {
+        return getPortalContextData();
+      }
+
+      return { success: false, error: `Unknown tool: ${name}` };
+    }
+
+    function getPortalContextData() {
+      const studentsSummary = (APP_STATE.students || []).map(s => {
+        const lessons = (s.completed_topics?._meta?.lessons || []).map(l => ({
+          date: l.date,
+          timeSlot: l.timeSlot,
+          subject: l.subject
+        }));
+        return {
+          id: s.id,
+          name: s.name,
+          parsha: s.completed_topics?._meta?.parsha || s.parsha_or_date,
+          barMitzvahDate: s.completed_topics?._meta?.barMitzvahDate || '',
+          notes: s.notes,
+          scheduledLessons: lessons
+        };
+      });
+
+      let totalCustomMaterials = 0;
+      if (APP_STATE.studyAdditions) {
+        Object.values(APP_STATE.studyAdditions).forEach(arr => {
+          if (Array.isArray(arr)) totalCustomMaterials += arr.length;
+        });
+      }
+
+      return {
+        activeTutorLang: APP_STATE.lang,
+        totalStudents: studentsSummary.length,
+        students: studentsSummary,
+        totalCustomMaterialsAdded: totalCustomMaterials
+      };
+    }
+
+    function openBase44Modal() {
+      populateBase44PromptTextarea();
+      const modal = document.getElementById('modal-base44-integration');
+      if (modal) modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeBase44Modal() {
+      const modal = document.getElementById('modal-base44-integration');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function populateBase44PromptTextarea() {
+      const el = document.getElementById('base44-prompt-textarea');
+      if (!el) return;
+
+      el.value = `You are Rabbi Closter's Bar Mitzvah Tutoring AI Agent connected directly to the TutorPilot companion portal database via Supabase.
+
+### Database Credentials & Endpoints
+- REST Endpoint: https://bpkwnqbabokesuesvkex.supabase.co/rest/v1/students_sync
+- API Key (Header 'apikey'): sb_publishable_hVy0YYOOT9k_LD_ZMe24zg_iuqTC538
+- Authorization Header: Bearer sb_publishable_hVy0YYOOT9k_LD_ZMe24zg_iuqTC538
+- Primary Key: id
+
+### Available Operations
+
+1. List Students & Schedule:
+   GET https://bpkwnqbabokesuesvkex.supabase.co/rest/v1/students_sync?select=*
+
+2. Create or Update a Student:
+   POST https://bpkwnqbabokesuesvkex.supabase.co/rest/v1/students_sync
+   Header: Prefer: resolution=merge-duplicates
+   Payload:
+   {
+     "id": "stu_<timestamp>",
+     "name": "<Student Name>",
+     "parsha_or_date": "<Parsha or Date>",
+     "notes": "<Tutor notes>",
+     "completed_topics": {
+       "_meta": {
+         "parsha": "<Parsha>",
+         "barMitzvahDate": "<Date>",
+         "lessons": []
+       }
+     },
+     "completed_parshiot": {},
+     "updated_at": "<ISO-timestamp>"
+   }
+
+3. Schedule a Tutoring Lesson:
+   Append a lesson to the student's completed_topics._meta.lessons array:
+   {
+     "id": "les_<timestamp>",
+     "date": "YYYY-MM-DD",
+     "timeSlot": "4:30 PM",
+     "subject": "<Lesson Focus>",
+     "notes": "<Notes>"
+   }
+   Then upsert the updated student record.
+
+4. Add Custom Lesson Study Material:
+   Upsert to system record id '__study_materials__':
+   POST https://bpkwnqbabokesuesvkex.supabase.co/rest/v1/students_sync
+   Header: Prefer: resolution=merge-duplicates
+   Payload:
+   {
+     "id": "__study_materials__",
+     "name": "SYSTEM_STUDY_MATERIALS",
+     "parsha_or_date": "system",
+     "notes": "Custom curriculum additions by tutors",
+     "completed_topics": {
+       "<lesson_id>": [
+         {
+           "id": "mat_<timestamp>",
+           "title": "<Headline>",
+           "content": "<Notes/Story>",
+           "createdAt": "<ISO-timestamp>",
+           "author": "Rabbi Closter"
+         }
+       ]
+     },
+     "completed_parshiot": {},
+     "updated_at": "<ISO-timestamp>"
+   }
+
+Whenever you perform an update, the TutorPilot website updates automatically via Supabase Realtime across all tutor devices!`;
+    }
+
+    function copyBase44Prompt() {
+      const textarea = document.getElementById('base44-prompt-textarea');
+      const text = textarea ? textarea.value : '';
+      const t = I18N[APP_STATE.lang];
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(t.toastPromptCopied || 'Base44 System Prompt copied to clipboard!');
+        }).catch(() => {
+          prompt('Copy Base44 Prompt:', text);
+        });
+      } else {
+        prompt('Copy Base44 Prompt:', text);
+      }
+    }
+
+    function downloadBase44Schema() {
+      const link = document.createElement('a');
+      link.href = 'base44_openapi_schema.json';
+      link.download = 'base44_openapi_schema.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Downloading base44_openapi_schema.json');
+    }
+
+    function copyToClipboardText(text, successMsg) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(successMsg || 'Copied to clipboard!');
+        }).catch(() => {
+          prompt('Copy text:', text);
+        });
+      } else {
+        prompt('Copy text:', text);
+      }
+    }
+
     function renderAllViews() {
       renderTopics();
       renderChumash();
@@ -4907,6 +6148,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       renderCalendar();
       renderActiveStudentWorkspace(true);
       updateStudyMaterialsBadge();
+      updateAiStatusPill();
     }
 
     // Toast Utility
@@ -5045,10 +6287,10 @@ alter publication supabase_realtime add table public.students_sync;`;
   </script>
 
   <!-- ============================================== -->
-  <!-- BOTTOM DOCK (Unified Navigation - 3 Tabs)      -->
+  <!-- BOTTOM DOCK (Unified Navigation - 4 Tabs)      -->
   <!-- ============================================== -->
   <nav class="fixed bottom-0 left-0 right-0 z-40 glass-nav border-t border-slate-800/90 mobile-safe-bottom px-3 pt-1.5">
-    <div class="grid grid-cols-3 items-center w-full max-w-md mx-auto gap-1">
+    <div class="grid grid-cols-4 items-center w-full max-w-lg mx-auto gap-1">
 
       <button onclick="switchTab('study')" id="mob-tab-study" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-brand-400 font-bold bg-brand-500/10 w-full">
         <i data-lucide="book-open" class="w-4 h-4 sm:w-5 sm:h-5"></i>
@@ -5063,6 +6305,11 @@ alter publication supabase_realtime add table public.students_sync;`;
       <button onclick="switchTab('calendar')" id="mob-tab-calendar" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 w-full">
         <i data-lucide="calendar" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         <span class="text-[11px] tracking-tight truncate w-full text-center" id="mob-lbl-calendar">Calendar</span>
+      </button>
+
+      <button onclick="switchTab('ai')" id="mob-tab-ai" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 w-full">
+        <i data-lucide="sparkles" class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400"></i>
+        <span class="text-[11px] tracking-tight truncate w-full text-center" id="mob-lbl-ai">AI</span>
       </button>
 
     </div>
