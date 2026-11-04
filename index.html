@@ -106,57 +106,116 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col pb-24 md:pb-12 antialiased selection:bg-brand-600 selection:text-white overflow-x-hidden w-full">
 
   <!-- ============================================== -->
-  <!-- TUTOR PASSCODE LOCK SCREEN (Security Gate)     -->
+  <!-- TUTOR PASSCODE & EMAIL OTP GATE (Security Gate) -->
   <!-- ============================================== -->
   <div id="lock-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-4 transition-all duration-300">
-    <div class="max-w-sm w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-5">
+    <div class="max-w-sm w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative space-y-5">
       
+      <!-- Language Toggle in Auth Screen -->
+      <div class="absolute top-4 right-4 rtl:right-auto rtl:left-4">
+        <button onclick="toggleLanguage()" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition active:scale-95">
+          <i data-lucide="languages" class="w-3.5 h-3.5 text-brand-400"></i>
+          <span id="auth-lang-indicator">עברית</span>
+        </button>
+      </div>
+
       <!-- Lock Icon / Badge -->
       <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-brand-600 to-amber-500 text-white flex items-center justify-center shadow-lg badge-glow">
         <i data-lucide="shield-check" class="w-8 h-8"></i>
       </div>
 
-      <div>
-        <h2 id="lock-title" class="text-xl font-bold text-white tracking-tight">Tutor & Rabbi Portal</h2>
-        <p id="lock-subtitle" class="text-xs text-slate-400 mt-1">Authorized Access Only • Enter Tutor PIN</p>
+      <div class="text-center">
+        <h2 id="auth-title" class="text-xl font-bold text-white tracking-tight">Tutor & Rabbi Portal</h2>
+        <p id="auth-subtitle" class="text-xs text-slate-400 mt-1">Authorized Access Only • Approved Email Required</p>
       </div>
 
-      <!-- PIN Input Form -->
-      <form onsubmit="handleUnlock(event)" class="space-y-4">
-        <div class="relative">
-          <input 
-            type="password" 
-            id="pin-input" 
-            inputmode="numeric" 
-            autocomplete="current-password"
-            placeholder="Enter PIN" 
-            maxlength="10"
-            class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 px-4 text-center text-2xl font-mono tracking-widest text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-            required
-            autofocus
+      <!-- STEP 1: Enter Approved Email -->
+      <div id="auth-step-email" class="space-y-4">
+        <form onsubmit="handleSendAuthOtp(event)" class="space-y-3">
+          <div class="relative">
+            <input 
+              type="email" 
+              id="auth-email-input" 
+              placeholder="Enter approved email (e.g. name@gmail.com)" 
+              autocomplete="email"
+              class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 px-4 text-center text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+              required
+              autofocus
+            >
+          </div>
+
+          <div id="auth-email-error" class="hidden text-xs text-rose-400 font-medium flex items-center justify-center gap-1.5 text-center px-1">
+            <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+            <span id="auth-email-error-text">Email not authorized.</span>
+          </div>
+
+          <button 
+            type="submit" 
+            id="btn-auth-send"
+            class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
           >
+            <span id="btn-auth-send-text">Send Login Code</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 rtl:rotate-180"></i>
+          </button>
+        </form>
+
+        <div class="pt-1 text-center">
+          <button type="button" onclick="showMasterPinPrompt()" id="btn-master-pin-toggle" class="text-[11px] text-slate-500 hover:text-slate-300 underline">
+            Or unlock with Master PIN (770)
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Enter 6-Digit Code / PIN -->
+      <div id="auth-step-code" class="hidden space-y-4">
+        <div class="text-center px-2">
+          <span class="text-xs text-slate-400" id="auth-code-prompt-text">Verification code sent to:</span>
+          <div id="auth-code-target-email" class="font-mono text-xs font-bold text-brand-300 mt-0.5 truncate"></div>
         </div>
 
-        <div id="pin-error" class="hidden text-xs text-rose-400 font-medium flex items-center justify-center gap-1">
-          <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
-          <span id="pin-error-text">Incorrect PIN. Try again.</span>
+        <form onsubmit="handleVerifyAuthOtp(event)" class="space-y-3">
+          <div class="relative">
+            <input 
+              type="text" 
+              id="auth-code-input" 
+              inputmode="numeric" 
+              placeholder="123456" 
+              maxlength="8"
+              class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 px-4 text-center text-2xl font-mono tracking-widest text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+              required
+            >
+          </div>
+
+          <div id="auth-code-error" class="hidden text-xs text-rose-400 font-medium flex items-center justify-center gap-1.5 text-center px-1">
+            <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+            <span id="auth-code-error-text">Invalid code. Try again.</span>
+          </div>
+
+          <button 
+            type="submit" 
+            id="btn-auth-verify"
+            class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
+          >
+            <span id="btn-auth-verify-text">Verify & Unlock (30 Days)</span>
+            <i data-lucide="check" class="w-4 h-4"></i>
+          </button>
+        </form>
+
+        <div class="flex items-center justify-between text-[11px] pt-1">
+          <button type="button" onclick="handleResendOtp()" id="btn-auth-resend" class="text-brand-400 hover:text-brand-300 font-medium underline">
+            Resend Code
+          </button>
+          <button type="button" onclick="handleBackToEmail()" id="btn-auth-back" class="text-slate-400 hover:text-slate-200">
+            Use Different Email
+          </button>
         </div>
+      </div>
 
-        <button 
-          type="submit" 
-          class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
-        >
-          <span id="lock-btn-text">Unlock Portal</span>
-          <i data-lucide="arrow-right" class="w-4 h-4 rtl:rotate-180"></i>
-        </button>
-      </form>
-
-      <div id="lock-footer-text" class="pt-2 text-[11px] text-slate-500">
-        Confidential Bar Mitzvah Student Records
+      <div id="auth-footer-text" class="pt-2 text-[11px] text-slate-500 text-center">
+        Confidential Bar Mitzvah Student Records • Stays Open 30 Days
       </div>
     </div>
   </div>
-
 
   <!-- Top Sticky Header (Ultra-Clean & Mobile Fitted) -->
   <header class="sticky top-0 z-40 glass-nav border-b border-slate-800/90 px-3 sm:px-4 py-2.5">
@@ -540,6 +599,22 @@
 
       <div class="space-y-2.5">
         
+        <!-- Active User Profile Card -->
+        <div id="settings-user-card" class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div id="settings-user-avatar" class="w-8 h-8 rounded-full bg-brand-600/20 text-brand-400 border border-brand-500/30 flex items-center justify-center font-bold text-xs shrink-0">
+              S
+            </div>
+            <div class="min-w-0 truncate">
+              <div id="settings-user-name" class="text-xs font-bold text-white truncate">Shmuel Dovid Uhlman (Lead)</div>
+              <p id="settings-session-days" class="text-[10px] text-emerald-400 font-medium truncate">Session active for 30 days</p>
+            </div>
+          </div>
+          <button onclick="logoutAuth()" class="px-2.5 py-1 text-[11px] font-semibold text-rose-400 hover:text-rose-300 bg-rose-950/40 border border-rose-900/60 rounded-lg transition active:scale-95 shrink-0">
+            <span id="btn-logout-label">Log Out</span>
+          </button>
+        </div>
+
         <!-- Live Cloud Sync Status Tile -->
         <button onclick="closeSettingsModal(); openCloudModal();" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition active:scale-98 text-left">
           <div class="flex items-center gap-3">
@@ -745,6 +820,28 @@
         cloudSaveBtn: "Connect & Sync Now",
         
         // Toasts & Prompts
+        
+        // Email OTP Auth Gate
+        authTitle: "Tutor & Rabbi Portal",
+        authSubtitle: "Authorized Access Only • Approved Email Required",
+        authEmailPlaceholder: "Enter approved email (e.g. name@gmail.com)",
+        authSendCode: "Send Login Code",
+        authSendingCode: "Sending code to your email...",
+        authEmailNotApproved: "This email is not authorized to access this portal.",
+        authInvalidEmail: "Please enter a valid email address.",
+        authCodeTitle: "Enter Verification Code",
+        authCodeSubtitle: "Verification code sent to:",
+        authCodePlaceholder: "Enter 6-digit code (or 770)",
+        authVerifyBtn: "Verify & Unlock (30 Days)",
+        authVerifying: "Verifying code...",
+        authInvalidCode: "Invalid or expired code. Please try again.",
+        authResendCode: "Resend Code",
+        authChangeEmail: "Use Different Email",
+        authConfidentialFooter: "Confidential Bar Mitzvah Student Records • Stays Open 30 Days",
+        authWelcomeToast: (name) => "Welcome, " + name + "! Portal unlocked for 30 days.",
+        masterPinToggle: "Or unlock with Master PIN (770)",
+        authLogout: "Log Out",
+        confirmLogout: "Are you sure you want to log out and lock this device?",
         toastUnlock: "Welcome! Portal unlocked.",
         toastLangSwitch: "Language switched to English",
         toastNoteSaved: (name) => "Notes saved for " + name,
@@ -876,6 +973,28 @@
         cloudSaveBtn: "שמור והתחבר",
         
         // Toasts & Prompts
+        
+        // Email OTP Auth Gate
+        authTitle: "פורטל המלמד והרב",
+        authSubtitle: "גישה מורשית בלבד • דורש דוא״ל מאושר",
+        authEmailPlaceholder: "הזן דוא״ל מאושר (למשל: name@gmail.com)",
+        authSendCode: "שלח קוד כניסה",
+        authSendingCode: "שולח קוד לדוא״ל...",
+        authEmailNotApproved: "כתובת דוא״ל זו אינה מורשית לגישה למערכת.",
+        authInvalidEmail: "נא להזין כתובת דוא״ל תקינה.",
+        authCodeTitle: "הזן קוד אימות",
+        authCodeSubtitle: "קוד אימות נשלח אל:",
+        authCodePlaceholder: "הזן קוד בן 6 ספרות (או 770)",
+        authVerifyBtn: "אימות וכניסה (לחודש ימים)",
+        authVerifying: "מאמת קוד...",
+        authInvalidCode: "קוד שגוי או שפג תוקפו. אנא נסה שוב.",
+        authResendCode: "שלח קוד שוב",
+        authChangeEmail: "השתמש בדוא״ל אחר",
+        authConfidentialFooter: "תיעוד חסוי של תלמידי בר מצווה • נשאר פתוח לחודש",
+        authWelcomeToast: (name) => "ברוך הבא, " + name + "! המערכת פתוחה ל-30 יום.",
+        masterPinToggle: "או כניסה באמצעות קוד ראשי (770)",
+        authLogout: "התנתקות מהמערכת",
+        confirmLogout: "האם אתה בטוח שברצונך להתנתק ולנעול את המכשיר?",
         toastUnlock: "ברוך הבא! המערכת נפתחה.",
         toastLangSwitch: "השפה הוחלפה לעברית",
         toastNoteSaved: (name) => "ההערה נשמרה עבור " + name,
@@ -1179,49 +1298,319 @@ alter publication supabase_realtime add table public.students_sync;`;
       showToast(t.toastCloudDisconnected);
     }
 
+    // ==============================================
+    // SECURITY GATE: APPROVED EMAILS & 30-DAY PERSISTENCE
+    // ==============================================
     const TUTOR_PASSCODE = "770";
+    const ONE_MONTH_MS = 30 * 24 * 60 * 60 * 1000; // 30 days = 1 month
 
-    function checkPasscodeAuth() {
-      const isAuth = localStorage.getItem('tutor_auth_unlocked');
-      const lockScreen = document.getElementById('lock-screen');
-      if (isAuth === 'true') {
-        if (lockScreen) lockScreen.classList.add('hidden');
-      } else {
-        if (lockScreen) {
-          lockScreen.classList.remove('hidden');
-          const pinInput = document.getElementById('pin-input');
-          if (pinInput) setTimeout(() => pinInput.focus(), 150);
+    // Whitelist of approved emails
+    const APPROVED_USERS = {
+      "shmueldoviduhlman@gmail.com": {
+        email: "shmueldoviduhlman@gmail.com",
+        role: "lead",
+        name_en: "Shmuel Dovid Uhlman (Lead Tutor)",
+        name_he: "שמואל דוד אולמן (מלמד ראשי)"
+      },
+      "rabbiycloster@gmail.com": {
+        email: "rabbiycloster@gmail.com",
+        role: "rabbi",
+        name_en: "Rabbi Closter",
+        name_he: "הרב קלוסטר"
+      }
+    };
+
+    let pendingAuthEmail = "";
+
+    function getSupabaseAuthClient() {
+      if (APP_STATE.cloud.client) return APP_STATE.cloud.client;
+      if (window.supabase && APP_STATE.cloud.url && APP_STATE.cloud.key) {
+        try {
+          APP_STATE.cloud.client = window.supabase.createClient(APP_STATE.cloud.url, APP_STATE.cloud.key, {
+            auth: { persistSession: true, autoRefreshToken: true }
+          });
+          return APP_STATE.cloud.client;
+        } catch (e) {
+          console.error("Auth client init error:", e);
         }
       }
+      return null;
     }
 
-    function handleUnlock(e) {
+    function checkPasscodeAuth() {
+      const lockScreen = document.getElementById('lock-screen');
+      const raw = localStorage.getItem('tutor_auth_session');
+      const isAuthLegacy = localStorage.getItem('tutor_auth_unlocked');
+
+      if (raw) {
+        try {
+          const session = JSON.parse(raw);
+          const now = Date.now();
+          if (session.expiresAt && now < session.expiresAt) {
+            // Still active within 30-day window!
+            APP_STATE.currentUser = session;
+            if (lockScreen) lockScreen.classList.add('hidden');
+            updateUserSessionDisplay(session);
+            return true;
+          } else {
+            // Session expired after 30 days
+            localStorage.removeItem('tutor_auth_session');
+            localStorage.removeItem('tutor_auth_unlocked');
+          }
+        } catch (e) {
+          console.error("Error reading session:", e);
+        }
+      } else if (isAuthLegacy === 'true') {
+        // Upgrade legacy unlock to 30-day session
+        const defaultSession = {
+          email: "shmueldoviduhlman@gmail.com",
+          role: "lead",
+          name_en: "Shmuel Dovid Uhlman (Lead Tutor)",
+          name_he: "שמואל דוד אולמן (מלמד ראשי)",
+          expiresAt: Date.now() + ONE_MONTH_MS
+        };
+        localStorage.setItem('tutor_auth_session', JSON.stringify(defaultSession));
+        APP_STATE.currentUser = defaultSession;
+        if (lockScreen) lockScreen.classList.add('hidden');
+        updateUserSessionDisplay(defaultSession);
+        return true;
+      }
+
+      // Not authenticated
+      if (lockScreen) {
+        lockScreen.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+        handleBackToEmail();
+      }
+      return false;
+    }
+
+    async function handleSendAuthOtp(e) {
       e.preventDefault();
       const t = I18N[APP_STATE.lang];
-      const input = document.getElementById('pin-input');
-      const err = document.getElementById('pin-error');
-      const lockScreen = document.getElementById('lock-screen');
+      const emailInput = document.getElementById('auth-email-input');
+      const errBox = document.getElementById('auth-email-error');
+      const errText = document.getElementById('auth-email-error-text');
+      const sendBtn = document.getElementById('btn-auth-send');
+      const sendBtnText = document.getElementById('btn-auth-send-text');
 
-      if (input.value.trim() === TUTOR_PASSCODE) {
+      const rawEmail = (emailInput.value || '').trim().toLowerCase();
+      if (!rawEmail || !rawEmail.includes('@')) {
+        errText.textContent = t.authInvalidEmail;
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      const user = APPROVED_USERS[rawEmail];
+      if (!user) {
+        errText.textContent = t.authEmailNotApproved;
+        errBox.classList.remove('hidden');
+        emailInput.classList.add('border-rose-500');
+        setTimeout(() => emailInput.classList.remove('border-rose-500'), 2000);
+        return;
+      }
+
+      errBox.classList.add('hidden');
+      pendingAuthEmail = rawEmail;
+
+      // Show sending state
+      sendBtn.disabled = true;
+      sendBtnText.textContent = t.authSendingCode;
+
+      try {
+        const client = getSupabaseAuthClient();
+        if (client) {
+          await client.auth.signInWithOtp({
+            email: rawEmail,
+            options: { shouldCreateUser: true }
+          });
+        } else {
+          // Direct REST API call
+          await fetch(APP_STATE.cloud.url + '/auth/v1/otp', {
+            method: 'POST',
+            headers: {
+              'apikey': APP_STATE.cloud.key,
+              'Authorization': 'Bearer ' + APP_STATE.cloud.key,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email: rawEmail, create_user: true })
+          });
+        }
+      } catch (err) {
+        console.warn("OTP send warning (may be rate limited, Master PIN 770 available):", err);
+      }
+
+      // Transition to code step
+      sendBtn.disabled = false;
+      sendBtnText.textContent = t.authSendCode;
+
+      document.getElementById('auth-step-email').classList.add('hidden');
+      document.getElementById('auth-step-code').classList.remove('hidden');
+      document.getElementById('auth-code-target-email').textContent = rawEmail;
+      
+      const codeInput = document.getElementById('auth-code-input');
+      codeInput.value = '';
+      setTimeout(() => codeInput.focus(), 150);
+      showToast(APP_STATE.lang === 'he' ? "קוד אימות נשלח לדוא״ל שלך" : "Verification code sent to your email!");
+    }
+
+    async function handleVerifyAuthOtp(e) {
+      e.preventDefault();
+      const t = I18N[APP_STATE.lang];
+      const codeInput = document.getElementById('auth-code-input');
+      const errBox = document.getElementById('auth-code-error');
+      const errText = document.getElementById('auth-code-error-text');
+      const verifyBtn = document.getElementById('btn-auth-verify');
+      const verifyBtnText = document.getElementById('btn-auth-verify-text');
+
+      const code = (codeInput.value || '').trim();
+      const email = pendingAuthEmail || "shmueldoviduhlman@gmail.com";
+      const user = APPROVED_USERS[email] || APPROVED_USERS["shmueldoviduhlman@gmail.com"];
+
+      if (!code) return;
+
+      verifyBtn.disabled = true;
+      verifyBtnText.textContent = t.authVerifying;
+
+      let verified = false;
+
+      // 1. Check Master Bypass PIN (770)
+      if (code === TUTOR_PASSCODE) {
+        verified = true;
+      } else {
+        // 2. Verify with Supabase Auth OTP
+        try {
+          const client = getSupabaseAuthClient();
+          if (client) {
+            const { data, error } = await client.auth.verifyOtp({
+              email: email,
+              token: code,
+              type: 'email'
+            });
+            if (!error && (data.session || data.user)) {
+              verified = true;
+            }
+          } else {
+            const res = await fetch(APP_STATE.cloud.url + '/auth/v1/verify', {
+              method: 'POST',
+              headers: {
+                'apikey': APP_STATE.cloud.key,
+                'Authorization': 'Bearer ' + APP_STATE.cloud.key,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ email: email, token: code, type: 'email' })
+            });
+            if (res.ok) verified = true;
+          }
+        } catch (err) {
+          console.error("Verification error:", err);
+        }
+      }
+
+      verifyBtn.disabled = false;
+      verifyBtnText.textContent = t.authVerifyBtn;
+
+      if (verified) {
+        errBox.classList.add('hidden');
+        
+        // Grant 30-Day (1 Month) Session
+        const session = {
+          email: user.email,
+          role: user.role,
+          name_en: user.name_en,
+          name_he: user.name_he,
+          expiresAt: Date.now() + ONE_MONTH_MS
+        };
+        localStorage.setItem('tutor_auth_session', JSON.stringify(session));
         localStorage.setItem('tutor_auth_unlocked', 'true');
-        err.classList.add('hidden');
+        APP_STATE.currentUser = session;
+        updateUserSessionDisplay(session);
+
+        const lockScreen = document.getElementById('lock-screen');
         lockScreen.classList.add('opacity-0', 'pointer-events-none');
         setTimeout(() => {
           lockScreen.classList.add('hidden');
         }, 300);
-        showToast(t.toastUnlock);
+
+        const displayName = APP_STATE.lang === 'he' ? user.name_he : user.name_en;
+        showToast(t.authWelcomeToast(displayName));
       } else {
-        err.classList.remove('hidden');
-        input.value = '';
-        input.focus();
-        input.classList.add('border-rose-500');
-        setTimeout(() => input.classList.remove('border-rose-500'), 1500);
+        errText.textContent = t.authInvalidCode;
+        errBox.classList.remove('hidden');
+        codeInput.value = '';
+        codeInput.focus();
+        codeInput.classList.add('border-rose-500');
+        setTimeout(() => codeInput.classList.remove('border-rose-500'), 1500);
       }
     }
 
-    function lockPortal() {
+    function handleResendOtp() {
+      const emailInput = document.getElementById('auth-email-input');
+      emailInput.value = pendingAuthEmail;
+      handleSendAuthOtp({ preventDefault: () => {} });
+    }
+
+    function handleBackToEmail() {
+      const emailStep = document.getElementById('auth-step-email');
+      const codeStep = document.getElementById('auth-step-code');
+      const errEmail = document.getElementById('auth-email-error');
+      const errCode = document.getElementById('auth-code-error');
+      
+      if (errEmail) errEmail.classList.add('hidden');
+      if (errCode) errCode.classList.add('hidden');
+      if (codeStep) codeStep.classList.add('hidden');
+      if (emailStep) emailStep.classList.remove('hidden');
+
+      const emailInput = document.getElementById('auth-email-input');
+      if (emailInput) {
+        if (pendingAuthEmail) emailInput.value = pendingAuthEmail;
+        setTimeout(() => emailInput.focus(), 150);
+      }
+    }
+
+    function showMasterPinPrompt() {
+      pendingAuthEmail = "shmueldoviduhlman@gmail.com";
+      document.getElementById('auth-step-email').classList.add('hidden');
+      document.getElementById('auth-step-code').classList.remove('hidden');
+      document.getElementById('auth-code-target-email').textContent = "shmueldoviduhlman@gmail.com (Master PIN 770)";
+      const codeInput = document.getElementById('auth-code-input');
+      codeInput.value = '';
+      setTimeout(() => codeInput.focus(), 150);
+    }
+
+    function logoutAuth() {
+      const t = I18N[APP_STATE.lang];
+      if (!confirm(t.confirmLogout)) return;
+      localStorage.removeItem('tutor_auth_session');
       localStorage.removeItem('tutor_auth_unlocked');
       location.reload();
+    }
+
+    function lockPortal() {
+      logoutAuth();
+    }
+
+    function updateUserSessionDisplay(session) {
+      if (!session) return;
+      const isHe = APP_STATE.lang === 'he';
+      const name = isHe ? (session.name_he || session.name_en) : session.name_en;
+      
+      const avatarEl = document.getElementById('settings-user-avatar');
+      if (avatarEl) {
+        avatarEl.textContent = session.role === 'lead' ? 'S' : 'R';
+      }
+
+      const nameEl = document.getElementById('settings-user-name');
+      if (nameEl) {
+        nameEl.textContent = name;
+      }
+
+      const daysEl = document.getElementById('settings-session-days');
+      if (daysEl && session.expiresAt) {
+        const daysLeft = Math.max(1, Math.round((session.expiresAt - Date.now()) / (24 * 3600 * 1000)));
+        daysEl.textContent = isHe 
+          ? ("מחובר • נותרו " + daysLeft + " ימים לחודש")
+          : ("Session active • " + daysLeft + " days remaining");
+      }
     }
 
     // Initialize App
@@ -1472,6 +1861,48 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       const lockFooterText = document.getElementById('lock-footer-text');
       if (lockFooterText) lockFooterText.textContent = t.lockFooter;
+
+      // Localize 30-Day Email Auth Gate
+      const authTitle = document.getElementById('auth-title');
+      if (authTitle) authTitle.textContent = t.authTitle;
+
+      const authSubtitle = document.getElementById('auth-subtitle');
+      if (authSubtitle) authSubtitle.textContent = t.authSubtitle;
+
+      const authEmailInput = document.getElementById('auth-email-input');
+      if (authEmailInput) authEmailInput.placeholder = t.authEmailPlaceholder;
+
+      const btnAuthSendText = document.getElementById('btn-auth-send-text');
+      if (btnAuthSendText) btnAuthSendText.textContent = t.authSendCode;
+
+      const authCodePromptText = document.getElementById('auth-code-prompt-text');
+      if (authCodePromptText) authCodePromptText.textContent = t.authCodeSubtitle;
+
+      const authCodeInput = document.getElementById('auth-code-input');
+      if (authCodeInput) authCodeInput.placeholder = t.authCodePlaceholder;
+
+      const btnAuthVerifyText = document.getElementById('btn-auth-verify-text');
+      if (btnAuthVerifyText) btnAuthVerifyText.textContent = t.authVerifyBtn;
+
+      const btnAuthResend = document.getElementById('btn-auth-resend');
+      if (btnAuthResend) btnAuthResend.textContent = t.authResendCode;
+
+      const btnAuthBack = document.getElementById('btn-auth-back');
+      if (btnAuthBack) btnAuthBack.textContent = t.authChangeEmail;
+
+      const authFooterText = document.getElementById('auth-footer-text');
+      if (authFooterText) authFooterText.textContent = t.authConfidentialFooter;
+
+      const authLangIndicator = document.getElementById('auth-lang-indicator');
+      if (authLangIndicator) authLangIndicator.textContent = isHe ? "English" : "עברית";
+
+      const btnMasterPinToggle = document.getElementById('btn-master-pin-toggle');
+      if (btnMasterPinToggle) btnMasterPinToggle.textContent = t.masterPinToggle;
+
+      const btnLogoutLabel = document.getElementById('btn-logout-label');
+      if (btnLogoutLabel) btnLogoutLabel.textContent = t.authLogout;
+
+      if (APP_STATE.currentUser) updateUserSessionDisplay(APP_STATE.currentUser);
     }
 
     function switchTab(tabId) {
