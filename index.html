@@ -301,6 +301,11 @@
           <span id="tab-students-label">Student Tracker</span>
           <span id="student-badge-count" class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded-full font-mono border border-amber-500/30">0</span>
         </button>
+
+        <button id="tab-calendar" onclick="switchTab('calendar')" class="tab-btn flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap">
+          <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+          <span id="tab-calendar-label">Calendar</span>
+        </button>
       </div>
 
     </div>
@@ -424,6 +429,73 @@
       </div>
     </section>
 
+    <!-- ============================================== -->
+    <!-- VIEW 4: DUAL HEBREW & SECULAR CALENDAR         -->
+    <!-- ============================================== -->
+    <section id="view-calendar" class="space-y-4 hidden">
+
+      <!-- Section Header & Month Controls -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+        <div>
+          <h2 id="calendar-head-title" class="text-xl font-bold text-white flex items-center gap-2">
+            <i data-lucide="calendar" class="w-5 h-5 text-brand-400"></i>
+            <span id="calendar-title-text">Tutoring Schedule & Calendar</span>
+          </h2>
+          <p id="calendar-desc-text" class="text-xs text-slate-400 mt-1">
+            7-day week schedule from Sunday to Saturday with dual Hebrew and secular dates, lesson planning, and direct student portfolio links.
+          </p>
+        </div>
+
+        <!-- Month Navigation Toolbar -->
+        <div class="flex items-center gap-2 self-start sm:self-auto">
+          <button onclick="changeCalendarMonth(-1)" class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white transition active:scale-95" title="Previous Month">
+            <i data-lucide="chevron-left" class="w-4 h-4 rtl:rotate-180"></i>
+          </button>
+
+          <button onclick="resetCalendarToToday()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-semibold text-brand-400 hover:text-brand-300 transition active:scale-95">
+            <span id="calendar-today-btn-label">Today</span>
+          </button>
+
+          <button onclick="changeCalendarMonth(1)" class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white transition active:scale-95" title="Next Month">
+            <i data-lucide="chevron-right" class="w-4 h-4 rtl:rotate-180"></i>
+          </button>
+
+          <button onclick="openScheduleModalForToday()" class="px-3.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-semibold shadow-md active:scale-95 transition flex items-center gap-1.5">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span id="calendar-quick-schedule-btn">+ Schedule Lesson</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Month & Hebrew Year Display Banner -->
+      <div class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span id="calendar-secular-month-year" class="text-sm font-bold text-white">November 2026</span>
+          <span class="text-slate-600">•</span>
+          <span id="calendar-hebrew-month-year" class="text-xs font-semibold text-brand-400 font-mono">מרחשון תשפ״ז</span>
+        </div>
+        <div class="text-[11px] text-slate-400 flex items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 font-medium">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
+            <span id="lbl-cal-today-indicator">Today</span>
+          </span>
+          <span class="text-slate-600 hidden sm:inline">•</span>
+          <span class="italic text-[10px] text-slate-400 hidden sm:inline" id="lbl-cal-hint">Tap day to schedule • Tap student for portfolio</span>
+        </div>
+      </div>
+
+      <!-- 7-Day Weekdays Header (Sun to Sat) -->
+      <div id="calendar-weekdays-header" class="grid grid-cols-7 gap-1 sm:gap-2 text-center text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+        <!-- Populated via JS -->
+      </div>
+
+      <!-- Calendar 7-Day Month Grid (Sun to Sat) -->
+      <div id="calendar-days-grid" class="grid grid-cols-7 gap-1 sm:gap-2">
+        <!-- Populated dynamically via JS -->
+      </div>
+
+    </section>
+
   </main>
 
   <!-- ============================================== -->
@@ -483,6 +555,96 @@
             Save Student
           </button>
         </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: SCHEDULE LESSON                         -->
+  <!-- ============================================== -->
+  <div id="modal-schedule-lesson" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 hidden backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <button onclick="closeScheduleLessonModal()" class="absolute top-4 right-4 rtl:right-auto rtl:left-4 text-slate-400 hover:text-slate-200">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Modal Header -->
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-brand-500/20 text-brand-400 border border-brand-500/30 flex items-center justify-center shrink-0">
+          <i data-lucide="calendar-plus" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 id="modal-schedule-title" class="text-base font-bold text-white">Schedule Bar Mitzvah Lesson</h3>
+          <p id="modal-schedule-date-subtitle" class="text-xs text-brand-300 font-mono mt-0.5">Sunday, Nov 15 • כ״ה חשון תשפ״ז</p>
+        </div>
+      </div>
+
+      <!-- Existing Lessons on this Day -->
+      <div id="schedule-existing-container" class="mb-4 hidden">
+        <label id="lbl-existing-lessons-title" class="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+          <i data-lucide="list" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span id="txt-existing-lessons-title">Scheduled Lessons for this Day</span>
+        </label>
+        <div id="schedule-existing-list" class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+      <!-- Booking Form -->
+      <form id="schedule-lesson-form" onsubmit="handleSaveScheduledLesson(event)" class="space-y-4">
+
+        <!-- Student Selector -->
+        <div>
+          <label id="lbl-schedule-student" class="block text-xs font-medium text-slate-300 mb-1">Select Student</label>
+          <select id="schedule-student-select" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <!-- Fast Time Slot Selection -->
+        <div>
+          <label id="lbl-schedule-time" class="block text-xs font-medium text-slate-300 mb-1.5">Lesson Time</label>
+
+          <!-- One-Tap Time Buttons -->
+          <div class="grid grid-cols-4 gap-1.5 mb-2" id="schedule-quick-time-buttons">
+            <button type="button" onclick="selectQuickTimeSlot('3:30 PM')" class="time-slot-btn py-1.5 px-2 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:border-brand-500 hover:text-white transition">3:30 PM</button>
+            <button type="button" onclick="selectQuickTimeSlot('4:00 PM')" class="time-slot-btn py-1.5 px-2 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:border-brand-500 hover:text-white transition">4:00 PM</button>
+            <button type="button" onclick="selectQuickTimeSlot('4:30 PM')" class="time-slot-btn py-1.5 px-2 text-xs rounded-lg border border-brand-500 bg-brand-600/30 text-white font-semibold transition">4:30 PM</button>
+            <button type="button" onclick="selectQuickTimeSlot('5:00 PM')" class="time-slot-btn py-1.5 px-2 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:border-brand-500 hover:text-white transition">5:00 PM</button>
+            <button type="button" onclick="selectQuickTimeSlot('5:30 PM')" class="time-slot-btn py-1.5 px-2 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:border-brand-500 hover:text-white transition">5:30 PM</button>
+            <button type="button" onclick="selectQuickTimeSlot('6:00 PM')" class="time-slot-btn py-1.5 px-2 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:border-brand-500 hover:text-white transition">6:00 PM</button>
+            <button type="button" onclick="selectQuickTimeSlot('6:30 PM')" class="time-slot-btn py-1.5 px-2 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:border-brand-500 hover:text-white transition">6:30 PM</button>
+            <button type="button" onclick="selectQuickTimeSlot('7:00 PM')" class="time-slot-btn py-1.5 px-2 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:border-brand-500 hover:text-white transition">7:00 PM</button>
+          </div>
+
+          <!-- Custom Time Option -->
+          <input type="text" id="schedule-custom-time" placeholder="Or type custom time (e.g. 5:15 PM)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+
+        <!-- Weekly Recurrence Checkbox -->
+        <div class="flex items-center gap-2 p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+          <input type="checkbox" id="schedule-repeat-weekly" class="w-4 h-4 rounded text-brand-600 bg-slate-900 border-slate-700 focus:ring-brand-500">
+          <label for="schedule-repeat-weekly" id="lbl-schedule-repeat" class="text-xs text-slate-300 cursor-pointer select-none">
+            Repeat weekly on this day (e.g. every week)
+          </label>
+        </div>
+
+        <!-- Optional Lesson Focus / Topic -->
+        <div>
+          <label id="lbl-schedule-topic" class="block text-xs font-medium text-slate-300 mb-1">Lesson Focus / Notes (Optional)</label>
+          <input type="text" id="schedule-topic-notes" placeholder="e.g. Reviewing Tefillin & Haftarah" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeScheduleLessonModal()" id="btn-cancel-schedule" class="px-3.5 py-2 text-xs rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+            Cancel
+          </button>
+          <button type="submit" id="btn-save-schedule" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-semibold shadow-md active:scale-95 transition">
+            Save Lesson to Calendar
+          </button>
+        </div>
+
       </form>
     </div>
   </div>
@@ -760,6 +922,12 @@
       activeStudentId: null,
       activeStudentDrawerId: null,
       newStudentPendingAvatar: '',
+      calendar: {
+        year: new Date().getFullYear(),
+        month: new Date().getMonth(),
+        selectedDateStr: null,
+        selectedTimeSlot: '4:30 PM'
+      },
       cloud: {
         url: localStorage.getItem('tutor_sb_url') || 'https://bpkwnqbabokesuesvkex.supabase.co',
         key: localStorage.getItem('tutor_sb_key') || 'sb_publishable_hVy0YYOOT9k_LD_ZMe24zg_iuqTC538',
@@ -939,7 +1107,32 @@
         toastStudentMoved: "Student list reordered",
         toastPhotoUpdated: "Student picture updated!",
         toastPhotoRemoved: "Student picture removed",
-        openDetailHint: "Tap card to open details & checklist"
+        openDetailHint: "Tap card to open details & checklist",
+        tabCalendar: "Calendar",
+        mobCalendar: "Calendar",
+        calendarTitle: "Tutoring Schedule & Calendar",
+        calendarSubtitle: "7-day week schedule from Sunday to Saturday with dual Hebrew and secular dates, lesson planning, and direct student portfolio links.",
+        daysOfWeek: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+        daysOfWeekFull: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Shabbat"],
+        prevMonthTitle: "Previous Month",
+        nextMonthTitle: "Next Month",
+        todayBtn: "Today",
+        addLessonTitle: "Schedule Lesson",
+        selectStudentPrompt: "-- Select a student --",
+        lessonTimeLabel: "Lesson Time",
+        repeatWeeklyLabel: "Repeat weekly on this day",
+        lessonTopicOptional: "Lesson Focus / Notes (Optional)",
+        customTimePlaceholder: "e.g. 5:15 PM",
+        scheduledLessonsHeader: "Scheduled Lessons for this Day",
+        noLessonsDay: "No lessons scheduled for this day yet.",
+        addLessonBtn: "Save Lesson to Calendar",
+        deleteLessonConfirm: (name) => 'Remove scheduled lesson for ' + name + '?',
+        toastLessonScheduled: "Lesson scheduled and synced with Rabbi!",
+        toastLessonRemoved: "Scheduled lesson removed",
+        weeklyBadge: "Weekly",
+        oneTimeBadge: "Single",
+        jumpToPortfolioHint: "Click student to open portfolio",
+        quickScheduleBtn: "+ Schedule Lesson"
       },
       he: {
         appTitle: "טיוטור-פיילוט",
@@ -1109,7 +1302,32 @@
         toastStudentMoved: "סדר התלמידים עודכן",
         toastPhotoUpdated: "תמונת התלמיד עודכנה בהצלחה!",
         toastPhotoRemoved: "תמונת התלמיד הוסרה",
-        openDetailHint: "הקש על הכרטיס לפתיחת הפרטים והשיעורים"
+        openDetailHint: "הקש על הכרטיס לפתיחת הפרטים והשיעורים",
+        tabCalendar: "לוח זמנים",
+        mobCalendar: "יומן",
+        calendarTitle: "לוח זמנים ומערכת שיעורים",
+        calendarSubtitle: "מערכת שבועית בת 7 ימים מראשון עד שבת עם תאריכים עבריים ולועזיים, קביעת שיעורים וקישור ישיר לתיק התלמיד.",
+        daysOfWeek: ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "שבת"],
+        daysOfWeekFull: ["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "שבת קודש"],
+        prevMonthTitle: "חודש קודם",
+        nextMonthTitle: "חודש הבא",
+        todayBtn: "היום",
+        addLessonTitle: "קביעת שיעור לתלמיד",
+        selectStudentPrompt: "-- בחר תלמיד --",
+        lessonTimeLabel: "שעת השיעור",
+        repeatWeeklyLabel: "חזור שבועית ביום זה",
+        lessonTopicOptional: "נושא השיעור / הערות (אופציונלי)",
+        customTimePlaceholder: "לדוגמה: 17:15",
+        scheduledLessonsHeader: "שיעורים שנקבעו ליום זה",
+        noLessonsDay: "עדיין לא נקבעו שיעורים ליום זה.",
+        addLessonBtn: "שמור שיעור בלוח",
+        deleteLessonConfirm: (name) => 'האם להסיר את השיעור של ' + name + '?',
+        toastLessonScheduled: "השיעור נקבע וסונכרן עם הרב!",
+        toastLessonRemoved: "השיעור הוסר מהלוח",
+        weeklyBadge: "שבועי",
+        oneTimeBadge: "חד פעמי",
+        jumpToPortfolioHint: "הקש על התלמיד לפתיחת תיק ההתקדמות",
+        quickScheduleBtn: "+ קבע שיעור"
       }
     };
 
@@ -1295,6 +1513,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                 notes: row.notes || '',
                 avatar: meta.avatar || '',
                 orderIndex: typeof meta.order === 'number' ? meta.order : 0,
+                schedule: Array.isArray(meta.schedule) ? meta.schedule : [],
                 completedTopics: cleanCompletedTopics,
                 completedParshiot: row.completed_parshiot || {},
                 updatedAt: row.updated_at
@@ -1349,6 +1568,7 @@ alter publication supabase_realtime add table public.students_sync;`;
           notes: newRecord.notes || '',
           avatar: meta.avatar || '',
           orderIndex: typeof meta.order === 'number' ? meta.order : 0,
+          schedule: Array.isArray(meta.schedule) ? meta.schedule : [],
           completedTopics: cleanCompletedTopics,
           completedParshiot: newRecord.completed_parshiot || {},
           updatedAt: newRecord.updated_at
@@ -1390,7 +1610,8 @@ alter publication supabase_realtime add table public.students_sync;`;
         const completedTopics = { ...(student.completedTopics || {}) };
         completedTopics._meta = {
           avatar: student.avatar || '',
-          order: typeof student.orderIndex === 'number' ? student.orderIndex : 0
+          order: typeof student.orderIndex === 'number' ? student.orderIndex : 0,
+          schedule: Array.isArray(student.schedule) ? student.schedule : []
         };
 
         const payload = {
@@ -1838,6 +2059,9 @@ alter publication supabase_realtime add table public.students_sync;`;
       const tabStudents = document.getElementById('tab-students-label');
       if (tabStudents) tabStudents.textContent = t.tabStudents;
 
+      const tabCalendar = document.getElementById('tab-calendar-label');
+      if (tabCalendar) tabCalendar.textContent = t.tabCalendar;
+
       // Navigation Mobile Dock Labels
       const mobTopics = document.getElementById('mob-lbl-topics');
       if (mobTopics) mobTopics.textContent = t.mobTopics;
@@ -1847,6 +2071,9 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       const mobStudents = document.getElementById('mob-lbl-students');
       if (mobStudents) mobStudents.textContent = t.mobStudents;
+
+      const mobCalendar = document.getElementById('mob-lbl-calendar');
+      if (mobCalendar) mobCalendar.textContent = t.mobCalendar;
 
       // Section: Topics Head
       const topicsHeadTitle = document.getElementById('topics-head-title');
@@ -2090,6 +2317,25 @@ alter publication supabase_realtime add table public.students_sync;`;
       const btnLogoutLabel = document.getElementById('btn-logout-label');
       if (btnLogoutLabel) btnLogoutLabel.textContent = t.authLogout;
 
+      // Calendar Header Localizations
+      const calHeadTitle = document.getElementById('calendar-title-text');
+      if (calHeadTitle) calHeadTitle.textContent = t.calendarTitle;
+
+      const calDescText = document.getElementById('calendar-desc-text');
+      if (calDescText) calDescText.textContent = t.calendarSubtitle;
+
+      const calTodayBtn = document.getElementById('calendar-today-btn-label');
+      if (calTodayBtn) calTodayBtn.textContent = t.todayBtn;
+
+      const calQuickSched = document.getElementById('calendar-quick-schedule-btn');
+      if (calQuickSched) calQuickSched.textContent = t.quickScheduleBtn;
+
+      const calTodayInd = document.getElementById('lbl-cal-today-indicator');
+      if (calTodayInd) calTodayInd.textContent = t.todayBtn;
+
+      const calHint = document.getElementById('lbl-cal-hint');
+      if (calHint) calHint.textContent = isHe ? "הקש על יום לקביעת שיעור • הקש על תלמיד לפתיחת תיק" : "Tap day to schedule • Tap student for portfolio";
+
       if (APP_STATE.currentUser) updateUserSessionDisplay(APP_STATE.currentUser);
       updateCloudStatusPill();
     }
@@ -2097,7 +2343,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     function switchTab(tabId) {
       APP_STATE.activeTab = tabId;
 
-      const tabs = ['topics', 'chumash', 'students'];
+      const tabs = ['topics', 'chumash', 'students', 'calendar'];
       tabs.forEach(t => {
         const btn = document.getElementById(`tab-${t}`);
         const view = document.getElementById(`view-${t}`);
@@ -2113,6 +2359,9 @@ alter publication supabase_realtime add table public.students_sync;`;
           if (mobBtn) mobBtn.className = "flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition text-slate-400 hover:text-slate-200";
         }
       });
+      if (tabId === 'calendar') {
+        renderCalendar();
+      }
       // Scroll to top of view smoothly on tab switch
       window.scrollTo({ top: 0, behavior: 'smooth' });
       lucide.createIcons();
@@ -3077,6 +3326,7 @@ alter publication supabase_realtime add table public.students_sync;`;
           APP_STATE.students.forEach((s, idx) => {
             if (typeof s.orderIndex !== 'number') s.orderIndex = idx;
             if (!s.avatar) s.avatar = '';
+            if (!Array.isArray(s.schedule)) s.schedule = [];
           });
           APP_STATE.students.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
         } else {
@@ -3087,6 +3337,16 @@ alter publication supabase_realtime add table public.students_sync;`;
               parshaOrDate: "Parshat Lech Lecha (Nov 2026)",
               avatar: "",
               orderIndex: 0,
+              schedule: [
+                {
+                  id: "les_sample_1",
+                  dateStr: "2026-11-08",
+                  dayOfWeek: 0,
+                  time: "4:30 PM",
+                  repeatWeekly: true,
+                  topic: "Tefillin & Shema review"
+                }
+              ],
               notes: "Great curiosity! Loves basketball analogies. Completed Tefillin and Shabbat basics.",
               completedTopics: { shabbat: true, tefillin: true, kashrut: true },
               completedParshiot: { lech_lecha: true, bereishit: true }
@@ -3097,6 +3357,16 @@ alter publication supabase_realtime add table public.students_sync;`;
               parshaOrDate: "Parshat Beshalach (Jan 2027)",
               avatar: "",
               orderIndex: 1,
+              schedule: [
+                {
+                  id: "les_sample_2",
+                  dateStr: "2026-11-10",
+                  dayOfWeek: 2,
+                  time: "5:00 PM",
+                  repeatWeekly: true,
+                  topic: "Bar Mitzvah responsibility"
+                }
+              ],
               notes: "Introductory lessons. Focused on Bar Mitzvah responsibility.",
               completedTopics: { bar_mitzvah: true, ahavat_yisrael: true },
               completedParshiot: { shemot: true }
@@ -3261,10 +3531,482 @@ alter publication supabase_realtime add table public.students_sync;`;
       showToast(t.toastStudentDeleted);
     }
 
+    // ==============================================
+    // CALENDAR & SCHEDULING ENGINE
+    // ==============================================
+
+    function toHebrewNumeral(num) {
+      if (num === 15) return "ט״ו";
+      if (num === 16) return "ט״ז";
+      const letters = [
+        [400, "ת"], [300, "ש"], [200, "ר"], [100, "ק"],
+        [90, "צ"], [80, "פ"], [70, "ע"], [60, "ס"],
+        [50, "נ"], [40, "מ"], [30, "ל"], [20, "כ"],
+        [10, "י"], [9, "ט"], [8, "ח"], [7, "ז"],
+        [6, "ו"], [5, "ה"], [4, "ד"], [3, "ג"],
+        [2, "ב"], [1, "א"]
+      ];
+      let res = "";
+      for (const [val, char] of letters) {
+        while (num >= val) {
+          res += char;
+          num -= val;
+        }
+      }
+      if (res.length > 1) {
+        res = res.slice(0, -1) + "״" + res.slice(-1);
+      } else if (res.length === 1) {
+        res = res + "׳";
+      }
+      return res;
+    }
+
+    function getHebrewDateInfo(date) {
+      try {
+        const parts = new Intl.DateTimeFormat("he-u-ca-hebrew", {
+          day: "numeric",
+          month: "long",
+          year: "numeric"
+        }).formatToParts(date);
+
+        let dayNum = 1;
+        let monthName = "";
+        let yearNum = 5787;
+
+        for (const p of parts) {
+          if (p.type === "day") dayNum = parseInt(p.value, 10) || 1;
+          if (p.type === "month") monthName = p.value;
+          if (p.type === "year") yearNum = parseInt(p.value, 10) || 5787;
+        }
+        const dayHebrewNumeral = toHebrewNumeral(dayNum);
+        const yearHebrewNumeral = toHebrewNumeral(yearNum % 1000);
+        return { dayNum, dayHebrewNumeral, monthName, yearNum, yearHebrewNumeral };
+      } catch (e) {
+        return { dayNum: 1, dayHebrewNumeral: "א׳", monthName: "חשון", yearNum: 5787, yearHebrewNumeral: "תשפ״ז" };
+      }
+    }
+
+    function changeCalendarMonth(delta) {
+      let { year, month } = APP_STATE.calendar;
+      month += delta;
+      if (month < 0) {
+        month = 11;
+        year -= 1;
+      } else if (month > 11) {
+        month = 0;
+        year += 1;
+      }
+      APP_STATE.calendar.year = year;
+      APP_STATE.calendar.month = month;
+      renderCalendar();
+    }
+
+    function resetCalendarToToday() {
+      const now = new Date();
+      APP_STATE.calendar.year = now.getFullYear();
+      APP_STATE.calendar.month = now.getMonth();
+      renderCalendar();
+    }
+
+    function getScheduledSessionsForDate(targetDate) {
+      const y = targetDate.getFullYear();
+      const m = String(targetDate.getMonth() + 1).padStart(2, '0');
+      const d = String(targetDate.getDate()).padStart(2, '0');
+      const dateStr = `${y}-${m}-${d}`;
+      const dayOfWeek = targetDate.getDay();
+
+      const sessions = [];
+      (APP_STATE.students || []).forEach(student => {
+        (student.schedule || []).forEach(s => {
+          if (s.repeatWeekly && s.dayOfWeek === dayOfWeek) {
+            sessions.push({ ...s, studentId: student.id, studentName: student.name, studentAvatar: student.avatar });
+          } else if (!s.repeatWeekly && s.dateStr === dateStr) {
+            sessions.push({ ...s, studentId: student.id, studentName: student.name, studentAvatar: student.avatar });
+          }
+        });
+      });
+
+      sessions.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+      return sessions;
+    }
+
+    function renderCalendar() {
+      const grid = document.getElementById('calendar-days-grid');
+      const weekdaysHeader = document.getElementById('calendar-weekdays-header');
+      const secularBanner = document.getElementById('calendar-secular-month-year');
+      const hebrewBanner = document.getElementById('calendar-hebrew-month-year');
+      if (!grid) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      const t = I18N[APP_STATE.lang];
+      const { year, month } = APP_STATE.calendar;
+
+      const secularMonthNamesEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const secularMonthNamesHe = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
+
+      if (secularBanner) {
+        secularBanner.textContent = `${isHe ? secularMonthNamesHe[month] : secularMonthNamesEn[month]} ${year}`;
+      }
+
+      const midMonthDate = new Date(year, month, 15);
+      const midHebrew = getHebrewDateInfo(midMonthDate);
+      if (hebrewBanner) {
+        hebrewBanner.textContent = `${midHebrew.monthName} ${midHebrew.yearHebrewNumeral}`;
+      }
+
+      if (weekdaysHeader) {
+        weekdaysHeader.innerHTML = t.daysOfWeek.map((dayName, idx) => {
+          const isShabbat = idx === 6;
+          return `<div class="p-1.5 sm:p-2 rounded-lg ${isShabbat ? 'text-amber-400 bg-amber-500/10' : 'bg-slate-900/40'} border border-slate-800/60 font-mono text-[11px]">${dayName}</div>`;
+        }).join('');
+      }
+
+      const firstDayOfWeek = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+      const today = new Date();
+      const todayDateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+      let cellsHtml = '';
+
+      for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+        const prevDay = daysInPrevMonth - i;
+        const prevDate = new Date(year, month - 1, prevDay);
+        const prevHebrew = getHebrewDateInfo(prevDate);
+        const prevY = prevDate.getFullYear();
+        const prevM = String(prevDate.getMonth() + 1).padStart(2, '0');
+        const prevD = String(prevDay).padStart(2, '0');
+        const dateStr = `${prevY}-${prevM}-${prevD}`;
+        const sessions = getScheduledSessionsForDate(prevDate);
+
+        cellsHtml += renderDayCell(prevDay, prevHebrew.dayHebrewNumeral, false, false, dateStr, prevDate.getDay(), sessions);
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const currDate = new Date(year, month, d);
+        const currHebrew = getHebrewDateInfo(currDate);
+        const currY = year;
+        const currM = String(month + 1).padStart(2, '0');
+        const currD = String(d).padStart(2, '0');
+        const dateStr = `${currY}-${currM}-${currD}`;
+        const isToday = dateStr === todayDateStr;
+        const sessions = getScheduledSessionsForDate(currDate);
+
+        cellsHtml += renderDayCell(d, currHebrew.dayHebrewNumeral, true, isToday, dateStr, currDate.getDay(), sessions);
+      }
+
+      const totalRendered = firstDayOfWeek + daysInMonth;
+      const remaining = (7 - (totalRendered % 7)) % 7;
+      for (let tDay = 1; tDay <= remaining; tDay++) {
+        const nextDate = new Date(year, month + 1, tDay);
+        const nextHebrew = getHebrewDateInfo(nextDate);
+        const nextY = nextDate.getFullYear();
+        const nextM = String(nextDate.getMonth() + 1).padStart(2, '0');
+        const nextD = String(tDay).padStart(2, '0');
+        const dateStr = `${nextY}-${nextM}-${nextD}`;
+        const sessions = getScheduledSessionsForDate(nextDate);
+
+        cellsHtml += renderDayCell(tDay, nextHebrew.dayHebrewNumeral, false, false, dateStr, nextDate.getDay(), sessions);
+      }
+
+      grid.innerHTML = cellsHtml;
+      lucide.createIcons();
+    }
+
+    function renderDayCell(dayNum, hebrewDayNumeral, isCurrentMonth, isToday, dateStr, dayOfWeek, sessions) {
+      const t = I18N[APP_STATE.lang];
+      const isShabbat = dayOfWeek === 6;
+
+      const maxDirect = 2;
+      const directSessions = sessions.slice(0, maxDirect);
+      const extraCount = sessions.length - maxDirect;
+
+      const sessionBadges = directSessions.map(s => {
+        const avatar = s.studentAvatar
+          ? `<img src="${s.studentAvatar}" class="w-3.5 h-3.5 rounded-full object-cover shrink-0">`
+          : `<span class="w-3.5 h-3.5 rounded-full bg-brand-500/30 text-brand-300 font-bold text-[8px] flex items-center justify-center shrink-0">${s.studentName.charAt(0)}</span>`;
+
+        return `
+          <div
+            onclick="event.stopPropagation(); openStudentDrawer('${s.studentId}')"
+            title="${t.jumpToPortfolioHint}: ${s.studentName} (${s.time})"
+            class="cursor-pointer group flex items-center justify-between gap-1 px-1.5 py-0.5 rounded bg-brand-950/80 hover:bg-brand-900 border border-brand-500/30 hover:border-brand-400 text-brand-200 transition text-[10px] leading-tight truncate shadow-xs"
+          >
+            <div class="flex items-center gap-1 min-w-0">
+              ${avatar}
+              <span class="truncate font-semibold text-white group-hover:text-brand-300">${s.studentName}</span>
+            </div>
+            <span class="shrink-0 font-mono text-[9px] text-amber-300 font-medium">${s.time}</span>
+          </div>
+        `;
+      }).join('');
+
+      const extraBadge = extraCount > 0
+        ? `<span class="text-[9px] font-bold text-slate-400 hover:text-white px-1 py-0.2 rounded bg-slate-800/80 block text-center">+${extraCount} more</span>`
+        : '';
+
+      return `
+        <div
+          onclick="openScheduleLessonModal('${dateStr}')"
+          class="group relative min-h-[78px] sm:min-h-[96px] p-1.5 sm:p-2 rounded-xl border flex flex-col justify-between transition cursor-pointer select-none active:scale-[0.99] ${
+            isToday
+              ? 'bg-slate-900/90 border-amber-400 ring-1 ring-amber-400/50 shadow-md shadow-amber-500/5'
+              : isCurrentMonth
+                ? 'bg-slate-900/50 border-slate-800/80 hover:border-slate-700 hover:bg-slate-850/70'
+                : 'bg-slate-950/40 border-slate-900/60 opacity-40 hover:opacity-75'
+          } ${isShabbat ? 'bg-amber-950/10' : ''}"
+        >
+          <!-- Date Header: English Left, Hebrew Right -->
+          <div dir="ltr" class="flex items-center justify-between text-xs leading-none">
+            <span class="font-bold ${isToday ? 'text-amber-400 font-extrabold' : isCurrentMonth ? 'text-white' : 'text-slate-400'} font-mono">
+              ${dayNum}
+            </span>
+            <span class="text-[11px] font-semibold text-brand-400/90 font-mono">
+              ${hebrewDayNumeral}
+            </span>
+          </div>
+
+          <!-- Scheduled Session Chips Container -->
+          <div class="space-y-1 my-1 overflow-hidden">
+            ${sessionBadges}
+            ${extraBadge}
+          </div>
+
+          <!-- Quick Add Hover Indicator -->
+          <div class="flex justify-end opacity-0 group-hover:opacity-100 transition">
+            <span class="p-0.5 rounded text-brand-400 hover:text-white hover:bg-slate-800 text-[10px]">
+              <i data-lucide="plus" class="w-3 h-3"></i>
+            </span>
+          </div>
+        </div>
+      `;
+    }
+
+    function openScheduleModalForToday() {
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, '0');
+      const d = String(today.getDate()).padStart(2, '0');
+      openScheduleLessonModal(`${y}-${m}-${d}`);
+    }
+
+    function openScheduleLessonModal(dateStr) {
+      APP_STATE.calendar.selectedDateStr = dateStr;
+      const modal = document.getElementById('modal-schedule-lesson');
+      if (!modal) return;
+
+      const t = I18N[APP_STATE.lang];
+      const isHe = APP_STATE.lang === 'he';
+
+      const parts = dateStr.split('-');
+      const dateObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      const hebrewInfo = getHebrewDateInfo(dateObj);
+      const dayOfWeekName = t.daysOfWeekFull[dateObj.getDay()];
+
+      const titleEl = document.getElementById('modal-schedule-title');
+      if (titleEl) titleEl.textContent = t.addLessonTitle;
+
+      const subtitle = document.getElementById('modal-schedule-date-subtitle');
+      if (subtitle) {
+        subtitle.textContent = isHe
+          ? `${dayOfWeekName}, ${hebrewInfo.dayHebrewNumeral} ${hebrewInfo.monthName} ${hebrewInfo.yearHebrewNumeral} • ${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`
+          : `${dayOfWeekName}, ${hebrewInfo.dayHebrewNumeral} ${hebrewInfo.monthName} ${hebrewInfo.yearHebrewNumeral} • ${dateStr}`;
+      }
+
+      const lblStudent = document.getElementById('lbl-schedule-student');
+      if (lblStudent) lblStudent.textContent = isHe ? "בחר תלמיד" : "Select Student";
+
+      const lblTime = document.getElementById('lbl-schedule-time');
+      if (lblTime) lblTime.textContent = t.lessonTimeLabel;
+
+      const customTimeInput = document.getElementById('schedule-custom-time');
+      if (customTimeInput) {
+        customTimeInput.placeholder = t.customTimePlaceholder;
+        customTimeInput.value = '';
+      }
+
+      const lblRepeat = document.getElementById('lbl-schedule-repeat');
+      if (lblRepeat) lblRepeat.textContent = t.repeatWeeklyLabel;
+
+      const lblTopic = document.getElementById('lbl-schedule-topic');
+      if (lblTopic) lblTopic.textContent = t.lessonTopicOptional;
+
+      const topicInput = document.getElementById('schedule-topic-notes');
+      if (topicInput) topicInput.value = '';
+
+      const btnCancel = document.getElementById('btn-cancel-schedule');
+      if (btnCancel) btnCancel.textContent = t.cancel;
+
+      const btnSave = document.getElementById('btn-save-schedule');
+      if (btnSave) btnSave.textContent = t.addLessonBtn;
+
+      const txtExisting = document.getElementById('txt-existing-lessons-title');
+      if (txtExisting) txtExisting.textContent = t.scheduledLessonsHeader;
+
+      const studentSelect = document.getElementById('schedule-student-select');
+      if (studentSelect) {
+        if (!APP_STATE.students || APP_STATE.students.length === 0) {
+          studentSelect.innerHTML = `<option value="">-- ${isHe ? 'אין תלמידים רשומים עדיין' : 'No students added yet'} --</option>`;
+        } else {
+          studentSelect.innerHTML = `<option value="">${t.selectStudentPrompt}</option>` +
+            APP_STATE.students.map(s => `<option value="${s.id}">${s.name} (${s.parshaOrDate || t.defaultCandidate})</option>`).join('');
+        }
+      }
+
+      APP_STATE.calendar.selectedTimeSlot = '4:30 PM';
+      selectQuickTimeSlot('4:30 PM');
+
+      const repeatWeeklyCheckbox = document.getElementById('schedule-repeat-weekly');
+      if (repeatWeeklyCheckbox) repeatWeeklyCheckbox.checked = false;
+
+      const existingContainer = document.getElementById('schedule-existing-container');
+      const existingList = document.getElementById('schedule-existing-list');
+      const existingSessions = getScheduledSessionsForDate(dateObj);
+
+      if (existingSessions.length > 0) {
+        existingContainer.classList.remove('hidden');
+        existingList.innerHTML = existingSessions.map(s => `
+          <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950 border border-slate-800 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-amber-400 font-bold">${s.time}</span>
+              <span class="text-white font-semibold">${s.studentName}</span>
+              ${s.repeatWeekly ? `<span class="text-[9px] px-1.5 py-0.2 rounded bg-brand-500/20 text-brand-300 font-mono">${t.weeklyBadge}</span>` : ''}
+              ${s.topic ? `<span class="text-slate-400 italic text-[11px] truncate max-w-[130px]">• ${s.topic}</span>` : ''}
+            </div>
+            <button type="button" onclick="deleteScheduledLesson('${s.studentId}', '${s.id}', event)" class="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-slate-800 transition" title="Delete">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `).join('');
+      } else {
+        existingContainer.classList.add('hidden');
+        existingList.innerHTML = '';
+      }
+
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeScheduleLessonModal() {
+      const modal = document.getElementById('modal-schedule-lesson');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function selectQuickTimeSlot(timeStr) {
+      APP_STATE.calendar.selectedTimeSlot = timeStr;
+      const buttons = document.querySelectorAll('#schedule-quick-time-buttons .time-slot-btn');
+      buttons.forEach(btn => {
+        if (btn.textContent.trim() === timeStr) {
+          btn.className = "time-slot-btn py-1.5 px-2 text-xs rounded-lg border border-brand-500 bg-brand-600/30 text-white font-semibold transition";
+        } else {
+          btn.className = "time-slot-btn py-1.5 px-2 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:border-brand-500 hover:text-white transition";
+        }
+      });
+    }
+
+    function handleSaveScheduledLesson(e) {
+      e.preventDefault();
+      const t = I18N[APP_STATE.lang];
+      const studentSelect = document.getElementById('schedule-student-select');
+      const studentId = studentSelect ? studentSelect.value : '';
+
+      if (!studentId) {
+        showToast(t.toastNameRequired);
+        return;
+      }
+
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+
+      const customTime = document.getElementById('schedule-custom-time').value.trim();
+      const finalTime = customTime || APP_STATE.calendar.selectedTimeSlot || '4:30 PM';
+      const repeatWeekly = document.getElementById('schedule-repeat-weekly').checked;
+      const topic = document.getElementById('schedule-topic-notes').value.trim();
+      const dateStr = APP_STATE.calendar.selectedDateStr;
+
+      const parts = dateStr.split('-');
+      const dateObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      const dayOfWeek = dateObj.getDay();
+
+      if (!Array.isArray(student.schedule)) {
+        student.schedule = [];
+      }
+
+      const newSession = {
+        id: "les_" + Date.now(),
+        dateStr: dateStr,
+        dayOfWeek: dayOfWeek,
+        time: finalTime,
+        repeatWeekly: repeatWeekly,
+        topic: topic
+      };
+
+      student.schedule.push(newSession);
+
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud.client) {
+        pushStudentToCloud(student);
+      }
+
+      closeScheduleLessonModal();
+      renderCalendar();
+      showToast(t.toastLessonScheduled);
+    }
+
+    function deleteScheduledLesson(studentId, lessonId, e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      const t = I18N[APP_STATE.lang];
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student || !Array.isArray(student.schedule)) return;
+
+      if (!confirm(t.deleteLessonConfirm(student.name))) return;
+
+      student.schedule = student.schedule.filter(s => s.id !== lessonId);
+
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud.client) {
+        pushStudentToCloud(student);
+      }
+
+      if (APP_STATE.calendar.selectedDateStr) {
+        const parts = APP_STATE.calendar.selectedDateStr.split('-');
+        const dateObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        const existingSessions = getScheduledSessionsForDate(dateObj);
+        const existingContainer = document.getElementById('schedule-existing-container');
+        const existingList = document.getElementById('schedule-existing-list');
+
+        if (existingSessions.length > 0) {
+          existingContainer.classList.remove('hidden');
+          existingList.innerHTML = existingSessions.map(s => `
+            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950 border border-slate-800 text-xs">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-amber-400 font-bold">${s.time}</span>
+                <span class="text-white font-semibold">${s.studentName}</span>
+                ${s.repeatWeekly ? `<span class="text-[9px] px-1.5 py-0.2 rounded bg-brand-500/20 text-brand-300 font-mono">${t.weeklyBadge}</span>` : ''}
+                ${s.topic ? `<span class="text-slate-400 italic text-[11px] truncate max-w-[130px]">• ${s.topic}</span>` : ''}
+              </div>
+              <button type="button" onclick="deleteScheduledLesson('${s.studentId}', '${s.id}', event)" class="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-slate-800 transition" title="Delete">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          `).join('');
+        } else {
+          existingContainer.classList.add('hidden');
+          existingList.innerHTML = '';
+        }
+      }
+
+      renderCalendar();
+      showToast(t.toastLessonRemoved);
+      lucide.createIcons();
+    }
+
     function renderAllViews() {
       renderTopics();
       renderChumash();
       renderStudents();
+      renderCalendar();
       renderActiveStudentWorkspace(true);
     }
 
@@ -3425,6 +4167,11 @@ alter publication supabase_realtime add table public.students_sync;`;
           <span id="mob-student-badge" class="absolute -top-1 -right-2 w-4 h-4 rounded-full bg-amber-500 text-slate-950 font-bold text-[9px] flex items-center justify-center">0</span>
         </div>
         <span class="text-[10px] tracking-tight" id="mob-lbl-students">Tracker</span>
+      </button>
+
+      <button onclick="switchTab('calendar')" id="mob-tab-calendar" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition text-slate-400 hover:text-slate-200">
+        <i data-lucide="calendar" class="w-5 h-5"></i>
+        <span class="text-[10px] tracking-tight" id="mob-lbl-calendar">Calendar</span>
       </button>
 
     </div>
