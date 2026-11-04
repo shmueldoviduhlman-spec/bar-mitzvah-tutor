@@ -1630,7 +1630,31 @@
         toastApiKeySaved: "Gemini API Key saved and verified!",
         toastApiKeyInvalid: "Please enter a valid Gemini API Key",
         toastChatCleared: "Chat cleared",
-        toastPromptCopied: "Base44 System Prompt copied to clipboard!"
+        toastPromptCopied: "Base44 System Prompt copied to clipboard!",
+
+        // Skills & Daily Learning
+        skillsDailyTitle: "Daily Learning & Ceremony Skills",
+        hebrewReadingTitle: "Hebrew Reading & Booklets",
+        hebrewBookletLabel: "Booklet",
+        hebrewPageLabel: "Page",
+        hebrewVowelLabel: "Vowel / Letter",
+        parshaReadingTitle: "Torah Parsha & Trope",
+        parshaAliyahLabel: "Aliyah",
+        parshaLinesMasteredLabel: "Lines Mastered",
+        parshaCurrentLineLabel: "Holding at Line",
+        shemaTitle: "Kriat Shema & Tefillah",
+        shemaSectionLabel: "Section",
+        shemaStatusLabel: "Fluency",
+        activeHomeworkTitle: "Active Homework",
+        homeworkAssigned: "Assigned",
+        homeworkCompletedBadge: "Completed",
+        homeworkPendingBadge: "Pending Review",
+        markHomeworkDone: "Mark as Done",
+        unmarkHomework: "Mark Pending",
+        assignHomeworkBtn: "+ Assign Homework",
+        customGoalsTitle: "Custom Student Goals",
+        addCustomGoalBtn: "+ Add Goal",
+        viewFullProfile: "View Full Profile"
       },
       he: {
         appTitle: "טיוטור-פיילוט",
@@ -1876,7 +1900,31 @@
         toastApiKeySaved: "מפתח Gemini נשמר בהצלחה!",
         toastApiKeyInvalid: "אנא הזן מפתח Gemini תקין",
         toastChatCleared: "השיחה נוקתה",
-        toastPromptCopied: "הנחיות Base44 הועתקו ללוח!"
+        toastPromptCopied: "הנחיות Base44 הועתקו ללוח!",
+
+        // Skills & Daily Learning
+        skillsDailyTitle: "מיומנויות קריאה ולימוד יומי",
+        hebrewReadingTitle: "קריאה בעברית וחוברות",
+        hebrewBookletLabel: "חוברת",
+        hebrewPageLabel: "עמוד",
+        hebrewVowelLabel: "ניקוד / אות",
+        parshaReadingTitle: "קריאת הפרשה וטעמים",
+        parshaAliyahLabel: "עלייה",
+        parshaLinesMasteredLabel: "שורות שנלמדו",
+        parshaCurrentLineLabel: "אוֹחֵז בשורה",
+        shemaTitle: "קריאת שמע ותפילה",
+        shemaSectionLabel: "קטע",
+        shemaStatusLabel: "רמת שליטה",
+        activeHomeworkTitle: "שיעורי בית פעילים",
+        homeworkAssigned: "הוטל בתאריך",
+        homeworkCompletedBadge: "הושלם בהצלחה",
+        homeworkPendingBadge: "ממתין לבדיקה",
+        markHomeworkDone: "סמן כהושלם",
+        unmarkHomework: "החזר לממתין",
+        assignHomeworkBtn: "+ הוסף שיעורי בית",
+        customGoalsTitle: "יעדים אישיים לתלמיד",
+        addCustomGoalBtn: "+ הוסף יעד",
+        viewFullProfile: "צפה בפרופיל המלא"
       }
     };
 
@@ -1909,6 +1957,164 @@ alter publication supabase_realtime add table public.students_sync;`;
           if (btn) btn.textContent = t.cloudGuideCopySql;
         }, 2000);
       });
+    }
+
+    function getDefaultStudentSkills() {
+      return {
+        hebrewReading: {
+          booklet: 'Booklet 1',
+          currentPage: '',
+          letterOrVowel: '',
+          nextTarget: ''
+        },
+        parshaReading: {
+          aliyah: 'Aliyah 1',
+          linesLearned: '',
+          currentLine: '',
+          notes: ''
+        },
+        shemaReading: {
+          section: 'Passuk 1 & V\'Ahavta',
+          status: 'Learning with vowels'
+        },
+        homework: {
+          task: '',
+          assignedDate: '',
+          completed: false
+        },
+        customGoals: [],
+        nextLessonBullets: []
+      };
+    }
+
+    function ensureStudentSkills(student) {
+      if (!student) return;
+      if (!student.skills || typeof student.skills !== 'object') {
+        student.skills = getDefaultStudentSkills();
+      }
+      if (!student.skills.hebrewReading) student.skills.hebrewReading = { booklet: 'Booklet 1', currentPage: '', letterOrVowel: '', nextTarget: '' };
+      if (!student.skills.parshaReading) student.skills.parshaReading = { aliyah: 'Aliyah 1', linesLearned: '', currentLine: '', notes: '' };
+      if (!student.skills.shemaReading) student.skills.shemaReading = { section: 'Passuk 1 & V\'Ahavta', status: 'Learning with vowels' };
+      if (!student.skills.homework) student.skills.homework = { task: '', assignedDate: '', completed: false };
+      if (!Array.isArray(student.skills.customGoals)) student.skills.customGoals = [];
+      if (!Array.isArray(student.skills.nextLessonBullets)) student.skills.nextLessonBullets = [];
+    }
+
+    let skillAutoSaveTimer = null;
+    function handleSkillFieldChange(studentId, section, field, value) {
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      ensureStudentSkills(student);
+      student.skills[section][field] = value;
+      clearTimeout(skillAutoSaveTimer);
+      skillAutoSaveTimer = setTimeout(() => {
+        saveStudentsToStorage(false);
+        if (APP_STATE.cloud.client) pushStudentToCloud(student);
+      }, 400);
+    }
+
+    function setStudentBooklet(studentId, bookletName) {
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      ensureStudentSkills(student);
+      student.skills.hebrewReading.booklet = bookletName;
+      const input = document.getElementById('input-hebrew-booklet-' + studentId);
+      if (input) input.value = bookletName;
+      saveStudentsToStorage(false);
+      if (APP_STATE.cloud.client) pushStudentToCloud(student);
+      const isHe = APP_STATE.lang === 'he';
+      showToast(isHe ? ('עודכן: ' + bookletName) : ('Set to ' + bookletName));
+    }
+
+    function toggleStudentHomework(studentId) {
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      ensureStudentSkills(student);
+      student.skills.homework.completed = !student.skills.homework.completed;
+      saveStudentsToStorage(false);
+      if (APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderStudentDrawer(studentId, true);
+      const isHe = APP_STATE.lang === 'he';
+      showToast(student.skills.homework.completed ?
+        (isHe ? 'שיעורי בית סומנו כהושלמו!' : 'Homework marked as completed!') :
+        (isHe ? 'שיעורי בית הוחזרו לממתינים לבדיקה' : 'Homework marked as pending review'));
+    }
+
+    function clearStudentHomework(studentId) {
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      ensureStudentSkills(student);
+      student.skills.homework.task = '';
+      student.skills.homework.completed = false;
+      student.skills.homework.assignedDate = '';
+      saveStudentsToStorage(false);
+      if (APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderStudentDrawer(studentId, true);
+      const isHe = APP_STATE.lang === 'he';
+      showToast(isHe ? 'שיעורי בית נמחקו' : 'Homework cleared');
+    }
+
+    function promptAddStudentHomework(studentId) {
+      const isHe = APP_STATE.lang === 'he';
+      const promptText = isHe ? 'הזן משימת שיעורי בית לתלמיד:' : 'Enter homework task for this student:';
+      const task = prompt(promptText);
+      if (!task || !task.trim()) return;
+
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      ensureStudentSkills(student);
+      student.skills.homework.task = task.trim();
+      student.skills.homework.completed = false;
+      student.skills.homework.assignedDate = new Date().toISOString().split('T')[0];
+      saveStudentsToStorage(false);
+      if (APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderStudentDrawer(studentId, true);
+      showToast(isHe ? 'שיעורי בית הוקצו בהצלחה' : 'Homework assigned!');
+    }
+
+    function promptAddStudentCustomGoal(studentId) {
+      const isHe = APP_STATE.lang === 'he';
+      const promptText = isHe ? 'הזן יעד חדש לתלמיד (לדוגמה: ברכות העלייה לתורה, תרגול דרשה):' : 'Enter a new custom goal for this student (e.g. Aliyah blessings, Dvar Torah practice):';
+      const goalText = prompt(promptText);
+      if (!goalText || !goalText.trim()) return;
+
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      ensureStudentSkills(student);
+      student.skills.customGoals.push({
+        id: 'goal_' + Date.now() + Math.random().toString(36).substr(2, 4),
+        title: goalText.trim(),
+        completed: false
+      });
+      saveStudentsToStorage(false);
+      if (APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderStudentDrawer(studentId, true);
+      showToast(isHe ? 'יעד נוסף בהצלחה' : 'Goal added!');
+    }
+
+    function toggleStudentCustomGoal(studentId, goalId) {
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      ensureStudentSkills(student);
+      const goal = student.skills.customGoals.find(g => g.id === goalId);
+      if (goal) {
+        goal.completed = !goal.completed;
+        saveStudentsToStorage(false);
+        if (APP_STATE.cloud.client) pushStudentToCloud(student);
+        renderStudentDrawer(studentId, true);
+      }
+    }
+
+    function deleteStudentCustomGoal(studentId, goalId) {
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      ensureStudentSkills(student);
+      student.skills.customGoals = student.skills.customGoals.filter(g => g.id !== goalId);
+      saveStudentsToStorage(false);
+      if (APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderStudentDrawer(studentId, true);
+      const isHe = APP_STATE.lang === 'he';
+      showToast(isHe ? 'יעד נמחק' : 'Goal removed');
     }
 
     function openSettingsModal() {
@@ -2098,6 +2304,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                 notes: row.notes || '',
                 avatar: meta.avatar || '',
                 orderIndex: typeof meta.order === 'number' ? meta.order : 0,
+                skills: meta.skills || getDefaultStudentSkills(),
                 schedule: scheduleList,
                 completedTopics: cleanCompletedTopics,
                 completedParshiot: row.completed_parshiot || {},
@@ -2200,6 +2407,7 @@ alter publication supabase_realtime add table public.students_sync;`;
           notes: newRecord.notes || '',
           avatar: meta.avatar || '',
           orderIndex: typeof meta.order === 'number' ? meta.order : 0,
+          skills: meta.skills || getDefaultStudentSkills(),
           schedule: scheduleList,
           completedTopics: cleanCompletedTopics,
           completedParshiot: newRecord.completed_parshiot || {},
@@ -2245,6 +2453,7 @@ alter publication supabase_realtime add table public.students_sync;`;
           avatar: student.avatar || '',
           order: typeof student.orderIndex === 'number' ? student.orderIndex : 0,
           schedule: cleanSchedule,
+          skills: student.skills || getDefaultStudentSkills(),
           lessons: cleanSchedule.map(s => ({
             id: s.id,
             date: s.dateStr,
@@ -4256,7 +4465,267 @@ alter publication supabase_realtime add table public.students_sync;`;
       // Render Body
       const body = document.getElementById('drawer-body-content');
       if (body) {
+        ensureStudentSkills(student);
+        const sk = student.skills;
+        const hw = sk.homework || {};
+        const hr = sk.hebrewReading || {};
+        const pr = sk.parshaReading || {};
+        const sr = sk.shemaReading || {};
+        const goals = Array.isArray(sk.customGoals) ? sk.customGoals : [];
+
+        // Active Homework Card
+        const homeworkBannerHtml = (hw.task && hw.task.trim())
+          ? `
+          <div class="p-3.5 rounded-xl border ${hw.completed ? 'bg-emerald-950/40 border-emerald-500/40' : 'bg-amber-950/30 border-amber-500/40'} space-y-2">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="flex items-center gap-2">
+                <i data-lucide="clipboard-list" class="w-4 h-4 ${hw.completed ? 'text-emerald-400' : 'text-amber-400'}"></i>
+                <span class="text-xs font-bold text-white">${t.activeHomeworkTitle}</span>
+                ${hw.assignedDate ? `<span class="text-[10px] text-slate-400 font-mono">(${hw.assignedDate})</span>` : ''}
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onclick="toggleStudentHomework('${student.id}')"
+                  class="px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition ${hw.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30' : 'bg-amber-500 hover:bg-amber-400 text-slate-950'}"
+                >
+                  <i data-lucide="${hw.completed ? 'check' : 'circle'}" class="w-3.5 h-3.5"></i>
+                  <span>${hw.completed ? t.homeworkCompletedBadge : t.markHomeworkDone}</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="clearStudentHomework('${student.id}')"
+                  title="${isHe ? 'מחק שיעורי בית' : 'Clear homework'}"
+                  class="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-slate-800 transition"
+                >
+                  <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+            <p class="text-xs ${hw.completed ? 'line-through text-slate-400' : 'text-amber-200 font-medium'} leading-relaxed pl-6 rtl:pl-0 rtl:pr-6">
+              ${escapeHtml(hw.task)}
+            </p>
+          </div>
+          `
+          : `
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/50 border border-dashed border-slate-800 text-xs">
+            <span class="text-slate-400 flex items-center gap-1.5">
+              <i data-lucide="clipboard-list" class="w-3.5 h-3.5 text-slate-500"></i>
+              <span>${isHe ? 'אין שיעורי בית פעילים כרגע' : 'No active homework'}</span>
+            </span>
+            <button
+              type="button"
+              onclick="promptAddStudentHomework('${student.id}')"
+              class="text-amber-400 hover:text-amber-300 font-medium hover:underline text-[11px] flex items-center gap-1"
+            >
+              <i data-lucide="plus" class="w-3 h-3"></i>
+              <span>${t.assignHomeworkBtn}</span>
+            </button>
+          </div>
+          `;
+
+        // Skills Grid
+        const skillsSectionHtml = `
+          <!-- Core Ceremony Skills & Daily Learning Section -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-amber-400">
+              <span class="flex items-center gap-1.5">
+                <i data-lucide="layers" class="w-3.5 h-3.5 text-amber-400"></i>
+                ${t.skillsDailyTitle}
+              </span>
+              <span class="text-[10px] text-slate-500 font-mono font-normal">Auto-saves to cloud</span>
+            </div>
+
+            <!-- 2-Column Skills Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <!-- Card 1: Hebrew Reading & Booklets -->
+              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                    <i data-lucide="book-marked" class="w-3.5 h-3.5"></i>
+                    <span>${t.hebrewReadingTitle}</span>
+                  </span>
+                  <span class="text-[10px] text-slate-500 font-mono">Booklet</span>
+                </div>
+
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between text-[11px] text-slate-400">
+                    <span>${t.hebrewBookletLabel}</span>
+                    <div class="flex items-center gap-1 flex-wrap justify-end">
+                      <span class="text-[9px] text-slate-500">Quick:</span>
+                      <button type="button" onclick="setStudentBooklet('${student.id}', 'Booklet 1')" class="px-1.5 py-0.5 rounded text-[10px] bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700">B1</button>
+                      <button type="button" onclick="setStudentBooklet('${student.id}', 'Booklet 2')" class="px-1.5 py-0.5 rounded text-[10px] bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700">B2</button>
+                      <button type="button" onclick="setStudentBooklet('${student.id}', 'Aleph Champ')" class="px-1.5 py-0.5 rounded text-[10px] bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700">Champ</button>
+                      <button type="button" onclick="setStudentBooklet('${student.id}', 'Reshit Chochma')" class="px-1.5 py-0.5 rounded text-[10px] bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700">Reshit</button>
+                    </div>
+                  </div>
+                  <input
+                    type="text"
+                    id="input-hebrew-booklet-${student.id}"
+                    value="${escapeHtml(hr.booklet || '')}"
+                    onchange="handleSkillFieldChange('${student.id}', 'hebrewReading', 'booklet', this.value)"
+                    placeholder="e.g. Booklet 1, Aleph Champ..."
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  />
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="space-y-1">
+                    <label class="text-[11px] text-slate-400 block">${t.hebrewPageLabel}</label>
+                    <input
+                      type="text"
+                      value="${escapeHtml(hr.currentPage || '')}"
+                      onchange="handleSkillFieldChange('${student.id}', 'hebrewReading', 'currentPage', this.value)"
+                      placeholder="e.g. 14"
+                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
+                    />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-[11px] text-slate-400 block">${t.hebrewVowelLabel}</label>
+                    <input
+                      type="text"
+                      value="${escapeHtml(hr.letterOrVowel || '')}"
+                      onchange="handleSkillFieldChange('${student.id}', 'hebrewReading', 'letterOrVowel', this.value)"
+                      placeholder="e.g. Patach / Shin"
+                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 2: Parsha Reading & Trope -->
+              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+                    <i data-lucide="scroll" class="w-3.5 h-3.5"></i>
+                    <span>${t.parshaReadingTitle}</span>
+                  </span>
+                  <span class="text-[10px] text-slate-500 font-mono">Torah</span>
+                </div>
+
+                <div class="space-y-1">
+                  <label class="text-[11px] text-slate-400 block">${t.parshaAliyahLabel}</label>
+                  <select
+                    onchange="handleSkillFieldChange('${student.id}', 'parshaReading', 'aliyah', this.value)"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                  >
+                    ${['Aliyah 1', 'Aliyah 2', 'Aliyah 3', 'Aliyah 4', 'Aliyah 5', 'Aliyah 6', 'Aliyah 7', 'Maftir & Haftarah'].map(al => `
+                      <option value="${al}" ${(pr.aliyah === al) ? 'selected' : ''}>${al}</option>
+                    `).join('')}
+                  </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="space-y-1">
+                    <label class="text-[11px] text-slate-400 block">${t.parshaLinesMasteredLabel}</label>
+                    <input
+                      type="text"
+                      value="${escapeHtml(pr.linesLearned || '')}"
+                      onchange="handleSkillFieldChange('${student.id}', 'parshaReading', 'linesLearned', this.value)"
+                      placeholder="e.g. Lines 1-8"
+                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                    />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-[11px] text-slate-400 block">${t.parshaCurrentLineLabel}</label>
+                    <input
+                      type="text"
+                      value="${escapeHtml(pr.currentLine || '')}"
+                      onchange="handleSkillFieldChange('${student.id}', 'parshaReading', 'currentLine', this.value)"
+                      placeholder="e.g. Line 9"
+                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 3: Shema & Tefillah -->
+              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <span>${t.shemaTitle}</span>
+                  </span>
+                  <span class="text-[10px] text-slate-500 font-mono">Tefillah</span>
+                </div>
+
+                <div class="space-y-1">
+                  <label class="text-[11px] text-slate-400 block">${t.shemaSectionLabel}</label>
+                  <input
+                    type="text"
+                    value="${escapeHtml(sr.section || '')}"
+                    onchange="handleSkillFieldChange('${student.id}', 'shemaReading', 'section', this.value)"
+                    placeholder="e.g. Passuk 1 & V'Ahavta"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+
+                <div class="space-y-1">
+                  <label class="text-[11px] text-slate-400 block">${t.shemaStatusLabel}</label>
+                  <select
+                    onchange="handleSkillFieldChange('${student.id}', 'shemaReading', 'status', this.value)"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  >
+                    ${['Learning with vowels', 'Practicing fluency & speed', 'Mastered / Fluent'].map(st => `
+                      <option value="${st}" ${(sr.status === st) ? 'selected' : ''}>${st}</option>
+                    `).join('')}
+                  </select>
+                </div>
+              </div>
+
+              <!-- Card 4: Custom Goals Checklist -->
+              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+                    <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+                    <span>${t.customGoalsTitle}</span>
+                    <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-800">
+                      ${goals.filter(g => g.completed).length}/${goals.length}
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    onclick="promptAddStudentCustomGoal('${student.id}')"
+                    class="text-emerald-400 hover:text-emerald-300 text-[11px] font-semibold flex items-center gap-1"
+                  >
+                    <i data-lucide="plus" class="w-3 h-3"></i>
+                    <span>${t.addCustomGoalBtn}</span>
+                  </button>
+                </div>
+
+                <div class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                  ${goals.length === 0 ? `
+                    <p class="text-[11px] text-slate-500 italic py-2">${isHe ? 'אין יעדים מיוחדים עדיין. לחץ + להוספה.' : 'No custom goals yet. Click + to add.'}</p>
+                  ` : goals.map(g => `
+                    <div class="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-slate-900/60 border border-slate-800/80 text-xs">
+                      <label class="flex items-center gap-2 cursor-pointer min-w-0 select-none">
+                        <input
+                          type="checkbox"
+                          ${g.completed ? 'checked' : ''}
+                          onchange="toggleStudentCustomGoal('${student.id}', '${g.id}')"
+                          class="rounded border-slate-700 text-emerald-600 focus:ring-emerald-500 bg-slate-950 w-3.5 h-3.5"
+                        />
+                        <span class="truncate ${g.completed ? 'line-through text-slate-500' : 'text-slate-200'}">${escapeHtml(g.title)}</span>
+                      </label>
+                      <button
+                        type="button"
+                        onclick="deleteStudentCustomGoal('${student.id}', '${g.id}')"
+                        class="text-slate-500 hover:text-red-400 p-0.5"
+                      >
+                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                      </button>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
         body.innerHTML = `
+          ${homeworkBannerHtml}
+          ${skillsSectionHtml}
+
           <!-- Collaborative Notes Editor -->
           <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2">
             <label class="block text-xs font-semibold text-slate-300 flex items-center justify-between">
@@ -4593,6 +5062,7 @@ alter publication supabase_realtime add table public.students_sync;`;
             if (typeof s.orderIndex !== 'number') s.orderIndex = idx;
             if (!s.avatar) s.avatar = '';
             if (!Array.isArray(s.schedule)) s.schedule = [];
+            ensureStudentSkills(s);
           });
           APP_STATE.students.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
         } else {
@@ -4763,6 +5233,8 @@ alter publication supabase_realtime add table public.students_sync;`;
         avatar: APP_STATE.newStudentPendingAvatar || '',
         orderIndex: APP_STATE.students.length,
         notes: notes,
+        skills: getDefaultStudentSkills(),
+        schedule: [],
         completedTopics: {},
         completedParshiot: {}
       };
@@ -5309,6 +5781,20 @@ alter publication supabase_realtime add table public.students_sync;`;
               ? s.topic.trim()
               : (s.studentNotes || s.studentParsha || (isHe ? 'לא הוגדרו נושאי לימוד ספציפיים לשעה זו. לחץ על "ערוך" כדי להוסיף מה ללמד.' : 'No specific lesson notes added for this hour. Tap "Edit" to add what to teach.'));
 
+            const studentObj = APP_STATE.students.find(st => st.id === s.studentId);
+            const activeHw = (studentObj && studentObj.skills && studentObj.skills.homework && studentObj.skills.homework.task && !studentObj.skills.homework.completed)
+              ? studentObj.skills.homework.task
+              : null;
+            const hr = (studentObj && studentObj.skills && studentObj.skills.hebrewReading) || {};
+            const pr = (studentObj && studentObj.skills && studentObj.skills.parshaReading) || {};
+            const quickStatusPills = [];
+            if (hr.booklet || hr.currentPage) {
+              quickStatusPills.push(`📖 ${escapeHtml(hr.booklet || 'Hebrew')} ${hr.currentPage ? ('p. ' + escapeHtml(hr.currentPage)) : ''} ${hr.letterOrVowel ? ('(' + escapeHtml(hr.letterOrVowel) + ')') : ''}`);
+            }
+            if (pr.aliyah || pr.currentLine) {
+              quickStatusPills.push(`📜 ${escapeHtml(pr.aliyah || 'Parsha')} ${pr.currentLine ? (isHe ? 'שורה ' : 'line ') + escapeHtml(pr.currentLine) : ''}`);
+            }
+
             return `
               <div class="rounded-xl border ${isExpanded ? 'border-brand-500/60 bg-slate-950 shadow-md ring-1 ring-brand-500/20' : 'border-slate-800 bg-slate-950/80 hover:border-slate-700'} overflow-hidden transition">
                 <!-- Main Header Row (Clickable) -->
@@ -5348,6 +5834,23 @@ alter publication supabase_realtime add table public.students_sync;`;
                 <!-- Collapsible Teaching Plan Details -->
                 ${isExpanded ? `
                   <div class="px-3.5 pb-3.5 pt-1 border-t border-slate-800/80 bg-slate-900/60 space-y-2.5 text-xs">
+                    ${activeHw ? `
+                      <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                          <i data-lucide="clipboard-list" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
+                          <span class="font-bold shrink-0">${isHe ? 'שיעורי בית לבדיקה:' : 'Homework to check:'}</span>
+                          <span class="truncate font-medium">${escapeHtml(activeHw)}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onclick="event.stopPropagation(); toggleStudentHomework('${s.studentId}'); renderExistingLessonsInModal();"
+                          class="shrink-0 text-[10px] bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-2 py-0.5 rounded shadow transition active:scale-95"
+                        >
+                          ${isHe ? 'סומן כנבדק ✓' : 'Checked ✓'}
+                        </button>
+                      </div>
+                    ` : ''}
+
                     <div class="p-3 rounded-xl bg-brand-950/40 border border-brand-500/25 space-y-1.5">
                       <div class="flex items-center justify-between text-brand-300 font-bold text-xs">
                         <span class="flex items-center gap-1.5">
@@ -5366,6 +5869,12 @@ alter publication supabase_realtime add table public.students_sync;`;
                       <div id="lesson-topic-display-${s.id}" class="text-slate-200 text-xs leading-relaxed whitespace-pre-wrap pl-5 rtl:pl-0 rtl:pr-5">
                         ${escapeHtml(teachingText)}
                       </div>
+
+                      ${quickStatusPills.length > 0 ? `
+                        <div class="flex items-center gap-1.5 flex-wrap pt-1 pl-5 rtl:pl-0 rtl:pr-5">
+                          ${quickStatusPills.map(p => `<span class="px-2 py-0.5 rounded-md bg-slate-900/90 text-slate-300 text-[10px] font-mono border border-slate-700/80">${p}</span>`).join('')}
+                        </div>
+                      ` : ''}
 
                       <div id="lesson-topic-edit-box-${s.id}" class="hidden space-y-2 pt-1.5">
                         <textarea
@@ -6545,18 +7054,23 @@ KEYWORD 1: SCHEDULE (or BOOK, CALENDAR, קבע שיעור)
   5. Reply in WhatsApp confirming student name, date, time, and teaching focus.
 
 KEYWORD 2: DEBRIEF (or FINISHED CLASS, TODAY'S LESSON, סיכום שיעור)
-• When to use: The tutor finished a class and explains what was gone over, taught, or tested today.
-• Syntax: DEBRIEF [Student Name]: [Summary of what was taught, tested, or mastered].
+• When to use: The tutor finished a class and explains what was gone over, taught, tested, or assigned today.
+• Syntax: DEBRIEF [Student Name]: [Summary of Hebrew booklet page/vowel, Parsha lines, Shema, homework, and concepts covered].
 • Action:
   1. Fetch student record from /students_sync.
-  2. Append a clean timestamped debrief summary into student notes or lesson logs.
+  2. Parse and update student.completed_topics._meta.skills:
+     • skills.hebrewReading: { booklet, currentPage, letterOrVowel, nextTarget }
+     • skills.parshaReading: { aliyah, linesLearned, currentLine, notes }
+     • skills.shemaReading: { section, status }
+     • skills.homework: { task: "[Assigned task]", assignedDate: "YYYY-MM-DD", completed: false }
   3. Analyze the debrief text against the 36 Canonical Curriculum Lessons:
      - If the student was tested or mastered a concept, set completed_topics[topicId] = true.
      - If the student mastered a Chumash parsha, set completed_parshiot[parshaId] = true.
   4. Post upsert to /students_sync.
   5. Reply in WhatsApp with:
      • Debrief summary logged to profile.
-     • Exact topics checked off as completed (e.g. "Checked off: Tefillin").
+     • Core skills holding: Hebrew booklet & page, Parsha lines holding, active homework assigned.
+     • Topics checked off as completed (e.g. "Checked off: Tefillin").
      • List of remaining topics the student still needs to learn.
 
 KEYWORD 3: NEXT LESSON (or SCHEDULE NEXT, שיעור הבא)
@@ -6565,12 +7079,20 @@ KEYWORD 3: NEXT LESSON (or SCHEDULE NEXT, שיעור הבא)
   (Note: Often chained with DEBRIEF: e.g. "DEBRIEF Ethan Miller... and NEXT LESSON on Thursday at 5:00 PM").
 • Action:
   1. Fetch student record from /students_sync.
-  2. Analyze completed_topics and completed_parshiot against the 36 Curriculum Lessons.
-  3. Determine the next unlearned topics in sequence (or topics that needed review).
-  4. Formulate the recommended lesson focus (e.g. "Next to learn: Kashrut (Kosher meat and dairy rules) + Review Shema blessing").
-  5. Schedule the appointment on the given date/time with that recommended plan saved in the 'topic' field.
-  6. Post upsert to /students_sync.
-  7. Reply in WhatsApp confirming the scheduled lesson and the preparation notes that will appear on the tutor's calendar day view!
+  2. Analyze student's completed_topics._meta.skills and completed_topics:
+     • Check if active homework exists.
+     • Calculate next step for Hebrew reading (e.g. next page / vowel).
+     • Calculate next lines for Torah Parsha reading (e.g. advance to next verses).
+     • Determine next unlearned topic from the 36 curriculum lessons.
+  3. Formulate the preparation plan as clean bullet points for the calendar card:
+     • Check Homework: [Active homework task]
+     • Hebrew Reading: Advance to page [N] ([letter / vowel])
+     • Torah Reading: Learn [Aliyah] lines [Y-Z]
+     • Shema: [Section to practice]
+     • Concept: [Next unlearned topic e.g. Kashrut]
+  4. Inside student.completed_topics._meta.schedule, add the session with topic set to these bullet points.
+  5. Post upsert to /students_sync.
+  6. Reply in WhatsApp confirming the scheduled lesson and the bullet point preparation checklist that will appear on the tutor's calendar day view!
 
 KEYWORD 4: ADD MATERIAL (or ENRICH, הוסף חומר)
 • When to use: The tutor or Rabbi wants to add a teaching tip, story, explanation, or source link to any of the 36 lessons.

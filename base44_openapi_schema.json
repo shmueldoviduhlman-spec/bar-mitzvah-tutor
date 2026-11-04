@@ -166,6 +166,56 @@
                 "properties": {
                   "parsha": { "type": "string" },
                   "barMitzvahDate": { "type": "string" },
+                  "skills": {
+                    "type": "object",
+                    "description": "Daily ceremony learning progress, Hebrew booklet tracking, and active homework",
+                    "properties": {
+                      "hebrewReading": {
+                        "type": "object",
+                        "properties": {
+                          "booklet": { "type": "string", "example": "Booklet 1" },
+                          "currentPage": { "type": "string", "example": "14" },
+                          "letterOrVowel": { "type": "string", "example": "Patach with Shin" },
+                          "nextTarget": { "type": "string", "example": "Page 15 (Tzere)" }
+                        }
+                      },
+                      "parshaReading": {
+                        "type": "object",
+                        "properties": {
+                          "aliyah": { "type": "string", "example": "Aliyah 1" },
+                          "linesLearned": { "type": "string", "example": "Lines 1-8" },
+                          "currentLine": { "type": "string", "example": "Line 9" },
+                          "notes": { "type": "string", "example": "Practice Sof Pasuk trope" }
+                        }
+                      },
+                      "shemaReading": {
+                        "type": "object",
+                        "properties": {
+                          "section": { "type": "string", "example": "Passuk 1 & V'Ahavta" },
+                          "status": { "type": "string", "example": "Learning with vowels" }
+                        }
+                      },
+                      "homework": {
+                        "type": "object",
+                        "properties": {
+                          "task": { "type": "string", "example": "Read page 14 twice and practice lines 1-8" },
+                          "assignedDate": { "type": "string", "example": "2026-11-04" },
+                          "completed": { "type": "boolean", "default": false }
+                        }
+                      },
+                      "customGoals": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "string" },
+                            "title": { "type": "string" },
+                            "completed": { "type": "boolean" }
+                          }
+                        }
+                      }
+                    }
+                  },
                   "schedule": {
                     "type": "array",
                     "description": "Calendar tutoring sessions matching portal calendar day view",
