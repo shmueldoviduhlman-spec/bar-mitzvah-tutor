@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>TutorPilot | Bar Mitzvah Tutor Companion & Tracker</title>
+  <title>TutorPilot | The Operating System for Tutors & Rabbis</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -228,18 +228,27 @@
           <i data-lucide="arrow-right" class="w-4 h-4 rtl:rotate-180"></i>
         </button>
 
-        <!-- Super Admin 1-Tap Quick Pass -->
-        <div class="pt-2 border-t border-slate-800">
-          <button
-            type="button"
-            onclick="handleOwnerQuickLogin()"
-            class="w-full py-2 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm"
-            title="Fast direct login as Lead Tutor Shmuel Dovid"
-          >
-            <i data-lucide="crown" class="w-3.5 h-3.5 text-amber-400"></i>
-            <span id="lbl-owner-quick-login">Super Admin One-Tap Sign In (Shmuel Dovid)</span>
-          </button>
+        <!-- Divider -->
+        <div class="relative flex py-1 items-center">
+          <div class="flex-grow border-t border-slate-800"></div>
+          <span class="flex-shrink mx-2 text-[10px] text-slate-500 uppercase tracking-wider" id="lbl-or-signin-divider">or</span>
+          <div class="flex-grow border-t border-slate-800"></div>
         </div>
+
+        <!-- Google One-Click Sign In -->
+        <button
+          type="button"
+          onclick="handleGoogleSignIn()"
+          class="w-full py-2.5 px-4 bg-slate-950 hover:bg-slate-800 text-slate-200 text-xs sm:text-sm font-semibold rounded-xl border border-slate-700/80 transition duration-150 active:scale-95 shadow-sm flex items-center justify-center gap-2.5"
+        >
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span id="lbl-google-signin-text">Continue with Google</span>
+        </button>
       </form>
 
       <!-- ============================================== -->
@@ -310,6 +319,28 @@
         >
           <i data-lucide="sparkles" class="w-4 h-4 text-amber-200"></i>
           <span id="btn-signup-text">Start 14-Day Free Trial</span>
+        </button>
+
+        <!-- Divider -->
+        <div class="relative flex py-1 items-center">
+          <div class="flex-grow border-t border-slate-800"></div>
+          <span class="flex-shrink mx-2 text-[10px] text-slate-500 uppercase tracking-wider" id="lbl-or-signup-divider">or</span>
+          <div class="flex-grow border-t border-slate-800"></div>
+        </div>
+
+        <!-- Google One-Click Sign Up -->
+        <button
+          type="button"
+          onclick="handleGoogleSignIn()"
+          class="w-full py-2.5 px-4 bg-slate-950 hover:bg-slate-800 text-slate-200 text-xs sm:text-sm font-semibold rounded-xl border border-slate-700/80 transition duration-150 active:scale-95 shadow-sm flex items-center justify-center gap-2.5"
+        >
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span id="lbl-google-signup-text">Continue with Google</span>
         </button>
 
         <p class="text-[11px] text-slate-400 text-center" id="lbl-signup-subtext">
@@ -420,7 +451,7 @@
                 <span id="cloud-status-text" class="text-[10px] sm:text-xs text-emerald-300 font-semibold truncate max-w-[85px] sm:max-w-none">Synced with Rabbi</span>
               </button>
             </div>
-            <p id="app-subtitle" class="text-[10px] text-slate-400 truncate hidden sm:block">Bar Mitzvah Tutor Companion & Tracker</p>
+            <p id="app-subtitle" class="text-[10px] text-slate-400 truncate hidden sm:block">The Operating System for Tutors & Rabbis</p>
           </div>
         </div>
 
@@ -444,6 +475,11 @@
                   <i data-lucide="crown" class="w-3 h-3"></i> Super Admin
                 </span>
               </div>
+              <!-- Super Admin User Directory Item (visible only to shmueldoviduhlman@gmail.com) -->
+              <button id="btn-user-dropdown-admin" onclick="openAdminUserDirectoryModal(); toggleUserDropdown()" class="hidden w-full flex items-center gap-2 p-2 rounded-xl text-amber-300 hover:text-amber-200 hover:bg-amber-950/30 transition border border-amber-500/20">
+                <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
+                <span id="user-dropdown-admin-label">Master User Directory</span>
+              </button>
               <button onclick="openSettingsModal(); toggleUserDropdown()" class="w-full flex items-center gap-2 p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition">
                 <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
                 <span id="user-dropdown-settings-label">Settings</span>
@@ -1816,6 +1852,95 @@
     </div>
   </div>
 
+  <!-- ============================================== -->
+  <!-- MODAL: MASTER ADMIN USER DIRECTORY             -->
+  <!-- ============================================== -->
+  <div id="modal-admin-user-directory" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-5 hidden backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden relative">
+
+      <!-- Header -->
+      <div class="p-4 sm:p-6 border-b border-slate-800 flex items-start justify-between bg-slate-950/60">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center shadow-sm">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base sm:text-lg font-bold text-white tracking-tight" id="lbl-admin-directory-title">TutorPilot User Management Directory</h3>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Super Admin</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5" id="lbl-admin-directory-subtitle">Monitor registered tutors, active 14-day trials, and cloud workspace isolation</p>
+          </div>
+        </div>
+        <button onclick="closeAdminUserDirectoryModal()" class="text-slate-400 hover:text-white p-1 rounded-xl hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- KPI Stats Banner -->
+      <div class="grid grid-cols-3 gap-2 sm:gap-4 p-4 sm:px-6 bg-slate-950/40 border-b border-slate-800/80">
+        <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col">
+          <span class="text-[11px] font-semibold text-slate-400" id="lbl-admin-stat-total">Total Tutors</span>
+          <span id="admin-stat-total" class="text-lg sm:text-2xl font-extrabold text-white mt-0.5">1</span>
+        </div>
+        <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col">
+          <span class="text-[11px] font-semibold text-amber-400" id="lbl-admin-stat-trials">Active Trials</span>
+          <span id="admin-stat-trials" class="text-lg sm:text-2xl font-extrabold text-amber-300 mt-0.5">0</span>
+        </div>
+        <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col">
+          <span class="text-[11px] font-semibold text-emerald-400" id="lbl-admin-stat-students">Total Students</span>
+          <span id="admin-stat-students" class="text-lg sm:text-2xl font-extrabold text-emerald-300 mt-0.5">0</span>
+        </div>
+      </div>
+
+      <!-- Search & Action Toolbar -->
+      <div class="p-4 sm:px-6 border-b border-slate-800 flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 rtl:left-auto rtl:right-3"></i>
+          <input
+            type="text"
+            id="admin-search-users"
+            oninput="renderAdminUserDirectory()"
+            placeholder="Search tutor by name, email, or synagogue..."
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 pl-9 pr-3 rtl:pl-3 rtl:pr-9 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+          >
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            onclick="fetchAdminUserDirectory(true)"
+            class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-sm"
+            title="Refresh Live from Cloud"
+          >
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-brand-400"></i>
+            <span id="lbl-admin-refresh">Sync Cloud</span>
+          </button>
+          <button
+            type="button"
+            onclick="exportUserDirectoryCsv()"
+            class="px-3 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-sm"
+            title="Download CSV Spreadsheet"
+          >
+            <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span id="lbl-admin-export">Export CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Users Table Container -->
+      <div class="p-4 sm:p-6 overflow-y-auto flex-1 divide-y divide-slate-800" id="admin-users-table-container">
+        <!-- Rendered dynamically via renderAdminUserDirectory() -->
+      </div>
+
+      <!-- Footer Note -->
+      <div class="p-3 bg-slate-950 border-t border-slate-800 text-[11px] text-slate-500 text-center flex items-center justify-center gap-1.5">
+        <i data-lucide="lock" class="w-3.5 h-3.5 text-slate-400"></i>
+        <span>Master Super Admin View • Strictly Private to shmueldoviduhlman@gmail.com</span>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 text-white text-xs py-2.5 px-5 rounded-full shadow-2xl z-50 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2 font-medium">
     <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
@@ -1872,7 +1997,7 @@
     const I18N = {
       en: {
         appTitle: "TutorPilot",
-        appSubtitle: "Bar Mitzvah Tutor Companion & Tracker",
+        appSubtitle: "The Operating System for Tutors & Rabbis",
         shareRabbi: "Share with Rabbi",
         searchPlaceholder: "Search topics, Rashis, stories, keywords...",
         tabStudy: "Study",
@@ -2184,7 +2309,7 @@
       },
       he: {
         appTitle: "טיוטור-פיילוט",
-        appSubtitle: "מלווה מלמדי בר מצווה ומעקב תלמידים",
+        appSubtitle: "מערכת ההפעלה המובילה למלמדים ורבנים",
         shareRabbi: "שתף עם הרב",
         searchPlaceholder: "חיפוש מושגים, רש״י, סיפורים, מילות מפתח...",
         tabStudy: "לימוד",
@@ -3687,20 +3812,26 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     function grantAuthSession(userRecord) {
+      const email = (userRecord.email || '').toLowerCase().trim();
+      const isOwner = email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com';
       const session = {
         id: userRecord.id || ('usr_' + Date.now()),
-        email: userRecord.email,
-        role: userRecord.role || 'tutor',
-        name_en: userRecord.name_en || userRecord.name || 'Tutor',
-        name_he: userRecord.name_he || userRecord.name || 'מלמד',
-        organization: userRecord.organization || '',
-        subscription_status: userRecord.subscription_status || 'trialing',
+        email: email,
+        role: isOwner ? 'super_admin' : (userRecord.role || 'tutor'),
+        name_en: userRecord.name_en || userRecord.name || (isOwner ? 'Shmuel Dovid Uhlman (Lead)' : email.split('@')[0]),
+        name_he: userRecord.name_he || userRecord.name || (isOwner ? 'שמואל דוד אולמן (מלמד ראשי)' : email.split('@')[0]),
+        organization: userRecord.organization || (isOwner ? 'Lead TutorPilot Admin' : ''),
+        subscription_status: isOwner ? 'lifetime' : (userRecord.subscription_status || 'trialing'),
+        trial_days: typeof userRecord.trial_days === 'number' ? userRecord.trial_days : 14,
+        createdAt: userRecord.createdAt || new Date().toISOString(),
         expiresAt: Date.now() + ONE_MONTH_MS
       };
 
       localStorage.setItem('tutor_auth_session', JSON.stringify(session));
       localStorage.setItem('tutor_auth_unlocked', 'true');
       APP_STATE.currentUser = session;
+
+      syncUserToCloudDirectory(session);
 
       updateUserSessionDisplay(session);
       loadStudentsFromStorage();
@@ -3724,6 +3855,367 @@ alter publication supabase_realtime add table public.students_sync;`;
       grantAuthSession(defaultUser);
     }
 
+    // ==============================================
+    // MASTER ADMIN USER DIRECTORY ENGINE
+    // ==============================================
+
+    function isSuperAdminUser() {
+      const u = APP_STATE.currentUser;
+      if (!u) return false;
+      const email = (u.email || '').toLowerCase().trim();
+      return u.role === 'super_admin' || email === 'shmueldoviduhlman@gmail.com';
+    }
+
+    function openAdminUserDirectoryModal() {
+      if (!isSuperAdminUser()) {
+        showToast('Super Admin access required');
+        return;
+      }
+      const modal = document.getElementById('modal-admin-user-directory');
+      if (modal) {
+        modal.classList.remove('hidden');
+        fetchAdminUserDirectory(false);
+      }
+    }
+
+    function closeAdminUserDirectoryModal() {
+      const modal = document.getElementById('modal-admin-user-directory');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function syncUserToCloudDirectory(userRecord) {
+      if (!userRecord || !userRecord.email) return;
+      const email = userRecord.email.toLowerCase().trim();
+      const isOwner = email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com';
+
+      try {
+        const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
+        const existing = registeredUsers[email] || {};
+
+        registeredUsers[email] = {
+          id: userRecord.id || existing.id || ('usr_' + Date.now()),
+          email: email,
+          name_en: userRecord.name_en || existing.name_en || email.split('@')[0],
+          name_he: userRecord.name_he || existing.name_he || email.split('@')[0],
+          organization: userRecord.organization || existing.organization || '',
+          role: isOwner ? 'super_admin' : (userRecord.role || existing.role || 'tutor'),
+          subscription_status: isOwner ? 'lifetime' : (userRecord.subscription_status || existing.subscription_status || 'trialing'),
+          trial_days: typeof userRecord.trial_days === 'number' ? userRecord.trial_days : (typeof existing.trial_days === 'number' ? existing.trial_days : 14),
+          createdAt: existing.createdAt || userRecord.createdAt || new Date().toISOString(),
+          last_active: new Date().toISOString()
+        };
+
+        if (!registeredUsers['shmueldoviduhlman@gmail.com']) {
+          registeredUsers['shmueldoviduhlman@gmail.com'] = {
+            id: 'super_admin_shmuel',
+            email: 'shmueldoviduhlman@gmail.com',
+            name_en: 'Shmuel Dovid Uhlman (Lead Tutor)',
+            name_he: 'שמואל דוד אולמן (מלמד ראשי)',
+            organization: 'Lead TutorPilot Admin',
+            role: 'super_admin',
+            subscription_status: 'lifetime',
+            trial_days: 9999,
+            createdAt: '2026-10-01T00:00:00Z',
+            last_active: new Date().toISOString()
+          };
+        }
+
+        localStorage.setItem('tutor_registered_users', JSON.stringify(registeredUsers));
+
+        if (APP_STATE.cloud.client) {
+          const userList = Object.values(registeredUsers);
+          await APP_STATE.cloud.client
+            .from('students_sync')
+            .upsert({
+              id: '__tutor_users_directory__',
+              name: 'TutorPilot User Management Directory',
+              parsha_or_date: 'Internal Directory',
+              notes: 'System record tracking registered tutors',
+              completed_topics: {
+                users: userList,
+                updated_at: new Date().toISOString()
+              },
+              updated_at: new Date().toISOString()
+            });
+        }
+      } catch (err) {
+        console.warn('Sync user directory notice:', err);
+      }
+    }
+
+    async function fetchAdminUserDirectory(showToastNotice = false) {
+      if (!isSuperAdminUser()) return;
+
+      try {
+        if (APP_STATE.cloud.client) {
+          const { data, error } = await APP_STATE.cloud.client
+            .from('students_sync')
+            .select('*')
+            .eq('id', '__tutor_users_directory__')
+            .maybeSingle();
+
+          if (!error && data && data.completed_topics && Array.isArray(data.completed_topics.users)) {
+            const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
+            data.completed_topics.users.forEach(u => {
+              if (u && u.email) {
+                const norm = u.email.toLowerCase().trim();
+                registeredUsers[norm] = { ...(registeredUsers[norm] || {}), ...u };
+              }
+            });
+            localStorage.setItem('tutor_registered_users', JSON.stringify(registeredUsers));
+          }
+        }
+      } catch (e) {
+        console.warn('Fetch directory notice:', e);
+      }
+
+      renderAdminUserDirectory();
+      if (showToastNotice) {
+        showToast(APP_STATE.lang === 'he' ? 'נתוני המשתמשים סונכרנו בהצלחה' : 'User directory synchronized with cloud');
+      }
+    }
+
+    function renderAdminUserDirectory() {
+      if (!isSuperAdminUser()) return;
+      const container = document.getElementById('admin-users-table-container');
+      if (!container) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      const searchInput = document.getElementById('admin-search-users');
+      const query = (searchInput?.value || '').toLowerCase().trim();
+
+      const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
+      if (!registeredUsers['shmueldoviduhlman@gmail.com']) {
+        registeredUsers['shmueldoviduhlman@gmail.com'] = {
+          id: 'super_admin_shmuel',
+          email: 'shmueldoviduhlman@gmail.com',
+          name_en: 'Shmuel Dovid Uhlman (Lead Tutor)',
+          name_he: 'שמואל דוד אולמן (מלמד ראשי)',
+          organization: 'Lead TutorPilot Admin',
+          role: 'super_admin',
+          subscription_status: 'lifetime',
+          trial_days: 9999,
+          createdAt: '2026-10-01T00:00:00Z',
+          last_active: new Date().toISOString()
+        };
+      }
+
+      const allUsers = Object.values(registeredUsers);
+      const filtered = allUsers.filter(u => {
+        if (!query) return true;
+        const name = (u.name_en || u.name_he || '').toLowerCase();
+        const email = (u.email || '').toLowerCase();
+        const org = (u.organization || '').toLowerCase();
+        return name.includes(query) || email.includes(query) || org.includes(query);
+      });
+
+      const totalCount = allUsers.length;
+      const trialCount = allUsers.filter(u => u.subscription_status === 'trialing').length;
+      let studentCount = 0;
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('tutor_students_')) {
+            const list = JSON.parse(localStorage.getItem(k) || '[]');
+            if (Array.isArray(list)) studentCount += list.length;
+          }
+        }
+      } catch (e) {}
+
+      const statTotal = document.getElementById('admin-stat-total');
+      const statTrials = document.getElementById('admin-stat-trials');
+      const statStudents = document.getElementById('admin-stat-students');
+      if (statTotal) statTotal.textContent = totalCount;
+      if (statTrials) statTrials.textContent = trialCount;
+      if (statStudents) statStudents.textContent = studentCount;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="py-12 text-center text-slate-500">
+            <i data-lucide="users" class="w-10 h-10 mx-auto mb-2 text-slate-600"></i>
+            <p class="text-sm font-semibold">${isHe ? 'לא נמצאו משתמשים התואמים לחיפוש' : 'No registered users match your search'}</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = filtered.map(u => {
+        const email = u.email;
+        const isOwner = email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com';
+        const name = isHe ? (u.name_he || u.name_en || email.split('@')[0]) : (u.name_en || u.name_he || email.split('@')[0]);
+        const initial = name.charAt(0).toUpperCase();
+        const org = u.organization || (isHe ? 'ללא מוסד' : 'Individual Tutor');
+
+        let statusBadge = '';
+        if (isOwner || u.subscription_status === 'lifetime') {
+          statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">
+            <i data-lucide="crown" class="w-3 h-3 text-amber-400"></i> ${isHe ? 'מנהל ראשי (לכל החיים)' : 'Lifetime Super Admin'}
+          </span>`;
+        } else if (u.subscription_status === 'active') {
+          statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+            <i data-lucide="check" class="w-3 h-3 text-emerald-400"></i> ${isHe ? 'מנוי פעיל ($39/חודש)' : 'Active Subscriber ($39/mo)'}
+          </span>`;
+        } else {
+          const days = typeof u.trial_days === 'number' ? u.trial_days : 14;
+          statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-brand-500/10 text-brand-300 border border-brand-500/30">
+            <i data-lucide="clock" class="w-3 h-3 text-brand-400"></i> ${isHe ? ('ניסיון חינם (' + days + ' ימים)') : ('14-Day Free Trial (' + days + 'd)')}
+          </span>`;
+        }
+
+        const userStorageKey = (isOwner) ? 'tutor_students_v1' : ('tutor_students_' + email.replace(/[^a-z0-9]/g, '_'));
+        const userStudents = JSON.parse(localStorage.getItem(userStorageKey) || '[]');
+        const count = Array.isArray(userStudents) ? userStudents.length : 0;
+
+        return `
+          <div class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-950/40 px-2 rounded-2xl transition">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-9 h-9 rounded-2xl ${isOwner ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-slate-800 text-brand-300 border border-slate-700'} flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                ${initial}
+              </div>
+              <div class="min-w-0 truncate">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs sm:text-sm font-bold text-white truncate">${name}</span>
+                  ${isOwner ? '<span class="text-amber-400 text-xs">👑</span>' : ''}
+                </div>
+                <div class="flex items-center gap-2 text-[11px] text-slate-400 font-mono truncate">
+                  <span>${email}</span>
+                  <span>•</span>
+                  <span class="font-sans text-slate-500">${org}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2.5 shrink-0 justify-between sm:justify-end">
+              <div>${statusBadge}</div>
+              <div class="text-[11px] font-semibold text-slate-400 font-mono px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800">
+                ${count} ${isHe ? 'תלמידים' : 'students'}
+              </div>
+
+              ${!isOwner ? `
+                <div class="flex items-center gap-1">
+                  <button
+                    onclick="extendUserTrial('${email}')"
+                    title="${isHe ? 'הארך תקופת ניסיון ב-14 יום' : 'Extend trial +14 days'}"
+                    class="p-1.5 rounded-xl bg-slate-800 hover:bg-brand-900/40 text-slate-300 hover:text-brand-300 border border-slate-700 transition active:scale-95 text-xs font-semibold"
+                  >
+                    +14d
+                  </button>
+                  <button
+                    onclick="grantUserLifetimeAccess('${email}')"
+                    title="${isHe ? 'הענק גישה לכל החיים' : 'Grant lifetime access'}"
+                    class="p-1.5 rounded-xl bg-slate-800 hover:bg-amber-900/40 text-slate-300 hover:text-amber-300 border border-slate-700 transition active:scale-95"
+                  >
+                    <i data-lucide="crown" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button
+                    onclick="deleteUserFromDirectory('${email}')"
+                    title="${isHe ? 'מחק משתמש' : 'Delete user'}"
+                    class="p-1.5 rounded-xl bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-400 border border-slate-700 transition active:scale-95"
+                  >
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              ` : `
+                <span class="text-[11px] text-slate-500 font-mono px-2">Owner</span>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function extendUserTrial(email) {
+      const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
+      if (registeredUsers[email]) {
+        registeredUsers[email].trial_days = (registeredUsers[email].trial_days || 14) + 14;
+        localStorage.setItem('tutor_registered_users', JSON.stringify(registeredUsers));
+        syncUserToCloudDirectory(registeredUsers[email]);
+        renderAdminUserDirectory();
+        showToast(APP_STATE.lang === 'he' ? 'תקופת הניסיון הוארכה ב-14 יום' : 'Trial extended by 14 days');
+      }
+    }
+
+    function grantUserLifetimeAccess(email) {
+      const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
+      if (registeredUsers[email]) {
+        registeredUsers[email].subscription_status = 'lifetime';
+        localStorage.setItem('tutor_registered_users', JSON.stringify(registeredUsers));
+        syncUserToCloudDirectory(registeredUsers[email]);
+        renderAdminUserDirectory();
+        showToast(APP_STATE.lang === 'he' ? 'הוענקה גישה מלאה לכל החיים' : 'Granted lifetime full access');
+      }
+    }
+
+    function deleteUserFromDirectory(email) {
+      if (email === 'shmueldoviduhlman@gmail.com') return;
+      if (!confirm(`Delete user ${email} from directory?`)) return;
+
+      const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
+      delete registeredUsers[email];
+      localStorage.setItem('tutor_registered_users', JSON.stringify(registeredUsers));
+
+      const storageKey = 'tutor_students_' + email.replace(/[^a-z0-9]/g, '_');
+      localStorage.removeItem(storageKey);
+
+      if (APP_STATE.cloud.client) {
+        const userList = Object.values(registeredUsers);
+        APP_STATE.cloud.client
+          .from('students_sync')
+          .upsert({
+            id: '__tutor_users_directory__',
+            completed_topics: { users: userList, updated_at: new Date().toISOString() },
+            updated_at: new Date().toISOString()
+          }).then(() => {}).catch(() => {});
+      }
+
+      renderAdminUserDirectory();
+      showToast(APP_STATE.lang === 'he' ? 'המשתמש הוסר בהצלחה' : 'User removed from directory');
+    }
+
+    function exportUserDirectoryCsv() {
+      const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
+      const allUsers = Object.values(registeredUsers);
+      if (allUsers.length === 0) return;
+
+      let csv = 'Full Name,Email,Organization,Role,Subscription Status,Trial Days,Registered Date\n';
+      allUsers.forEach(u => {
+        csv += `"${u.name_en || u.name_he || ''}","${u.email || ''}","${u.organization || ''}","${u.role || ''}","${u.subscription_status || ''}","${u.trial_days || 14}","${u.createdAt || ''}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `tutorpilot_users_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('CSV Exported');
+    }
+
+    async function handleGoogleSignIn() {
+      const client = getSupabaseAuthClient();
+      if (!client || !client.auth) {
+        showToast(APP_STATE.lang === 'he' ? 'שירות ההתחברות אינו זמין כרגע' : 'Auth service unavailable');
+        return;
+      }
+      try {
+        const { data, error } = await client.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin + window.location.pathname
+          }
+        });
+        if (error) throw error;
+      } catch (err) {
+        console.error('Google Sign In Error:', err);
+        showToast(err.message || 'Google sign in failed');
+      }
+    }
+
     async function handleSignIn(e) {
       if (e && e.preventDefault) e.preventDefault();
       const emailInput = document.getElementById('signin-email');
@@ -3738,10 +4230,18 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!email || !password) return;
       if (errBox) errBox.classList.add('hidden');
 
-      // 1. Direct recognized Super Admin bypass
+      // 1. Direct recognized Super Admin bypass with password check
       if (APPROVED_USERS[email]) {
-        grantAuthSession(APPROVED_USERS[email]);
-        return;
+        if (password === '770' || password === '770770' || password === 'admin770' || password === 'tutorpilot' || (APPROVED_USERS[email].password && APPROVED_USERS[email].password === password)) {
+          grantAuthSession(APPROVED_USERS[email]);
+          return;
+        } else {
+          if (errBox && errText) {
+            errText.textContent = 'Incorrect password for Super Admin.';
+            errBox.classList.remove('hidden');
+          }
+          return;
+        }
       }
 
       if (submitBtn) submitBtn.disabled = true;
@@ -4029,6 +4529,16 @@ alter publication supabase_realtime add table public.students_sync;`;
           : '<i data-lucide="award" class="w-3 h-3 text-brand-400"></i> ' + (isHe ? 'מלמד (14 ימי ניסיון)' : 'Tutor (14-Day Trial)');
       }
 
+      // Super Admin Directory button in Dropdown Menu
+      const adminBtn = document.getElementById('btn-user-dropdown-admin');
+      if (adminBtn) {
+        if (isSuperAdmin) {
+          adminBtn.classList.remove('hidden');
+        } else {
+          adminBtn.classList.add('hidden');
+        }
+      }
+
       // Settings Modal Profile Display
       const settingsAvatar = document.getElementById('settings-user-avatar');
       const settingsName = document.getElementById('settings-user-name');
@@ -4133,6 +4643,18 @@ alter publication supabase_realtime add table public.students_sync;`;
       renderAllViews();
       initSupabaseCloud();
       lucide.createIcons();
+
+      // Secret Super Admin Keyboard Shortcut (Ctrl+Shift+A or Cmd+Shift+A)
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+          const lockScreen = document.getElementById('lock-screen');
+          if (lockScreen && !lockScreen.classList.contains('hidden')) {
+            e.preventDefault();
+            const defaultUser = APPROVED_USERS['shmueldoviduhlman@gmail.com'];
+            grantAuthSession(defaultUser);
+          }
+        }
+      });
 
       // Outside click listener for User Profile Menu
       document.addEventListener('click', (e) => {
@@ -4451,8 +4973,18 @@ alter publication supabase_realtime add table public.students_sync;`;
       const btnSigninText = document.getElementById('btn-signin-text');
       if (btnSigninText) btnSigninText.textContent = t.authSignInBtn;
 
-      const lblOwnerQuickLogin = document.getElementById('lbl-owner-quick-login');
-      if (lblOwnerQuickLogin) lblOwnerQuickLogin.textContent = t.authOwnerQuickLogin;
+      // Google Buttons & Dividers
+      const lblGoogleSignin = document.getElementById('lbl-google-signin-text');
+      if (lblGoogleSignin) lblGoogleSignin.textContent = isHe ? "המשך באמצעות גוגל" : "Continue with Google";
+
+      const lblGoogleSignup = document.getElementById('lbl-google-signup-text');
+      if (lblGoogleSignup) lblGoogleSignup.textContent = isHe ? "המשך באמצעות גוגל" : "Continue with Google";
+
+      const lblOrSignin = document.getElementById('lbl-or-signin-divider');
+      if (lblOrSignin) lblOrSignin.textContent = isHe ? "או באמצעות אימייל" : "or with email";
+
+      const lblOrSignup = document.getElementById('lbl-or-signup-divider');
+      if (lblOrSignup) lblOrSignup.textContent = isHe ? "או באמצעות אימייל" : "or with email";
 
       // Tab 2: Create Account (Sign Up)
       const lblSignupName = document.getElementById('lbl-signup-name');
@@ -4517,11 +5049,36 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (btnLogoutLabel) btnLogoutLabel.textContent = t.authLogout;
 
       // Header User Dropdown Localizations
+      const userDropdownAdmin = document.getElementById('user-dropdown-admin-label');
+      if (userDropdownAdmin) userDropdownAdmin.textContent = isHe ? "ניהול משתמשי המערכת" : "Master User Directory";
+
       const userDropdownSettings = document.getElementById('user-dropdown-settings-label');
       if (userDropdownSettings) userDropdownSettings.textContent = t.settingsTitle;
 
       const userDropdownLogout = document.getElementById('user-dropdown-logout-label');
       if (userDropdownLogout) userDropdownLogout.textContent = t.authLogout;
+
+      // Admin Directory Modal Localizations
+      const lblAdminDirTitle = document.getElementById('lbl-admin-directory-title');
+      if (lblAdminDirTitle) lblAdminDirTitle.textContent = isHe ? "ניהול משתמשי טיוטור-פיילוט" : "TutorPilot User Management Directory";
+
+      const lblAdminDirSub = document.getElementById('lbl-admin-directory-subtitle');
+      if (lblAdminDirSub) lblAdminDirSub.textContent = isHe ? "מעקב אחר מלמדים רשומים, תקופות ניסיון והפרדת נתונים" : "Monitor registered tutors, active 14-day trials, and cloud workspace isolation";
+
+      const lblAdminStatTotal = document.getElementById('lbl-admin-stat-total');
+      if (lblAdminStatTotal) lblAdminStatTotal.textContent = isHe ? "סה״כ מלמדים" : "Total Tutors";
+
+      const lblAdminStatTrials = document.getElementById('lbl-admin-stat-trials');
+      if (lblAdminStatTrials) lblAdminStatTrials.textContent = isHe ? "ניסיון פעיל" : "Active Trials";
+
+      const lblAdminStatStudents = document.getElementById('lbl-admin-stat-students');
+      if (lblAdminStatStudents) lblAdminStatStudents.textContent = isHe ? "סה״כ תלמידים" : "Total Students";
+
+      const lblAdminRefresh = document.getElementById('lbl-admin-refresh');
+      if (lblAdminRefresh) lblAdminRefresh.textContent = isHe ? "רענן מהענן" : "Sync Cloud";
+
+      const lblAdminExport = document.getElementById('lbl-admin-export');
+      if (lblAdminExport) lblAdminExport.textContent = isHe ? "ייצוא CSV" : "Export CSV";
 
       if (APP_STATE.currentUser) {
         updateUserSessionDisplay(APP_STATE.currentUser);
