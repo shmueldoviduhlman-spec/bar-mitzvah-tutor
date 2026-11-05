@@ -4354,14 +4354,14 @@ alter publication supabase_realtime add table public.students_sync;`;
                 '<p class="text-slate-200 leading-relaxed font-normal">' + hook + '</p>' +
               '</div>' +
 
-              '<!-- Section 2: Core Knowledge Anchors -->' +
-              '<div>' +
-                '<span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-2">' +
-                  '<i data-lucide="compass" class="w-3.5 h-3.5 text-cyan-400"></i> ' + t.coreNuggets +
+              '<!-- Section 2: Core Knowledge Anchors (Responsive Two-Column Grid) -->' +
+              '<div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2.5">' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5 mb-1">' +
+                  '<i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400"></i> ' + t.coreNuggets +
                 '</span>' +
-                '<ul class="space-y-1.5 list-none pl-0">' +
-                  nuggets.map(n => '<li class="flex items-start gap-2 text-slate-300"><span class="text-brand-400 mt-1">▸</span><span>' + n + '</span></li>').join('') +
-                '</ul>' +
+                '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">' +
+                  nuggets.map(n => '<div class="p-2 sm:p-2.5 rounded-lg bg-slate-950/70 border border-slate-800/80 hover:border-slate-700/80 transition flex items-start gap-2 text-slate-200 text-xs leading-relaxed"><span class="text-amber-400 font-bold mt-0.5 shrink-0">✦</span><div>' + n + '</div></div>').join('') +
+                '</div>' +
               '</div>' +
 
               '<!-- Section 3: Bar Mitzvah Life Angle -->' +
@@ -4530,13 +4530,13 @@ alter publication supabase_realtime add table public.students_sync;`;
                 '</ul>' +
               '</div>' +
 
-              '<!-- Section 2: Key Topics -->' +
-              '<div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/80 border border-slate-800">' +
-                '<span class="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5 mb-2">' +
-                  '<i data-lucide="key" class="w-3.5 h-3.5"></i> ' + t.keyTopics +
+              '<!-- Section 2: Key Topics (Responsive Two-Column Grid) -->' +
+              '<div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2.5">' +
+                '<span class="text-[11px] font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5 mb-1">' +
+                  '<i data-lucide="key" class="w-3.5 h-3.5 text-cyan-400"></i> ' + t.keyTopics +
                 '</span>' +
                 '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">' +
-                  keyTopics.map(k => '<div class="flex items-start gap-2 text-slate-300"><span class="text-amber-400">✦</span><span>' + k + '</span></div>').join('') +
+                  keyTopics.map(k => '<div class="p-2 sm:p-2.5 rounded-lg bg-slate-950/70 border border-slate-800/80 hover:border-slate-700/80 transition flex items-start gap-2 text-slate-200 text-xs leading-relaxed"><span class="text-cyan-400 font-bold mt-0.5 shrink-0">✦</span><div>' + k + '</div></div>').join('') +
                 '</div>' +
               '</div>' +
 

@@ -1,352 +1,420 @@
 // Jewish Topics Curriculum Database
-// 13 Topics with 5 high-density memory triggers tailored for non-religious 12-13 year olds
+// 13 Topics with 7 rich memory triggers tailored for non-religious 12-13 year olds
 window.JEWISH_TOPICS_DATA = [
   {
-    id: "shabbat",
-    title_en: "Shabbat",
-    title_he: "שבת קודש",
-    category: "foundations",
-    hook_en: "Imagine if Apple designed a feature that forced you to put down your phone, pause homework, eat gourmet meals with family, and recharge 100% of your energy every 7 days. That's Shabbat.",
-    hook_he: "דמיין לעצמך שחברת אפל הייתה ממציאה פיצ'ר שמחייב אותך להניח את הטלפון, לעצור שיעורי בית, לאכול סעודות משפחתיות ולטעון את המצברים ב-100% כל 7 ימים. זוהי בדיוק השבת.",
-    nuggets_en: [
-      "Not just 'resting from work' (Menucha), but active soul creation and stepping out of the rat race.",
-      "39 Melachot: Not hard labor, but creative mastery over the physical world. On Shabbat, we let God run the world.",
-      "Shamir V'Zachor: Lighting candles (Shalom Bayit/light) and Kiddush (verbalizing holiness over wine).",
-      "Neshamah Yeteirah: An expanded, extra dimension of soul and mindfulness felt on this day."
+    "id": "shabbat",
+    "title_en": "Shabbat",
+    "title_he": "שבת קודש",
+    "category": "foundations",
+    "hook_en": "Imagine if Apple designed a feature that forced you to put down your phone, pause homework, eat gourmet meals with family, and recharge 100% of your energy every 7 days. That is Shabbat.",
+    "hook_he": "דמיין לעצמך שחברת אפל הייתה ממציאה פיצ'ר שמחייב אותך להניח את הטלפון, לעצור שיעורי בית, לאכול סעודות משפחתיות ולטעון את המצברים ב-100% כל 7 ימים. זוהי בדיוק השבת.",
+    "nuggets_en": [
+      "<strong>Menucha (Soul Expansion):</strong> Not mere physical resting from work, but active soul rejuvenation, mindfulness, and stepping out of the weekly rat race.",
+      "<strong>39 Creative Melachot:</strong> Not hard physical exertion, but creative mastery over nature; on Shabbat, we step back and let Hashem run the world.",
+      "<strong>The Secret Spice:</strong> Rabbi Yehudah HaNasi told Emperor Antoninus that Shabbat itself is a divine spice that only those who observe it can taste.",
+      "<strong>Neshamah Yeteirah:</strong> An expanded spiritual capacity and elevated mindfulness granted to every Jew to perceive deeper meaning and peace.",
+      "<strong>Shamor & Zachor:</strong> Zachor through Kiddush (verbalizing sacred time over wine) and Shamor through candle lighting (peace in the home and spiritual illumination).",
+      "<strong>Three Festive Banquets:</strong> Celebrating Friday night, Shabbat day, and Seudah Shlishit at twilight with singing, delicious food, and deep family talk.",
+      "<strong>Digital Sovereignty:</strong> Unplugging screens for 25 hours gives you freedom; the real flex is being the master of your devices, not their slave."
     ],
-    nuggets_he: [
-      "לא סתם 'מנוחה ממאמץ' אלא יצירה רוחנית של הנפש והפסקה ממרוץ החיים.",
-      "ל״ט מלאכות: לא איסור עבודה פיזית קשה, אלא שביתה מיצירה ושינוי הטבע. בשבת אנו מניחים לה' לנהל את העולם.",
-      "שמור וזכור בדיבור אחד: הדלקת נרות (שלום בית ואור) וקידוש על היין (הצהרה על קדושת הזמן).",
-      "נשמה יתירה: ממד נוסף של עומק, שלווה ומודעות שמרגישים ביום זה."
+    "nuggets_he": [
+      "<strong>מנוחת הנפש:</strong> לא סתם שביתה ממאמץ גופני, אלא התחדשות הנשמה, שלווה פנימית ועצירה מוחלטת ממרוץ החיים.",
+      "<strong>ל״ט מלאכות:</strong> איסור המלאכה אינו על עבודה קשה, אלא על שינוי הבריאה; בשבת אנו מעידים שהעולם שייך לבורא.",
+      "<strong>תבלין השבת:</strong> רבי יהודה הנשיא גילה לקיסר אנטונינוס שהשבת היא תבלין אלוקי מיוחד שרק מי ששומר אותה זוכה לטעום את טעמו.",
+      "<strong>נשמה יתירה:</strong> ממד עמוק של מודעות, רוגע והרחבת הלב המוענק לכל יהודי ביום קדוש זה.",
+      "<strong>שמור וזכור:</strong> זכור באמצעות קידוש על היין (הצהרה על קדושת הזמן), ושמור בהדלקת נרות שבת (אור ושלום בית).",
+      "<strong>שלוש סעודות:</strong> סעודת ליל שבת, סעודת היום וסעודה שלישית של רעווא דרעווין עם שירים, מטעמים ושיחות נפש משפחתיות.",
+      "<strong>חירות דיגיטלית:</strong> התנתקות ממסכים ל-25 שעות מעניקה שליטה עצמית; החופש האמיתי הוא להיות הבוס של המסך שלך ולא עבד שלו."
     ],
-    life_app_en: "When you game 6 hours straight, do you feel recharged or drained? Shabbat teaches boundary power: being the master of your screen, not its slave. The freedom to unplug is the ultimate flex.",
-    life_app_he: "כשאתה משחק 6 שעות רצוף במסך, אתה מרגיש טעון או מרוקן? שבת מלמדת שליטה עצמית: להיות הבוס של המסך שלך ולא עבד שלו. היכולת להתנתק היא העוצמה האמיתית.",
-    midrash_en: "The Emperor Antoninus asked Rabbi Yehuda HaNasi: 'Why does your Shabbat food smell and taste so incredible?' The Rabbi answered: 'We have a special spice called Shabbat. Whoever keeps Shabbat gets the taste; whoever doesn't, can never taste it.'",
-    midrash_he: "הקיסר אנטונינוס שאל את רבי יהודה הנשיא: 'מדוע לתבשילי השבת יש ריח וטעם כה מיוחדים?' השיב לו רבי: 'תבלין אחד יש לנו ושמו שבת. מי ששומר שבת טועם אותו, ומי שאינו שומר אינו יכול לקלוט את טעמו'.",
-    discussion_en: "If you had to unplug from all devices for 24 hours, what would you actually do that you currently never have time for?",
-    discussion_he: "אם היית צריך להתנתק מכל המסכים ל-24 שעות, מה היית עושה שכרגע אף פעם אין לך זמן אליו?"
+    "life_app_en": "When you game 6 hours straight, do you feel recharged or drained? Shabbat teaches boundary power: being the master of your screen, not its slave. The freedom to unplug is the ultimate flex.",
+    "life_app_he": "כשאתה משחק 6 שעות רצוף במסך, אתה מרגיש טעון או מרוקן? שבת מלמדת שליטה עצמית: להיות הבוס של המסך שלך ולא עבד שלו. היכולת להתנתק היא העוצמה האמיתית.",
+    "midrash_en": "The Emperor Antoninus asked Rabbi Yehuda HaNasi: 'Why does your Shabbat food smell and taste so incredible?' The Rabbi answered: 'We have a special spice called Shabbat. Whoever keeps Shabbat gets the taste; whoever doesn't, can never taste it.'",
+    "midrash_he": "הקיסר אנטונינוס שאל את רבי יהודה הנשיא: 'מדוע לתבשילי השבת יש ריח וטעם כה מיוחדים?' השיב לו רבי: 'תבלין אחד יש לנו ושמו שבת. מי ששומר שבת טועם אותו, ומי שאינו שומר אינו יכול לקלוט את טעמו'.",
+    "discussion_en": "If you had to unplug from all devices for 24 hours, what would you actually do that you currently never have time for?",
+    "discussion_he": "אם היית צריך להתנתק מכל המסכים ל-24 שעות, מה היית עושה שכרגע אף פעם אין לך זמן אליו?"
   },
   {
-    id: "kashrut",
-    title_en: "Kashrut",
-    title_he: "כשרות",
-    category: "foundations",
-    hook_en: "If you owned a $2,000,000 Ferrari, would you put dirty vegetable oil in the fuel tank? Your body and soul are worth infinitely more.",
-    hook_he: "אם היה לך רכב פרארי בשווי 2 מיליון דולר, היית ממלא בו שמן בישול משומש? הגוף והנשמה שלך שווים לאין שיעור יותר.",
-    nuggets_en: [
-      "Kashrut means 'fit' or 'suitable' — spiritual calibration for the Jewish soul.",
-      "Land animals require split hooves and chewing cud (mindful digestion and grounded stability).",
-      "Fish require fins and scales (fins steer direction against the stream; scales protect from external parasites).",
-      "Separation of Milk and Meat: Meat represents mortality/taking life; milk represents nurturing life. We never mix the two.",
-      "Shechitah: Painless, precise slaughter emphasizing cruelty prevention (Tza'ar Ba'alei Chayim)."
+    "id": "kashrut",
+    "title_en": "Kashrut",
+    "title_he": "כשרות",
+    "category": "foundations",
+    "hook_en": "If you owned a $2,000,000 Ferrari, would you put dirty vegetable oil in the fuel tank? Your body and soul are worth infinitely more.",
+    "hook_he": "אם היה לך רכב פרארי בשווי 2 מיליון דולר, היית ממלא בו שמן בישול משומש? הגוף והנשמה שלך שווים לאין שיעור יותר.",
+    "nuggets_en": [
+      "<strong>Spiritual Calibration:</strong> Kashrut literally means 'fit' or 'suitable'; what enters the mouth directly tunes the sensitivity of the Jewish soul.",
+      "<strong>Timtum HaLev:</strong> The Talmud explains that forbidden foods spiritually coarsen the heart, while kosher food keeps the soul receptive and alert.",
+      "<strong>Land Animals:</strong> Must chew their cud (thoughtful digestion before reacting) and have split hooves (standing firm and grounded in values).",
+      "<strong>Creatures of Water:</strong> Must possess fins (direction to swim upstream against trends) and scales (armor defending against toxic influences).",
+      "<strong>Separation of Milk & Meat:</strong> Meat represents mortality and taking life, while milk represents motherly nurturing; Torah keeps these distinct.",
+      "<strong>Compassion in Shechitah:</strong> Humane and instantaneous slaughter with a razor-sharp blade, forbidding cruelty and banning hunting for entertainment.",
+      "<strong>Conscious Mastery:</strong> Animals eat impulsively whatever is in front of them; a human pauses, checks the source, and elevates food with a blessing."
     ],
-    nuggets_he: [
-      "כשרות פירושה 'כשיר' או 'מתאים' — כיול ותזונה מותאמת לנשמה היהודית.",
-      "סימני בהמה: מפרסת פרסה ומעלת גרה (יציבות באדמה ועיכול מדוד ומחושב).",
-      "סימני דגים: סנפיר וקשקשת (סנפיר מעניק כיוון ושחייה נגד הזרם; קשקשת מגינה ממזיקים חיצוניים).",
-      "הפרדת בשר וחלב: בשר מסמל נטילת חיים; חלב מסמל הענקת חיים וגידול. אנו שומרים על גבולות החיים.",
-      "שחיטה כשרה: הליך מהיר ומדויק ללא סבל, המדגיש מניעת צער בעלי חיים."
+    "nuggets_he": [
+      "<strong>כיול רוחני:</strong> כשרות מלשון 'כשיר' או 'מתאים'; המאכלים שנכנסים לגוף משפיעים ישירות על עדינות הנשמה וצלילות המחשבה.",
+      "<strong>טמטום הלב:</strong> חז״ל לימדו שמאכלות אסורים אוטמים את הרגש הרוחני, בעוד מזון כשר שומר על הלב קשוב, ערכי ופתוח.",
+      "<strong>סימני בהמה:</strong> העלאת גרה (סמל לחשיבה מעמיקה ואיפוק לפני פעולה) ופרסות שסועות (יציבות איתנה בערכים ובקרקע).",
+      "<strong>סימני דגים:</strong> סנפיר (מעניק כוח לשחות נגד הזרם החברתי) וקשקשת (שריון מגן מפני השפעות שליליות מסביב).",
+      "<strong>הפרדת בשר וחלב:</strong> בשר מסמל נטילת חיים ומעשיות; חלב מסמל הענקת חיים וגידול; התורה אוסרת לערבב בין התחומים.",
+      "<strong>צער בעלי חיים ושחיטה:</strong> הליך מדויק ומהיר בסכין חלקה לחלוטין ללא כאב, עם איסור מוחלט על התאכזרות וציד לשם שעשוע.",
+      "<strong>בחירה מודעת:</strong> בעלי חיים אוכלים באימפולסיביות; בן אדם עוצר, בודק, מברך ומקדש את הפעולה הבסיסית ביותר."
     ],
-    life_app_en: "Animals eat whatever is in front of them impulsively. Humans pause, check, and choose. Kashrut trains you to have self-control in an impulsive, snack-driven world.",
-    life_app_he: "בעלי חיים אוכלים כל מה שנמצא מולם מתוך דחף רגעי. בן אדם עוצר, בודק ובוחר. כשרות מפתחת משמעת עצמית ואיפוק בעולם של פיתויים מיידיים.",
-    midrash_en: "The Talmud teaches that what goes into your mouth affects your sensitivity: coarse, forbidden foods harden the spiritual heart ('Timtum HaLev'), while kosher mindfulness keeps the soul receptive and alert.",
-    midrash_he: "חז״ל מלמדים שמה שנכנס לפינו משפיע על עדינות הנפש: מאכלות אסורים גורמים ל'טמטום הלב', בעוד אכילה כשרה שומרת על נשמה רגישה, צלולה וערנית.",
-    discussion_en: "What is harder: stopping yourself from eating food that smells delicious, or walking away when someone insults you? How does training one help the other?",
-    discussion_he: "מה יותר קשה: לעצור את עצמך ממאכל מפתה, או להבליג כשמישהו מעליב אותך? איך אימון באחד עוזר לשני?"
+    "life_app_en": "Animals eat whatever is in front of them impulsively. Humans pause, check, and choose. Kashrut trains you to have self-control in an impulsive, snack-driven world.",
+    "life_app_he": "בעלי חיים אוכלים כל מה שנמצא מולם מתוך דחף רגעי. בן אדם עוצר, בודק ובוחר. כשרות מפתחת משמעת עצמית ואיפוק בעולם של פיתויים מיידיים.",
+    "midrash_en": "The Talmud teaches that what goes into your mouth affects your sensitivity: coarse, forbidden foods harden the spiritual heart ('Timtum HaLev'), while kosher mindfulness keeps the soul receptive and alert.",
+    "midrash_he": "חז״ל מלמדים שמה שנכנס לפינו משפיע על עדינות הנפש: מאכלות אסורים גורמים ל'טמטום הלב', בעוד אכילה כשרה שומרת על נשמה רגישה, צלולה וערנית.",
+    "discussion_en": "What is harder: stopping yourself from eating food that smells delicious, or walking away when someone insults you? How does training one help the other?",
+    "discussion_he": "מה יותר קשה: לעצור את עצמך ממאכל מפתה, או להבליג כשמישהו מעליב אותך? איך אימון באחד עוזר לשני?"
   },
   {
-    id: "tefillin",
-    title_en: "Tefillin",
-    title_he: "תפילין",
-    category: "mitzvot",
-    hook_en: "Athletes wear heart monitors and smartwatches. Tefillin are the original biofeedback hardware: aligning your logic, your passions, and your hands to do good.",
-    hook_he: "ספורטאים עונדים שעונים חכמים ומדדי דופק. תפילין הן החומרה המקורית: חיבור וכיול של ההיגיון במוח, הרגשות בלב והמעשים בידיים.",
-    nuggets_en: [
-      "Shel Yad (Arm): Placed on the bicep, resting directly against the heart, wrapped 7 times around the arm to bind emotions and actions.",
-      "Shel Rosh (Head): Placed above the hairline directly over the frontal lobe where consciousness and decision-making happen.",
-      "Contains 4 holy Torah passages written on parchment by a Sofer (Scribe), declaring the Shema and our mission.",
-      "Black leather boxes (Batim) made from one solid piece of kosher animal hide, perfectly square.",
-      "Bar Mitzvah milestone: The first daily Mitzvah unique to reaching adulthood."
+    "id": "tefillin",
+    "title_en": "Tefillin",
+    "title_he": "תפילין",
+    "category": "mitzvot",
+    "hook_en": "Athletes wear heart monitors and smartwatches. Tefillin are the original biofeedback hardware: aligning your logic, your passions, and your hands to do good.",
+    "hook_he": "ספורטאים עונדים שעונים חכמים ומדדי דופק. תפילין הן החומרה המקורית: חיבור וכיול של ההיגיון במוח, הרגשות בלב והמעשים בידיים.",
+    "nuggets_en": [
+      "<strong>Biofeedback Circuit:</strong> Connecting the head (intellect), heart (emotions), and arm (strength) into unified service of high moral purpose.",
+      "<strong>Shel Yad on the Bicep:</strong> Bound next to the heart and wrapped 7 times, channeling our passions and physical actions toward doing good.",
+      "<strong>Shel Rosh on the Crown:</strong> Rested directly over the brain's decision-making frontal lobe, sanctifying our logic, thoughts, and perception.",
+      "<strong>Four Sacred Passages:</strong> Handwritten by an expert Sofer on parchment, declaring the Shema and our covenant of eternal freedom.",
+      "<strong>Black Solid Batim:</strong> Formed from a single piece of kosher hide into exact geometric squares, dyed pure black to symbolize unyielding integrity.",
+      "<strong>Quiet Inner Dignity:</strong> Rabbi Eliezer taught that nations revere the Jew on whose head the Name of Hashem is bound.",
+      "<strong>The Adult Milestone:</strong> The prime daily mitzvah unique to adulthood, starting from your Bar Mitzvah and connecting you for life."
     ],
-    nuggets_he: [
-      "של יד: מונחת על הקידומת (שריר הזרוע) כנגד הלב, ונכרכת 7 פעמים כדי לרתום את הרגשות והפעולות.",
-      "של ראש: מונחת מעל קו השיער, בדיוק מעל האונה הקדמית שבה מתקבלות ההחלטות.",
-      "בתוכן 4 פרשיות קודש הכתובות על קלף בדיו על ידי סופר סת״ם, ובראשן קבלת עול מלכות שמים (שמע ישראל).",
-      "בתים שחורים מעור טהור ומרובעים בתכלית הדיוק.",
-      "ציון דרך של גיל 13: המצווה היומית הראשונה המייחדת את הבחור שהפך לבוגר."
+    "nuggets_he": [
+      "<strong>מעגל כיול פנימי:</strong> חיבור עוצמתי בין המוח (השכל), הלב (הרגשות) והיד (המעשים) למטרה מוסרית ורוחנית אחת.",
+      "<strong>תפילין של יד:</strong> מונחות על שריר הזרוע כנגד הלב ונכרכות 7 פעמים, לרתום את תשוקות הלב והמעשים היומיומיים לטוב.",
+      "<strong>תפילין של ראש:</strong> מונחות מעל קו השיער כנגד האונה המרכזית במוח, לקדש את המחשבות, כושר השיפוט והראייה.",
+      "<strong>ארבע פרשיות קודש:</strong> כתובות בדיו שחור על קלף בידי סופר סת״ם, ובראשן קבלת עול מלכות שמים וברית היציאה מעבדות לחירות.",
+      "<strong>בתים שחורים ומרובעים:</strong> עשויים מעור בהמה טהורה בדיוק גיאומטרי מופתי ומושחרים, סמל ליושרה ונאמנות בלתי מתפשרת.",
+      "<strong>כבוד פנימי ושקט:</strong> רבי אליעזר אמר: 'וראו כל עמי הארץ כי שם ה' נקרא עליך' — אלו תפילין שבראש המעניקות יראת כבוד ועוצמה.",
+      "<strong>שער הבגרות:</strong> המצווה היומית הראשונה המייחדת את הבחור שהגיע לגיל 13 ומקשרת אותו ישירות לאביו שבשמים בכל בוקר."
     ],
-    life_app_en: "How often do you know the right thing to do in your brain, but your feelings want to do the opposite? Tefillin connects the cable between your brain's wisdom and your heart's desires.",
-    life_app_he: "כמה פעמים קורה שאתה יודע במוח מה הדבר הנכון, אבל הלב והחשק רוצים בדיוק ההפך? התפילין מחברות את הכבל בין שכל ישר לרגש נכון.",
-    midrash_en: "Rabbi Eliezer taught: 'All the nations of the earth shall see that Hashem's name is called upon you and they shall respect you (Deut 28:10) — these are the Tefillin on the head.' It gives a young man quiet, unshakable dignity.",
-    midrash_he: "רבי אליעזר אומר: 'וראו כל עמי הארץ כי שם ה' נקרא עליך ויראו ממך — אלו תפילין שבראש'. התפילין מעניקות לצעיר עוצמה וכבוד פנימי בלתי מעורער.",
-    discussion_en: "If you could wear a bracelet that reminds you of your highest personal standard every morning, what motto would you write on it?",
-    discussion_he: "אם היית עונד צמיד שמזכיר לך כל בוקר את הערך הכי חשוב שלך, איזה משפט היית כותב עליו?"
+    "life_app_en": "How often do you know the right thing to do in your brain, but your feelings want to do the opposite? Tefillin connects the cable between your brain's wisdom and your heart's desires.",
+    "life_app_he": "כמה פעמים קורה שאתה יודע במוח מה הדבר הנכון, אבל הלב והחשק רוצים בדיוק ההפך? התפילין מחברות את הכבל בין שכל ישר לרגש נכון.",
+    "midrash_en": "Rabbi Eliezer taught: 'All the nations of the earth shall see that Hashem's name is called upon you and they shall respect you (Deut 28:10) — these are the Tefillin on the head.' It gives a young man quiet, unshakable dignity.",
+    "midrash_he": "רבי אליעזר אומר: 'וראו כל עמי הארץ כי שם ה' נקרא עליך ויראו ממך — אלו תפילין שבראש'. התפילין מעניקות לצעיר עוצמה וכבוד פנימי בלתי מעורער.",
+    "discussion_en": "If you could wear a bracelet that reminds you of your highest personal standard every morning, what motto would you write on it?",
+    "discussion_he": "אם היית עונד צמיד שמזכיר לך כל בוקר את הערך הכי חשוב שלך, איזה משפט היית כותב עליו?"
   },
   {
-    id: "jewish_wedding",
-    title_en: "The Jewish Wedding",
-    title_he: "חתונה יהודית",
-    category: "life_cycle",
-    hook_en: "Why does the biggest, happiest party in a Jewish life pause at the absolute climax to smash a glass on the floor?",
-    hook_he: "מדוע בחגיגה הכי גדולה ושמחה של החיים, רגע לפני הריקודים, החתן עוצר הכל ושובר כוס זכוכית ברגל?",
-    nuggets_en: [
-      "Bashert (Destiny): Kabbalah explains that before birth, one soul splits in two; marriage is the reunion of halves.",
-      "The Chuppah: Open on all four sides like the tent of Abraham, signaling that their home will be welcoming to anyone in need.",
-      "Kiddushin & Ring: Simple, smooth gold ring without stones, representing honest value and unbroken eternity.",
-      "Ketubah: The world's oldest legal protection contract for women, ensuring care, honor, and financial rights.",
-      "Breaking the Glass: Remembering Jerusalem's destruction and showing that even at peak personal happiness, we remember the world's pain."
+    "id": "jewish_wedding",
+    "title_en": "The Jewish Wedding",
+    "title_he": "חתונה יהודית",
+    "category": "life_cycle",
+    "hook_en": "Why does the biggest, happiest party in a Jewish life pause at the absolute climax to smash a glass on the floor?",
+    "hook_he": "מדוע בחגיגה הכי גדולה ושמחה של החיים, רגע לפני הריקודים, החתן עוצר הכל ושובר כוס זכוכית ברגל?",
+    "nuggets_en": [
+      "<strong>Bashert (Soul Reunion):</strong> Kabbalah teaches that before birth, one soul splits into two; holy marriage is the reunion of matched halves.",
+      "<strong>The Open Chuppah:</strong> Open on all four sides like the tent of Abraham and Sarah, promising their home will be welcoming to guests in need.",
+      "<strong>Smooth Gold Ring:</strong> A pure circular band without stones or gems, reflecting authentic value, transparent honesty, and endless dedication.",
+      "<strong>The Historic Ketubah:</strong> The world's first legal charter protecting women's rights, establishing financial security, respect, and marital devotion.",
+      "<strong>Breaking the Glass:</strong> Halting personal joy to remember Jerusalem's destruction, demonstrating that true leaders remember the world's pain.",
+      "<strong>Sheva Berachot:</strong> Seven festive blessings recited over wine celebrating love, joy, friendship, and the future restoration of world peace.",
+      "<strong>Loyalty Over Moods:</strong> While pop culture treats relationships as temporary, a Jewish marriage builds an unbreakable sanctuary through every storm."
     ],
-    nuggets_he: [
-      "בשערט (ייעוד): הקבלה מלמדת שטרם הירידה לעולם הנשמה מתפצלת לשניים; החתונה היא איחוד המחציות.",
-      "החופה: פתוחה מ-4 רוחותיה כאוהל אברהם, סימן שביתם יהיה פתוח תמיד להכנסת אורחים וחסד.",
-      "קידושין וטבעת: טבעת עגולה וחלקה ללא אבנים, המבטאת שווי אמיתי וחיבור נצחי ללא אשליות.",
-      "כתובה: המסמך המשפטי החלוצי שמגן על כבוד, צרכי וזכויות האישה.",
-      "שבירת הכוס: זיכרון חורבן ירושלים — לזכור שגם ברגעי השיא של האושר האישי איננו שוכחים את תיקון העולם."
+    "nuggets_he": [
+      "<strong>בשערט (איחוד נשמות):</strong> תורת הסוד מלמדת שטרם ירידתן לעולם נשמות מתפצלות; החתונה היהודית היא איחוד שמח של שני חלקי נשמה.",
+      "<strong>החופה הפתוחה:</strong> פתוחה מארבע רוחותיה כמו אוהל אברהם ושרה, הבטחה שהבית החדש יוקדש לחסד, נתינה והכנסת אורחים.",
+      "<strong>טבעת זהב חלקה:</strong> עגולה ופשוטה ללא יהלומים או חריטות, המבטאת שווי אמיתי, כנות נקייה והתקשרות נצחית שאינה תלויה במראית עין.",
+      "<strong>הכתובה ההיסטורית:</strong> המסמך המשפטי החלוצי בעולם המבטיח את כבודה, זכויותיה וביטחונה הכלכלי והאישי של האישה.",
+      "<strong>שבירת הכוס:</strong> עצירת שיא השמחה כדי לזכור את חורבן ירושלים, מסר מוסרי שבוגר אמיתי לעולם אינו שוכח את כאב הזולת.",
+      "<strong>שבע ברכות:</strong> שבע ברכות על כוס ייין המקדשות אהבה, אחווה, שלום ורעות ומברכות את בניין ירושלים וגאולת העולם.",
+      "<strong>נאמנות מעל רגשות חולפים:</strong> בעוד התרבות מסביב מציגה קשרים כדבר בר-החלפה, חתונה יהודית בונה מבצר נצחי של שותפות אמת."
     ],
-    life_app_en: "Popular culture treats relationships as disposable. A Jewish wedding teaches loyalty, teamwork, and building something stronger than temporary moods.",
-    life_app_he: "התרבות מסביב מציגה קשרים כדבר חולף שניתן להחליף בקלות. חתונה יהודית מלמדת על נאמנות, עבודת צוות ובניית בית יציב שעומד בכל סערה.",
-    midrash_en: "A Roman matron asked Rabbi Yose ben Halafta: 'What has your God been doing since He finished creating the world in six days?' He replied: 'He sits and arranges marriages, connecting matching souls.'",
-    midrash_he: "מטרוניתא רומית שאלה את רבי יוסי בן חלפתא: 'מה עושה אלוהיכם מאז שסיים את ששת ימי בראשית?' ענה לה: 'יושב ומזווג זיווגים — מחבר בין נשמות'.",
-    discussion_en: "Why is it important to remember people who are struggling or hurting even on your most joyful birthday or celebration?",
-    discussion_he: "למה חשוב לזכור אנשים שקשה להם דווקא ביום ההולדת או בחגיגה הכי גדולה ושמחה שלך?"
+    "life_app_en": "Popular culture treats relationships as disposable. A Jewish wedding teaches loyalty, teamwork, and building something stronger than temporary moods.",
+    "life_app_he": "התרבות מסביב מציגה קשרים כדבר חולף שניתן להחליף בקלות. חתונה יהודית מלמדת על נאמנות, עבודת צוות ובניית בית יציב שעומד בכל סערה.",
+    "midrash_en": "A Roman matron asked Rabbi Yose ben Halafta: 'What has your God been doing since He finished creating the world in six days?' He replied: 'He sits and arranges marriages, connecting matching souls.'",
+    "midrash_he": "מטרוניתא רומית שאלה את רבי יוסי בן חלפתא: 'מה עושה אלוהיכם מאז שסיים את ששת ימי בראשית?' ענה לה: 'יושב ומזווג זיווגים — מחבר בין נשמות'.",
+    "discussion_en": "Why is it important to remember people who are struggling or hurting even on your most joyful birthday or celebration?",
+    "discussion_he": "למה חשוב לזכור אנשים שקשה להם דווקא ביום ההולדת או בחגיגה הכי גדולה ושמחה שלך?"
   },
   {
-    id: "avot",
-    title_en: "The Avot & Imahot",
-    title_he: "האבות והאמהות",
-    category: "history",
-    hook_en: "Who were your great-great-great grandparents? In Judaism, you aren't just an individual; you are the continuation of a 3,800-year dynastic family tree.",
-    hook_he: "מי היו סבא וסבתא של הסבא שלך? ביהדות אתה לא אדם בודד שנחת משום מקום; אתה ממשיך של שושלת אבות בת 3,800 שנה.",
-    nuggets_en: [
-      "Abraham & Sarah (Chesed): Radical generosity, smashed idols of conformity, stood against the whole world.",
-      "Isaac & Rebecca (Gevurah): Inner discipline, overcoming trauma, digging deep wells of persistence.",
-      "Jacob, Rachel & Leah (Tiferet): Harmony, resilience through unfair betrayals, turning struggles into tribes.",
-      "Ma'aseh Avot Siman L'Banim: The patterns and struggles of the founders repeat as guidance for their descendants."
+    "id": "avot",
+    "title_en": "The Avot & Imahot",
+    "title_he": "האבות והאמהות",
+    "category": "history",
+    "hook_en": "Who were your great-great-great grandparents? In Judaism, you aren't just an individual; you are the continuation of a 3,800-year dynastic family tree.",
+    "hook_he": "מי היו סבא וסבתא של הסבא שלך? ביהדות אתה לא אדם בודד שנחת משום מקום; אתה ממשיך של שושלת אבות בת 3,800 שנה.",
+    "nuggets_en": [
+      "<strong>Abraham (Chesed & Courage):</strong> Radically generous, smashed the idols of conformity in Ur Kasdim, and stood proud against the entire world.",
+      "<strong>Sarah the Prophetess:</strong> Partner in destiny whose prophetic vision surpassed Abraham's, nurturing the moral purity of the next generation.",
+      "<strong>Isaac (Gevurah & Persistence):</strong> Inner strength, supreme dedication at the Akeidah, and persistent digging of water wells despite disputes.",
+      "<strong>Rebecca the Discernment:</strong> Courageous kindness drawing water for thirsty camels, possessing intuitive clarity to guide Yaakov toward blessing.",
+      "<strong>Jacob (Tiferet & Resilience):</strong> Endurance through 20 years of deception with Laban, wrestling an angel until dawn, and building the 12 tribes.",
+      "<strong>Rachel & Leah:</strong> Rachel giving away the secret signs out of sheer empathy; Leah mastering heartfelt gratitude by naming Yehudah.",
+      "<strong>Ma'aseh Avot Siman L'Banim:</strong> The founding ancestors established the spiritual DNA, moral bravery, and survival roadmap for every Jew today."
     ],
-    nuggets_he: [
-      "אברהם ושרה (חסד): נתינה ללא גבולות, ניפוץ מוסכמות של עבודה זרה ועמידה אמיצה מול כל העולם.",
-      "יצחק ורבקה (גבורה): משמעת פנימית, התגברות על ניסיונות וחפירת בארות מים בעקביות.",
-      "יעקב, רחל ולאה (תפארת ואמת): חוסן נפשי מול בגידות לבן, הפיכת קשיים לבניין 12 שבטי ישראל.",
-      "מעשה אבות סימן לבנים: הדרך שבה התמודדו המייסדים היא מפת הדרכים והגנים הרוחניים שלנו."
+    "nuggets_he": [
+      "<strong>אברהם אבינו (חסד ועצמאות):</strong> הכנסת אורחים מופלאה, ניפוץ אלילי השקר באור כשדים ועמידה גאה לבדו מול כל העולם כ'עברי'.",
+      "<strong>שרה אמנו (נבואה ועוצמה):</strong> שותפה שווה למסע שרוח קודשה עלתה על של אברהם, בשמירה קפדנית על חינוך הדור הבא.",
+      "<strong>יצחק אבינו (גבורה ועקביות):</strong> משמעת עצמית מוחלטת, מסירות נפש בעקידה ועקשנות שקטה בחפירת בארות מים מול סכסוכי פלשתים.",
+      "<strong>רבקה אמנו (חסד ותבונה):</strong> טוב לב יוצא דופן בהשקיית עשרה גמלים בבאר, וראייה נבואית צלולה בהכוונת יעקב לקבלת הברכות.",
+      "<strong>יעקב אבינו (אמת ותפארת):</strong> חוסן נפשי מול 20 שנות מרמה של לבן, מאבק אמיץ עם שרו של עשיו והעמדת שבטי י-ה ללא פגם.",
+      "<strong>רחל ולאה:</strong> רחל המוסרת את הסימנים במסירות נפש עילאית; לאה המייסדת את ערך ההודאה כשקראה לבנה יהודה: 'הפעם אודה את ה''.",
+      "<strong>מעשה אבות סימן לבנים:</strong> הניסיונות והניצחונות של האבות והאימהות הם הקוד הגנטי והמפה הרוחנית שפועלים בקרבנו עד היום."
     ],
-    life_app_en: "When all your friends at school follow an unhealthy trend, remember Abraham: he was called 'HaIvri' because the entire world stood on one side, and he stood proudly on the other.",
-    life_app_he: "כשכל החברים בבית הספר נגררים אחרי טרנד מטופש או פוגעני, תיזכר באברהם: הוא נקרא 'העברי' כי כל העולם עמד מעבר אחד והוא בחר לעמוד בצד של האמת.",
-    midrash_en: "The Midrash says Abraham was thrown into a fiery furnace at Nimrod's court for refusing to bow down to statues, proving that truth is worth standing for even under maximum heat.",
-    midrash_he: "המדרש מספר שנמרוד השליך את אברהם לכבשן האש כי סירב להשתחוות לפסלים — ללמד שערכי אמת חזקים יותר מכל לחץ חברתי.",
-    discussion_en: "Which trait do you admire most in a leader: someone super kind, someone super disciplined, or someone who never gives up when life gets unfair?",
-    discussion_he: "איזו תכונה אתה הכי מעריך במנהיג: אדם שכולו טוב לב, אדם בעל משמעת ברזל, או אדם שלעולם אינו נשבר גם כשקשה?"
+    "life_app_en": "When all your friends at school follow an unhealthy trend, remember Abraham: he was called 'HaIvri' because the entire world stood on one side, and he stood proudly on the other.",
+    "life_app_he": "כשכל החברים בבית הספר נגררים אחרי טרנד מטופש או פוגעני, תיזכר באברהם: הוא נקרא 'העברי' כי כל העולם עמד מעבר אחד והוא בחר לעמוד בצד של האמת.",
+    "midrash_en": "The Midrash says Abraham was thrown into a fiery furnace at Nimrod's court for refusing to bow down to statues, proving that truth is worth standing for even under maximum heat.",
+    "midrash_he": "המדרש מספר שנמרוד השליך את אברהם לכבשן האש כי סירב להשתחוות לפסלים — ללמד שערכי אמת חזקים יותר מכל לחץ חברתי.",
+    "discussion_en": "Which trait do you admire most in a leader: someone super kind, someone super disciplined, or someone who never gives up when life gets unfair?",
+    "discussion_he": "איזו תכונה אתה הכי מעריך במנהיג: אדם שכולו טוב לב, אדם בעל משמעת ברזל, או אדם שלעולם אינו נשבר גם כשקשה?"
   },
   {
-    id: "eretz_yisrael",
-    title_en: "Eretz Yisrael",
-    title_he: "ארץ ישראל",
-    category: "foundations",
-    hook_en: "Every other ancient empire (Rome, Babylon, Greece) faded into dusty museums. Why is the Jewish nation alive and thriving on the exact soil promised to Abraham?",
-    hook_he: "כל האימפריות העתיקות (רומא, בבל, מצרים) נעלמו למוזיאונים. איך ייתכן שעם ישראל חי, נושם ומשגשג בדיוק על אותה האדמה שהובטחה לאברהם?",
-    nuggets_en: [
-      "Not just a refuge, but the central spiritual stage where the Jewish soul functions at 100% capacity.",
-      "The Land that responds to us: For 2,000 years under foreign empires it stayed a desolate desert; the moment Jews returned, it bloomed into high-tech and agriculture.",
-      "Jerusalem & Kotel: The focal point of Jewish prayers worldwide for over three millennia.",
-      "Mitzvot HaTeluyot Ba'Aretz: Special land-based commandments (Shmittah, Terumot, Ma'asrot)."
+    "id": "eretz_yisrael",
+    "title_en": "Eretz Yisrael",
+    "title_he": "ארץ ישראל",
+    "category": "foundations",
+    "hook_en": "Every other ancient empire (Rome, Babylon, Greece) faded into dusty museums. Why is the Jewish nation alive and thriving on the exact soil promised to Abraham?",
+    "hook_he": "כל האימפריות העתיקות (רומא, בבל, מצרים) נעלמו למוזיאונים. איך ייתכן שעם ישראל חי, נושם ומשגשג בדיוק על אותה האדמה שהובטחה לאברהם?",
+    "nuggets_en": [
+      "<strong>The Promised Homeland:</strong> Not a random refuge, but the unique spiritual ecosystem where the Jewish nation fulfills its highest destiny.",
+      "<strong>The Responsive Soil:</strong> Lay desolate for nearly 2,000 years under foreign conquerors, yet miraculously burst into fruit and high tech upon our return.",
+      "<strong>Jerusalem & Kotel:</strong> The focal point of Jewish prayers worldwide for over three millennia, facing Mount Moriah where the Shechinah never departs.",
+      "<strong>Land-Dependent Mitzvot:</strong> Special agricultural commandments (Shmittah, Terumot, Ma'asrot) sanctifying nature and connecting land with God.",
+      "<strong>Avraham's Walking Deed:</strong> 'Arise and walk through the length and breadth of the land' — personal physical connection to holy terrain.",
+      "<strong>Ingathering of Exiles:</strong> The ongoing modern miracle of gathering millions of Jews from over 100 countries back into one vibrant home.",
+      "<strong>An Unshakable Anchor:</strong> No matter where a Jewish boy travels in the world, in Israel he is never a stranger or tourist; he is home."
     ],
-    nuggets_he: [
-      "לא רק מקלט בטוח, אלא הבמה הרוחנית המרכזית שבה עם ישראל פועל במלוא הפוטנציאל שלו.",
-      "הארץ המגיבה לעמה: במשך 2,000 שנות גלות הייתה שממה; ברגע ששבו בניה הפכה למעצמת פריחה, חקלאות והייטק.",
-      "ירושלים והכותל המערבי: מוקד התפילה של כל יהודי בעולם מזה אלפי שנים.",
-      "מצוות התלויות בארץ: שמיטה, תרומות ומעשרות — חיבור עמוק בין עבודת האדמה לקדושה."
+    "nuggets_he": [
+      "<strong>האקוסיסטם הרוחני:</strong> ארץ ישראל איננה רק מקלט פיזי, אלא האדמה הייחודית שבה עם ישראל פורח ומגשים את ייעודו השלם.",
+      "<strong>הארץ המגיבה לבניה:</strong> שממה מוחלטת במשך 2,000 שנות כיבוש זר, שהתעוררה לחיים ולמעצמת חקלאות, מדע והייטק עם שיבת בניה.",
+      "<strong>ירושלים והכותל המערבי:</strong> מוקד התפילות והכיסופים מכל פינה בעולם; שער השמים של הר המוריה שממנו לא זזה שכינה מעולם.",
+      "<strong>מצוות התלויות בארץ:</strong> שמיטה, תרומות, מעשרות וביכורים המחברים את עבודת האדמה הפשוטה לחסד חברתי ולקדושת הבורא.",
+      "<strong>קניין ההליכה:</strong> 'קום התהלך בארץ לאורכה ולרוחבה כי לך אתננה' — חיבור פיזי וממשי של כל יהודי לשבילי המולדת.",
+      "<strong>קיבוץ גלויות:</strong> התגשמות נבואות התנ״ך בעיניים שלנו: חזרת מיליוני יהודים מלמעלה מ-100 גלויות לחיות ולבנות יחד.",
+      "<strong>עוגן נצחי:</strong> לא משנה היכן יסתובב נער יהודי בעולם, בארץ ישראל הוא לעולם אינו זר או תייר — הוא בבית של המשפחה."
     ],
-    life_app_en: "No matter where you live in the world, you have an eternal home where you are never an outsider or a stranger.",
-    life_app_he: "לא משנה היכן אתה גר בעולם, תמיד יש לך בית אחד שבו לעולם אינך זר או אורח.",
-    midrash_en: "The Talmud says: 'Ten measures of beauty descended to the world; nine were taken by Jerusalem and one by the rest of the entire earth.'",
-    midrash_he: "אמרו חז״ל: 'עשרה קבים של יופי ירדו לעולם — תשעה נטלה ירושלים ואחד כל העולם כולו'.",
-    discussion_en: "If you could bring three things from your room to Israel right now, what would you bring, and what is the first place you'd visit?",
-    discussion_he: "אם היית נוחת מחר בבוקר בישראל, מה המקום הראשון שהיית רוצה לראות בעיניים שלך?"
+    "life_app_en": "No matter where you live in the world, you have an eternal home where you are never an outsider or a stranger.",
+    "life_app_he": "לא משנה היכן אתה גר בעולם, תמיד יש לך בית אחד שבו לעולם אינך זר או אורח.",
+    "midrash_en": "The Talmud says: 'Ten measures of beauty descended to the world; nine were taken by Jerusalem and one by the rest of the entire earth.'",
+    "midrash_he": "אמרו חז״ל: 'עשרה קבים של יופי ירדו לעולם — תשעה נטלה ירושלים ואחד כל העולם כולו'.",
+    "discussion_en": "If you could bring three things from your room to Israel right now, what would you bring, and what is the first place you'd visit?",
+    "discussion_he": "אם היית נוחת מחר בבוקר בישראל, מה המקום הראשון שהיית רוצה לראות בעיניים שלך?"
   },
   {
-    id: "lashon_hakodesh",
-    title_en: "Lashon HaKodesh",
-    title_he: "לשון הקודש",
-    category: "wisdom",
-    hook_en: "In English, a 'dog' is just an arbitrary word we made up. In Hebrew, every word is the actual spiritual blueprint and source code of what it names.",
-    hook_he: "באנגלית המילה Dog היא סתם צליל שהומצא באקראי. בעברית, כל מילה היא שורש ה-DNA והתוכנה הפנימית של הבריאה.",
-    nuggets_en: [
-      "God created the universe with speech: 'And God said, Let there be light.' Words are creative energy.",
-      "Every Hebrew letter has a numeric value (Gematria) and deep architectural meaning.",
-      "No real synonyms: In Hebrew, words for love, soul, or joy (Ahava, Simcha, Sasson, Gilah) describe distinct emotional mechanics.",
-      "Clean language: Ancient Hebrew has no native curse or foul words; all profanity in modern slang had to be borrowed from other languages."
+    "id": "lashon_hakodesh",
+    "title_en": "Lashon HaKodesh",
+    "title_he": "לשון הקודש",
+    "category": "wisdom",
+    "hook_en": "In English, a 'dog' is just an arbitrary word we made up. In Hebrew, every word is the actual spiritual blueprint and source code of what it names.",
+    "hook_he": "באנגלית המילה Dog היא סתם צליל שהומצא באקראי. בעברית, כל מילה היא שורש ה-DNA והתוכנה הפנימית של הבריאה.",
+    "nuggets_en": [
+      "<strong>Creation Source Code:</strong> Hashem formed reality with words: 'Let there be light'; Hebrew letters are the energetic building blocks of creation.",
+      "<strong>Gematria & Architecture:</strong> Every Hebrew letter contains a numeric value and inner meaning linking physical matter with spiritual reality.",
+      "<strong>Precision of Meaning:</strong> No random synonyms; words like Ahava (love), Simcha (joy), and Sasson (outburst of joy) map distinct emotional states.",
+      "<strong>Inherent Holiness:</strong> Classical Hebrew contains zero native curse or vulgar words; vulgar slang in modern Hebrew had to be imported from outside.",
+      "<strong>Life & Death in the Tongue:</strong> King Solomon taught that speech holds creative and destructive power; words spoken cannot be pulled back.",
+      "<strong>The Irreversible Arrow:</strong> The Midrash compares a harsh word to an arrow; once released from the bow, you cannot control the damage it inflicts.",
+      "<strong>Lashon Hara Defense:</strong> The Chafetz Chaim proved that guarding speech preserves self-respect, mental peace, and lifelong friendships."
     ],
-    nuggets_he: [
-      "העולם נברא בעשרה מאמרות: 'ויאמר אלוהים יהי אור'. דיבור הוא אנרגיה מייצרת מציאות.",
-      "אותיות עם משמעות וגימטריה: כל אות היא צינור שפע ייחודי.",
-      "אין מילים נרדפות סתם: מילים כמו שמחה, ששון, גילה ודיצה מתארות שלבים מדויקים בהרגשה.",
-      "שפה נקייה: בלשון הקודש המקורית אין מילות גנאי או קללות; כל הקללות בסלנג הושאלו משפות אחרות."
+    "nuggets_he": [
+      "<strong>שורש תוכנת הבריאה:</strong> העולם נברא בעשרה מאמרות: 'ויאמר אלוהים יהי אור' — האותיות העבריות הן אבני הבניין של המציאות.",
+      "<strong>גימטריה ומשמעות פנימית:</strong> לכל אות יש ערך מספרי, צורה ומשמעות עמוקה המחברים בין החפץ הגשמי למקורו הרוחני.",
+      "<strong>דיוק פסיכולוגי:</strong> אין מילים נרדפות סתם; מילים כמו שמחה, ששון, גילה ודיצה מגדירות שלבים שונים ומדויקים בהרגשת הנפש.",
+      "<strong>שפה נקייה מטבעה:</strong> בלשון הקודש המקורית אין מילות גנאי או קללות; כל הקללות בסלנג הישראלי הושאלו משפות זרות.",
+      "<strong>מוות וחיים ביד הלשון:</strong> שלמה המלך לימד שדיבור הוא כוח יוצר או הורס; מילה אחת מרוממת ומילה אחת מסוגלת לרסק.",
+      "<strong>חץ שנורה מהקשת:</strong> המדרש מדמה מילה פוגענית לחץ; ברגע שעזב את המיתר, אי אפשר להחזירו או לעצור את פגיעתו.",
+      "<strong>שמירת הלשון כעוצמה:</strong> החפץ חיים הוכיח ששמירה על דיבור נקי מביאה בריאות נפשית, אריכות ימים וכבוד אמיתי מהחברים."
     ],
-    life_app_en: "The words you text or say in a group chat can build someone's confidence for weeks, or destroy their day in seconds. Words are physical power.",
-    life_app_he: "משפט אחד שאתה שולח בקבוצת וואטסאפ יכול לבנות לחבר ביטחון לשבועות, או לרסק לו את המצב רוח בשנייה. מילים הן נשק חם.",
-    midrash_en: "King Solomon said: 'Death and life are in the power of the tongue' (Proverbs 18:21). Like an arrow released from a bow, once a word leaves your lips, you cannot bring it back.",
-    midrash_he: "שלמה המלך אמר: 'מוות וחיים ביד לשון'. כמו חץ שנורה מהקשת, ברגע שמילה יצאה מהפה אי אפשר להחזיר אותה.",
-    discussion_en: "Has someone ever said something that changed how you felt about yourself for days? How do you choose what words you type online?",
-    discussion_he: "האם מישהו אמר לך פעם משהו שגרם לך להרגיש שונה לגמרי לגבי עצמך? איך אתה בוחר אילו מילים לכתוב ברשתות או בוואטסאפ?"
+    "life_app_en": "The words you text or say in a group chat can build someone's confidence for weeks, or destroy their day in seconds. Words are physical power.",
+    "life_app_he": "משפט אחד שאתה שולח בקבוצת וואטסאפ יכול לבנות לחבר ביטחון לשבועות, או לרסק לו את המצב רוח בשנייה. מילים הן נשק חם.",
+    "midrash_en": "King Solomon said: 'Death and life are in the power of the tongue' (Proverbs 18:21). Like an arrow released from a bow, once a word leaves your lips, you cannot bring it back.",
+    "midrash_he": "שלמה המלך אמר: 'מוות וחיים ביד לשון'. כמו חץ שנורה מהקשת, ברגע שמילה יצאה מהפה אי אפשר להחזיר אותה.",
+    "discussion_en": "Has someone ever said something that changed how you felt about yourself for days? How do you choose what words you type online?",
+    "discussion_he": "האם מישהו אמר לך פעם משהו שגרם לך להרגיש שונה לגמרי לגבי עצמך? איך אתה בוחר אילו מילים לכתוב ברשתות או בוואטסאפ?"
   },
   {
-    id: "kiddush_hashem",
-    title_en: "Kiddush Hashem",
-    title_he: "קידוש השם",
-    category: "values",
-    hook_en: "When an athlete puts on the jersey of their national team, every single thing they do reflects on their entire country. You wear that jersey every day.",
-    hook_he: "כששחקן עולה למגרש עם חולצת נבחרת, כל תנועה שלו מייצגת מדינה שלמה. אתה לובש את החולצה הזו בכל יום מחייך.",
-    nuggets_en: [
-      "Kiddush Hashem: Living so honorably that people say: 'Blessed is the God of this person.'",
-      "Chilul Hashem (Desecration): Cheating, lying, or being rude while being known as a Jew damages the name of our people.",
-      "Quiet integrity: Returning lost items, opening doors, saying thank you, honesty in tests.",
-      "Light unto the nations (Or LaGoyim): Setting the standard of moral excellence in the world."
+    "id": "kiddush_hashem",
+    "title_en": "Kiddush Hashem",
+    "title_he": "קידוש השם",
+    "category": "values",
+    "hook_en": "When an athlete puts on the jersey of their national team, every single thing they do reflects on their entire country. You wear that jersey every day.",
+    "hook_he": "כששחקן עולה למגרש עם חולצת נבחרת, כל תנועה שלו מייצגת מדינה שלמה. אתה לובש את החולצה הזו בכל יום מחייך.",
+    "nuggets_en": [
+      "<strong>Sanctifying the Name:</strong> Living with such integrity and grace that strangers say: 'Blessed is the God of this person.'",
+      "<strong>Chilul Hashem (Desecration):</strong> Dishonesty, rudeness, or cheating committed by a Jew damages the moral reputation of the entire nation.",
+      "<strong>Quiet Everyday Honesty:</strong> Returning lost change, holding doors, saying thank you, and never cheating on an exam even when unseen.",
+      "<strong>Rabbi Shimon & the Diamond:</strong> Rabbi Shimon ben Shetach returned a diamond found on a purchased donkey, moving a merchant to praise Hashem.",
+      "<strong>Or LaGoyim (Moral Beacon):</strong> Demonstrating that Jewish life is about being an ethical lighthouse and raising the moral bar for society.",
+      "<strong>Wearing the National Jersey:</strong> When identified as Jewish in sports or school, your personal choices uplift or drag down the collective team.",
+      "<strong>Courage Under Heat:</strong> Standing up for your values with quiet self-assurance rather than shrinking under social pressure."
     ],
-    nuggets_he: [
-      "קידוש השם: התנהגות מופתית שגורמת לסביבה לומר: 'אשרי אביו ואמו שלימדוהו, ברוך אלוקיו'.",
-      "חילול השם: זלזול, רמאות או דיבור פוגעני כיהודי פוגעים בשם הטוב של כל העם.",
-      "יושרה שקטה: החזרת אבידה, נימוס, להגיד תודה, הגינות מוחלטת במבחנים גם כשאף אחד לא רואה.",
-      "אור לגויים: להוות מודל של מוסר, עזרה לזולת ואחריות חברתית."
+    "nuggets_he": [
+      "<strong>קידוש השם ברבים:</strong> התנהגות מופתית, אמיצה ואצילית הגורמת לרואים לומר: 'אשרי מי שלמדו תורה, ברוך אלוקיו'.",
+      "<strong>איסור חילול השם:</strong> חוסר הגינות, שקר או זלזול בזולת מצד יהודי פוגעים בשם הטוב ובאמון של עם ישראל כולו.",
+      "<strong>יושרה שקטה ביומיום:</strong> החזרת עודף מיותר בקיוסק, נימוס, להגיד תודה לעובד ניקיון, והגינות מוחלטת במבחנים גם ללא השגחה.",
+      "<strong>מעשה החמור והיהלום:</strong> רבי שמעון בן שטח מצא יהלום יקר בצוואר חמור שקנה והחזירו מיד לנוכרי, שזעק בהתרגשות: 'ברוך אלוקי ישראל!'.",
+      "<strong>אור לגויים:</strong> תפקידנו להיות מגדלור מוסרי המוביל עזרה הדדית, חסד עולמי ותיקון עולם בכל תחום.",
+      "<strong>חולצת הנבחרת:</strong> כנער יהודי, כל תנועה והתנהגות שלך ברחוב או בספורט מייצגת את המשפחה, הקהילה והעם כולו.",
+      "<strong>גבורת אופי פנימית:</strong> היכולת לעמוד על העקרונות שלך בביטחון שקט מול לחץ חברתי מבלי להיגרר."
     ],
-    life_app_en: "When you act with class, patience, and honesty at school or on the court, you earn massive respect for your whole family and community without saying a single sermon.",
-    life_app_he: "כשאתה מתנהג בג'נטלמניות ובסבלנות במגרש או בכיתה, אתה מרוויח כבוד עצום לעצמך ולמשפחה שלך בלי צורך להטיף מוסר לאף אחד.",
-    midrash_en: "Rabbi Shimon ben Shetach bought a donkey from an Arab merchant and found a precious diamond hanging from its neck. He immediately returned it. The merchant cried out: 'Blessed is the God of Shimon ben Shetach!'",
-    midrash_he: "רבי שמעון בן שטח קנה חמור מסוחר נוכרי ומצא יהלום יקר בצווארו. מיד רץ והחזיר לו. זעק הסוחר: 'ברוך אלוהי שמעון בן שטח!'",
-    discussion_en: "Think of a time someone did the right thing even though they could have cheated and gotten away with it. How did you feel about them?",
-    discussion_he: "חשוב על פעם שראית מישהו שנהג ביושר מוחלט אפילו כשיכל לרמות בקלות ואף אחד לא היה יודע. מה חשבת עליו באותו רגע?"
+    "life_app_en": "When you act with class, patience, and honesty at school or on the court, you earn massive respect for your whole family and community without saying a single sermon.",
+    "life_app_he": "כשאתה מתנהג בג'נטלמניות ובסבלנות במגרש או בכיתה, אתה מרוויח כבוד עצום לעצמך ולמשפחה שלך בלי צורך להטיף מוסר לאף אחד.",
+    "midrash_en": "Rabbi Shimon ben Shetach bought a donkey from an Arab merchant and found a precious diamond hanging from its neck. He immediately returned it. The merchant cried out: 'Blessed is the God of Shimon ben Shetach!'",
+    "midrash_he": "רבי שמעון בן שטח קנה חמור מסוחר נוכרי ומצא יהלום יקר בצווארו. מיד רץ והחזיר לו. זעק הסוחר: 'ברוך אלוהי שמעון בן שטח!'.",
+    "discussion_en": "Think of a time someone did the right thing even though they could have cheated and gotten away with it. How did you feel about them?",
+    "discussion_he": "חשוב על פעם שראית מישהו שנהג ביושר מוחלט אפילו כשיכל לרמות בקלות ואף אחד לא היה יודע. מה חשבת עליו באותו רגע?"
   },
   {
-    id: "ahavat_yisrael",
-    title_en: "Ahavat Yisrael & Chesed",
-    title_he: "אהבת ישראל וחסד",
-    category: "values",
-    hook_en: "If you break your pinky finger, does your left hand get mad at it? No, it immediately bandages it. The Jewish people are one single body.",
-    hook_he: "אם נשברת לך הזרת ברגל, היד שלך תכעס עליה? לא, היא מיד תחבוש אותה. עם ישראל הוא גוף אחד שלם.",
-    nuggets_en: [
-      "V'Ahavta L'Re'acha Kamocha (Love your neighbor as yourself): Rabbi Akiva declared this is the master rule of the Torah.",
-      "Hillel's Golden Rule: 'What is hateful to you, do not do to your friend. That is the whole Torah; the rest is commentary.'",
-      "Chesed is greater than charity (Tzedakah): Charity is just money, but Chesed includes your time, smile, empathy, and personal care.",
-      "Kol Yisrael Areivim Zeh BaZeh: We are all responsible and co-signers for one another."
+    "id": "ahavat_yisrael",
+    "title_en": "Ahavat Yisrael & Chesed",
+    "title_he": "אהבת ישראל וחסד",
+    "category": "values",
+    "hook_en": "If you break your pinky finger, does your left hand get mad at it? No, it immediately bandages it. The Jewish people are one single body.",
+    "hook_he": "אם נשברת לך הזרת ברגל, היד שלך תכעס עליה? לא, היא מיד תחבוש אותה. עם ישראל הוא גוף אחד שלם.",
+    "nuggets_en": [
+      "<strong>The Master Principle:</strong> Rabbi Akiva declared 'Love your fellow as yourself' to be the supreme core foundation of the entire Torah.",
+      "<strong>Hillel's Golden Maxim:</strong> 'What is hateful to you, do not do to your friend; this is the whole Torah, the rest is commentary; go study!'",
+      "<strong>Chesed Outweighs Charity:</strong> Tzedakah gives money, but Chesed gives your personal time, your heart, your smile, and your listening ear.",
+      "<strong>One Living Organism:</strong> If one foot stumbles, the hands rush to protect it; all Jewish souls are interconnected limbs of one body.",
+      "<strong>Dan L'Chaf Zechut:</strong> The moral obligation to judge others favorably, assuming positive intentions before jumping to negative judgment.",
+      "<strong>Ahavat Chinam Restores All:</strong> The Temple was destroyed because of baseless hatred; our world will only be repaired through unconditional love.",
+      "<strong>The Kid in the Corner:</strong> Spotting the classmate sitting alone at lunch or omitted from group plans and including them is real Jewish DNA."
     ],
-    nuggets_he: [
-      "'ואהבת לרעך כמוך': רבי עקיבא לימד שזהו כלל גדול בתורה.",
-      "כלל הזהב של הלל: 'מה ששנוא עליך אל תעשה לחברך — זו כל התורה, והשאר פירושה'.",
-      "גמילות חסדים גדולה מצדקה: צדקה היא רק בממון, אך חסד נעשה בגופך, בזמנך, בחיוך ובאוזן קשבת.",
-      "כל ישראל ערבים זה בזה: אנו ערבים ושותפים זה לרווחתו של זה."
+    "nuggets_he": [
+      "<strong>הכלל הגדול בתורה:</strong> רבי עקיבא לימד ש'ואהבת לרעך כמוך' הוא הציר המרכזי שממנו צומחות כל המצוות כולן.",
+      "<strong>כלל הזהב של הלל:</strong> 'דעלך סני לחברך לא תעביד' (מה ששנוא עליך אל תעשה לחברך) — זו כל התורה כולה והשאר פירושה.",
+      "<strong>גמילות חסדים מול צדקה:</strong> צדקה היא בכסף בלבד, אך חסד נעשה בגופך, בזמנך, בחיוך חם ובאוזן קשבת ללא עלות כספית.",
+      "<strong>גוף אחד חי:</strong> אם רגל אחת נתקלת, הידיים ממהרות לעזור לה; כל נשמות ישראל מחוברות יחד כאברים בגוף אחד.",
+      "<strong>כף זכות ועין טובה:</strong> החובה המוסרית לדון את החבר לכף זכות, לחפש הסבר חיובי להתנהגותו ולא למהר לחרוץ דין.",
+      "<strong>אהבת חינם בונה עולם:</strong> בית המקדש חרב בעוון שנאת חינם; העולם נבנה ונגאל אך ורק בזכות אהבת חינם ללא תנאים.",
+      "<strong>הילד שיושב בצד:</strong> לשים לב למי שיושב לבד בהפסקה או שלא הוזמן לקבוצה ולהכניס אותו פנימה — זהו המבחן האמיתי של מנהיג."
     ],
-    life_app_en: "Spotting the kid sitting alone at lunch or getting left out of the group chat and pulling them in isn't just nice — it is the core DNA of being a Jew.",
-    life_app_he: "לראות את הילד שיושב לבד בהפסקה או שלא צורף לקבוצה ולגשת אליו — זה לא סתם מעשה נחמד, זה הלב של היותך יהודי.",
-    midrash_en: "The Beit HaMikdash (Temple) was destroyed because of Sinat Chinam (baseless hatred). It will only be rebuilt through Ahavat Chinam (unconditional love).",
-    midrash_he: "בית המקדש חרב בעוון שנאת חינם. הוא ייבנה מחדש אך ורק בזכות אהבת חינם.",
-    discussion_en: "Why is it sometimes harder to be patient and kind with people closest to us than with complete strangers?",
-    discussion_he: "למה לפעמים הרבה יותר קשה להיות סבלניים ונחמדים דווקא לאנשים הכי קרובים אלינו מאשר לאנשים זרים ברחוב?"
+    "life_app_en": "Spotting the kid sitting alone at lunch or getting left out of the group chat and pulling them in isn't just nice — it is the core DNA of being a Jew.",
+    "life_app_he": "לראות את הילד שיושב לבד בהפסקה או שלא צורף לקבוצה ולגשת אליו — זה לא סתם מעשה נחמד, זה הלב של היותך יהודי.",
+    "midrash_en": "The Beit HaMikdash (Temple) was destroyed because of Sinat Chinam (baseless hatred). It will only be rebuilt through Ahavat Chinam (unconditional love).",
+    "midrash_he": "בית המקדש חרב בעוון שנאת חינם. הוא ייבנה מחדש אך ורק בזכות אהבת חינם.",
+    "discussion_en": "Why is it sometimes harder to be patient and kind with people closest to us than with complete strangers?",
+    "discussion_he": "למה לפעמים הרבה יותר קשה להיות סבלניים ונחמדים דווקא לאנשים הכי קרובים אלינו מאשר לאנשים זרים ברחוב?"
   },
   {
-    id: "jewish_holidays",
-    title_en: "The Holiday Cycle",
-    title_he: "מעגל השנה והחגים",
-    category: "life_cycle",
-    hook_en: "Jewish holidays are not anniversaries of old historical events. They are annual cosmic power outlets where you plug into specific energies.",
-    hook_he: "חגי ישראל אינם ימי זיכרון להיסטוריה עתיקה. הם תחנות כוח שנתיות שבהן אתה מתחבר לאנרגיות מיוחדות.",
-    nuggets_en: [
-      "Tishrei Season: Rosh Hashanah (Mental reboot & coronation), Yom Kippur (Clean slate & total forgiveness), Sukkot (Joy & divine shelter), Simchat Torah (Dancing with our heritage).",
-      "Chanukah: Winning the culture war, light overcoming dark, quality over quantity.",
-      "Purim: Seeing God behind the masks of coincidence, celebrating upside-down breakthroughs.",
-      "Pesach: True freedom — escaping our personal addictions, bad habits, and mental Pharaohs.",
-      "Shavuot: Celebrating the greatest revelation at Sinai; receiving the Torah renewed."
+    "id": "jewish_holidays",
+    "title_en": "The Holiday Cycle",
+    "title_he": "מעגל השנה והחגים",
+    "category": "life_cycle",
+    "hook_en": "Jewish holidays are not anniversaries of old historical events. They are annual cosmic power outlets where you plug into specific energies.",
+    "hook_he": "חגי ישראל אינם ימי זיכרון להיסטוריה עתיקה. הם תחנות כוח שנתיות שבהן אתה מתחבר לאנרגיות מיוחדות.",
+    "nuggets_en": [
+      "<strong>Cosmic Portals, Not History:</strong> Holidays return each year with concentrated spiritual power to recharge our mindset and soul.",
+      "<strong>Rosh Hashanah & Coronation:</strong> Resetting life goals, crowning Hashem as King, and blowing the Shofar to awaken our inner potential.",
+      "<strong>Yom Kippur Clean Slate:</strong> The holiest day of forgiveness; fasting to detach from bodily distractions and emerge completely cleansed.",
+      "<strong>Sukkot & Simchat Torah:</strong> Leaving solid mansions for fragile huts under the stars, learning joy is about relationships, not luxury.",
+      "<strong>Chanukah & Spiritual Light:</strong> A tiny jar of pure oil defying empires; proving that quality, courage, and light always beat brute force.",
+      "<strong>Purim & Hidden Miracles:</strong> Discovering Hashem running history behind masks and coincidences; transforming anxiety into joy.",
+      "<strong>Pesach & Seder Freedom:</strong> Escaping our personal mental pharaohs, ego, and addictions; passing the torch of freedom to the next generation."
     ],
-    nuggets_he: [
-      "חודש תשרי: ראש השנה (איתחול המערכת והמלכה), יום כיפור (דף חדש וסליחה), סוכות (שמחה וביטחון), שמחת תורה (חגיגת השייכות).",
-      "חנוכה: ניצחון האור על החושך, איכות מול כמות, נאמנות לערכים.",
-      "פורים: גילוי הנס שמאחורי מסכות המקריות והגורל.",
-      "פסח: חירות אמיתית — שחרור מההרגלים המגבילים ומה'פרעה' הפנימי.",
-      "שבועות: קבלת התורה בסיני מחדש — חיבור למקור החוכמה."
+    "nuggets_he": [
+      "<strong>תחנות כוח שנתיות:</strong> החגים אינם רק היסטוריה שחלפה, אלא חלונות זמן קוסמיים המביאים עימם אנרגיה מיוחדת לשינוי עצמי.",
+      "<strong>ראש השנה והמלכה:</strong> אתחול היעדים לשנה החדשה, המלכת הבורא ותקיעת שופר המעוררת את הנשמה מתרדמת השגרה.",
+      "<strong>יום כיפור ודף נקי:</strong> היום הקדוש בשנה שבו מוחלים כל העוונות; צום המרומם אותנו לדרגת מלאכים ומעניק התחלה חדשה ונקייה.",
+      "<strong>סוכות ושמחת תורה:</strong> יציאה לדירת ארעי תחת הסכך, המלמדת ששמחה וביטחון אמיתיים נובעים מחיבור לנצח ולא מרכוש גשמי.",
+      "<strong>חנוכה וניצחון האור:</strong> פך שמן טהור אחד שמנצח אימפריה עצומה; ההוכחה שמעט מן האור דוחה הרבה מן החושך.",
+      "<strong>פורים וההשגחה הנסתרת:</strong> גילוי יד ה' מאחורי מסכות המקריות והאירועים; הפיכת אבל לשמחה על ידי נתינה וערבות הדדית.",
+      "<strong>פסח וחירות אמיתית:</strong> שחרור מהפרעה הפנימי, מהרגלים שליליים ומהאגו; ליל הסדר שבו האב מעביר את לפיד האמונה לבנו."
     ],
-    life_app_en: "Life isn't a flat circle where each year repeats identically; it is a spiral staircase. Each holiday you meet gives you an opportunity to climb one level higher.",
-    life_app_he: "החיים אינם מעגל שטוח שחוזר על עצמו; הם מדרגות ספירלה. בכל חג שמגיע אתה מקבל הזדמנות לעלות עוד קומה באישיות שלך.",
-    midrash_en: "The word for year in Hebrew is 'Shanah' (which shares a root with Shinui - change, and Sheninah - repetition). You either repeat your old habits, or you transform.",
-    midrash_he: "המילה 'שנה' מגיעה משני שורשים: שינון (חזרה על הישן) או שינוי (התחדשות וצמיחה). הבחירה בידיך.",
-    discussion_en: "Which Jewish holiday is your favorite to celebrate with family, and what special feeling does it give you that ordinary days don't?",
-    discussion_he: "איזה חג יהודי אתה הכי אוהב לחגוג עם המשפחה, ואיזו תחושה מיוחדת הוא מעניק לך שאין בימים רגילים?"
+    "life_app_en": "Life isn't a flat circle where each year repeats identically; it is a spiral staircase. Each holiday you meet gives you an opportunity to climb one level higher.",
+    "life_app_he": "החיים אינם מעגל שטוח שחוזר על עצמו; הם מדרגות ספירלה. בכל חג שמגיע אתה מקבל הזדמנות לעלות עוד קומה באישיות שלך.",
+    "midrash_en": "The word for year in Hebrew is 'Shanah' (which shares a root with Shinui - change, and Sheninah - repetition). You either repeat your old habits, or you transform.",
+    "midrash_he": "המילה 'שנה' מגיעה משני שורשים: שינון (חזרה על הישן) או שינוי (התחדשות וצמיחה). הבחירה בידיך.",
+    "discussion_en": "Which Jewish holiday is your favorite to celebrate with family, and what special feeling does it give you that ordinary days don't?",
+    "discussion_he": "איזה חג יהודי אתה הכי אוהב לחגוג עם המשפחה, ואיזו תחושה מיוחדת הוא מעניק לך שאין בימים רגילים?"
   },
   {
-    id: "jewish_identity",
-    title_en: "Jewish Identity & The Soul",
-    title_he: "הנשמה והזהות היהודית",
-    category: "wisdom",
-    hook_en: "You don't *have* a soul. You *are* a soul — that happens to live temporarily inside a physical body.",
-    hook_he: "אין לך נשמה בכיס. אתה *הנשמה* בעצמך — שקיבלה גוף פיזי ככלי שליחות בעולם הזה.",
-    nuggets_en: [
-      "Chelek Elokah Mima'al: The soul is an actual spark of the Infinite Creator breathed into you.",
-      "No Jew can ever lose their connection: A gold coin dropped in mud is still 100% pure gold; wash off the mud, and it shines.",
-      "Pintele Yid: The unbreakable ember in every Jewish heart that awakens when called upon.",
-      "Unique Mission: No two souls in history have identical missions; if you exist, the world cannot complete its purpose without you."
+    "id": "jewish_identity",
+    "title_en": "Jewish Identity & The Soul",
+    "title_he": "הנשמה והזהות היהודית",
+    "category": "wisdom",
+    "hook_en": "You don't *have* a soul. You *are* a soul — that happens to live temporarily inside a physical body.",
+    "hook_he": "אין לך נשמה בכיס. אתה *הנשמה* בעצמך — שקיבלה גוף פיזי ככלי שליחות בעולם הזה.",
+    "nuggets_en": [
+      "<strong>Chelek Elokah Mima'al:</strong> The soul is a literal divine spark breathed into you by the Creator; your true identity is infinite and eternal.",
+      "<strong>The Gold in the Mud:</strong> A 24-karat gold coin dropped in mud remains pure gold; wash off the mud, and it glitters without a scratch.",
+      "<strong>The Pintele Yid:</strong> The indestructible ember in every Jewish heart that awakens whenever a call of courage or tradition sounds.",
+      "<strong>Irreplaceable Cosmic Mission:</strong> The Arizal taught that every single soul has a specific destiny; if you are here, the universe needs you.",
+      "<strong>Unconditional Divine Love:</strong> The Baal Shem Tov taught that Hashem loves every Jew more than elderly parents love an only child born in old age.",
+      "<strong>Defying the Laws of History:</strong> Mark Twain marveled at how the tiny Jewish nation outlasted all ancient superpowers through spiritual strength.",
+      "<strong>Inner Dignity Over Likes:</strong> Your value is intrinsic from God, not determined by social media follower counts or fleeting peer approval."
     ],
-    nuggets_he: [
-      "חלק א-לוה ממעל: הנשמה היא ניצוץ אלוקי חי שנפח בך הבורא.",
-      "קשר בלתי ניתן לניתוק: מטבע זהב שנפל לבוץ נשאר זהב טהור; שוטפים את הבוץ והוא זורח.",
-      "ה'פינטעלע ייד': הניצוץ הנסתר שתמיד נשאר ער בלב כל יהודי.",
-      "שליחות בלעדית: אין שני אנשים בעלי אותו תפקיד; אם נבראת, סימן שהעולם חסר בלעדיך."
+    "nuggets_he": [
+      "<strong>חלק אלוק ממעל:</strong> הנשמה היא ניצוץ אלוקי חי שנפח בך הבורא; הזהות האמיתית שלך היא נצחית, רוחנית ובעלת ערך אינסופי.",
+      "<strong>מטבע הזהב בבוץ:</strong> מטבע זהב טהור שנפל לרפש אינו מאבד מערכו; מנקים את הלכלוך החיצוני והוא זורח שוב במלוא תפארתו.",
+      "<strong>הפינטעלע ייד:</strong> הניצוץ היהודי הפנימי שלעולם אינו כבה, ומתעורר בעוצמה בכל רגע של מבחן, שייכות או גבורה.",
+      "<strong>שליחות שאין לה תחליף:</strong> האר״י הקדוש לימד שכל נשמה יורדת עם תפקיד ייחודי; אם אתה חי כעת, סימן שהעולם אינו יכול להסתדר בלעדיך.",
+      "<strong>אהבה ללא תנאי:</strong> הבעל שם טוב אמר שהקב״ה אוהב כל יהודי יותר ממה שהורים מבוגרים אוהבים את בן זקוניהם היחיד.",
+      "<strong>חוקי ההיסטוריה הופרו:</strong> הסופר מארק טווין תמה כיצד עם קטן שרד את כל האימפריות הכבירות בזכות נאמנותו לספר ולרוח.",
+      "<strong>ערך עצמי בלתי תלוי:</strong> השווי הפנימי שלך נתון ישירות מבורא עולם, ולא נקבע על פי מספר הלייקים או דעת הסביבה ברשת."
     ],
-    life_app_en: "Whenever you doubt yourself, feel insecure, or compare your social media likes to other kids, remember: your worth is infinite and unconditional.",
-    life_app_he: "כשאתה מתלבט לגבי עצמך, משווה לייקים או מרגיש חסר ביטחון, תזכור: הערך שלך לא תלוי במה שאחרים חושבים, הוא אינסופי מלידה.",
-    midrash_en: "The Baal Shem Tov taught: God loves every single Jew more than elderly parents love their only child born in their old age.",
-    midrash_he: "הבעל שם טוב אמר: הקב״ה אוהב כל יהודי יותר ממה שהורים מבוגרים אוהבים את בן זקוניהם היחיד.",
-    discussion_en: "What makes you feel most proud to be Jewish, especially when standing out among friends who have different backgrounds?",
-    discussion_he: "מה גורם לך להרגיש הכי גאה בזהות היהודית שלך, במיוחד כשאתה נמצא בסביבה מגוונת עם חברים בעלי רקע שונה?"
+    "life_app_en": "Whenever you doubt yourself, feel insecure, or compare your social media likes to other kids, remember: your worth is infinite and unconditional.",
+    "life_app_he": "כשאתה מתלבט לגבי עצמך, משווה לייקים או מרגיש חסר ביטחון, תזכור: הערך שלך לא תלוי במה שאחרים חושבים, הוא אינסופי מלידה.",
+    "midrash_en": "The Baal Shem Tov taught: God loves every single Jew more than elderly parents love their only child born in their old age.",
+    "midrash_he": "הבעל שם טוב אמר: הקב״ה אוהב כל יהודי יותר ממה שהורים מבוגרים אוהבים את בן זקוניהם היחיד.",
+    "discussion_en": "What makes you feel most proud to be Jewish, especially when standing out among friends who have different backgrounds?",
+    "discussion_he": "מה גורם לך להרגיש הכי גאה בזהות היהודית שלך, במיוחד כשאתה נמצא בסביבה מגוונת עם חברים בעלי רקע שונה?"
   },
   {
-    id: "bar_mitzvah",
-    title_en: "Bar Mitzvah & Maturity",
-    title_he: "בר מצווה ואחריות",
-    category: "life_cycle",
-    hook_en: "Until age 13, you were in the passenger seat. At Bar Mitzvah, you take the driver's steering wheel of your own soul.",
-    hook_he: "עד גיל 13 ישבת במושב הנוסע ברכב. בבר מצווה אתה עובר למושב הנהג ואוחז בהגה של החיים שלך.",
-    nuggets_en: [
-      "Bar Mitzvah literally means 'Son of the Mitzvah' (connected and commanded).",
-      "Yetzer Tov awakens: At 13, your full moral conscience and spiritual maturity activate.",
-      "From consumer to producer: Children only receive; adults understand how to give and make an impact.",
-      "Counting in the Minyan: Your physical presence now empowers an entire community to say Kaddish and Kedushah.",
-      "Aliyah to the Torah: Standing up before the congregation to declare your dedication to the heritage."
+    "id": "bar_mitzvah",
+    "title_en": "Bar Mitzvah & Maturity",
+    "title_he": "בר מצווה ואחריות",
+    "category": "life_cycle",
+    "hook_en": "Until age 13, you were in the passenger seat. At Bar Mitzvah, you take the driver's steering wheel of your own soul.",
+    "hook_he": "עד גיל 13 ישבת במושב הנוסע ברכב. בבר מצווה אתה עובר למושב הנהג ואוחז בהגה של החיים שלך.",
+    "nuggets_en": [
+      "<strong>Taking the Steering Wheel:</strong> Stepping out of the passenger seat of childhood to steer your own moral choices and destiny.",
+      "<strong>Son of the Covenant:</strong> Bar Mitzvah literally means 'son of the commandment' — becoming a trusted partner in Hashem's covenant.",
+      "<strong>Awakening of Yetzer Tov:</strong> At 13, your full moral conscience and capacity for spiritual maturity and self-discipline activate.",
+      "<strong>Completing the Sacred Minyan:</strong> Your presence is essential; without you, an entire room of adults cannot say Kaddish, Kedushah, or Borchu.",
+      "<strong>Aliyah to the Living Torah:</strong> Ascending before the congregation to touch the parchment and proclaim blessings on our eternal heritage.",
+      "<strong>From Consumer to Contributor:</strong> A child merely receives and takes; a mature young man understands how to give, protect, and make an impact.",
+      "<strong>Accountability Over Excuses:</strong> True maturity is looking in the mirror and owning your mistakes with integrity, instead of blaming others."
     ],
-    nuggets_he: [
-      "בר מצווה פירושו בן המצווה — שותף ומחויב לברית.",
-      "כניסת יצר הטוב: בגיל 13 מתעורר המצפון המלא והיכולת להבחין בין עיקר לטפל.",
-      "מצרכן ליוצר: ילד רק מקבל מהסביבה; בוגר מבין איך לתת, להשפיע ולהנהיג.",
-      "מצטרף למניין: הנוכחות שלך קריטית! בלעדיך קהילה שלמה אינה יכולה לומר קדיש וקדושה.",
-      "עלייה לתורה: עלייה על הבמה מול הקהל והצהרה שאתה לוקח אחריות על השרשרת."
+    "nuggets_he": [
+      "<strong>אחיזה בהגה החיים:</strong> מעבר ממושב הנוסע הפסיבי של הילדות אל מושב הנהג המנווט את חייו המוסריים והרוחניים.",
+      "<strong>שותף לברית:</strong> בר מצווה פירושו בן הברית והמצווה — אדם בוגר שעליו אפשר לסמוך כשותף נאמן במפעל של העם היהודי.",
+      "<strong>כניסת יצר הטוב:</strong> בגיל 13 מתעורר במלואו המצפון המוסרי, כושר ההבחנה בין טוב לרע והרצון להשפיע טוב על העולם.",
+      "<strong>השלמת מניין קדוש:</strong> הנוכחות שלך חיונית ומכרעת! בלעדיך ציבור שלם אינו יכול לומר קדיש, קדושה או לקרוא בתורה.",
+      "<strong>עלייה לתורה:</strong> עמידה נרגשת על הבמה מול הקהל, נגיעה בקלף הקדוש והצהרה שאתה לוקח אחריות להמשיך את השרשרת.",
+      "<strong>מצרכן ליוצר ומשפיע:</strong> ילד קטן רק צורך תשומת לב ומשאבים; גבר בוגר לומד להעניק, לעזור בבית ולהנהיג אחרים.",
+      "<strong>אחריות ללא תירוצים:</strong> סימן הבגרות האמיתי הוא היכולת להסתכל במראה ולקחת אחריות כשאתה טועה, בלי להאשים אחרים."
     ],
-    life_app_en: "Maturity isn't shaving or growing taller; maturity is taking responsibility when you mess up, instead of blaming parents, teachers, or referees.",
-    life_app_he: "בגרות היא לא רק גובה או גילוח; בגרות היא היכולת לקחת אחריות כשאתה טועה, במקום להאשים את ההורים או את השופט במגרש.",
-    midrash_en: "King Solomon was called 'Kohelet' because he gathered wisdom. At your Bar Mitzvah, you gather the strength of all your ancestors to write your own chapter.",
-    midrash_he: "חז״ל אומרים שביום הבר מצווה האדם הופך לעץ שעומד בפני עצמו ומוציא פירות.",
-    discussion_en: "Now that you are turning 13, what is one major area of your life where you want to make your own decisions and take full responsibility?",
-    discussion_he: "כעת כשאתה מגיע לגיל 13, מהו התחום הראשון בחייך שבו אתה רוצה לקבל החלטות עצמאיות ולקחת אחריות מלאה של בוגר?"
+    "life_app_en": "Maturity isn't shaving or growing taller; maturity is taking responsibility when you mess up, instead of blaming parents, teachers, or referees.",
+    "life_app_he": "בגרות היא לא רק גובה או גילוח; בגרות היא היכולת לקחת אחריות כשאתה טועה, במקום להאשים את ההורים או את השופט במגרש.",
+    "midrash_en": "King Solomon was called 'Kohelet' because he gathered wisdom. At your Bar Mitzvah, you gather the strength of all your ancestors to write your own chapter.",
+    "midrash_he": "חז״ל אומרים שביום הבר מצווה האדם הופך לעץ שעומד בפני עצמו ומוציא פירות.",
+    "discussion_en": "Now that you are turning 13, what is one major area of your life where you want to make your own decisions and take full responsibility?",
+    "discussion_he": "כעת כשאתה מגיע לגיל 13, מהו התחום הראשון בחייך שבו אתה רוצה לקבל החלטות עצמאיות ולקחת אחריות מלאה של בוגר?"
   },
   {
-    id: "tefillah",
-    title_en: "Tefillah & Prayer",
-    title_he: "תפילה והתקשרות",
-    category: "mitzvot",
-    hook_en: "You don't need a secretary, a password, or a VIP pass. You have a direct, free, 24/7 unblockable line straight to the Creator of the universe.",
-    hook_he: "אינך זקוק לפרוטקציה, ססמה או אישור מיוחד. יש לך קו פתוח וישיר 24/7 לבורא היקום כולו בכל רגע שתרצה.",
-    nuggets_en: [
-      "Tefillah comes from 'Toefel' (to bind/connect) and 'Hitpallel' (self-reflection).",
-      "3 daily prayers established by the Avot: Shacharit (Abraham - morning light), Mincha (Isaac - midday focus), Maariv (Jacob - night resilience).",
-      "Structure of the Shemoneh Esrei: Praise first (remember who you're talking to), Personal requests (health, wisdom, forgiveness), and Gratitude.",
-      "Kavanah: Direction of the heart — prayer without focus is like a body without a soul."
+    "id": "tefillah",
+    "title_en": "Tefillah & Prayer",
+    "title_he": "תפילה והתקשרות",
+    "category": "mitzvot",
+    "hook_en": "You don't need a secretary, a password, or a VIP pass. You have a direct, free, 24/7 unblockable line straight to the Creator of the universe.",
+    "hook_he": "אינך זקוק לפרוטקציה, ססמה או אישור מיוחד. יש לך קו פתוח וישיר 24/7 לבורא היקום כולו בכל רגע שתרצה.",
+    "nuggets_en": [
+      "<strong>Connection & Introspection:</strong> Tefillah comes from 'Toefel' (to bind/connect) and 'Hitpallel' (to self-judge and evaluate one's direction).",
+      "<strong>Direct Line to the King:</strong> No intermediaries, secretaries, or passes required; any young man can speak openly to Hashem at any moment.",
+      "<strong>Three Daily Anchors:</strong> Shacharit (morning renewal by Abraham), Mincha (midday pause by Isaac), and Maariv (night faith by Jacob).",
+      "<strong>Shemoneh Esrei Blueprint:</strong> Structured with master psychological insight: Praise first, heartfelt requests for wisdom/healing, and deep gratitude.",
+      "<strong>Kavanah Over Speed:</strong> Focus of the heart; the rabbis taught that prayer recited without intentional heart is like a body without a soul.",
+      "<strong>Gratitude as First Breath:</strong> Opening the morning with Modeh Ani trains the mind to see the daily miracle of awakening and breathing.",
+      "<strong>Never Despair:</strong> The sages taught: Even if a sharp sword rests upon a person's neck, they should never abandon prayer and Hashem's mercy."
     ],
-    nuggets_he: [
-      "המילה תפילה מלשון חיבור (הטופל כלי) והתבוננות עצמית (להתפלל).",
-      "3 תפילות כנגד האבות: שחרית (אברהם - אור והתחלה), מנחה (יצחק - עצירה באמצע היום), ערבית (יעקב - ביטחון בחושך).",
-      "מבנה שמונה עשרה: שבח (הבנה מול מי אנו עומדים), בקשות (חוכמה, בריאות, סליחה) והודאה.",
-      "כוונה: תפילה בלא כוונה כגוף בלא נשמה."
+    "nuggets_he": [
+      "<strong>חיבור והתבוננות פנימית:</strong> תפילה מלשון חיבור (הטופל כלי) וחשבון נפש אישי (להתפלל — לשפוט את עצמי בכנות מול הבורא).",
+      "<strong>קו ישיר למלך:</strong> בלי פרוטקציה ובלי מתווכים; כל נער יכול לפנות לבורא עולם בשפה שלו, מכל מקום ובכל רגע נתון.",
+      "<strong>שלוש תפילות ביום:</strong> שחרית (חסד ואור הבוקר של אברהם), מנחה (עצירת סערת היום של יצחק), וערבית (ביטחון בחושך של יעקב).",
+      "<strong>מבנה שמונה עשרה:</strong> חוכמה פסיכולוגית מופלאה: שבח תחילה (להבין מול מי עומדים), בקשות (חוכמה, בריאות, צדק) והודיה מעומק הלב.",
+      "<strong>כוונה עדיפה על מהירות:</strong> כוונת הלב היא העיקר; חז״ל לימדו שתפילה ללא כוונה היא כגוף ללא נשמה.",
+      "<strong>הכרת הטוב בנשימה ראשונה:</strong> פתיחת הבוקר ב'מודה אני' מחנכת את המוח לזהות את הנס היומיומי של התעוררות, ראייה ונשימה.",
+      "<strong>תקווה בלתי נשברת:</strong> אפילו חרב חדה מונחת על צווארו של אדם, אל ימנע עצמו מן הרחמים ומהכוח האדיר של תפילה כנה."
     ],
-    life_app_en: "Prayer isn't just asking for things like an Amazon wish list. It's taking 5 minutes to breathe, center your mind, express gratitude for health, and ask for strength before an exam or game.",
-    life_app_he: "תפילה היא לא רשימת קניות של אמזון. היא הרגע שלך לעצור, להודות על החיים והבריאות, ולבקש כוח אמיתי לפני מבחן או אתגר בחיים.",
-    midrash_en: "Rabbi Yehoshua taught: Even if a sharp sword rests upon a person's neck, they should never despair of Hashem's mercy and the power of sincere prayer.",
-    midrash_he: "אמרו חז״ל: אפילו חרב חדה מונחת על צווארו של אדם, אל ימנע עצמו מן הרחמים.",
-    discussion_en: "If you could have a direct one-on-one conversation with Hashem right now, what is the single most important thing you would talk about?",
-    discussion_he: "אם הייתה לך עכשיו שיחה ישירה של אחד על אחד עם בורא עולם, מהו הדבר הכי חשוב שהיית רוצה לדבר עליו או לבקש?"
+    "life_app_en": "Prayer isn't just asking for things like an Amazon wish list. It's taking 5 minutes to breathe, center your mind, express gratitude for health, and ask for strength before an exam or game.",
+    "life_app_he": "תפילה היא לא רשימת קניות של אמזון. היא הרגע שלך לעצור, להודות על החיים והבריאות, ולבקש כוח אמיתי לפני מבחן או אתגר בחיים.",
+    "midrash_en": "Rabbi Yehoshua taught: Even if a sharp sword rests upon a person's neck, they should never despair of Hashem's mercy and the power of sincere prayer.",
+    "midrash_he": "אמרו חז״ל: אפילו חרב חדה מונחת על צווארו של אדם, אל ימנע עצמו מן הרחמים.",
+    "discussion_en": "If you could have a direct one-on-one conversation with Hashem right now, what is the single most important thing you would talk about?",
+    "discussion_he": "אם הייתה לך עכשיו שיחה ישירה של אחד על אחד עם בורא עולם, מהו הדבר הכי חשוב שהיית רוצה לדבר עליו או לבקש?"
   }
 ];
