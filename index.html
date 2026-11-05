@@ -249,9 +249,9 @@
           <div class="min-w-0">
             <div class="flex items-center gap-1.5 sm:gap-2">
               <span id="app-title" class="text-sm sm:text-base font-bold text-white tracking-tight truncate">TutorPilot</span>
-              <button onclick="openCloudModal()" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition active:scale-95 shrink-0" title="Cloud Sync Status">
+              <button onclick="openCloudModal()" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 hover:bg-emerald-500/20 transition active:scale-95 shrink-0" title="Cloud Sync Status">
                 <span id="cloud-status-dot" class="w-2 h-2 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]"></span>
-                <span id="cloud-status-text" class="text-[10px] sm:text-xs text-emerald-300 font-semibold truncate">Synced with Rabbi</span>
+                <span id="cloud-status-text" class="text-[10px] sm:text-xs text-emerald-300 font-semibold truncate max-w-[85px] sm:max-w-none">Synced with Rabbi</span>
               </button>
             </div>
             <p id="app-subtitle" class="text-[10px] text-slate-400 truncate hidden sm:block">Bar Mitzvah Tutor Companion & Tracker</p>
@@ -262,13 +262,13 @@
         <div class="flex items-center gap-1.5 shrink-0">
 
           <!-- Language Switcher -->
-          <button onclick="toggleLanguage()" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition active:scale-95 shadow-sm">
+          <button onclick="toggleLanguage()" class="flex items-center justify-center gap-1.5 px-2.5 py-1.5 min-h-[36px] sm:min-h-[38px] rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition active:scale-95 shadow-sm">
             <i data-lucide="languages" class="w-3.5 h-3.5 text-brand-400"></i>
             <span id="lang-indicator">עברית</span>
           </button>
 
           <!-- Settings Button (Gear) -->
-          <button onclick="openSettingsModal()" class="p-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition active:scale-95 shadow-sm" title="Settings">
+          <button onclick="openSettingsModal()" class="w-9 h-9 sm:w-9.5 sm:h-9.5 flex items-center justify-center rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition active:scale-95 shadow-sm" title="Settings">
             <i data-lucide="settings" class="w-4 h-4"></i>
           </button>
 
@@ -1076,12 +1076,12 @@
       </div>
 
       <!-- Drawer Sticky Top Bar -->
-      <div class="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between gap-3 shrink-0 bg-slate-950/80">
-        <div class="flex items-center gap-3 min-w-0" id="drawer-header-content">
+      <div class="px-3.5 py-3 sm:px-5 sm:py-4 border-b border-slate-800/80 flex items-center justify-between gap-3 shrink-0 bg-slate-950/90 backdrop-blur-md">
+        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0" id="drawer-header-content">
           <!-- Populated by renderStudentDrawer -->
         </div>
 
-        <div class="flex items-center gap-2 shrink-0">
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <button onclick="switchTab('study'); closeStudentDrawer();" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-lg font-medium transition">
             <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400"></i>
             <span id="drawer-btn-curriculum-label">Curriculum</span>
@@ -1093,7 +1093,7 @@
       </div>
 
       <!-- Drawer Scrollable Body -->
-      <div id="drawer-body-content" class="p-4 sm:p-6 overflow-y-auto space-y-5 flex-1">
+      <div id="drawer-body-content" class="p-3.5 sm:p-6 overflow-y-auto space-y-3.5 sm:space-y-5 flex-1">
         <!-- Populated by renderStudentDrawer -->
       </div>
     </div>
@@ -2610,13 +2610,13 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (text) {
         text.textContent = label;
         if (currentStatus === 'connected') {
-          text.className = 'text-[10px] sm:text-xs text-emerald-300 font-semibold truncate';
+          text.className = 'text-[10px] sm:text-xs text-emerald-300 font-semibold truncate max-w-[85px] sm:max-w-none';
         } else if (currentStatus === 'syncing') {
-          text.className = 'text-[10px] sm:text-xs text-amber-300 font-semibold truncate';
+          text.className = 'text-[10px] sm:text-xs text-amber-300 font-semibold truncate max-w-[85px] sm:max-w-none';
         } else if (currentStatus === 'offline') {
-          text.className = 'text-[10px] sm:text-xs text-amber-400 font-semibold truncate';
+          text.className = 'text-[10px] sm:text-xs text-amber-400 font-semibold truncate max-w-[85px] sm:max-w-none';
         } else {
-          text.className = 'text-[10px] sm:text-xs text-slate-400 font-semibold truncate';
+          text.className = 'text-[10px] sm:text-xs text-slate-400 font-semibold truncate max-w-[85px] sm:max-w-none';
         }
       }
 
@@ -4344,10 +4344,10 @@ alter publication supabase_realtime add table public.students_sync;`;
 
           '<!-- Expanded Full Cheat Sheet Content -->' +
           (isExpanded ?
-            '<div class="border-t border-slate-800 bg-slate-950/50 p-4 sm:p-5 space-y-4 text-xs sm:text-sm animate-fadeIn">' +
+            '<div class="border-t border-slate-800/80 bg-slate-950/50 p-3 sm:p-5 space-y-3 sm:space-y-4 text-xs sm:text-sm animate-fadeIn">' +
 
               '<!-- Section 1: The Modern Teen Hook -->' +
-              '<div class="p-3 sm:p-3.5 rounded-xl bg-gradient-to-r from-amber-950/30 to-slate-900 border border-amber-900/40">' +
+              '<div class="p-3 sm:p-3.5 rounded-xl bg-gradient-to-r from-amber-950/20 to-slate-900 border border-amber-900/30">' +
                 '<span class="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5 mb-1.5">' +
                   '<i data-lucide="zap" class="w-3.5 h-3.5"></i> ' + t.modernHook +
                 '</span>' +
@@ -4355,17 +4355,17 @@ alter publication supabase_realtime add table public.students_sync;`;
               '</div>' +
 
               '<!-- Section 2: Core Knowledge Anchors (Responsive Two-Column Grid) -->' +
-              '<div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2.5">' +
+              '<div class="p-3 sm:p-4 rounded-xl bg-slate-900/70 border border-slate-800/80 space-y-2.5">' +
                 '<span class="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5 mb-1">' +
                   '<i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400"></i> ' + t.coreNuggets +
                 '</span>' +
                 '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">' +
-                  nuggets.map(n => '<div class="p-2 sm:p-2.5 rounded-lg bg-slate-950/70 border border-slate-800/80 hover:border-slate-700/80 transition flex items-start gap-2 text-slate-200 text-xs leading-relaxed"><span class="text-amber-400 font-bold mt-0.5 shrink-0">✦</span><div>' + n + '</div></div>').join('') +
+                  nuggets.map(n => '<div class="p-2 sm:p-2.5 rounded-lg bg-slate-950/70 border border-slate-800/70 hover:border-slate-700/80 transition flex items-start gap-2 text-slate-200 text-xs leading-relaxed"><span class="text-amber-400 font-bold mt-0.5 shrink-0">✦</span><div>' + n + '</div></div>').join('') +
                 '</div>' +
               '</div>' +
 
               '<!-- Section 3: Bar Mitzvah Life Angle -->' +
-              '<div class="p-3 sm:p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">' +
+              '<div class="p-3 sm:p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/80">' +
                 '<span class="text-[11px] font-bold uppercase tracking-wider text-brand-400 flex items-center gap-1.5 mb-1">' +
                   '<i data-lucide="target" class="w-3.5 h-3.5"></i> ' + t.lifeApplication +
                 '</span>' +
@@ -4373,7 +4373,7 @@ alter publication supabase_realtime add table public.students_sync;`;
               '</div>' +
 
               '<!-- Section 4: Midrash / Story Gem -->' +
-              '<div class="p-3 sm:p-3.5 rounded-xl bg-purple-950/20 border border-purple-900/30">' +
+              '<div class="p-3 sm:p-3.5 rounded-xl bg-purple-950/15 border border-purple-900/25">' +
                 '<span class="text-[11px] font-bold uppercase tracking-wider text-purple-300 flex items-center gap-1.5 mb-1">' +
                   '<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ' + t.midrashGem +
                 '</span>' +
@@ -4381,7 +4381,7 @@ alter publication supabase_realtime add table public.students_sync;`;
               '</div>' +
 
               '<!-- Section 5: Discussion Spark -->' +
-              '<div class="p-3 rounded-xl bg-emerald-950/20 border border-emerald-900/30 flex items-start gap-2.5">' +
+              '<div class="p-3 rounded-xl bg-emerald-950/15 border border-emerald-900/25 flex items-start gap-2.5">' +
                 '<i data-lucide="message-circle-question" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>' +
                 '<div>' +
                   '<span class="text-[11px] font-bold text-emerald-400 block mb-0.5">' + t.discussionPrompt + '</span>' +
@@ -4390,7 +4390,7 @@ alter publication supabase_realtime add table public.students_sync;`;
               '</div>' +
 
               '<!-- Section 6: Custom Notes & Materials -->' +
-              '<div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/90 border border-amber-500/30 space-y-3">' +
+              '<div class="p-3 sm:p-4 rounded-xl bg-slate-900/80 border border-amber-500/25 space-y-3">' +
                 '<div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">' +
                   '<div class="flex items-center gap-2">' +
                     '<i data-lucide="bookmark-plus" class="w-4 h-4 text-amber-400"></i>' +
@@ -4518,10 +4518,10 @@ alter publication supabase_realtime add table public.students_sync;`;
 
           '<!-- Expanded Full Content -->' +
           (isExpanded ?
-            '<div class="border-t border-slate-800 bg-slate-950/50 p-4 sm:p-5 space-y-4 text-xs sm:text-sm animate-fadeIn">' +
+            '<div class="border-t border-slate-800/80 bg-slate-950/50 p-3 sm:p-5 space-y-3 sm:space-y-4 text-xs sm:text-sm animate-fadeIn">' +
 
               '<!-- Section 1: Big Plot -->' +
-              '<div>' +
+              '<div class="p-3 sm:p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80">' +
                 '<span class="text-[11px] font-bold uppercase tracking-wider text-brand-400 flex items-center gap-1.5 mb-2">' +
                   '<i data-lucide="film" class="w-3.5 h-3.5"></i> ' + t.bigPlot +
                 '</span>' +
@@ -4531,17 +4531,17 @@ alter publication supabase_realtime add table public.students_sync;`;
               '</div>' +
 
               '<!-- Section 2: Key Topics (Responsive Two-Column Grid) -->' +
-              '<div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2.5">' +
+              '<div class="p-3 sm:p-4 rounded-xl bg-slate-900/70 border border-slate-800/80 space-y-2.5">' +
                 '<span class="text-[11px] font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5 mb-1">' +
                   '<i data-lucide="key" class="w-3.5 h-3.5 text-cyan-400"></i> ' + t.keyTopics +
                 '</span>' +
                 '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">' +
-                  keyTopics.map(k => '<div class="p-2 sm:p-2.5 rounded-lg bg-slate-950/70 border border-slate-800/80 hover:border-slate-700/80 transition flex items-start gap-2 text-slate-200 text-xs leading-relaxed"><span class="text-cyan-400 font-bold mt-0.5 shrink-0">✦</span><div>' + k + '</div></div>').join('') +
+                  keyTopics.map(k => '<div class="p-2 sm:p-2.5 rounded-lg bg-slate-950/70 border border-slate-800/70 hover:border-slate-700/80 transition flex items-start gap-2 text-slate-200 text-xs leading-relaxed"><span class="text-cyan-400 font-bold mt-0.5 shrink-0">✦</span><div>' + k + '</div></div>').join('') +
                 '</div>' +
               '</div>' +
 
               '<!-- Section 3: Rashi & Midrash Pearls -->' +
-              '<div class="p-3.5 sm:p-4 rounded-xl bg-indigo-950/20 border border-indigo-900/30">' +
+              '<div class="p-3 sm:p-3.5 rounded-xl bg-indigo-950/15 border border-indigo-900/25">' +
                 '<span class="text-[11px] font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5 mb-2">' +
                   '<i data-lucide="gem" class="w-3.5 h-3.5"></i> ' + t.rashiPearls +
                 '</span>' +
@@ -4551,7 +4551,7 @@ alter publication supabase_realtime add table public.students_sync;`;
               '</div>' +
 
               '<!-- Section 4: Bar Mitzvah Life Angle -->' +
-              '<div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/80 border border-slate-800">' +
+              '<div class="p-3 sm:p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/80">' +
                 '<span class="text-[11px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5 mb-1">' +
                   '<i data-lucide="target" class="w-3.5 h-3.5"></i> ' + t.lifeApplication +
                 '</span>' +
@@ -4559,7 +4559,7 @@ alter publication supabase_realtime add table public.students_sync;`;
               '</div>' +
 
               '<!-- Section 5: Custom Notes & Materials -->' +
-              '<div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/90 border border-cyan-500/30 space-y-3">' +
+              '<div class="p-3 sm:p-4 rounded-xl bg-slate-900/80 border border-cyan-500/25 space-y-3">' +
                 '<div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">' +
                   '<div class="flex items-center gap-2">' +
                     '<i data-lucide="bookmark-plus" class="w-4 h-4 text-cyan-400"></i>' +
@@ -4878,18 +4878,20 @@ alter publication supabase_realtime add table public.students_sync;`;
                 ${overallPct}%
               </span>
             </div>
-            <div class="flex items-center gap-2 flex-wrap text-xs">
-              <span id="drawer-header-parsha-badge" class="px-2.5 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-medium flex items-center gap-1.5 text-xs">
-                <i data-lucide="scroll" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <div class="flex items-center gap-2 flex-wrap text-xs text-slate-400">
+              <span id="drawer-header-parsha-badge" class="flex items-center gap-1.5 text-cyan-300 font-medium">
+                <i data-lucide="scroll" class="w-3.5 h-3.5 text-cyan-400 shrink-0"></i>
                 <span id="drawer-header-parsha-badge-text">${studentParsha || (isHe ? 'ללא פרשה' : 'No Parsha')}</span>
               </span>
               ${studentDate ? `
-                <span class="px-2.5 py-0.5 rounded-md bg-slate-900 text-slate-300 border border-slate-700/80 font-mono text-[11px] flex items-center gap-1.5">
-                  <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+                <span class="text-slate-600 font-bold">•</span>
+                <span class="flex items-center gap-1.5 text-slate-300 font-mono text-[11px]">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
                   <span>${studentDate}</span>
                 </span>
               ` : ''}
-              <button onclick="triggerPhotoUpload('${student.id}', event)" class="hover:text-brand-300 underline font-medium text-[11px] text-slate-400 ml-1">
+              <span class="text-slate-600 font-bold">•</span>
+              <button onclick="triggerPhotoUpload('${student.id}', event)" class="hover:text-brand-300 underline font-medium text-[11px] text-slate-400">
                 ${student.avatar ? t.changePhoto : t.uploadPhoto}
               </button>
               ${student.avatar ? `
@@ -5005,7 +5007,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                       <button
                         type="button"
                         onclick="setStudentBooklet('${student.id}', '${b.id}')"
-                        class="py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition border ${
+                        class="py-2 px-1.5 min-h-[38px] rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition border ${
                           isSelected
                             ? b.active + ' font-bold'
                             : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
@@ -5028,7 +5030,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                       value="${escapeHtml(hr.currentPage || '')}"
                       onchange="handleSkillFieldChange('${student.id}', 'hebrewReading', 'currentPage', this.value)"
                       placeholder="e.g. 14"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
+                      class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
                     />
                   </div>
 
@@ -5037,7 +5039,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                     <label class="text-[11px] text-slate-400 block">${isHe ? 'אות' : 'Letter'}</label>
                     <select
                       onchange="selectStudentLetter('${student.id}', this.value)"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium truncate"
+                      class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2 py-2 min-h-[38px] text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium truncate"
                     >
                       <option value="">-- ${isHe ? 'ללא אות' : 'None'} --</option>
                       ${HEBREW_LETTERS_LIST.map(lt => `
@@ -5053,7 +5055,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                     <label class="text-[11px] text-slate-400 block">${isHe ? 'ניקוד' : 'Vowel'}</label>
                     <select
                       onchange="selectStudentVowel('${student.id}', this.value)"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium truncate"
+                      class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2 py-2 min-h-[38px] text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium truncate"
                     >
                       <option value="">-- ${isHe ? 'ללא ניקוד' : 'None'} --</option>
                       ${HEBREW_VOWELS_LIST.map(vw => `
@@ -5098,7 +5100,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                     value="${escapeHtml(pr.parshaName || student.parshaOrDate || '')}"
                     oninput="handleStudentParshaChange('${student.id}', this.value)"
                     placeholder="${t.parshaNamePlaceholder}"
-                    class="w-full bg-slate-900 border border-cyan-700/50 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-400 font-medium"
+                    class="w-full bg-slate-900 border border-cyan-700/50 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-400 font-medium"
                   />
                 </div>
 
@@ -5106,7 +5108,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                   <label class="text-[11px] text-slate-400 block">${t.parshaAliyahLabel}</label>
                   <select
                     onchange="handleSkillFieldChange('${student.id}', 'parshaReading', 'aliyah', this.value)"
-                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                    class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
                   >
                     ${['Aliyah 1', 'Aliyah 2', 'Aliyah 3', 'Aliyah 4', 'Aliyah 5', 'Aliyah 6', 'Aliyah 7', 'Maftir & Haftarah'].map(al => `
                       <option value="${al}" ${(pr.aliyah === al) ? 'selected' : ''}>${al}</option>
@@ -5122,7 +5124,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                       value="${escapeHtml(pr.linesLearned || '')}"
                       onchange="handleSkillFieldChange('${student.id}', 'parshaReading', 'linesLearned', this.value)"
                       placeholder="e.g. Lines 1-8"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                      class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                     />
                   </div>
                   <div class="space-y-1">
@@ -5132,7 +5134,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                       value="${escapeHtml(pr.currentLine || '')}"
                       onchange="handleSkillFieldChange('${student.id}', 'parshaReading', 'currentLine', this.value)"
                       placeholder="e.g. Line 9"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono"
+                      class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono"
                     />
                   </div>
                 </div>
@@ -5241,7 +5243,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                       value="${escapeHtml(dt.topic || '')}"
                       oninput="handleDvarTorahFieldChange('${student.id}', 'topic', this.value)"
                       placeholder="${t.dvarTorahTopicPlaceholder}"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                     />
                   </div>
 
@@ -5249,7 +5251,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                     <label class="text-[11px] text-slate-400 block">${t.dvarTorahStageLabel}</label>
                     <select
                       onchange="handleDvarTorahFieldChange('${student.id}', 'stage', this.value)"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                     >
                       ${[
                         { id: 'Outline & Ideas', label: isHe ? 'ראשי פרקים ורעיונות' : 'Outline & Ideas' },
@@ -5611,16 +5613,17 @@ alter publication supabase_realtime add table public.students_sync;`;
                       <i data-lucide="camera" class="w-3.5 h-3.5 text-white"></i>
                     </div>
                   </div>
-                  <div class="min-w-0 space-y-1">
+                  <div class="min-w-0 space-y-0.5">
                     <h4 class="text-sm sm:text-base font-bold text-white truncate group-hover:text-brand-300 transition">${student.name}</h4>
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-[11px] font-medium">
-                        <i data-lucide="scroll" class="w-3 h-3 text-cyan-400"></i>
+                    <div class="flex items-center gap-1.5 flex-wrap text-xs text-slate-400">
+                      <span class="inline-flex items-center gap-1 text-cyan-300 font-medium">
+                        <i data-lucide="scroll" class="w-3 h-3 text-cyan-400 shrink-0"></i>
                         <span class="truncate">${cardParsha || (isHe ? 'ללא פרשה' : 'No Parsha')}</span>
                       </span>
                       ${cardDate ? `
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-950 text-slate-300 border border-slate-800 text-[11px] font-mono">
-                          <i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i>
+                        <span class="text-slate-600 font-bold">•</span>
+                        <span class="inline-flex items-center gap-1 text-slate-300 font-mono text-[11px]">
+                          <i data-lucide="calendar" class="w-3 h-3 text-slate-400 shrink-0"></i>
                           <span class="truncate">${cardDate}</span>
                         </span>
                       ` : ''}
@@ -6479,9 +6482,10 @@ alter publication supabase_realtime add table public.students_sync;`;
                       <span class="text-white font-bold text-xs sm:text-sm block truncate group-hover:text-brand-300 transition">
                         ${escapeHtml(s.studentName)}
                       </span>
-                      <div class="flex items-center gap-1.5 flex-wrap">
-                        ${s.studentParsha ? `<span class="text-[11px] text-cyan-300 font-medium truncate block">${escapeHtml(s.studentParsha)}</span>` : ''}
-                        ${s.studentDate ? `<span class="text-[10px] text-slate-400 font-mono">(${escapeHtml(s.studentDate)})</span>` : ''}
+                      <div class="flex items-center gap-1.5 flex-wrap text-xs text-slate-400">
+                        ${s.studentParsha ? `<span class="flex items-center gap-1 text-cyan-300 font-medium truncate"><i data-lucide="scroll" class="w-3 h-3 text-cyan-400 shrink-0"></i>${escapeHtml(s.studentParsha)}</span>` : ''}
+                        ${s.studentParsha && s.studentDate ? `<span class="text-slate-600 font-bold">•</span>` : ''}
+                        ${s.studentDate ? `<span class="flex items-center gap-1 text-slate-300 font-mono text-[10px]"><i data-lucide="calendar" class="w-3 h-3 text-slate-400 shrink-0"></i>${escapeHtml(s.studentDate)}</span>` : ''}
                       </div>
                     </div>
                   </div>
