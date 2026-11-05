@@ -286,30 +286,36 @@
     <!-- ============================================== -->
     <section id="view-study" class="space-y-6">
 
-      <!-- Study Sub-Section Switcher (Centered Segmented Switcher & Custom Materials Review) -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 sm:p-2.5 shadow-lg backdrop-blur flex flex-col sm:flex-row items-center justify-between gap-2 max-w-4xl mx-auto">
+      <!-- Study Sub-Section Switcher (Course Selector, AI Curriculum Builder & Custom Materials Review) -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 sm:p-2.5 shadow-lg backdrop-blur flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 max-w-4xl mx-auto">
         
-        <!-- Segmented Buttons: Concepts vs Chumash -->
-        <div class="flex items-center bg-slate-950/80 p-1 rounded-xl border border-slate-800/80 w-full sm:w-auto">
-          <button id="sub-study-concepts" onclick="switchStudySection('concepts')" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 sm:px-7 py-2 rounded-lg text-xs sm:text-sm font-bold bg-brand-600 text-white shadow transition">
-            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
-            <span id="lbl-study-concepts">Concepts</span>
-            <span class="text-[10px] bg-brand-800/80 px-1.5 py-0.5 rounded-full font-mono">13</span>
-          </button>
-
-          <button id="sub-study-chumash" onclick="switchStudySection('chumash')" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 sm:px-7 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-400 hover:text-slate-200 transition">
-            <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400"></i>
-            <span id="lbl-study-chumash">Chumash</span>
-            <span class="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded-full font-mono">23</span>
-          </button>
+        <!-- Course Selector Dropdown & Quick Switches -->
+        <div class="flex items-center gap-2 w-full md:w-auto">
+          <div class="relative flex-1 md:w-72">
+            <select id="study-course-select" onchange="handleCourseSelectionChange(this.value)" class="w-full bg-slate-950 text-white font-semibold text-xs sm:text-sm py-2 px-3 pl-8 pr-7 rounded-xl border border-slate-700/80 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer appearance-none transition shadow-inner">
+              <option value="concepts">✦ Bar Mitzvah: Concepts (13)</option>
+              <option value="chumash">📜 Bar Mitzvah: Chumash (23)</option>
+            </select>
+            <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
         </div>
 
-        <!-- Review Added Materials Button -->
-        <button onclick="openReviewStudyMaterialsModal()" id="btn-review-study-materials" class="flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-950/80 hover:bg-slate-800/80 text-amber-300 border border-amber-500/30 text-xs font-semibold transition active:scale-95 w-full sm:w-auto shrink-0 shadow-sm" title="Review custom added materials across all lessons">
-          <i data-lucide="bookmark-check" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span id="lbl-review-study-materials">Custom Materials</span>
-          <span id="badge-total-study-materials" class="hidden px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-amber-500/20 text-amber-200 border border-amber-500/40">0</span>
-        </button>
+        <!-- Action Buttons: AI Curriculum Builder & Notes -->
+        <div class="flex items-center gap-2 w-full md:w-auto justify-end shrink-0">
+          <!-- AI Curriculum Generator Button -->
+          <button onclick="openAiCurriculumBuilderModal()" id="btn-open-ai-curriculum-builder" class="flex-1 md:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold transition shadow-md active:scale-95 shrink-0" title="Generate custom course or curriculum for any subject with AI">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-slate-950"></i>
+            <span id="lbl-ai-curriculum-builder">AI Curriculum Builder</span>
+          </button>
+
+          <!-- Review Added Materials Button -->
+          <button onclick="openReviewStudyMaterialsModal()" id="btn-review-study-materials" class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-950/80 hover:bg-slate-800/80 text-amber-300 border border-amber-500/30 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Review custom added materials across all lessons">
+            <i data-lucide="bookmark-check" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span id="lbl-review-study-materials">Notes</span>
+            <span id="badge-total-study-materials" class="hidden px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-amber-500/20 text-amber-200 border border-amber-500/40">0</span>
+          </button>
+        </div>
 
       </div>
 
@@ -361,6 +367,43 @@
         <!-- Chumash Parshiot Grid -->
         <div id="chumash-grid" class="space-y-3 max-w-4xl mx-auto">
           <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- Sub-Section 3: Custom Generated Course Grid -->
+      <div id="study-section-custom" class="space-y-6 hidden">
+        <!-- Section Header with Course Details and Actions -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+          <div class="space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span id="custom-course-badge-category" class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/40">General</span>
+              <span id="custom-course-badge-level" class="text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">All Ages</span>
+              <span id="custom-course-badge-lessons" class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">0 Lessons</span>
+            </div>
+            <h2 id="custom-course-head-title" class="text-xl font-bold text-white flex items-center gap-2">
+              <span class="text-amber-400">✦</span>
+              <span id="custom-course-title-text">Course Title</span>
+            </h2>
+            <p id="custom-course-head-desc" class="text-xs md:text-sm text-slate-400 max-w-2xl">
+              Course description and curriculum overview.
+            </p>
+          </div>
+
+          <!-- Course Control Buttons -->
+          <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
+            <button onclick="openAddCustomLessonModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white border border-slate-700 transition active:scale-95 shadow-sm">
+              <i data-lucide="plus" class="w-3.5 h-3.5 text-brand-400"></i>
+              <span id="lbl-custom-course-add-lesson">+ Add Lesson</span>
+            </button>
+            <button onclick="handleDeleteActiveCustomCourse()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-xs font-semibold text-red-300 border border-red-800/40 transition active:scale-95 shadow-sm" title="Delete this custom course">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-400"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom Course Lessons Grid -->
+        <div id="custom-course-grid" class="space-y-3 max-w-4xl mx-auto">
+          <!-- Rendered dynamically via renderCustomCourse -->
         </div>
       </div>
 
@@ -701,6 +744,246 @@
           Close
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: AI CURRICULUM BUILDER                    -->
+  <!-- ============================================== -->
+  <div id="modal-ai-curriculum-builder" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
+    <div class="max-w-2xl w-full max-h-[90vh] bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+              <span id="txt-ai-builder-modal-title">AI Curriculum Builder</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Universal</span>
+            </h3>
+            <p class="text-xs text-slate-400" id="txt-ai-builder-modal-subtitle">Generate a custom structured curriculum for any subject, age group, or topic in seconds</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAiCurriculumBuilderModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Builder Form -->
+      <form id="form-ai-curriculum-builder" onsubmit="handleGenerateCurriculum(event)" class="space-y-4 flex-1 overflow-y-auto pr-1">
+        
+        <!-- Topic / Subject -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-builder-topic">Course Topic / Subject Title *</label>
+          <input
+            type="text"
+            id="ai-builder-topic"
+            placeholder="e.g. Gemara Berachot: Perek 4, 8th Grade Geometry, Hilchot Shabbat, Conversational Hebrew..."
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            required
+          >
+        </div>
+
+        <!-- Category & Target Level -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-builder-domain">Category / Domain</label>
+            <select id="ai-builder-domain" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer">
+              <option value="Talmud & Rabbinics">Talmud & Rabbinics (גמרא)</option>
+              <option value="Halacha & Practical Law">Halacha & Practical Law (הלכה)</option>
+              <option value="Bar Mitzvah & Torah">Bar Mitzvah & Torah (בר מצווה ותורה)</option>
+              <option value="Hebrew & Languages">Hebrew & Languages (עברית ושפות)</option>
+              <option value="Mathematics & Logic">Mathematics & Logic (מתמטיקה)</option>
+              <option value="Science & General Studies">Science & General Studies (מדעים וכללי)</option>
+              <option value="General / Other">General / Other (אחר)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-builder-level">Target Student Level</label>
+            <select id="ai-builder-level" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer">
+              <option value="12-13 Years Old (Bar Mitzvah)">12-13 Years Old (Bar Mitzvah)</option>
+              <option value="Elementary (Ages 8-11)">Elementary (Ages 8-11)</option>
+              <option value="High School (Ages 14-18)">High School (Ages 14-18)</option>
+              <option value="Adult / Beginner">Adult / Beginner</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Lesson Count & Language -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-builder-lessons-count">Number of Lessons</label>
+            <select id="ai-builder-lessons-count" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer">
+              <option value="4">4 Lessons</option>
+              <option value="6">6 Lessons</option>
+              <option value="8" selected>8 Lessons (Recommended)</option>
+              <option value="10">10 Lessons</option>
+              <option value="12">12 Lessons</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-builder-language">Curriculum Language</label>
+            <select id="ai-builder-language" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer">
+              <option value="Bilingual (English & Hebrew)" selected>Bilingual (English & Hebrew)</option>
+              <option value="English Only">English Only</option>
+              <option value="Hebrew Only">Hebrew Only (עברית בלבד)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Custom Guidance / Focus Notes -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-builder-guidance">Custom Guidelines / Focus Areas (Optional)</label>
+          <textarea
+            id="ai-builder-guidance"
+            rows="3"
+            placeholder="e.g. Focus on practical everyday applications, 7 clear memory anchors per lesson, and relatable analogies..."
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed"
+          ></textarea>
+        </div>
+
+        <!-- Loading Shimmer State -->
+        <div id="ai-builder-loading-state" class="hidden p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 animate-pulse">
+          <i data-lucide="loader-2" class="w-5 h-5 text-amber-400 animate-spin shrink-0"></i>
+          <div class="text-xs text-slate-200">
+            <span class="font-bold text-amber-300 block mb-0.5">AI is generating your curriculum...</span>
+            <span>Crafting structured lesson titles, 7 core anchors, opening hooks, and review questions.</span>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="pt-3 border-t border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+          <!-- 1-Click Starter Course Option -->
+          <button
+            type="button"
+            onclick="loadStarterSampleCourse('gemara_berachot')"
+            class="px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-amber-300 text-xs font-semibold transition border border-amber-500/20 flex items-center justify-center gap-1.5 active:scale-95 shadow-sm"
+            title="Load an instant sample course without waiting for AI generation"
+          >
+            <i data-lucide="book" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>Load Sample (Gemara Berachot)</span>
+          </button>
+
+          <div class="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onclick="closeAiCurriculumBuilderModal()"
+              class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              id="btn-submit-ai-builder"
+              class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md active:scale-95"
+            >
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+              <span id="txt-submit-ai-builder">Generate with AI</span>
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADD CUSTOM LESSON MANUALLY               -->
+  <!-- ============================================== -->
+  <div id="modal-add-custom-lesson" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
+    <div class="max-w-xl w-full max-h-[90vh] bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-5 h-5 text-brand-400"></i>
+          <span>Add Lesson to Course</span>
+        </h3>
+        <button type="button" onclick="closeAddCustomLessonModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleSaveCustomLesson(event)" class="space-y-3.5 flex-1 overflow-y-auto pr-1">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Lesson Title (English) *</label>
+          <input
+            type="text"
+            id="input-custom-lesson-title-en"
+            placeholder="e.g. Morning Prayer Deadline"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+            required
+          >
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Lesson Title (Hebrew - Optional)</label>
+          <input
+            type="text"
+            id="input-custom-lesson-title-he"
+            placeholder="e.g. זמן תפילת השחר"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+          >
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Hook / Opening Problem</label>
+          <input
+            type="text"
+            id="input-custom-lesson-hook"
+            placeholder="Why does time matter when speaking to the Creator?"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+          >
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Core Anchors (1 per line, up to 7)</label>
+          <textarea
+            id="input-custom-lesson-anchors"
+            rows="5"
+            placeholder="Opening Mishna: Prayer deadline until midday&#10;Rabbi Yehuda vs Chachamim&#10;Sha'ot Zmaniyot proportional hours"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500 leading-relaxed"
+          ></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Real-World Student Application</label>
+          <input
+            type="text"
+            id="input-custom-lesson-life-app"
+            placeholder="Starting your morning with proactive focus"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+          >
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Discussion Question / Riddle</label>
+          <input
+            type="text"
+            id="input-custom-lesson-discussion"
+            placeholder="Does prayer feel like a chore or an opportunity?"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+          >
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-800">
+          <button
+            type="button"
+            onclick="closeAddCustomLessonModal()"
+            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md active:scale-95"
+          >
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Save Lesson</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -1356,7 +1639,10 @@
     const APP_STATE = {
       lang: localStorage.getItem('tutor_lang') || 'en', // 'en' or 'he'
       activeTab: 'study', // 'study', 'students', 'calendar'
-      studySection: 'concepts', // 'concepts' or 'chumash'
+      studySection: 'concepts', // 'concepts', 'chumash', or 'custom'
+      customCourses: [],
+      activeCourseId: 'concepts',
+      expandedCustomLessonIds: {},
       chumashFilter: 'all', // 'all', 'bereishit', 'shemot'
       searchQuery: '',
       expandedTopicIds: {},
@@ -1407,6 +1693,18 @@
         mobCalendar: "Calendar",
         subStudyConcepts: "Concepts",
         subStudyChumash: "Chumash",
+        courseSelectConcepts: "✦ Bar Mitzvah: Concepts (13)",
+        courseSelectChumash: "📜 Bar Mitzvah: Chumash (23)",
+        lblAiCurriculumBuilder: "AI Curriculum Builder",
+        customCourseCategory: "Category",
+        customCourseLevel: "Level",
+        customCourseLessonsCount: (n) => n + " Lessons",
+        btnDeleteCourse: "Delete Course",
+        btnAddLesson: "+ Add Lesson",
+        confirmDeleteCourse: (title) => 'Are you sure you want to delete the course "' + title + '"?',
+        toastCourseDeleted: "Course deleted",
+        toastCourseCreated: (title) => 'Course created: "' + title + '"!',
+        toastLessonAdded: "Lesson added to course!",
         collapseAll: "Collapse All",
         topicsTitle: "13 Core Jewish Concepts",
         topicsDesc: "Tailored hooks, high-density memory points, and relatable teen analogies for 12-13 year olds.",
@@ -1693,6 +1991,18 @@
         mobCalendar: "יומן",
         subStudyConcepts: "מושגים",
         subStudyChumash: "חומש",
+        courseSelectConcepts: "✦ בר מצווה: מושגי יסוד (13)",
+        courseSelectChumash: "📜 בר מצווה: חומש (23)",
+        lblAiCurriculumBuilder: "מחולל תוכניות AI",
+        customCourseCategory: "תחום",
+        customCourseLevel: "רמה",
+        customCourseLessonsCount: (n) => n + " שיעורים",
+        btnDeleteCourse: "מחק קורס",
+        btnAddLesson: "+ הוסף שיעור",
+        confirmDeleteCourse: (title) => 'האם אתה בטוח שברצונך למחוק את הקורס "' + title + '"?',
+        toastCourseDeleted: "הקורס נמחק בהצלחה",
+        toastCourseCreated: (title) => 'הקורס נוצר בהצלחה: "' + title + '"!',
+        toastLessonAdded: "השיעור נוסף בהצלחה לקורס!",
         collapseAll: "כווץ הכל",
         topicsTitle: "13 מושגי יסוד ביהדות",
         topicsDesc: "פתיחות מרתקות, עוגני זיכרון ממוקדים, וחיבור מעשי לעולמו של נער בן 12-13.",
@@ -2708,6 +3018,12 @@ alter publication supabase_realtime add table public.students_sync;`;
             mergeStudyMaterialsWithCloud(studyRecord.completed_topics);
           }
 
+          // Check for custom courses system record
+          const coursesRecord = data.find(row => row.id === '__custom_courses__');
+          if (coursesRecord && coursesRecord.completed_topics && Array.isArray(coursesRecord.completed_topics.courses)) {
+            mergeCustomCoursesWithCloud(coursesRecord.completed_topics.courses);
+          }
+
           // Filter out internal system records from student roster
           const actualStudentRows = data.filter(row => !row.id.startsWith('__'));
           if (actualStudentRows.length > 0) {
@@ -2811,6 +3127,21 @@ alter publication supabase_realtime add table public.students_sync;`;
         return;
       }
       if (oldRecord && oldRecord.id === '__study_materials__') {
+        return;
+      }
+
+      // Intercept custom courses cloud synchronization
+      if (newRecord && newRecord.id === '__custom_courses__') {
+        if (newRecord.completed_topics && Array.isArray(newRecord.completed_topics.courses)) {
+          mergeCustomCoursesWithCloud(newRecord.completed_topics.courses);
+          populateCourseSelector();
+          if (APP_STATE.studySection === 'custom') {
+            renderCustomCourse();
+          }
+        }
+        return;
+      }
+      if (oldRecord && oldRecord.id === '__custom_courses__') {
         return;
       }
 
@@ -3337,6 +3668,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       checkPasscodeAuth();
       loadStudentsFromStorage();
       loadStudyMaterialsFromStorage();
+      loadCustomCoursesFromStorage();
       checkUrlHashSync();
       applyLanguageDirection();
       renderAllViews();
@@ -4089,8 +4421,10 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       if (targetType === 'concept') {
         renderTopics();
-      } else {
+      } else if (targetType === 'parsha') {
         renderChumash();
+      } else {
+        renderCustomCourse();
       }
 
       showToast(t.toastMaterialAdded || 'Study material added successfully!');
@@ -4111,6 +4445,7 @@ alter publication supabase_realtime add table public.students_sync;`;
         saveStudyMaterialsToStorage(true);
         renderTopics();
         renderChumash();
+        renderCustomCourse();
         renderReviewMaterialsList();
         showToast(t.toastMaterialDeleted || 'Material removed');
         lucide.createIcons();
@@ -4278,6 +4613,732 @@ alter publication supabase_realtime add table public.students_sync;`;
         });
       } else {
         prompt('Copy the materials below:', markdown);
+      }
+    }
+
+    // ==============================================
+    // CUSTOM COURSES & AI CURRICULUM BUILDER
+    // ==============================================
+
+    function loadCustomCoursesFromStorage() {
+      try {
+        const stored = localStorage.getItem('tutor_custom_courses');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            APP_STATE.customCourses = parsed;
+          }
+        }
+      } catch (e) {
+        console.error('Failed to parse tutor_custom_courses:', e);
+      }
+      if (!Array.isArray(APP_STATE.customCourses)) {
+        APP_STATE.customCourses = [];
+      }
+      populateCourseSelector();
+    }
+
+    function saveCustomCoursesToStorage(syncCloud) {
+      if (syncCloud === undefined) syncCloud = true;
+      try {
+        localStorage.setItem('tutor_custom_courses', JSON.stringify(APP_STATE.customCourses || []));
+      } catch (e) {
+        console.error('Failed to save tutor_custom_courses:', e);
+      }
+      populateCourseSelector();
+      if (syncCloud) {
+        pushCustomCoursesToCloud();
+      }
+    }
+
+    async function pushCustomCoursesToCloud() {
+      if (!APP_STATE.cloud.client) return;
+      try {
+        const payload = {
+          id: '__custom_courses__',
+          name: 'SYSTEM_CUSTOM_COURSES',
+          parsha_or_date: 'system',
+          notes: 'Universal Custom Curricula generated by AI or Tutors',
+          completed_topics: { courses: APP_STATE.customCourses || [] },
+          completed_parshiot: {},
+          updated_at: new Date().toISOString()
+        };
+        await APP_STATE.cloud.client
+          .from('students_sync')
+          .upsert(payload);
+      } catch (err) {
+        console.error('Failed to push custom courses to cloud:', err);
+      }
+    }
+
+    function mergeCustomCoursesWithCloud(cloudCourses) {
+      if (!Array.isArray(cloudCourses)) return;
+      if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
+
+      let hasNewData = false;
+      const existingIds = new Set(APP_STATE.customCourses.map(c => c.id));
+      cloudCourses.forEach(cloudCourse => {
+        if (!existingIds.has(cloudCourse.id)) {
+          APP_STATE.customCourses.push(cloudCourse);
+          existingIds.add(cloudCourse.id);
+          hasNewData = true;
+        } else {
+          const idx = APP_STATE.customCourses.findIndex(c => c.id === cloudCourse.id);
+          if (idx !== -1 && cloudCourse.updated_at && (!APP_STATE.customCourses[idx].updated_at || cloudCourse.updated_at > APP_STATE.customCourses[idx].updated_at)) {
+            APP_STATE.customCourses[idx] = cloudCourse;
+            hasNewData = true;
+          }
+        }
+      });
+
+      if (hasNewData) {
+        saveCustomCoursesToStorage(false);
+      }
+    }
+
+    function populateCourseSelector() {
+      const select = document.getElementById('study-course-select');
+      if (!select) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      const t = I18N[APP_STATE.lang];
+
+      let html = '<option value="concepts"' + (APP_STATE.activeCourseId === 'concepts' ? ' selected' : '') + '>' + (t.courseSelectConcepts || '✦ Bar Mitzvah: Concepts (13)') + '</option>' +
+        '<option value="chumash"' + (APP_STATE.activeCourseId === 'chumash' ? ' selected' : '') + '>' + (t.courseSelectChumash || '📜 Bar Mitzvah: Chumash (23)') + '</option>';
+
+      if (Array.isArray(APP_STATE.customCourses) && APP_STATE.customCourses.length > 0) {
+        html += '<optgroup label="' + (isHe ? 'תוכניות לימוד נוספות' : 'Custom Curricula') + '">';
+        APP_STATE.customCourses.forEach(c => {
+          const title = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
+          const count = c.lessons ? c.lessons.length : 0;
+          const isSelected = APP_STATE.activeCourseId === c.id;
+          html += '<option value="' + c.id + '"' + (isSelected ? ' selected' : '') + '>✦ ' + title + ' (' + count + ')</option>';
+        });
+        html += '</optgroup>';
+      }
+
+      select.innerHTML = html;
+    }
+
+    function handleCourseSelectionChange(val) {
+      APP_STATE.activeCourseId = val;
+      const secConcepts = document.getElementById('study-section-concepts');
+      const secChumash = document.getElementById('study-section-chumash');
+      const secCustom = document.getElementById('study-section-custom');
+
+      if (val === 'concepts') {
+        APP_STATE.studySection = 'concepts';
+        if (secConcepts) secConcepts.classList.remove('hidden');
+        if (secChumash) secChumash.classList.add('hidden');
+        if (secCustom) secCustom.classList.add('hidden');
+        renderTopics();
+      } else if (val === 'chumash') {
+        APP_STATE.studySection = 'chumash';
+        if (secChumash) secChumash.classList.remove('hidden');
+        if (secConcepts) secConcepts.classList.add('hidden');
+        if (secCustom) secCustom.classList.add('hidden');
+        renderChumash();
+      } else {
+        APP_STATE.studySection = 'custom';
+        if (secCustom) secCustom.classList.remove('hidden');
+        if (secConcepts) secConcepts.classList.add('hidden');
+        if (secChumash) secChumash.classList.add('hidden');
+        renderCustomCourse();
+      }
+      lucide.createIcons();
+    }
+
+    function toggleCustomLessonAccordion(lessonId) {
+      if (!APP_STATE.expandedCustomLessonIds) APP_STATE.expandedCustomLessonIds = {};
+      APP_STATE.expandedCustomLessonIds[lessonId] = !APP_STATE.expandedCustomLessonIds[lessonId];
+      renderCustomCourse();
+    }
+
+    function renderCustomCourse() {
+      const secCustom = document.getElementById('study-section-custom');
+      if (!secCustom) return;
+
+      const course = (APP_STATE.customCourses || []).find(c => c.id === APP_STATE.activeCourseId);
+      if (!course) {
+        handleCourseSelectionChange('concepts');
+        return;
+      }
+
+      const isHe = APP_STATE.lang === 'he';
+      const t = I18N[APP_STATE.lang];
+      const q = (APP_STATE.searchQuery || '').toLowerCase();
+
+      const badgeCategory = document.getElementById('custom-course-badge-category');
+      const badgeLevel = document.getElementById('custom-course-badge-level');
+      const badgeLessons = document.getElementById('custom-course-badge-lessons');
+      const headTitle = document.getElementById('custom-course-title-text');
+      const headDesc = document.getElementById('custom-course-head-desc');
+
+      if (badgeCategory) badgeCategory.textContent = course.category || (isHe ? 'כללי' : 'General');
+      if (badgeLevel) badgeLevel.textContent = course.target_level || (isHe ? 'כל הגילאים' : 'All Ages');
+      if (badgeLessons) badgeLessons.textContent = t.customCourseLessonsCount ? t.customCourseLessonsCount(course.lessons ? course.lessons.length : 0) : ((course.lessons ? course.lessons.length : 0) + ' Lessons');
+      if (headTitle) headTitle.textContent = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
+      if (headDesc) headDesc.textContent = isHe ? (course.description_he || course.description_en || '') : (course.description_en || course.description_he || '');
+
+      const container = document.getElementById('custom-course-grid');
+      if (!container) return;
+
+      const lessons = course.lessons || [];
+      const filtered = lessons.filter(l => {
+        if (!q) return true;
+        const text = ((l.title_en || '') + ' ' + (l.title_he || '') + ' ' + (l.hook_en || '') + ' ' + (l.hook_he || '') + ' ' + ((l.anchors_en || []).join(' ')) + ' ' + ((l.anchors_he || []).join(' '))).toLowerCase();
+        return text.includes(q);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="py-12 text-center text-slate-500"><i data-lucide="search-x" class="w-8 h-8 mx-auto mb-2 opacity-50"></i><p>' + (q ? (t.topicsEmptySearch ? t.topicsEmptySearch(q) : 'No lessons found matching "' + q + '"') : 'No lessons in this course yet. Click "+ Add Lesson" to start!') + '</p></div>';
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = filtered.map((lesson, idx) => {
+        const title = isHe ? (lesson.title_he || lesson.title_en) : (lesson.title_en || lesson.title_he);
+        const hook = isHe ? (lesson.hook_he || lesson.hook_en || '') : (lesson.hook_en || lesson.hook_he || '');
+        const anchors = isHe ? (lesson.anchors_he && lesson.anchors_he.length ? lesson.anchors_he : lesson.anchors_en || []) : (lesson.anchors_en && lesson.anchors_en.length ? lesson.anchors_en : lesson.anchors_he || []);
+        const lifeApp = isHe ? (lesson.life_app_he || lesson.life_app_en || '') : (lesson.life_app_en || lesson.life_app_he || '');
+        const discussion = isHe ? (lesson.discussion_he || lesson.discussion_en || '') : (lesson.discussion_en || lesson.discussion_he || '');
+        const isExpanded = !!(APP_STATE.expandedCustomLessonIds && APP_STATE.expandedCustomLessonIds[lesson.id]);
+        const additions = (APP_STATE.studyAdditions && APP_STATE.studyAdditions[lesson.id]) || [];
+        const additionsCount = additions.length;
+
+        return '<article id="custom-lesson-card-' + lesson.id + '" class="bg-slate-900/90 border transition-all duration-200 rounded-xl overflow-hidden shadow-sm ' +
+          (isExpanded ? 'border-amber-500/60 ring-1 ring-amber-500/30' : 'border-slate-800 hover:border-slate-700') + '">' +
+
+          '<div onclick="toggleCustomLessonAccordion(\'' + lesson.id + '\')" class="cursor-pointer select-none p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-slate-800/40 transition">' +
+            '<div class="flex items-center gap-3 min-w-0">' +
+              '<div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center font-mono text-xs font-bold shrink-0">' +
+                (lesson.lesson_num || idx + 1) +
+              '</div>' +
+              '<div class="min-w-0">' +
+                '<h3 class="text-sm sm:text-base font-semibold text-white truncate">' +
+                  title +
+                '</h3>' +
+              '</div>' +
+            '</div>' +
+            '<div class="flex items-center gap-2 shrink-0">' +
+              (additionsCount > 0 ?
+                '<span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1" title="' + additionsCount + ' notes added">' +
+                  '<i data-lucide="bookmark" class="w-3 h-3"></i>' +
+                  additionsCount +
+                '</span>' : '') +
+              '<i data-lucide="' + (isExpanded ? 'chevron-up' : 'chevron-down') + '" class="w-4 h-4 text-slate-400"></i>' +
+            '</div>' +
+          '</div>' +
+
+          (isExpanded ?
+            '<div class="border-t border-slate-800/80 bg-slate-950/50 p-3 sm:p-5 space-y-3 sm:space-y-4 text-xs sm:text-sm animate-fadeIn">' +
+
+              (hook ?
+                '<div class="p-3 sm:p-3.5 rounded-xl bg-gradient-to-r from-amber-950/20 to-slate-900 border border-amber-900/30">' +
+                  '<span class="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5 mb-1.5">' +
+                    '<i data-lucide="zap" class="w-3.5 h-3.5"></i> ' + (t.modernHook || 'The Hook / Opening Analogy') +
+                  '</span>' +
+                  '<p class="text-slate-200 leading-relaxed font-normal">' + hook + '</p>' +
+                '</div>' : '') +
+
+              (anchors.length > 0 ?
+                '<div class="p-3 sm:p-4 rounded-xl bg-slate-900/70 border border-slate-800/80 space-y-2.5">' +
+                  '<span class="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5 mb-1">' +
+                    '<i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400"></i> ' + (t.coreNuggets || 'Core Knowledge Anchors') +
+                  '</span>' +
+                  '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">' +
+                    anchors.map(n => '<div class="p-2 sm:p-2.5 rounded-lg bg-slate-950/70 border border-slate-800/70 hover:border-slate-700/80 transition flex items-start gap-2 text-slate-200 text-xs leading-relaxed"><span class="text-amber-400 font-bold mt-0.5 shrink-0">✦</span><div>' + n + '</div></div>').join('') +
+                  '</div>' +
+                '</div>' : '') +
+
+              (lifeApp ?
+                '<div class="p-3 sm:p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/80">' +
+                  '<span class="text-[11px] font-bold uppercase tracking-wider text-brand-400 flex items-center gap-1.5 mb-1">' +
+                    '<i data-lucide="target" class="w-3.5 h-3.5"></i> ' + (t.lifeApplication || 'Real-World Student Angle') +
+                  '</span>' +
+                  '<p class="text-slate-300 leading-relaxed">' + lifeApp + '</p>' +
+                '</div>' : '') +
+
+              (discussion ?
+                '<div class="p-3 sm:p-3.5 rounded-xl bg-purple-950/15 border border-purple-900/25">' +
+                  '<span class="text-[11px] font-bold uppercase tracking-wider text-purple-300 flex items-center gap-1.5 mb-1">' +
+                    '<i data-lucide="message-square" class="w-3.5 h-3.5"></i> ' + (t.discussionPrompt || 'Discussion Spark Question') +
+                  '</span>' +
+                  '<p class="text-slate-300 leading-relaxed italic">"' + discussion + '"</p>' +
+                '</div>' : '') +
+
+              '<div class="pt-2 border-t border-slate-800 flex items-center justify-between gap-2">' +
+                '<span class="text-xs text-slate-400">' + (additionsCount > 0 ? (additionsCount + ' private notes attached') : 'No notes attached yet') + '</span>' +
+                '<button type="button" onclick="openAddStudyMaterialModal(\'' + lesson.id + '\', \'custom_lesson\', \'' + (title.replace(/'/g, "\\'")) + '\')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold transition active:scale-95 shadow-sm">' +
+                  '<i data-lucide="bookmark-plus" class="w-3.5 h-3.5 text-amber-400"></i>' +
+                  '<span>+ Add Note / Material</span>' +
+                '</button>' +
+              '</div>' +
+
+            '</div>' : '') +
+
+        '</article>';
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function openAiCurriculumBuilderModal() {
+      const modal = document.getElementById('modal-ai-curriculum-builder');
+      if (modal) modal.classList.remove('hidden');
+      const topicInput = document.getElementById('ai-builder-topic');
+      if (topicInput) setTimeout(() => topicInput.focus(), 100);
+      lucide.createIcons();
+    }
+
+    function closeAiCurriculumBuilderModal() {
+      const modal = document.getElementById('modal-ai-curriculum-builder');
+      if (modal) modal.classList.add('hidden');
+      const loadingState = document.getElementById('ai-builder-loading-state');
+      if (loadingState) loadingState.classList.add('hidden');
+      const submitBtn = document.getElementById('btn-submit-ai-builder');
+      if (submitBtn) submitBtn.disabled = false;
+    }
+
+    function openAddCustomLessonModal() {
+      const modal = document.getElementById('modal-add-custom-lesson');
+      if (modal) modal.classList.remove('hidden');
+      const titleInput = document.getElementById('input-custom-lesson-title-en');
+      if (titleInput) {
+        titleInput.value = '';
+        setTimeout(() => titleInput.focus(), 100);
+      }
+      lucide.createIcons();
+    }
+
+    function closeAddCustomLessonModal() {
+      const modal = document.getElementById('modal-add-custom-lesson');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function handleSaveCustomLesson(e) {
+      e.preventDefault();
+      const course = (APP_STATE.customCourses || []).find(c => c.id === APP_STATE.activeCourseId);
+      if (!course) return;
+
+      const titleEn = document.getElementById('input-custom-lesson-title-en').value.trim();
+      const titleHe = document.getElementById('input-custom-lesson-title-he').value.trim();
+      const hook = document.getElementById('input-custom-lesson-hook').value.trim();
+      const rawAnchors = document.getElementById('input-custom-lesson-anchors').value.trim();
+      const lifeApp = document.getElementById('input-custom-lesson-life-app').value.trim();
+      const discussion = document.getElementById('input-custom-lesson-discussion').value.trim();
+
+      if (!titleEn) return;
+
+      const anchors = rawAnchors ? rawAnchors.split('\n').map(s => s.trim()).filter(Boolean) : [];
+      if (!course.lessons) course.lessons = [];
+
+      const newLesson = {
+        id: 'les_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+        lesson_num: course.lessons.length + 1,
+        title_en: titleEn,
+        title_he: titleHe || titleEn,
+        hook_en: hook,
+        hook_he: hook,
+        anchors_en: anchors,
+        anchors_he: anchors,
+        life_app_en: lifeApp,
+        life_app_he: lifeApp,
+        discussion_en: discussion,
+        discussion_he: discussion
+      };
+
+      course.lessons.push(newLesson);
+      course.updated_at = new Date().toISOString();
+      saveCustomCoursesToStorage(true);
+      closeAddCustomLessonModal();
+      renderCustomCourse();
+      showToast(I18N[APP_STATE.lang].toastLessonAdded || 'Lesson added to course!');
+    }
+
+    function handleDeleteActiveCustomCourse() {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === APP_STATE.activeCourseId);
+      if (!course) return;
+
+      const t = I18N[APP_STATE.lang];
+      const title = APP_STATE.lang === 'he' ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
+      if (!confirm(t.confirmDeleteCourse ? t.confirmDeleteCourse(title) : ('Delete course "' + title + '"?'))) {
+        return;
+      }
+
+      APP_STATE.customCourses = APP_STATE.customCourses.filter(c => c.id !== course.id);
+      saveCustomCoursesToStorage(true);
+      handleCourseSelectionChange('concepts');
+      showToast(t.toastCourseDeleted || 'Course deleted');
+    }
+
+    function loadStarterSampleCourse(sampleKey) {
+      const isHe = APP_STATE.lang === 'he';
+      const sampleCourse = {
+        id: 'course_sample_' + Date.now(),
+        title_en: 'Gemara Berachot: Tefillat HaShachar',
+        title_he: 'גמרא ברכות: תפילת השחר',
+        category: 'Talmud & Rabbinics',
+        target_level: '12-13 Years Old (Bar Mitzvah)',
+        description_en: 'Comprehensive study of prayer deadlines, Kavanah, and rabbinic debates in Masechet Berachot Perek 4.',
+        description_he: 'לימוד מקיף של זמני תפילה, כוונה ומחלוקות חז"ל במסכת ברכות פרק רביעי.',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        lessons: [
+          {
+            id: 'les_ber_1',
+            lesson_num: 1,
+            title_en: 'Morning Prayer Deadline',
+            title_he: 'זמן תפילת השחר עד חצות',
+            hook_en: 'Why is prayer bound to the clock and the sun instead of whenever you feel inspired?',
+            hook_he: 'למה התפילה תלויה בזריחת החמה ובזמנים מוגדרים במקום מתי שמתחשק?',
+            anchors_en: [
+              '**Opening Mishna**: Tefillat HaShachar is permitted until midday according to Rabbi Yehuda.',
+              '**The Sages**: Chachamim rule that the morning prayer can only be recited until four proportional hours.',
+              '**Sha\'ot Zmaniyot**: Halachic hours divide daylight into 12 equal segments, fluctuating in winter and summer.',
+              '**Missed Prayers**: An unintentional delay still allows prayer until midday, though with reduced reward.',
+              '**Daily Tamid**: The morning prayer was instituted to correspond directly to the daily morning sacrifice.',
+              '**Patriarchal Origin**: Rabbi Yehoshua ben Levi teaches that Avraham Avinu instituted Shacharit.',
+              '**Morning Momentum**: Starting your day with structured focus before looking at distractions or phones.'
+            ],
+            anchors_he: [
+              '**משנה ראשונה**: תפילת השחר עד חצות לדעת רבי יהודה.',
+              '**חכמים**: דעת חכמים שזמן תפילת השחר הוא רק עד ארבע שעות זמניות.',
+              '**שעות זמניות**: היום מתחלק ל-12 חלקים שווים המשתנים בין קיץ לחורף.',
+              '**שכר תפילה**: מי שהתפלל לאחר ארבע שעות עד חצות מקבל שכר תפילה אך לא שכר תפילה בזמנה.',
+              '**קורבן התמיד**: תפילות כנגד תמידין תיקנום כנגד תמיד של שחר.',
+              '**אבות תיקנום**: אברהם אבינו תיקן תפילת שחרית שנאמר וישכם אברהם בבוקר.',
+              '**התחלה נכונה**: פתיחת היום בסדר ובכוונה לפני הסחות דעת וטלפונים.'
+            ],
+            life_app_en: 'Setting your priorities in the very first hour after waking up shapes the success of your entire day.',
+            life_app_he: 'קביעת סדרי עדיפויות בשעה הראשונה לאחר הקימה קובעת את אופי כל היום כולו.',
+            discussion_en: 'Does having a strict deadline for prayer make it harder or more meaningful?',
+            discussion_he: 'האם זמנים קבועים לתפילה מקשים על הכוונה או דווקא מעניקים משמעות ועקביות?'
+          },
+          {
+            id: 'les_ber_2',
+            lesson_num: 2,
+            title_en: 'Tefillat Tashlumin: Making Up Missed Prayers',
+            title_he: 'תפילת תשלומים: פיצוי על תפילה שנשכחה',
+            hook_en: 'If you missed a flight, can you use your ticket on the next departure?',
+            hook_he: 'אם פספסת טיסה בטעות, האם תוכל לעלות על הטיסה הבאה?',
+            anchors_en: [
+              '**Core Principle**: A person who missed a prayer unintentionally can pray twice in the subsequent service.',
+              '**Accidental vs Intentional**: Tashlumin only applies to genuine errors (shogeg) or coercion (ones), not willful neglect.',
+              '**Order of Prayers**: The current obligatory prayer is always recited first, followed by the make-up prayer.',
+              '**Shacharit in Mincha**: Missed morning prayer is made up as a second Amidah during Mincha.',
+              '**Mincha in Maariv**: Missed afternoon prayer is made up during Maariv, even though Maariv is at night.',
+              '**Kedusha of Time**: Missed Mussaf cannot be compensated in Mincha because its time has fully passed.',
+              '**Second Chance**: Judaism builds second opportunities into daily life, acknowledging human limitation.'
+            ],
+            anchors_he: [
+              '**עיקרון יסוד**: מי שטעה או נאנס ולא התפלל מתפלל בתפילה הסמוכה שתיים.',
+              '**שוגג או אונס**: תשלומים נוהגים רק באונס או שגגה ולא במזיד.',
+              '**סדר התפילות**: תפילת החובה של אותו הזמן קודמת תמיד לתפילת התשלומים.',
+              '**שחרית במנחה**: מי שלא התפלל שחרית מתפלל מנחה שתיים.',
+              '**מנחה במעריב**: מי שלא התפלל מנחה מתפלל מעריב שתיים בלילה.',
+              '**תפילת מוסף**: אין תשלומין לתפילת מוסף שעבר זמנה.',
+              '**הזדמנות שנייה**: התורה מעניקה אפשרות לתקן ומכירה בחולשות האדם.'
+            ],
+            life_app_en: 'A mistake should not derail your entire week; take immediate action to get back on track.',
+            life_app_he: 'טעות אחת לא צריכה להרוס את כל השבוע; קח אחריות ותקן בהזדמנות הראשונה.',
+            discussion_en: 'Why do you think the Rabbis did not allow making up an intentionally missed prayer?',
+            discussion_he: 'מדוע חכמים לא התירו תשלומים למי שלא התפלל במזיד?'
+          },
+          {
+            id: 'les_ber_3',
+            lesson_num: 3,
+            title_en: 'Mincha & Maariv Windows',
+            title_he: 'זמני מנחה ומעריב: פלג המנחה ושקיעה',
+            hook_en: 'Why is the afternoon prayer considered the most challenging yet spiritually rewarding?',
+            hook_he: 'מדוע תפילת מנחה נחשבת לתפילה המאתגרת והחשובה ביותר ביום העמוס?',
+            anchors_en: [
+              '**Mincha Gedolah**: The afternoon prayer window opens at 6.5 halachic hours, shortly after solar midday.',
+              '**Mincha Ketanah**: The preferred window begins at 9.5 halachic hours when the sun noticeably slopes.',
+              '**Plag HaMincha**: Exactly 1.25 hours before sunset, creating the halachic bridge to early Shabbat or Maariv.',
+              '**Elijah on Mount Carmel**: The Talmud teaches that Elijah was answered only at the time of Mincha.',
+              '**Workday Pause**: Stopping busy work or gaming in the middle of the afternoon demands real dedication.',
+              '**Maariv at Night**: Evening prayer extends throughout the entire night until dawn (Amud HaShachar).',
+              '**Daily Rhythm**: Three daily anchors create balance and perspective from dawn to dusk.'
+            ],
+            anchors_he: [
+              '**מנחה גדולה**: תחילת זמן מנחה משש שעות ומחצה של היום.',
+              '**מנחה קטנה**: הזמן העיקרי מתשע שעות ומחצה כשהשמש נוטה מערבה.',
+              '**פלג המנחה**: שעה ורבע זמנית לפני השקיעה, המאפשרת קבלת שבת מוקדמת.',
+              '**אליהו בהר הכרמל**: לעולם יהא אדם זהיר בתפילת המנחה שלא נענה אליהו אלא בתפילת המנחה.',
+              '**עצירה באמצע היום**: עצירת המרוץ היומי באמצע העבודה דורשת משמעת וכוונה עמוקה.',
+              '**תפילת ערבית**: זמנה נמשך כל הלילה עד עלות השחר.',
+              '**קצב החיים**: שלוש תפילות ביום יוצרות איזון וחיבור מתמיד לבורא.'
+            ],
+            life_app_en: 'Pausing in the middle of a frantic day for five minutes gives you clarity that hours of rushing cannot provide.',
+            life_app_he: 'עצירה של חמש דקות באמצע יום עמוס מעניקה בהירות ושקט נפשי ששום מרוץ לא יכול לספק.',
+            discussion_en: 'Is it easier to pray in the quiet morning or in the middle of an active afternoon?',
+            discussion_he: 'האם קל יותר להתרכז בתפילה של בוקר שקט או בעצירה באמצע יום פעיל?'
+          },
+          {
+            id: 'les_ber_4',
+            lesson_num: 4,
+            title_en: 'Tefillat HaDerech: The Traveler\'s Prayer',
+            title_he: 'תפילת הדרך: שמירה ובטחון בדרכים',
+            hook_en: 'Why do we feel vulnerable the moment we leave our familiar home neighborhood?',
+            hook_he: 'למה אנחנו מרגישים פגיעים ברגע שאנחנו יוצאים מהסביבה המוכרת של הבית?',
+            anchors_en: [
+              '**Leaving the City**: Tefillat HaDerech is recited once a traveler passes 70 cubits beyond city limits.',
+              '**Plural Language**: The prayer is phrased in the plural ("she-tolichenu") to bind personal safety with all travelers.',
+              '**Road Hazards**: Ancient roads faced wild beasts and bandits; modern roads face highway speed and traffic.',
+              '**Distance Requirement**: Traditionally recited on journeys exceeding a parsah (approx 4 kilometers or 72 minutes).',
+              '**Standing or Riding**: Ideally recited while stationary, but may be said while riding or traveling safely.',
+              '**Smuchah LeChaverta**: Connected to a prior blessing or recited standing before entering the highway.',
+              '**Daily Gratitude**: Recognizing that every safe arrival is a quiet blessing.'
+            ],
+            anchors_he: [
+              '**יציאה מהעיר**: נאמרת לאחר שהתרחק שבעים אמה מעבר לבתי העיר.',
+              '**לשון רבים**: התפילה מנוסחת בלשון רבים ("שתוליכנו לשלום") כדי לחבר את גורלנו לכל עוברי הדרכים.',
+              '**סכנות הדרך**: בימי קדם סכנת חיות שודדים, ובימינו סכנות הכבישים והתנועה המהירה.',
+              '**שיעור מהלך פרסה**: חיוב התפילה בדרך שמשכה מהלך פרסה (כ-4 ק"מ או נסיעה משמעותית).',
+              '**בעמידה או בנסיעה**: לכתחילה יעמוד, ובדיעבד מותר לומר גם תוך כדי נסיעה בטוחה.',
+              '**סמוכה לחברתה**: מנהג לסמוך את תפילת הדרך לברכה אחרת כגון ברכת השחר.',
+              '**הודיה יומיומית**: ההבנה שכל הגעה ליעד בשלום היא ברכה וחסד.'
+            ],
+            life_app_en: 'Recognizing that safety and progress in life are never guaranteed makes every journey intentional.',
+            life_app_he: 'ההכנה לקראת נסיעה מזכירה לנו שהביטחון אינו מובן מאליו ומחייבת אותנו לאחריות וזהירות.',
+            discussion_en: 'Why is Tefillat HaDerech formulated in the plural ("lead us in peace") rather than singular ("lead me")?',
+            discussion_he: 'מדוע תפילת הדרך נאמרת בלשון רבים ("שתוליכנו לשלום") ולא בלשון יחיד?'
+          },
+          {
+            id: 'les_ber_5',
+            lesson_num: 5,
+            title_en: 'Kavanah: The Mind and Heart of Prayer',
+            title_he: 'כוונה בתפילה: הראש והלב של המילים',
+            hook_en: 'If an actor reads a script with zero emotion, does the audience feel moved?',
+            hook_he: 'אם שחקן קורא תסריט בלי שום רגש וכוונה, האם הקהל יתרגש?',
+            anchors_en: [
+              '**Tefillah Without Kavanah**: Chassidic wisdom compares prayer without heart to a body without a soul.',
+              '**First Blessing Requirement**: The Shulchan Aruch rules that Kavanah in the first blessing (Avot) is indispensable.',
+              '**Thinking Before Speaking**: The early pious ones (Chasidim Rishonim) would meditate for one hour before praying.',
+              '**Understanding the Words**: Saying fewer requests with deep understanding surpasses rushing through many prayers.',
+              '**Overcoming Distraction**: When your mind wanders, gently bring your focus back to the next sentence without despair.',
+              '**Physical Posture**: Facing Jerusalem, standing with feet together like angels, and eyes cast downward.',
+              '**Inner Transformation**: True prayer is not telling the Creator what you want, but aligning who you are.'
+            ],
+            anchors_he: [
+              '**תפילה בלא כוונה**: תפילה בלא כוונה כגוף בלא נשמה.',
+              '**ברכת אבות**: השולחן ערוך פוסק שהכוונה בברכת אבות הראשונה מעכבת.',
+              '**חסידים ראשונים**: היו שוהים שעה אחת קודם התפילה כדי לכוון ליבם למקום.',
+              '**טוב מעט בכוונה**: טוב מעט תחנונים בכוונה מהרבות בלא כוונה.',
+              '**התמודדות עם הסחות דעת**: כשמחשבה זרה נכנסת, מחזירים בעדינות את המבט והריכוז למילים.',
+              '**יציבה גופנית**: פונים לעבר ירושלים, עמידה ברגליים צמודות כמלאכים, ועיניים למטה.',
+              '**שינוי פנימי**: תפילה אינה רשימת קניות לבורא עולם, אלא התחברות ושיפור אישי.'
+            ],
+            life_app_en: 'Quality of attention matters far more than quantity of activity in school, relationships, and life.',
+            life_app_he: 'איכות הריכוז והנוכחות שלך חשובה פי כמה מכמות הדברים שאתה עושה בחיפזון.',
+            discussion_en: 'What is one concrete technique you can use to stay focused when saying the Shema or Amidah?',
+            discussion_he: 'איזה כלי מעשי עוזר לך להתרכז ולא לרחף כשאתה מתפלל או לומד?'
+          },
+          {
+            id: 'les_ber_6',
+            lesson_num: 6,
+            title_en: 'Standing Before the King',
+            title_he: 'העומד להתפלל: כבוד מלכות ושליחות הבר מצווה',
+            hook_en: 'How would you dress, stand, and speak if you were granted an audience with the President?',
+            hook_he: 'איך היית מתלבש, עומד ומדבר אם היית זוכה להיכנס לפגישה אישית עם ראש הממשלה או מלך?',
+            anchors_en: [
+              '**Know Before Whom You Stand**: "Da lifnei mi ata omeid" etched above the Holy Ark.',
+              '**Three Steps Back and Forward**: Bowing and taking three steps into the presence of the King.',
+              '**Bowing in the Amidah**: Bending at Baruch, bowing at Ata, and straightening at the Name.',
+              '**Four Bows**: Only at the beginning and end of Avot, and the beginning and end of Modim.',
+              '**Whispered Intimacy**: The Amidah is whispered so that only you hear your words, preserving privacy with the King.',
+              '**Shalom Rav**: Concluding by stepping back and wishing peace on the right, left, and entire world.',
+              '**Bar Mitzvah Crown**: Reaching the age of 13 marks the moment your prayers count in the communal Minyan.'
+            ],
+            anchors_he: [
+              '**דע לפני מי אתה עומד**: הכתובת המפורסמת מעל ארון הקודש המזכירה את מעמד התפילה.',
+              '**שלוש פסיעות**: פסיעה קדימה לכניסה לפני המלך ופסיעה לאחור בסיום התפילה.',
+              '**סדר הכריעות**: כורע בברוך, משתחווה באתה, וזוקף בשם ה\'.',
+              '**ארבע כריעות**: רק בתחילת וסוף ברכת אבות, ובתחילת וסוף ברכת מודים.',
+              '**תפילה בלחש**: תפילת עמידה נאמרת בלחש שרק המתפלל שומע קולו כחנה הנביאה.',
+              '**עושה שלום במרומיו**: פרידה מנומסת מהמלך תוך ברכת שלום לכל ישראל.',
+              '**שליחות הבר מצווה**: בהגיעך לגיל 13 תפילתך מצטרפת רשמית לחישוב מניין של כל עם ישראל.'
+            ],
+            life_app_en: 'Carrying yourself with dignity and respect elevates how others treat you and how you treat yourself.',
+            life_app_he: 'כאשר נער מתנהג בכבוד ובבגרות, הסביבה כולה מתייחסת אליו כאל אדם שלם ומכובד.',
+            discussion_en: 'Why do you think the Amidah is recited in a whisper rather than out loud?',
+            discussion_he: 'מדוע תפילת שמונה עשרה נאמרת בלחש ולא בקול רם?'
+          }
+        ]
+      };
+
+      if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
+      APP_STATE.customCourses.push(sampleCourse);
+      saveCustomCoursesToStorage(true);
+      closeAiCurriculumBuilderModal();
+      handleCourseSelectionChange(sampleCourse.id);
+      showToast(isHe ? 'קורס לדוגמה הוטען בהצלחה!' : 'Sample course loaded successfully!');
+    }
+
+    async function handleGenerateCurriculum(e) {
+      e.preventDefault();
+
+      const topic = document.getElementById('ai-builder-topic').value.trim();
+      const domain = document.getElementById('ai-builder-domain').value;
+      const level = document.getElementById('ai-builder-level').value;
+      const lessonCount = parseInt(document.getElementById('ai-builder-lessons-count').value, 10) || 8;
+      const langChoice = document.getElementById('ai-builder-language').value;
+      const guidance = document.getElementById('ai-builder-guidance').value.trim();
+
+      if (!topic) {
+        showToast('Please enter a course topic or subject title');
+        return;
+      }
+
+      let apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key');
+      if (!apiKey) {
+        const promptKey = prompt('Please enter your free Google Gemini API Key to generate this course (or click Cancel to test the instant sample course):', '');
+        if (promptKey && promptKey.trim()) {
+          apiKey = promptKey.trim();
+          APP_STATE.geminiApiKey = apiKey;
+          localStorage.setItem('tutor_gemini_key', apiKey);
+          pushPortalSettingsToCloud();
+        } else {
+          return;
+        }
+      }
+
+      const loadingState = document.getElementById('ai-builder-loading-state');
+      const submitBtn = document.getElementById('btn-submit-ai-builder');
+      if (loadingState) loadingState.classList.remove('hidden');
+      if (submitBtn) submitBtn.disabled = true;
+
+      const systemInstruction = `You are an elite master curriculum designer and pedagogical expert.
+Generate a structured, educational course curriculum based strictly on the provided specifications.
+You MUST return ONLY a valid, parseable JSON object with NO markdown backticks, NO code block markers, and NO conversational text.
+
+JSON Schema:
+{
+  "title_en": "Course Title in English",
+  "title_he": "כותרת הקורס בעברית",
+  "category": "${domain}",
+  "target_level": "${level}",
+  "description_en": "Concise 1-2 sentence curriculum summary in English",
+  "description_he": "תקציר תוכנית הלימודים במשפט או שניים בעברית",
+  "lessons": [
+    {
+      "lesson_num": 1,
+      "title_en": "Concise Lesson Name Only",
+      "title_he": "שם שיעור קצר ותמציתי",
+      "hook_en": "Opening real-world problem, teaser, or relatable question",
+      "hook_he": "פתיח מעניין או שאלה מרתקת",
+      "anchors_en": [
+        "**Keyword**: First clear factual anchor explaining the core mechanism.",
+        "**Keyword**: Second essential learning point.",
+        "**Keyword**: Third point.",
+        "**Keyword**: Fourth point.",
+        "**Keyword**: Fifth point.",
+        "**Keyword**: Sixth point.",
+        "**Keyword**: Seventh memorable concluding takeaway."
+      ],
+      "anchors_he": [
+        "**מילת מפתח**: עוגן ידע ראשון ברור ומדויק.",
+        "**מילת מפתח**: נקודה שנייה.",
+        "**מילת מפתח**: נקודה שלישית.",
+        "**מילת מפתח**: נקודה רביעית.",
+        "**מילת מפתח**: נקודה חמישית.",
+        "**מילת מפתח**: נקודה שישית.",
+        "**מילת מפתח**: נקודה שביעית לסיכום."
+      ],
+      "life_app_en": "Practical everyday life application or relatable angle for students.",
+      "life_app_he": "חיבור מעשי ומשמעותי לחיי היומיום.",
+      "discussion_en": "Thought provoking discussion question or debate.",
+      "discussion_he": "שאלת דיון מעוררת מחשבה."
+    }
+  ]
+}`;
+
+      const userPrompt = `Create a ${lessonCount}-lesson structured curriculum for:
+Topic: ${topic}
+Category: ${domain}
+Target Student Level: ${level}
+Language: ${langChoice}
+Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per lesson, high-density memory points, and practical relatable student angles.'}`;
+
+      try {
+        const candidateModels = [
+          'gemini-1.5-flash',
+          'gemini-2.0-flash',
+          'gemini-2.5-flash',
+          'gemini-3.5-flash'
+        ];
+
+        let rawResponseText = null;
+        let lastErr = null;
+
+        for (const model of candidateModels) {
+          try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            const resp = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] },
+                generationConfig: {
+                  temperature: 0.7,
+                  responseMimeType: "application/json"
+                }
+              })
+            });
+
+            if (resp.ok) {
+              const resData = await resp.json();
+              rawResponseText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (rawResponseText) break;
+            } else {
+              const errJson = await resp.json().catch(() => ({}));
+              lastErr = new Error(errJson.error?.message || `Status ${resp.status}`);
+            }
+          } catch (fetchErr) {
+            lastErr = fetchErr;
+          }
+        }
+
+        if (!rawResponseText) {
+          throw lastErr || new Error('Failed to generate course with Gemini AI');
+        }
+
+        let cleanJsonStr = rawResponseText.trim();
+        if (cleanJsonStr.startsWith('```json')) cleanJsonStr = cleanJsonStr.replace(/^```json/, '');
+        if (cleanJsonStr.startsWith('```')) cleanJsonStr = cleanJsonStr.replace(/^```/, '');
+        if (cleanJsonStr.endsWith('```')) cleanJsonStr = cleanJsonStr.replace(/```$/, '');
+        cleanJsonStr = cleanJsonStr.trim();
+
+        const courseData = JSON.parse(cleanJsonStr);
+        courseData.id = 'course_' + Date.now();
+        courseData.created_at = new Date().toISOString();
+        courseData.updated_at = new Date().toISOString();
+
+        if (Array.isArray(courseData.lessons)) {
+          courseData.lessons.forEach((l, idx) => {
+            if (!l.id) l.id = 'les_' + Date.now() + '_' + idx;
+            if (!l.lesson_num) l.lesson_num = idx + 1;
+            if (!Array.isArray(l.anchors_en)) l.anchors_en = [];
+            if (!Array.isArray(l.anchors_he)) l.anchors_he = [];
+          });
+        }
+
+        if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
+        APP_STATE.customCourses.push(courseData);
+        saveCustomCoursesToStorage(true);
+
+        closeAiCurriculumBuilderModal();
+        handleCourseSelectionChange(courseData.id);
+        const toastTitle = APP_STATE.lang === 'he' ? (courseData.title_he || courseData.title_en) : (courseData.title_en || courseData.title_he);
+        showToast(I18N[APP_STATE.lang].toastCourseCreated ? I18N[APP_STATE.lang].toastCourseCreated(toastTitle) : ('Course created: "' + toastTitle + '"!'));
+      } catch (err) {
+        console.error('AI Course Generation Error:', err);
+        alert('Could not generate course: ' + (err.message || 'Unknown error') + '\nTip: You can also click "Load Sample" to instantly test without an API key.');
+      } finally {
+        if (loadingState) loadingState.classList.add('hidden');
+        if (submitBtn) submitBtn.disabled = false;
       }
     }
 
@@ -7148,14 +8209,15 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     const GEMINI_CANDIDATE_MODELS = [
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'gemini-2.5-flash',
       'gemini-3.5-flash',
       'gemini-3.5-flash-lite',
       'gemini-3.1-flash-lite',
       'gemini-3.7-flash',
       'gemini-3.8-flash',
-      'gemini-flash-latest',
-      'gemini-2.5-flash',
-      'gemini-2.0-flash'
+      'gemini-flash-latest'
     ];
 
     function findStudentFlexible(nameOrId) {
@@ -7852,8 +8914,14 @@ Base44, please confirm receipt of this protocol and let us know that you are rea
     }
 
     function renderAllViews() {
-      renderTopics();
-      renderChumash();
+      populateCourseSelector();
+      if (APP_STATE.studySection === 'custom') {
+        renderCustomCourse();
+      } else if (APP_STATE.studySection === 'chumash') {
+        renderChumash();
+      } else {
+        renderTopics();
+      }
       renderStudents();
       renderCalendar();
       renderActiveStudentWorkspace(true);
