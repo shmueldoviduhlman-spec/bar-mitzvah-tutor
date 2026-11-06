@@ -114,6 +114,7 @@ assert(indexHtml.includes('study-category-custom'), 'HTML contains study-categor
 
 // Gate 2: ensureStudentSkills initializes enrolledModules with 100% backward compatibility
 console.log('\n--- Gate 2: Enrolled Modules Backward Compatibility ---');
+sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
 const dummyStudent = { id: 'std_test_1', name: 'Benny Cohen' };
 sandbox.ensureStudentSkills(dummyStudent);
 assert(dummyStudent.enrolledModules !== undefined, 'enrolledModules object exists on student');
@@ -121,6 +122,15 @@ assert(dummyStudent.enrolledModules.lessons === true, 'enrolledModules.lessons d
 assert(dummyStudent.enrolledModules.reading === true, 'enrolledModules.reading defaults to true');
 assert(dummyStudent.enrolledModules.speech === true, 'enrolledModules.speech defaults to true');
 assert(dummyStudent.enrolledModules.custom === true, 'enrolledModules.custom defaults to true');
+
+// Verify external tutor default enrollment omits Bar Mitzvah specific modules
+sandbox.APP_STATE.currentUser = { email: 'math_teacher@school.edu' };
+const externalStudent = { id: 'std_ext_1', name: 'Alice Smith' };
+sandbox.ensureStudentSkills(externalStudent);
+assert(externalStudent.enrolledModules.lessons === true, 'External student has lessons enabled');
+assert(externalStudent.enrolledModules.reading === false, 'External student has Hebrew reading disabled by default');
+assert(externalStudent.enrolledModules.speech === false, 'External student has Bar Mitzvah speech disabled by default');
+assert(externalStudent.enrolledModules.custom === true, 'External student has custom enabled');
 
 // Gate 3: Permanent Goals & Homework Invariants
 console.log('\n--- Gate 3: Permanent Goals & Homework Invariants ---');
@@ -147,6 +157,67 @@ sandbox.switchStudyCategory('custom');
 assert(sandbox.APP_STATE.activeStudyCategory === 'custom', 'activeStudyCategory switched to custom');
 sandbox.switchStudyCategory('lessons');
 assert(sandbox.APP_STATE.activeStudyCategory === 'lessons', 'activeStudyCategory switched back to lessons');
+
+// Gate 6: Multi-Tenant Isolation & isMasterAccount Invariants
+console.log('\n--- Gate 6: Multi-Tenant Isolation & Account Scoping ---');
+assert(typeof sandbox.isMasterAccount === 'function', 'isMasterAccount is a function');
+
+// Test master accounts
+sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
+assert(sandbox.isMasterAccount() === true, 'shmueldoviduhlman@gmail.com is identified as master account');
+
+sandbox.APP_STATE.currentUser = { email: 'RABBIYCLOSTER@GMAIL.COM' };
+assert(sandbox.isMasterAccount() === true, 'rabbiycloster@gmail.com is identified as master account (case insensitive)');
+
+sandbox.APP_STATE.currentUser = { email: 'admin@tutors.org', role: 'super_admin' };
+assert(sandbox.isMasterAccount() === true, 'super_admin role is identified as master account');
+
+// Test external tutor accounts
+sandbox.APP_STATE.currentUser = { email: 'math_teacher@school.edu', role: 'authenticated' };
+assert(sandbox.isMasterAccount() === false, 'External tutor is NOT identified as master account');
+
+sandbox.APP_STATE.currentUser = null;
+assert(sandbox.isMasterAccount() === false, 'Unauthenticated user is NOT identified as master account');
+
+// Test storage key scoping
+sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
+assert(sandbox.getCustomCoursesStorageKey() === 'tutor_custom_courses', 'Master courses storage key is unscoped');
+assert(sandbox.getStudyMaterialsStorageKey() === 'tutor_study_additions', 'Master materials storage key is unscoped');
+
+sandbox.APP_STATE.currentUser = { email: 'math_teacher@school.edu' };
+assert(sandbox.getCustomCoursesStorageKey() === 'tutor_custom_courses_math_teacher_school_edu', 'External courses storage key is scoped');
+assert(sandbox.getStudyMaterialsStorageKey() === 'tutor_study_additions_math_teacher_school_edu', 'External materials storage key is scoped');
+
+// Test course selector population
+sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
+sandbox.populateCourseSelector();
+const masterSelectHtml = getOrCreateElem('study-course-select').innerHTML;
+assert(masterSelectHtml.includes('concepts') && masterSelectHtml.includes('chumash'), 'Master course selector includes Concepts and Chumash');
+
+sandbox.APP_STATE.currentUser = { email: 'math_teacher@school.edu' };
+sandbox.APP_STATE.customCourses = [];
+sandbox.populateCourseSelector();
+const extSelectHtml = getOrCreateElem('study-course-select').innerHTML;
+assert(!extSelectHtml.includes('concepts') && !extSelectHtml.includes('chumash'), 'External course selector omits Concepts and Chumash');
+
+// Test Lessons Category View isolation
+sandbox.APP_STATE.currentUser = { email: 'math_teacher@school.edu' };
+sandbox.renderLessonsCategoryView();
+const tutorHub = getOrCreateElem('study-section-tutor-hub');
+const tutorBlank = getOrCreateElem('tutor-hub-blank-state');
+const secConcepts = getOrCreateElem('study-section-concepts');
+const secChumash = getOrCreateElem('study-section-chumash');
+assert(!tutorHub.classList.contains('hidden'), 'External user has tutor hub unhidden');
+assert(!tutorBlank.classList.contains('hidden'), 'External user with zero courses sees blank state');
+assert(secConcepts.classList.contains('hidden'), 'External user has Jewish Concepts hidden');
+assert(secChumash.classList.contains('hidden'), 'External user has Chumash hidden');
+
+// Test Lessons Category View for Master
+sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
+sandbox.APP_STATE.studySection = 'concepts';
+sandbox.renderLessonsCategoryView();
+assert(tutorHub.classList.contains('hidden'), 'Master account has tutor hub hidden');
+assert(!secConcepts.classList.contains('hidden'), 'Master account has Jewish Concepts unhidden');
 
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);

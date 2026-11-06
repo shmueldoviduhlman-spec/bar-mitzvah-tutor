@@ -466,7 +466,7 @@
       <!-- ============================================== -->
       <div id="study-category-lessons" class="space-y-6">
         <!-- Lessons Sub-Header & Selector Toolbar -->
-        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 sm:p-2.5 shadow-lg backdrop-blur flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 max-w-4xl mx-auto">
+        <div id="study-lessons-master-toolbar" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 sm:p-2.5 shadow-lg backdrop-blur flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 max-w-4xl mx-auto">
           
           <!-- Course Selector Dropdown -->
           <div class="flex items-center gap-2 w-full md:w-auto">
@@ -528,6 +528,37 @@
             </div>
           </div>
           <div id="chumash-grid" class="space-y-3 max-w-4xl mx-auto"></div>
+        </div>
+
+        <!-- Sub-Section 3: External Tutor Teaching Hub (for new/non-master users) -->
+        <div id="study-section-tutor-hub" class="space-y-6 hidden">
+          <!-- Blank state when tutor hasn't created classes yet -->
+          <div id="tutor-hub-blank-state" class="text-center py-12 px-6 bg-slate-900/60 border border-slate-800 rounded-3xl max-w-2xl mx-auto space-y-5 shadow-xl backdrop-blur">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600/20 to-amber-500/20 border border-brand-500/30 flex items-center justify-center mx-auto text-brand-400">
+              <i data-lucide="book-plus" class="w-8 h-8"></i>
+            </div>
+            <div class="space-y-2">
+              <h3 id="lbl-tutor-hub-title" class="text-lg sm:text-xl font-bold text-white">Your Teaching Hub is Ready</h3>
+              <p id="lbl-tutor-hub-desc" class="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+                You haven't created any lessons yet. Build lessons for any subject (Math, Science, History, Judaics, Languages) or let AI design a full curriculum in seconds.
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <button onclick="openAiCurriculumBuilderModal()" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs sm:text-sm shadow-lg transition active:scale-95">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                <span id="lbl-tutor-hub-ai-btn">AI Curriculum Builder</span>
+              </button>
+              <button onclick="openAddCustomLessonModal()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 transition active:scale-95">
+                <i data-lucide="plus" class="w-4 h-4 text-brand-400"></i>
+                <span id="lbl-tutor-hub-add-btn">+ Add Lesson</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Active lessons list when the tutor has classes -->
+          <div id="tutor-hub-active-lessons" class="space-y-6 hidden">
+            <div id="tutor-hub-lessons-container"></div>
+          </div>
         </div>
       </div>
 
@@ -2203,6 +2234,39 @@
     };
     window.APP_STATE = APP_STATE;
 
+    function isMasterAccount() {
+      if (!APP_STATE.currentUser) {
+        try {
+          const raw = localStorage.getItem('tutor_auth_session');
+          if (raw) {
+            const s = JSON.parse(raw);
+            const e = (s && s.email || '').toLowerCase().trim();
+            if (e === 'shmueldoviduhlman@gmail.com' || e === 'rabbiycloster@gmail.com' || (s && s.role === 'super_admin')) return true;
+            if (e) return false;
+          }
+        } catch (_) {}
+        return false;
+      }
+      const email = (APP_STATE.currentUser.email || '').toLowerCase().trim();
+      return email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com' || APP_STATE.currentUser.role === 'super_admin';
+    }
+
+    function getCustomCoursesStorageKey() {
+      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      if (email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com' || !email) {
+        return 'tutor_custom_courses';
+      }
+      return 'tutor_custom_courses_' + email.replace(/[^a-z0-9]/g, '_');
+    }
+
+    function getStudyMaterialsStorageKey() {
+      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      if (email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com' || !email) {
+        return 'tutor_study_additions';
+      }
+      return 'tutor_study_additions_' + email.replace(/[^a-z0-9]/g, '_');
+    }
+
     // Dictionary Translations
     const I18N = {
       en: {
@@ -2975,10 +3039,11 @@ alter publication supabase_realtime add table public.students_sync;`;
         student.skills = getDefaultStudentSkills();
       }
       if (!student.enrolledModules || typeof student.enrolledModules !== 'object') {
+        const isMaster = isMasterAccount();
         student.enrolledModules = {
           lessons: true,
-          reading: true,
-          speech: true,
+          reading: isMaster,
+          speech: isMaster,
           custom: true
         };
       }
@@ -3652,21 +3717,26 @@ alter publication supabase_realtime add table public.students_sync;`;
             updateAiStatusPill();
           }
 
-          // Check for study materials system record
-          const studyRecord = data.find(row => row.id === '__study_materials__');
+          // Check for study materials system record with Multi-Tenant Isolation
+          const isMaster = isMasterAccount();
+          const myEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+          const targetMaterialsId = isMaster ? '__study_materials__' : ('__study_materials_' + (myEmail ? myEmail.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
+          const targetCoursesId = isMaster ? '__custom_courses__' : ('__custom_courses_' + (myEmail ? myEmail.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
+
+          const studyRecord = data.find(row => row.id === targetMaterialsId);
           if (studyRecord && studyRecord.completed_topics) {
-            mergeStudyMaterialsWithCloud(studyRecord.completed_topics);
+            const mats = studyRecord.completed_topics.materials || studyRecord.completed_topics;
+            mergeStudyMaterialsWithCloud(mats);
           }
 
-          // Check for custom courses system record
-          const coursesRecord = data.find(row => row.id === '__custom_courses__');
+          // Check for custom courses system record with Multi-Tenant Isolation
+          const coursesRecord = data.find(row => row.id === targetCoursesId);
           if (coursesRecord && coursesRecord.completed_topics && Array.isArray(coursesRecord.completed_topics.courses)) {
             mergeCustomCoursesWithCloud(coursesRecord.completed_topics.courses);
           }
 
           // Filter out internal system records from student roster with Multi-Tenant Isolation
-          const isSuperAdmin = APP_STATE.currentUser && (APP_STATE.currentUser.role === 'super_admin' || APP_STATE.currentUser.email === 'shmueldoviduhlman@gmail.com');
-          const myEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase();
+          const isSuperAdmin = APP_STATE.currentUser && (APP_STATE.currentUser.role === 'super_admin' || isMaster);
           const myUserId = (APP_STATE.currentUser && APP_STATE.currentUser.id || '');
 
           const actualStudentRows = data.filter(row => {
@@ -3937,12 +4007,18 @@ alter publication supabase_realtime add table public.students_sync;`;
     async function pushStudyMaterialsToCloud() {
       if (!APP_STATE.cloud.client) return;
       try {
+        const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+        const isMaster = isMasterAccount();
+        const recordId = isMaster ? '__study_materials__' : ('__study_materials_' + (email ? email.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
         const payload = {
-          id: '__study_materials__',
-          name: 'SYSTEM_STUDY_MATERIALS',
+          id: recordId,
+          name: isMaster ? 'SYSTEM_STUDY_MATERIALS' : ('STUDY_MATERIALS_' + email),
           parsha_or_date: 'system',
-          notes: 'Custom curriculum additions by tutors',
-          completed_topics: APP_STATE.studyAdditions || {},
+          notes: 'Custom curriculum additions by ' + (email || 'tutor'),
+          completed_topics: {
+            materials: APP_STATE.studyAdditions || {},
+            _meta: { owner_email: email, user_id: APP_STATE.currentUser?.id || '' }
+          },
           completed_parshiot: {},
           updated_at: new Date().toISOString()
         };
@@ -4101,6 +4177,8 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       updateUserSessionDisplay(session);
       loadStudentsFromStorage();
+      loadStudyMaterialsFromStorage();
+      loadCustomCoursesFromStorage();
       renderAllViews();
 
       const lockScreen = document.getElementById('lock-screen');
@@ -4810,6 +4888,8 @@ alter publication supabase_realtime add table public.students_sync;`;
       APP_STATE.activeStudentId = null;
       APP_STATE.activeStudentDrawerId = null;
       APP_STATE.students = [];
+      APP_STATE.customCourses = [];
+      APP_STATE.studyAdditions = {};
       renderAllViews();
 
       const lockScreen = document.getElementById('lock-screen');
@@ -5066,6 +5146,18 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       const customCurriculaHeadDesc = document.getElementById('custom-curricula-head-desc');
       if (customCurriculaHeadDesc) customCurriculaHeadDesc.textContent = t.customHubDesc || 'Create tailored courses for any subject, or use the managed AI builder to scaffold complete curricula in seconds.';
+
+      const lblTutorHubTitle = document.getElementById('lbl-tutor-hub-title');
+      if (lblTutorHubTitle) lblTutorHubTitle.textContent = isHe ? 'מרחב ההוראה שלך מוכן' : 'Your Teaching Hub is Ready';
+
+      const lblTutorHubDesc = document.getElementById('lbl-tutor-hub-desc');
+      if (lblTutorHubDesc) lblTutorHubDesc.textContent = isHe ? 'עדיין לא נוצרו שיעורים. צור שיעורים לכל מקצוע (מתמטיקה, מדעים, שפות, לימודי קודש) או תן לבינה המלאכותית לבנות תוכנית לימודים בשניות.' : "You haven't created any lessons yet. Build lessons for any subject (Math, Science, History, Judaics, Languages) or let AI design a full curriculum in seconds.";
+
+      const lblTutorHubAiBtn = document.getElementById('lbl-tutor-hub-ai-btn');
+      if (lblTutorHubAiBtn) lblTutorHubAiBtn.textContent = isHe ? 'מחולל תוכניות לימוד ב-AI' : 'AI Curriculum Builder';
+
+      const lblTutorHubAddBtn = document.getElementById('lbl-tutor-hub-add-btn');
+      if (lblTutorHubAddBtn) lblTutorHubAddBtn.textContent = isHe ? '+ הוסף שיעור' : '+ Add Lesson';
 
       // Study Sub-Section Switcher Pills & Collapse
       const subStudyConcepts = document.getElementById('lbl-study-concepts');
@@ -5634,8 +5726,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       });
 
       if (category === 'lessons') {
-        if (APP_STATE.studySection === 'concepts') renderTopics();
-        else if (APP_STATE.studySection === 'chumash') renderChumash();
+        renderLessonsCategoryView();
       } else if (category === 'reading') {
         renderStudyLettersGrid();
       } else if (category === 'custom') {
@@ -5647,6 +5738,177 @@ alter publication supabase_realtime add table public.students_sync;`;
         }
       }
 
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function renderLessonsCategoryView() {
+      const isMaster = isMasterAccount();
+      const masterToolbar = document.getElementById('study-lessons-master-toolbar');
+      const secConcepts = document.getElementById('study-section-concepts');
+      const secChumash = document.getElementById('study-section-chumash');
+      const tutorHub = document.getElementById('study-section-tutor-hub');
+      const tutorBlankState = document.getElementById('tutor-hub-blank-state');
+      const tutorActiveLessons = document.getElementById('tutor-hub-active-lessons');
+
+      if (isMaster) {
+        if (masterToolbar) masterToolbar.classList.remove('hidden');
+        if (tutorHub) tutorHub.classList.add('hidden');
+        if (APP_STATE.studySection === 'concepts') {
+          if (secConcepts) secConcepts.classList.remove('hidden');
+          if (secChumash) secChumash.classList.add('hidden');
+          renderTopics();
+        } else if (APP_STATE.studySection === 'chumash') {
+          if (secChumash) secChumash.classList.remove('hidden');
+          if (secConcepts) secConcepts.classList.add('hidden');
+          renderChumash();
+        } else {
+          if (secConcepts) secConcepts.classList.add('hidden');
+          if (secChumash) secChumash.classList.add('hidden');
+          renderCustomCourse();
+        }
+      } else {
+        // External tutor / new user: keep master Bar Mitzvah lessons 100% hidden
+        if (masterToolbar) masterToolbar.classList.add('hidden');
+        if (secConcepts) secConcepts.classList.add('hidden');
+        if (secChumash) secChumash.classList.add('hidden');
+        if (tutorHub) tutorHub.classList.remove('hidden');
+
+        const hasCourses = Array.isArray(APP_STATE.customCourses) && APP_STATE.customCourses.length > 0;
+        if (hasCourses) {
+          if (tutorBlankState) tutorBlankState.classList.add('hidden');
+          if (tutorActiveLessons) {
+            tutorActiveLessons.classList.remove('hidden');
+            renderTutorHubActiveLessons();
+          }
+        } else {
+          if (tutorBlankState) tutorBlankState.classList.remove('hidden');
+          if (tutorActiveLessons) tutorActiveLessons.classList.add('hidden');
+        }
+      }
+
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function renderTutorHubActiveLessons() {
+      const container = document.getElementById('tutor-hub-lessons-container');
+      if (!container) return;
+      const isHe = APP_STATE.lang === 'he';
+      const courses = APP_STATE.customCourses || [];
+      if (courses.length === 0) return;
+
+      let activeCourse = courses.find(c => c.id === APP_STATE.activeCourseId);
+      if (!activeCourse) {
+        activeCourse = courses[0];
+        APP_STATE.activeCourseId = activeCourse.id;
+      }
+
+      const title = isHe ? (activeCourse.title_he || activeCourse.title_en) : (activeCourse.title_en || activeCourse.title_he);
+      const desc = isHe ? (activeCourse.description_he || activeCourse.description_en) : (activeCourse.description_en || activeCourse.description_he);
+      const lessons = activeCourse.lessons || [];
+
+      let html = `
+        <div class="space-y-6 max-w-4xl mx-auto">
+          <!-- External Tutor Toolbar -->
+          <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 sm:p-2.5 shadow-lg backdrop-blur flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
+            <div class="flex items-center gap-2 flex-1">
+              <div class="relative flex-1 md:w-72">
+                <select onchange="handleCourseSelectionChange(this.value)" class="w-full bg-slate-950 text-white font-semibold text-xs sm:text-sm py-2 px-3 pl-8 pr-7 rounded-xl border border-slate-700/80 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer appearance-none transition shadow-inner">
+                  ${courses.map(c => `
+                    <option value="${c.id}" ${c.id === activeCourse.id ? 'selected' : ''}>
+                      ✦ ${(isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he))} (${c.lessons ? c.lessons.length : 0})
+                    </option>
+                  `).join('')}
+                </select>
+                <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 justify-end shrink-0">
+              <button onclick="openAiCurriculumBuilderModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-bold text-xs shadow transition active:scale-95">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>AI Builder</span>
+              </button>
+              <button onclick="openAddCustomLessonModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs border border-slate-700 transition active:scale-95">
+                <i data-lucide="plus" class="w-3.5 h-3.5 text-brand-400"></i>
+                <span>+ Add Lesson</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Course Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
+            <div>
+              <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <span class="text-brand-400">✦</span> ${escapeHtml(title)}
+              </h2>
+              <p class="text-xs md:text-sm text-slate-400 mt-1">${escapeHtml(desc || '')}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-400 font-mono">${lessons.length} lessons</span>
+            </div>
+          </div>
+
+          <!-- Course Lessons Grid -->
+          <div class="space-y-3">
+            ${lessons.length === 0 ? `
+              <div class="text-center py-8 px-4 bg-slate-950/60 border border-slate-800/80 rounded-2xl">
+                <p class="text-xs sm:text-sm text-slate-400">No lessons in this course yet. Click "+ Add Lesson" to create your first class.</p>
+              </div>
+            ` : lessons.map((les, idx) => {
+              const lTitle = isHe ? (les.title_he || les.title_en) : (les.title_en || les.title_he);
+              const lHook = isHe ? (les.hook_he || les.hook_en) : (les.hook_en || les.hook_he);
+              const anchors = les.anchors || [];
+              const isExpanded = !!APP_STATE.expandedCustomLessonIds[les.id];
+
+              return `
+                <div class="rounded-2xl border ${isExpanded ? 'border-brand-500/50 bg-slate-900/90' : 'border-slate-800 bg-slate-900/60 hover:border-slate-700'} p-4 transition shadow-sm">
+                  <div class="flex items-start justify-between gap-3 cursor-pointer select-none" onclick="toggleCustomLessonAccordion('${les.id}')">
+                    <div class="flex items-start gap-3">
+                      <span class="w-6 h-6 rounded-lg bg-brand-500/20 text-brand-300 border border-brand-500/30 flex items-center justify-center text-xs font-mono font-bold shrink-0 mt-0.5">
+                        ${idx + 1}
+                      </span>
+                      <div>
+                        <h4 class="text-sm font-bold text-white">${escapeHtml(lTitle)}</h4>
+                        ${lHook ? `<p class="text-xs text-slate-400 mt-0.5 line-clamp-1">${escapeHtml(lHook)}</p>` : ''}
+                      </div>
+                    </div>
+                    <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4 text-slate-400 shrink-0 mt-1"></i>
+                  </div>
+
+                  ${isExpanded ? `
+                    <div class="mt-4 pt-4 border-t border-slate-800 space-y-3 text-xs">
+                      ${lHook ? `
+                        <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200">
+                          <span class="font-bold">Opening Hook:</span> ${escapeHtml(lHook)}
+                        </div>
+                      ` : ''}
+
+                      ${anchors.length > 0 ? `
+                        <div class="space-y-1.5">
+                          <span class="font-semibold text-slate-300">Core Points:</span>
+                          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            ${anchors.map(a => `
+                              <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800/80 text-slate-300 leading-relaxed">
+                                • ${escapeHtml(typeof a === 'string' ? a : (a.point || a.title || ''))}
+                              </div>
+                            `).join('')}
+                          </div>
+                        </div>
+                      ` : ''}
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
       if (window.lucide && typeof lucide.createIcons === 'function') {
         lucide.createIcons();
       }
@@ -5796,15 +6058,18 @@ alter publication supabase_realtime add table public.students_sync;`;
 
     function loadStudyMaterialsFromStorage() {
       try {
-        const stored = localStorage.getItem('tutor_study_additions');
+        const key = getStudyMaterialsStorageKey();
+        const stored = localStorage.getItem(key);
         if (stored) {
           const parsed = JSON.parse(stored);
           if (parsed && typeof parsed === 'object') {
             APP_STATE.studyAdditions = parsed;
           }
+        } else {
+          APP_STATE.studyAdditions = {};
         }
       } catch (e) {
-        console.error('Failed to parse tutor_study_additions from localStorage:', e);
+        console.error('Failed to parse study additions from localStorage:', e);
       }
       if (!APP_STATE.studyAdditions) {
         APP_STATE.studyAdditions = {};
@@ -5815,9 +6080,10 @@ alter publication supabase_realtime add table public.students_sync;`;
     function saveStudyMaterialsToStorage(syncCloud) {
       if (syncCloud === undefined) syncCloud = true;
       try {
-        localStorage.setItem('tutor_study_additions', JSON.stringify(APP_STATE.studyAdditions || {}));
+        const key = getStudyMaterialsStorageKey();
+        localStorage.setItem(key, JSON.stringify(APP_STATE.studyAdditions || {}));
       } catch (e) {
-        console.error('Failed to save tutor_study_additions to localStorage:', e);
+        console.error('Failed to save study additions to localStorage:', e);
       }
       updateStudyMaterialsBadge();
       if (syncCloud) {
@@ -6158,15 +6424,18 @@ alter publication supabase_realtime add table public.students_sync;`;
 
     function loadCustomCoursesFromStorage() {
       try {
-        const stored = localStorage.getItem('tutor_custom_courses');
+        const key = getCustomCoursesStorageKey();
+        const stored = localStorage.getItem(key);
         if (stored) {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed)) {
             APP_STATE.customCourses = parsed;
           }
+        } else {
+          APP_STATE.customCourses = [];
         }
       } catch (e) {
-        console.error('Failed to parse tutor_custom_courses:', e);
+        console.error('Failed to parse custom courses from storage:', e);
       }
       if (!Array.isArray(APP_STATE.customCourses)) {
         APP_STATE.customCourses = [];
@@ -6177,9 +6446,10 @@ alter publication supabase_realtime add table public.students_sync;`;
     function saveCustomCoursesToStorage(syncCloud) {
       if (syncCloud === undefined) syncCloud = true;
       try {
-        localStorage.setItem('tutor_custom_courses', JSON.stringify(APP_STATE.customCourses || []));
+        const key = getCustomCoursesStorageKey();
+        localStorage.setItem(key, JSON.stringify(APP_STATE.customCourses || []));
       } catch (e) {
-        console.error('Failed to save tutor_custom_courses:', e);
+        console.error('Failed to save custom courses to storage:', e);
       }
       populateCourseSelector();
       if (syncCloud) {
@@ -6190,12 +6460,18 @@ alter publication supabase_realtime add table public.students_sync;`;
     async function pushCustomCoursesToCloud() {
       if (!APP_STATE.cloud.client) return;
       try {
+        const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+        const isMaster = isMasterAccount();
+        const recordId = isMaster ? '__custom_courses__' : ('__custom_courses_' + (email ? email.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
         const payload = {
-          id: '__custom_courses__',
-          name: 'SYSTEM_CUSTOM_COURSES',
+          id: recordId,
+          name: isMaster ? 'SYSTEM_CUSTOM_COURSES' : ('CUSTOM_COURSES_' + email),
           parsha_or_date: 'system',
-          notes: 'Universal Custom Curricula generated by AI or Tutors',
-          completed_topics: { courses: APP_STATE.customCourses || [] },
+          notes: 'Custom Curricula for ' + (email || 'tutor'),
+          completed_topics: {
+            courses: APP_STATE.customCourses || [],
+            _meta: { owner_email: email, user_id: APP_STATE.currentUser?.id || '' }
+          },
           completed_parshiot: {},
           updated_at: new Date().toISOString()
         };
@@ -6238,19 +6514,29 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       const isHe = APP_STATE.lang === 'he';
       const t = I18N[APP_STATE.lang];
+      const isMaster = isMasterAccount();
 
-      let html = '<option value="concepts"' + (APP_STATE.activeCourseId === 'concepts' ? ' selected' : '') + '>' + (t.courseSelectConcepts || '✦ Bar Mitzvah: Concepts (13)') + '</option>' +
-        '<option value="chumash"' + (APP_STATE.activeCourseId === 'chumash' ? ' selected' : '') + '>' + (t.courseSelectChumash || '📜 Bar Mitzvah: Chumash (23)') + '</option>';
+      let html = '';
+      if (isMaster) {
+        html += '<option value="concepts"' + (APP_STATE.activeCourseId === 'concepts' ? ' selected' : '') + '>' + (t.courseSelectConcepts || '✦ Bar Mitzvah: Concepts (13)') + '</option>' +
+          '<option value="chumash"' + (APP_STATE.activeCourseId === 'chumash' ? ' selected' : '') + '>' + (t.courseSelectChumash || '📜 Bar Mitzvah: Chumash (23)') + '</option>';
+      }
 
       if (Array.isArray(APP_STATE.customCourses) && APP_STATE.customCourses.length > 0) {
-        html += '<optgroup label="' + (isHe ? 'תוכניות לימוד נוספות' : 'Custom Curricula') + '">';
+        if (isMaster) {
+          html += '<optgroup label="' + (isHe ? 'תוכניות לימוד נוספות' : 'Custom Curricula') + '">';
+        }
         APP_STATE.customCourses.forEach(c => {
           const title = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
           const count = c.lessons ? c.lessons.length : 0;
           const isSelected = APP_STATE.activeCourseId === c.id;
           html += '<option value="' + c.id + '"' + (isSelected ? ' selected' : '') + '>✦ ' + title + ' (' + count + ')</option>';
         });
-        html += '</optgroup>';
+        if (isMaster) {
+          html += '</optgroup>';
+        }
+      } else if (!isMaster) {
+        html = '<option value="">-- ' + (isHe ? 'אין שיעורים עדיין' : 'No classes created yet') + ' --</option>';
       }
 
       select.innerHTML = html;
@@ -10572,13 +10858,7 @@ Base44, please confirm receipt of this protocol and let us know that you are rea
 
     function renderAllViews() {
       populateCourseSelector();
-      if (APP_STATE.studySection === 'custom') {
-        renderCustomCourse();
-      } else if (APP_STATE.studySection === 'chumash') {
-        renderChumash();
-      } else {
-        renderTopics();
-      }
+      renderLessonsCategoryView();
       renderStudents();
       renderCalendar();
       renderActiveStudentWorkspace(true);
