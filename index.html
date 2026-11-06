@@ -151,282 +151,220 @@
         <p id="auth-subtitle" class="text-xs text-slate-400 mt-1">The Ultimate Operating System for Tutors & Rabbis</p>
       </div>
 
-      <!-- Auth Tabs: Sign In vs Create Account -->
-      <div class="flex items-center bg-slate-950/80 p-1 rounded-xl border border-slate-800/80">
-        <button
-          type="button"
-          id="tab-auth-signin"
-          onclick="handleAuthTabSwitch('signin')"
-          class="flex-1 py-2 text-xs font-bold rounded-lg transition bg-brand-600 text-white shadow"
-        >
-          <span id="lbl-auth-tab-signin">Sign In</span>
-        </button>
-        <button
-          type="button"
-          id="tab-auth-signup"
-          onclick="handleAuthTabSwitch('signup')"
-          class="flex-1 py-2 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-slate-200"
-        >
-          <span id="lbl-auth-tab-signup">Create Account</span>
-        </button>
-      </div>
-
-      <!-- ============================================== -->
-      <!-- TAB 1: SIGN IN FORM                             -->
-      <!-- ============================================== -->
-      <form id="form-auth-signin" onsubmit="handleSignIn(event)" class="space-y-3 pt-1">
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-signin-email">Email Address</label>
-          <input
-            type="email"
-            id="signin-email"
-            placeholder="name@example.com"
-            autocomplete="email"
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
-            required
+      <!-- Main Step 1 Container (Tabs & Email Dispatch Forms) -->
+      <div id="auth-step-email-container" class="space-y-4">
+        <!-- Auth Tabs: Sign In vs Create Account -->
+        <div class="flex items-center bg-slate-950/80 p-1 rounded-xl border border-slate-800/80">
+          <button
+            type="button"
+            id="tab-auth-signin"
+            onclick="handleAuthTabSwitch('signin')"
+            class="flex-1 py-2 text-xs font-bold rounded-lg transition bg-brand-600 text-white shadow"
           >
+            <span id="lbl-auth-tab-signin">Sign In</span>
+          </button>
+          <button
+            type="button"
+            id="tab-auth-signup"
+            onclick="handleAuthTabSwitch('signup')"
+            class="flex-1 py-2 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-slate-200"
+          >
+            <span id="lbl-auth-tab-signup">Create Account</span>
+          </button>
         </div>
 
-        <div>
-          <div class="flex items-center justify-between mb-1">
-            <label class="block text-xs font-semibold text-slate-300" id="lbl-signin-password">Password</label>
-            <button type="button" onclick="handleSwitchToOtpMode()" class="text-[11px] text-brand-400 hover:text-brand-300 underline" id="btn-switch-to-otp">Sign in with email code</button>
+        <!-- ============================================== -->
+        <!-- TAB 1: SIGN IN FORM                             -->
+        <!-- ============================================== -->
+        <form id="form-auth-signin" onsubmit="handleSendSignInCode(event)" class="space-y-3 pt-1">
+          <!-- Google One-Click Sign In -->
+          <button
+            type="button"
+            onclick="handleGoogleSignIn()"
+            class="w-full py-2.5 px-4 bg-slate-950 hover:bg-slate-800 text-slate-200 text-xs sm:text-sm font-semibold rounded-xl border border-slate-700/80 transition duration-150 active:scale-95 shadow-sm flex items-center justify-center gap-2.5"
+          >
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span id="lbl-google-signin-text">Continue with Google</span>
+          </button>
+
+          <!-- Divider -->
+          <div class="relative flex py-1 items-center">
+            <div class="flex-grow border-t border-slate-800"></div>
+            <span class="flex-shrink mx-2 text-[10px] text-slate-500 uppercase tracking-wider" id="lbl-or-signin-divider">or with email code</span>
+            <div class="flex-grow border-t border-slate-800"></div>
           </div>
-          <div class="relative">
-            <input
-              type="password"
-              id="signin-password"
-              placeholder="••••••••"
-              autocomplete="current-password"
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-3 pr-10 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
-              required
-            >
-            <button type="button" onclick="togglePasswordVisibility('signin-password', 'signin-eye-icon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1">
-              <i data-lucide="eye" id="signin-eye-icon" class="w-4 h-4"></i>
-            </button>
-          </div>
-        </div>
 
-        <div class="flex items-center justify-between text-xs pt-0.5">
-          <label class="flex items-center gap-2 cursor-pointer select-none text-slate-400 hover:text-slate-300">
-            <input type="checkbox" id="signin-remember-me" checked class="rounded border-slate-700 text-brand-500 focus:ring-brand-500 bg-slate-950">
-            <span id="lbl-signin-remember">Remember me for 30 days</span>
-          </label>
-        </div>
-
-        <div id="signin-error" class="hidden text-xs text-rose-400 font-medium flex items-center gap-1.5 p-2.5 rounded-xl bg-rose-950/30 border border-rose-900/40">
-          <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
-          <span id="signin-error-text">Invalid login credentials.</span>
-        </div>
-
-        <button
-          type="submit"
-          id="btn-signin-submit"
-          class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white text-xs sm:text-sm font-bold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
-        >
-          <span id="btn-signin-text">Sign In to TutorPilot</span>
-          <i data-lucide="arrow-right" class="w-4 h-4 rtl:rotate-180"></i>
-        </button>
-
-        <!-- Divider -->
-        <div class="relative flex py-1 items-center">
-          <div class="flex-grow border-t border-slate-800"></div>
-          <span class="flex-shrink mx-2 text-[10px] text-slate-500 uppercase tracking-wider" id="lbl-or-signin-divider">or</span>
-          <div class="flex-grow border-t border-slate-800"></div>
-        </div>
-
-        <!-- Google One-Click Sign In -->
-        <button
-          type="button"
-          onclick="handleGoogleSignIn()"
-          class="w-full py-2.5 px-4 bg-slate-950 hover:bg-slate-800 text-slate-200 text-xs sm:text-sm font-semibold rounded-xl border border-slate-700/80 transition duration-150 active:scale-95 shadow-sm flex items-center justify-center gap-2.5"
-        >
-          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-          </svg>
-          <span id="lbl-google-signin-text">Continue with Google</span>
-        </button>
-      </form>
-
-      <!-- ============================================== -->
-      <!-- TAB 2: CREATE ACCOUNT FORM                      -->
-      <!-- ============================================== -->
-      <form id="form-auth-signup" onsubmit="handleSignUp(event)" class="space-y-3 pt-1 hidden">
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-signup-name">Full Name *</label>
-          <input
-            type="text"
-            id="signup-name"
-            placeholder="e.g. Rabbi David Cohen"
-            autocomplete="name"
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
-            required
-          >
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-signup-email">Email Address *</label>
-          <input
-            type="email"
-            id="signup-email"
-            placeholder="name@example.com"
-            autocomplete="email"
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
-            required
-          >
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-signup-password">Password (Minimum 6 Characters) *</label>
-          <div class="relative">
-            <input
-              type="password"
-              id="signup-password"
-              placeholder="••••••••"
-              minlength="6"
-              autocomplete="new-password"
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 pr-10 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
-              required
-            >
-            <button type="button" onclick="togglePasswordVisibility('signup-password', 'signup-eye-icon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1">
-              <i data-lucide="eye" id="signup-eye-icon" class="w-4 h-4"></i>
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-signup-org">Synagogue / School (Optional)</label>
-          <input
-            type="text"
-            id="signup-org"
-            placeholder="e.g. Congregation Beth Tefillah"
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
-          >
-        </div>
-
-        <div id="signup-error" class="hidden text-xs text-rose-400 font-medium flex items-center gap-1.5 p-2.5 rounded-xl bg-rose-950/30 border border-rose-900/40">
-          <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
-          <span id="signup-error-text">Could not create account.</span>
-        </div>
-
-        <button
-          type="submit"
-          id="btn-signup-submit"
-          class="w-full py-2.5 px-4 bg-gradient-to-r from-brand-600 to-amber-500 hover:from-brand-500 hover:to-amber-400 text-white text-xs sm:text-sm font-bold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
-        >
-          <i data-lucide="sparkles" class="w-4 h-4 text-amber-200"></i>
-          <span id="btn-signup-text">Start 14-Day Free Trial</span>
-        </button>
-
-        <!-- Divider -->
-        <div class="relative flex py-1 items-center">
-          <div class="flex-grow border-t border-slate-800"></div>
-          <span class="flex-shrink mx-2 text-[10px] text-slate-500 uppercase tracking-wider" id="lbl-or-signup-divider">or</span>
-          <div class="flex-grow border-t border-slate-800"></div>
-        </div>
-
-        <!-- Google One-Click Sign Up -->
-        <button
-          type="button"
-          onclick="handleGoogleSignIn()"
-          class="w-full py-2.5 px-4 bg-slate-950 hover:bg-slate-800 text-slate-200 text-xs sm:text-sm font-semibold rounded-xl border border-slate-700/80 transition duration-150 active:scale-95 shadow-sm flex items-center justify-center gap-2.5"
-        >
-          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-          </svg>
-          <span id="lbl-google-signup-text">Continue with Google</span>
-        </button>
-
-        <p class="text-[11px] text-slate-400 text-center" id="lbl-signup-subtext">
-          14-day full access • No credit card required • Instant setup
-        </p>
-      </form>
-
-      <!-- ============================================== -->
-      <!-- TAB 3: ONE-TIME EMAIL CODE (Passwordless OTP)   -->
-      <!-- ============================================== -->
-      <div id="form-auth-otp" class="space-y-3 pt-1 hidden">
-        <div class="text-center px-1">
-          <p class="text-xs text-slate-300" id="otp-header-desc">Enter your email and we'll send a 6-digit verification code.</p>
-        </div>
-
-        <form onsubmit="handleSendAuthOtp(event)" id="otp-step-email-form" class="space-y-3">
           <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-signin-email">Email Address</label>
             <input
               type="email"
-              id="auth-email-input"
+              id="signin-email"
               placeholder="name@example.com"
+              autocomplete="email"
               class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
               required
             >
+            <p class="text-[11px] text-slate-400 mt-1" id="lbl-signin-helper">We'll send an authentic 6-digit verification code to your email.</p>
           </div>
 
-          <div id="auth-email-error" class="hidden text-xs text-rose-400 font-medium flex items-center justify-center gap-1.5 text-center px-1">
+          <div id="signin-error" class="hidden text-xs text-rose-400 font-medium flex items-center gap-1.5 p-2.5 rounded-xl bg-rose-950/30 border border-rose-900/40">
             <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
-            <span id="auth-email-error-text">Email not authorized.</span>
+            <span id="signin-error-text">Could not send verification code.</span>
           </div>
 
           <button
             type="submit"
-            id="btn-auth-send"
-            class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white text-xs sm:text-sm font-semibold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
+            id="btn-signin-submit"
+            class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white text-xs sm:text-sm font-bold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
           >
-            <span id="btn-auth-send-text">Send Verification Code</span>
-            <i data-lucide="arrow-right" class="w-4 h-4 rtl:rotate-180"></i>
+            <i data-lucide="mail" class="w-4 h-4"></i>
+            <span id="btn-signin-text">Send 6-Digit Code</span>
           </button>
         </form>
 
-        <div id="auth-step-code" class="hidden space-y-3">
-          <div class="text-center px-1">
-            <span class="text-xs text-slate-400">Code sent to:</span>
-            <span id="auth-code-target-email" class="font-mono text-xs font-bold text-brand-300 block truncate"></span>
+        <!-- ============================================== -->
+        <!-- TAB 2: CREATE ACCOUNT FORM                      -->
+        <!-- ============================================== -->
+        <form id="form-auth-signup" onsubmit="handleSendSignUpCode(event)" class="space-y-3 pt-1 hidden">
+          <!-- Google One-Click Sign Up -->
+          <button
+            type="button"
+            onclick="handleGoogleSignIn()"
+            class="w-full py-2.5 px-4 bg-slate-950 hover:bg-slate-800 text-slate-200 text-xs sm:text-sm font-semibold rounded-xl border border-slate-700/80 transition duration-150 active:scale-95 shadow-sm flex items-center justify-center gap-2.5"
+          >
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span id="lbl-google-signup-text">Continue with Google</span>
+          </button>
+
+          <!-- Divider -->
+          <div class="relative flex py-1 items-center">
+            <div class="flex-grow border-t border-slate-800"></div>
+            <span class="flex-shrink mx-2 text-[10px] text-slate-500 uppercase tracking-wider" id="lbl-or-signup-divider">or register with email code</span>
+            <div class="flex-grow border-t border-slate-800"></div>
           </div>
 
-          <form onsubmit="handleVerifyAuthOtp(event)" class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-signup-name">Full Name *</label>
+            <input
+              type="text"
+              id="signup-name"
+              placeholder="e.g. Rabbi David Cohen"
+              autocomplete="name"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              required
+            >
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-signup-org">Synagogue / School (Optional)</label>
+            <input
+              type="text"
+              id="signup-org"
+              placeholder="e.g. Congregation Beth Tefillah"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            >
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-signup-email">Email Address *</label>
+            <input
+              type="email"
+              id="signup-email"
+              placeholder="name@example.com"
+              autocomplete="email"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              required
+            >
+            <p class="text-[11px] text-slate-400 mt-1" id="lbl-signup-helper">We'll send a 6-digit code to verify your email and activate your trial.</p>
+          </div>
+
+          <div id="signup-error" class="hidden text-xs text-rose-400 font-medium flex items-center gap-1.5 p-2.5 rounded-xl bg-rose-950/30 border border-rose-900/40">
+            <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+            <span id="signup-error-text">Could not send verification code.</span>
+          </div>
+
+          <button
+            type="submit"
+            id="btn-signup-submit"
+            class="w-full py-2.5 px-4 bg-gradient-to-r from-brand-600 to-amber-500 hover:from-brand-500 hover:to-amber-400 text-white text-xs sm:text-sm font-bold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
+          >
+            <i data-lucide="sparkles" class="w-4 h-4 text-amber-200"></i>
+            <span id="btn-signup-text">Send Code & Start 14-Day Trial</span>
+          </button>
+
+          <p class="text-[11px] text-slate-400 text-center" id="lbl-signup-subtext">
+            14-day full access • No credit card required • Instant setup
+          </p>
+        </form>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- STEP 2: CODE VERIFICATION PANEL                 -->
+      <!-- ============================================== -->
+      <div id="auth-panel-code" class="space-y-4 hidden">
+        <div class="text-center space-y-1">
+          <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mb-1">
+            <i data-lucide="mail-check" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-base font-bold text-white tracking-tight" id="auth-code-title">Enter 6-Digit Code</h3>
+          <p class="text-xs text-slate-400">
+            <span id="auth-code-subtitle">Code sent to:</span>
+            <span id="auth-code-target-email" class="font-mono font-bold text-emerald-400 block truncate mt-0.5"></span>
+          </p>
+        </div>
+
+        <form id="form-auth-verify" onsubmit="handleVerifyAuthOtp(event)" class="space-y-3">
+          <div>
             <input
               type="text"
               id="auth-code-input"
               inputmode="numeric"
-              placeholder="123456"
+              pattern="[0-9]*"
+              placeholder="••••••"
               maxlength="6"
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-center text-xl font-mono tracking-widest text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 px-3 text-center text-2xl font-mono tracking-widest text-white placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               required
+              autocomplete="one-time-code"
             >
-
-            <div id="auth-code-error" class="hidden text-xs text-rose-400 font-medium flex items-center justify-center gap-1.5 text-center px-1">
-              <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
-              <span id="auth-code-error-text">Invalid code.</span>
-            </div>
-
-            <button
-              type="submit"
-              id="btn-auth-verify"
-              class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white text-xs sm:text-sm font-semibold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
-            >
-              <span id="btn-auth-verify-text">Verify & Sign In</span>
-              <i data-lucide="check" class="w-4 h-4"></i>
-            </button>
-          </form>
-
-          <div class="flex items-center justify-between text-xs pt-1">
-            <button type="button" onclick="handleResendOtp()" class="text-brand-400 hover:text-brand-300 underline">Resend Code</button>
-            <button type="button" onclick="handleSwitchToPasswordMode()" class="text-slate-400 hover:text-slate-200">Sign in with password</button>
           </div>
-        </div>
 
-        <div class="text-center pt-1">
-          <button type="button" onclick="handleSwitchToPasswordMode()" class="text-xs text-slate-400 hover:text-slate-200 underline">← Back to Password Sign In</button>
+          <div id="auth-code-error" class="hidden text-xs text-rose-400 font-medium flex items-center justify-center gap-1.5 p-2.5 rounded-xl bg-rose-950/30 border border-rose-900/40 text-center">
+            <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+            <span id="auth-code-error-text">Invalid code.</span>
+          </div>
+
+          <button
+            type="submit"
+            id="btn-auth-verify"
+            class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
+          >
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span id="btn-auth-verify-text">Verify Code & Enter TutorPilot</span>
+          </button>
+        </form>
+
+        <div class="flex items-center justify-between text-xs pt-1 px-1">
+          <button type="button" id="btn-auth-resend" onclick="handleResendOtp()" class="text-brand-400 hover:text-brand-300 font-medium underline">
+            Resend Code
+          </button>
+          <button type="button" id="btn-auth-back" onclick="handleBackToEmailStep()" class="text-slate-400 hover:text-slate-200 font-medium underline">
+            ← Change Email
+          </button>
         </div>
       </div>
 
       <div id="auth-footer-text" class="pt-2 text-[11px] text-slate-500 text-center border-t border-slate-800">
-        Encrypted & Secure • Multi-Tenant Protected • Stays Open 30 Days
+        🔒 Verified Email Code Authentication • Stays Open on this Device for 30 Days
       </div>
     </div>
   </div>
@@ -3385,6 +3323,32 @@ alter publication supabase_realtime add table public.students_sync;`;
             }
           });
 
+        // Supabase OAuth State Change Listener (for Google Sign In returns)
+        if (APP_STATE.cloud.client.auth && !window.__auth_state_listener_registered__) {
+          window.__auth_state_listener_registered__ = true;
+          APP_STATE.cloud.client.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session && session.user && !APP_STATE.currentUser) {
+              const u = session.user;
+              const email = (u.email || '').toLowerCase().trim();
+              const meta = u.user_metadata || {};
+              const isMaster = email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com';
+              grantAuthSession({
+                id: u.id,
+                email: email,
+                name_en: meta.full_name || meta.name || (isMaster ? 'Shmuel Dovid Uhlman (Lead Tutor)' : email.split('@')[0]),
+                name_he: isMaster ? 'שמואל דוד אולמן (מלמד ראשי)' : (meta.full_name || meta.name || email.split('@')[0]),
+                organization: meta.organization || (isMaster ? 'Lead TutorPilot Admin' : ''),
+                role: isMaster ? 'super_admin' : 'tutor',
+                subscription_status: isMaster ? 'lifetime' : 'trialing',
+                trial_days: isMaster ? 9999 : 14
+              });
+              if (window.history && window.history.replaceState) {
+                window.history.replaceState(null, '', window.location.pathname);
+              }
+            }
+          });
+        }
+
       } catch (err) {
         console.error('Supabase init error:', err);
         updateCloudStatusPill('offline');
@@ -3567,7 +3531,18 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
 
       if (eventType === 'INSERT' || eventType === 'UPDATE') {
+        if (!newRecord || !newRecord.id || newRecord.id.startsWith('__')) return;
         const meta = (newRecord.completed_topics && newRecord.completed_topics._meta) || {};
+
+        // Multi-Tenant Isolation Check: Only sync students belonging to current user
+        const isSuperAdmin = APP_STATE.currentUser && (APP_STATE.currentUser.role === 'super_admin' || APP_STATE.currentUser.email === 'shmueldoviduhlman@gmail.com');
+        const myEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase();
+        const myUserId = (APP_STATE.currentUser && APP_STATE.currentUser.id || '');
+        const owner = (meta.owner_email || '').toLowerCase();
+        const uid = meta.user_id || '';
+
+        const belongsToUser = isSuperAdmin ? (!owner || owner === myEmail) : ((owner && owner === myEmail) || (uid && uid === myUserId));
+        if (!belongsToUser) return;
         const cleanCompletedTopics = { ...(newRecord.completed_topics || {}) };
         delete cleanCompletedTopics._meta;
 
@@ -3613,6 +3588,9 @@ alter publication supabase_realtime add table public.students_sync;`;
         }
         showToast(isHe ? ('סונכרן בזמן אמת: ' + updatedStudent.name) : ('Live update synced: ' + updatedStudent.name));
       } else if (eventType === 'DELETE') {
+        if (!oldRecord || !oldRecord.id || oldRecord.id.startsWith('__')) return;
+        const exists = APP_STATE.students.some(s => s.id === oldRecord.id);
+        if (!exists) return;
         APP_STATE.students = APP_STATE.students.filter(s => s.id !== oldRecord.id);
         if (APP_STATE.activeStudentId === oldRecord.id) {
           APP_STATE.activeStudentId = APP_STATE.students.length > 0 ? APP_STATE.students[0].id : null;
@@ -3808,9 +3786,11 @@ alter publication supabase_realtime add table public.students_sync;`;
       const tabSignUp = document.getElementById('tab-auth-signup');
       const formSignIn = document.getElementById('form-auth-signin');
       const formSignUp = document.getElementById('form-auth-signup');
-      const formOtp = document.getElementById('form-auth-otp');
+      const emailContainer = document.getElementById('auth-step-email-container');
+      const codePanel = document.getElementById('auth-panel-code');
 
-      if (formOtp) formOtp.classList.add('hidden');
+      if (codePanel) codePanel.classList.add('hidden');
+      if (emailContainer) emailContainer.classList.remove('hidden');
 
       if (tab === 'signin') {
         if (tabSignIn) tabSignIn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition bg-brand-600 text-white shadow";
@@ -3830,46 +3810,6 @@ alter publication supabase_realtime add table public.students_sync;`;
       lucide.createIcons();
     }
 
-    function togglePasswordVisibility(inputId, iconId) {
-      const input = document.getElementById(inputId);
-      const icon = document.getElementById(iconId);
-      if (!input) return;
-      if (input.type === 'password') {
-        input.type = 'text';
-        if (icon) icon.setAttribute('data-lucide', 'eye-off');
-      } else {
-        input.type = 'password';
-        if (icon) icon.setAttribute('data-lucide', 'eye');
-      }
-      lucide.createIcons();
-    }
-
-    function handleSwitchToOtpMode() {
-      const formSignIn = document.getElementById('form-auth-signin');
-      const formSignUp = document.getElementById('form-auth-signup');
-      const formOtp = document.getElementById('form-auth-otp');
-      const emailStep = document.getElementById('otp-step-email-form');
-      const codeStep = document.getElementById('auth-step-code');
-
-      if (formSignIn) formSignIn.classList.add('hidden');
-      if (formSignUp) formSignUp.classList.add('hidden');
-      if (formOtp) formOtp.classList.remove('hidden');
-      if (emailStep) emailStep.classList.remove('hidden');
-      if (codeStep) codeStep.classList.add('hidden');
-
-      const otpEmail = document.getElementById('auth-email-input');
-      const signinEmail = document.getElementById('signin-email');
-      if (otpEmail && signinEmail && signinEmail.value) {
-        otpEmail.value = signinEmail.value;
-      }
-      if (otpEmail) setTimeout(() => otpEmail.focus(), 100);
-      lucide.createIcons();
-    }
-
-    function handleSwitchToPasswordMode() {
-      handleAuthTabSwitch('signin');
-    }
-
     function grantAuthSession(userRecord) {
       const email = (userRecord.email || '').toLowerCase().trim();
       const isOwner = email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com';
@@ -3877,11 +3817,11 @@ alter publication supabase_realtime add table public.students_sync;`;
         id: userRecord.id || ('usr_' + Date.now()),
         email: email,
         role: isOwner ? 'super_admin' : (userRecord.role || 'tutor'),
-        name_en: userRecord.name_en || userRecord.name || (isOwner ? 'Shmuel Dovid Uhlman (Lead)' : email.split('@')[0]),
+        name_en: userRecord.name_en || userRecord.name || (isOwner ? 'Shmuel Dovid Uhlman (Lead Tutor)' : email.split('@')[0]),
         name_he: userRecord.name_he || userRecord.name || (isOwner ? 'שמואל דוד אולמן (מלמד ראשי)' : email.split('@')[0]),
         organization: userRecord.organization || (isOwner ? 'Lead TutorPilot Admin' : ''),
         subscription_status: isOwner ? 'lifetime' : (userRecord.subscription_status || 'trialing'),
-        trial_days: typeof userRecord.trial_days === 'number' ? userRecord.trial_days : 14,
+        trial_days: isOwner ? 9999 : (typeof userRecord.trial_days === 'number' ? userRecord.trial_days : 14),
         createdAt: userRecord.createdAt || new Date().toISOString(),
         expiresAt: Date.now() + ONE_MONTH_MS
       };
@@ -3907,11 +3847,6 @@ alter publication supabase_realtime add table public.students_sync;`;
       const t = I18N[APP_STATE.lang];
       const displayName = APP_STATE.lang === 'he' ? session.name_he : session.name_en;
       showToast(t.authWelcomeToast ? t.authWelcomeToast(displayName) : ('Welcome, ' + displayName + '!'));
-    }
-
-    function handleOwnerQuickLogin() {
-      const defaultUser = APPROVED_USERS['shmueldoviduhlman@gmail.com'];
-      grantAuthSession(defaultUser);
     }
 
     // ==============================================
@@ -4275,198 +4210,180 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
-    async function handleSignIn(e) {
+    let resendCooldownInterval = null;
+    let resendCooldownSeconds = 0;
+
+    function startResendCooldownTimer(seconds = 60) {
+      resendCooldownSeconds = seconds;
+      const btn = document.getElementById('btn-auth-resend');
+      if (resendCooldownInterval) clearInterval(resendCooldownInterval);
+
+      const updateBtn = () => {
+        if (!btn) return;
+        if (resendCooldownSeconds > 0) {
+          btn.disabled = true;
+          btn.classList.add('opacity-50', 'cursor-not-allowed');
+          btn.classList.remove('underline');
+          btn.textContent = APP_STATE.lang === 'he' ? `שלח שוב (${resendCooldownSeconds}ש)` : `Resend Code (${resendCooldownSeconds}s)`;
+        } else {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', 'cursor-not-allowed');
+          btn.classList.add('underline');
+          btn.textContent = I18N[APP_STATE.lang].authResendCode || 'Resend Code';
+          clearInterval(resendCooldownInterval);
+          resendCooldownInterval = null;
+        }
+      };
+
+      updateBtn();
+      resendCooldownInterval = setInterval(() => {
+        resendCooldownSeconds--;
+        updateBtn();
+      }, 1000);
+    }
+
+    function showCodeVerificationPanel(email) {
+      const emailContainer = document.getElementById('auth-step-email-container');
+      const codePanel = document.getElementById('auth-panel-code');
+      const targetEmail = document.getElementById('auth-code-target-email');
+      const codeInput = document.getElementById('auth-code-input');
+      const errBox = document.getElementById('auth-code-error');
+
+      if (emailContainer) emailContainer.classList.add('hidden');
+      if (codePanel) codePanel.classList.remove('hidden');
+      if (targetEmail) targetEmail.textContent = email;
+      if (errBox) errBox.classList.add('hidden');
+      if (codeInput) {
+        codeInput.value = '';
+        setTimeout(() => codeInput.focus(), 150);
+      }
+      startResendCooldownTimer(60);
+      lucide.createIcons();
+    }
+
+    async function handleSendSignInCode(e) {
       if (e && e.preventDefault) e.preventDefault();
       const emailInput = document.getElementById('signin-email');
-      const passwordInput = document.getElementById('signin-password');
       const errBox = document.getElementById('signin-error');
       const errText = document.getElementById('signin-error-text');
       const submitBtn = document.getElementById('btn-signin-submit');
 
       const email = (emailInput.value || '').trim().toLowerCase();
-      const password = (passwordInput.value || '').trim();
-
-      if (!email || !password) return;
-      if (errBox) errBox.classList.add('hidden');
-
-      // 1. Direct recognized Super Admin bypass with password check
-      if (APPROVED_USERS[email]) {
-        if (password === '770' || password === '770770' || password === 'admin770' || password === 'tutorpilot' || (APPROVED_USERS[email].password && APPROVED_USERS[email].password === password)) {
-          grantAuthSession(APPROVED_USERS[email]);
-          return;
-        } else {
-          if (errBox && errText) {
-            errText.textContent = 'Incorrect password for Super Admin.';
-            errBox.classList.remove('hidden');
-          }
-          return;
+      if (!email || !email.includes('@')) {
+        if (errBox && errText) {
+          errText.textContent = APP_STATE.lang === 'he' ? 'נא להזין כתובת אימייל תקינה.' : 'Please enter a valid email address.';
+          errBox.classList.remove('hidden');
         }
+        return;
       }
 
-      if (submitBtn) submitBtn.disabled = true;
+      if (errBox) errBox.classList.add('hidden');
+      pendingAuthEmail = email;
+      window.pendingSignupInfo = null;
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="inline-block animate-spin mr-2">⏳</span><span>${APP_STATE.lang === 'he' ? 'שולח קוד אימות...' : 'Sending code...'}</span>`;
+      }
 
       try {
         const client = getSupabaseAuthClient();
-        if (client && client.auth) {
-          const { data, error } = await client.auth.signInWithPassword({
-            email: email,
-            password: password
-          });
-
-          if (!error && data && data.user) {
-            const user = data.user;
-            const meta = user.user_metadata || {};
-            grantAuthSession({
-              id: user.id,
-              email: user.email,
-              name_en: meta.full_name || meta.name || email.split('@')[0],
-              name_he: meta.full_name || meta.name || email.split('@')[0],
-              role: 'tutor',
-              organization: meta.organization || '',
-              subscription_status: 'trialing'
-            });
-            if (submitBtn) submitBtn.disabled = false;
-            return;
-          }
+        if (!client || !client.auth) {
+          throw new Error(APP_STATE.lang === 'he' ? 'שירות האימות אינו זמין כרגע' : 'Auth service unavailable');
         }
 
-        // 2. Local Registered Accounts Verification Fallback
-        const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
-        if (registeredUsers[email]) {
-          const u = registeredUsers[email];
-          if (u.password === password) {
-            grantAuthSession(u);
-            if (submitBtn) submitBtn.disabled = false;
-            return;
-          } else {
-            throw new Error('Incorrect password');
-          }
-        }
+        const { error } = await client.auth.signInWithOtp({
+          email: email,
+          options: { shouldCreateUser: true }
+        });
 
-        throw new Error('No account found with this email. Please click "Create Account" above.');
+        if (error) throw error;
+
+        showCodeVerificationPanel(email);
+        showToast(APP_STATE.lang === 'he' ? 'קוד אימות בן 6 ספרות נשלח לאימייל שלך!' : '6-digit verification code sent to your email!');
       } catch (err) {
+        console.error('OTP Send Error:', err);
         if (errBox && errText) {
-          errText.textContent = err.message || 'Login failed. Please check your credentials.';
+          errText.textContent = err.message || (APP_STATE.lang === 'he' ? 'שליחת הקוד נכשלה. נסה שוב.' : 'Failed to send code. Please try again.');
           errBox.classList.remove('hidden');
         }
       } finally {
-        if (submitBtn) submitBtn.disabled = false;
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<i data-lucide="mail" class="w-4 h-4"></i><span id="btn-signin-text">${I18N[APP_STATE.lang].authSendCode || 'Send 6-Digit Code'}</span>`;
+          lucide.createIcons();
+        }
       }
     }
 
-    async function handleSignUp(e) {
+    async function handleSendSignUpCode(e) {
       if (e && e.preventDefault) e.preventDefault();
       const nameInput = document.getElementById('signup-name');
-      const emailInput = document.getElementById('signup-email');
-      const passwordInput = document.getElementById('signup-password');
       const orgInput = document.getElementById('signup-org');
+      const emailInput = document.getElementById('signup-email');
       const errBox = document.getElementById('signup-error');
       const errText = document.getElementById('signup-error-text');
       const submitBtn = document.getElementById('btn-signup-submit');
 
       const name = (nameInput.value || '').trim();
-      const email = (emailInput.value || '').trim().toLowerCase();
-      const password = (passwordInput.value || '').trim();
       const org = orgInput ? (orgInput.value || '').trim() : '';
+      const email = (emailInput.value || '').trim().toLowerCase();
 
-      if (!name || !email || !password) return;
-      if (password.length < 6) {
+      if (!name) {
         if (errBox && errText) {
-          errText.textContent = 'Password must be at least 6 characters.';
+          errText.textContent = APP_STATE.lang === 'he' ? 'נא להזין שם מלא.' : 'Please enter your full name.';
+          errBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (!email || !email.includes('@')) {
+        if (errBox && errText) {
+          errText.textContent = APP_STATE.lang === 'he' ? 'נא להזין כתובת אימייל תקינה.' : 'Please enter a valid email address.';
           errBox.classList.remove('hidden');
         }
         return;
       }
 
       if (errBox) errBox.classList.add('hidden');
-      if (submitBtn) submitBtn.disabled = true;
+      pendingAuthEmail = email;
+      window.pendingSignupInfo = { name: name, org: org };
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="inline-block animate-spin mr-2">⏳</span><span>${APP_STATE.lang === 'he' ? 'שולח קוד אימות...' : 'Sending code...'}</span>`;
+      }
 
       try {
-        let userId = 'usr_' + Date.now();
         const client = getSupabaseAuthClient();
-        if (client && client.auth) {
-          const { data, error } = await client.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-              data: {
-                full_name: name,
-                organization: org
-              }
-            }
-          });
-          if (data && data.user) {
-            userId = data.user.id;
-          }
+        if (!client || !client.auth) {
+          throw new Error(APP_STATE.lang === 'he' ? 'שירות האימות אינו זמין כרגע' : 'Auth service unavailable');
         }
 
-        // Store account record locally
-        const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
-        const newUserRecord = {
-          id: userId,
+        const { error } = await client.auth.signInWithOtp({
           email: email,
-          name_en: name,
-          name_he: name,
-          organization: org,
-          password: password,
-          role: 'tutor',
-          subscription_status: 'trialing',
-          createdAt: new Date().toISOString()
-        };
-        registeredUsers[email] = newUserRecord;
-        localStorage.setItem('tutor_registered_users', JSON.stringify(registeredUsers));
+          options: {
+            data: { full_name: name, organization: org },
+            shouldCreateUser: true
+          }
+        });
 
-        grantAuthSession(newUserRecord);
+        if (error) throw error;
+
+        showCodeVerificationPanel(email);
+        showToast(APP_STATE.lang === 'he' ? 'קוד אימות בן 6 ספרות נשלח לאימייל שלך!' : '6-digit verification code sent to your email!');
       } catch (err) {
+        console.error('Sign Up OTP Error:', err);
         if (errBox && errText) {
-          errText.textContent = err.message || 'Could not create account. Please try again.';
+          errText.textContent = err.message || (APP_STATE.lang === 'he' ? 'שליחת הקוד נכשלה. נסה שוב.' : 'Failed to send code. Please try again.');
           errBox.classList.remove('hidden');
         }
       } finally {
-        if (submitBtn) submitBtn.disabled = false;
-      }
-    }
-
-    async function handleSendAuthOtp(e) {
-      if (e && e.preventDefault) e.preventDefault();
-      const emailInput = document.getElementById('auth-email-input');
-      const errBox = document.getElementById('auth-email-error');
-      const errText = document.getElementById('auth-email-error-text');
-
-      const rawEmail = (emailInput.value || '').trim().toLowerCase();
-      if (!rawEmail || !rawEmail.includes('@')) {
-        if (errBox && errText) {
-          errText.textContent = 'Please enter a valid email address.';
-          errBox.classList.remove('hidden');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4 text-amber-200"></i><span id="btn-signup-text">${I18N[APP_STATE.lang].authSignUpBtn || 'Send Code & Start 14-Day Trial'}</span>`;
+          lucide.createIcons();
         }
-        return;
-      }
-
-      if (errBox) errBox.classList.add('hidden');
-      pendingAuthEmail = rawEmail;
-
-      if (APPROVED_USERS[rawEmail]) {
-        grantAuthSession(APPROVED_USERS[rawEmail]);
-        return;
-      }
-
-      const emailStep = document.getElementById('otp-step-email-form');
-      const codeStep = document.getElementById('auth-step-code');
-      const targetEmail = document.getElementById('auth-code-target-email');
-      if (emailStep) emailStep.classList.add('hidden');
-      if (codeStep) codeStep.classList.remove('hidden');
-      if (targetEmail) targetEmail.textContent = rawEmail;
-
-      const codeInput = document.getElementById('auth-code-input');
-      if (codeInput) setTimeout(() => codeInput.focus(), 150);
-
-      try {
-        const client = getSupabaseAuthClient();
-        if (client && client.auth) {
-          await client.auth.signInWithOtp({ email: rawEmail });
-        }
-      } catch (err) {
-        console.warn('Supabase OTP trigger notice:', err);
       }
     }
 
@@ -4475,47 +4392,136 @@ alter publication supabase_realtime add table public.students_sync;`;
       const codeInput = document.getElementById('auth-code-input');
       const errBox = document.getElementById('auth-code-error');
       const errText = document.getElementById('auth-code-error-text');
-      const code = (codeInput.value || '').trim();
-      const email = pendingAuthEmail;
+      const verifyBtn = document.getElementById('btn-auth-verify');
 
-      if (!code) return;
+      const code = (codeInput ? codeInput.value : '').trim();
+      const email = (pendingAuthEmail || '').trim().toLowerCase();
 
-      let verified = false;
-      try {
-        const client = getSupabaseAuthClient();
-        if (client && client.auth) {
-          const { data, error } = await client.auth.verifyOtp({
-            email: email,
-            token: code,
-            type: 'email'
-          });
-          if (!error && (data.session || data.user)) verified = true;
-        }
-      } catch (err) {
-        console.warn('OTP verify attempt:', err);
-      }
-
-      if (verified || code === '123456') {
-        grantAuthSession({
-          id: 'usr_' + Date.now(),
-          email: email,
-          name_en: email.split('@')[0],
-          name_he: email.split('@')[0],
-          role: APPROVED_USERS[email] ? APPROVED_USERS[email].role : 'tutor',
-          subscription_status: 'trialing'
-        });
-      } else {
+      if (!code || code.length !== 6) {
         if (errBox && errText) {
-          errText.textContent = 'Invalid verification code. Please check and retry.';
+          errText.textContent = APP_STATE.lang === 'he' ? 'נא להזין קוד בן 6 ספרות בדיוק.' : 'Please enter the exact 6-digit code.';
           errBox.classList.remove('hidden');
         }
+        return;
+      }
+
+      if (errBox) errBox.classList.add('hidden');
+      if (verifyBtn) {
+        verifyBtn.disabled = true;
+        verifyBtn.innerHTML = `<span class="inline-block animate-spin mr-2">⏳</span><span>${APP_STATE.lang === 'he' ? 'מאמת קוד...' : 'Verifying code...'}</span>`;
+      }
+
+      let verified = false;
+      let authUser = null;
+
+      try {
+        const client = getSupabaseAuthClient();
+        if (!client || !client.auth) {
+          throw new Error(APP_STATE.lang === 'he' ? 'שירות האימות אינו זמין כרגע' : 'Auth service unavailable');
+        }
+
+        const { data, error } = await client.auth.verifyOtp({
+          email: email,
+          token: code,
+          type: 'email'
+        });
+
+        if (error) throw error;
+        if (data && (data.session || data.user)) {
+          verified = true;
+          authUser = data.user || (data.session && data.session.user);
+        }
+      } catch (err) {
+        console.warn('OTP Verification Error:', err);
+        if (errBox && errText) {
+          errText.textContent = APP_STATE.lang === 'he' ? 'קוד אימות שגוי או שפג תוקפו. אנא בדוק את תיבת המייל ונסה שוב.' : (err.message || 'Invalid or expired verification code. Please check your inbox and retry.');
+          errBox.classList.remove('hidden');
+        }
+        if (verifyBtn) {
+          verifyBtn.disabled = false;
+          verifyBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i><span id="btn-auth-verify-text">${I18N[APP_STATE.lang].authVerifyBtn || 'Verify Code & Enter TutorPilot'}</span>`;
+          lucide.createIcons();
+        }
+        return;
+      }
+
+      if (verified) {
+        const isMaster = email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com';
+        const pendingInfo = window.pendingSignupInfo || {};
+        const meta = (authUser && authUser.user_metadata) || {};
+
+        const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
+        const existingUser = registeredUsers[email] || {};
+
+        const fullName = pendingInfo.name || existingUser.name_en || meta.full_name || meta.name || (isMaster ? 'Shmuel Dovid Uhlman (Lead Tutor)' : email.split('@')[0]);
+        const orgName = pendingInfo.org || existingUser.organization || meta.organization || (isMaster ? 'Lead TutorPilot Admin' : '');
+
+        const userRecord = {
+          id: (authUser && authUser.id) || existingUser.id || ('usr_' + Date.now()),
+          email: email,
+          name_en: fullName,
+          name_he: isMaster ? 'שמואל דוד אולמן (מלמד ראשי)' : fullName,
+          organization: orgName,
+          role: isMaster ? 'super_admin' : (existingUser.role || 'tutor'),
+          subscription_status: isMaster ? 'lifetime' : (existingUser.subscription_status || 'trialing'),
+          trial_days: isMaster ? 9999 : 14,
+          createdAt: existingUser.createdAt || new Date().toISOString()
+        };
+
+        // Save in local registry for external tutors
+        if (!isMaster) {
+          registeredUsers[email] = userRecord;
+          localStorage.setItem('tutor_registered_users', JSON.stringify(registeredUsers));
+        }
+
+        grantAuthSession(userRecord);
+        window.pendingSignupInfo = null;
       }
     }
 
-    function handleResendOtp() {
-      const emailInput = document.getElementById('auth-email-input');
-      if (emailInput && pendingAuthEmail) emailInput.value = pendingAuthEmail;
-      handleSendAuthOtp({ preventDefault: () => {} });
+    function handleBackToEmailStep() {
+      const emailContainer = document.getElementById('auth-step-email-container');
+      const codePanel = document.getElementById('auth-panel-code');
+      if (codePanel) codePanel.classList.add('hidden');
+      if (emailContainer) emailContainer.classList.remove('hidden');
+
+      if (window.pendingSignupInfo) {
+        handleAuthTabSwitch('signup');
+        const emailInput = document.getElementById('signup-email');
+        if (emailInput && pendingAuthEmail) emailInput.value = pendingAuthEmail;
+      } else {
+        handleAuthTabSwitch('signin');
+        const emailInput = document.getElementById('signin-email');
+        if (emailInput && pendingAuthEmail) emailInput.value = pendingAuthEmail;
+      }
+      lucide.createIcons();
+    }
+
+    async function handleResendOtp() {
+      if (resendCooldownSeconds > 0) return;
+      if (!pendingAuthEmail) {
+        handleBackToEmailStep();
+        return;
+      }
+
+      const btn = document.getElementById('btn-auth-resend');
+      if (btn) btn.textContent = APP_STATE.lang === 'he' ? 'שולח שוב...' : 'Resending...';
+
+      try {
+        const client = getSupabaseAuthClient();
+        if (!client || !client.auth) throw new Error('Auth client unavailable');
+        const { error } = await client.auth.signInWithOtp({
+          email: pendingAuthEmail,
+          options: { shouldCreateUser: true }
+        });
+        if (error) throw error;
+        showToast(APP_STATE.lang === 'he' ? 'קוד אימות חדש נשלח לאימייל שלך!' : 'New verification code sent to your email!');
+        startResendCooldownTimer(60);
+      } catch (err) {
+        console.error('Resend OTP Error:', err);
+        showToast(err.message || 'Failed to resend code');
+        startResendCooldownTimer(10);
+      }
     }
 
     function toggleUserDropdown() {
@@ -4703,17 +4709,17 @@ alter publication supabase_realtime add table public.students_sync;`;
       initSupabaseCloud();
       lucide.createIcons();
 
-      // Secret Super Admin Keyboard Shortcut (Ctrl+Shift+A or Cmd+Shift+A)
-      document.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
-          const lockScreen = document.getElementById('lock-screen');
-          if (lockScreen && !lockScreen.classList.contains('hidden')) {
-            e.preventDefault();
-            const defaultUser = APPROVED_USERS['shmueldoviduhlman@gmail.com'];
-            grantAuthSession(defaultUser);
+      // Auto-submit code verification when 6 digits are typed
+      const codeInput = document.getElementById('auth-code-input');
+      if (codeInput) {
+        codeInput.addEventListener('input', (e) => {
+          const val = (e.target.value || '').replace(/\D/g, '');
+          e.target.value = val;
+          if (val.length === 6) {
+            handleVerifyAuthOtp(new Event('submit'));
           }
-        }
-      });
+        });
+      }
 
       // Outside click listener for User Profile Menu
       document.addEventListener('click', (e) => {
@@ -5020,17 +5026,11 @@ alter publication supabase_realtime add table public.students_sync;`;
       const signinEmail = document.getElementById('signin-email');
       if (signinEmail) signinEmail.placeholder = t.authEmailPlaceholder;
 
-      const lblSigninPassword = document.getElementById('lbl-signin-password');
-      if (lblSigninPassword) lblSigninPassword.textContent = t.authPasswordLabel;
-
-      const btnSwitchToOtp = document.getElementById('btn-switch-to-otp');
-      if (btnSwitchToOtp) btnSwitchToOtp.textContent = isHe ? "התחבר באמצעות קוד אימות" : "Sign in with email code";
-
-      const lblSigninRemember = document.getElementById('lbl-signin-remember');
-      if (lblSigninRemember) lblSigninRemember.textContent = t.authRememberMe;
+      const lblSigninHelper = document.getElementById('lbl-signin-helper');
+      if (lblSigninHelper) lblSigninHelper.textContent = isHe ? "נשלח קוד אימות אותנטי בן 6 ספרות לתיבת האימייל שלך." : "We'll send an authentic 6-digit verification code to your email.";
 
       const btnSigninText = document.getElementById('btn-signin-text');
-      if (btnSigninText) btnSigninText.textContent = t.authSignInBtn;
+      if (btnSigninText) btnSigninText.textContent = isHe ? "שלח קוד בן 6 ספרות" : "Send 6-Digit Code";
 
       // Google Buttons & Dividers
       const lblGoogleSignin = document.getElementById('lbl-google-signin-text');
@@ -5040,10 +5040,10 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (lblGoogleSignup) lblGoogleSignup.textContent = isHe ? "המשך באמצעות גוגל" : "Continue with Google";
 
       const lblOrSignin = document.getElementById('lbl-or-signin-divider');
-      if (lblOrSignin) lblOrSignin.textContent = isHe ? "או באמצעות אימייל" : "or with email";
+      if (lblOrSignin) lblOrSignin.textContent = isHe ? "או באמצעות קוד אימות במייל" : "or with email code";
 
       const lblOrSignup = document.getElementById('lbl-or-signup-divider');
-      if (lblOrSignup) lblOrSignup.textContent = isHe ? "או באמצעות אימייל" : "or with email";
+      if (lblOrSignup) lblOrSignup.textContent = isHe ? "או הרשמה עם קוד אימות במייל" : "or register with email code";
 
       // Tab 2: Create Account (Sign Up)
       const lblSignupName = document.getElementById('lbl-signup-name');
@@ -5052,51 +5052,45 @@ alter publication supabase_realtime add table public.students_sync;`;
       const signupName = document.getElementById('signup-name');
       if (signupName) signupName.placeholder = t.authFullNamePlaceholder;
 
-      const lblSignupEmail = document.getElementById('lbl-signup-email');
-      if (lblSignupEmail) lblSignupEmail.textContent = isHe ? "כתובת אימייל *" : "Email Address *";
-
-      const signupEmail = document.getElementById('signup-email');
-      if (signupEmail) signupEmail.placeholder = t.authEmailPlaceholder;
-
-      const lblSignupPassword = document.getElementById('lbl-signup-password');
-      if (lblSignupPassword) lblSignupPassword.textContent = isHe ? "סיסמה (לפחות 6 תווים) *" : "Password (Minimum 6 Characters) *";
-
       const lblSignupOrg = document.getElementById('lbl-signup-org');
       if (lblSignupOrg) lblSignupOrg.textContent = t.authOrgLabel;
 
       const signupOrg = document.getElementById('signup-org');
       if (signupOrg) signupOrg.placeholder = t.authOrgPlaceholder;
 
+      const lblSignupEmail = document.getElementById('lbl-signup-email');
+      if (lblSignupEmail) lblSignupEmail.textContent = isHe ? "כתובת אימייל *" : "Email Address *";
+
+      const signupEmail = document.getElementById('signup-email');
+      if (signupEmail) signupEmail.placeholder = t.authEmailPlaceholder;
+
+      const lblSignupHelper = document.getElementById('lbl-signup-helper');
+      if (lblSignupHelper) lblSignupHelper.textContent = isHe ? "נשלח קוד בן 6 ספרות לאימות האימייל והפעלת הניסיון." : "We'll send a 6-digit code to verify your email and activate your trial.";
+
       const btnSignupText = document.getElementById('btn-signup-text');
-      if (btnSignupText) btnSignupText.textContent = t.authSignUpBtn;
+      if (btnSignupText) btnSignupText.textContent = isHe ? "שלח קוד והתחל 14 יום ניסיון" : "Send Code & Start 14-Day Trial";
 
       const lblSignupSubtext = document.getElementById('lbl-signup-subtext');
       if (lblSignupSubtext) lblSignupSubtext.textContent = t.authTrialSubtext;
 
-      // Tab 3: One-Time Email Code (OTP)
-      const otpHeaderDesc = document.getElementById('otp-header-desc');
-      if (otpHeaderDesc) otpHeaderDesc.textContent = isHe ? "הזן את כתובת האימייל שלך ונשלח קוד אימות בן 6 ספרות." : "Enter your email and we'll send a 6-digit verification code.";
+      // Step 2: Code Verification Panel
+      const authCodeTitle = document.getElementById('auth-code-title');
+      if (authCodeTitle) authCodeTitle.textContent = isHe ? "הזן קוד בן 6 ספרות" : "Enter 6-Digit Code";
 
-      const authEmailInput = document.getElementById('auth-email-input');
-      if (authEmailInput) authEmailInput.placeholder = t.authEmailPlaceholder;
-
-      const btnAuthSendText = document.getElementById('btn-auth-send-text');
-      if (btnAuthSendText) btnAuthSendText.textContent = t.authSendCode;
-
-      const authCodePromptText = document.getElementById('auth-code-prompt-text');
-      if (authCodePromptText) authCodePromptText.textContent = t.authCodeSubtitle;
+      const authCodeSubtitle = document.getElementById('auth-code-subtitle');
+      if (authCodeSubtitle) authCodeSubtitle.textContent = isHe ? "קוד אימות נשלח אל:" : "Code sent to:";
 
       const authCodeInput = document.getElementById('auth-code-input');
-      if (authCodeInput) authCodeInput.placeholder = t.authCodePlaceholder;
+      if (authCodeInput) authCodeInput.placeholder = "••••••";
 
       const btnAuthVerifyText = document.getElementById('btn-auth-verify-text');
-      if (btnAuthVerifyText) btnAuthVerifyText.textContent = t.authVerifyBtn;
+      if (btnAuthVerifyText) btnAuthVerifyText.textContent = isHe ? "אמת קוד והיכנס לטיוטור-פיילוט" : "Verify Code & Enter TutorPilot";
 
       const btnAuthResend = document.getElementById('btn-auth-resend');
-      if (btnAuthResend) btnAuthResend.textContent = t.authResendCode;
+      if (btnAuthResend && resendCooldownSeconds <= 0) btnAuthResend.textContent = isHe ? "שלח קוד שוב" : "Resend Code";
 
       const btnAuthBack = document.getElementById('btn-auth-back');
-      if (btnAuthBack) btnAuthBack.textContent = t.authChangeEmail;
+      if (btnAuthBack) btnAuthBack.textContent = isHe ? "← החלף אימייל" : "← Change Email";
 
       const authFooterText = document.getElementById('auth-footer-text');
       if (authFooterText) authFooterText.textContent = t.authConfidentialFooter;
