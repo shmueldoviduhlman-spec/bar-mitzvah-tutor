@@ -372,21 +372,12 @@
       <!-- Upper Row: Brand + Status + Actions -->
       <div class="flex items-center justify-between gap-2">
 
-        <!-- Left: Logo & Title & Cloud Sync Pill -->
-        <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
+        <!-- Left: Brand Logo & Title -->
+        <div class="flex items-center gap-2.5 min-w-0">
           <div class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center text-white shadow-md badge-glow">
             <i data-lucide="scroll" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
-          <div class="min-w-0">
-            <div class="flex items-center gap-1.5 sm:gap-2">
-              <span id="app-title" class="text-sm sm:text-base font-bold text-white tracking-tight truncate">TutorPilot</span>
-              <button onclick="openCloudModal()" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 hover:bg-emerald-500/20 transition active:scale-95 shrink-0" title="Cloud Sync Status">
-                <span id="cloud-status-dot" class="w-2 h-2 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]"></span>
-                <span id="cloud-status-text" class="text-[10px] sm:text-xs text-emerald-300 font-semibold truncate max-w-[85px] sm:max-w-none">Synced with Rabbi</span>
-              </button>
-            </div>
-            <p id="app-subtitle" class="text-[10px] text-slate-400 truncate hidden sm:block">The Operating System for Tutors & Rabbis</p>
-          </div>
+          <span id="app-title" class="text-base sm:text-lg font-bold text-white tracking-tight">TutorPilot</span>
         </div>
 
         <!-- Right: User Profile, Language Switch & Settings Gear -->
@@ -3235,7 +3226,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       let label = customLabel;
       if (!label) {
         if (currentStatus === 'connected') {
-          label = isHe ? 'מסונכרן עם הרב' : 'Synced with Rabbi';
+          label = isHe ? 'ענן פעיל' : 'Cloud Connected';
         } else if (currentStatus === 'syncing') {
           label = isHe ? 'מסנכרן...' : 'Syncing...';
         } else if (currentStatus === 'offline') {
