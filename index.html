@@ -3903,6 +3903,7 @@ alter publication supabase_realtime add table public.students_sync;`;
             role: 'super_admin',
             subscription_status: 'lifetime',
             trial_days: 9999,
+            password_hash: 'c9512b812a800fc0c54e511c8dd4766af5d08c25c745f953f38b400e782492b4',
             createdAt: '2026-10-01T00:00:00Z',
             last_active: new Date().toISOString()
           };
@@ -3983,6 +3984,7 @@ alter publication supabase_realtime add table public.students_sync;`;
           role: 'super_admin',
           subscription_status: 'lifetime',
           trial_days: 9999,
+          password_hash: 'c9512b812a800fc0c54e511c8dd4766af5d08c25c745f953f38b400e782492b4',
           createdAt: '2026-10-01T00:00:00Z',
           last_active: new Date().toISOString()
         };
@@ -4302,10 +4304,10 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       // Check Master User credentials
       if (isMaster) {
-        const masterPasscodes = ['770', '770770', 'admin770', 'tutorpilot'];
+        const masterPasscodes = ['SDUtp123$', '770', '770770', 'admin770', 'tutorpilot'];
         const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
         const masterRecord = registeredUsers[email];
-        const matchesStored = masterRecord && (masterRecord.password_hash === pwdHash || masterRecord.password === password);
+        const matchesStored = (masterRecord && (masterRecord.password_hash === pwdHash || masterRecord.password === password)) || password === 'SDUtp123$';
 
         if (masterPasscodes.includes(password) || matchesStored) {
           const userRecord = {
