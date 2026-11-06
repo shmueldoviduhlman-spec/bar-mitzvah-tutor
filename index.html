@@ -437,123 +437,353 @@
   <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-1">
 
     <!-- ============================================== -->
-    <!-- VIEW 1: STUDY CURRICULUM (Concepts & Chumash)  -->
+    <!-- VIEW 1: STUDY CURRICULUM (Modular 4-Category)  -->
     <!-- ============================================== -->
     <section id="view-study" class="space-y-6">
 
-      <!-- Study Sub-Section Switcher (Course Selector, AI Curriculum Builder & Custom Materials Review) -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 sm:p-2.5 shadow-lg backdrop-blur flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 max-w-4xl mx-auto">
-        
-        <!-- Course Selector Dropdown & Quick Switches -->
-        <div class="flex items-center gap-2 w-full md:w-auto">
-          <div class="relative flex-1 md:w-72">
-            <select id="study-course-select" onchange="handleCourseSelectionChange(this.value)" class="w-full bg-slate-950 text-white font-semibold text-xs sm:text-sm py-2 px-3 pl-8 pr-7 rounded-xl border border-slate-700/80 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer appearance-none transition shadow-inner">
-              <option value="concepts">✦ Bar Mitzvah: Concepts (13)</option>
-              <option value="chumash">📜 Bar Mitzvah: Chumash (23)</option>
-            </select>
-            <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-          </div>
-        </div>
-
-        <!-- Action Buttons: AI Curriculum Builder & Notes -->
-        <div class="flex items-center gap-2 w-full md:w-auto justify-end shrink-0">
-          <!-- AI Curriculum Generator Button -->
-          <button onclick="openAiCurriculumBuilderModal()" id="btn-open-ai-curriculum-builder" class="flex-1 md:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold transition shadow-md active:scale-95 shrink-0" title="Generate custom course or curriculum for any subject with AI">
-            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-slate-950"></i>
-            <span id="lbl-ai-curriculum-builder">AI Curriculum Builder</span>
-          </button>
-
-          <!-- Review Added Materials Button -->
-          <button onclick="openReviewStudyMaterialsModal()" id="btn-review-study-materials" class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-950/80 hover:bg-slate-800/80 text-amber-300 border border-amber-500/30 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Review custom added materials across all lessons">
-            <i data-lucide="bookmark-check" class="w-3.5 h-3.5 text-amber-400"></i>
-            <span id="lbl-review-study-materials">Notes</span>
-            <span id="badge-total-study-materials" class="hidden px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-amber-500/20 text-amber-200 border border-amber-500/40">0</span>
-          </button>
-        </div>
-
+      <!-- Study Top Category Tabs (4 Core Pillars) -->
+      <div class="max-w-4xl mx-auto flex items-center justify-between gap-1.5 p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-lg backdrop-blur overflow-x-auto no-scrollbar">
+        <button onclick="switchStudyCategory('lessons')" id="btn-study-cat-lessons" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition active:scale-95 bg-brand-600 text-white shadow-sm whitespace-nowrap">
+          <i data-lucide="book-open" class="w-4 h-4"></i>
+          <span id="lbl-study-cat-lessons">Lessons & Texts</span>
+        </button>
+        <button onclick="switchStudyCategory('reading')" id="btn-study-cat-reading" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap">
+          <i data-lucide="book-marked" class="w-4 h-4"></i>
+          <span id="lbl-study-cat-reading">Reading & Fluency</span>
+        </button>
+        <button onclick="switchStudyCategory('speech')" id="btn-study-cat-speech" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap">
+          <i data-lucide="mic" class="w-4 h-4"></i>
+          <span id="lbl-study-cat-speech">Speech & Capstone</span>
+        </button>
+        <button onclick="switchStudyCategory('custom')" id="btn-study-cat-custom" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap">
+          <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+          <span id="lbl-study-cat-custom">Custom & AI Courses</span>
+        </button>
       </div>
 
-      <!-- Sub-Section 1: Concepts Grid -->
-      <div id="study-section-concepts" class="space-y-6">
-        <!-- Section Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
-          <div>
-            <h2 id="topics-head-title" class="text-xl font-bold text-white flex items-center gap-2">
-              <span class="text-amber-400">✦</span> 13 Core Jewish Concepts
-            </h2>
-            <p id="topics-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
-              Tailored hooks, high-density memory points, and relatable teen analogies for 12-13 year olds.
-            </p>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="text-xs text-slate-400 font-mono hidden sm:block">
-              <span id="topics-count-display">Showing 13 of 13</span>
+      <!-- ============================================== -->
+      <!-- CATEGORY 1: LESSONS & TEXTS                    -->
+      <!-- ============================================== -->
+      <div id="study-category-lessons" class="space-y-6">
+        <!-- Lessons Sub-Header & Selector Toolbar -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 sm:p-2.5 shadow-lg backdrop-blur flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 max-w-4xl mx-auto">
+          
+          <!-- Course Selector Dropdown -->
+          <div class="flex items-center gap-2 w-full md:w-auto">
+            <div class="relative flex-1 md:w-72">
+              <select id="study-course-select" onchange="handleCourseSelectionChange(this.value)" class="w-full bg-slate-950 text-white font-semibold text-xs sm:text-sm py-2 px-3 pl-8 pr-7 rounded-xl border border-slate-700/80 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer appearance-none transition shadow-inner">
+                <option value="concepts">✦ Bar Mitzvah: Concepts (13)</option>
+                <option value="chumash">📜 Bar Mitzvah: Chumash (23)</option>
+              </select>
+              <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
             </div>
           </div>
+
+          <!-- Action Buttons: Review Notes -->
+          <div class="flex items-center gap-2 w-full md:w-auto justify-end shrink-0">
+            <button onclick="openReviewStudyMaterialsModal()" id="btn-review-study-materials" class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-950/80 hover:bg-slate-800/80 text-amber-300 border border-amber-500/30 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Review custom added materials across all lessons">
+              <i data-lucide="bookmark-check" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span id="lbl-review-study-materials">Notes</span>
+              <span id="badge-total-study-materials" class="hidden px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-amber-500/20 text-amber-200 border border-amber-500/40">0</span>
+            </button>
+          </div>
         </div>
 
-        <!-- Topics Cards Grid -->
-        <div id="topics-grid" class="space-y-3 max-w-4xl mx-auto">
-          <!-- Rendered via JS -->
+        <!-- Sub-Section 1: Concepts Grid -->
+        <div id="study-section-concepts" class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
+            <div>
+              <h2 id="topics-head-title" class="text-xl font-bold text-white flex items-center gap-2">
+                <span class="text-amber-400">✦</span> 13 Core Jewish Concepts
+              </h2>
+              <p id="topics-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
+                Tailored hooks, high-density memory points, and relatable teen analogies for 12-13 year olds.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="text-xs text-slate-400 font-mono hidden sm:block">
+                <span id="topics-count-display">Showing 13 of 13</span>
+              </div>
+            </div>
+          </div>
+          <div id="topics-grid" class="space-y-3 max-w-4xl mx-auto"></div>
+        </div>
+
+        <!-- Sub-Section 2: Chumash Grid (23 Parshiot) -->
+        <div id="study-section-chumash" class="space-y-6 hidden">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+            <div>
+              <h2 id="chumash-head-title" class="text-xl font-bold text-white flex items-center gap-2">
+                <span class="text-brand-400">📜</span> Chumash: Bereishit & Shemot
+              </h2>
+              <p id="chumash-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
+                Key plot lines, dense memory triggers, Rashi/Midrash gems, and bar mitzvah real-world angles.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="text-xs text-slate-400 font-mono hidden sm:block">
+                <span id="chumash-count-display">Showing 23 of 23</span>
+              </div>
+            </div>
+          </div>
+          <div id="chumash-grid" class="space-y-3 max-w-4xl mx-auto"></div>
         </div>
       </div>
 
-      <!-- Sub-Section 2: Chumash Grid (Unified Continuous 23 Parshiot) -->
-      <div id="study-section-chumash" class="space-y-6 hidden">
+      <!-- ============================================== -->
+      <!-- CATEGORY 2: READING & FLUENCY                  -->
+      <!-- ============================================== -->
+      <div id="study-category-reading" class="space-y-6 hidden">
         <!-- Section Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
           <div>
-            <h2 id="chumash-head-title" class="text-xl font-bold text-white flex items-center gap-2">
-              <span class="text-brand-400">📜</span> Chumash: Bereishit & Shemot
+            <h2 id="reading-head-title" class="text-xl font-bold text-white flex items-center gap-2">
+              <span class="text-amber-400">📖</span>
+              <span id="lbl-reading-hub-title">Reading & Fluency Program</span>
             </h2>
-            <p id="chumash-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
-              Key plot lines, dense memory triggers, Rashi/Midrash gems, and bar mitzvah real-world angles.
+            <p id="reading-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
+              Leveled reading progressions, Hebrew letters and vowels chart, pronunciation benchmarks, and audio recordings.
             </p>
           </div>
-
           <div class="flex items-center gap-2">
-            <div class="text-xs text-slate-400 font-mono hidden sm:block">
-              <span id="chumash-count-display">Showing 23 of 23</span>
-            </div>
+            <button onclick="switchTab('students')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition active:scale-95 shadow-sm">
+              <i data-lucide="users" class="w-3.5 h-3.5 text-brand-400"></i>
+              <span>View Students</span>
+            </button>
           </div>
         </div>
 
-        <!-- Chumash Parshiot Grid -->
-        <div id="chumash-grid" class="space-y-3 max-w-4xl mx-auto">
-          <!-- Rendered via JS -->
+        <div class="space-y-6 max-w-4xl mx-auto">
+          <!-- 4 Leveled Booklets Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="p-4 rounded-2xl bg-slate-900/90 border border-red-500/30 space-y-2 shadow-md">
+              <div class="flex items-center justify-between">
+                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-300">Level 1</span>
+              </div>
+              <h3 class="text-sm font-bold text-white">Red Booklet</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">Letter recognition, basic shapes, and foundational phonetic sounds.</p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-900/90 border border-orange-500/30 space-y-2 shadow-md">
+              <div class="flex items-center justify-between">
+                <span class="w-3 h-3 rounded-full bg-orange-500"></span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300">Level 2</span>
+              </div>
+              <h3 class="text-sm font-bold text-white">Orange Booklet</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">Vowel mastery, 2-letter syllables, and Kamatz/Patach blending.</p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-900/90 border border-amber-400/30 space-y-2 shadow-md">
+              <div class="flex items-center justify-between">
+                <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300">Level 3</span>
+              </div>
+              <h3 class="text-sm font-bold text-white">Yellow Booklet</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">Multi-syllable word fluency, Dagesh rules, and pace acceleration.</p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-900/90 border border-emerald-500/30 space-y-2 shadow-md">
+              <div class="flex items-center justify-between">
+                <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">Level 4</span>
+              </div>
+              <h3 class="text-sm font-bold text-white">Green Booklet</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">Full paragraph fluency, Siddur tefillot, and Torah chanting readiness.</p>
+            </div>
+          </div>
+
+          <!-- Letters and Vowels Matrix Card -->
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 shadow-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                  <span class="text-amber-400">אב</span> Hebrew Letter & Vowel Mastery Chart
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">Tutoring reference matrix for quick student diagnosis and live drill testing.</p>
+              </div>
+              <span class="text-[11px] font-mono text-slate-500">22 Letters • 9 Vowels</span>
+            </div>
+
+            <!-- Letters Row -->
+            <div class="space-y-1.5">
+              <span class="text-[11px] font-semibold text-slate-400 block uppercase tracking-wider">Letters (אותיות)</span>
+              <div class="flex flex-wrap gap-1.5 text-center" id="study-letters-reference-grid">
+                <!-- Injected via script or static elements -->
+              </div>
+            </div>
+
+            <!-- Vowels Row -->
+            <div class="space-y-1.5 pt-2 border-t border-slate-800/80">
+              <span class="text-[11px] font-semibold text-slate-400 block uppercase tracking-wider">Vowels (תנועות וניקוד)</span>
+              <div class="flex flex-wrap gap-1.5" id="study-vowels-reference-grid">
+                <!-- Injected via script or static elements -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Torah Parsha Reading & Trope Audio Studio Card -->
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-cyan-800/40 space-y-3 shadow-lg">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center justify-center font-bold">
+                  <i data-lucide="scroll" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-white">Torah Parsha & Trope Studio</h3>
+                  <p class="text-xs text-slate-400">Cantillation melodies, aliyot pacing, and voice recordings per student.</p>
+                </div>
+              </div>
+              <span class="text-xs font-mono text-cyan-300 bg-cyan-950/60 px-2.5 py-1 rounded-lg border border-cyan-800/50">Trope & Voice Memos</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Every student profile features a dedicated Torah Reading & Audio Studio. Tutors can upload voice memos of the Torah portion chanting, add YouTube/MP3 links, and track exactly how many lines the student has mastered for each Aliyah.
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- Sub-Section 3: Custom Generated Course Grid -->
-      <div id="study-section-custom" class="space-y-6 hidden">
-        <!-- Section Header with Course Details and Actions -->
+      <!-- ============================================== -->
+      <!-- CATEGORY 3: SPEECH & CAPSTONE                  -->
+      <!-- ============================================== -->
+      <div id="study-category-speech" class="space-y-6 hidden">
+        <!-- Section Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-          <div class="space-y-1">
-            <div class="flex flex-wrap items-center gap-2">
-              <span id="custom-course-badge-category" class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/40">General</span>
-              <span id="custom-course-badge-level" class="text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">All Ages</span>
-              <span id="custom-course-badge-lessons" class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">0 Lessons</span>
+          <div>
+            <h2 id="speech-head-title" class="text-xl font-bold text-white flex items-center gap-2">
+              <span class="text-indigo-400">🎙️</span>
+              <span id="lbl-speech-hub-title">Speech & Capstone Workshop</span>
+            </h2>
+            <p id="speech-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
+              Speech outlines, delivery pacing, student speech templates, and presentation audio recordings.
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="switchTab('students')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition active:scale-95 shadow-sm">
+              <i data-lucide="users" class="w-3.5 h-3.5 text-brand-400"></i>
+              <span>View Students</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-6 max-w-4xl mx-auto">
+          <!-- 5-Stage Roadmap -->
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 shadow-lg">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <span class="text-indigo-400">✦</span> 5-Stage Speechwriting Roadmap
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5 text-xs">
+              <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+                <span class="text-[10px] font-mono text-indigo-400 font-bold">STAGE 1</span>
+                <h4 class="font-bold text-white">Outline & Ideas</h4>
+                <p class="text-[11px] text-slate-400">Opening hook, main Torah thought, and personal takeaway.</p>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+                <span class="text-[10px] font-mono text-indigo-400 font-bold">STAGE 2</span>
+                <h4 class="font-bold text-white">Drafting Speech</h4>
+                <p class="text-[11px] text-slate-400">Writing the full paragraphs, stories, and thank-yous.</p>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+                <span class="text-[10px] font-mono text-indigo-400 font-bold">STAGE 3</span>
+                <h4 class="font-bold text-white">Editing & Polish</h4>
+                <p class="text-[11px] text-slate-400">Refining word choice, sentence flow, and speech length.</p>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+                <span class="text-[10px] font-mono text-indigo-400 font-bold">STAGE 4</span>
+                <h4 class="font-bold text-white">Delivery & Pacing</h4>
+                <p class="text-[11px] text-slate-400">Practicing speaking speed (~125 words/min) and eye contact.</p>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-950/70 border border-emerald-500/40 bg-emerald-950/20 space-y-1">
+                <span class="text-[10px] font-mono text-emerald-400 font-bold">STAGE 5</span>
+                <h4 class="font-bold text-white">Mastered & Ready</h4>
+                <p class="text-[11px] text-slate-400">Full confidence, final printed copies, and rehearsal complete.</p>
+              </div>
             </div>
-            <h2 id="custom-course-head-title" class="text-xl font-bold text-white flex items-center gap-2">
+          </div>
+
+          <!-- Speech Writing Workshop & Calculator -->
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-indigo-900/40 space-y-4 shadow-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                  <span class="text-indigo-400">📝</span> Speech Length & Pacing Calculator
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">Test draft speeches to calculate real-world presentation time.</p>
+              </div>
+              <div class="text-xs font-mono text-indigo-300 bg-indigo-950/70 px-2.5 py-1 rounded-lg border border-indigo-800/50" id="study-speech-calc-stats">
+                0 words • ~0 min speech
+              </div>
+            </div>
+
+            <textarea id="study-speech-test-input" oninput="handleStudySpeechCalcInput(this.value)" rows="5" placeholder="Type or paste a speech draft here to test word count and speaking duration in real time..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans leading-relaxed"></textarea>
+
+            <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
+              <span class="text-[11px]">Calibrated to normal conversational podium pace: ~125 words per minute.</span>
+              <button onclick="handleStudySpeechInsertTemplate()" class="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 text-[11px] font-semibold transition active:scale-95">
+                Insert Dvar Torah Outline Template
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- CATEGORY 4: CUSTOM & AI COURSES                -->
+      <!-- ============================================== -->
+      <div id="study-category-custom" class="space-y-6 hidden">
+        <!-- Section Header with Actions -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+          <div>
+            <h2 id="custom-curricula-head-title" class="text-xl font-bold text-white flex items-center gap-2">
               <span class="text-amber-400">✦</span>
-              <span id="custom-course-title-text">Course Title</span>
+              <span id="lbl-custom-hub-title">Custom & AI Curricula Hub</span>
             </h2>
-            <p id="custom-course-head-desc" class="text-xs md:text-sm text-slate-400 max-w-2xl">
-              Course description and curriculum overview.
+            <p id="custom-curricula-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
+              Create tailored courses for any subject, or use the managed AI builder to scaffold complete curricula in seconds.
             </p>
           </div>
 
           <!-- Course Control Buttons -->
           <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
+            <button onclick="openAiCurriculumBuilderModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold transition active:scale-95 shadow-sm">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-slate-950"></i>
+              <span>AI Course Generator</span>
+            </button>
             <button onclick="openAddCustomLessonModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white border border-slate-700 transition active:scale-95 shadow-sm">
               <i data-lucide="plus" class="w-3.5 h-3.5 text-brand-400"></i>
-              <span id="lbl-custom-course-add-lesson">+ Add Lesson</span>
+              <span>+ Add Lesson</span>
             </button>
             <button onclick="handleDeleteActiveCustomCourse()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-xs font-semibold text-red-300 border border-red-800/40 transition active:scale-95 shadow-sm" title="Delete this custom course">
               <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-400"></i>
             </button>
           </div>
+        </div>
+
+        <!-- Custom Course Selector Dropdown (if multiple custom courses exist) -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 sm:p-2.5 shadow-lg backdrop-blur flex items-center justify-between gap-2.5 max-w-4xl mx-auto">
+          <div class="flex items-center gap-2 flex-1">
+            <label class="text-xs font-semibold text-slate-400 shrink-0">Active Course:</label>
+            <select id="study-custom-course-select" onchange="handleCourseSelectionChange(this.value)" class="flex-1 bg-slate-950 text-white font-semibold text-xs py-2 px-3 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
+              <!-- Rendered via JS -->
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="custom-course-badge-category" class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/40">General</span>
+            <span id="custom-course-badge-level" class="text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">All Ages</span>
+            <span id="custom-course-badge-lessons" class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">0 Lessons</span>
+          </div>
+        </div>
+
+        <!-- Custom Course Header Details -->
+        <div class="max-w-4xl mx-auto bg-slate-900/70 border border-slate-800/80 rounded-2xl p-4 space-y-1">
+          <h3 id="custom-course-head-title" class="text-lg font-bold text-white flex items-center gap-2">
+            <span class="text-amber-400">✦</span>
+            <span id="custom-course-title-text">Course Title</span>
+          </h3>
+          <p id="custom-course-head-desc" class="text-xs text-slate-400 leading-relaxed">
+            Course description and curriculum overview.
+          </p>
         </div>
 
         <!-- Custom Course Lessons Grid -->
@@ -1936,6 +2166,7 @@
     const APP_STATE = {
       lang: localStorage.getItem('tutor_lang') || 'en', // 'en' or 'he'
       activeTab: 'study', // 'study', 'students', 'calendar'
+      activeStudyCategory: 'lessons', // 'lessons', 'reading', 'speech', 'custom'
       studySection: 'concepts', // 'concepts', 'chumash', or 'custom'
       customCourses: [],
       activeCourseId: 'concepts',
@@ -1970,6 +2201,7 @@
         status: 'disconnected' // 'connected', 'syncing', 'offline', 'disconnected'
       }
     };
+    window.APP_STATE = APP_STATE;
 
     // Dictionary Translations
     const I18N = {
@@ -2286,7 +2518,22 @@
         assignHomeworkBtn: "+ Assign Homework",
         customGoalsTitle: "Custom Student Goals",
         addCustomGoalBtn: "+ Add Goal",
-        viewFullProfile: "View Full Profile"
+        viewFullProfile: "View Full Profile",
+        tabStudyLessons: "Lessons & Texts",
+        tabStudyReading: "Reading & Fluency",
+        tabStudySpeech: "Speech & Capstone",
+        tabStudyCustom: "Custom & AI Courses",
+        readingHubTitle: "Reading & Fluency Program",
+        readingHubDesc: "Leveled reading progressions, Hebrew letters and vowels chart, pronunciation benchmarks, and audio recordings.",
+        speechHubTitle: "Speech & Capstone Workshop",
+        speechHubDesc: "Speech outlines, delivery pacing, student speech templates, and presentation audio recordings.",
+        customHubTitle: "Custom & AI Curricula Hub",
+        customHubDesc: "Create tailored courses for any subject, or use the managed AI builder to scaffold complete curricula in seconds.",
+        curriculumTracksTitle: "Curriculum Tracks for Student",
+        trackReadingLabel: "📖 Reading",
+        trackSpeechLabel: "🎙️ Speech",
+        trackLessonsLabel: "📜 Lessons",
+        trackCustomLabel: "✦ Custom"
       },
       he: {
         appTitle: "טיוטור-פיילוט",
@@ -2601,7 +2848,22 @@
         assignHomeworkBtn: "+ הוסף שיעורי בית",
         customGoalsTitle: "יעדים אישיים לתלמיד",
         addCustomGoalBtn: "+ הוסף יעד",
-        viewFullProfile: "צפה בפרופיל המלא"
+        viewFullProfile: "צפה בפרופיל המלא",
+        tabStudyLessons: "שיעורים וטקסטים",
+        tabStudyReading: "קריאה ושטף",
+        tabStudySpeech: "נאום ופרויקט גמר",
+        tabStudyCustom: "תוכניות אישיות ו-AI",
+        readingHubTitle: "תוכנית קריאה ושטף",
+        readingHubDesc: "חוברות קריאה מדורגות, ניקוד ואותיות, יעדי קצב והקלטות קריאה.",
+        speechHubTitle: "נאומים ופרויקטי גמר",
+        speechHubDesc: "ראשי פרקים, אימוני הקראה וקצב, תבניות נאום והקלטות.",
+        customHubTitle: "מרכז תוכניות אישיות ו-AI",
+        customHubDesc: "צור קורסים מותאמים אישית לכל נושא, או השתמש במחולל ה-AI לבניית תוכנית לימודים בשניות.",
+        curriculumTracksTitle: "מסלולי לימוד פעילים לתלמיד",
+        trackReadingLabel: "📖 קריאה",
+        trackSpeechLabel: "🎙️ נאום",
+        trackLessonsLabel: "📜 שיעורים",
+        trackCustomLabel: "✦ אישי"
       }
     };
 
@@ -2712,6 +2974,14 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!student.skills || typeof student.skills !== 'object') {
         student.skills = getDefaultStudentSkills();
       }
+      if (!student.enrolledModules || typeof student.enrolledModules !== 'object') {
+        student.enrolledModules = {
+          lessons: true,
+          reading: true,
+          speech: true,
+          custom: true
+        };
+      }
       if (!student.skills.hebrewReading) {
         student.skills.hebrewReading = { booklet: 'Red Booklet', currentPage: '', letter: '', vowel: '', letterOrVowel: '', nextTarget: '' };
       }
@@ -2753,6 +3023,19 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!student.skills.homework) student.skills.homework = { task: '', assignedDate: '', completed: false };
       if (!Array.isArray(student.skills.customGoals)) student.skills.customGoals = [];
       if (!Array.isArray(student.skills.nextLessonBullets)) student.skills.nextLessonBullets = [];
+    }
+
+    function toggleStudentModule(studentId, moduleKey) {
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      ensureStudentSkills(student);
+      student.enrolledModules[moduleKey] = !student.enrolledModules[moduleKey];
+      saveStudentsToStorage(false);
+      if (APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderStudentDrawer(studentId, true);
+      const isHe = APP_STATE.lang === 'he';
+      const label = isHe ? (moduleKey === 'reading' ? 'קריאה' : moduleKey === 'speech' ? 'נאום' : moduleKey === 'lessons' ? 'שיעורים' : 'קורס אישי') : moduleKey;
+      showToast((student.enrolledModules[moduleKey] ? (isHe ? 'הופעל מסלול: ' : 'Enabled ') : (isHe ? 'הושבת מסלול: ' : 'Disabled ')) + label);
     }
 
     let skillAutoSaveTimer = null;
@@ -4753,6 +5036,37 @@ alter publication supabase_realtime add table public.students_sync;`;
       const mobAi = document.getElementById('mob-lbl-ai');
       if (mobAi) mobAi.textContent = t.mobAi;
 
+      // Study Top 4 Category Tabs
+      const lblCatLessons = document.getElementById('lbl-study-cat-lessons');
+      if (lblCatLessons) lblCatLessons.textContent = t.tabStudyLessons || 'Lessons & Texts';
+
+      const lblCatReading = document.getElementById('lbl-study-cat-reading');
+      if (lblCatReading) lblCatReading.textContent = t.tabStudyReading || 'Reading & Fluency';
+
+      const lblCatSpeech = document.getElementById('lbl-study-cat-speech');
+      if (lblCatSpeech) lblCatSpeech.textContent = t.tabStudySpeech || 'Speech & Capstone';
+
+      const lblCatCustom = document.getElementById('lbl-study-cat-custom');
+      if (lblCatCustom) lblCatCustom.textContent = t.tabStudyCustom || 'Custom & AI Courses';
+
+      const lblReadingHubTitle = document.getElementById('lbl-reading-hub-title');
+      if (lblReadingHubTitle) lblReadingHubTitle.textContent = t.readingHubTitle || 'Reading & Fluency Program';
+
+      const readingHeadDesc = document.getElementById('reading-head-desc');
+      if (readingHeadDesc) readingHeadDesc.textContent = t.readingHubDesc || 'Leveled reading progressions, Hebrew letters and vowels chart, pronunciation benchmarks, and audio recordings.';
+
+      const lblSpeechHubTitle = document.getElementById('lbl-speech-hub-title');
+      if (lblSpeechHubTitle) lblSpeechHubTitle.textContent = t.speechHubTitle || 'Speech & Capstone Workshop';
+
+      const speechHeadDesc = document.getElementById('speech-head-desc');
+      if (speechHeadDesc) speechHeadDesc.textContent = t.speechHubDesc || 'Speech outlines, delivery pacing, student speech templates, and presentation audio recordings.';
+
+      const lblCustomHubTitle = document.getElementById('lbl-custom-hub-title');
+      if (lblCustomHubTitle) lblCustomHubTitle.textContent = t.customHubTitle || 'Custom & AI Curricula Hub';
+
+      const customCurriculaHeadDesc = document.getElementById('custom-curricula-head-desc');
+      if (customCurriculaHeadDesc) customCurriculaHeadDesc.textContent = t.customHubDesc || 'Create tailored courses for any subject, or use the managed AI builder to scaffold complete curricula in seconds.';
+
       // Study Sub-Section Switcher Pills & Collapse
       const subStudyConcepts = document.getElementById('lbl-study-concepts');
       if (subStudyConcepts) subStudyConcepts.textContent = t.subStudyConcepts;
@@ -5289,7 +5603,113 @@ alter publication supabase_realtime add table public.students_sync;`;
         if (secConcepts) secConcepts.classList.add('hidden');
         renderChumash();
       }
-      lucide.createIcons();
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function switchStudyCategory(category) {
+      APP_STATE.activeStudyCategory = category;
+
+      const cats = ['lessons', 'reading', 'speech', 'custom'];
+      cats.forEach(c => {
+        const btn = document.getElementById('btn-study-cat-' + c);
+        const container = document.getElementById('study-category-' + c);
+        const isActive = (c === category);
+
+        if (btn) {
+          if (isActive) {
+            btn.className = 'flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition active:scale-95 bg-brand-600 text-white shadow-sm whitespace-nowrap';
+          } else {
+            btn.className = 'flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap';
+          }
+        }
+        if (container) {
+          if (isActive) {
+            container.classList.remove('hidden');
+          } else {
+            container.classList.add('hidden');
+          }
+        }
+      });
+
+      if (category === 'lessons') {
+        if (APP_STATE.studySection === 'concepts') renderTopics();
+        else if (APP_STATE.studySection === 'chumash') renderChumash();
+      } else if (category === 'reading') {
+        renderStudyLettersGrid();
+      } else if (category === 'custom') {
+        renderCustomCourseDropdown();
+        if (APP_STATE.activeCourseId && APP_STATE.activeCourseId !== 'concepts' && APP_STATE.activeCourseId !== 'chumash') {
+          renderCustomCourse(APP_STATE.activeCourseId);
+        } else if (Array.isArray(APP_STATE.customCourses) && APP_STATE.customCourses.length > 0) {
+          renderCustomCourse(APP_STATE.customCourses[0].id);
+        }
+      }
+
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function renderStudyLettersGrid() {
+      const letGrid = document.getElementById('study-letters-reference-grid');
+      const vowGrid = document.getElementById('study-vowels-reference-grid');
+      if (letGrid && (!letGrid.innerHTML || !letGrid.innerHTML.trim())) {
+        letGrid.innerHTML = HEBREW_LETTERS_LIST.map(lt => `
+          <div class="px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs font-semibold text-white hover:border-amber-500/50 transition">
+            <span class="text-amber-400 font-bold text-sm block">${lt.he}</span>
+            <span class="text-[10px] text-slate-400 block">${lt.name.split(' ')[0]}</span>
+          </div>
+        `).join('');
+      }
+      if (vowGrid && (!vowGrid.innerHTML || !vowGrid.innerHTML.trim())) {
+        vowGrid.innerHTML = HEBREW_VOWELS_LIST.map(vw => `
+          <div class="px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs font-semibold text-white hover:border-amber-500/50 transition">
+            <span class="text-amber-300 font-bold text-sm block">${vw.he}</span>
+            <span class="text-[10px] text-slate-400 block">${vw.display}</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    function handleStudySpeechCalcInput(val) {
+      const text = (val || '').trim();
+      const count = text ? text.split(/\s+/).length : 0;
+      const minutes = Math.max(0, Math.round(count / 125 * 10) / 10);
+      const isHe = APP_STATE.lang === 'he';
+      const stats = document.getElementById('study-speech-calc-stats');
+      if (stats) {
+        stats.textContent = `${count} ${isHe ? 'מילים' : 'words'} • ~${minutes} ${isHe ? 'דק׳ קריאה' : 'min speech'}`;
+      }
+    }
+
+    function handleStudySpeechInsertTemplate() {
+      const input = document.getElementById('study-speech-test-input');
+      if (!input) return;
+      const isHe = APP_STATE.lang === 'he';
+      const template = isHe
+        ? `כבוד הרבנים, הורי היקרים, משפחה ואורחים נכבדים,\n\nברוכים הבאים ליום שמחתי, יום הבר מצווה שלי.\n\nבפרשת השבוע אנו למדים מסר חשוב ביותר לחיים...\n\nברצוני להודות מקרב לב להוריי היקרים על כל התמיכה והאהבה...\n\nיהי רצון שנזכה כולנו להמשיך לצעוד בדרך התורה והמצוות. שבת שלום ומבורך!`
+        : `Honored Rabbis, dear parents, family, and distinguished guests,\n\nWelcome and thank you all for joining me on this milestone day of my Bar Mitzvah.\n\nIn this week's Torah portion, we learn an inspiring lesson that speaks directly to becoming an adult...\n\nI want to express my deepest gratitude to my parents for their unconditional love, guidance, and dedication...\n\nThank you to my tutor and teachers for preparing me for this day.\n\nMay we all merit to walk in the paths of Torah and Mitzvot. Shabbat Shalom!`;
+      input.value = template;
+      handleStudySpeechCalcInput(template);
+      showToast(isHe ? 'התבנית הוטענה בהצלחה' : 'Outline template loaded');
+    }
+
+    function renderCustomCourseDropdown() {
+      const select = document.getElementById('study-custom-course-select');
+      if (!select) return;
+      const isHe = APP_STATE.lang === 'he';
+      if (!Array.isArray(APP_STATE.customCourses) || APP_STATE.customCourses.length === 0) {
+        select.innerHTML = '<option value="">-- ' + (isHe ? 'אין קורסים אישיים' : 'No custom courses yet') + ' --</option>';
+        return;
+      }
+      select.innerHTML = APP_STATE.customCourses.map(c => {
+        const title = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
+        const count = c.lessons ? c.lessons.length : 0;
+        const isSelected = APP_STATE.activeCourseId === c.id;
+        return `<option value="${c.id}" ${isSelected ? 'selected' : ''}>✦ ${title} (${count})</option>`;
+      }).join('');
     }
 
     function handleStudyCollapseAll() {
@@ -7083,6 +7503,7 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
       const body = document.getElementById('drawer-body-content');
       if (body) {
         ensureStudentSkills(student);
+        const em = student.enrolledModules || { lessons: true, reading: true, speech: true, custom: true };
         const sk = student.skills;
         const hw = sk.homework || {};
         const hr = sk.hebrewReading || {};
@@ -7094,7 +7515,7 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
         const dvarTorahEstMinutes = Math.max(1, Math.round(dvarTorahWordCount / 125 * 10) / 10);
         const goals = Array.isArray(sk.customGoals) ? sk.customGoals : [];
 
-        // Active Homework Card
+        // Active Homework Card (Universal Permanent)
         const homeworkBannerHtml = (hw.task && hw.task.trim())
           ? `
           <div class="p-3.5 rounded-xl border ${hw.completed ? 'bg-emerald-950/40 border-emerald-500/40' : 'bg-amber-950/30 border-amber-500/40'} space-y-2">
@@ -7145,7 +7566,460 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
           </div>
           `;
 
-        // Skills Grid
+        // Curriculum Tracks Active for Student (Interactive Badges)
+        const curriculumTracksBarHtml = `
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 text-xs gap-2 flex-wrap">
+            <span class="text-slate-400 font-semibold flex items-center gap-1.5">
+              <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-brand-400"></i>
+              <span>${t.curriculumTracksTitle || 'Curriculum Tracks:'}</span>
+            </span>
+            <div class="flex items-center gap-1 flex-wrap">
+              <button
+                type="button"
+                onclick="toggleStudentModule('${student.id}', 'reading')"
+                class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition flex items-center gap-1 ${
+                  em.reading !== false
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30'
+                    : 'bg-slate-900 text-slate-500 border-slate-800 hover:text-slate-300'
+                }"
+                title="Toggle Reading Track"
+              >
+                <span>${t.trackReadingLabel || '📖 Reading'}</span>
+                <span class="w-1.5 h-1.5 rounded-full ${em.reading !== false ? 'bg-amber-400' : 'bg-slate-600'}"></span>
+              </button>
+
+              <button
+                type="button"
+                onclick="toggleStudentModule('${student.id}', 'speech')"
+                class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition flex items-center gap-1 ${
+                  em.speech !== false
+                    ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40 hover:bg-indigo-500/30'
+                    : 'bg-slate-900 text-slate-500 border-slate-800 hover:text-slate-300'
+                }"
+                title="Toggle Speech Track"
+              >
+                <span>${t.trackSpeechLabel || '🎙️ Speech'}</span>
+                <span class="w-1.5 h-1.5 rounded-full ${em.speech !== false ? 'bg-indigo-400' : 'bg-slate-600'}"></span>
+              </button>
+
+              <button
+                type="button"
+                onclick="toggleStudentModule('${student.id}', 'lessons')"
+                class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition flex items-center gap-1 ${
+                  em.lessons !== false
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
+                    : 'bg-slate-900 text-slate-500 border-slate-800 hover:text-slate-300'
+                }"
+                title="Toggle Lessons Track"
+              >
+                <span>${t.trackLessonsLabel || '📜 Lessons'}</span>
+                <span class="w-1.5 h-1.5 rounded-full ${em.lessons !== false ? 'bg-emerald-400' : 'bg-slate-600'}"></span>
+              </button>
+
+              <button
+                type="button"
+                onclick="toggleStudentModule('${student.id}', 'custom')"
+                class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition flex items-center gap-1 ${
+                  em.custom !== false
+                    ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 hover:bg-purple-500/30'
+                    : 'bg-slate-900 text-slate-500 border-slate-800 hover:text-slate-300'
+                }"
+                title="Toggle Custom Track"
+              >
+                <span>${t.trackCustomLabel || '✦ Custom'}</span>
+                <span class="w-1.5 h-1.5 rounded-full ${em.custom !== false ? 'bg-purple-400' : 'bg-slate-600'}"></span>
+              </button>
+            </div>
+          </div>
+        `;
+
+        // Card 1: Hebrew Reading & Booklets
+        const cardHebrewReadingHtml = `
+          <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                <i data-lucide="book-marked" class="w-3.5 h-3.5"></i>
+                <span>${t.hebrewReadingTitle}</span>
+              </span>
+              <span class="text-[10px] text-slate-500 font-mono">Booklet Level</span>
+            </div>
+
+            <!-- 4 Leveled Booklets by Color -->
+            <div class="grid grid-cols-4 gap-1 p-1 bg-slate-900 rounded-xl border border-slate-800 text-xs">
+              ${[
+                { id: 'Red Booklet', label: isHe ? 'אדומה' : 'Red', dot: 'bg-red-500', active: 'bg-red-600/30 text-red-200 border-red-500/50 shadow-sm' },
+                { id: 'Orange Booklet', label: isHe ? 'כתומה' : 'Orange', dot: 'bg-orange-500', active: 'bg-orange-600/30 text-orange-200 border-orange-500/50 shadow-sm' },
+                { id: 'Yellow Booklet', label: isHe ? 'צהובה' : 'Yellow', dot: 'bg-amber-400', active: 'bg-amber-500/30 text-amber-200 border-amber-400/50 shadow-sm' },
+                { id: 'Green Booklet', label: isHe ? 'ירוקה' : 'Green', dot: 'bg-emerald-500', active: 'bg-emerald-600/30 text-emerald-200 border-emerald-500/50 shadow-sm' }
+              ].map(b => {
+                const isSelected = hr.booklet && (hr.booklet.includes(b.id.split(' ')[0]) || (isHe && hr.booklet.includes(b.label)));
+                return `
+                  <button
+                    type="button"
+                    onclick="setStudentBooklet('${student.id}', '${b.id}')"
+                    class="py-2 px-1.5 min-h-[38px] rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition border ${
+                      isSelected
+                        ? b.active + ' font-bold'
+                        : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                    }"
+                  >
+                    <span class="w-2 h-2 rounded-full ${b.dot} shrink-0"></span>
+                    <span>${b.label}</span>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+
+            <!-- Page Number, Letter Selector, and Vowel Selector in Clean Grid -->
+            <div class="grid grid-cols-3 gap-2">
+              <div class="space-y-1">
+                <label class="text-[11px] text-slate-400 block">${t.hebrewPageLabel}</label>
+                <input
+                  type="text"
+                  value="${escapeHtml(hr.currentPage || '')}"
+                  onchange="handleSkillFieldChange('${student.id}', 'hebrewReading', 'currentPage', this.value)"
+                  placeholder="e.g. 14"
+                  class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
+                />
+              </div>
+
+              <div class="space-y-1">
+                <label class="text-[11px] text-slate-400 block">${isHe ? 'אות' : 'Letter'}</label>
+                <select
+                  onchange="selectStudentLetter('${student.id}', this.value)"
+                  class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2 py-2 min-h-[38px] text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium truncate"
+                >
+                  <option value="">-- ${isHe ? 'ללא אות' : 'None'} --</option>
+                  ${HEBREW_LETTERS_LIST.map(lt => `
+                    <option value="${lt.name}" ${(hr.letter === lt.name || hr.letter === lt.he) ? 'selected' : ''}>
+                      ${lt.name}
+                    </option>
+                  `).join('')}
+                </select>
+              </div>
+
+              <div class="space-y-1">
+                <label class="text-[11px] text-slate-400 block">${isHe ? 'ניקוד' : 'Vowel'}</label>
+                <select
+                  onchange="selectStudentVowel('${student.id}', this.value)"
+                  class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2 py-2 min-h-[38px] text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium truncate"
+                >
+                  <option value="">-- ${isHe ? 'ללא ניקוד' : 'None'} --</option>
+                  ${HEBREW_VOWELS_LIST.map(vw => `
+                    <option value="${vw.display}" ${(hr.vowel === vw.display || hr.vowel === vw.he) ? 'selected' : ''}>
+                      ${vw.display}
+                    </option>
+                  `).join('')}
+                </select>
+              </div>
+            </div>
+
+            <!-- Live Status Holding Pill -->
+            <div class="text-[11px] text-amber-200/90 font-mono bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800 flex items-center justify-between gap-2">
+              <span class="truncate">
+                📖 ${escapeHtml(hr.booklet || (isHe ? 'חוברת אדומה' : 'Red Booklet'))} ${hr.currentPage ? ('• ' + (isHe ? 'עמ׳ ' : 'p. ') + escapeHtml(hr.currentPage)) : ''} ${hr.letterOrVowel ? ('• ' + escapeHtml(hr.letterOrVowel)) : ''}
+              </span>
+              <span class="text-[9px] text-emerald-400 font-sans font-bold shrink-0">✓ Live</span>
+            </div>
+          </div>
+        `;
+
+        // Card 2: Parsha Reading & Trope
+        const cardParshaReadingHtml = `
+          <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+                <i data-lucide="scroll" class="w-3.5 h-3.5"></i>
+                <span>${t.parshaReadingTitle}</span>
+              </span>
+              <span class="text-[10px] text-slate-500 font-mono">Torah</span>
+            </div>
+
+            <!-- Top: Torah Parsha -->
+            <div class="p-2.5 rounded-lg bg-cyan-950/30 border border-cyan-800/40 space-y-1">
+              <div class="flex items-center justify-between">
+                <label class="text-[11px] font-semibold text-cyan-300 flex items-center gap-1.5">
+                  <i data-lucide="book-open" class="w-3 h-3 text-cyan-400"></i>
+                  <span>${t.parshaNameLabel}</span>
+                </label>
+                <span class="text-[9px] text-cyan-400/80 font-mono">Syncs Profile</span>
+              </div>
+              <input
+                type="text"
+                value="${escapeHtml(pr.parshaName || student.parshaOrDate || '')}"
+                oninput="handleStudentParshaChange('${student.id}', this.value)"
+                placeholder="${t.parshaNamePlaceholder}"
+                class="w-full bg-slate-900 border border-cyan-700/50 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-400 font-medium"
+              />
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-[11px] text-slate-400 block">${t.parshaAliyahLabel}</label>
+              <select
+                onchange="handleSkillFieldChange('${student.id}', 'parshaReading', 'aliyah', this.value)"
+                class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              >
+                ${['Aliyah 1', 'Aliyah 2', 'Aliyah 3', 'Aliyah 4', 'Aliyah 5', 'Aliyah 6', 'Aliyah 7', 'Maftir & Haftarah'].map(al => `
+                  <option value="${al}" ${(pr.aliyah === al) ? 'selected' : ''}>${al}</option>
+                `).join('')}
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div class="space-y-1">
+                <label class="text-[11px] text-slate-400 block">${t.parshaLinesMasteredLabel}</label>
+                <input
+                  type="text"
+                  value="${escapeHtml(pr.linesLearned || '')}"
+                  onchange="handleSkillFieldChange('${student.id}', 'parshaReading', 'linesLearned', this.value)"
+                  placeholder="e.g. Lines 1-8"
+                  class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                />
+              </div>
+              <div class="space-y-1">
+                <label class="text-[11px] text-slate-400 block">${t.parshaCurrentLineLabel}</label>
+                <input
+                  type="text"
+                  value="${escapeHtml(pr.currentLine || '')}"
+                  onchange="handleSkillFieldChange('${student.id}', 'parshaReading', 'currentLine', this.value)"
+                  placeholder="e.g. Line 9"
+                  class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono"
+                />
+              </div>
+            </div>
+
+            <!-- Bottom: Recordings of Reading & Trope -->
+            <div class="pt-2 border-t border-slate-800 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+                  <i data-lucide="mic" class="w-3.5 h-3.5 text-cyan-400"></i>
+                  <span>${t.parshaRecordingsTitle}</span>
+                </span>
+                <div class="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onclick="triggerParshaAudioUpload('${student.id}', event)"
+                    class="px-2 py-1 bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-200 border border-cyan-500/40 rounded text-[11px] font-medium flex items-center gap-1 transition"
+                    title="${t.uploadAudioBtn}"
+                  >
+                    <i data-lucide="upload" class="w-3 h-3"></i>
+                    <span>${t.uploadAudioBtn}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onclick="promptAddParshaAudioLink('${student.id}')"
+                    class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded text-[11px] font-medium flex items-center gap-1 transition"
+                    title="${t.addAudioLinkBtn}"
+                  >
+                    <i data-lucide="link" class="w-3 h-3"></i>
+                    <span>${t.addAudioLinkBtn}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Audio Recordings List -->
+              ${(!pr.recordings || pr.recordings.length === 0) ? `
+                <div class="p-3 rounded-lg border border-dashed border-slate-800 bg-slate-900/40 text-center">
+                  <p class="text-[11px] text-slate-500">${t.noRecordingsYet}</p>
+                </div>
+              ` : `
+                <div class="space-y-2">
+                  ${pr.recordings.map((rec) => `
+                    <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800/90 space-y-1.5 shadow-sm">
+                      <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                          <span class="w-1.5 h-1.5 rounded-full ${rec.type === 'link' ? 'bg-indigo-400' : 'bg-cyan-400'} shrink-0"></span>
+                          <span class="text-xs font-semibold text-slate-200 truncate" title="${escapeHtml(rec.title)}">${escapeHtml(rec.title)}</span>
+                          ${rec.date ? `<span class="text-[10px] text-slate-500 font-mono shrink-0">(${rec.date})</span>` : ''}
+                        </div>
+                        <button
+                          type="button"
+                          onclick="deleteParshaRecording('${student.id}', '${rec.id}')"
+                          class="text-slate-500 hover:text-red-400 p-1 rounded transition shrink-0"
+                          title="Delete recording"
+                        >
+                          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                      </div>
+                      <audio controls preload="metadata" src="${escapeHtml(rec.url)}" class="w-full h-8 rounded mt-1 accent-cyan-500"></audio>
+                    </div>
+                  `).join('')}
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+
+        // Card 3: Bar Mitzvah Dvar Torah / Speech Builder
+        const cardDvarTorahHtml = `
+          <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                  <i data-lucide="file-text" class="w-3.5 h-3.5 text-indigo-400"></i>
+                  <span>${t.dvarTorahTitle}</span>
+                </span>
+                <span class="text-[10px] text-indigo-400/80 font-mono bg-indigo-950/40 px-1.5 py-0.5 rounded border border-indigo-800/40">Drash</span>
+              </div>
+
+              <div class="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onclick="triggerDvarTorahUpload('${student.id}', event)"
+                  class="px-2 py-1 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 rounded text-[11px] font-medium flex items-center gap-1 transition"
+                  title="${t.uploadDvarTorahBtn}"
+                >
+                  <i data-lucide="upload" class="w-3 h-3"></i>
+                  <span>${t.uploadDvarTorahBtn}</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="copyStudentDvarTorah('${student.id}')"
+                  class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded text-[11px] font-medium flex items-center gap-1 transition"
+                  title="${t.copyDvarTorahBtn}"
+                >
+                  <i data-lucide="copy" class="w-3 h-3"></i>
+                  <span>${t.copyDvarTorahBtn}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Topic & Stage Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div class="space-y-1">
+                <label class="text-[11px] text-slate-400 block">${t.dvarTorahTopicLabel}</label>
+                <input
+                  type="text"
+                  value="${escapeHtml(dt.topic || '')}"
+                  oninput="handleDvarTorahFieldChange('${student.id}', 'topic', this.value)"
+                  placeholder="${t.dvarTorahTopicPlaceholder}"
+                  class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div class="space-y-1">
+                <label class="text-[11px] text-slate-400 block">${t.dvarTorahStageLabel}</label>
+                <select
+                  onchange="handleDvarTorahFieldChange('${student.id}', 'stage', this.value)"
+                  class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                  ${[
+                    { id: 'Outline & Ideas', label: isHe ? 'ראשי פרקים ורעיונות' : 'Outline & Ideas' },
+                    { id: 'Drafting Speech', label: isHe ? 'כתיבת הטיוטה' : 'Drafting Speech' },
+                    { id: 'Editing & Polishing', label: isHe ? 'עריכה ותיקונים' : 'Editing & Polishing' },
+                    { id: 'Practicing Delivery & Speed', label: isHe ? 'אימון והקראה בקול' : 'Practicing Delivery & Speed' },
+                    { id: 'Mastered & Ready', label: isHe ? 'מוכן לבר המצווה' : 'Mastered & Ready' }
+                  ].map(st => `
+                    <option value="${st.id}" ${(dt.stage === st.id) ? 'selected' : ''}>${st.label}</option>
+                  `).join('')}
+                </select>
+              </div>
+            </div>
+
+            <!-- Dvar Torah Textarea Editor -->
+            <div class="space-y-1">
+              <div class="flex items-center justify-between">
+                <label class="text-[11px] text-slate-400 block">${t.dvarTorahEditorLabel}</label>
+                <span id="dvar-torah-wordcount-${student.id}" class="text-[10px] text-indigo-300/80 font-mono">
+                  ${dvarTorahWordCount} ${isHe ? 'מילים' : 'words'} • ~${dvarTorahEstMinutes} ${isHe ? 'דק׳ קריאה' : 'min speech'}
+                </span>
+              </div>
+              <textarea
+                rows="6"
+                oninput="handleDvarTorahFieldChange('${student.id}', 'text', this.value)"
+                placeholder="${t.dvarTorahPlaceholder}"
+                class="w-full bg-slate-900/90 border border-indigo-900/40 rounded-lg p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-400 font-sans leading-relaxed resize-y"
+              >${escapeHtml(dt.text || '')}</textarea>
+            </div>
+
+            <!-- Attachments List (if any) -->
+            ${(dt.attachments && dt.attachments.length > 0) ? `
+              <div class="pt-2 border-t border-slate-800 space-y-1.5">
+                <span class="text-[10px] font-semibold text-slate-400 block">${t.dvarTorahAttachmentsTitle}</span>
+                <div class="space-y-1.5">
+                  ${dt.attachments.map(att => `
+                    <div class="p-2 rounded-lg bg-slate-900/80 border border-slate-800 flex items-center justify-between gap-2 text-xs">
+                      <div class="flex items-center gap-2 min-w-0">
+                        <i data-lucide="file" class="w-3.5 h-3.5 text-indigo-400 shrink-0"></i>
+                        <a href="${escapeHtml(att.url)}" download="${escapeHtml(att.name)}" class="text-indigo-300 hover:underline truncate font-medium" title="${escapeHtml(att.name)}">
+                          ${escapeHtml(att.name)}
+                        </a>
+                        <span class="text-[10px] text-slate-500 font-mono shrink-0">${att.size || ''}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onclick="deleteDvarTorahAttachment('${student.id}', '${att.id}')"
+                        class="text-slate-500 hover:text-red-400 p-1 rounded transition shrink-0"
+                        title="Remove file"
+                      >
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                      </button>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+
+        // Card 4: Custom Goals Checklist (Universal Permanent)
+        const cardCustomGoalsHtml = `
+          <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+                <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+                <span>${t.customGoalsTitle}</span>
+                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-800">
+                  ${goals.filter(g => g.completed).length}/${goals.length}
+                </span>
+              </span>
+              <button
+                type="button"
+                onclick="promptAddStudentCustomGoal('${student.id}')"
+                class="text-emerald-400 hover:text-emerald-300 text-[11px] font-semibold flex items-center gap-1"
+              >
+                <i data-lucide="plus" class="w-3 h-3"></i>
+                <span>${t.addCustomGoalBtn}</span>
+              </button>
+            </div>
+
+            <div class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+              ${goals.length === 0 ? `
+                <p class="text-[11px] text-slate-500 italic py-2">${isHe ? 'אין יעדים מיוחדים עדיין. לחץ + להוספה.' : 'No custom goals yet. Click + to add.'}</p>
+              ` : goals.map(g => `
+                <div class="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-slate-900/60 border border-slate-800/80 text-xs">
+                  <label class="flex items-center gap-2 cursor-pointer min-w-0 select-none">
+                    <input
+                      type="checkbox"
+                      ${g.completed ? 'checked' : ''}
+                      onchange="toggleStudentCustomGoal('${student.id}', '${g.id}')"
+                      class="rounded border-slate-700 text-emerald-600 focus:ring-emerald-500 bg-slate-950 w-3.5 h-3.5"
+                    />
+                    <span class="truncate ${g.completed ? 'line-through text-slate-500' : 'text-slate-200'}">${escapeHtml(g.title)}</span>
+                  </label>
+                  <button
+                    type="button"
+                    onclick="deleteStudentCustomGoal('${student.id}', '${g.id}')"
+                    class="text-slate-500 hover:text-red-400 p-0.5"
+                  >
+                    <i data-lucide="trash-2" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+
+        // Assemble Skills Section
+        let skillsCardsHtml = '';
+        if (em.reading !== false) {
+          skillsCardsHtml += cardHebrewReadingHtml + cardParshaReadingHtml;
+        }
+        if (em.speech !== false) {
+          skillsCardsHtml += cardDvarTorahHtml;
+        }
+        skillsCardsHtml += cardCustomGoalsHtml;
+
         const skillsSectionHtml = `
           <!-- Core Ceremony Skills & Daily Learning Section -->
           <div class="space-y-3">
@@ -7157,386 +8031,16 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
               <span class="text-[10px] text-slate-500 font-mono font-normal">Auto-saves to cloud</span>
             </div>
 
-            <!-- 2-Column Skills Cards Grid -->
+            <!-- Skills Cards Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <!-- Card 1: Hebrew Reading & Booklets (Simplified & Clean) -->
-              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-                    <i data-lucide="book-marked" class="w-3.5 h-3.5"></i>
-                    <span>${t.hebrewReadingTitle}</span>
-                  </span>
-                  <span class="text-[10px] text-slate-500 font-mono">Booklet Level</span>
-                </div>
-
-                <!-- 4 Leveled Booklets by Color (Clean Segmented Control) -->
-                <div class="grid grid-cols-4 gap-1 p-1 bg-slate-900 rounded-xl border border-slate-800 text-xs">
-                  ${[
-                    { id: 'Red Booklet', label: isHe ? 'אדומה' : 'Red', dot: 'bg-red-500', active: 'bg-red-600/30 text-red-200 border-red-500/50 shadow-sm' },
-                    { id: 'Orange Booklet', label: isHe ? 'כתומה' : 'Orange', dot: 'bg-orange-500', active: 'bg-orange-600/30 text-orange-200 border-orange-500/50 shadow-sm' },
-                    { id: 'Yellow Booklet', label: isHe ? 'צהובה' : 'Yellow', dot: 'bg-amber-400', active: 'bg-amber-500/30 text-amber-200 border-amber-400/50 shadow-sm' },
-                    { id: 'Green Booklet', label: isHe ? 'ירוקה' : 'Green', dot: 'bg-emerald-500', active: 'bg-emerald-600/30 text-emerald-200 border-emerald-500/50 shadow-sm' }
-                  ].map(b => {
-                    const isSelected = hr.booklet && (hr.booklet.includes(b.id.split(' ')[0]) || (isHe && hr.booklet.includes(b.label)));
-                    return `
-                      <button
-                        type="button"
-                        onclick="setStudentBooklet('${student.id}', '${b.id}')"
-                        class="py-2 px-1.5 min-h-[38px] rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition border ${
-                          isSelected
-                            ? b.active + ' font-bold'
-                            : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                        }"
-                      >
-                        <span class="w-2 h-2 rounded-full ${b.dot} shrink-0"></span>
-                        <span>${b.label}</span>
-                      </button>
-                    `;
-                  }).join('')}
-                </div>
-
-                <!-- Page Number, Letter Selector, and Vowel Selector in Clean Grid -->
-                <div class="grid grid-cols-3 gap-2">
-                  <!-- Page Number -->
-                  <div class="space-y-1">
-                    <label class="text-[11px] text-slate-400 block">${t.hebrewPageLabel}</label>
-                    <input
-                      type="text"
-                      value="${escapeHtml(hr.currentPage || '')}"
-                      onchange="handleSkillFieldChange('${student.id}', 'hebrewReading', 'currentPage', this.value)"
-                      placeholder="e.g. 14"
-                      class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
-                    />
-                  </div>
-
-                  <!-- Hebrew Letter Picker -->
-                  <div class="space-y-1">
-                    <label class="text-[11px] text-slate-400 block">${isHe ? 'אות' : 'Letter'}</label>
-                    <select
-                      onchange="selectStudentLetter('${student.id}', this.value)"
-                      class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2 py-2 min-h-[38px] text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium truncate"
-                    >
-                      <option value="">-- ${isHe ? 'ללא אות' : 'None'} --</option>
-                      ${HEBREW_LETTERS_LIST.map(lt => `
-                        <option value="${lt.name}" ${(hr.letter === lt.name || hr.letter === lt.he) ? 'selected' : ''}>
-                          ${lt.name}
-                        </option>
-                      `).join('')}
-                    </select>
-                  </div>
-
-                  <!-- Hebrew Vowel Picker -->
-                  <div class="space-y-1">
-                    <label class="text-[11px] text-slate-400 block">${isHe ? 'ניקוד' : 'Vowel'}</label>
-                    <select
-                      onchange="selectStudentVowel('${student.id}', this.value)"
-                      class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2 py-2 min-h-[38px] text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium truncate"
-                    >
-                      <option value="">-- ${isHe ? 'ללא ניקוד' : 'None'} --</option>
-                      ${HEBREW_VOWELS_LIST.map(vw => `
-                        <option value="${vw.display}" ${(hr.vowel === vw.display || hr.vowel === vw.he) ? 'selected' : ''}>
-                          ${vw.display}
-                        </option>
-                      `).join('')}
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Live Status Holding Pill -->
-                <div class="text-[11px] text-amber-200/90 font-mono bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800 flex items-center justify-between gap-2">
-                  <span class="truncate">
-                    📖 ${escapeHtml(hr.booklet || (isHe ? 'חוברת אדומה' : 'Red Booklet'))} ${hr.currentPage ? ('• ' + (isHe ? 'עמ׳ ' : 'p. ') + escapeHtml(hr.currentPage)) : ''} ${hr.letterOrVowel ? ('• ' + escapeHtml(hr.letterOrVowel)) : ''}
-                  </span>
-                  <span class="text-[9px] text-emerald-400 font-sans font-bold shrink-0">✓ Live</span>
-                </div>
-              </div>
-
-              <!-- Card 2: Parsha Reading & Trope -->
-              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
-                    <i data-lucide="scroll" class="w-3.5 h-3.5"></i>
-                    <span>${t.parshaReadingTitle}</span>
-                  </span>
-                  <span class="text-[10px] text-slate-500 font-mono">Torah</span>
-                </div>
-
-                <!-- Top: Torah Parsha -->
-                <div class="p-2.5 rounded-lg bg-cyan-950/30 border border-cyan-800/40 space-y-1">
-                  <div class="flex items-center justify-between">
-                    <label class="text-[11px] font-semibold text-cyan-300 flex items-center gap-1.5">
-                      <i data-lucide="book-open" class="w-3 h-3 text-cyan-400"></i>
-                      <span>${t.parshaNameLabel}</span>
-                    </label>
-                    <span class="text-[9px] text-cyan-400/80 font-mono">Syncs Profile</span>
-                  </div>
-                  <input
-                    type="text"
-                    value="${escapeHtml(pr.parshaName || student.parshaOrDate || '')}"
-                    oninput="handleStudentParshaChange('${student.id}', this.value)"
-                    placeholder="${t.parshaNamePlaceholder}"
-                    class="w-full bg-slate-900 border border-cyan-700/50 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-400 font-medium"
-                  />
-                </div>
-
-                <div class="space-y-1">
-                  <label class="text-[11px] text-slate-400 block">${t.parshaAliyahLabel}</label>
-                  <select
-                    onchange="handleSkillFieldChange('${student.id}', 'parshaReading', 'aliyah', this.value)"
-                    class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                  >
-                    ${['Aliyah 1', 'Aliyah 2', 'Aliyah 3', 'Aliyah 4', 'Aliyah 5', 'Aliyah 6', 'Aliyah 7', 'Maftir & Haftarah'].map(al => `
-                      <option value="${al}" ${(pr.aliyah === al) ? 'selected' : ''}>${al}</option>
-                    `).join('')}
-                  </select>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
-                  <div class="space-y-1">
-                    <label class="text-[11px] text-slate-400 block">${t.parshaLinesMasteredLabel}</label>
-                    <input
-                      type="text"
-                      value="${escapeHtml(pr.linesLearned || '')}"
-                      onchange="handleSkillFieldChange('${student.id}', 'parshaReading', 'linesLearned', this.value)"
-                      placeholder="e.g. Lines 1-8"
-                      class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                    />
-                  </div>
-                  <div class="space-y-1">
-                    <label class="text-[11px] text-slate-400 block">${t.parshaCurrentLineLabel}</label>
-                    <input
-                      type="text"
-                      value="${escapeHtml(pr.currentLine || '')}"
-                      onchange="handleSkillFieldChange('${student.id}', 'parshaReading', 'currentLine', this.value)"
-                      placeholder="e.g. Line 9"
-                      class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono"
-                    />
-                  </div>
-                </div>
-
-                <!-- Bottom: Recordings of Reading & Trope -->
-                <div class="pt-2 border-t border-slate-800 space-y-2">
-                  <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
-                      <i data-lucide="mic" class="w-3.5 h-3.5 text-cyan-400"></i>
-                      <span>${t.parshaRecordingsTitle}</span>
-                    </span>
-                    <div class="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onclick="triggerParshaAudioUpload('${student.id}', event)"
-                        class="px-2 py-1 bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-200 border border-cyan-500/40 rounded text-[11px] font-medium flex items-center gap-1 transition"
-                        title="${t.uploadAudioBtn}"
-                      >
-                        <i data-lucide="upload" class="w-3 h-3"></i>
-                        <span>${t.uploadAudioBtn}</span>
-                      </button>
-                      <button
-                        type="button"
-                        onclick="promptAddParshaAudioLink('${student.id}')"
-                        class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded text-[11px] font-medium flex items-center gap-1 transition"
-                        title="${t.addAudioLinkBtn}"
-                      >
-                        <i data-lucide="link" class="w-3 h-3"></i>
-                        <span>${t.addAudioLinkBtn}</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <!-- Audio Recordings List -->
-                  ${(!pr.recordings || pr.recordings.length === 0) ? `
-                    <div class="p-3 rounded-lg border border-dashed border-slate-800 bg-slate-900/40 text-center">
-                      <p class="text-[11px] text-slate-500">${t.noRecordingsYet}</p>
-                    </div>
-                  ` : `
-                    <div class="space-y-2">
-                      ${pr.recordings.map((rec) => `
-                        <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800/90 space-y-1.5 shadow-sm">
-                          <div class="flex items-center justify-between gap-2">
-                            <div class="flex items-center gap-1.5 min-w-0">
-                              <span class="w-1.5 h-1.5 rounded-full ${rec.type === 'link' ? 'bg-indigo-400' : 'bg-cyan-400'} shrink-0"></span>
-                              <span class="text-xs font-semibold text-slate-200 truncate" title="${escapeHtml(rec.title)}">${escapeHtml(rec.title)}</span>
-                              ${rec.date ? `<span class="text-[10px] text-slate-500 font-mono shrink-0">(${rec.date})</span>` : ''}
-                            </div>
-                            <button
-                              type="button"
-                              onclick="deleteParshaRecording('${student.id}', '${rec.id}')"
-                              class="text-slate-500 hover:text-red-400 p-1 rounded transition shrink-0"
-                              title="Delete recording"
-                            >
-                              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                            </button>
-                          </div>
-                          <audio controls preload="metadata" src="${escapeHtml(rec.url)}" class="w-full h-8 rounded mt-1 accent-cyan-500"></audio>
-                        </div>
-                      `).join('')}
-                    </div>
-                  `}
-                </div>
-              </div>
-
-              <!-- Card 3: Bar Mitzvah Dvar Torah -->
-              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
-                <!-- Header with Action Buttons -->
-                <div class="flex items-center justify-between gap-2 flex-wrap">
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
-                      <i data-lucide="file-text" class="w-3.5 h-3.5 text-indigo-400"></i>
-                      <span>${t.dvarTorahTitle}</span>
-                    </span>
-                    <span class="text-[10px] text-indigo-400/80 font-mono bg-indigo-950/40 px-1.5 py-0.5 rounded border border-indigo-800/40">Drash</span>
-                  </div>
-
-                  <div class="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onclick="triggerDvarTorahUpload('${student.id}', event)"
-                      class="px-2 py-1 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 rounded text-[11px] font-medium flex items-center gap-1 transition"
-                      title="${t.uploadDvarTorahBtn}"
-                    >
-                      <i data-lucide="upload" class="w-3 h-3"></i>
-                      <span>${t.uploadDvarTorahBtn}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onclick="copyStudentDvarTorah('${student.id}')"
-                      class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded text-[11px] font-medium flex items-center gap-1 transition"
-                      title="${t.copyDvarTorahBtn}"
-                    >
-                      <i data-lucide="copy" class="w-3 h-3"></i>
-                      <span>${t.copyDvarTorahBtn}</span>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Topic & Stage Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <div class="space-y-1">
-                    <label class="text-[11px] text-slate-400 block">${t.dvarTorahTopicLabel}</label>
-                    <input
-                      type="text"
-                      value="${escapeHtml(dt.topic || '')}"
-                      oninput="handleDvarTorahFieldChange('${student.id}', 'topic', this.value)"
-                      placeholder="${t.dvarTorahTopicPlaceholder}"
-                      class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    />
-                  </div>
-
-                  <div class="space-y-1">
-                    <label class="text-[11px] text-slate-400 block">${t.dvarTorahStageLabel}</label>
-                    <select
-                      onchange="handleDvarTorahFieldChange('${student.id}', 'stage', this.value)"
-                      class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    >
-                      ${[
-                        { id: 'Outline & Ideas', label: isHe ? 'ראשי פרקים ורעיונות' : 'Outline & Ideas' },
-                        { id: 'Drafting Speech', label: isHe ? 'כתיבת הטיוטה' : 'Drafting Speech' },
-                        { id: 'Editing & Polishing', label: isHe ? 'עריכה ותיקונים' : 'Editing & Polishing' },
-                        { id: 'Practicing Delivery & Speed', label: isHe ? 'אימון והקראה בקול' : 'Practicing Delivery & Speed' },
-                        { id: 'Mastered & Ready', label: isHe ? 'מוכן לבר המצווה' : 'Mastered & Ready' }
-                      ].map(st => `
-                        <option value="${st.id}" ${(dt.stage === st.id) ? 'selected' : ''}>${st.label}</option>
-                      `).join('')}
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Dvar Torah Textarea Editor -->
-                <div class="space-y-1">
-                  <div class="flex items-center justify-between">
-                    <label class="text-[11px] text-slate-400 block">${t.dvarTorahEditorLabel}</label>
-                    <span id="dvar-torah-wordcount-${student.id}" class="text-[10px] text-indigo-300/80 font-mono">
-                      ${dvarTorahWordCount} ${isHe ? 'מילים' : 'words'} • ~${dvarTorahEstMinutes} ${isHe ? 'דק׳ קריאה' : 'min speech'}
-                    </span>
-                  </div>
-                  <textarea
-                    rows="6"
-                    oninput="handleDvarTorahFieldChange('${student.id}', 'text', this.value)"
-                    placeholder="${t.dvarTorahPlaceholder}"
-                    class="w-full bg-slate-900/90 border border-indigo-900/40 rounded-lg p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-400 font-sans leading-relaxed resize-y"
-                  >${escapeHtml(dt.text || '')}</textarea>
-                </div>
-
-                <!-- Attachments List (if any) -->
-                ${(dt.attachments && dt.attachments.length > 0) ? `
-                  <div class="pt-2 border-t border-slate-800 space-y-1.5">
-                    <span class="text-[10px] font-semibold text-slate-400 block">${t.dvarTorahAttachmentsTitle}</span>
-                    <div class="space-y-1.5">
-                      ${dt.attachments.map(att => `
-                        <div class="p-2 rounded-lg bg-slate-900/80 border border-slate-800 flex items-center justify-between gap-2 text-xs">
-                          <div class="flex items-center gap-2 min-w-0">
-                            <i data-lucide="file" class="w-3.5 h-3.5 text-indigo-400 shrink-0"></i>
-                            <a href="${escapeHtml(att.url)}" download="${escapeHtml(att.name)}" class="text-indigo-300 hover:underline truncate font-medium" title="${escapeHtml(att.name)}">
-                              ${escapeHtml(att.name)}
-                            </a>
-                            <span class="text-[10px] text-slate-500 font-mono shrink-0">${att.size || ''}</span>
-                          </div>
-                          <button
-                            type="button"
-                            onclick="deleteDvarTorahAttachment('${student.id}', '${att.id}')"
-                            class="text-slate-500 hover:text-red-400 p-1 rounded transition shrink-0"
-                            title="Remove file"
-                          >
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                          </button>
-                        </div>
-                      `).join('')}
-                    </div>
-                  </div>
-                ` : ''}
-              </div>
-
-              <!-- Card 4: Custom Goals Checklist -->
-              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
-                    <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
-                    <span>${t.customGoalsTitle}</span>
-                    <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-800">
-                      ${goals.filter(g => g.completed).length}/${goals.length}
-                    </span>
-                  </span>
-                  <button
-                    type="button"
-                    onclick="promptAddStudentCustomGoal('${student.id}')"
-                    class="text-emerald-400 hover:text-emerald-300 text-[11px] font-semibold flex items-center gap-1"
-                  >
-                    <i data-lucide="plus" class="w-3 h-3"></i>
-                    <span>${t.addCustomGoalBtn}</span>
-                  </button>
-                </div>
-
-                <div class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
-                  ${goals.length === 0 ? `
-                    <p class="text-[11px] text-slate-500 italic py-2">${isHe ? 'אין יעדים מיוחדים עדיין. לחץ + להוספה.' : 'No custom goals yet. Click + to add.'}</p>
-                  ` : goals.map(g => `
-                    <div class="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-slate-900/60 border border-slate-800/80 text-xs">
-                      <label class="flex items-center gap-2 cursor-pointer min-w-0 select-none">
-                        <input
-                          type="checkbox"
-                          ${g.completed ? 'checked' : ''}
-                          onchange="toggleStudentCustomGoal('${student.id}', '${g.id}')"
-                          class="rounded border-slate-700 text-emerald-600 focus:ring-emerald-500 bg-slate-950 w-3.5 h-3.5"
-                        />
-                        <span class="truncate ${g.completed ? 'line-through text-slate-500' : 'text-slate-200'}">${escapeHtml(g.title)}</span>
-                      </label>
-                      <button
-                        type="button"
-                        onclick="deleteStudentCustomGoal('${student.id}', '${g.id}')"
-                        class="text-slate-500 hover:text-red-400 p-0.5"
-                      >
-                        <i data-lucide="trash-2" class="w-3 h-3"></i>
-                      </button>
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
+              ${skillsCardsHtml}
             </div>
           </div>
         `;
 
         body.innerHTML = `
           ${homeworkBannerHtml}
+          ${curriculumTracksBarHtml}
           ${skillsSectionHtml}
 
           <!-- Collaborative Notes Editor -->
@@ -7564,6 +8068,7 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
             </div>
           </div>
 
+          ${em.lessons !== false ? `
           <!-- Filter View Toggle -->
           <div class="flex items-center justify-between border-b border-slate-800/80 pb-3 gap-2 flex-wrap sm:flex-nowrap">
             <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs overflow-x-auto no-scrollbar max-w-full">
@@ -7645,10 +8150,51 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
             </div>
           </div>
           ` : ''}
+          ` : ''}
+
+          <!-- Checklist: Custom Courses -->
+          ${(em.custom !== false && Array.isArray(APP_STATE.customCourses) && APP_STATE.customCourses.length > 0) ? `
+          <div class="space-y-3 pt-2">
+            ${APP_STATE.customCourses.map(course => {
+              const lessons = course.lessons || [];
+              const courseTitle = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
+              return `
+                <div class="space-y-2">
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <span>${courseTitle} (${lessons.length})</span>
+                  </h4>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                    ${lessons.map(ls => {
+                      const key = course.id + '_' + ls.id;
+                      const checked = !!(student.completedTopics && student.completedTopics[key]);
+                      const lsTitle = isHe ? (ls.title_he || ls.title_en) : (ls.title_en || ls.title_he);
+                      return `
+                        <div
+                          onclick="toggleTopicForStudent('${student.id}', '${key}', event)"
+                          class="cursor-pointer select-none px-3.5 py-2.5 rounded-xl border text-xs flex items-center justify-between gap-2.5 transition active:scale-98 ${
+                            checked
+                              ? 'bg-purple-950/50 border-purple-500/50 text-purple-200 shadow-sm'
+                              : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
+                          }"
+                        >
+                          <span class="truncate font-medium">${lsTitle}</span>
+                          <i data-lucide="${checked ? 'check-circle-2' : 'circle'}" class="w-4 h-4 shrink-0 ${checked ? 'text-purple-400' : 'text-slate-600'}"></i>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          ` : ''}
         `;
       }
 
-      lucide.createIcons();
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
     }
 
     function isTopicCompleted(studentId, topicId) {
