@@ -4191,11 +4191,25 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     async function handleGoogleSignIn() {
+      const isHe = APP_STATE.lang === 'he';
+      const formSignIn = document.getElementById('form-auth-signin');
+      const isSignInTab = formSignIn && !formSignIn.classList.contains('hidden');
+      const errBox = document.getElementById(isSignInTab ? 'signin-error' : 'signup-error');
+      const errText = document.getElementById(isSignInTab ? 'signin-error-text' : 'signup-error-text');
+      const emailInput = document.getElementById(isSignInTab ? 'signin-email' : 'signup-email');
+
+      if (errBox) errBox.classList.add('hidden');
+
       const client = getSupabaseAuthClient();
       if (!client || !client.auth) {
-        showToast(APP_STATE.lang === 'he' ? 'שירות ההתחברות אינו זמין כרגע' : 'Auth service unavailable');
+        if (errBox && errText) {
+          errText.textContent = isHe ? 'שירות האימות אינו זמין כרגע' : 'Auth service unavailable';
+          errBox.classList.remove('hidden');
+        }
+        showToast(isHe ? 'שירות ההתחברות אינו זמין כרגע' : 'Auth service unavailable');
         return;
       }
+
       try {
         const { data, error } = await client.auth.signInWithOAuth({
           provider: 'google',
@@ -4206,7 +4220,20 @@ alter publication supabase_realtime add table public.students_sync;`;
         if (error) throw error;
       } catch (err) {
         console.error('Google Sign In Error:', err);
-        showToast(err.message || 'Google sign in failed');
+        const userMsg = isHe
+          ? 'התחברות באמצעות גוגל טרם הופעלה בפרויקט Supabase. נא להזין אימייל למטה לקבלת קוד אימות בן 6 ספרות.'
+          : 'Google Sign-In is not configured in your Supabase dashboard yet. Please enter your email below to receive your 6-digit verification code.';
+
+        if (errBox && errText) {
+          errText.textContent = userMsg;
+          errBox.classList.remove('hidden');
+        }
+        showToast(userMsg);
+        if (emailInput) {
+          emailInput.focus();
+          emailInput.classList.add('ring-2', 'ring-brand-500');
+          setTimeout(() => emailInput.classList.remove('ring-2', 'ring-brand-500'), 2500);
+        }
       }
     }
 
