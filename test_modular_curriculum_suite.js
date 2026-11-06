@@ -219,6 +219,91 @@ sandbox.renderLessonsCategoryView();
 assert(tutorHub.classList.contains('hidden'), 'Master account has tutor hub hidden');
 assert(!secConcepts.classList.contains('hidden'), 'Master account has Jewish Concepts unhidden');
 
+// Gate 7: Reading & Speech Multi-Tenant Isolation
+console.log('\n--- Gate 7: Reading & Speech Multi-Tenant Isolation ---');
+assert(typeof sandbox.getCustomReadingStorageKey === 'function', 'getCustomReadingStorageKey is a function');
+assert(typeof sandbox.getCustomMilestonesStorageKey === 'function', 'getCustomMilestonesStorageKey is a function');
+
+// Test reading & milestone storage key scoping
+sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
+assert(sandbox.getCustomReadingStorageKey() === 'tutor_custom_reading', 'Master reading storage key is unscoped');
+assert(sandbox.getCustomMilestonesStorageKey() === 'tutor_custom_milestones', 'Master milestones storage key is unscoped');
+
+sandbox.APP_STATE.currentUser = { email: 'science_tutor@academy.org' };
+assert(sandbox.getCustomReadingStorageKey() === 'tutor_custom_reading_science_tutor_academy_org', 'External reading storage key is scoped');
+assert(sandbox.getCustomMilestonesStorageKey() === 'tutor_custom_milestones_science_tutor_academy_org', 'External milestones storage key is scoped');
+
+// Test Reading View Isolation
+sandbox.APP_STATE.currentUser = { email: 'science_tutor@academy.org' };
+sandbox.APP_STATE.customReadingMaterials = [];
+sandbox.renderReadingCategoryView();
+const masterReadingContent = getOrCreateElem('study-reading-master-content');
+const tutorReadingHub = getOrCreateElem('study-reading-tutor-hub');
+const tutorReadingBlank = getOrCreateElem('tutor-reading-blank-state');
+assert(masterReadingContent.classList.contains('hidden'), 'External tutor has master reading content hidden');
+assert(!tutorReadingHub.classList.contains('hidden'), 'External tutor has reading tutor hub unhidden');
+assert(!tutorReadingBlank.classList.contains('hidden'), 'External tutor with 0 reading units sees blank state');
+
+sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
+sandbox.renderReadingCategoryView();
+assert(!masterReadingContent.classList.contains('hidden'), 'Master account has master reading content unhidden');
+assert(tutorReadingHub.classList.contains('hidden'), 'Master account has reading tutor hub hidden');
+
+// Test Speech View Isolation
+sandbox.APP_STATE.currentUser = { email: 'science_tutor@academy.org' };
+sandbox.APP_STATE.customMilestones = [];
+sandbox.renderSpeechCategoryView();
+const masterSpeechContent = getOrCreateElem('study-speech-master-content');
+const tutorSpeechHub = getOrCreateElem('study-speech-tutor-hub');
+const tutorSpeechBlank = getOrCreateElem('tutor-speech-blank-state');
+assert(masterSpeechContent.classList.contains('hidden'), 'External tutor has master speech content hidden');
+assert(!tutorSpeechHub.classList.contains('hidden'), 'External tutor has speech tutor hub unhidden');
+assert(!tutorSpeechBlank.classList.contains('hidden'), 'External tutor with 0 milestones sees blank state');
+
+sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
+sandbox.renderSpeechCategoryView();
+assert(!masterSpeechContent.classList.contains('hidden'), 'Master account has master speech content unhidden');
+assert(tutorSpeechHub.classList.contains('hidden'), 'Master account has speech tutor hub hidden');
+
+// Gate 8: Authoring Modals & Student Drawer Synchronization
+console.log('\n--- Gate 8: Authoring Modals & Student Drawer Synchronization ---');
+assert(indexHtml.includes('modal-add-custom-reading'), 'HTML contains modal-add-custom-reading');
+assert(indexHtml.includes('modal-ai-reading-builder'), 'HTML contains modal-ai-reading-builder');
+assert(indexHtml.includes('modal-add-custom-milestone'), 'HTML contains modal-add-custom-milestone');
+assert(indexHtml.includes('modal-ai-milestone-builder'), 'HTML contains modal-ai-milestone-builder');
+
+assert(typeof sandbox.openAddCustomReadingModal === 'function', 'openAddCustomReadingModal is a function');
+assert(typeof sandbox.openAiReadingBuilderModal === 'function', 'openAiReadingBuilderModal is a function');
+assert(typeof sandbox.openAddCustomMilestoneModal === 'function', 'openAddCustomMilestoneModal is a function');
+assert(typeof sandbox.openAiMilestoneBuilderModal === 'function', 'openAiMilestoneBuilderModal is a function');
+
+// Test active units rendering when external tutor has content
+sandbox.APP_STATE.currentUser = { email: 'science_tutor@academy.org' };
+sandbox.APP_STATE.customReadingMaterials = [
+  { id: 'unit_1', title: 'Level 1: Phonics', badge: 'Level 1', color: 'red', description: 'CVC words', targets: ['cat', 'bat'] }
+];
+sandbox.renderReadingCategoryView();
+assert(tutorReadingBlank.classList.contains('hidden'), 'External tutor with reading units hides blank state');
+
+sandbox.APP_STATE.customMilestones = [
+  { id: 'stage_1', stage_num: 1, title: 'Stage 1: Outline', guidance: 'Thesis and outline', deliverables: ['Draft'] }
+];
+sandbox.renderSpeechCategoryView();
+assert(tutorSpeechBlank.classList.contains('hidden'), 'External tutor with milestones hides blank state');
+
+// Test student drawer custom cards
+const testExtStudent = {
+  id: 'std_ext_test',
+  name: 'Sam Wilson',
+  enrolledModules: { lessons: true, reading: true, speech: true, custom: true },
+  skills: { customReading: { levelId: 'unit_1' }, customSpeech: { topic: 'Mars Rover' } }
+};
+const customReadingCardHtml = sandbox.renderStudentCustomReadingCard(testExtStudent);
+assert(customReadingCardHtml.includes('Level 1: Phonics') || customReadingCardHtml.includes('Level 1'), 'Custom reading card renders tutor level badge');
+
+const customSpeechCardHtml = sandbox.renderStudentCustomSpeechCard(testExtStudent);
+assert(customSpeechCardHtml.includes('Mars Rover') || customSpeechCardHtml.includes('Stage 1: Outline'), 'Custom speech card renders tutor topic and stages');
+
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
 console.log(`========================================\n`);

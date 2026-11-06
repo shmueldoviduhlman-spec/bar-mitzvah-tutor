@@ -441,21 +441,21 @@
     <!-- ============================================== -->
     <section id="view-study" class="space-y-6">
 
-      <!-- Study Top Category Tabs (4 Core Pillars) -->
+      <!-- Study Top Category Tabs (3 Unified Sections) -->
       <div class="max-w-4xl mx-auto flex items-center justify-between gap-1.5 p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-lg backdrop-blur overflow-x-auto no-scrollbar">
         <button onclick="switchStudyCategory('lessons')" id="btn-study-cat-lessons" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition active:scale-95 bg-brand-600 text-white shadow-sm whitespace-nowrap">
           <i data-lucide="book-open" class="w-4 h-4"></i>
-          <span id="lbl-study-cat-lessons">Lessons & Texts</span>
+          <span id="lbl-study-cat-lessons">Lessons & Classes</span>
         </button>
         <button onclick="switchStudyCategory('reading')" id="btn-study-cat-reading" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap">
           <i data-lucide="book-marked" class="w-4 h-4"></i>
-          <span id="lbl-study-cat-reading">Reading & Fluency</span>
+          <span id="lbl-study-cat-reading">Reading & Skills</span>
         </button>
         <button onclick="switchStudyCategory('speech')" id="btn-study-cat-speech" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap">
           <i data-lucide="mic" class="w-4 h-4"></i>
           <span id="lbl-study-cat-speech">Speech & Capstone</span>
         </button>
-        <button onclick="switchStudyCategory('custom')" id="btn-study-cat-custom" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap">
+        <button onclick="switchStudyCategory('custom')" id="btn-study-cat-custom" class="hidden flex-1 items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap">
           <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
           <span id="lbl-study-cat-custom">Custom & AI Courses</span>
         </button>
@@ -566,111 +566,170 @@
       <!-- CATEGORY 2: READING & FLUENCY                  -->
       <!-- ============================================== -->
       <div id="study-category-reading" class="space-y-6 hidden">
-        <!-- Section Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-          <div>
-            <h2 id="reading-head-title" class="text-xl font-bold text-white flex items-center gap-2">
-              <span class="text-amber-400">📖</span>
-              <span id="lbl-reading-hub-title">Reading & Fluency Program</span>
-            </h2>
-            <p id="reading-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
-              Leveled reading progressions, Hebrew letters and vowels chart, pronunciation benchmarks, and audio recordings.
-            </p>
+        <!-- Master Reading Content (Bar Mitzvah) -->
+        <div id="study-reading-master-content" class="space-y-6">
+          <!-- Section Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+            <div>
+              <h2 id="reading-head-title" class="text-xl font-bold text-white flex items-center gap-2">
+                <span class="text-amber-400">📖</span>
+                <span id="lbl-reading-hub-title">Reading & Fluency Program</span>
+              </h2>
+              <p id="reading-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
+                Leveled reading progressions, Hebrew letters and vowels chart, pronunciation benchmarks, and audio recordings.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="switchTab('students')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition active:scale-95 shadow-sm">
+                <i data-lucide="users" class="w-3.5 h-3.5 text-brand-400"></i>
+                <span>View Students</span>
+              </button>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <button onclick="switchTab('students')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition active:scale-95 shadow-sm">
-              <i data-lucide="users" class="w-3.5 h-3.5 text-brand-400"></i>
-              <span>View Students</span>
-            </button>
+
+          <div class="space-y-6 max-w-4xl mx-auto">
+            <!-- 4 Leveled Booklets Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="p-4 rounded-2xl bg-slate-900/90 border border-red-500/30 space-y-2 shadow-md">
+                <div class="flex items-center justify-between">
+                  <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                  <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-300">Level 1</span>
+                </div>
+                <h3 class="text-sm font-bold text-white">Red Booklet</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">Letter recognition, basic shapes, and foundational phonetic sounds.</p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-slate-900/90 border border-orange-500/30 space-y-2 shadow-md">
+                <div class="flex items-center justify-between">
+                  <span class="w-3 h-3 rounded-full bg-orange-500"></span>
+                  <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300">Level 2</span>
+                </div>
+                <h3 class="text-sm font-bold text-white">Orange Booklet</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">Vowel mastery, 2-letter syllables, and Kamatz/Patach blending.</p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-slate-900/90 border border-amber-400/30 space-y-2 shadow-md">
+                <div class="flex items-center justify-between">
+                  <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+                  <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300">Level 3</span>
+                </div>
+                <h3 class="text-sm font-bold text-white">Yellow Booklet</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">Multi-syllable word fluency, Dagesh rules, and pace acceleration.</p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-slate-900/90 border border-emerald-500/30 space-y-2 shadow-md">
+                <div class="flex items-center justify-between">
+                  <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                  <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">Level 4</span>
+                </div>
+                <h3 class="text-sm font-bold text-white">Green Booklet</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">Full paragraph fluency, Siddur tefillot, and Torah chanting readiness.</p>
+              </div>
+            </div>
+
+            <!-- Letters and Vowels Matrix Card -->
+            <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 shadow-lg">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span class="text-amber-400">אב</span> Hebrew Letter & Vowel Mastery Chart
+                  </h3>
+                  <p class="text-xs text-slate-400 mt-0.5">Tutoring reference matrix for quick student diagnosis and live drill testing.</p>
+                </div>
+                <span class="text-[11px] font-mono text-slate-500">22 Letters • 9 Vowels</span>
+              </div>
+
+              <!-- Letters Row -->
+              <div class="space-y-1.5">
+                <span class="text-[11px] font-semibold text-slate-400 block uppercase tracking-wider">Letters (אותיות)</span>
+                <div class="flex flex-wrap gap-1.5 text-center" id="study-letters-reference-grid">
+                  <!-- Injected via script or static elements -->
+                </div>
+              </div>
+
+              <!-- Vowels Row -->
+              <div class="space-y-1.5 pt-2 border-t border-slate-800/80">
+                <span class="text-[11px] font-semibold text-slate-400 block uppercase tracking-wider">Vowels (תנועות וניקוד)</span>
+                <div class="flex flex-wrap gap-1.5" id="study-vowels-reference-grid">
+                  <!-- Injected via script or static elements -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Torah Parsha Reading & Trope Audio Studio Card -->
+            <div class="p-5 rounded-2xl bg-slate-900/90 border border-cyan-800/40 space-y-3 shadow-lg">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center justify-center font-bold">
+                    <i data-lucide="scroll" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-bold text-white">Torah Parsha & Trope Studio</h3>
+                    <p class="text-xs text-slate-400">Cantillation melodies, aliyot pacing, and voice recordings per student.</p>
+                  </div>
+                </div>
+                <span class="text-xs font-mono text-cyan-300 bg-cyan-950/60 px-2.5 py-1 rounded-lg border border-cyan-800/50">Trope & Voice Memos</span>
+              </div>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Every student profile features a dedicated Torah Reading & Audio Studio. Tutors can upload voice memos of the Torah portion chanting, add YouTube/MP3 links, and track exactly how many lines the student has mastered for each Aliyah.
+              </p>
+            </div>
           </div>
         </div>
 
-        <div class="space-y-6 max-w-4xl mx-auto">
-          <!-- 4 Leveled Booklets Cards -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-            <div class="p-4 rounded-2xl bg-slate-900/90 border border-red-500/30 space-y-2 shadow-md">
-              <div class="flex items-center justify-between">
-                <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-300">Level 1</span>
+        <!-- External Tutor Reading Hub (Multi-Tenant Blank/Custom View) -->
+        <div id="study-reading-tutor-hub" class="space-y-6 hidden">
+          <!-- External Tutor Reading Header with AI & Add Tools -->
+          <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2.5 sm:p-3 shadow-lg backdrop-blur flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 max-w-4xl mx-auto">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center font-bold">
+                <i data-lucide="book-marked" class="w-5 h-5"></i>
               </div>
-              <h3 class="text-sm font-bold text-white">Red Booklet</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">Letter recognition, basic shapes, and foundational phonetic sounds.</p>
-            </div>
-
-            <div class="p-4 rounded-2xl bg-slate-900/90 border border-orange-500/30 space-y-2 shadow-md">
-              <div class="flex items-center justify-between">
-                <span class="w-3 h-3 rounded-full bg-orange-500"></span>
-                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300">Level 2</span>
-              </div>
-              <h3 class="text-sm font-bold text-white">Orange Booklet</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">Vowel mastery, 2-letter syllables, and Kamatz/Patach blending.</p>
-            </div>
-
-            <div class="p-4 rounded-2xl bg-slate-900/90 border border-amber-400/30 space-y-2 shadow-md">
-              <div class="flex items-center justify-between">
-                <span class="w-3 h-3 rounded-full bg-amber-400"></span>
-                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300">Level 3</span>
-              </div>
-              <h3 class="text-sm font-bold text-white">Yellow Booklet</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">Multi-syllable word fluency, Dagesh rules, and pace acceleration.</p>
-            </div>
-
-            <div class="p-4 rounded-2xl bg-slate-900/90 border border-emerald-500/30 space-y-2 shadow-md">
-              <div class="flex items-center justify-between">
-                <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
-                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">Level 4</span>
-              </div>
-              <h3 class="text-sm font-bold text-white">Green Booklet</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">Full paragraph fluency, Siddur tefillot, and Torah chanting readiness.</p>
-            </div>
-          </div>
-
-          <!-- Letters and Vowels Matrix Card -->
-          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 shadow-lg">
-            <div class="flex items-center justify-between">
               <div>
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                  <span class="text-amber-400">אב</span> Hebrew Letter & Vowel Mastery Chart
+                <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-1.5">
+                  <span id="lbl-reading-hub-tutor-title">Reading & Skills Program</span>
                 </h3>
-                <p class="text-xs text-slate-400 mt-0.5">Tutoring reference matrix for quick student diagnosis and live drill testing.</p>
-              </div>
-              <span class="text-[11px] font-mono text-slate-500">22 Letters • 9 Vowels</span>
-            </div>
-
-            <!-- Letters Row -->
-            <div class="space-y-1.5">
-              <span class="text-[11px] font-semibold text-slate-400 block uppercase tracking-wider">Letters (אותיות)</span>
-              <div class="flex flex-wrap gap-1.5 text-center" id="study-letters-reference-grid">
-                <!-- Injected via script or static elements -->
+                <p class="text-[11px] text-slate-400">Leveled units, target vocabulary, and student fluency tracking</p>
               </div>
             </div>
-
-            <!-- Vowels Row -->
-            <div class="space-y-1.5 pt-2 border-t border-slate-800/80">
-              <span class="text-[11px] font-semibold text-slate-400 block uppercase tracking-wider">Vowels (תנועות וניקוד)</span>
-              <div class="flex flex-wrap gap-1.5" id="study-vowels-reference-grid">
-                <!-- Injected via script or static elements -->
-              </div>
+            <div class="flex items-center gap-2">
+              <button onclick="openAiReadingBuilderModal()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs shadow-md transition active:scale-95">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>AI Reading Builder</span>
+              </button>
+              <button onclick="openAddCustomReadingModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white border border-slate-700 transition active:scale-95 shadow-sm">
+                <i data-lucide="plus" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>+ Add Reading Unit</span>
+              </button>
             </div>
           </div>
 
-          <!-- Torah Parsha Reading & Trope Audio Studio Card -->
-          <div class="p-5 rounded-2xl bg-slate-900/90 border border-cyan-800/40 space-y-3 shadow-lg">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center justify-center font-bold">
-                  <i data-lucide="scroll" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <h3 class="text-sm font-bold text-white">Torah Parsha & Trope Studio</h3>
-                  <p class="text-xs text-slate-400">Cantillation melodies, aliyot pacing, and voice recordings per student.</p>
-                </div>
-              </div>
-              <span class="text-xs font-mono text-cyan-300 bg-cyan-950/60 px-2.5 py-1 rounded-lg border border-cyan-800/50">Trope & Voice Memos</span>
+          <!-- Blank State when external tutor has no reading units -->
+          <div id="tutor-reading-blank-state" class="text-center py-12 px-6 bg-slate-900/60 border border-slate-800 rounded-3xl max-w-2xl mx-auto space-y-5 shadow-xl backdrop-blur">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-600/20 to-brand-500/20 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+              <i data-lucide="book-marked" class="w-8 h-8"></i>
             </div>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              Every student profile features a dedicated Torah Reading & Audio Studio. Tutors can upload voice memos of the Torah portion chanting, add YouTube/MP3 links, and track exactly how many lines the student has mastered for each Aliyah.
-            </p>
+            <div class="space-y-2">
+              <h3 class="text-lg sm:text-xl font-bold text-white">Your Reading Program is Ready</h3>
+              <p class="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+                You haven't created any reading levels or skill drills yet. Build custom reading units, phonics progressions, or leveled booklets, or let AI generate a complete reading ladder in seconds.
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <button onclick="openAiReadingBuilderModal()" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs sm:text-sm shadow-lg transition active:scale-95">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                <span>AI Reading Builder</span>
+              </button>
+              <button onclick="openAddCustomReadingModal()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 transition active:scale-95">
+                <i data-lucide="plus" class="w-4 h-4 text-amber-400"></i>
+                <span>+ Add Reading Unit</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Active Units Container -->
+          <div id="tutor-reading-active-container" class="space-y-6 max-w-4xl mx-auto hidden">
+            <div id="tutor-reading-units-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
           </div>
         </div>
       </div>
@@ -679,81 +738,165 @@
       <!-- CATEGORY 3: SPEECH & CAPSTONE                  -->
       <!-- ============================================== -->
       <div id="study-category-speech" class="space-y-6 hidden">
-        <!-- Section Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-          <div>
-            <h2 id="speech-head-title" class="text-xl font-bold text-white flex items-center gap-2">
-              <span class="text-indigo-400">🎙️</span>
-              <span id="lbl-speech-hub-title">Speech & Capstone Workshop</span>
-            </h2>
-            <p id="speech-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
-              Speech outlines, delivery pacing, student speech templates, and presentation audio recordings.
-            </p>
+        <!-- Master Speech Content (Bar Mitzvah) -->
+        <div id="study-speech-master-content" class="space-y-6">
+          <!-- Section Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+            <div>
+              <h2 id="speech-head-title" class="text-xl font-bold text-white flex items-center gap-2">
+                <span class="text-indigo-400">🎙️</span>
+                <span id="lbl-speech-hub-title">Speech & Capstone Workshop</span>
+              </h2>
+              <p id="speech-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
+                Speech outlines, delivery pacing, student speech templates, and presentation audio recordings.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="switchTab('students')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition active:scale-95 shadow-sm">
+                <i data-lucide="users" class="w-3.5 h-3.5 text-brand-400"></i>
+                <span>View Students</span>
+              </button>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <button onclick="switchTab('students')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition active:scale-95 shadow-sm">
-              <i data-lucide="users" class="w-3.5 h-3.5 text-brand-400"></i>
-              <span>View Students</span>
-            </button>
+
+          <div class="space-y-6 max-w-4xl mx-auto">
+            <!-- 5-Stage Roadmap -->
+            <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 shadow-lg">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span class="text-indigo-400">✦</span> 5-Stage Speechwriting Roadmap
+              </h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5 text-xs">
+                <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+                  <span class="text-[10px] font-mono text-indigo-400 font-bold">STAGE 1</span>
+                  <h4 class="font-bold text-white">Outline & Ideas</h4>
+                  <p class="text-[11px] text-slate-400">Opening hook, main Torah thought, and personal takeaway.</p>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+                  <span class="text-[10px] font-mono text-indigo-400 font-bold">STAGE 2</span>
+                  <h4 class="font-bold text-white">Drafting Speech</h4>
+                  <p class="text-[11px] text-slate-400">Writing the full paragraphs, stories, and thank-yous.</p>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+                  <span class="text-[10px] font-mono text-indigo-400 font-bold">STAGE 3</span>
+                  <h4 class="font-bold text-white">Editing & Polish</h4>
+                  <p class="text-[11px] text-slate-400">Refining word choice, sentence flow, and speech length.</p>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+                  <span class="text-[10px] font-mono text-indigo-400 font-bold">STAGE 4</span>
+                  <h4 class="font-bold text-white">Delivery & Pacing</h4>
+                  <p class="text-[11px] text-slate-400">Practicing speaking speed (~125 words/min) and eye contact.</p>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-950/70 border border-emerald-500/40 bg-emerald-950/20 space-y-1">
+                  <span class="text-[10px] font-mono text-emerald-400 font-bold">STAGE 5</span>
+                  <h4 class="font-bold text-white">Mastered & Ready</h4>
+                  <p class="text-[11px] text-slate-400">Full confidence, final printed copies, and rehearsal complete.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Speech Writing Workshop & Calculator -->
+            <div class="p-5 rounded-2xl bg-slate-900/90 border border-indigo-900/40 space-y-4 shadow-lg">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span class="text-indigo-400">📝</span> Speech Length & Pacing Calculator
+                  </h3>
+                  <p class="text-xs text-slate-400 mt-0.5">Test draft speeches to calculate real-world presentation time.</p>
+                </div>
+                <div class="text-xs font-mono text-indigo-300 bg-indigo-950/70 px-2.5 py-1 rounded-lg border border-indigo-800/50" id="study-speech-calc-stats">
+                  0 words • ~0 min speech
+                </div>
+              </div>
+
+              <textarea id="study-speech-test-input" oninput="handleStudySpeechCalcInput(this.value)" rows="5" placeholder="Type or paste a speech draft here to test word count and speaking duration in real time..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans leading-relaxed"></textarea>
+
+              <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
+                <span class="text-[11px]">Calibrated to normal conversational podium pace: ~125 words per minute.</span>
+                <button onclick="handleStudySpeechInsertTemplate()" class="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 text-[11px] font-semibold transition active:scale-95">
+                  Insert Dvar Torah Outline Template
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="space-y-6 max-w-4xl mx-auto">
-          <!-- 5-Stage Roadmap -->
-          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 shadow-lg">
-            <h3 class="text-sm font-bold text-white flex items-center gap-2">
-              <span class="text-indigo-400">✦</span> 5-Stage Speechwriting Roadmap
-            </h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5 text-xs">
-              <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
-                <span class="text-[10px] font-mono text-indigo-400 font-bold">STAGE 1</span>
-                <h4 class="font-bold text-white">Outline & Ideas</h4>
-                <p class="text-[11px] text-slate-400">Opening hook, main Torah thought, and personal takeaway.</p>
+        <!-- External Tutor Speech Hub (Multi-Tenant Blank/Custom View) -->
+        <div id="study-speech-tutor-hub" class="space-y-6 hidden">
+          <!-- External Tutor Speech Header with AI & Add Tools -->
+          <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2.5 sm:p-3 shadow-lg backdrop-blur flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 max-w-4xl mx-auto">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center justify-center font-bold">
+                <i data-lucide="mic" class="w-5 h-5"></i>
               </div>
-              <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
-                <span class="text-[10px] font-mono text-indigo-400 font-bold">STAGE 2</span>
-                <h4 class="font-bold text-white">Drafting Speech</h4>
-                <p class="text-[11px] text-slate-400">Writing the full paragraphs, stories, and thank-yous.</p>
+              <div>
+                <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-1.5">
+                  <span id="lbl-speech-hub-tutor-title">Speech & Capstone Workshop</span>
+                </h3>
+                <p class="text-[11px] text-slate-400">Milestone stages, speech delivery pacing, and presentation roadmaps</p>
               </div>
-              <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
-                <span class="text-[10px] font-mono text-indigo-400 font-bold">STAGE 3</span>
-                <h4 class="font-bold text-white">Editing & Polish</h4>
-                <p class="text-[11px] text-slate-400">Refining word choice, sentence flow, and speech length.</p>
-              </div>
-              <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
-                <span class="text-[10px] font-mono text-indigo-400 font-bold">STAGE 4</span>
-                <h4 class="font-bold text-white">Delivery & Pacing</h4>
-                <p class="text-[11px] text-slate-400">Practicing speaking speed (~125 words/min) and eye contact.</p>
-              </div>
-              <div class="p-3 rounded-xl bg-slate-950/70 border border-emerald-500/40 bg-emerald-950/20 space-y-1">
-                <span class="text-[10px] font-mono text-emerald-400 font-bold">STAGE 5</span>
-                <h4 class="font-bold text-white">Mastered & Ready</h4>
-                <p class="text-[11px] text-slate-400">Full confidence, final printed copies, and rehearsal complete.</p>
-              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="openAiMilestoneBuilderModal()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white font-bold text-xs shadow-md transition active:scale-95">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>AI Milestone Builder</span>
+              </button>
+              <button onclick="openAddCustomMilestoneModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white border border-slate-700 transition active:scale-95 shadow-sm">
+                <i data-lucide="plus" class="w-3.5 h-3.5 text-indigo-400"></i>
+                <span>+ Add Milestone</span>
+              </button>
             </div>
           </div>
 
-          <!-- Speech Writing Workshop & Calculator -->
-          <div class="p-5 rounded-2xl bg-slate-900/90 border border-indigo-900/40 space-y-4 shadow-lg">
-            <div class="flex items-center justify-between">
-              <div>
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                  <span class="text-indigo-400">📝</span> Speech Length & Pacing Calculator
-                </h3>
-                <p class="text-xs text-slate-400 mt-0.5">Test draft speeches to calculate real-world presentation time.</p>
-              </div>
-              <div class="text-xs font-mono text-indigo-300 bg-indigo-950/70 px-2.5 py-1 rounded-lg border border-indigo-800/50" id="study-speech-calc-stats">
-                0 words • ~0 min speech
-              </div>
+          <!-- Blank State when external tutor has no milestone stages -->
+          <div id="tutor-speech-blank-state" class="text-center py-12 px-6 bg-slate-900/60 border border-slate-800 rounded-3xl max-w-2xl mx-auto space-y-5 shadow-xl backdrop-blur">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center mx-auto text-indigo-400">
+              <i data-lucide="mic" class="w-8 h-8"></i>
             </div>
-
-            <textarea id="study-speech-test-input" oninput="handleStudySpeechCalcInput(this.value)" rows="5" placeholder="Type or paste a speech draft here to test word count and speaking duration in real time..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans leading-relaxed"></textarea>
-
-            <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
-              <span class="text-[11px]">Calibrated to normal conversational podium pace: ~125 words per minute.</span>
-              <button onclick="handleStudySpeechInsertTemplate()" class="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 text-[11px] font-semibold transition active:scale-95">
-                Insert Dvar Torah Outline Template
+            <div class="space-y-2">
+              <h3 class="text-lg sm:text-xl font-bold text-white">Your Speech & Capstone Workshop is Ready</h3>
+              <p class="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+                You haven't created any milestone stages yet. Build structured milestones for speeches, essays, presentations, or capstone projects, or generate a complete roadmap with AI.
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <button onclick="openAiMilestoneBuilderModal()" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-lg transition active:scale-95">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                <span>AI Milestone Builder</span>
               </button>
+              <button onclick="openAddCustomMilestoneModal()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 transition active:scale-95">
+                <i data-lucide="plus" class="w-4 h-4 text-indigo-400"></i>
+                <span>+ Add Milestone</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Active Milestones Container -->
+          <div id="tutor-speech-active-container" class="space-y-6 max-w-4xl mx-auto hidden">
+            <!-- Dynamic Stages Grid -->
+            <div id="tutor-milestones-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 text-xs"></div>
+
+            <!-- Generic Speech & Presentation Length Calculator -->
+            <div class="p-5 rounded-2xl bg-slate-900/90 border border-indigo-900/40 space-y-4 shadow-lg">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span class="text-indigo-400">📝</span> Speech Length & Pacing Calculator
+                  </h3>
+                  <p class="text-xs text-slate-400 mt-0.5">Test draft speeches or presentation slides to calculate real-world presentation time.</p>
+                </div>
+                <div class="text-xs font-mono text-indigo-300 bg-indigo-950/70 px-2.5 py-1 rounded-lg border border-indigo-800/50" id="study-speech-calc-stats-tutor">
+                  0 words • ~0 min speech
+                </div>
+              </div>
+
+              <textarea id="study-speech-test-input-tutor" oninput="handleStudySpeechCalcInputTutor(this.value)" rows="5" placeholder="Type or paste a speech or presentation draft here to test word count and speaking duration in real time..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans leading-relaxed"></textarea>
+
+              <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
+                <span class="text-[11px]">Calibrated to normal conversational podium pace: ~125 words per minute.</span>
+                <button onclick="handleStudySpeechInsertGenericTemplate()" class="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 text-[11px] font-semibold transition active:scale-95">
+                  Insert Presentation Outline Template
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1557,6 +1700,341 @@
   </div>
 
   <!-- ============================================== -->
+  <!-- MODAL: ADD CUSTOM READING UNIT MANUALLY        -->
+  <!-- ============================================== -->
+  <div id="modal-add-custom-reading" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
+    <div class="max-w-lg w-full max-h-[90vh] bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+          <i data-lucide="book-marked" class="w-5 h-5 text-amber-400"></i>
+          <span id="txt-modal-custom-reading-title">Add Reading Unit / Level</span>
+        </h3>
+        <button type="button" onclick="closeAddCustomReadingModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleSaveCustomReading(event)" class="space-y-3.5 flex-1 overflow-y-auto pr-1">
+        <input type="hidden" id="input-custom-reading-id" value="">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Unit / Level Title *</label>
+          <input
+            type="text"
+            id="input-custom-reading-title"
+            required
+            placeholder="e.g. Level 1: Phonics & Short Vowels"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+          >
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Badge Tag</label>
+            <input
+              type="text"
+              id="input-custom-reading-badge"
+              placeholder="e.g. Level 1"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            >
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Accent Color</label>
+            <select
+              id="input-custom-reading-color"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            >
+              <option value="red">Red (Foundational)</option>
+              <option value="orange">Orange (Early)</option>
+              <option value="amber" selected>Amber (Intermediate)</option>
+              <option value="emerald">Emerald (Proficient)</option>
+              <option value="blue">Blue (Advanced)</option>
+              <option value="purple">Purple (Mastery)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Skills Covered & Description</label>
+          <textarea
+            id="input-custom-reading-desc"
+            rows="2"
+            placeholder="e.g. Letter sounds, CVC 3-letter word blending, initial consonant digraphs."
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
+          ></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Target Words or Phonics Rules (comma separated)</label>
+          <input
+            type="text"
+            id="input-custom-reading-targets"
+            placeholder="e.g. cat, bat, hat, sit, pig, run, sun"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+          >
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+          <button type="button" onclick="closeAddCustomReadingModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition shadow-md">
+            Save Reading Unit
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: AI READING & SKILLS BUILDER             -->
+  <!-- ============================================== -->
+  <div id="modal-ai-reading-builder" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
+    <div class="max-w-lg w-full max-h-[90vh] bg-slate-900 border border-amber-500/30 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
+          <span>AI Reading & Skills Builder</span>
+        </h3>
+        <button type="button" onclick="closeAiReadingBuilderModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleGenerateReadingLadder(event)" class="space-y-3.5 flex-1 overflow-y-auto pr-1">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Subject / Language / Focus Area *</label>
+          <input
+            type="text"
+            id="ai-reading-topic"
+            required
+            placeholder="e.g. English Early Phonics, Spanish Beginners, ESL Sight Words, Scientific Terms"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+          >
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Target Grade / Age</label>
+            <select
+              id="ai-reading-level"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            >
+              <option value="kindergarten">Kindergarten - 1st Grade</option>
+              <option value="elementary" selected>2nd - 3rd Grade</option>
+              <option value="intermediate">4th - 6th Grade</option>
+              <option value="middle_high">Middle / High School</option>
+              <option value="adult">Adult Learner</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Number of Levels</label>
+            <select
+              id="ai-reading-count"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            >
+              <option value="3">3 Progressive Levels</option>
+              <option value="4" selected>4 Leveled Booklets</option>
+              <option value="5">5 Comprehensive Levels</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Pedagogical Instructions (Optional)</label>
+          <textarea
+            id="ai-reading-guidance"
+            rows="2"
+            placeholder="e.g. Focus on silent E, vowel blends, short sentences, and everyday vocabulary."
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
+          ></textarea>
+        </div>
+
+        <!-- AI Generating Loading Banner -->
+        <div id="ai-reading-loading-state" class="hidden p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3">
+          <i data-lucide="loader-2" class="w-5 h-5 text-amber-400 animate-spin shrink-0"></i>
+          <span class="text-xs text-amber-200 font-medium">Generating leveled reading program with AI...</span>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+          <button type="button" onclick="closeAiReadingBuilderModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+            Cancel
+          </button>
+          <button type="submit" id="btn-submit-ai-reading" class="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold transition shadow-md">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>Generate Reading Ladder</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADD CUSTOM MILESTONE STAGE MANUALLY     -->
+  <!-- ============================================== -->
+  <div id="modal-add-custom-milestone" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
+    <div class="max-w-lg w-full max-h-[90vh] bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+          <i data-lucide="flag" class="w-5 h-5 text-indigo-400"></i>
+          <span id="txt-modal-custom-milestone-title">Add Milestone Stage</span>
+        </h3>
+        <button type="button" onclick="closeAddCustomMilestoneModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleSaveCustomMilestone(event)" class="space-y-3.5 flex-1 overflow-y-auto pr-1">
+        <input type="hidden" id="input-custom-milestone-id" value="">
+        <div class="grid grid-cols-3 gap-2.5">
+          <div class="col-span-1">
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Stage # *</label>
+            <input
+              type="number"
+              id="input-custom-milestone-num"
+              required
+              min="1"
+              max="20"
+              value="1"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Stage Title *</label>
+            <input
+              type="text"
+              id="input-custom-milestone-title"
+              required
+              placeholder="e.g. Outline & Research"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Guidance & Core Objectives</label>
+          <textarea
+            id="input-custom-milestone-guidance"
+            rows="2"
+            placeholder="e.g. Formulate main thesis question, find 3 sources, structure opening hook."
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+          ></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Key Deliverables (comma separated)</label>
+          <input
+            type="text"
+            id="input-custom-milestone-deliverables"
+            placeholder="e.g. Thesis statement, Bibliography, Outline draft"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Target Words or Duration Target</label>
+          <input
+            type="text"
+            id="input-custom-milestone-target"
+            placeholder="e.g. 250 words / ~2 min presentation"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+          <button type="button" onclick="closeAddCustomMilestoneModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-md">
+            Save Milestone Stage
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: AI MILESTONE & CAPSTONE BUILDER         -->
+  <!-- ============================================== -->
+  <div id="modal-ai-milestone-builder" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
+    <div class="max-w-lg w-full max-h-[90vh] bg-slate-900 border border-indigo-500/30 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-5 h-5 text-indigo-400"></i>
+          <span>AI Speech & Capstone Builder</span>
+        </h3>
+        <button type="button" onclick="closeAiMilestoneBuilderModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleGenerateMilestoneRoadmap(event)" class="space-y-3.5 flex-1 overflow-y-auto pr-1">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Project / Speech Type *</label>
+          <input
+            type="text"
+            id="ai-milestone-topic"
+            required
+            placeholder="e.g. Persuasive Speech, Science Fair Project, History Research Presentation, Senior Capstone"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Target Audience / Level</label>
+            <select
+              id="ai-milestone-level"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="elementary">Elementary School</option>
+              <option value="middle" selected>Middle School</option>
+              <option value="high">High School</option>
+              <option value="college">College / Professional</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Number of Stages</label>
+            <select
+              id="ai-milestone-count"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="4">4 Core Stages</option>
+              <option value="5" selected>5 Standard Stages</option>
+              <option value="6">6 Detailed Milestones</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Special Requirements or Rubric Focus (Optional)</label>
+          <textarea
+            id="ai-milestone-guidance"
+            rows="2"
+            placeholder="e.g. Must include visual slides, 3 primary sources, speech rehearsal (~125 words/min), and Q&A defense."
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+          ></textarea>
+        </div>
+
+        <!-- AI Generating Loading Banner -->
+        <div id="ai-milestone-loading-state" class="hidden p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center gap-3">
+          <i data-lucide="loader-2" class="w-5 h-5 text-indigo-400 animate-spin shrink-0"></i>
+          <span class="text-xs text-indigo-200 font-medium">Generating capstone roadmap with AI...</span>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+          <button type="button" onclick="closeAiMilestoneBuilderModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+            Cancel
+          </button>
+          <button type="submit" id="btn-submit-ai-milestone" class="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white text-xs font-bold transition shadow-md">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>Generate Roadmap</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
   <!-- MODAL: ADD STUDENT (Clean & Simple)            -->
   <!-- ============================================== -->
   <div id="modal-add-student" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 hidden backdrop-blur-sm">
@@ -2200,6 +2678,8 @@
       activeStudyCategory: 'lessons', // 'lessons', 'reading', 'speech', 'custom'
       studySection: 'concepts', // 'concepts', 'chumash', or 'custom'
       customCourses: [],
+      customReadingMaterials: [],
+      customMilestones: [],
       activeCourseId: 'concepts',
       expandedCustomLessonIds: {},
       chumashFilter: 'all', // 'all', 'bereishit', 'shemot'
@@ -2265,6 +2745,22 @@
         return 'tutor_study_additions';
       }
       return 'tutor_study_additions_' + email.replace(/[^a-z0-9]/g, '_');
+    }
+
+    function getCustomReadingStorageKey() {
+      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      if (email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com' || !email) {
+        return 'tutor_custom_reading';
+      }
+      return 'tutor_custom_reading_' + email.replace(/[^a-z0-9]/g, '_');
+    }
+
+    function getCustomMilestonesStorageKey() {
+      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      if (email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com' || !email) {
+        return 'tutor_custom_milestones';
+      }
+      return 'tutor_custom_milestones_' + email.replace(/[^a-z0-9]/g, '_');
     }
 
     // Dictionary Translations
@@ -3722,6 +4218,8 @@ alter publication supabase_realtime add table public.students_sync;`;
           const myEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
           const targetMaterialsId = isMaster ? '__study_materials__' : ('__study_materials_' + (myEmail ? myEmail.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
           const targetCoursesId = isMaster ? '__custom_courses__' : ('__custom_courses_' + (myEmail ? myEmail.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
+          const targetReadingId = isMaster ? '__custom_reading__' : ('__custom_reading_' + (myEmail ? myEmail.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
+          const targetMilestonesId = isMaster ? '__custom_milestones__' : ('__custom_milestones_' + (myEmail ? myEmail.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
 
           const studyRecord = data.find(row => row.id === targetMaterialsId);
           if (studyRecord && studyRecord.completed_topics) {
@@ -3733,6 +4231,18 @@ alter publication supabase_realtime add table public.students_sync;`;
           const coursesRecord = data.find(row => row.id === targetCoursesId);
           if (coursesRecord && coursesRecord.completed_topics && Array.isArray(coursesRecord.completed_topics.courses)) {
             mergeCustomCoursesWithCloud(coursesRecord.completed_topics.courses);
+          }
+
+          // Check for custom reading system record with Multi-Tenant Isolation
+          const readingRecord = data.find(row => row.id === targetReadingId);
+          if (readingRecord && readingRecord.completed_topics && Array.isArray(readingRecord.completed_topics.readingMaterials)) {
+            mergeCustomReadingWithCloud(readingRecord.completed_topics.readingMaterials);
+          }
+
+          // Check for custom milestones system record with Multi-Tenant Isolation
+          const milestonesRecord = data.find(row => row.id === targetMilestonesId);
+          if (milestonesRecord && milestonesRecord.completed_topics && Array.isArray(milestonesRecord.completed_topics.milestones)) {
+            mergeCustomMilestonesWithCloud(milestonesRecord.completed_topics.milestones);
           }
 
           // Filter out internal system records from student roster with Multi-Tenant Isolation
@@ -3856,8 +4366,9 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
 
       // Intercept custom courses cloud synchronization
-      if (newRecord && newRecord.id === '__custom_courses__') {
-        if (newRecord.completed_topics && Array.isArray(newRecord.completed_topics.courses)) {
+      const isCoursesRecord = (newRecord && newRecord.id && newRecord.id.startsWith('__custom_courses')) || (oldRecord && oldRecord.id && oldRecord.id.startsWith('__custom_courses'));
+      if (isCoursesRecord) {
+        if (newRecord && newRecord.completed_topics && Array.isArray(newRecord.completed_topics.courses)) {
           mergeCustomCoursesWithCloud(newRecord.completed_topics.courses);
           populateCourseSelector();
           if (APP_STATE.studySection === 'custom') {
@@ -3866,7 +4377,22 @@ alter publication supabase_realtime add table public.students_sync;`;
         }
         return;
       }
-      if (oldRecord && oldRecord.id === '__custom_courses__') {
+
+      // Intercept custom reading cloud synchronization
+      const isReadingRecord = (newRecord && newRecord.id && newRecord.id.startsWith('__custom_reading')) || (oldRecord && oldRecord.id && oldRecord.id.startsWith('__custom_reading'));
+      if (isReadingRecord) {
+        if (newRecord && newRecord.completed_topics && Array.isArray(newRecord.completed_topics.readingMaterials)) {
+          mergeCustomReadingWithCloud(newRecord.completed_topics.readingMaterials);
+        }
+        return;
+      }
+
+      // Intercept custom milestones cloud synchronization
+      const isMilestonesRecord = (newRecord && newRecord.id && newRecord.id.startsWith('__custom_milestones')) || (oldRecord && oldRecord.id && oldRecord.id.startsWith('__custom_milestones'));
+      if (isMilestonesRecord) {
+        if (newRecord && newRecord.completed_topics && Array.isArray(newRecord.completed_topics.milestones)) {
+          mergeCustomMilestonesWithCloud(newRecord.completed_topics.milestones);
+        }
         return;
       }
 
@@ -4179,6 +4705,8 @@ alter publication supabase_realtime add table public.students_sync;`;
       loadStudentsFromStorage();
       loadStudyMaterialsFromStorage();
       loadCustomCoursesFromStorage();
+      loadCustomReadingFromStorage();
+      loadCustomMilestonesFromStorage();
       renderAllViews();
 
       const lockScreen = document.getElementById('lock-screen');
@@ -4889,6 +5417,8 @@ alter publication supabase_realtime add table public.students_sync;`;
       APP_STATE.activeStudentDrawerId = null;
       APP_STATE.students = [];
       APP_STATE.customCourses = [];
+      APP_STATE.customReadingMaterials = [];
+      APP_STATE.customMilestones = [];
       APP_STATE.studyAdditions = {};
       renderAllViews();
 
@@ -5042,6 +5572,8 @@ alter publication supabase_realtime add table public.students_sync;`;
       loadStudentsFromStorage();
       loadStudyMaterialsFromStorage();
       loadCustomCoursesFromStorage();
+      loadCustomReadingFromStorage();
+      loadCustomMilestonesFromStorage();
       checkUrlHashSync();
       applyLanguageDirection();
       renderAllViews();
@@ -5728,7 +6260,9 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (category === 'lessons') {
         renderLessonsCategoryView();
       } else if (category === 'reading') {
-        renderStudyLettersGrid();
+        renderReadingCategoryView();
+      } else if (category === 'speech') {
+        renderSpeechCategoryView();
       } else if (category === 'custom') {
         renderCustomCourseDropdown();
         if (APP_STATE.activeCourseId && APP_STATE.activeCourseId !== 'concepts' && APP_STATE.activeCourseId !== 'chumash') {
@@ -6506,6 +7040,1046 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (hasNewData) {
         saveCustomCoursesToStorage(false);
       }
+    }
+
+    // ==========================================================
+    // SECTION 2: CUSTOM READING MATERIALS CONTROLLERS & STORAGE
+    // ==========================================================
+    function loadCustomReadingFromStorage() {
+      try {
+        const key = getCustomReadingStorageKey();
+        const stored = localStorage.getItem(key);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            APP_STATE.customReadingMaterials = parsed;
+          }
+        } else {
+          APP_STATE.customReadingMaterials = [];
+        }
+      } catch (e) {
+        console.error('Failed to parse custom reading from storage:', e);
+      }
+      if (!Array.isArray(APP_STATE.customReadingMaterials)) {
+        APP_STATE.customReadingMaterials = [];
+      }
+      renderReadingCategoryView();
+    }
+
+    function saveCustomReadingToStorage(syncCloud) {
+      if (syncCloud === undefined) syncCloud = true;
+      try {
+        const key = getCustomReadingStorageKey();
+        localStorage.setItem(key, JSON.stringify(APP_STATE.customReadingMaterials || []));
+      } catch (e) {
+        console.error('Failed to save custom reading to storage:', e);
+      }
+      renderReadingCategoryView();
+      if (syncCloud) {
+        pushCustomReadingToCloud();
+      }
+    }
+
+    async function pushCustomReadingToCloud() {
+      if (!APP_STATE.cloud.client) return;
+      try {
+        const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+        const isMaster = isMasterAccount();
+        const recordId = isMaster ? '__custom_reading__' : ('__custom_reading_' + (email ? email.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
+        const payload = {
+          id: recordId,
+          name: isMaster ? 'SYSTEM_CUSTOM_READING' : ('CUSTOM_READING_' + email),
+          parsha_or_date: 'system',
+          notes: 'Custom Reading Units for ' + (email || 'tutor'),
+          completed_topics: {
+            readingMaterials: APP_STATE.customReadingMaterials || [],
+            _meta: { owner_email: email, user_id: APP_STATE.currentUser?.id || '' }
+          },
+          completed_parshiot: {},
+          updated_at: new Date().toISOString()
+        };
+        await APP_STATE.cloud.client
+          .from('students_sync')
+          .upsert(payload);
+      } catch (err) {
+        console.error('Failed to push custom reading to cloud:', err);
+      }
+    }
+
+    function mergeCustomReadingWithCloud(cloudReading) {
+      if (!Array.isArray(cloudReading)) return;
+      if (!Array.isArray(APP_STATE.customReadingMaterials)) APP_STATE.customReadingMaterials = [];
+
+      let hasNewData = false;
+      const existingIds = new Set(APP_STATE.customReadingMaterials.map(r => r.id));
+      cloudReading.forEach(item => {
+        if (!existingIds.has(item.id)) {
+          APP_STATE.customReadingMaterials.push(item);
+          existingIds.add(item.id);
+          hasNewData = true;
+        } else {
+          const idx = APP_STATE.customReadingMaterials.findIndex(r => r.id === item.id);
+          if (idx !== -1 && item.updated_at && (!APP_STATE.customReadingMaterials[idx].updated_at || item.updated_at > APP_STATE.customReadingMaterials[idx].updated_at)) {
+            APP_STATE.customReadingMaterials[idx] = item;
+            hasNewData = true;
+          }
+        }
+      });
+
+      if (hasNewData) {
+        saveCustomReadingToStorage(false);
+      }
+    }
+
+    function renderReadingCategoryView() {
+      const isMaster = isMasterAccount();
+      const masterContent = document.getElementById('study-reading-master-content');
+      const tutorHub = document.getElementById('study-reading-tutor-hub');
+      const tutorBlankState = document.getElementById('tutor-reading-blank-state');
+      const tutorActive = document.getElementById('tutor-reading-active-container');
+
+      if (isMaster) {
+        if (masterContent) masterContent.classList.remove('hidden');
+        if (tutorHub) tutorHub.classList.add('hidden');
+        renderStudyLettersGrid();
+      } else {
+        if (masterContent) masterContent.classList.add('hidden');
+        if (tutorHub) tutorHub.classList.remove('hidden');
+
+        const hasUnits = Array.isArray(APP_STATE.customReadingMaterials) && APP_STATE.customReadingMaterials.length > 0;
+        if (hasUnits) {
+          if (tutorBlankState) tutorBlankState.classList.add('hidden');
+          if (tutorActive) {
+            tutorActive.classList.remove('hidden');
+            renderTutorReadingUnitsGrid();
+          }
+        } else {
+          if (tutorBlankState) tutorBlankState.classList.remove('hidden');
+          if (tutorActive) tutorActive.classList.add('hidden');
+        }
+      }
+
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function renderTutorReadingUnitsGrid() {
+      const grid = document.getElementById('tutor-reading-units-grid');
+      if (!grid) return;
+      const units = APP_STATE.customReadingMaterials || [];
+
+      grid.innerHTML = units.map(u => {
+        const colorClasses = {
+          red: { badge: 'bg-red-500/20 text-red-300 border-red-500/40', dot: 'bg-red-500', border: 'border-red-500/30' },
+          orange: { badge: 'bg-orange-500/20 text-orange-300 border-orange-500/40', dot: 'bg-orange-500', border: 'border-orange-500/30' },
+          amber: { badge: 'bg-amber-500/20 text-amber-300 border-amber-500/40', dot: 'bg-amber-400', border: 'border-amber-400/30' },
+          emerald: { badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', dot: 'bg-emerald-500', border: 'border-emerald-500/30' },
+          blue: { badge: 'bg-blue-500/20 text-blue-300 border-blue-500/40', dot: 'bg-blue-500', border: 'border-blue-500/30' },
+          purple: { badge: 'bg-purple-500/20 text-purple-300 border-purple-500/40', dot: 'bg-purple-500', border: 'border-purple-500/30' }
+        };
+        const c = colorClasses[u.color] || colorClasses.amber;
+        const targets = Array.isArray(u.targets) ? u.targets : (typeof u.targets === 'string' ? u.targets.split(',').map(s => s.trim()).filter(Boolean) : []);
+
+        return `
+          <div class="p-4 rounded-2xl bg-slate-900/90 border ${c.border} space-y-3 shadow-md flex flex-col justify-between hover:border-slate-600 transition">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-3 h-3 rounded-full ${c.dot}"></span>
+                  <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${c.badge}">
+                    ${escapeHtml(u.badge || 'Level')}
+                  </span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button onclick="openAddCustomReadingModal('${u.id}')" title="Edit Unit" class="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button onclick="handleDeleteCustomReadingUnit('${u.id}')" title="Delete Unit" class="p-1 rounded text-slate-400 hover:text-red-400 hover:bg-slate-800 transition">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+              <h4 class="text-sm font-bold text-white">${escapeHtml(u.title)}</h4>
+              ${u.description ? `<p class="text-xs text-slate-400 leading-relaxed">${escapeHtml(u.description)}</p>` : ''}
+              
+              ${targets.length > 0 ? `
+                <div class="pt-1.5 space-y-1">
+                  <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Targets & Words:</span>
+                  <div class="flex flex-wrap gap-1">
+                    ${targets.map(t => `
+                      <span class="px-2 py-0.5 rounded-md bg-slate-950 border border-slate-800 text-[11px] font-mono text-slate-300">
+                        ${escapeHtml(t)}
+                      </span>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function openAddCustomReadingModal(readingId) {
+      const modal = document.getElementById('modal-add-custom-reading');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+
+      const idInput = document.getElementById('input-custom-reading-id');
+      const titleInput = document.getElementById('input-custom-reading-title');
+      const badgeInput = document.getElementById('input-custom-reading-badge');
+      const colorInput = document.getElementById('input-custom-reading-color');
+      const descInput = document.getElementById('input-custom-reading-desc');
+      const targetsInput = document.getElementById('input-custom-reading-targets');
+      const headerTitle = document.getElementById('txt-modal-custom-reading-title');
+
+      if (readingId) {
+        const item = (APP_STATE.customReadingMaterials || []).find(r => r.id === readingId);
+        if (item) {
+          idInput.value = item.id;
+          titleInput.value = item.title || '';
+          badgeInput.value = item.badge || '';
+          colorInput.value = item.color || 'amber';
+          descInput.value = item.description || '';
+          targetsInput.value = Array.isArray(item.targets) ? item.targets.join(', ') : (item.targets || '');
+          if (headerTitle) headerTitle.textContent = 'Edit Reading Unit';
+        }
+      } else {
+        idInput.value = '';
+        titleInput.value = '';
+        badgeInput.value = 'Level ' + ((APP_STATE.customReadingMaterials || []).length + 1);
+        colorInput.value = 'amber';
+        descInput.value = '';
+        targetsInput.value = '';
+        if (headerTitle) headerTitle.textContent = 'Add Reading Unit / Level';
+      }
+      setTimeout(() => titleInput.focus(), 100);
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function closeAddCustomReadingModal() {
+      const modal = document.getElementById('modal-add-custom-reading');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function handleSaveCustomReading(e) {
+      e.preventDefault();
+      const id = document.getElementById('input-custom-reading-id').value.trim();
+      const title = document.getElementById('input-custom-reading-title').value.trim();
+      const badge = document.getElementById('input-custom-reading-badge').value.trim();
+      const color = document.getElementById('input-custom-reading-color').value || 'amber';
+      const desc = document.getElementById('input-custom-reading-desc').value.trim();
+      const rawTargets = document.getElementById('input-custom-reading-targets').value.trim();
+
+      if (!title) return;
+      const targets = rawTargets ? rawTargets.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      if (!Array.isArray(APP_STATE.customReadingMaterials)) {
+        APP_STATE.customReadingMaterials = [];
+      }
+
+      if (id) {
+        const idx = APP_STATE.customReadingMaterials.findIndex(r => r.id === id);
+        if (idx !== -1) {
+          APP_STATE.customReadingMaterials[idx] = {
+            ...APP_STATE.customReadingMaterials[idx],
+            title,
+            badge: badge || ('Level ' + (idx + 1)),
+            color,
+            description: desc,
+            targets,
+            updated_at: new Date().toISOString()
+          };
+        }
+      } else {
+        const newUnit = {
+          id: 'read_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+          title,
+          badge: badge || ('Level ' + (APP_STATE.customReadingMaterials.length + 1)),
+          color,
+          description: desc,
+          targets,
+          updated_at: new Date().toISOString()
+        };
+        APP_STATE.customReadingMaterials.push(newUnit);
+      }
+
+      saveCustomReadingToStorage(true);
+      closeAddCustomReadingModal();
+      showToast('Reading unit saved!');
+    }
+
+    function handleDeleteCustomReadingUnit(id) {
+      const item = (APP_STATE.customReadingMaterials || []).find(r => r.id === id);
+      if (!item) return;
+      if (!confirm(`Delete reading unit "${item.title}"?`)) return;
+
+      APP_STATE.customReadingMaterials = APP_STATE.customReadingMaterials.filter(r => r.id !== id);
+      saveCustomReadingToStorage(true);
+      showToast('Reading unit deleted');
+    }
+
+    function openAiReadingBuilderModal() {
+      const modal = document.getElementById('modal-ai-reading-builder');
+      if (modal) modal.classList.remove('hidden');
+      const topicInput = document.getElementById('ai-reading-topic');
+      if (topicInput) setTimeout(() => topicInput.focus(), 100);
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function closeAiReadingBuilderModal() {
+      const modal = document.getElementById('modal-ai-reading-builder');
+      if (modal) modal.classList.add('hidden');
+      const loading = document.getElementById('ai-reading-loading-state');
+      if (loading) loading.classList.add('hidden');
+      const btn = document.getElementById('btn-submit-ai-reading');
+      if (btn) btn.disabled = false;
+    }
+
+    async function handleGenerateReadingLadder(e) {
+      e.preventDefault();
+      const topic = document.getElementById('ai-reading-topic').value.trim();
+      const level = document.getElementById('ai-reading-level').value;
+      const count = parseInt(document.getElementById('ai-reading-count').value, 10) || 4;
+      const guidance = document.getElementById('ai-reading-guidance').value.trim();
+
+      if (!topic) return;
+
+      const loading = document.getElementById('ai-reading-loading-state');
+      const btn = document.getElementById('btn-submit-ai-reading');
+      if (loading) loading.classList.remove('hidden');
+      if (btn) btn.disabled = true;
+
+      const apiKey = getEffectiveGeminiApiKey();
+      let generatedLevels = null;
+
+      if (apiKey) {
+        try {
+          const sys = `You are a world-class reading specialist and curriculum designer. Return ONLY a parseable JSON object without markdown or code backticks:
+{
+  "levels": [
+    {
+      "level_num": 1,
+      "badge": "Level 1",
+      "title": "Level Title",
+      "color": "red",
+      "description": "Clear learning objective",
+      "targets": ["word1", "word2", "word3", "word4", "word5", "word6"]
+    }
+  ]
+}`;
+          const prompt = `Create a ${count}-level reading and fluency progression ladder for:
+Topic: ${topic}
+Level: ${level}
+Guidance: ${guidance || 'Provide clear target words, progressive phonetic difficulty, and colors red, orange, amber, emerald, blue, purple.'}`;
+
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: sys + '\n\n' + prompt }] }],
+              generationConfig: { responseMimeType: 'application/json' }
+            })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+              const clean = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+              const parsed = JSON.parse(clean);
+              if (parsed && Array.isArray(parsed.levels)) {
+                generatedLevels = parsed.levels;
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('AI reading generation API call failed, using intelligent template:', err);
+        }
+      }
+
+      // Offline intelligent template fallback
+      if (!generatedLevels || generatedLevels.length === 0) {
+        const colors = ['red', 'orange', 'amber', 'emerald', 'blue', 'purple'];
+        generatedLevels = Array.from({ length: count }, (_, i) => {
+          const num = i + 1;
+          const stageNames = ['Foundations & Basic Sounds', 'Blending & Common Sight Words', 'Sentence Flow & Multisyllable Words', 'Paragraph Fluency & Vocabulary Mastery', 'Advanced Reading & Independent Expression'];
+          return {
+            level_num: num,
+            badge: `Level ${num}`,
+            title: `Level ${num}: ${stageNames[i] || ('Advanced Unit ' + num)}`,
+            color: colors[i % colors.length],
+            description: `Progressive mastery for ${topic}. Focusing on level ${num} mechanics and recognition speed.`,
+            targets: [`${topic.split(' ')[0]} ${num}A`, `${topic.split(' ')[0]} ${num}B`, 'Accuracy', 'Pacing', 'Comprehension']
+          };
+        });
+      }
+
+      if (!Array.isArray(APP_STATE.customReadingMaterials)) {
+        APP_STATE.customReadingMaterials = [];
+      }
+
+      generatedLevels.forEach((l, idx) => {
+        APP_STATE.customReadingMaterials.push({
+          id: 'read_' + Date.now() + '_' + idx + '_' + Math.random().toString(36).substr(2, 4),
+          title: l.title || (`Level ${idx + 1}`),
+          badge: l.badge || (`Level ${idx + 1}`),
+          color: l.color || 'amber',
+          description: l.description || '',
+          targets: Array.isArray(l.targets) ? l.targets : [],
+          updated_at: new Date().toISOString()
+        });
+      });
+
+      saveCustomReadingToStorage(true);
+      closeAiReadingBuilderModal();
+      showToast(`${generatedLevels.length} reading levels generated!`);
+    }
+
+    // ==========================================================
+    // SECTION 3: CUSTOM MILESTONES CONTROLLERS & STORAGE
+    // ==========================================================
+    function loadCustomMilestonesFromStorage() {
+      try {
+        const key = getCustomMilestonesStorageKey();
+        const stored = localStorage.getItem(key);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            APP_STATE.customMilestones = parsed;
+          }
+        } else {
+          APP_STATE.customMilestones = [];
+        }
+      } catch (e) {
+        console.error('Failed to parse custom milestones from storage:', e);
+      }
+      if (!Array.isArray(APP_STATE.customMilestones)) {
+        APP_STATE.customMilestones = [];
+      }
+      renderSpeechCategoryView();
+    }
+
+    function saveCustomMilestonesToStorage(syncCloud) {
+      if (syncCloud === undefined) syncCloud = true;
+      try {
+        const key = getCustomMilestonesStorageKey();
+        localStorage.setItem(key, JSON.stringify(APP_STATE.customMilestones || []));
+      } catch (e) {
+        console.error('Failed to save custom milestones to storage:', e);
+      }
+      renderSpeechCategoryView();
+      if (syncCloud) {
+        pushCustomMilestonesToCloud();
+      }
+    }
+
+    async function pushCustomMilestonesToCloud() {
+      if (!APP_STATE.cloud.client) return;
+      try {
+        const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+        const isMaster = isMasterAccount();
+        const recordId = isMaster ? '__custom_milestones__' : ('__custom_milestones_' + (email ? email.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
+        const payload = {
+          id: recordId,
+          name: isMaster ? 'SYSTEM_CUSTOM_MILESTONES' : ('CUSTOM_MILESTONES_' + email),
+          parsha_or_date: 'system',
+          notes: 'Custom Milestones for ' + (email || 'tutor'),
+          completed_topics: {
+            milestones: APP_STATE.customMilestones || [],
+            _meta: { owner_email: email, user_id: APP_STATE.currentUser?.id || '' }
+          },
+          completed_parshiot: {},
+          updated_at: new Date().toISOString()
+        };
+        await APP_STATE.cloud.client
+          .from('students_sync')
+          .upsert(payload);
+      } catch (err) {
+        console.error('Failed to push custom milestones to cloud:', err);
+      }
+    }
+
+    function mergeCustomMilestonesWithCloud(cloudMilestones) {
+      if (!Array.isArray(cloudMilestones)) return;
+      if (!Array.isArray(APP_STATE.customMilestones)) APP_STATE.customMilestones = [];
+
+      let hasNewData = false;
+      const existingIds = new Set(APP_STATE.customMilestones.map(m => m.id));
+      cloudMilestones.forEach(item => {
+        if (!existingIds.has(item.id)) {
+          APP_STATE.customMilestones.push(item);
+          existingIds.add(item.id);
+          hasNewData = true;
+        } else {
+          const idx = APP_STATE.customMilestones.findIndex(m => m.id === item.id);
+          if (idx !== -1 && item.updated_at && (!APP_STATE.customMilestones[idx].updated_at || item.updated_at > APP_STATE.customMilestones[idx].updated_at)) {
+            APP_STATE.customMilestones[idx] = item;
+            hasNewData = true;
+          }
+        }
+      });
+
+      if (hasNewData) {
+        saveCustomMilestonesToStorage(false);
+      }
+    }
+
+    function renderSpeechCategoryView() {
+      const isMaster = isMasterAccount();
+      const masterContent = document.getElementById('study-speech-master-content');
+      const tutorHub = document.getElementById('study-speech-tutor-hub');
+      const tutorBlankState = document.getElementById('tutor-speech-blank-state');
+      const tutorActive = document.getElementById('tutor-speech-active-container');
+
+      if (isMaster) {
+        if (masterContent) masterContent.classList.remove('hidden');
+        if (tutorHub) tutorHub.classList.add('hidden');
+      } else {
+        if (masterContent) masterContent.classList.add('hidden');
+        if (tutorHub) tutorHub.classList.remove('hidden');
+
+        const hasMilestones = Array.isArray(APP_STATE.customMilestones) && APP_STATE.customMilestones.length > 0;
+        if (hasMilestones) {
+          if (tutorBlankState) tutorBlankState.classList.add('hidden');
+          if (tutorActive) {
+            tutorActive.classList.remove('hidden');
+            renderTutorMilestonesGrid();
+          }
+        } else {
+          if (tutorBlankState) tutorBlankState.classList.remove('hidden');
+          if (tutorActive) tutorActive.classList.add('hidden');
+        }
+      }
+
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function renderTutorMilestonesGrid() {
+      const grid = document.getElementById('tutor-milestones-grid');
+      if (!grid) return;
+      const milestones = APP_STATE.customMilestones || [];
+
+      // Sort by stage_num
+      milestones.sort((a, b) => (a.stage_num || 0) - (b.stage_num || 0));
+
+      grid.innerHTML = milestones.map((m, idx) => {
+        const isLast = idx === milestones.length - 1;
+        const deliverables = Array.isArray(m.deliverables) ? m.deliverables : (typeof m.deliverables === 'string' ? m.deliverables.split(',').map(s => s.trim()).filter(Boolean) : []);
+
+        return `
+          <div class="p-3.5 rounded-xl ${isLast ? 'bg-emerald-950/20 border border-emerald-500/40' : 'bg-slate-950/70 border border-slate-800'} space-y-2 shadow-sm flex flex-col justify-between">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono ${isLast ? 'text-emerald-400' : 'text-indigo-400'} font-bold">
+                  STAGE ${m.stage_num || (idx + 1)}
+                </span>
+                <div class="flex items-center gap-1">
+                  <button onclick="openAddCustomMilestoneModal('${m.id}')" title="Edit Stage" class="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                    <i data-lucide="edit-3" class="w-3 h-3"></i>
+                  </button>
+                  <button onclick="handleDeleteCustomMilestone('${m.id}')" title="Delete Stage" class="p-1 rounded text-slate-400 hover:text-red-400 hover:bg-slate-800 transition">
+                    <i data-lucide="trash-2" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              </div>
+              <h4 class="font-bold text-white text-xs">${escapeHtml(m.title)}</h4>
+              ${m.guidance ? `<p class="text-[11px] text-slate-400 leading-relaxed">${escapeHtml(m.guidance)}</p>` : ''}
+              
+              ${deliverables.length > 0 ? `
+                <div class="pt-1 space-y-1">
+                  <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Deliverables:</span>
+                  <div class="space-y-0.5">
+                    ${deliverables.map(d => `
+                      <div class="text-[10px] text-slate-300 flex items-center gap-1">
+                        <span class="text-indigo-400">•</span>
+                        <span>${escapeHtml(d)}</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+
+            ${m.target_words ? `
+              <div class="pt-2 border-t border-slate-800/80 text-[10px] text-slate-400 font-mono">
+                Target: ${escapeHtml(m.target_words)}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function openAddCustomMilestoneModal(milestoneId) {
+      const modal = document.getElementById('modal-add-custom-milestone');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+
+      const idInput = document.getElementById('input-custom-milestone-id');
+      const numInput = document.getElementById('input-custom-milestone-num');
+      const titleInput = document.getElementById('input-custom-milestone-title');
+      const guidanceInput = document.getElementById('input-custom-milestone-guidance');
+      const deliverablesInput = document.getElementById('input-custom-milestone-deliverables');
+      const targetInput = document.getElementById('input-custom-milestone-target');
+      const headerTitle = document.getElementById('txt-modal-custom-milestone-title');
+
+      if (milestoneId) {
+        const item = (APP_STATE.customMilestones || []).find(m => m.id === milestoneId);
+        if (item) {
+          idInput.value = item.id;
+          numInput.value = item.stage_num || 1;
+          titleInput.value = item.title || '';
+          guidanceInput.value = item.guidance || '';
+          deliverablesInput.value = Array.isArray(item.deliverables) ? item.deliverables.join(', ') : (item.deliverables || '');
+          targetInput.value = item.target_words || '';
+          if (headerTitle) headerTitle.textContent = 'Edit Milestone Stage';
+        }
+      } else {
+        idInput.value = '';
+        numInput.value = (APP_STATE.customMilestones || []).length + 1;
+        titleInput.value = '';
+        guidanceInput.value = '';
+        deliverablesInput.value = '';
+        targetInput.value = '';
+        if (headerTitle) headerTitle.textContent = 'Add Milestone Stage';
+      }
+      setTimeout(() => titleInput.focus(), 100);
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function closeAddCustomMilestoneModal() {
+      const modal = document.getElementById('modal-add-custom-milestone');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function handleSaveCustomMilestone(e) {
+      e.preventDefault();
+      const id = document.getElementById('input-custom-milestone-id').value.trim();
+      const stageNum = parseInt(document.getElementById('input-custom-milestone-num').value, 10) || 1;
+      const title = document.getElementById('input-custom-milestone-title').value.trim();
+      const guidance = document.getElementById('input-custom-milestone-guidance').value.trim();
+      const rawDeliverables = document.getElementById('input-custom-milestone-deliverables').value.trim();
+      const targetWords = document.getElementById('input-custom-milestone-target').value.trim();
+
+      if (!title) return;
+      const deliverables = rawDeliverables ? rawDeliverables.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      if (!Array.isArray(APP_STATE.customMilestones)) {
+        APP_STATE.customMilestones = [];
+      }
+
+      if (id) {
+        const idx = APP_STATE.customMilestones.findIndex(m => m.id === id);
+        if (idx !== -1) {
+          APP_STATE.customMilestones[idx] = {
+            ...APP_STATE.customMilestones[idx],
+            stage_num: stageNum,
+            title,
+            guidance,
+            deliverables,
+            target_words: targetWords,
+            updated_at: new Date().toISOString()
+          };
+        }
+      } else {
+        const newStage = {
+          id: 'mile_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+          stage_num: stageNum,
+          title,
+          guidance,
+          deliverables,
+          target_words: targetWords,
+          updated_at: new Date().toISOString()
+        };
+        APP_STATE.customMilestones.push(newStage);
+      }
+
+      saveCustomMilestonesToStorage(true);
+      closeAddCustomMilestoneModal();
+      showToast('Milestone stage saved!');
+    }
+
+    function handleDeleteCustomMilestone(id) {
+      const item = (APP_STATE.customMilestones || []).find(m => m.id === id);
+      if (!item) return;
+      if (!confirm(`Delete milestone "${item.title}"?`)) return;
+
+      APP_STATE.customMilestones = APP_STATE.customMilestones.filter(m => m.id !== id);
+      saveCustomMilestonesToStorage(true);
+      showToast('Milestone stage deleted');
+    }
+
+    function openAiMilestoneBuilderModal() {
+      const modal = document.getElementById('modal-ai-milestone-builder');
+      if (modal) modal.classList.remove('hidden');
+      const topicInput = document.getElementById('ai-milestone-topic');
+      if (topicInput) setTimeout(() => topicInput.focus(), 100);
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function closeAiMilestoneBuilderModal() {
+      const modal = document.getElementById('modal-ai-milestone-builder');
+      if (modal) modal.classList.add('hidden');
+      const loading = document.getElementById('ai-milestone-loading-state');
+      if (loading) loading.classList.add('hidden');
+      const btn = document.getElementById('btn-submit-ai-milestone');
+      if (btn) btn.disabled = false;
+    }
+
+    async function handleGenerateMilestoneRoadmap(e) {
+      e.preventDefault();
+      const topic = document.getElementById('ai-milestone-topic').value.trim();
+      const level = document.getElementById('ai-milestone-level').value;
+      const count = parseInt(document.getElementById('ai-milestone-count').value, 10) || 5;
+      const guidance = document.getElementById('ai-milestone-guidance').value.trim();
+
+      if (!topic) return;
+
+      const loading = document.getElementById('ai-milestone-loading-state');
+      const btn = document.getElementById('btn-submit-ai-milestone');
+      if (loading) loading.classList.remove('hidden');
+      if (btn) btn.disabled = true;
+
+      const apiKey = getEffectiveGeminiApiKey();
+      let generatedStages = null;
+
+      if (apiKey) {
+        try {
+          const sys = `You are an expert speech and capstone project coach. Return ONLY a parseable JSON object without markdown or code backticks:
+{
+  "stages": [
+    {
+      "stage_num": 1,
+      "title": "Stage Title",
+      "guidance": "Clear student objectives",
+      "deliverables": ["Deliverable 1", "Deliverable 2"],
+      "target_words": "200 words"
+    }
+  ]
+}`;
+          const prompt = `Create a ${count}-stage project and presentation roadmap for:
+Project Type: ${topic}
+Target Audience / Level: ${level}
+Guidance: ${guidance || 'Provide clear deliverables per stage, speech rehearsal at ~125 words per minute, and final presentation completion.'}`;
+
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: sys + '\n\n' + prompt }] }],
+              generationConfig: { responseMimeType: 'application/json' }
+            })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+              const clean = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+              const parsed = JSON.parse(clean);
+              if (parsed && Array.isArray(parsed.stages)) {
+                generatedStages = parsed.stages;
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('AI milestone roadmap API call failed, using intelligent template:', err);
+        }
+      }
+
+      // Offline intelligent template fallback
+      if (!generatedStages || generatedStages.length === 0) {
+        const standardNames = [
+          'Topic Selection & Central Thesis',
+          'Research, Evidence & Rough Outline',
+          'Drafting Full Presentation & Visual Aids',
+          'Delivery Pacing, Timing & Rehearsal (~125 wpm)',
+          'Final Mastered Presentation & Q&A Defense',
+          'Reflection & Post-Presentation Review'
+        ];
+        generatedStages = Array.from({ length: count }, (_, i) => {
+          const num = i + 1;
+          return {
+            stage_num: num,
+            title: `Stage ${num}: ${standardNames[i] || ('Milestone ' + num)}`,
+            guidance: `Key checkpoint for ${topic}. Complete all deliverables before moving to next stage.`,
+            deliverables: [`Stage ${num} checkpoint verified`, `Peer or tutor review complete`],
+            target_words: `${num * 120} words`
+          };
+        });
+      }
+
+      if (!Array.isArray(APP_STATE.customMilestones)) {
+        APP_STATE.customMilestones = [];
+      }
+
+      generatedStages.forEach((s, idx) => {
+        APP_STATE.customMilestones.push({
+          id: 'mile_' + Date.now() + '_' + idx + '_' + Math.random().toString(36).substr(2, 4),
+          stage_num: s.stage_num || (idx + 1),
+          title: s.title || (`Stage ${idx + 1}`),
+          guidance: s.guidance || '',
+          deliverables: Array.isArray(s.deliverables) ? s.deliverables : [],
+          target_words: s.target_words || '',
+          updated_at: new Date().toISOString()
+        });
+      });
+
+      saveCustomMilestonesToStorage(true);
+      closeAiMilestoneBuilderModal();
+      showToast(`${generatedStages.length} milestone stages generated!`);
+    }
+
+    function handleStudySpeechCalcInputTutor(val) {
+      const stats = document.getElementById('study-speech-calc-stats-tutor');
+      if (!stats) return;
+      const text = (val || '').trim();
+      const count = text ? text.split(/\s+/).length : 0;
+      const estMin = Math.round(count / 125 * 10) / 10;
+      stats.textContent = `${count} words • ~${estMin} min speech`;
+    }
+
+    function handleStudySpeechInsertGenericTemplate() {
+      const textarea = document.getElementById('study-speech-test-input-tutor');
+      if (!textarea) return;
+      const template = `I. Introduction
+- Engaging opening hook or relatable story
+- Central thesis statement
+- Roadmap of main points
+
+II. Core Point 1: Background & Problem
+- Key evidence, examples, and data
+- Why this matters to the audience
+
+III. Core Point 2: Analysis & Real-World Application
+- Deep dive into mechanisms and solutions
+- Practical takeaway for everyday life
+
+IV. Conclusion
+- Summary of core arguments
+- Memorable call to action or closing reflection
+- Thank you to audience, mentors, and listeners`;
+
+      textarea.value = template;
+      handleStudySpeechCalcInputTutor(template);
+      textarea.focus();
+    }
+
+    // ==========================================================
+    // STUDENT DRAWER CUSTOM SKILLS INTEGRATION
+    // ==========================================================
+    function setStudentCustomReadingLevel(studentId, levelId) {
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      if (!student.skills) student.skills = {};
+      if (!student.skills.customReading) student.skills.customReading = {};
+      student.skills.customReading.levelId = levelId;
+      saveStudentsToStorage(true);
+      renderStudentDrawer(studentId, true);
+    }
+
+    function handleStudentCustomReadingChange(studentId, field, val) {
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      if (!student.skills) student.skills = {};
+      if (!student.skills.customReading) student.skills.customReading = {};
+      student.skills.customReading[field] = val;
+      saveStudentsToStorage(true);
+    }
+
+    function handleStudentCustomSpeechChange(studentId, field, val) {
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      if (!student.skills) student.skills = {};
+      if (!student.skills.customSpeech) student.skills.customSpeech = {};
+      student.skills.customSpeech[field] = val;
+      saveStudentsToStorage(true);
+    }
+
+    function renderStudentCustomReadingCard(student) {
+      const units = APP_STATE.customReadingMaterials || [];
+      const isHe = APP_STATE.lang === 'he';
+      const sr = (student.skills && student.skills.customReading) || {};
+
+      if (units.length === 0) {
+        return `
+          <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                <i data-lucide="book-marked" class="w-3.5 h-3.5"></i>
+                <span>${isHe ? 'תוכנית קריאה ומיומנויות' : 'Reading & Skills'}</span>
+              </span>
+              <button type="button" onclick="switchStudyCategory('reading'); switchTab('study');" class="text-[11px] text-amber-400 hover:underline">
+                ${isHe ? '+ הוסף יחידות בלימוד' : '+ Add in Study'}
+              </button>
+            </div>
+            <p class="text-xs text-slate-500 italic">
+              ${isHe ? 'עדיין לא נוצרו יחידות קריאה. עבור ללשונית לימוד כדי ליצור רמות קריאה בעזרת בינה מלאכותית או ידנית.' : 'No reading levels created yet. Visit Study > Reading & Skills to generate levels with AI or create them manually.'}
+            </p>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+              <i data-lucide="book-marked" class="w-3.5 h-3.5"></i>
+              <span>${isHe ? 'רמת קריאה פעילה' : 'Active Reading Level'}</span>
+            </span>
+            <span class="text-[10px] text-slate-500 font-mono">${units.length} ${isHe ? 'רמות' : 'Levels'}</span>
+          </div>
+
+          <!-- Unit Selector Buttons -->
+          <div class="grid grid-cols-${Math.min(units.length, 4)} gap-1.5 p-1 bg-slate-900 rounded-xl border border-slate-800 text-xs">
+            ${units.map(u => {
+              const isSelected = sr.levelId === u.id || (!sr.levelId && u.id === units[0].id);
+              const colorClasses = {
+                red: 'bg-red-500',
+                orange: 'bg-orange-500',
+                amber: 'bg-amber-400',
+                emerald: 'bg-emerald-500',
+                blue: 'bg-blue-500',
+                purple: 'bg-purple-500'
+              };
+              const dotClass = colorClasses[u.color] || 'bg-amber-400';
+              return `
+                <button
+                  type="button"
+                  onclick="setStudentCustomReadingLevel('${student.id}', '${u.id}')"
+                  class="py-2 px-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition border ${
+                    isSelected
+                      ? 'bg-amber-500/20 text-amber-200 border-amber-400/50 shadow-sm font-bold'
+                      : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  }"
+                >
+                  <span class="w-2 h-2 rounded-full ${dotClass} shrink-0"></span>
+                  <span class="truncate">${escapeHtml(u.badge || u.title)}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- Current Page & Notes -->
+          <div class="grid grid-cols-2 gap-2">
+            <div class="space-y-1">
+              <label class="text-[11px] text-slate-400 block">${isHe ? 'עמוד / יחידה נוכחית' : 'Current Page / Unit'}</label>
+              <input
+                type="text"
+                value="${escapeHtml(sr.currentPage || '')}"
+                onchange="handleStudentCustomReadingChange('${student.id}', 'currentPage', this.value)"
+                placeholder="e.g. Page 12"
+                class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              />
+            </div>
+            <div class="space-y-1">
+              <label class="text-[11px] text-slate-400 block">${isHe ? 'הערת מיומנות' : 'Skill Note / Target'}</label>
+              <input
+                type="text"
+                value="${escapeHtml(sr.notes || '')}"
+                onchange="handleStudentCustomReadingChange('${student.id}', 'notes', this.value)"
+                placeholder="e.g. Mastered short A"
+                class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              />
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderStudentCustomSpeechCard(student) {
+      const milestones = APP_STATE.customMilestones || [];
+      const isHe = APP_STATE.lang === 'he';
+      const sp = (student.skills && student.skills.customSpeech) || {};
+      const spText = sp.text || '';
+      const wordCount = spText.trim() ? spText.trim().split(/\s+/).length : 0;
+      const estMinutes = Math.max(1, Math.round(wordCount / 125 * 10) / 10);
+
+      const defaultStages = [
+        { id: 'stage_1', title: isHe ? 'שלב 1: נושא וראשי פרקים' : 'Stage 1: Topic & Outline' },
+        { id: 'stage_2', title: isHe ? 'שלב 2: כתיבת טיוטה' : 'Stage 2: Drafting' },
+        { id: 'stage_3', title: isHe ? 'שלב 3: עריכה ושיוף' : 'Stage 3: Editing & Polish' },
+        { id: 'stage_4', title: isHe ? 'שלב 4: אימון והצגה' : 'Stage 4: Delivery & Pacing' },
+        { id: 'stage_5', title: isHe ? 'שלב 5: מוכן להצגה' : 'Stage 5: Mastered & Ready' }
+      ];
+      const stagesToUse = milestones.length > 0 ? milestones : defaultStages;
+
+      return `
+        <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                <i data-lucide="mic" class="w-3.5 h-3.5 text-indigo-400"></i>
+                <span>${isHe ? 'פרויקט / הצגה / נאום' : 'Speech & Capstone Project'}</span>
+              </span>
+              <span class="text-[10px] text-indigo-400/80 font-mono bg-indigo-950/40 px-1.5 py-0.5 rounded border border-indigo-800/40">Presentation</span>
+            </div>
+          </div>
+
+          <!-- Topic and Stage Dropdown -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div class="space-y-1">
+              <label class="text-[11px] text-slate-400 block">${isHe ? 'נושא הפרויקט / הנאום' : 'Project / Speech Topic'}</label>
+              <input
+                type="text"
+                value="${escapeHtml(sp.topic || '')}"
+                oninput="handleStudentCustomSpeechChange('${student.id}', 'topic', this.value)"
+                placeholder="e.g. Clean Energy Solutions"
+                class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+            <div class="space-y-1">
+              <label class="text-[11px] text-slate-400 block">${isHe ? 'שלב נוכחי' : 'Current Stage'}</label>
+              <select
+                onchange="handleStudentCustomSpeechChange('${student.id}', 'stage', this.value)"
+                class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              >
+                ${stagesToUse.map(st => `
+                  <option value="${st.id || st.title}" ${(sp.stage === (st.id || st.title)) ? 'selected' : ''}>
+                    ${escapeHtml(st.title)}
+                  </option>
+                `).join('')}
+              </select>
+            </div>
+          </div>
+
+          <!-- Speech Editor Textarea -->
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <label class="text-[11px] text-slate-400 block">${isHe ? 'טקסט הנאום / עבודה' : 'Speech / Presentation Draft'}</label>
+              <span class="text-[10px] text-indigo-300/80 font-mono">
+                ${wordCount} ${isHe ? 'מילים' : 'words'} • ~${estMinutes} ${isHe ? 'דק׳ הצגה' : 'min presentation'}
+              </span>
+            </div>
+            <textarea
+              rows="5"
+              oninput="handleStudentCustomSpeechChange('${student.id}', 'text', this.value)"
+              placeholder="Draft presentation content, speech outline, or slide speaker notes here..."
+              class="w-full bg-slate-900/90 border border-indigo-900/40 rounded-lg p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-400 font-sans leading-relaxed resize-y"
+            >${escapeHtml(sp.text || '')}</textarea>
+          </div>
+        </div>
+      `;
     }
 
     function populateCourseSelector() {
@@ -8296,13 +9870,32 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
           </div>
         `;
 
-        // Assemble Skills Section
+        // Assemble Skills Section with Multi-Tenant Isolation
+        const isMaster = isMasterAccount();
+        let readingCardHtml = '';
+        if (em.reading !== false) {
+          if (isMaster) {
+            readingCardHtml = cardHebrewReadingHtml + cardParshaReadingHtml;
+          } else {
+            readingCardHtml = renderStudentCustomReadingCard(student);
+          }
+        }
+
+        let speechCardHtml = '';
+        if (em.speech !== false) {
+          if (isMaster) {
+            speechCardHtml = cardDvarTorahHtml;
+          } else {
+            speechCardHtml = renderStudentCustomSpeechCard(student);
+          }
+        }
+
         let skillsCardsHtml = '';
         if (em.reading !== false) {
-          skillsCardsHtml += cardHebrewReadingHtml + cardParshaReadingHtml;
+          skillsCardsHtml += readingCardHtml;
         }
         if (em.speech !== false) {
-          skillsCardsHtml += cardDvarTorahHtml;
+          skillsCardsHtml += speechCardHtml;
         }
         skillsCardsHtml += cardCustomGoalsHtml;
 
@@ -10859,6 +12452,8 @@ Base44, please confirm receipt of this protocol and let us know that you are rea
     function renderAllViews() {
       populateCourseSelector();
       renderLessonsCategoryView();
+      renderReadingCategoryView();
+      renderSpeechCategoryView();
       renderStudents();
       renderCalendar();
       renderActiveStudentWorkspace(true);
