@@ -8443,57 +8443,7 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
           });
           APP_STATE.students.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
         } else {
-          if (storageKey !== 'tutor_students_v1') {
-            APP_STATE.students = [];
-          } else {
-            APP_STATE.students = [
-              {
-                id: "stu_" + Date.now(),
-                name: "David Goldstein",
-                parsha: "Parshat Lech Lecha",
-                barMitzvahDate: "Nov 2026",
-                parshaOrDate: "Parshat Lech Lecha (Nov 2026)",
-                avatar: "",
-                orderIndex: 0,
-                schedule: [
-                  {
-                    id: "les_sample_1",
-                    dateStr: "2026-11-08",
-                    dayOfWeek: 0,
-                    time: "4:30 PM",
-                    repeatWeekly: true,
-                    topic: "Tefillin & Shema review"
-                  }
-                ],
-                notes: "Great curiosity! Loves basketball analogies. Completed Tefillin and Shabbat basics.",
-                completedTopics: { shabbat: true, tefillin: true, kashrut: true },
-                completedParshiot: { lech_lecha: true, bereishit: true }
-              },
-              {
-                id: "stu_" + (Date.now() + 1),
-                name: "Ethan Miller",
-                parsha: "Parshat Beshalach",
-                barMitzvahDate: "Jan 2027",
-                parshaOrDate: "Parshat Beshalach (Jan 2027)",
-                avatar: "",
-                orderIndex: 1,
-                schedule: [
-                  {
-                    id: "les_sample_2",
-                    dateStr: "2026-11-10",
-                    dayOfWeek: 2,
-                    time: "5:00 PM",
-                    repeatWeekly: true,
-                    topic: "Bar Mitzvah responsibility"
-                  }
-                ],
-                notes: "Introductory lessons. Focused on Bar Mitzvah responsibility.",
-                completedTopics: { bar_mitzvah: true, ahavat_yisrael: true },
-                completedParshiot: { shemot: true }
-              }
-            ];
-            saveStudentsToStorage(false);
-          }
+          APP_STATE.students = [];
         }
       } catch (e) {
         console.error("Storage error:", e);
