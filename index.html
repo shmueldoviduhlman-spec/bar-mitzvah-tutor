@@ -483,11 +483,17 @@
             </button>
           </div>
 
-          <!-- Action Buttons: AI Builder, Add Lesson, Review Notes -->
+          <!-- Action Buttons: AI Class, AI Lesson, Add Lesson, Review Notes -->
           <div class="flex items-center gap-2 w-full md:w-auto justify-end shrink-0">
-            <button onclick="openAiCurriculumBuilderModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/20 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Generate a full curriculum with AI">
+            <button onclick="openAiCurriculumBuilderModal('full')" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/20 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Generate an entire class/course with AI">
               <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span class="hidden sm:inline">AI Builder</span>
+              <span class="hidden sm:inline">AI Class</span>
+              <span class="sm:hidden">AI Class</span>
+            </button>
+            <button onclick="openAiCurriculumBuilderModal('single')" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Create a single connected lesson with AI">
+              <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span class="hidden sm:inline">AI Lesson</span>
+              <span class="sm:hidden">AI Lesson</span>
             </button>
             <button onclick="openAddCustomLessonModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition active:scale-95 shrink-0 shadow" title="Add a lesson to the current course">
               <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
@@ -1147,6 +1153,18 @@
 
         <!-- Quick Prompt Chips -->
         <div class="pt-2 border-t border-slate-800/80 flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <button onclick="applyAiQuickPrompt('create_lesson')" class="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-[11px] text-amber-300 font-semibold whitespace-nowrap transition active:scale-95 flex items-center gap-1 shadow-sm">
+            <span>⚡</span>
+            <span>Create a Lesson</span>
+          </button>
+          <button onclick="applyAiQuickPrompt('create_course')" class="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-[11px] text-indigo-300 font-semibold whitespace-nowrap transition active:scale-95 flex items-center gap-1 shadow-sm">
+            <span>📚</span>
+            <span>Create Full Class</span>
+          </button>
+          <button onclick="applyAiQuickPrompt('connect_lesson')" class="px-2.5 py-1 rounded-lg bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-cyan-300 font-medium whitespace-nowrap transition active:scale-95 flex items-center gap-1">
+            <span>🔗</span>
+            <span>Connect Idea to Lessons</span>
+          </button>
           <button onclick="applyAiQuickPrompt('add_student')" class="px-2.5 py-1 rounded-lg bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-medium whitespace-nowrap transition active:scale-95 flex items-center gap-1">
             <span>👤</span>
             <span id="lbl-ai-chip-add-student">Add student</span>
@@ -1154,10 +1172,6 @@
           <button onclick="applyAiQuickPrompt('schedule_lesson')" class="px-2.5 py-1 rounded-lg bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-medium whitespace-nowrap transition active:scale-95 flex items-center gap-1">
             <span>📅</span>
             <span id="lbl-ai-chip-schedule">Schedule lesson</span>
-          </button>
-          <button onclick="applyAiQuickPrompt('add_note')" class="px-2.5 py-1 rounded-lg bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-medium whitespace-nowrap transition active:scale-95 flex items-center gap-1">
-            <span>📝</span>
-            <span id="lbl-ai-chip-add-note">Add note to lesson</span>
           </button>
           <button onclick="applyAiQuickPrompt('summarize_roster')" class="px-2.5 py-1 rounded-lg bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-medium whitespace-nowrap transition active:scale-95 flex items-center gap-1">
             <span>📊</span>
@@ -1324,10 +1338,10 @@
           </div>
           <div>
             <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-              <span id="txt-ai-builder-modal-title">AI Curriculum Builder</span>
+              <span id="txt-ai-builder-modal-title">AI Course & Lesson Studio</span>
               <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Universal</span>
             </h3>
-            <p class="text-xs text-slate-400" id="txt-ai-builder-modal-subtitle">Generate a custom structured curriculum for any subject, age group, or topic in seconds</p>
+            <p class="text-xs text-slate-400" id="txt-ai-builder-modal-subtitle">Generate a full curriculum or design a single lesson connected to your courses</p>
           </div>
         </div>
         <button type="button" onclick="closeAiCurriculumBuilderModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
@@ -1335,7 +1349,29 @@
         </button>
       </div>
 
-      <!-- Builder Form -->
+      <!-- Segmented Tab Bar: Full Course vs Single Connected Lesson -->
+      <div class="flex items-center gap-2 p-1 rounded-2xl bg-slate-950 border border-slate-800 shrink-0">
+        <button
+          type="button"
+          id="tab-btn-ai-builder-full"
+          onclick="switchAiBuilderTab('full')"
+          class="flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-amber-500 text-slate-950 shadow"
+        >
+          <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+          <span id="lbl-tab-ai-full">Full Class / Course</span>
+        </button>
+        <button
+          type="button"
+          id="tab-btn-ai-builder-single"
+          onclick="switchAiBuilderTab('single')"
+          class="flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200"
+        >
+          <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span id="lbl-tab-ai-single">Single Connected Lesson</span>
+        </button>
+      </div>
+
+      <!-- Builder Form (Full Class) -->
       <form id="form-ai-curriculum-builder" onsubmit="handleGenerateCurriculum(event)" class="space-y-4 flex-1 overflow-y-auto pr-1">
         
         <!-- Topic / Subject -->
@@ -1451,6 +1487,92 @@
           </div>
         </div>
 
+      </form>
+
+      <!-- Single Lesson Builder Form -->
+      <form id="form-ai-single-lesson-builder" onsubmit="handleGenerateSingleLesson(event)" class="space-y-4 flex-1 overflow-y-auto pr-1 hidden">
+        
+        <!-- Target Course Selection -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-single-target-course">Target Course *</label>
+          <select
+            id="ai-single-target-course"
+            onchange="updateAiSingleLessonConnectOptions()"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+          >
+            <!-- Injected dynamically -->
+          </select>
+        </div>
+
+        <!-- Lesson Topic / Idea Prompt -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-single-lesson-topic">Lesson Topic / Core Idea *</label>
+          <input
+            type="text"
+            id="ai-single-lesson-topic"
+            placeholder="e.g. Modeh Ani: Living with Daily Purpose, Overcoming Peer Pressure, Tefillin Mindset..."
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            required
+          >
+        </div>
+
+        <!-- Connect to Existing Lesson in This Course -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-single-connect-lesson">Connect with Prior Lesson</label>
+            <select id="ai-single-connect-lesson" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer">
+              <option value="">-- None (Standalone Lesson) --</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-single-language">Language</label>
+            <select id="ai-single-lesson-language" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer">
+              <option value="Bilingual (English & Hebrew)" selected>Bilingual (English & Hebrew)</option>
+              <option value="English Only">English Only</option>
+              <option value="Hebrew Only">Hebrew Only (עברית בלבד)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Specific Vision / Custom Guidance -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-single-guidance">Lesson Vision & Specific Focus (Prompt AI)</label>
+          <textarea
+            id="ai-single-lesson-guidance"
+            rows="3"
+            placeholder="e.g. Include a modern teen analogy about morning phone habits, 7 high-impact memory anchors, a midrash on sleep, and a discussion riddle for 13-year-olds..."
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed"
+          ></textarea>
+        </div>
+
+        <!-- Shimmer Loading State -->
+        <div id="ai-single-loading-state" class="hidden p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 animate-pulse">
+          <i data-lucide="loader-2" class="w-5 h-5 text-amber-400 animate-spin shrink-0"></i>
+          <div class="text-xs text-slate-200">
+            <span class="font-bold text-amber-300 block mb-0.5">AI is generating your complete lesson...</span>
+            <span>Crafting opening hook, 7 knowledge anchors, midrash gem, teen application, and discussion spark.</span>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="pt-3 border-t border-slate-800 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onclick="closeAiCurriculumBuilderModal()"
+            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            id="btn-submit-ai-single-lesson"
+            class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs sm:text-sm transition active:scale-95 shadow-lg flex items-center gap-1.5"
+          >
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span id="lbl-btn-generate-single">Generate & Add Lesson</span>
+          </button>
+        </div>
       </form>
     </div>
   </div>
@@ -8480,21 +8602,93 @@ IV. Conclusion
       lucide.createIcons();
     }
 
-    function openAiCurriculumBuilderModal() {
+    function openAiCurriculumBuilderModal(mode = 'full') {
       const modal = document.getElementById('modal-ai-curriculum-builder');
       if (modal) modal.classList.remove('hidden');
-      const topicInput = document.getElementById('ai-builder-topic');
-      if (topicInput) setTimeout(() => topicInput.focus(), 100);
-      lucide.createIcons();
+      switchAiBuilderTab(mode === 'single' ? 'single' : 'full');
+      if (mode === 'single') {
+        const topicInput = document.getElementById('ai-single-lesson-topic');
+        if (topicInput) setTimeout(() => topicInput.focus(), 100);
+      } else {
+        const topicInput = document.getElementById('ai-builder-topic');
+        if (topicInput) setTimeout(() => topicInput.focus(), 100);
+      }
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function switchAiBuilderTab(tab) {
+      const btnFull = document.getElementById('tab-btn-ai-builder-full');
+      const btnSingle = document.getElementById('tab-btn-ai-builder-single');
+      const formFull = document.getElementById('form-ai-curriculum-builder');
+      const formSingle = document.getElementById('form-ai-single-lesson-builder');
+
+      if (tab === 'single') {
+        if (btnFull) btnFull.className = 'flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200';
+        if (btnSingle) btnSingle.className = 'flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-amber-500 text-slate-950 shadow';
+        if (formFull) formFull.classList.add('hidden');
+        if (formSingle) formSingle.classList.remove('hidden');
+        populateAiSingleLessonCourseSelect();
+      } else {
+        if (btnFull) btnFull.className = 'flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-amber-500 text-slate-950 shadow';
+        if (btnSingle) btnSingle.className = 'flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200';
+        if (formFull) formFull.classList.remove('hidden');
+        if (formSingle) formSingle.classList.add('hidden');
+      }
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function populateAiSingleLessonCourseSelect() {
+      const courseSel = document.getElementById('ai-single-target-course');
+      if (!courseSel) return;
+      const isHe = APP_STATE.lang === 'he';
+      const courses = APP_STATE.customCourses || [];
+
+      if (courses.length === 0) {
+        courseSel.innerHTML = `<option value="">-- ${isHe ? 'אין קורסים' : 'No courses'} --</option>`;
+        return;
+      }
+
+      courseSel.innerHTML = courses.map(c => {
+        const isSel = c.id === APP_STATE.activeCourseId;
+        const title = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
+        return `<option value="${c.id}"${isSel ? ' selected' : ''}>${c.icon || '✦'} ${escapeHtml(title)}</option>`;
+      }).join('');
+
+      updateAiSingleLessonConnectOptions();
+    }
+
+    function updateAiSingleLessonConnectOptions() {
+      const courseSel = document.getElementById('ai-single-target-course');
+      const connSel = document.getElementById('ai-single-connect-lesson');
+      if (!courseSel || !connSel) return;
+
+      const courseId = courseSel.value;
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const isHe = APP_STATE.lang === 'he';
+
+      let html = `<option value="">-- ${isHe ? 'ללא חיבור (שיעור עצמאי)' : 'None (Standalone Lesson)'} --</option>`;
+
+      if (course && Array.isArray(course.lessons) && course.lessons.length > 0) {
+        html += course.lessons.map(l => {
+          const title = isHe ? (l.title_he || l.title_en) : (l.title_en || l.title_he);
+          return `<option value="${l.id}">Connect to Lesson ${l.lesson_num}: ${escapeHtml(title)}</option>`;
+        }).join('');
+      }
+
+      connSel.innerHTML = html;
     }
 
     function closeAiCurriculumBuilderModal() {
       const modal = document.getElementById('modal-ai-curriculum-builder');
       if (modal) modal.classList.add('hidden');
-      const loadingState = document.getElementById('ai-builder-loading-state');
-      if (loadingState) loadingState.classList.add('hidden');
-      const submitBtn = document.getElementById('btn-submit-ai-builder');
-      if (submitBtn) submitBtn.disabled = false;
+      const loadingStateFull = document.getElementById('ai-builder-loading-state');
+      if (loadingStateFull) loadingStateFull.classList.add('hidden');
+      const loadingStateSingle = document.getElementById('ai-single-loading-state');
+      if (loadingStateSingle) loadingStateSingle.classList.add('hidden');
+      const submitBtnFull = document.getElementById('btn-submit-ai-builder');
+      if (submitBtnFull) submitBtnFull.disabled = false;
+      const submitBtnSingle = document.getElementById('btn-submit-ai-single-lesson');
+      if (submitBtnSingle) submitBtnSingle.disabled = false;
     }
 
     // ==============================================
@@ -9603,6 +9797,201 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
       } catch (err) {
         console.error('AI Course Generation Error:', err);
         alert('Could not generate course: ' + (err.message || 'Unknown error') + '\nTip: You can also click "Load Sample" to instantly test without an API key.');
+      } finally {
+        if (loadingState) loadingState.classList.add('hidden');
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    }
+
+    async function handleGenerateSingleLesson(e) {
+      e.preventDefault();
+
+      const targetCourseId = document.getElementById('ai-single-target-course').value;
+      const lessonTopic = document.getElementById('ai-single-lesson-topic').value.trim();
+      const connectLessonId = document.getElementById('ai-single-connect-lesson').value;
+      const guidance = document.getElementById('ai-single-lesson-guidance').value.trim();
+      const langChoice = document.getElementById('ai-single-lesson-language').value;
+
+      if (!lessonTopic) {
+        showToast(APP_STATE.lang === 'he' ? 'אנא הזן נושא או רעיון לשיעור' : 'Please enter a lesson topic or idea');
+        return;
+      }
+
+      let course = (APP_STATE.customCourses || []).find(c => c.id === targetCourseId);
+      if (!course) {
+        course = (APP_STATE.customCourses || []).find(c => c.id === APP_STATE.activeCourseId);
+      }
+      if (!course && APP_STATE.customCourses && APP_STATE.customCourses.length > 0) {
+        course = APP_STATE.customCourses[0];
+      }
+
+      if (!course) {
+        showToast('Please create or select a course first');
+        return;
+      }
+
+      const apiKey = getEffectiveGeminiApiKey();
+      if (!apiKey) {
+        showToast('AI service currently unavailable');
+        return;
+      }
+
+      const loadingState = document.getElementById('ai-single-loading-state');
+      const submitBtn = document.getElementById('btn-submit-ai-single-lesson');
+      if (loadingState) loadingState.classList.remove('hidden');
+      if (submitBtn) submitBtn.disabled = true;
+
+      // Find connected lesson if any
+      let connectedLessonInfo = '';
+      if (connectLessonId && course.lessons) {
+        const connLesson = course.lessons.find(l => l.id === connectLessonId);
+        if (connLesson) {
+          connectedLessonInfo = `Explicitly connect this new lesson to existing Lesson ${connLesson.lesson_num}: "${connLesson.title_en}" (${connLesson.hook_en || ''}). Show how this new lesson builds upon or deepens what was learned in that lesson.`;
+        }
+      }
+
+      const systemInstruction = `You are an elite master curriculum designer and educational author for Bar Mitzvah and Judaic studies.
+Generate a single, deeply rich and structured educational lesson based on the user's prompt.
+You MUST return ONLY a valid, parseable JSON object matching the exact schema below, with NO markdown backticks, NO code block markers, and NO extra text.
+
+JSON Schema:
+{
+  "title_en": "Clear, Inspiring Lesson Title in English",
+  "title_he": "כותרת השיעור בעברית",
+  "hook_en": "Opening real-world dilemma, teaser question, or relatable analogy tailored for young students and teens.",
+  "hook_he": "פתיח מעניין או אנלוגיה מחיי היומיום של בני נוער.",
+  "anchors_en": [
+    "**Keyword**: First essential factual or conceptual anchor explaining the core mechanism.",
+    "**Keyword**: Second essential knowledge point.",
+    "**Keyword**: Third knowledge point.",
+    "**Keyword**: Fourth knowledge point.",
+    "**Keyword**: Fifth knowledge point.",
+    "**Keyword**: Sixth knowledge point.",
+    "**Keyword**: Seventh memorable concluding takeaway."
+  ],
+  "anchors_he": [
+    "**מילת מפתח**: עוגן ידע ראשון ברור ומדויק.",
+    "**מילת מפתח**: נקודה שנייה.",
+    "**מילת מפתח**: נקודה שלישית.",
+    "**מילת מפתח**: נקודה רביעית.",
+    "**מילת מפתח**: נקודה חמישית.",
+    "**מילת מפתח**: נקודה שישית.",
+    "**מילת מפתח**: נקודה שביעית לסיכום."
+  ],
+  "midrash_en": "Midrashic gem or rabbinic depth insight bringing traditional depth and beauty.",
+  "midrash_he": "פנינת מדרש או עומק רעיוני מהמקורות.",
+  "life_app_en": "Real-world relatable student application explaining how to live this in everyday modern life.",
+  "life_app_he": "חיבור מעשי לחיי היומיום של הנער.",
+  "discussion_en": "Engaging discussion spark, debate dilemma, or riddle for the student to ponder.",
+  "discussion_he": "שאלת דיון מרתקת או חידה מעוררת מחשבה.",
+  "connections": "Pedagogical explanation of how this lesson connects to prior topics in this course."
+}`;
+
+      const userPrompt = `Create a complete rich lesson for the course "${course.title_en}":
+Topic / Idea: ${lessonTopic}
+Course Category: ${course.category || 'General'}
+Target Level: ${course.target_level || 'Bar Mitzvah (Age 12-13)'}
+Language: ${langChoice}
+${connectedLessonInfo ? 'Connection Requirement: ' + connectedLessonInfo : ''}
+Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with bold keyword reminders, high-density points, relatable teen analogies, and an engaging discussion riddle.'}`;
+
+      try {
+        const candidateModels = [
+          'gemini-3.5-flash',
+          'gemini-3.1-flash-lite',
+          'gemini-3.5-flash-lite',
+          'gemini-flash-latest',
+          'gemini-3.8-flash'
+        ];
+
+        let rawResponseText = null;
+        let lastErr = null;
+
+        for (const model of candidateModels) {
+          try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            const resp = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] },
+                generationConfig: {
+                  temperature: 0.7,
+                  responseMimeType: "application/json"
+                }
+              })
+            });
+
+            if (resp.ok) {
+              const resData = await resp.json();
+              rawResponseText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (rawResponseText) break;
+            } else {
+              const errJson = await resp.json().catch(() => ({}));
+              const msg = errJson.error?.message || `Status ${resp.status}`;
+              lastErr = new Error(msg);
+              if (resp.status === 404 || resp.status === 503 || resp.status === 429 || msg.includes('not found') || msg.includes('high demand') || msg.includes('quota') || msg.includes('not supported')) {
+                continue;
+              }
+            }
+          } catch (fetchErr) {
+            lastErr = fetchErr;
+          }
+        }
+
+        if (!rawResponseText) {
+          throw lastErr || new Error('Failed to generate lesson with Gemini AI');
+        }
+
+        let cleanJsonStr = rawResponseText.trim();
+        if (cleanJsonStr.startsWith('```json')) cleanJsonStr = cleanJsonStr.replace(/^```json/, '');
+        if (cleanJsonStr.startsWith('```')) cleanJsonStr = cleanJsonStr.replace(/^```/, '');
+        if (cleanJsonStr.endsWith('```')) cleanJsonStr = cleanJsonStr.replace(/```$/, '');
+        cleanJsonStr = cleanJsonStr.trim();
+
+        const lessonData = JSON.parse(cleanJsonStr);
+        if (!Array.isArray(course.lessons)) course.lessons = [];
+
+        const newLesson = {
+          id: 'les_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+          lesson_num: course.lessons.length + 1,
+          title_en: lessonData.title_en || lessonTopic,
+          title_he: lessonData.title_he || lessonData.title_en || lessonTopic,
+          hook_en: lessonData.hook_en || '',
+          hook_he: lessonData.hook_he || lessonData.hook_en || '',
+          anchors_en: Array.isArray(lessonData.anchors_en) ? lessonData.anchors_en : [],
+          anchors_he: Array.isArray(lessonData.anchors_he) ? lessonData.anchors_he : [],
+          life_app_en: lessonData.life_app_en || '',
+          life_app_he: lessonData.life_app_he || lessonData.life_app_en || '',
+          midrash_en: lessonData.midrash_en || '',
+          midrash_he: lessonData.midrash_he || lessonData.midrash_en || '',
+          discussion_en: lessonData.discussion_en || '',
+          discussion_he: lessonData.discussion_he || lessonData.discussion_en || '',
+          connections: lessonData.connections || '',
+          recordings: []
+        };
+
+        course.lessons.push(newLesson);
+        course.updated_at = new Date().toISOString();
+        APP_STATE.activeCourseId = course.id;
+        if (!APP_STATE.expandedCustomLessonIds) APP_STATE.expandedCustomLessonIds = {};
+        APP_STATE.expandedCustomLessonIds[newLesson.id] = true;
+
+        saveCustomCoursesToStorage(true);
+        closeAiCurriculumBuilderModal();
+        renderLessonsCategoryView();
+
+        setTimeout(() => {
+          const el = document.getElementById('custom-lesson-card-' + newLesson.id);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 200);
+
+        const lTitle = APP_STATE.lang === 'he' ? newLesson.title_he : newLesson.title_en;
+        showToast(APP_STATE.lang === 'he' ? `השיעור "${lTitle}" נוצר והתווסף לקורס בהצלחה!` : `Lesson "${lTitle}" created and added to course!`);
+      } catch (err) {
+        console.error('AI Single Lesson Error:', err);
+        alert('Could not generate lesson: ' + (err.message || 'Unknown error'));
       } finally {
         if (loadingState) loadingState.classList.add('hidden');
         if (submitBtn) submitBtn.disabled = false;
@@ -12301,6 +12690,36 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
             <div class="max-w-[85%] sm:max-w-[80%] rounded-2xl p-3 text-xs leading-relaxed ${isUser ? 'bg-brand-600 text-white rounded-tr-none' : 'bg-slate-950/80 border border-slate-800 text-slate-200 rounded-tl-none'} space-y-1.5">
               ${msg.actionBadges ? `<div class="space-y-1">${msg.actionBadges.map(b => `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono mr-1 mb-1"><i data-lucide="check" class="w-3 h-3"></i>${escapeHtml(b)}</span>`).join('')}</div>` : ''}
               <div class="whitespace-pre-wrap">${formatAiMarkdown(msg.content)}</div>
+              ${msg.createdLesson ? `
+                <div class="mt-2.5 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3 shadow-sm">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold text-xs shrink-0">✦</span>
+                    <div class="min-w-0">
+                      <div class="text-xs font-bold text-white truncate">${escapeHtml(msg.createdLesson.lessonTitle)}</div>
+                      <div class="text-[10px] text-amber-300/80 truncate">Course: ${escapeHtml(msg.createdLesson.courseTitle)}</div>
+                    </div>
+                  </div>
+                  <button type="button" onclick="navigateToLesson('${msg.createdLesson.courseId}', '${msg.createdLesson.lessonId}')" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] transition active:scale-95 shrink-0 flex items-center gap-1 shadow">
+                    <span>View Lesson</span>
+                    <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              ` : ''}
+              ${msg.createdCourse ? `
+                <div class="mt-2.5 p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-between gap-3 shadow-sm">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-xs shrink-0">📚</span>
+                    <div class="min-w-0">
+                      <div class="text-xs font-bold text-white truncate">${escapeHtml(msg.createdCourse.courseTitle)}</div>
+                      <div class="text-[10px] text-indigo-300/80">${msg.createdCourse.lessonCount || 0} Lessons</div>
+                    </div>
+                  </div>
+                  <button type="button" onclick="navigateToCourse('${msg.createdCourse.courseId}')" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[10px] transition active:scale-95 shrink-0 flex items-center gap-1 shadow">
+                    <span>View Course</span>
+                    <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              ` : ''}
             </div>
           </div>
         `;
@@ -12361,12 +12780,47 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
       showToast(t.toastChatCleared || 'Chat cleared');
     }
 
+    function navigateToCourse(courseId) {
+      switchTab('study');
+      switchStudyCategory('lessons');
+      APP_STATE.activeCourseId = courseId;
+      renderLessonsCategoryView();
+      if (typeof window.scrollTo === 'function') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function navigateToLesson(courseId, lessonId) {
+      navigateToCourse(courseId);
+      if (!APP_STATE.expandedCustomLessonIds) APP_STATE.expandedCustomLessonIds = {};
+      APP_STATE.expandedCustomLessonIds[lessonId] = true;
+      renderLessonsCategoryView();
+      setTimeout(() => {
+        const el = document.getElementById('custom-lesson-card-' + lessonId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 250);
+    }
+
+    window.navigateToCourse = navigateToCourse;
+    window.navigateToLesson = navigateToLesson;
+
     function applyAiQuickPrompt(promptKey) {
       const input = document.getElementById('ai-chat-input');
       if (!input) return;
       const isHe = APP_STATE.lang === 'he';
 
       const prompts = {
+        create_lesson: isHe
+          ? 'צור שיעור שלם בנושא הכרת הטוב ומודה אני, וחבר אותו לקורס מושגי יסוד'
+          : 'Create a complete lesson on Modeh Ani and Daily Gratitude, and connect it to my Bar Mitzvah Concepts course',
+        create_course: isHe
+          ? 'צור קורס שלם בן 6 שיעורים על מסכת אבות לנערים בני 13'
+          : 'Create a complete 6-lesson course on Pirkei Avot Ethics for 13-year-olds',
+        connect_lesson: isHe
+          ? 'יש לי רעיון לשיעור על התגברות על לחץ חברתי. איך אפשר לחבר את זה לשיעורים הקיימים שלי?'
+          : 'I have an idea for a lesson on overcoming peer pressure. How can I connect it to my currently existing lessons?',
         add_student: isHe ? 'הוסף תלמיד חדש בשם אריאל כהן לפרשת נח' : 'Add a new student named Ariel Cohen learning Parshat Noach',
         schedule_lesson: isHe ? 'קבע שיעור לאריאל כהן ליום חמישי הקרוב בשעה 4:30 אחה״צ בנושא תפילין' : 'Schedule a lesson for Ariel Cohen on Thursday at 4:30 PM reviewing Tefillin',
         add_note: isHe ? 'הוסף לכרטיס לימוד תפילין סיפור על חייל בכותל המערבי במלחמת ששת הימים' : 'Add this story to the Tefillin lesson: The story of the soldier putting on Tefillin at the Western Wall in 1967',
@@ -12536,6 +12990,93 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
               type: "OBJECT",
               properties: {}
             }
+          },
+          {
+            name: "create_lesson",
+            description: "Create a complete, rich educational lesson and add it to an existing course or new course. Includes hook, 7 knowledge anchors, midrash depth nugget, real-world application, and discussion spark.",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                courseIdOrName: { type: "STRING", description: "Name or ID of the course to add this lesson to. If not provided or not found, will add to the active course or create a new course." },
+                title_en: { type: "STRING", description: "Lesson title in English" },
+                title_he: { type: "STRING", description: "Lesson title in Hebrew" },
+                hook_en: { type: "STRING", description: "Opening real-world analogy, relatable dilemma, or hook for teens" },
+                hook_he: { type: "STRING", description: "Opening hook in Hebrew" },
+                anchors_en: {
+                  type: "ARRAY",
+                  items: { type: "STRING" },
+                  description: "5 to 7 high impact knowledge anchors formatted as '**Keyword**: Clear concise explanation'"
+                },
+                anchors_he: {
+                  type: "ARRAY",
+                  items: { type: "STRING" },
+                  description: "5 to 7 knowledge anchors in Hebrew"
+                },
+                midrash_en: { type: "STRING", description: "Midrashic depth nugget or classical rabbinic insight" },
+                midrash_he: { type: "STRING", description: "Midrashic depth nugget in Hebrew" },
+                life_app_en: { type: "STRING", description: "Relatable modern teen life application" },
+                life_app_he: { type: "STRING", description: "Real-world life application in Hebrew" },
+                discussion_en: { type: "STRING", description: "Interactive discussion spark, riddle, or debate prompt" },
+                discussion_he: { type: "STRING", description: "Discussion spark in Hebrew" },
+                connections: { type: "STRING", description: "Pedagogical explanation of how this lesson connects to prior topics in the course" }
+              },
+              required: ["title_en", "hook_en", "anchors_en"]
+            }
+          },
+          {
+            name: "create_course",
+            description: "Create a new curriculum class/course container in the Study Hub",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                title_en: { type: "STRING", description: "Course title in English" },
+                title_he: { type: "STRING", description: "Course title in Hebrew" },
+                category: { type: "STRING", description: "Subject category (e.g. Bar Mitzvah & Torah, Halacha, Talmud, Hebrew, Math, Science)" },
+                target_level: { type: "STRING", description: "Target student age/grade level" },
+                description_en: { type: "STRING", description: "1-2 sentence course summary in English" },
+                description_he: { type: "STRING", description: "1-2 sentence course summary in Hebrew" },
+                icon: { type: "STRING", description: "Emoji icon symbol for the course (e.g. 📜, ✦, ⚡, 📖, 🔬)" }
+              },
+              required: ["title_en"]
+            }
+          },
+          {
+            name: "create_full_class",
+            description: "Create an entire new course with a complete curriculum of structured lessons in one operation",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                course_title_en: { type: "STRING", description: "Course title in English" },
+                course_title_he: { type: "STRING", description: "Course title in Hebrew" },
+                category: { type: "STRING", description: "Category/domain" },
+                target_level: { type: "STRING", description: "Target age/grade" },
+                description_en: { type: "STRING", description: "Course summary" },
+                icon: { type: "STRING", description: "Course emoji icon" },
+                lessons: {
+                  type: "ARRAY",
+                  items: {
+                    type: "OBJECT",
+                    properties: {
+                      title_en: { type: "STRING" },
+                      title_he: { type: "STRING" },
+                      hook_en: { type: "STRING" },
+                      hook_he: { type: "STRING" },
+                      anchors_en: { type: "ARRAY", items: { type: "STRING" } },
+                      anchors_he: { type: "ARRAY", items: { type: "STRING" } },
+                      midrash_en: { type: "STRING" },
+                      midrash_he: { type: "STRING" },
+                      life_app_en: { type: "STRING" },
+                      life_app_he: { type: "STRING" },
+                      discussion_en: { type: "STRING" },
+                      discussion_he: { type: "STRING" }
+                    },
+                    required: ["title_en", "hook_en", "anchors_en"]
+                  },
+                  description: "List of structured lessons for this class"
+                }
+              },
+              required: ["course_title_en", "lessons"]
+            }
           }
         ]
       }];
@@ -12634,10 +13175,25 @@ Portal Capabilities & Your Authorized Tools:
 5. mark_topic_progress: Mark a Jewish Concept as completed or incomplete.
 6. mark_parsha_progress: Mark a Chumash Parsha as completed or incomplete.
 7. add_study_material: Add custom teaching notes, stories, explanation points, or discussion questions to a concept or parsha curriculum card.
-8. get_portal_data: Retrieve the live student roster and calendar schedule.
+8. get_portal_data: Retrieve the live student roster, calendar schedule, and courses.
+9. create_lesson: Create a full pedagogical lesson matching the website visual studio (hook, 7 knowledge anchors with bold keywords, midrash depth nugget, teen life application, discussion spark) and add it to an existing or new course.
+10. create_course: Create a new class/course subject container in the Study Hub.
+11. create_full_class: Create an entire new course with a complete multi-lesson curriculum in one go.
 
 Current Database State:
 ${JSON.stringify(portalContext)}
+
+Curriculum & Lesson Studio Guidelines:
+- You have deep pedagogical mastery across Jewish studies, Bar Mitzvah preparation, Chumash, Halacha, Talmud, Hebrew, and general subjects.
+- When the tutor discusses an idea for a lesson or class, converse thoughtfully with them, brainstorm creative angles, and propose explicit connections to their existing courses and lessons (referencing them by title and number).
+- When the tutor asks you to create or finalize a lesson, call the "create_lesson" tool with full rich details matching the exact visual vision:
+  * title_en & title_he (bilingual)
+  * hook_en & hook_he: an engaging teen-relatable dilemma, real-world puzzle, or modern analogy
+  * anchors_en: 5 to 7 high-impact core knowledge anchors, formatted strictly as '**Keyword**: clear explanation'
+  * midrash_en & midrash_he: a classical rabbinic insight, Talmudic depth gem, or Midrash
+  * life_app_en & life_app_he: a concrete modern teen takeaway
+  * discussion_en & discussion_he: a provocative question, debate spark, or riddle
+- When the tutor asks you to create a full class or whole curriculum, call "create_full_class" with the course title, description, and all structured lessons.
 
 Debriefing & Intelligent Planning Guidelines:
 - When the user provides a lesson debrief (e.g. 'DEBRIEF [Student]: we learned X, tested Y, he mastered Z'):
@@ -12646,7 +13202,7 @@ Debriefing & Intelligent Planning Guidelines:
   3. If asked to schedule their next lesson, analyze uncompleted topics and set the lesson subject to the recommended upcoming topics (e.g. 'Next to teach: [Topic]'), then call schedule_lesson.
 
 Guidelines:
-- When the user asks you to add a student, update a name, schedule a session, or add a study note, ALWAYS call the corresponding function tool.
+- When the user asks you to add a student, update a name, schedule a session, create a lesson, create a class, or add a study note, ALWAYS call the corresponding function tool.
 - Respond in the user's language (Hebrew if they write in Hebrew, English if they write in English).
 - Be supportive, concise, accurate, and respectful.`;
 
@@ -12724,6 +13280,8 @@ Guidelines:
         let modelText = '';
         const actionBadges = [];
         const functionResponses = [];
+        let createdLessonInfo = null;
+        let createdCourseInfo = null;
 
         for (const part of parts) {
           if (part.text) {
@@ -12733,6 +13291,12 @@ Guidelines:
             const result = executeAiToolCall(part.functionCall);
             if (result && result.message) {
               actionBadges.push(result.message);
+            }
+            if (result && result.createdLesson) {
+              createdLessonInfo = result.createdLesson;
+            }
+            if (result && result.createdCourse) {
+              createdCourseInfo = result.createdCourse;
             }
             functionResponses.push({
               functionResponse: {
@@ -12780,7 +13344,9 @@ Guidelines:
         APP_STATE.aiMessages.push({
           role: 'model',
           content: modelText || (APP_STATE.lang === 'he' ? 'הפעולה הושלמה בהצלחה!' : 'Operation executed successfully!'),
-          actionBadges: actionBadges.length > 0 ? actionBadges : null
+          actionBadges: actionBadges.length > 0 ? actionBadges : null,
+          createdLesson: createdLessonInfo,
+          createdCourse: createdCourseInfo
         });
         renderAiMessages();
         renderAllViews();
@@ -13032,6 +13598,241 @@ Guidelines:
         return getPortalContextData();
       }
 
+      if (name === 'create_course') {
+        const courseId = 'course_' + Date.now();
+        const titleEn = (args.title_en || 'New Course').trim();
+        const titleHe = (args.title_he || titleEn).trim();
+        const category = (args.category || 'General Studies').trim();
+        const targetLevel = (args.target_level || 'All Ages').trim();
+        const descEn = (args.description_en || '').trim();
+        const descHe = (args.description_he || descEn).trim();
+        const icon = (args.icon || '📚').trim();
+
+        const newCourse = {
+          id: courseId,
+          title_en: titleEn,
+          title_he: titleHe,
+          category: category,
+          target_level: targetLevel,
+          description_en: descEn,
+          description_he: descHe,
+          icon: icon,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          lessons: []
+        };
+
+        if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
+        APP_STATE.customCourses.push(newCourse);
+        APP_STATE.activeCourseId = courseId;
+        saveCustomCoursesToStorage(true);
+        renderLessonsCategoryView();
+
+        const courseDisplayTitle = isHe ? titleHe : titleEn;
+        return {
+          success: true,
+          courseId: newCourse.id,
+          courseTitle: courseDisplayTitle,
+          createdCourse: {
+            courseId: newCourse.id,
+            courseTitle: courseDisplayTitle,
+            lessonCount: 0
+          },
+          message: isHe ? `נוצר קורס חדש: ${courseDisplayTitle}` : `Created course: ${courseDisplayTitle}`
+        };
+      }
+
+      if (name === 'create_lesson') {
+        if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
+
+        let targetCourse = null;
+        if (args.courseIdOrName) {
+          const rawTarget = String(args.courseIdOrName).toLowerCase().trim();
+          targetCourse = APP_STATE.customCourses.find(c =>
+            c.id === args.courseIdOrName ||
+            (c.title_en && c.title_en.toLowerCase().includes(rawTarget)) ||
+            (c.title_he && c.title_he.toLowerCase().includes(rawTarget))
+          );
+        }
+
+        if (!targetCourse && APP_STATE.activeCourseId) {
+          targetCourse = APP_STATE.customCourses.find(c => c.id === APP_STATE.activeCourseId);
+        }
+
+        if (!targetCourse && APP_STATE.customCourses.length > 0) {
+          targetCourse = APP_STATE.customCourses[0];
+        }
+
+        if (!targetCourse) {
+          const newCourseId = 'course_' + Date.now();
+          targetCourse = {
+            id: newCourseId,
+            title_en: 'Custom Curriculum',
+            title_he: 'תוכנית לימודים',
+            category: 'General',
+            target_level: 'All Ages',
+            description_en: 'AI and tutor custom curriculum',
+            description_he: 'תוכנית לימודים מותאמת אישית',
+            icon: '✦',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            lessons: []
+          };
+          APP_STATE.customCourses.push(targetCourse);
+        }
+
+        if (!Array.isArray(targetCourse.lessons)) targetCourse.lessons = [];
+
+        const formatAnchors = (rawAnchors) => {
+          if (!rawAnchors) return [];
+          const list = Array.isArray(rawAnchors) ? rawAnchors : String(rawAnchors).split('\n').filter(Boolean);
+          return list.map(a => {
+            let str = String(a).trim().replace(/^([•\-✦]|(\*(?!\*)))\s*/, '');
+            if (!str.includes('**') && str.includes(':')) {
+              const colonIdx = str.indexOf(':');
+              const term = str.slice(0, colonIdx).trim();
+              const rest = str.slice(colonIdx + 1).trim();
+              return `**${term}**: ${rest}`;
+            }
+            return str;
+          });
+        };
+
+        const lessonId = 'les_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        const lessonNum = targetCourse.lessons.length + 1;
+        const titleEn = (args.title_en || `Lesson ${lessonNum}`).trim();
+        const titleHe = (args.title_he || titleEn).trim();
+
+        const newLesson = {
+          id: lessonId,
+          lesson_num: lessonNum,
+          title_en: titleEn,
+          title_he: titleHe,
+          hook_en: (args.hook_en || '').trim(),
+          hook_he: (args.hook_he || args.hook_en || '').trim(),
+          anchors_en: formatAnchors(args.anchors_en),
+          anchors_he: formatAnchors(args.anchors_he),
+          midrash_en: (args.midrash_en || '').trim(),
+          midrash_he: (args.midrash_he || '').trim(),
+          life_app_en: (args.life_app_en || '').trim(),
+          life_app_he: (args.life_app_he || '').trim(),
+          discussion_en: (args.discussion_en || '').trim(),
+          discussion_he: (args.discussion_he || '').trim(),
+          recordings: []
+        };
+
+        targetCourse.lessons.push(newLesson);
+        targetCourse.updated_at = new Date().toISOString();
+        APP_STATE.activeCourseId = targetCourse.id;
+
+        if (!APP_STATE.expandedCustomLessonIds) APP_STATE.expandedCustomLessonIds = {};
+        APP_STATE.expandedCustomLessonIds[newLesson.id] = true;
+
+        saveCustomCoursesToStorage(true);
+        renderLessonsCategoryView();
+
+        const courseDisplayTitle = isHe ? targetCourse.title_he : targetCourse.title_en;
+        const lessonDisplayTitle = isHe ? newLesson.title_he : newLesson.title_en;
+
+        return {
+          success: true,
+          courseId: targetCourse.id,
+          lessonId: newLesson.id,
+          courseTitle: courseDisplayTitle,
+          lessonTitle: lessonDisplayTitle,
+          createdLesson: {
+            courseId: targetCourse.id,
+            lessonId: newLesson.id,
+            courseTitle: courseDisplayTitle,
+            lessonTitle: lessonDisplayTitle
+          },
+          message: isHe
+            ? `נוצר שיעור חדש: ${lessonDisplayTitle} (בקורס "${courseDisplayTitle}")`
+            : `Created lesson: "${lessonDisplayTitle}" (in "${courseDisplayTitle}")`
+        };
+      }
+
+      if (name === 'create_full_class') {
+        const courseId = 'course_' + Date.now();
+        const titleEn = (args.course_title_en || args.title_en || 'New Course').trim();
+        const titleHe = (args.course_title_he || args.title_he || titleEn).trim();
+        const category = (args.category || 'General Studies').trim();
+        const targetLevel = (args.target_level || 'All Ages').trim();
+        const descEn = (args.description_en || '').trim();
+        const descHe = (args.description_he || descEn).trim();
+        const icon = (args.icon || '📚').trim();
+
+        const formatAnchors = (rawAnchors) => {
+          if (!rawAnchors) return [];
+          const list = Array.isArray(rawAnchors) ? rawAnchors : String(rawAnchors).split('\n').filter(Boolean);
+          return list.map(a => {
+            let str = String(a).trim().replace(/^([•\-✦]|(\*(?!\*)))\s*/, '');
+            if (!str.includes('**') && str.includes(':')) {
+              const colonIdx = str.indexOf(':');
+              const term = str.slice(0, colonIdx).trim();
+              const rest = str.slice(colonIdx + 1).trim();
+              return `**${term}**: ${rest}`;
+            }
+            return str;
+          });
+        };
+
+        const rawLessons = Array.isArray(args.lessons) ? args.lessons : [];
+        const builtLessons = rawLessons.map((l, idx) => ({
+          id: 'les_' + Date.now() + '_' + idx,
+          lesson_num: idx + 1,
+          title_en: (l.title_en || `Lesson ${idx + 1}`).trim(),
+          title_he: (l.title_he || l.title_en || `שיעור ${idx + 1}`).trim(),
+          hook_en: (l.hook_en || '').trim(),
+          hook_he: (l.hook_he || l.hook_en || '').trim(),
+          anchors_en: formatAnchors(l.anchors_en),
+          anchors_he: formatAnchors(l.anchors_he),
+          midrash_en: (l.midrash_en || '').trim(),
+          midrash_he: (l.midrash_he || '').trim(),
+          life_app_en: (l.life_app_en || '').trim(),
+          life_app_he: (l.life_app_he || '').trim(),
+          discussion_en: (l.discussion_en || '').trim(),
+          discussion_he: (l.discussion_he || '').trim(),
+          recordings: []
+        }));
+
+        const newCourse = {
+          id: courseId,
+          title_en: titleEn,
+          title_he: titleHe,
+          category: category,
+          target_level: targetLevel,
+          description_en: descEn,
+          description_he: descHe,
+          icon: icon,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          lessons: builtLessons
+        };
+
+        if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
+        APP_STATE.customCourses.push(newCourse);
+        APP_STATE.activeCourseId = courseId;
+        saveCustomCoursesToStorage(true);
+        renderLessonsCategoryView();
+
+        const courseDisplayTitle = isHe ? titleHe : titleEn;
+        return {
+          success: true,
+          courseId: newCourse.id,
+          courseTitle: courseDisplayTitle,
+          lessonCount: builtLessons.length,
+          createdCourse: {
+            courseId: newCourse.id,
+            courseTitle: courseDisplayTitle,
+            lessonCount: builtLessons.length
+          },
+          message: isHe
+            ? `נוצר קורס שלם עם ${builtLessons.length} שיעורים: "${courseDisplayTitle}"`
+            : `Created full class with ${builtLessons.length} lessons: "${courseDisplayTitle}"`
+        };
+      }
+
       return { success: false, error: `Unknown tool: ${name}` };
     }
 
@@ -13052,6 +13853,22 @@ Guidelines:
         };
       });
 
+      const coursesSummary = (APP_STATE.customCourses || []).map(c => ({
+        id: c.id,
+        title_en: c.title_en,
+        title_he: c.title_he,
+        category: c.category || '',
+        target_level: c.target_level || '',
+        totalLessons: (c.lessons || []).length,
+        lessons: (c.lessons || []).map(l => ({
+          id: l.id,
+          lesson_num: l.lesson_num,
+          title_en: l.title_en,
+          title_he: l.title_he,
+          hook_en: (l.hook_en || '').slice(0, 140)
+        }))
+      }));
+
       let totalCustomMaterials = 0;
       if (APP_STATE.studyAdditions) {
         Object.values(APP_STATE.studyAdditions).forEach(arr => {
@@ -13063,6 +13880,7 @@ Guidelines:
         activeTutorLang: APP_STATE.lang,
         totalStudents: studentsSummary.length,
         students: studentsSummary,
+        courses: coursesSummary,
         totalCustomMaterialsAdded: totalCustomMaterials
       };
     }

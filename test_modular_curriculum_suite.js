@@ -58,13 +58,15 @@ const sandbox = {
   confirm: () => true,
   alert: () => {},
   prompt: () => '',
+  scrollTo: () => {},
   window: {
     location: { href: 'https://bar-mitzvah-tutor.pages.dev' },
     addEventListener() {},
     lucide: { createIcons() {} },
     confirm: () => true,
     alert: () => {},
-    prompt: () => ''
+    prompt: () => '',
+    scrollTo: () => {}
   },
   document: {
     documentElement: { setAttribute() {} },
@@ -416,6 +418,131 @@ assert(activeLessonsHtmlAfterAudio.includes('Record Voice Memo'), 'Expanded less
 // Test Audio Deletion
 sandbox.deleteLessonAudio(createdCourse.id, createdLesson.id, createdLesson.recordings[0].id);
 assert(createdLesson.recordings.length === 0, 'deleteLessonAudio successfully removed recording');
+
+// Gate 10: Conversational AI Lesson & Course Studio and Connected Pedagogy
+console.log('\n--- Gate 10: AI Conversational Studio & Connected Curriculum ---');
+assert(indexHtml.includes('form-ai-single-lesson-builder'), 'HTML contains form-ai-single-lesson-builder');
+assert(indexHtml.includes('tab-btn-ai-builder-full'), 'HTML contains tab-btn-ai-builder-full');
+assert(indexHtml.includes('tab-btn-ai-builder-single'), 'HTML contains tab-btn-ai-builder-single');
+
+assert(typeof sandbox.switchAiBuilderTab === 'function', 'switchAiBuilderTab is a function');
+assert(typeof sandbox.populateAiSingleLessonCourseSelect === 'function', 'populateAiSingleLessonCourseSelect is a function');
+assert(typeof sandbox.updateAiSingleLessonConnectOptions === 'function', 'updateAiSingleLessonConnectOptions is a function');
+assert(typeof sandbox.handleGenerateSingleLesson === 'function', 'handleGenerateSingleLesson is a function');
+assert(typeof sandbox.navigateToCourse === 'function', 'navigateToCourse is a function');
+assert(typeof sandbox.navigateToLesson === 'function', 'navigateToLesson is a function');
+
+// Assert tools in buildGeminiToolsDeclaration
+const toolsDecl = sandbox.buildGeminiToolsDeclaration();
+assert(Array.isArray(toolsDecl) && toolsDecl.length > 0, 'buildGeminiToolsDeclaration returns tools array');
+const funcList = toolsDecl[0].functionDeclarations || [];
+const toolNames = funcList.map(f => f.name);
+assert(toolNames.includes('create_lesson'), 'buildGeminiToolsDeclaration includes create_lesson');
+assert(toolNames.includes('create_course'), 'buildGeminiToolsDeclaration includes create_course');
+assert(toolNames.includes('create_full_class'), 'buildGeminiToolsDeclaration includes create_full_class');
+
+// Test executeAiToolCall with create_course
+const createCourseResult = sandbox.executeAiToolCall({
+  name: 'create_course',
+  args: {
+    title_en: 'Chassidic Philosophy & Ethics',
+    title_he: 'תורת החסידות ומוסר',
+    category: 'Philosophy',
+    target_level: 'Bar Mitzvah & Teens',
+    description_en: 'Foundational concepts of Tanya and Chassidus',
+    icon: '🔥'
+  }
+});
+assert(createCourseResult.success === true, 'executeAiToolCall create_course succeeded');
+assert(createCourseResult.courseId !== undefined, 'create_course returned courseId');
+assert(createCourseResult.createdCourse !== undefined, 'create_course returned createdCourse payload');
+const chassidusCourse = sandbox.APP_STATE.customCourses.find(c => c.id === createCourseResult.courseId);
+assert(chassidusCourse !== undefined, 'Newly created course exists in customCourses');
+assert(chassidusCourse.icon === '🔥', 'Newly created course retained custom icon');
+
+// Test executeAiToolCall with create_lesson
+const createLessonResult = sandbox.executeAiToolCall({
+  name: 'create_lesson',
+  args: {
+    courseIdOrName: chassidusCourse.id,
+    title_en: 'The Divine Soul: Finding Your Inner Superpower',
+    title_he: 'הנפש האלוהית: מציאת הכוח הפנימי',
+    hook_en: 'Have you ever felt an inner battle between what is easy and what is truly right?',
+    hook_he: 'האם הרגשת פעם מאבק פנימי בין מה שקל לבין מה שנכון באמת?',
+    anchors_en: [
+      '**Two Souls**: Every person has a natural soul and a divine soul.',
+      '**Mind Over Heart**: The intellect has the natural power to guide emotions.',
+      '**Continuous Growth**: A Beinoni is not mediocre, but an active champion of choices.',
+      '**Action First**: Small good deeds create massive ripples in the universe.'
+    ],
+    anchors_he: [
+      '**שתי נפשות**: בכל אדם פועלות נפש טבעית ונפש אלוהית.',
+      '**מוח שליט על הלב**: לשכל יש את הכוח להדריך את הרגש.'
+    ],
+    midrash_en: 'The Tanya explains that an entire candle is illuminated by a single flame.',
+    midrash_he: 'מעט אור דוחה הרבה מן החושך.',
+    life_app_en: 'When feeling tempted to react angrily, pause for 5 seconds to let your mind steer your words.',
+    life_app_he: 'ברגע של כעס, עצור לחמש שניות ותן לשכל להוביל את התגובה.',
+    discussion_en: 'Can someone be a good person even if they constantly struggle with negative thoughts?',
+    discussion_he: 'האם אדם נחשב לצדיק במעשיו גם אם מחשבותיו מאתגרות אותו ללא הרף?'
+  }
+});
+assert(createLessonResult.success === true, 'executeAiToolCall create_lesson succeeded');
+assert(createLessonResult.lessonId !== undefined, 'create_lesson returned lessonId');
+assert(createLessonResult.createdLesson !== undefined, 'create_lesson returned createdLesson object');
+const chassidusLesson = chassidusCourse.lessons.find(l => l.id === createLessonResult.lessonId);
+assert(chassidusLesson !== undefined, 'Created lesson is attached to chassidusCourse');
+assert(chassidusLesson.anchors_en.length === 4, 'Lesson has 4 formatted anchors');
+assert(chassidusLesson.anchors_en[0].includes('**Two Souls**'), 'Anchors format bold keyword correctly');
+assert(chassidusLesson.life_app_en.includes('5 seconds'), 'Lesson includes teen life application');
+
+// Test executeAiToolCall with create_full_class
+const createFullClassResult = sandbox.executeAiToolCall({
+  name: 'create_full_class',
+  args: {
+    course_title_en: 'Tefillin Masterclass',
+    course_title_he: 'אמנות הנחת תפילין',
+    category: 'Mitzvot',
+    target_level: 'Grade 7-8',
+    icon: '📦',
+    lessons: [
+      {
+        title_en: 'The Anatomy of Tefillin',
+        title_he: 'מבנה התפילין והקלף',
+        hook_en: 'Why do Tefillin need to be jet black and mathematically square?',
+        anchors_en: ['**Halacha LeMoshe MiSinai**: The square boxes and black straps date back to Sinai.']
+      },
+      {
+        title_en: 'Head and Heart Alignment',
+        title_he: 'חיבור ראש ולב',
+        hook_en: 'Why wrap the arm before the head?',
+        anchors_en: ['**Subjugating Action**: We place dedication on the arm opposite the heart first.']
+      }
+    ]
+  }
+});
+assert(createFullClassResult.success === true, 'executeAiToolCall create_full_class succeeded');
+assert(createFullClassResult.lessonCount === 2, 'create_full_class generated 2 lessons');
+const tefillinClass = sandbox.APP_STATE.customCourses.find(c => c.id === createFullClassResult.courseId);
+assert(tefillinClass !== undefined, 'Full class found in customCourses');
+assert(tefillinClass.lessons.length === 2, 'Full class contains exactly 2 lessons');
+
+// Test Context Awareness in getPortalContextData
+const portalContext = sandbox.getPortalContextData();
+assert(Array.isArray(portalContext.courses), 'portalContext.courses is an array');
+assert(portalContext.courses.length >= 2, 'portalContext.courses contains custom courses');
+const contextCourse = portalContext.courses.find(c => c.id === chassidusCourse.id);
+assert(contextCourse !== undefined, 'Chassidus course is present in portalContext.courses');
+assert(contextCourse.lessons.length >= 1, 'Chassidus course in context lists its lessons with hooks');
+
+// Test Navigation helpers
+sandbox.navigateToCourse(chassidusCourse.id);
+assert(sandbox.APP_STATE.activeTab === 'study', 'navigateToCourse switched tab to study');
+assert(sandbox.APP_STATE.activeStudyCategory === 'lessons', 'navigateToCourse switched study category to lessons');
+assert(sandbox.APP_STATE.activeCourseId === chassidusCourse.id, 'navigateToCourse set activeCourseId');
+
+sandbox.navigateToLesson(chassidusCourse.id, chassidusLesson.id);
+assert(sandbox.APP_STATE.expandedCustomLessonIds[chassidusLesson.id] === true, 'navigateToLesson expanded custom lesson');
 
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
