@@ -202,9 +202,10 @@
           <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-signin-email">Email Address</label>
           <input
             type="email"
+            name="email"
             id="signin-email"
             placeholder="name@example.com"
-            autocomplete="email"
+            autocomplete="username email"
             class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
             required
           >
@@ -215,6 +216,7 @@
           <div class="relative">
             <input
               type="password"
+              name="password"
               id="signin-password"
               placeholder="••••••••"
               autocomplete="current-password"
@@ -271,6 +273,7 @@
           <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-signup-name">Full Name *</label>
           <input
             type="text"
+            name="name"
             id="signup-name"
             placeholder="e.g. Rabbi David Cohen"
             autocomplete="name"
@@ -283,8 +286,10 @@
           <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-signup-org">Synagogue / School (Optional)</label>
           <input
             type="text"
+            name="organization"
             id="signup-org"
             placeholder="e.g. Congregation Beth Tefillah"
+            autocomplete="organization"
             class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
           >
         </div>
@@ -293,9 +298,10 @@
           <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-signup-email">Email Address *</label>
           <input
             type="email"
+            name="email"
             id="signup-email"
             placeholder="name@example.com"
-            autocomplete="email"
+            autocomplete="username email"
             class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
             required
           >
@@ -306,6 +312,7 @@
           <div class="relative">
             <input
               type="password"
+              name="password"
               id="signup-password"
               placeholder="Min. 6 characters"
               autocomplete="new-password"
@@ -1799,7 +1806,7 @@
             <i data-lucide="lock" class="w-4 h-4 text-rose-400"></i>
             <div>
               <div id="settings-lock-title" class="text-xs font-bold text-rose-300">Lock Portal</div>
-              <p id="settings-lock-desc" class="text-[11px] text-slate-500 mt-0.5">Require verified email code to access</p>
+              <p id="settings-lock-desc" class="text-[11px] text-slate-500 mt-0.5">Require password to access</p>
             </div>
           </div>
           <i data-lucide="shield" class="w-4 h-4 text-slate-500"></i>
@@ -2082,7 +2089,7 @@
         settingsBackupTitle: "Download Student Backup",
         settingsBackupDesc: "Save offline JSON file to device",
         settingsLockTitle: "Lock Portal",
-        settingsLockDesc: "Lock screen and require verified email code",
+        settingsLockDesc: "Lock screen and require password to access",
 
         // Share Modal
         shareModalTitle: "Share Live Progress with Rabbi",
@@ -2397,7 +2404,7 @@
         settingsBackupTitle: "הורדת גיבוי תלמידים",
         settingsBackupDesc: "שמור קובץ JSON למכשיר",
         settingsLockTitle: "נעילת מערכת",
-        settingsLockDesc: "נעילת המסך ודרישת אימות קוד דוא״ל",
+        settingsLockDesc: "נעילת המסך ודרישת סיסמה לכניסה",
 
         // Share Modal
         shareModalTitle: "שיתוף התקדמות עם הרב",
