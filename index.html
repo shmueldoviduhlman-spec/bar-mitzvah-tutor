@@ -468,20 +468,31 @@
         <!-- Lessons Sub-Header & Selector Toolbar -->
         <div id="study-lessons-master-toolbar" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 sm:p-2.5 shadow-lg backdrop-blur flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 max-w-4xl mx-auto">
           
-          <!-- Course Selector Dropdown -->
-          <div class="flex items-center gap-2 w-full md:w-auto">
+          <!-- Course Selector Dropdown & + New Course -->
+          <div class="flex items-center gap-2 flex-1 min-w-0">
             <div class="relative flex-1 md:w-72">
-              <select id="study-course-select" onchange="handleCourseSelectionChange(this.value)" class="w-full bg-slate-950 text-white font-semibold text-xs sm:text-sm py-2 px-3 pl-8 pr-7 rounded-xl border border-slate-700/80 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer appearance-none transition shadow-inner">
-                <option value="concepts">✦ Bar Mitzvah: Concepts (13)</option>
-                <option value="chumash">📜 Bar Mitzvah: Chumash (23)</option>
+              <select id="study-course-select" onchange="handleCourseSelectionChange(this.value)" class="w-full bg-slate-950 text-white font-semibold text-xs sm:text-sm py-2 px-3 pl-8 pr-7 rounded-xl border border-slate-700/80 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer appearance-none transition shadow-inner truncate">
               </select>
               <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
               <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
             </div>
+            <button onclick="openCreateCourseModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition active:scale-95 shadow shrink-0" title="Create a new course">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span class="hidden sm:inline">+ New Course</span>
+              <span class="sm:hidden">+ Course</span>
+            </button>
           </div>
 
-          <!-- Action Buttons: Review Notes -->
+          <!-- Action Buttons: AI Builder, Add Lesson, Review Notes -->
           <div class="flex items-center gap-2 w-full md:w-auto justify-end shrink-0">
+            <button onclick="openAiCurriculumBuilderModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/20 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Generate a full curriculum with AI">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span class="hidden sm:inline">AI Builder</span>
+            </button>
+            <button onclick="openAddCustomLessonModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition active:scale-95 shrink-0 shadow" title="Add a lesson to the current course">
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+              <span>+ Add Lesson</span>
+            </button>
             <button onclick="openReviewStudyMaterialsModal()" id="btn-review-study-materials" class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-950/80 hover:bg-slate-800/80 text-amber-300 border border-amber-500/30 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Review custom added materials across all lessons">
               <i data-lucide="bookmark-check" class="w-3.5 h-3.5 text-amber-400"></i>
               <span id="lbl-review-study-materials">Notes</span>
@@ -490,75 +501,40 @@
           </div>
         </div>
 
-        <!-- Sub-Section 1: Concepts Grid -->
-        <div id="study-section-concepts" class="space-y-6">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
-            <div>
-              <h2 id="topics-head-title" class="text-xl font-bold text-white flex items-center gap-2">
-                <span class="text-amber-400">✦</span> 13 Core Jewish Concepts
-              </h2>
-              <p id="topics-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
-                Tailored hooks, high-density memory points, and relatable teen analogies for 12-13 year olds.
-              </p>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="text-xs text-slate-400 font-mono hidden sm:block">
-                <span id="topics-count-display">Showing 13 of 13</span>
-              </div>
-            </div>
+        <!-- Blank state when tutor hasn't created classes yet -->
+        <div id="tutor-hub-blank-state" class="text-center py-12 px-6 bg-slate-900/60 border border-slate-800 rounded-3xl max-w-2xl mx-auto space-y-5 shadow-xl backdrop-blur hidden">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600/20 to-amber-500/20 border border-brand-500/30 flex items-center justify-center mx-auto text-brand-400">
+            <i data-lucide="book-plus" class="w-8 h-8"></i>
           </div>
-          <div id="topics-grid" class="space-y-3 max-w-4xl mx-auto"></div>
+          <div class="space-y-2">
+            <h3 id="lbl-tutor-hub-title" class="text-lg sm:text-xl font-bold text-white">Your Teaching Hub is Ready</h3>
+            <p id="lbl-tutor-hub-desc" class="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+              You haven't created any lessons yet. Build lessons for any subject (Math, Science, History, Judaics, Languages) or let AI design a full curriculum in seconds.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <button onclick="openCreateCourseModal()" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm shadow-lg transition active:scale-95">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>+ Create Course</span>
+            </button>
+            <button onclick="openAiCurriculumBuilderModal()" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 transition active:scale-95">
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+              <span id="lbl-tutor-hub-ai-btn">AI Curriculum Builder</span>
+            </button>
+          </div>
         </div>
 
-        <!-- Sub-Section 2: Chumash Grid (23 Parshiot) -->
-        <div id="study-section-chumash" class="space-y-6 hidden">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-            <div>
-              <h2 id="chumash-head-title" class="text-xl font-bold text-white flex items-center gap-2">
-                <span class="text-brand-400">📜</span> Chumash: Bereishit & Shemot
-              </h2>
-              <p id="chumash-head-desc" class="text-xs md:text-sm text-slate-400 mt-1">
-                Key plot lines, dense memory triggers, Rashi/Midrash gems, and bar mitzvah real-world angles.
-              </p>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="text-xs text-slate-400 font-mono hidden sm:block">
-                <span id="chumash-count-display">Showing 23 of 23</span>
-              </div>
-            </div>
-          </div>
-          <div id="chumash-grid" class="space-y-3 max-w-4xl mx-auto"></div>
+        <!-- Active lessons list when the tutor has classes -->
+        <div id="tutor-hub-active-lessons" class="space-y-6">
+          <div id="tutor-hub-lessons-container"></div>
         </div>
 
-        <!-- Sub-Section 3: External Tutor Teaching Hub (for new/non-master users) -->
-        <div id="study-section-tutor-hub" class="space-y-6 hidden">
-          <!-- Blank state when tutor hasn't created classes yet -->
-          <div id="tutor-hub-blank-state" class="text-center py-12 px-6 bg-slate-900/60 border border-slate-800 rounded-3xl max-w-2xl mx-auto space-y-5 shadow-xl backdrop-blur">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600/20 to-amber-500/20 border border-brand-500/30 flex items-center justify-center mx-auto text-brand-400">
-              <i data-lucide="book-plus" class="w-8 h-8"></i>
-            </div>
-            <div class="space-y-2">
-              <h3 id="lbl-tutor-hub-title" class="text-lg sm:text-xl font-bold text-white">Your Teaching Hub is Ready</h3>
-              <p id="lbl-tutor-hub-desc" class="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
-                You haven't created any lessons yet. Build lessons for any subject (Math, Science, History, Judaics, Languages) or let AI design a full curriculum in seconds.
-              </p>
-            </div>
-            <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
-              <button onclick="openAiCurriculumBuilderModal()" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs sm:text-sm shadow-lg transition active:scale-95">
-                <i data-lucide="sparkles" class="w-4 h-4"></i>
-                <span id="lbl-tutor-hub-ai-btn">AI Curriculum Builder</span>
-              </button>
-              <button onclick="openAddCustomLessonModal()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 transition active:scale-95">
-                <i data-lucide="plus" class="w-4 h-4 text-brand-400"></i>
-                <span id="lbl-tutor-hub-add-btn">+ Add Lesson</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Active lessons list when the tutor has classes -->
-          <div id="tutor-hub-active-lessons" class="space-y-6 hidden">
-            <div id="tutor-hub-lessons-container"></div>
-          </div>
+        <!-- Fallback Legacy Containers for backward compatibility -->
+        <div id="study-section-concepts" class="hidden">
+          <div id="topics-grid"></div>
+        </div>
+        <div id="study-section-chumash" class="hidden">
+          <div id="chumash-grid"></div>
         </div>
       </div>
 
@@ -1480,6 +1456,146 @@
   </div>
 
   <!-- ============================================== -->
+  <!-- MODAL: CREATE NEW COURSE / CLASS SERIES         -->
+  <!-- ============================================== -->
+  <div id="modal-create-course" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
+    <div class="max-w-xl w-full max-h-[90vh] bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+          <i data-lucide="book-plus" class="w-5 h-5 text-amber-400"></i>
+          <span id="modal-create-course-title">Create New Course</span>
+        </h3>
+        <button type="button" onclick="closeCreateCourseModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleSaveCustomCourse(event)" class="space-y-3.5 flex-1 overflow-y-auto pr-1">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Course Title (English) *</label>
+          <input
+            type="text"
+            id="input-create-course-title-en"
+            placeholder="e.g. Bar Mitzvah: 13 Core Concepts, or Algebra 101"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            required
+          >
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Course Title (Hebrew - Optional)</label>
+          <input
+            type="text"
+            id="input-create-course-title-he"
+            placeholder="e.g. 13 מושגי יסוד ביהדות"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+          >
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Subject / Discipline</label>
+            <select
+              id="input-create-course-category"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            >
+              <option value="Judaic Studies">Judaic Studies</option>
+              <option value="Torah / Chumash">Torah / Chumash</option>
+              <option value="Bar Mitzvah">Bar Mitzvah</option>
+              <option value="Hebrew Language">Hebrew Language</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Science">Science</option>
+              <option value="History">History</option>
+              <option value="General">General</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Target Level</label>
+            <select
+              id="input-create-course-level"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            >
+              <option value="Bar Mitzvah (Age 12-13)">Bar Mitzvah (Age 12-13)</option>
+              <option value="Elementary (Ages 7-10)">Elementary (Ages 7-10)</option>
+              <option value="Middle School (Ages 11-14)">Middle School (Ages 11-14)</option>
+              <option value="High School (Ages 15-18)">High School (Ages 15-18)</option>
+              <option value="Adult / All Ages">Adult / All Ages</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Course Description / Overview</label>
+          <textarea
+            id="input-create-course-desc"
+            rows="3"
+            placeholder="Brief summary of what students will master in this class series..."
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed"
+          ></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Course Icon</label>
+          <div class="flex items-center gap-2">
+            <input
+              type="text"
+              id="input-create-course-icon"
+              value="✦"
+              maxlength="2"
+              class="w-16 text-center bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold"
+            >
+            <div class="flex items-center gap-1.5 text-xs text-slate-400">
+              <span>Quick pick:</span>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='✦'" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-400">✦</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='📜'" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700">📜</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='📖'" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700">📖</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='🔬'" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700">🔬</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='📐'" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700">📐</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-800">
+          <button
+            type="button"
+            onclick="closeCreateCourseModal()"
+            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md active:scale-95"
+          >
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Create Course</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Hidden Audio Inputs for File Uploads -->
+  <input type="file" id="lesson-audio-file-input" accept="audio/*" class="hidden" onchange="handleLessonAudioFileSelected(event)">
+  <input type="file" id="reading-audio-file-input" accept="audio/*" class="hidden" onchange="handleReadingAudioFileSelected(event)">
+
+  <!-- Fixed Recording HUD -->
+  <div id="voice-recording-hud" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 hidden">
+    <div class="flex items-center gap-3 px-4 py-2.5 rounded-full bg-slate-900/95 border border-red-500/50 shadow-2xl backdrop-blur-md text-white">
+      <span class="w-3 h-3 rounded-full bg-red-500 animate-ping"></span>
+      <span class="text-xs font-bold text-red-400 font-mono" id="voice-recording-timer">00:00</span>
+      <span class="text-xs font-semibold text-slate-200" id="voice-recording-label">Recording Voice Memo...</span>
+      <button type="button" onclick="stopVoiceRecording()" class="px-3 py-1 rounded-full bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition active:scale-95 flex items-center gap-1 shadow-md">
+        <i data-lucide="square" class="w-3 h-3 fill-current"></i>
+        <span>Stop & Save</span>
+      </button>
+      <button type="button" onclick="cancelVoiceRecording()" class="p-1 text-slate-400 hover:text-white transition" title="Cancel">
+        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
   <!-- MODAL: ADD CUSTOM LESSON MANUALLY               -->
   <!-- ============================================== -->
   <div id="modal-add-custom-lesson" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
@@ -1487,7 +1603,7 @@
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
           <i data-lucide="plus-circle" class="w-5 h-5 text-brand-400"></i>
-          <span>Add Lesson to Course</span>
+          <span id="modal-custom-lesson-title">Add Lesson to Course</span>
         </h3>
         <button type="button" onclick="closeAddCustomLessonModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -1566,10 +1682,11 @@
           </button>
           <button
             type="submit"
+            id="modal-custom-lesson-submit-btn"
             class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md active:scale-95"
           >
             <i data-lucide="check" class="w-4 h-4"></i>
-            <span>Save Lesson</span>
+            <span id="modal-custom-lesson-submit-text">Save Lesson</span>
           </button>
         </div>
       </form>
@@ -4707,6 +4824,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       loadCustomCoursesFromStorage();
       loadCustomReadingFromStorage();
       loadCustomMilestonesFromStorage();
+      seedBarMitzvahCoursesToAccount();
       renderAllViews();
 
       const lockScreen = document.getElementById('lock-screen');
@@ -5574,6 +5692,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       loadCustomCoursesFromStorage();
       loadCustomReadingFromStorage();
       loadCustomMilestonesFromStorage();
+      seedBarMitzvahCoursesToAccount();
       checkUrlHashSync();
       applyLanguageDirection();
       renderAllViews();
@@ -6278,49 +6397,23 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     function renderLessonsCategoryView() {
-      const isMaster = isMasterAccount();
-      const masterToolbar = document.getElementById('study-lessons-master-toolbar');
-      const secConcepts = document.getElementById('study-section-concepts');
-      const secChumash = document.getElementById('study-section-chumash');
-      const tutorHub = document.getElementById('study-section-tutor-hub');
       const tutorBlankState = document.getElementById('tutor-hub-blank-state');
       const tutorActiveLessons = document.getElementById('tutor-hub-active-lessons');
 
-      if (isMaster) {
-        if (masterToolbar) masterToolbar.classList.remove('hidden');
-        if (tutorHub) tutorHub.classList.add('hidden');
-        if (APP_STATE.studySection === 'concepts') {
-          if (secConcepts) secConcepts.classList.remove('hidden');
-          if (secChumash) secChumash.classList.add('hidden');
-          renderTopics();
-        } else if (APP_STATE.studySection === 'chumash') {
-          if (secChumash) secChumash.classList.remove('hidden');
-          if (secConcepts) secConcepts.classList.add('hidden');
-          renderChumash();
-        } else {
-          if (secConcepts) secConcepts.classList.add('hidden');
-          if (secChumash) secChumash.classList.add('hidden');
-          renderCustomCourse();
+      const hasCourses = Array.isArray(APP_STATE.customCourses) && APP_STATE.customCourses.length > 0;
+
+      if (hasCourses) {
+        if (tutorBlankState) tutorBlankState.classList.add('hidden');
+        if (tutorActiveLessons) {
+          tutorActiveLessons.classList.remove('hidden');
+          renderTutorHubActiveLessons();
         }
       } else {
-        // External tutor / new user: keep master Bar Mitzvah lessons 100% hidden
-        if (masterToolbar) masterToolbar.classList.add('hidden');
-        if (secConcepts) secConcepts.classList.add('hidden');
-        if (secChumash) secChumash.classList.add('hidden');
-        if (tutorHub) tutorHub.classList.remove('hidden');
-
-        const hasCourses = Array.isArray(APP_STATE.customCourses) && APP_STATE.customCourses.length > 0;
-        if (hasCourses) {
-          if (tutorBlankState) tutorBlankState.classList.add('hidden');
-          if (tutorActiveLessons) {
-            tutorActiveLessons.classList.remove('hidden');
-            renderTutorHubActiveLessons();
-          }
-        } else {
-          if (tutorBlankState) tutorBlankState.classList.remove('hidden');
-          if (tutorActiveLessons) tutorActiveLessons.classList.add('hidden');
-        }
+        if (tutorBlankState) tutorBlankState.classList.remove('hidden');
+        if (tutorActiveLessons) tutorActiveLessons.classList.add('hidden');
       }
+
+      populateCourseSelector();
 
       if (window.lucide && typeof lucide.createIcons === 'function') {
         lucide.createIcons();
@@ -6331,6 +6424,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       const container = document.getElementById('tutor-hub-lessons-container');
       if (!container) return;
       const isHe = APP_STATE.lang === 'he';
+      const t = I18N[APP_STATE.lang];
       const courses = APP_STATE.customCourses || [];
       if (courses.length === 0) return;
 
@@ -6346,93 +6440,212 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       let html = `
         <div class="space-y-6 max-w-4xl mx-auto">
-          <!-- External Tutor Toolbar -->
-          <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 sm:p-2.5 shadow-lg backdrop-blur flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
-            <div class="flex items-center gap-2 flex-1">
-              <div class="relative flex-1 md:w-72">
-                <select onchange="handleCourseSelectionChange(this.value)" class="w-full bg-slate-950 text-white font-semibold text-xs sm:text-sm py-2 px-3 pl-8 pr-7 rounded-xl border border-slate-700/80 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer appearance-none transition shadow-inner">
-                  ${courses.map(c => `
-                    <option value="${c.id}" ${c.id === activeCourse.id ? 'selected' : ''}>
-                      ✦ ${(isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he))} (${c.lessons ? c.lessons.length : 0})
-                    </option>
-                  `).join('')}
-                </select>
-                <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          <!-- Course Header Card -->
+          <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                  <span class="text-amber-400 font-mono">${escapeHtml(activeCourse.icon || '✦')}</span>
+                  ${escapeHtml(title)}
+                </span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">
+                  ${escapeHtml(activeCourse.category || 'Curriculum')}
+                </span>
+                ${activeCourse.target_level ? `
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                    ${escapeHtml(activeCourse.target_level)}
+                  </span>
+                ` : ''}
               </div>
+              ${desc ? `<p class="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl">${escapeHtml(desc)}</p>` : ''}
             </div>
-            <div class="flex items-center gap-2 justify-end shrink-0">
-              <button onclick="openAiCurriculumBuilderModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-bold text-xs shadow transition active:scale-95">
-                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                <span>AI Builder</span>
+            <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+              <span class="text-xs font-mono text-slate-400 px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800">
+                ${lessons.length} ${isHe ? 'שיעורים' : 'Lessons'}
+              </span>
+              <button onclick="handleDeleteActiveCustomCourse()" class="p-2 rounded-xl text-slate-500 hover:text-red-400 hover:bg-slate-800/80 transition" title="Delete Course">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
-              <button onclick="openAddCustomLessonModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs border border-slate-700 transition active:scale-95">
-                <i data-lucide="plus" class="w-3.5 h-3.5 text-brand-400"></i>
-                <span>+ Add Lesson</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Course Header -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
-            <div>
-              <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                <span class="text-brand-400">✦</span> ${escapeHtml(title)}
-              </h2>
-              <p class="text-xs md:text-sm text-slate-400 mt-1">${escapeHtml(desc || '')}</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs text-slate-400 font-mono">${lessons.length} lessons</span>
             </div>
           </div>
 
           <!-- Course Lessons Grid -->
           <div class="space-y-3">
             ${lessons.length === 0 ? `
-              <div class="text-center py-8 px-4 bg-slate-950/60 border border-slate-800/80 rounded-2xl">
-                <p class="text-xs sm:text-sm text-slate-400">No lessons in this course yet. Click "+ Add Lesson" to create your first class.</p>
+              <div class="text-center py-12 px-6 bg-slate-950/60 border border-slate-800/80 rounded-2xl space-y-3">
+                <p class="text-xs sm:text-sm text-slate-400">No lessons in this course yet.</p>
+                <button onclick="openAddCustomLessonModal('${activeCourse.id}')" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs shadow active:scale-95 transition">
+                  + Add First Lesson
+                </button>
               </div>
             ` : lessons.map((les, idx) => {
               const lTitle = isHe ? (les.title_he || les.title_en) : (les.title_en || les.title_he);
               const lHook = isHe ? (les.hook_he || les.hook_en) : (les.hook_en || les.hook_he);
-              const anchors = les.anchors || [];
+              const anchors = isHe ? (les.anchors_he && les.anchors_he.length ? les.anchors_he : les.anchors_en || []) : (les.anchors_en && les.anchors_en.length ? les.anchors_en : les.anchors_he || []);
+              const lifeApp = isHe ? (les.life_app_he || les.life_app_en) : (les.life_app_en || les.life_app_he);
+              const discussion = isHe ? (les.discussion_he || les.discussion_en) : (les.discussion_en || les.discussion_he);
+              const midrash = isHe ? (les.midrash_he || les.midrash_en) : (les.midrash_en || les.midrash_he);
               const isExpanded = !!APP_STATE.expandedCustomLessonIds[les.id];
+              const recordings = Array.isArray(les.recordings) ? les.recordings : (les.audio_url ? [{ id: 'legacy_audio', title: 'Lesson Audio', url: les.audio_url, type: 'audio' }] : []);
+              const additions = (APP_STATE.studyAdditions && APP_STATE.studyAdditions[les.id]) || [];
 
               return `
-                <div class="rounded-2xl border ${isExpanded ? 'border-brand-500/50 bg-slate-900/90' : 'border-slate-800 bg-slate-900/60 hover:border-slate-700'} p-4 transition shadow-sm">
-                  <div class="flex items-start justify-between gap-3 cursor-pointer select-none" onclick="toggleCustomLessonAccordion('${les.id}')">
-                    <div class="flex items-start gap-3">
-                      <span class="w-6 h-6 rounded-lg bg-brand-500/20 text-brand-300 border border-brand-500/30 flex items-center justify-center text-xs font-mono font-bold shrink-0 mt-0.5">
-                        ${idx + 1}
-                      </span>
-                      <div>
-                        <h4 class="text-sm font-bold text-white">${escapeHtml(lTitle)}</h4>
-                        ${lHook ? `<p class="text-xs text-slate-400 mt-0.5 line-clamp-1">${escapeHtml(lHook)}</p>` : ''}
+                <div id="custom-lesson-card-${les.id}" class="rounded-2xl border transition-all duration-200 overflow-hidden shadow-sm ${
+                  isExpanded ? 'border-amber-500/60 ring-1 ring-amber-500/30 bg-slate-900/90' : 'border-slate-800 bg-slate-900/60 hover:border-slate-700'
+                }">
+                  <!-- Header Row -->
+                  <div class="p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer select-none hover:bg-slate-800/40 transition" onclick="toggleCustomLessonAccordion('${les.id}')">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center font-mono text-xs font-bold shrink-0">
+                        ${les.lesson_num || idx + 1}
+                      </div>
+                      <div class="min-w-0">
+                        <h3 class="text-sm sm:text-base font-semibold text-white truncate">${escapeHtml(lTitle)}</h3>
+                        ${lHook && !isExpanded ? `<p class="text-xs text-slate-400 truncate mt-0.5">${escapeHtml(lHook)}</p>` : ''}
                       </div>
                     </div>
-                    <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4 text-slate-400 shrink-0 mt-1"></i>
+                    <div class="flex items-center gap-2 shrink-0">
+                      ${recordings.length > 0 ? `
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1" title="${recordings.length} audio recordings">
+                          <i data-lucide="volume-2" class="w-3 h-3 text-indigo-400"></i>
+                          ${recordings.length}
+                        </span>
+                      ` : ''}
+                      ${additions.length > 0 ? `
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1" title="${additions.length} notes added">
+                          <i data-lucide="bookmark" class="w-3 h-3 text-amber-400"></i>
+                          ${additions.length}
+                        </span>
+                      ` : ''}
+                      <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4 text-slate-400"></i>
+                    </div>
                   </div>
 
+                  <!-- Expanded Details -->
                   ${isExpanded ? `
-                    <div class="mt-4 pt-4 border-t border-slate-800 space-y-3 text-xs">
+                    <div class="border-t border-slate-800/80 bg-slate-950/60 p-4 sm:p-5 space-y-4 text-xs sm:text-sm animate-fadeIn">
+                      <!-- Opening Hook -->
                       ${lHook ? `
-                        <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200">
-                          <span class="font-bold">Opening Hook:</span> ${escapeHtml(lHook)}
+                        <div class="p-3.5 rounded-xl bg-gradient-to-r from-amber-950/20 to-slate-900 border border-amber-900/30 space-y-1">
+                          <span class="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                            <i data-lucide="zap" class="w-3.5 h-3.5"></i> ${t.modernHook || 'Opening Hook / Analogy'}
+                          </span>
+                          <p class="text-slate-200 leading-relaxed font-normal">${escapeHtml(lHook)}</p>
                         </div>
                       ` : ''}
 
+                      <!-- Core Anchors -->
                       ${anchors.length > 0 ? `
-                        <div class="space-y-1.5">
-                          <span class="font-semibold text-slate-300">Core Points:</span>
+                        <div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/70 border border-slate-800/80 space-y-2.5">
+                          <span class="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+                            <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400"></i> ${t.coreNuggets || 'Core Knowledge Anchors'}
+                          </span>
                           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             ${anchors.map(a => `
-                              <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800/80 text-slate-300 leading-relaxed">
-                                • ${escapeHtml(typeof a === 'string' ? a : (a.point || a.title || ''))}
+                              <div class="p-2 sm:p-2.5 rounded-lg bg-slate-950/70 border border-slate-800/70 text-slate-200 text-xs leading-relaxed flex items-start gap-2">
+                                <span class="text-amber-400 font-bold mt-0.5 shrink-0">✦</span>
+                                <div>${escapeHtml(typeof a === 'string' ? a : (a.point || a.title || ''))}</div>
                               </div>
                             `).join('')}
                           </div>
                         </div>
                       ` : ''}
+
+                      <!-- Midrash Gem (if present) -->
+                      ${midrash ? `
+                        <div class="p-3 rounded-xl bg-cyan-950/20 border border-cyan-800/30 space-y-1">
+                          <span class="text-[11px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ${t.midrashGem || 'Midrash & Depth Nugget'}
+                          </span>
+                          <p class="text-slate-200 leading-relaxed">${escapeHtml(midrash)}</p>
+                        </div>
+                      ` : ''}
+
+                      <!-- Real-World Student Application -->
+                      ${lifeApp ? `
+                        <div class="p-3 rounded-xl bg-emerald-950/20 border border-emerald-800/30 space-y-1">
+                          <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                            <i data-lucide="compass" class="w-3.5 h-3.5"></i> ${t.lifeApplication || 'Real-World Teen Application'}
+                          </span>
+                          <p class="text-slate-200 leading-relaxed">${escapeHtml(lifeApp)}</p>
+                        </div>
+                      ` : ''}
+
+                      <!-- Discussion Question / Riddle -->
+                      ${discussion ? `
+                        <div class="p-3 rounded-xl bg-indigo-950/20 border border-indigo-800/30 space-y-1">
+                          <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+                            <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> ${t.discussionSpark || 'Discussion Spark'}
+                          </span>
+                          <p class="text-slate-200 leading-relaxed">${escapeHtml(discussion)}</p>
+                        </div>
+                      ` : ''}
+
+                      <!-- SOUND & AUDIO STUDIO SECTION -->
+                      <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
+                        <div class="flex items-center justify-between">
+                          <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                            <i data-lucide="mic" class="w-3.5 h-3.5 text-indigo-400"></i>
+                            <span>Audio & Voice Recordings</span>
+                          </span>
+                          <span class="text-[10px] font-mono text-slate-500">${recordings.length} audio file(s)</span>
+                        </div>
+
+                        ${recordings.length > 0 ? `
+                          <div class="space-y-2">
+                            ${recordings.map(rec => `
+                              <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div class="flex items-center gap-2 min-w-0">
+                                  <i data-lucide="volume-2" class="w-4 h-4 text-indigo-400 shrink-0"></i>
+                                  <span class="text-xs text-white font-medium truncate">${escapeHtml(rec.title || 'Lesson Audio')}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                  <audio controls src="${escapeHtml(rec.url)}" class="h-8 max-w-[220px]"></audio>
+                                  <button type="button" onclick="deleteLessonAudio('${activeCourse.id}', '${les.id}', '${rec.id}')" class="text-slate-500 hover:text-red-400 p-1 rounded" title="Delete Recording">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                  </button>
+                                </div>
+                              </div>
+                            `).join('')}
+                          </div>
+                        ` : `
+                          <p class="text-xs text-slate-500 italic">No audio attached to this lesson yet. Record a voice memo or upload an MP3.</p>
+                        `}
+
+                        <!-- Audio Actions Strip -->
+                        <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-800/60">
+                          <button type="button" onclick="startVoiceRecording('lesson', '${les.id}', '${activeCourse.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition active:scale-95">
+                            <i data-lucide="mic" class="w-3.5 h-3.5 text-indigo-400"></i>
+                            <span>Record Voice Memo</span>
+                          </button>
+                          <button type="button" onclick="triggerLessonAudioUpload('${activeCourse.id}', '${les.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition active:scale-95">
+                            <i data-lucide="upload" class="w-3.5 h-3.5 text-slate-400"></i>
+                            <span>Upload Audio File</span>
+                          </button>
+                          <button type="button" onclick="promptLessonAudioLink('${activeCourse.id}', '${les.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition active:scale-95">
+                            <i data-lucide="link" class="w-3.5 h-3.5 text-slate-400"></i>
+                            <span>Audio Link</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- Bottom Actions: Edit, Delete, Add Notes -->
+                      <div class="pt-2 flex items-center justify-between border-t border-slate-800/80">
+                        <button type="button" onclick="openAddStudyMaterialModal('${les.id}')" class="flex items-center gap-1.5 text-amber-400 hover:text-amber-300 text-xs font-semibold">
+                          <i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i>
+                          <span>+ Add Custom Note</span>
+                        </button>
+                        <div class="flex items-center gap-2">
+                          <button type="button" onclick="openEditCustomLessonModal('${activeCourse.id}', '${les.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition active:scale-95">
+                            <i data-lucide="edit-3" class="w-3.5 h-3.5 text-slate-400"></i>
+                            <span>Edit Lesson</span>
+                          </button>
+                          <button type="button" onclick="handleDeleteCustomLesson('${activeCourse.id}', '${les.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-500/20 text-xs font-semibold transition active:scale-95">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ` : ''}
                 </div>
@@ -7132,32 +7345,27 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     function renderReadingCategoryView() {
-      const isMaster = isMasterAccount();
       const masterContent = document.getElementById('study-reading-master-content');
       const tutorHub = document.getElementById('study-reading-tutor-hub');
       const tutorBlankState = document.getElementById('tutor-reading-blank-state');
       const tutorActive = document.getElementById('tutor-reading-active-container');
 
-      if (isMaster) {
-        if (masterContent) masterContent.classList.remove('hidden');
-        if (tutorHub) tutorHub.classList.add('hidden');
-        renderStudyLettersGrid();
-      } else {
-        if (masterContent) masterContent.classList.add('hidden');
-        if (tutorHub) tutorHub.classList.remove('hidden');
+      if (masterContent) masterContent.classList.add('hidden');
+      if (tutorHub) tutorHub.classList.remove('hidden');
 
-        const hasUnits = Array.isArray(APP_STATE.customReadingMaterials) && APP_STATE.customReadingMaterials.length > 0;
-        if (hasUnits) {
-          if (tutorBlankState) tutorBlankState.classList.add('hidden');
-          if (tutorActive) {
-            tutorActive.classList.remove('hidden');
-            renderTutorReadingUnitsGrid();
-          }
-        } else {
-          if (tutorBlankState) tutorBlankState.classList.remove('hidden');
-          if (tutorActive) tutorActive.classList.add('hidden');
+      const hasUnits = Array.isArray(APP_STATE.customReadingMaterials) && APP_STATE.customReadingMaterials.length > 0;
+      if (hasUnits) {
+        if (tutorBlankState) tutorBlankState.classList.add('hidden');
+        if (tutorActive) {
+          tutorActive.classList.remove('hidden');
+          renderTutorReadingUnitsGrid();
         }
+      } else {
+        if (tutorBlankState) tutorBlankState.classList.remove('hidden');
+        if (tutorActive) tutorActive.classList.add('hidden');
       }
+
+      renderStudyLettersGrid();
 
       if (window.lucide && typeof lucide.createIcons === 'function') {
         lucide.createIcons();
@@ -7215,6 +7423,39 @@ alter publication supabase_realtime add table public.students_sync;`;
                   </div>
                 </div>
               ` : ''}
+
+              <!-- Reading Unit Audio Recordings -->
+              ${Array.isArray(u.recordings) && u.recordings.length > 0 ? `
+                <div class="pt-2 space-y-1.5 border-t border-slate-800">
+                  ${u.recordings.map(rec => `
+                    <div class="p-1.5 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between gap-1.5">
+                      <span class="text-[11px] text-white truncate max-w-[110px]" title="${escapeHtml(rec.title || 'Audio')}">${escapeHtml(rec.title || 'Audio')}</span>
+                      <div class="flex items-center gap-1">
+                        <audio controls src="${escapeHtml(rec.url)}" class="h-6 max-w-[130px]"></audio>
+                        <button type="button" onclick="deleteReadingAudio('${u.id}', '${rec.id}')" class="text-slate-500 hover:text-red-400 p-0.5" title="Delete Recording">
+                          <i data-lucide="trash-2" class="w-3 h-3"></i>
+                        </button>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Reading Unit Audio Action Buttons -->
+            <div class="flex items-center gap-1.5 pt-2 border-t border-slate-800/80">
+              <button type="button" onclick="startVoiceRecording('reading', '${u.id}')" class="px-2 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-[10px] font-semibold flex items-center gap-1 transition active:scale-95" title="Record Voice Memo">
+                <i data-lucide="mic" class="w-3 h-3 text-indigo-400"></i>
+                <span>Record</span>
+              </button>
+              <button type="button" onclick="triggerReadingAudioUpload('${u.id}')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-semibold flex items-center gap-1 transition active:scale-95" title="Upload Audio File">
+                <i data-lucide="upload" class="w-3 h-3 text-slate-400"></i>
+                <span>Upload</span>
+              </button>
+              <button type="button" onclick="promptReadingAudioLink('${u.id}')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-semibold flex items-center gap-1 transition active:scale-95" title="Audio Link">
+                <i data-lucide="link" class="w-3 h-3 text-slate-400"></i>
+                <span>Link</span>
+              </button>
             </div>
           </div>
         `;
@@ -7535,30 +7776,24 @@ Guidance: ${guidance || 'Provide clear target words, progressive phonetic diffic
     }
 
     function renderSpeechCategoryView() {
-      const isMaster = isMasterAccount();
       const masterContent = document.getElementById('study-speech-master-content');
       const tutorHub = document.getElementById('study-speech-tutor-hub');
       const tutorBlankState = document.getElementById('tutor-speech-blank-state');
       const tutorActive = document.getElementById('tutor-speech-active-container');
 
-      if (isMaster) {
-        if (masterContent) masterContent.classList.remove('hidden');
-        if (tutorHub) tutorHub.classList.add('hidden');
-      } else {
-        if (masterContent) masterContent.classList.add('hidden');
-        if (tutorHub) tutorHub.classList.remove('hidden');
+      if (masterContent) masterContent.classList.add('hidden');
+      if (tutorHub) tutorHub.classList.remove('hidden');
 
-        const hasMilestones = Array.isArray(APP_STATE.customMilestones) && APP_STATE.customMilestones.length > 0;
-        if (hasMilestones) {
-          if (tutorBlankState) tutorBlankState.classList.add('hidden');
-          if (tutorActive) {
-            tutorActive.classList.remove('hidden');
-            renderTutorMilestonesGrid();
-          }
-        } else {
-          if (tutorBlankState) tutorBlankState.classList.remove('hidden');
-          if (tutorActive) tutorActive.classList.add('hidden');
+      const hasMilestones = Array.isArray(APP_STATE.customMilestones) && APP_STATE.customMilestones.length > 0;
+      if (hasMilestones) {
+        if (tutorBlankState) tutorBlankState.classList.add('hidden');
+        if (tutorActive) {
+          tutorActive.classList.remove('hidden');
+          renderTutorMilestonesGrid();
         }
+      } else {
+        if (tutorBlankState) tutorBlankState.classList.remove('hidden');
+        if (tutorActive) tutorActive.classList.add('hidden');
       }
 
       if (window.lucide && typeof lucide.createIcons === 'function') {
@@ -8087,61 +8322,27 @@ IV. Conclusion
       if (!select) return;
 
       const isHe = APP_STATE.lang === 'he';
-      const t = I18N[APP_STATE.lang];
-      const isMaster = isMasterAccount();
+      const courses = APP_STATE.customCourses || [];
 
-      let html = '';
-      if (isMaster) {
-        html += '<option value="concepts"' + (APP_STATE.activeCourseId === 'concepts' ? ' selected' : '') + '>' + (t.courseSelectConcepts || '✦ Bar Mitzvah: Concepts (13)') + '</option>' +
-          '<option value="chumash"' + (APP_STATE.activeCourseId === 'chumash' ? ' selected' : '') + '>' + (t.courseSelectChumash || '📜 Bar Mitzvah: Chumash (23)') + '</option>';
+      if (courses.length === 0) {
+        select.innerHTML = '<option value="">-- ' + (isHe ? 'אין קורסים עדיין' : 'No courses created yet') + ' --</option>';
+        return;
       }
 
-      if (Array.isArray(APP_STATE.customCourses) && APP_STATE.customCourses.length > 0) {
-        if (isMaster) {
-          html += '<optgroup label="' + (isHe ? 'תוכניות לימוד נוספות' : 'Custom Curricula') + '">';
-        }
-        APP_STATE.customCourses.forEach(c => {
-          const title = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
-          const count = c.lessons ? c.lessons.length : 0;
-          const isSelected = APP_STATE.activeCourseId === c.id;
-          html += '<option value="' + c.id + '"' + (isSelected ? ' selected' : '') + '>✦ ' + title + ' (' + count + ')</option>';
-        });
-        if (isMaster) {
-          html += '</optgroup>';
-        }
-      } else if (!isMaster) {
-        html = '<option value="">-- ' + (isHe ? 'אין שיעורים עדיין' : 'No classes created yet') + ' --</option>';
-      }
+      let html = courses.map(c => {
+        const title = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
+        const count = c.lessons ? c.lessons.length : 0;
+        const isSelected = APP_STATE.activeCourseId === c.id;
+        return '<option value="' + c.id + '"' + (isSelected ? ' selected' : '') + '>' + (c.icon || '✦') + ' ' + escapeHtml(title) + ' (' + count + ')</option>';
+      }).join('');
 
       select.innerHTML = html;
     }
 
     function handleCourseSelectionChange(val) {
+      if (!val) return;
       APP_STATE.activeCourseId = val;
-      const secConcepts = document.getElementById('study-section-concepts');
-      const secChumash = document.getElementById('study-section-chumash');
-      const secCustom = document.getElementById('study-section-custom');
-
-      if (val === 'concepts') {
-        APP_STATE.studySection = 'concepts';
-        if (secConcepts) secConcepts.classList.remove('hidden');
-        if (secChumash) secChumash.classList.add('hidden');
-        if (secCustom) secCustom.classList.add('hidden');
-        renderTopics();
-      } else if (val === 'chumash') {
-        APP_STATE.studySection = 'chumash';
-        if (secChumash) secChumash.classList.remove('hidden');
-        if (secConcepts) secConcepts.classList.add('hidden');
-        if (secCustom) secCustom.classList.add('hidden');
-        renderChumash();
-      } else {
-        APP_STATE.studySection = 'custom';
-        if (secCustom) secCustom.classList.remove('hidden');
-        if (secConcepts) secConcepts.classList.add('hidden');
-        if (secChumash) secChumash.classList.add('hidden');
-        renderCustomCourse();
-      }
-      lucide.createIcons();
+      renderLessonsCategoryView();
     }
 
     function toggleCustomLessonAccordion(lessonId) {
@@ -8296,27 +8497,127 @@ IV. Conclusion
       if (submitBtn) submitBtn.disabled = false;
     }
 
-    function openAddCustomLessonModal() {
-      const modal = document.getElementById('modal-add-custom-lesson');
-      if (modal) modal.classList.remove('hidden');
-      const titleInput = document.getElementById('input-custom-lesson-title-en');
-      if (titleInput) {
-        titleInput.value = '';
-        setTimeout(() => titleInput.focus(), 100);
+    // ==============================================
+    // COURSE MANAGEMENT (CREATE, SELECT, DELETE)
+    // ==============================================
+    function openCreateCourseModal() {
+      const modal = document.getElementById('modal-create-course');
+      if (!modal) return;
+      document.getElementById('input-create-course-title-en').value = '';
+      document.getElementById('input-create-course-title-he').value = '';
+      document.getElementById('input-create-course-desc').value = '';
+      modal.classList.remove('hidden');
+      setTimeout(() => document.getElementById('input-create-course-title-en')?.focus(), 100);
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function closeCreateCourseModal() {
+      const modal = document.getElementById('modal-create-course');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function handleSaveCustomCourse(e) {
+      e.preventDefault();
+      const titleEn = document.getElementById('input-create-course-title-en').value.trim();
+      const titleHe = document.getElementById('input-create-course-title-he').value.trim();
+      const category = document.getElementById('input-create-course-category').value;
+      const level = document.getElementById('input-create-course-level').value;
+      const desc = document.getElementById('input-create-course-desc').value.trim();
+      const icon = document.getElementById('input-create-course-icon').value.trim() || '✦';
+
+      if (!titleEn) return;
+
+      const newCourse = {
+        id: 'course_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+        title_en: titleEn,
+        title_he: titleHe || titleEn,
+        category: category,
+        target_level: level,
+        description_en: desc,
+        description_he: desc,
+        icon: icon,
+        lessons: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
+      APP_STATE.customCourses.push(newCourse);
+      APP_STATE.activeCourseId = newCourse.id;
+      saveCustomCoursesToStorage(true);
+      closeCreateCourseModal();
+      renderLessonsCategoryView();
+      showToast(APP_STATE.lang === 'he' ? 'הקורס נוצר בהצלחה! כעת הוסף שיעור ראשון.' : 'Course created successfully! Now add your first lesson.');
+    }
+
+    // ==============================================
+    // LESSON MANAGEMENT (ADD, EDIT, DELETE)
+    // ==============================================
+    let editingLessonContext = null; // { courseId, lessonId } or null
+
+    function openAddCustomLessonModal(courseId) {
+      editingLessonContext = null;
+      const course = (APP_STATE.customCourses || []).find(c => c.id === (courseId || APP_STATE.activeCourseId));
+      if (!course && (!APP_STATE.customCourses || APP_STATE.customCourses.length === 0)) {
+        openCreateCourseModal();
+        return;
       }
-      lucide.createIcons();
+
+      const modal = document.getElementById('modal-add-custom-lesson');
+      const titleEl = document.getElementById('modal-custom-lesson-title');
+      const submitText = document.getElementById('modal-custom-lesson-submit-text');
+      if (titleEl) titleEl.textContent = 'Add Lesson to Course';
+      if (submitText) submitText.textContent = 'Save Lesson';
+
+      const titleInput = document.getElementById('input-custom-lesson-title-en');
+      if (titleInput) titleInput.value = '';
+      document.getElementById('input-custom-lesson-title-he').value = '';
+      document.getElementById('input-custom-lesson-hook').value = '';
+      document.getElementById('input-custom-lesson-anchors').value = '';
+      document.getElementById('input-custom-lesson-life-app').value = '';
+      document.getElementById('input-custom-lesson-discussion').value = '';
+
+      if (modal) modal.classList.remove('hidden');
+      setTimeout(() => titleInput?.focus(), 100);
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function openEditCustomLessonModal(courseId, lessonId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      if (!course) return;
+      const lesson = (course.lessons || []).find(l => l.id === lessonId);
+      if (!lesson) return;
+
+      editingLessonContext = { courseId: courseId, lessonId: lessonId };
+      const modal = document.getElementById('modal-add-custom-lesson');
+      const titleEl = document.getElementById('modal-custom-lesson-title');
+      const submitText = document.getElementById('modal-custom-lesson-submit-text');
+      if (titleEl) titleEl.textContent = 'Edit Lesson';
+      if (submitText) submitText.textContent = 'Update Lesson';
+
+      document.getElementById('input-custom-lesson-title-en').value = lesson.title_en || '';
+      document.getElementById('input-custom-lesson-title-he').value = lesson.title_he || '';
+      document.getElementById('input-custom-lesson-hook').value = lesson.hook_en || lesson.hook_he || '';
+      
+      const anchors = (lesson.anchors_en && lesson.anchors_en.length ? lesson.anchors_en : lesson.anchors_he || []);
+      document.getElementById('input-custom-lesson-anchors').value = anchors.map(a => typeof a === 'string' ? a : (a.point || a.title || '')).join('\n');
+
+      document.getElementById('input-custom-lesson-life-app').value = lesson.life_app_en || lesson.life_app_he || '';
+      document.getElementById('input-custom-lesson-discussion').value = lesson.discussion_en || lesson.discussion_he || '';
+
+      if (modal) modal.classList.remove('hidden');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
     }
 
     function closeAddCustomLessonModal() {
+      editingLessonContext = null;
       const modal = document.getElementById('modal-add-custom-lesson');
       if (modal) modal.classList.add('hidden');
     }
 
     function handleSaveCustomLesson(e) {
       e.preventDefault();
-      const course = (APP_STATE.customCourses || []).find(c => c.id === APP_STATE.activeCourseId);
-      if (!course) return;
-
+      const isHe = APP_STATE.lang === 'he';
       const titleEn = document.getElementById('input-custom-lesson-title-en').value.trim();
       const titleHe = document.getElementById('input-custom-lesson-title-he').value.trim();
       const hook = document.getElementById('input-custom-lesson-hook').value.trim();
@@ -8327,45 +8628,617 @@ IV. Conclusion
       if (!titleEn) return;
 
       const anchors = rawAnchors ? rawAnchors.split('\n').map(s => s.trim()).filter(Boolean) : [];
-      if (!course.lessons) course.lessons = [];
 
-      const newLesson = {
-        id: 'les_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-        lesson_num: course.lessons.length + 1,
-        title_en: titleEn,
-        title_he: titleHe || titleEn,
-        hook_en: hook,
-        hook_he: hook,
-        anchors_en: anchors,
-        anchors_he: anchors,
-        life_app_en: lifeApp,
-        life_app_he: lifeApp,
-        discussion_en: discussion,
-        discussion_he: discussion
-      };
+      if (editingLessonContext) {
+        // Update existing lesson
+        const course = (APP_STATE.customCourses || []).find(c => c.id === editingLessonContext.courseId);
+        if (!course) return;
+        const lesson = (course.lessons || []).find(l => l.id === editingLessonContext.lessonId);
+        if (!lesson) return;
 
-      course.lessons.push(newLesson);
+        lesson.title_en = titleEn;
+        lesson.title_he = titleHe || titleEn;
+        lesson.hook_en = hook;
+        lesson.hook_he = hook;
+        lesson.anchors_en = anchors;
+        lesson.anchors_he = anchors;
+        lesson.life_app_en = lifeApp;
+        lesson.life_app_he = lifeApp;
+        lesson.discussion_en = discussion;
+        lesson.discussion_he = discussion;
+        course.updated_at = new Date().toISOString();
+
+        saveCustomCoursesToStorage(true);
+        closeAddCustomLessonModal();
+        renderLessonsCategoryView();
+        showToast(isHe ? 'השיעור עודכן בהצלחה!' : 'Lesson updated successfully!');
+      } else {
+        // Add new lesson
+        let course = (APP_STATE.customCourses || []).find(c => c.id === APP_STATE.activeCourseId);
+        if (!course) {
+          if (APP_STATE.customCourses && APP_STATE.customCourses.length > 0) {
+            course = APP_STATE.customCourses[0];
+            APP_STATE.activeCourseId = course.id;
+          } else {
+            return;
+          }
+        }
+        if (!course.lessons) course.lessons = [];
+
+        const newLesson = {
+          id: 'les_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+          lesson_num: course.lessons.length + 1,
+          title_en: titleEn,
+          title_he: titleHe || titleEn,
+          hook_en: hook,
+          hook_he: hook,
+          anchors_en: anchors,
+          anchors_he: anchors,
+          life_app_en: lifeApp,
+          life_app_he: lifeApp,
+          discussion_en: discussion,
+          discussion_he: discussion,
+          recordings: []
+        };
+
+        course.lessons.push(newLesson);
+        course.updated_at = new Date().toISOString();
+        saveCustomCoursesToStorage(true);
+        closeAddCustomLessonModal();
+        renderLessonsCategoryView();
+        showToast(isHe ? 'שיעור נוסף בהצלחה!' : 'Lesson added to course!');
+      }
+    }
+
+    function handleDeleteCustomLesson(courseId, lessonId) {
+      const isHe = APP_STATE.lang === 'he';
+      if (!confirm(isHe ? 'האם למחוק שיעור זה מהקורס?' : 'Are you sure you want to delete this lesson?')) return;
+
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      if (!course || !course.lessons) return;
+
+      course.lessons = course.lessons.filter(l => l.id !== lessonId);
+      course.lessons.forEach((l, idx) => { l.lesson_num = idx + 1; });
       course.updated_at = new Date().toISOString();
       saveCustomCoursesToStorage(true);
-      closeAddCustomLessonModal();
-      renderCustomCourse();
-      showToast(I18N[APP_STATE.lang].toastLessonAdded || 'Lesson added to course!');
+      renderLessonsCategoryView();
+      showToast(isHe ? 'השיעור נמחק' : 'Lesson deleted');
     }
 
     function handleDeleteActiveCustomCourse() {
       const course = (APP_STATE.customCourses || []).find(c => c.id === APP_STATE.activeCourseId);
       if (!course) return;
 
-      const t = I18N[APP_STATE.lang];
-      const title = APP_STATE.lang === 'he' ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
-      if (!confirm(t.confirmDeleteCourse ? t.confirmDeleteCourse(title) : ('Delete course "' + title + '"?'))) {
+      const isHe = APP_STATE.lang === 'he';
+      const title = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
+      if (!confirm(isHe ? `האם למחוק את הקורס "${title}" וכל השיעורים שבו?` : `Are you sure you want to delete course "${title}" and all its lessons?`)) {
         return;
       }
 
       APP_STATE.customCourses = APP_STATE.customCourses.filter(c => c.id !== course.id);
+      if (APP_STATE.customCourses.length > 0) {
+        APP_STATE.activeCourseId = APP_STATE.customCourses[0].id;
+      } else {
+        APP_STATE.activeCourseId = null;
+      }
       saveCustomCoursesToStorage(true);
-      handleCourseSelectionChange('concepts');
-      showToast(t.toastCourseDeleted || 'Course deleted');
+      renderLessonsCategoryView();
+      showToast(isHe ? 'הקורס נמחק' : 'Course deleted');
+    }
+
+    // ==============================================
+    // AUDIO STUDIO: VOICE RECORDING & MEDIA RECORDER
+    // ==============================================
+    let activeMediaRecorder = null;
+    let activeAudioStream = null;
+    let recordedAudioChunks = [];
+    let currentRecordingTarget = null;
+    let voiceRecordingTimerInterval = null;
+    let voiceRecordingSeconds = 0;
+
+    async function startVoiceRecording(targetType, targetId, courseId) {
+      const isHe = APP_STATE.lang === 'he';
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert(isHe ? 'הדפדפן שלך אינו תומך בהקלטת קול ישירה מהמיקרופון.' : 'Your browser does not support in-browser microphone recording.');
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        activeAudioStream = stream;
+        currentRecordingTarget = { type: targetType, targetId: targetId, courseId: courseId };
+        recordedAudioChunks = [];
+        voiceRecordingSeconds = 0;
+
+        let options = {};
+        if (typeof MediaRecorder !== 'undefined') {
+          if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+            options = { mimeType: 'audio/webm;codecs=opus' };
+          } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+            options = { mimeType: 'audio/webm' };
+          } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+            options = { mimeType: 'audio/mp4' };
+          }
+        }
+
+        activeMediaRecorder = new MediaRecorder(stream, options);
+        activeMediaRecorder.ondataavailable = function(e) {
+          if (e.data && e.data.size > 0) {
+            recordedAudioChunks.push(e.data);
+          }
+        };
+
+        activeMediaRecorder.onstop = function() {
+          clearInterval(voiceRecordingTimerInterval);
+          if (activeAudioStream) {
+            activeAudioStream.getTracks().forEach(track => track.stop());
+            activeAudioStream = null;
+          }
+
+          if (recordedAudioChunks.length === 0) return;
+
+          const mimeType = activeMediaRecorder.mimeType || 'audio/webm';
+          const blob = new Blob(recordedAudioChunks, { type: mimeType });
+          const reader = new FileReader();
+          reader.onloadend = function() {
+            const base64Data = reader.result;
+            const now = new Date();
+            const dateStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            saveRecordedAudioToTarget(currentRecordingTarget, base64Data, (isHe ? 'הקלטה קולית ' : 'Voice Memo ') + dateStr);
+          };
+          reader.readAsDataURL(blob);
+        };
+
+        activeMediaRecorder.start(250);
+
+        const hud = document.getElementById('voice-recording-hud');
+        const timerEl = document.getElementById('voice-recording-timer');
+        const labelEl = document.getElementById('voice-recording-label');
+        if (hud) hud.classList.remove('hidden');
+        if (labelEl) labelEl.textContent = isHe ? 'מקליט קול...' : 'Recording Voice Memo...';
+        if (timerEl) timerEl.textContent = '00:00';
+
+        clearInterval(voiceRecordingTimerInterval);
+        voiceRecordingTimerInterval = setInterval(function() {
+          voiceRecordingSeconds++;
+          const mins = String(Math.floor(voiceRecordingSeconds / 60)).padStart(2, '0');
+          const secs = String(voiceRecordingSeconds % 60).padStart(2, '0');
+          if (timerEl) timerEl.textContent = mins + ':' + secs;
+        }, 1000);
+
+      } catch (err) {
+        console.error('Microphone access error:', err);
+        alert((isHe ? 'שגיאה בגישה למיקרופון: ' : 'Error accessing microphone: ') + (err.message || err.name));
+      }
+    }
+
+    function stopVoiceRecording() {
+      clearInterval(voiceRecordingTimerInterval);
+      const hud = document.getElementById('voice-recording-hud');
+      if (hud) hud.classList.add('hidden');
+
+      if (activeMediaRecorder && activeMediaRecorder.state !== 'inactive') {
+        activeMediaRecorder.stop();
+      }
+    }
+
+    function cancelVoiceRecording() {
+      clearInterval(voiceRecordingTimerInterval);
+      const hud = document.getElementById('voice-recording-hud');
+      if (hud) hud.classList.add('hidden');
+
+      if (activeAudioStream) {
+        activeAudioStream.getTracks().forEach(track => track.stop());
+        activeAudioStream = null;
+      }
+      activeMediaRecorder = null;
+      recordedAudioChunks = [];
+      currentRecordingTarget = null;
+      showToast(APP_STATE.lang === 'he' ? 'ההקלטה בוטלה' : 'Recording cancelled');
+    }
+
+    function saveRecordedAudioToTarget(target, base64Audio, defaultTitle) {
+      if (!target || !base64Audio) return;
+      const isHe = APP_STATE.lang === 'he';
+
+      if (target.type === 'lesson') {
+        const course = (APP_STATE.customCourses || []).find(c => c.id === target.courseId);
+        if (!course) return;
+        const lesson = (course.lessons || []).find(l => l.id === target.targetId);
+        if (!lesson) return;
+
+        if (!Array.isArray(lesson.recordings)) lesson.recordings = [];
+        lesson.recordings.push({
+          id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+          title: defaultTitle,
+          url: base64Audio,
+          type: 'audio',
+          date: new Date().toISOString()
+        });
+        course.updated_at = new Date().toISOString();
+        saveCustomCoursesToStorage(true);
+        renderLessonsCategoryView();
+        showToast(isHe ? 'ההקלטה נשמרה בשיעור בהצלחה!' : 'Voice memo saved to lesson!');
+      } else if (target.type === 'reading') {
+        const unit = (APP_STATE.customReadingMaterials || []).find(u => u.id === target.targetId);
+        if (!unit) return;
+        if (!Array.isArray(unit.recordings)) unit.recordings = [];
+        unit.recordings.push({
+          id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+          title: defaultTitle,
+          url: base64Audio,
+          type: 'audio',
+          date: new Date().toISOString()
+        });
+        saveCustomReadingToStorage(true);
+        renderTutorReadingUnitsGrid();
+        showToast(isHe ? 'ההקלטה נשמרה ביחידת הקריאה!' : 'Audio saved to reading unit!');
+      }
+    }
+
+    let currentLessonAudioUploadTarget = null;
+    function triggerLessonAudioUpload(courseId, lessonId) {
+      currentLessonAudioUploadTarget = { courseId: courseId, lessonId: lessonId };
+      const fileInput = document.getElementById('lesson-audio-file-input');
+      if (fileInput) {
+        fileInput.value = '';
+        fileInput.click();
+      }
+    }
+
+    function handleLessonAudioFileSelected(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file || !currentLessonAudioUploadTarget) return;
+
+      if (file.size > 15 * 1024 * 1024) {
+        alert(APP_STATE.lang === 'he' ? 'קובץ השמע גדול מדי (מקסימום 15MB). אנא השתמש בקישור שמע.' : 'Audio file is too large (maximum 15MB). Please use an audio URL link.');
+        return;
+      }
+
+      const defaultTitle = file.name.replace(/\.[^/.]+$/, "") || 'Lesson Audio';
+      const isHe = APP_STATE.lang === 'he';
+      const customTitle = prompt(isHe ? 'הזן כותרת לקובץ השמע:' : 'Enter a title for this audio file:', defaultTitle);
+      if (customTitle === null) return;
+      const title = (customTitle && customTitle.trim()) ? customTitle.trim() : defaultTitle;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Audio = e.target.result;
+        const course = (APP_STATE.customCourses || []).find(c => c.id === currentLessonAudioUploadTarget.courseId);
+        if (!course) return;
+        const lesson = (course.lessons || []).find(l => l.id === currentLessonAudioUploadTarget.lessonId);
+        if (!lesson) return;
+
+        if (!Array.isArray(lesson.recordings)) lesson.recordings = [];
+        lesson.recordings.push({
+          id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+          title: title,
+          url: base64Audio,
+          type: 'audio',
+          date: new Date().toISOString()
+        });
+        course.updated_at = new Date().toISOString();
+        saveCustomCoursesToStorage(true);
+        renderLessonsCategoryView();
+        showToast(isHe ? 'קובץ השמע נוסף לשיעור בהצלחה!' : 'Audio file attached to lesson!');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function promptLessonAudioLink(courseId, lessonId) {
+      const isHe = APP_STATE.lang === 'he';
+      const url = prompt(isHe ? 'הזן קישור לקובץ שמע (MP3 או קישור ישיר):' : 'Enter direct audio link URL (e.g. MP3 link):');
+      if (!url || !url.trim()) return;
+
+      const titlePrompt = prompt(isHe ? 'כותרת לקובץ השמע:' : 'Title for this audio:', 'Audio Lecture');
+      const title = (titlePrompt && titlePrompt.trim()) ? titlePrompt.trim() : 'Audio Lecture';
+
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      if (!course) return;
+      const lesson = (course.lessons || []).find(l => l.id === lessonId);
+      if (!lesson) return;
+
+      if (!Array.isArray(lesson.recordings)) lesson.recordings = [];
+      lesson.recordings.push({
+        id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        title: title,
+        url: url.trim(),
+        type: 'link',
+        date: new Date().toISOString()
+      });
+      course.updated_at = new Date().toISOString();
+      saveCustomCoursesToStorage(true);
+      renderLessonsCategoryView();
+      showToast(isHe ? 'קישור השמע נוסף לשיעור!' : 'Audio link attached to lesson!');
+    }
+
+    function deleteLessonAudio(courseId, lessonId, recId) {
+      const isHe = APP_STATE.lang === 'he';
+      if (!confirm(isHe ? 'האם למחוק הקלטה זו?' : 'Delete this audio recording?')) return;
+
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      if (!course) return;
+      const lesson = (course.lessons || []).find(l => l.id === lessonId);
+      if (!lesson || !Array.isArray(lesson.recordings)) return;
+
+      lesson.recordings = lesson.recordings.filter(r => r.id !== recId);
+      course.updated_at = new Date().toISOString();
+      saveCustomCoursesToStorage(true);
+      renderLessonsCategoryView();
+      showToast(isHe ? 'ההקלטה נמחקה' : 'Audio recording deleted');
+    }
+
+    let currentReadingAudioUploadTarget = null;
+    function triggerReadingAudioUpload(unitId) {
+      currentReadingAudioUploadTarget = { unitId: unitId };
+      const fileInput = document.getElementById('reading-audio-file-input');
+      if (fileInput) {
+        fileInput.value = '';
+        fileInput.click();
+      }
+    }
+
+    function handleReadingAudioFileSelected(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file || !currentReadingAudioUploadTarget) return;
+
+      if (file.size > 15 * 1024 * 1024) {
+        alert(APP_STATE.lang === 'he' ? 'קובץ השמע גדול מדי (מקסימום 15MB). אנא השתמש בקישור שמע.' : 'Audio file is too large (maximum 15MB). Please use an audio URL link.');
+        return;
+      }
+
+      const defaultTitle = file.name.replace(/\.[^/.]+$/, "") || 'Reading Audio';
+      const isHe = APP_STATE.lang === 'he';
+      const customTitle = prompt(isHe ? 'הזן כותרת לקובץ השמע:' : 'Enter a title for this audio file:', defaultTitle);
+      if (customTitle === null) return;
+      const title = (customTitle && customTitle.trim()) ? customTitle.trim() : defaultTitle;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Audio = e.target.result;
+        const unit = (APP_STATE.customReadingMaterials || []).find(u => u.id === currentReadingAudioUploadTarget.unitId);
+        if (!unit) return;
+
+        if (!Array.isArray(unit.recordings)) unit.recordings = [];
+        unit.recordings.push({
+          id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+          title: title,
+          url: base64Audio,
+          type: 'audio',
+          date: new Date().toISOString()
+        });
+        saveCustomReadingToStorage(true);
+        renderTutorReadingUnitsGrid();
+        showToast(isHe ? 'קובץ השמע נוסף ליחידת הקריאה!' : 'Audio file attached to reading unit!');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function promptReadingAudioLink(unitId) {
+      const isHe = APP_STATE.lang === 'he';
+      const url = prompt(isHe ? 'הזן קישור לקובץ שמע (MP3 או קישור ישיר):' : 'Enter direct audio link URL (e.g. MP3 link):');
+      if (!url || !url.trim()) return;
+
+      const titlePrompt = prompt(isHe ? 'כותרת לקובץ השמע:' : 'Title for this audio:', 'Reading Audio');
+      const title = (titlePrompt && titlePrompt.trim()) ? titlePrompt.trim() : 'Reading Audio';
+
+      const unit = (APP_STATE.customReadingMaterials || []).find(u => u.id === unitId);
+      if (!unit) return;
+
+      if (!Array.isArray(unit.recordings)) unit.recordings = [];
+      unit.recordings.push({
+        id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        title: title,
+        url: url.trim(),
+        type: 'link',
+        date: new Date().toISOString()
+      });
+      saveCustomReadingToStorage(true);
+      renderTutorReadingUnitsGrid();
+      showToast(isHe ? 'קישור השמע נוסף ליחידת הקריאה!' : 'Audio link attached to reading unit!');
+    }
+
+    function deleteReadingAudio(unitId, recId) {
+      const isHe = APP_STATE.lang === 'he';
+      if (!confirm(isHe ? 'האם למחוק הקלטה זו?' : 'Delete this audio recording?')) return;
+
+      const unit = (APP_STATE.customReadingMaterials || []).find(u => u.id === unitId);
+      if (!unit || !Array.isArray(unit.recordings)) return;
+
+      unit.recordings = unit.recordings.filter(r => r.id !== recId);
+      saveCustomReadingToStorage(true);
+      renderTutorReadingUnitsGrid();
+      showToast(isHe ? 'ההקלטה נמחקה' : 'Audio recording deleted');
+    }
+
+    // ==============================================
+    // SEED INITIAL BAR MITZVAH COURSES TO USER
+    // ==============================================
+    function seedBarMitzvahCoursesToAccount(force = false) {
+      const isMaster = isMasterAccount();
+      if (!isMaster && !force) return;
+
+      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      const seedMarkerKey = 'bm_curriculum_seeded_v2_' + (email || 'master');
+      if (!force && localStorage.getItem(seedMarkerKey)) {
+        return;
+      }
+
+      if (!Array.isArray(APP_STATE.customCourses)) {
+        APP_STATE.customCourses = [];
+      }
+
+      let mutatedCourses = false;
+
+      // 1. Course: 13 Core Jewish Concepts
+      const hasConcepts = APP_STATE.customCourses.some(c => c.id === 'course_bar_mitzvah_concepts');
+      const topicsData = window.JEWISH_TOPICS_DATA || [];
+      if (!hasConcepts && topicsData.length > 0) {
+        const conceptsCourse = {
+          id: 'course_bar_mitzvah_concepts',
+          title_en: 'Bar Mitzvah: 13 Core Jewish Concepts',
+          title_he: '13 מושגי יסוד לבר מצווה',
+          category: 'Judaic Studies',
+          target_level: 'Bar Mitzvah (Age 12-13)',
+          description_en: 'Tailored hooks, high-density memory points, and relatable teen analogies for 12-13 year olds.',
+          description_he: 'פתיחים מרתקים, נקודות זיכרון ממוקדות ואנלוגיות מחיי היומיום לנערים בני 12-13.',
+          icon: '✦',
+          lessons: topicsData.map((t, idx) => ({
+            id: t.id,
+            lesson_num: idx + 1,
+            title_en: t.title_en,
+            title_he: t.title_he,
+            hook_en: t.hook_en,
+            hook_he: t.hook_he,
+            anchors_en: t.nuggets_en || [],
+            anchors_he: t.nuggets_he || [],
+            life_app_en: t.life_app_en || '',
+            life_app_he: t.life_app_he || '',
+            midrash_en: t.midrash_en || '',
+            midrash_he: t.midrash_he || '',
+            discussion_en: t.discussion_en || '',
+            discussion_he: t.discussion_he || '',
+            recordings: []
+          })),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        APP_STATE.customCourses.unshift(conceptsCourse);
+        mutatedCourses = true;
+      }
+
+      // 2. Course: Chumash (Bereishit & Shemot)
+      const hasChumash = APP_STATE.customCourses.some(c => c.id === 'course_bar_mitzvah_chumash');
+      const allParshiot = [...(window.BEREISHIT_PARSHIOT_DATA || []), ...(window.SHEMOT_PARSHIOT_DATA || [])];
+      if (!hasChumash && allParshiot.length > 0) {
+        const chumashCourse = {
+          id: 'course_bar_mitzvah_chumash',
+          title_en: 'Bar Mitzvah: Chumash (Bereishit & Shemot)',
+          title_he: 'חומש: בראשית ושמות (23 פרשיות)',
+          category: 'Torah / Chumash',
+          target_level: 'Bar Mitzvah (Age 12-13)',
+          description_en: 'Key plot lines, dense memory triggers, Rashi/Midrash gems, and bar mitzvah real-world angles across 23 parshiot.',
+          description_he: 'מהלכי הפרשה, נקודות זיכרון ממוקדות, פניני רש״י וחיבור אישי לחיי היום יום על פני 23 פרשיות.',
+          icon: '📜',
+          lessons: allParshiot.map((p, idx) => ({
+            id: p.id,
+            lesson_num: idx + 1,
+            title_en: p.name_en || p.title_en || ('Parshat ' + p.id),
+            title_he: p.name_he || p.title_he || p.id,
+            hook_en: p.plot_en || '',
+            hook_he: p.plot_he || '',
+            anchors_en: [...(p.topics_en || []), ...(p.rashi_gems_en || [])],
+            anchors_he: [...(p.topics_he || []), ...(p.rashi_gems_he || [])],
+            life_app_en: p.life_app_en || '',
+            life_app_he: p.life_app_he || '',
+            midrash_en: '',
+            midrash_he: '',
+            discussion_en: '',
+            discussion_he: '',
+            recordings: []
+          })),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        APP_STATE.customCourses.push(chumashCourse);
+        mutatedCourses = true;
+      }
+
+      if (mutatedCourses) {
+        if (!APP_STATE.activeCourseId || APP_STATE.activeCourseId === 'concepts' || APP_STATE.activeCourseId === 'chumash') {
+          APP_STATE.activeCourseId = 'course_bar_mitzvah_concepts';
+        }
+        saveCustomCoursesToStorage(true);
+      }
+
+      // 3. Reading Materials: 4 Leveled Booklets
+      if (!Array.isArray(APP_STATE.customReadingMaterials) || APP_STATE.customReadingMaterials.length === 0) {
+        APP_STATE.customReadingMaterials = [
+          {
+            id: 'booklet_red',
+            badge: 'Level 1',
+            title: 'Red Booklet',
+            color: 'red',
+            targets: '22 Hebrew consonants, final letters, initial phonetic sounds',
+            notes: 'Letter recognition and foundational phonetic sounds',
+            recordings: []
+          },
+          {
+            id: 'booklet_orange',
+            badge: 'Level 2',
+            title: 'Orange Booklet',
+            color: 'orange',
+            targets: 'Vowels, Kamatz, Patach, Tzeirei, Segol, 2-letter syllables',
+            notes: 'Vowel mastery and two-letter syllable blending',
+            recordings: []
+          },
+          {
+            id: 'booklet_yellow',
+            badge: 'Level 3',
+            title: 'Yellow Booklet',
+            color: 'amber',
+            targets: 'Cholam, Kubutz, Shuruk, Shva, Dagesh Chazak, multi-syllable fluency',
+            notes: 'Multi-syllable word fluency, stopping vowels, and speed acceleration',
+            recordings: []
+          },
+          {
+            id: 'booklet_green',
+            badge: 'Level 4',
+            title: 'Green Booklet',
+            color: 'emerald',
+            targets: 'Continuous paragraph reading, Shema, Birchot HaShachar, trope preview',
+            notes: 'Full paragraph fluency, Siddur tefillot, and Torah chanting readiness',
+            recordings: []
+          }
+        ];
+        saveCustomReadingToStorage(true);
+      }
+
+      // 4. Milestones: 5 Speechwriting Stages
+      if (!Array.isArray(APP_STATE.customMilestones) || APP_STATE.customMilestones.length === 0) {
+        APP_STATE.customMilestones = [
+          {
+            id: 'milestone_topic_selection',
+            stage_num: 1,
+            title: 'Stage 1: Topic & Theme Selection',
+            description: 'Choose a core theme from your Torah portion or a Jewish value that speaks directly to you.',
+            deliverables: 'Topic selected, personal connection written'
+          },
+          {
+            id: 'milestone_sourcing_research',
+            stage_num: 2,
+            title: 'Stage 2: Sourcing & Gemara Research',
+            description: 'Find 2-3 authentic rabbinic sources (Talmud, Midrash, Rashi, Chassidut) to substantiate your thesis.',
+            deliverables: '2 rabbinic sources found, primary quote translated'
+          },
+          {
+            id: 'milestone_drafting_structuring',
+            stage_num: 3,
+            title: 'Stage 3: Drafting & Structuring',
+            description: 'Draft the opening hook, personal story, explanation of the source, and actionable lesson for adulthood.',
+            deliverables: 'Full speech draft completed (500-700 words)'
+          },
+          {
+            id: 'milestone_rehearsal_delivery',
+            stage_num: 4,
+            title: 'Stage 4: Rehearsal & Delivery Coaching',
+            description: 'Practice vocal projection, pacing at 120-130 words per minute, eye contact, and pausing.',
+            deliverables: '3 recorded audio practice sessions'
+          },
+          {
+            id: 'milestone_final_presentation',
+            stage_num: 5,
+            title: 'Stage 5: Final Capstone Presentation',
+            description: 'Deliver your Dvar Torah with poise, confidence, and heartfelt gratitude to parents and community.',
+            deliverables: 'Polished presentation card printed'
+          }
+        ];
+        saveCustomMilestonesToStorage(true);
+      }
+
+      try {
+        localStorage.setItem(seedMarkerKey, 'true');
+      } catch (_) {}
     }
 
     function loadStarterSampleCourse(sampleKey) {
@@ -9948,117 +10821,54 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
           </div>
 
           ${em.lessons !== false ? `
-          <!-- Filter View Toggle -->
-          <div class="flex items-center justify-between border-b border-slate-800/80 pb-3 gap-2 flex-wrap sm:flex-nowrap">
-            <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs overflow-x-auto no-scrollbar max-w-full">
-              <button onclick="setDrawerTrackerFilter('all')" class="px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap ${APP_STATE.trackerFilter === 'all' ? 'bg-brand-600 text-white font-semibold' : 'text-slate-400 hover:text-white'} transition text-[11px] sm:text-xs">
-                ${t.filterAllLessons} (${totalTopics + totalParshiot})
-              </button>
-              <button onclick="setDrawerTrackerFilter('topics')" class="px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap ${APP_STATE.trackerFilter === 'topics' ? 'bg-amber-600 text-white font-semibold' : 'text-slate-400 hover:text-white'} transition text-[11px] sm:text-xs">
-                ${t.filterConcepts} (${completedTCount}/${totalTopics})
-              </button>
-              <button onclick="setDrawerTrackerFilter('chumash')" class="px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap ${APP_STATE.trackerFilter === 'chumash' ? 'bg-cyan-600 text-white font-semibold' : 'text-slate-400 hover:text-white'} transition text-[11px] sm:text-xs">
-                ${t.filterChumash} (${completedPCount}/${totalParshiot})
-              </button>
-            </div>
-            <span class="text-xs font-mono font-bold text-emerald-400 hidden sm:inline shrink-0">
-              ${overallPct}% ${t.pctCompleted}
-            </span>
-          </div>
-
-          <!-- Checklist: 13 Topics -->
-          ${APP_STATE.trackerFilter !== 'chumash' ? `
-          <div class="space-y-3">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-              ${t.topicsProgress} (${completedTCount} / 13)
-            </h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-              ${topics.map(topic => {
-                const checked = isTopicCompleted(student.id, topic.id);
-                const title = cleanCurriculumName(isHe ? topic.title_he : topic.title_en);
-                return `
-                  <div
-                    onclick="toggleTopicForStudent('${student.id}', '${topic.id}', event)"
-                    class="cursor-pointer select-none px-3.5 py-2.5 rounded-xl border text-xs flex items-center justify-between gap-2.5 transition active:scale-98 ${
-                      checked
-                        ? 'bg-emerald-950/50 border-emerald-500/50 text-emerald-200 shadow-sm'
-                        : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
-                    }"
-                  >
-                    <span class="truncate font-medium">${title}</span>
-                    <i data-lucide="${checked ? 'check-circle-2' : 'circle'}" class="w-4 h-4 shrink-0 ${checked ? 'text-emerald-400' : 'text-slate-600'}"></i>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-          ` : ''}
-
-          <!-- Checklist: 23 Parshiot -->
-          ${APP_STATE.trackerFilter !== 'topics' ? `
-          <div class="space-y-3 pt-2">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-              <i data-lucide="book" class="w-3.5 h-3.5"></i>
-              ${t.chumashProgress} (${completedPCount} / 23)
-            </h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-              ${chumash.map(parsha => {
-                const checked = isParshaCompleted(student.id, parsha.id);
-                const title = cleanCurriculumName(isHe ? parsha.name_he : parsha.name_en);
-                const isBereishit = parsha.book === 'bereishit';
-                return `
-                  <div
-                    onclick="toggleParshaForStudent('${student.id}', '${parsha.id}', event)"
-                    class="cursor-pointer select-none px-3.5 py-2.5 rounded-xl border text-xs flex items-center justify-between gap-2.5 transition active:scale-98 ${
-                      checked
-                        ? 'bg-emerald-950/50 border-emerald-500/50 text-emerald-200 shadow-sm'
-                        : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
-                    }"
-                  >
-                    <div class="truncate flex items-center gap-1.5">
-                      <span class="text-[9px] px-1 rounded ${isBereishit ? 'bg-brand-500/20 text-brand-300' : 'bg-cyan-500/20 text-cyan-300'} font-mono">
-                        ${isBereishit ? (isHe ? 'בראשית' : 'Ber') : (isHe ? 'שמות' : 'Shem')}
-                      </span>
-                      <span class="truncate font-medium">${title}</span>
-                    </div>
-                    <i data-lucide="${checked ? 'check-circle-2' : 'circle'}" class="w-4 h-4 shrink-0 ${checked ? 'text-emerald-400' : 'text-slate-600'}"></i>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-          ` : ''}
-          ` : ''}
-
-          <!-- Checklist: Custom Courses -->
-          ${(em.custom !== false && Array.isArray(APP_STATE.customCourses) && APP_STATE.customCourses.length > 0) ? `
-          <div class="space-y-3 pt-2">
-            ${APP_STATE.customCourses.map(course => {
+          <!-- Unified Curriculum Courses Progress & Checklist -->
+          <div class="space-y-4 pt-2 border-t border-slate-800/80">
+            ${(!APP_STATE.customCourses || APP_STATE.customCourses.length === 0) ? `
+              <div class="text-center py-6 px-4 bg-slate-950/60 border border-slate-800 rounded-xl space-y-2">
+                <p class="text-xs text-slate-400">${isHe ? 'עדיין לא נוצרו קורסים. עבור ללשונית לימוד כדי ליצור קורס.' : 'No courses created yet. Visit Study > Lessons & Classes to create a course.'}</p>
+                <button type="button" onclick="switchTab('study')" class="text-xs text-brand-400 hover:underline font-semibold">
+                  ${isHe ? 'עבור ללשונית לימוד' : 'Go to Study Tab'}
+                </button>
+              </div>
+            ` : APP_STATE.customCourses.map(course => {
+              const cTitle = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
               const lessons = course.lessons || [];
-              const courseTitle = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
+              const completedCount = lessons.filter(l => {
+                const isConceptsOrChumash = (course.id === 'course_bar_mitzvah_concepts' || course.id === 'course_bar_mitzvah_chumash');
+                const key = isConceptsOrChumash ? l.id : (course.id + '_' + l.id);
+                return !!((student.completedTopics && (student.completedTopics[key] || student.completedTopics[l.id])) || (student.completedParshiot && student.completedParshiot[l.id]));
+              }).length;
+              const pct = lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0;
+
               return `
-                <div class="space-y-2">
-                  <h4 class="text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                    <span>${courseTitle} (${lessons.length})</span>
-                  </h4>
+                <div class="space-y-2.5 p-3 sm:p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
+                  <div class="flex items-center justify-between gap-2">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                      <span class="font-mono">${escapeHtml(course.icon || '✦')}</span>
+                      <span>${escapeHtml(cTitle)}</span>
+                    </h4>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${pct === 100 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-300'} border border-slate-700">
+                      ${completedCount} / ${lessons.length} (${pct}%)
+                    </span>
+                  </div>
+
                   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                    ${lessons.map(ls => {
-                      const key = course.id + '_' + ls.id;
-                      const checked = !!(student.completedTopics && student.completedTopics[key]);
-                      const lsTitle = isHe ? (ls.title_he || ls.title_en) : (ls.title_en || ls.title_he);
+                    ${lessons.map(lesson => {
+                      const isConceptsOrChumash = (course.id === 'course_bar_mitzvah_concepts' || course.id === 'course_bar_mitzvah_chumash');
+                      const key = isConceptsOrChumash ? lesson.id : (course.id + '_' + lesson.id);
+                      const checked = !!((student.completedTopics && (student.completedTopics[key] || student.completedTopics[lesson.id])) || (student.completedParshiot && student.completedParshiot[lesson.id]));
+                      const lTitle = cleanCurriculumName(isHe ? (lesson.title_he || lesson.title_en) : (lesson.title_en || lesson.title_he));
                       return `
                         <div
                           onclick="toggleTopicForStudent('${student.id}', '${key}', event)"
                           class="cursor-pointer select-none px-3.5 py-2.5 rounded-xl border text-xs flex items-center justify-between gap-2.5 transition active:scale-98 ${
                             checked
-                              ? 'bg-purple-950/50 border-purple-500/50 text-purple-200 shadow-sm'
+                              ? 'bg-emerald-950/50 border-emerald-500/50 text-emerald-200 shadow-sm'
                               : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
                           }"
                         >
-                          <span class="truncate font-medium">${lsTitle}</span>
-                          <i data-lucide="${checked ? 'check-circle-2' : 'circle'}" class="w-4 h-4 shrink-0 ${checked ? 'text-purple-400' : 'text-slate-600'}"></i>
+                          <span class="truncate font-medium">${escapeHtml(lTitle)}</span>
+                          <i data-lucide="${checked ? 'check-circle-2' : 'circle'}" class="w-4 h-4 shrink-0 ${checked ? 'text-emerald-400' : 'text-slate-600'}"></i>
                         </div>
                       `;
                     }).join('')}
@@ -10091,7 +10901,13 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
       const student = APP_STATE.students.find(s => s.id === studentId);
       if (!student) return;
       if (!student.completedTopics) student.completedTopics = {};
-      student.completedTopics[topicId] = !student.completedTopics[topicId];
+      if (!student.completedParshiot) student.completedParshiot = {};
+
+      const currentVal = !!(student.completedTopics[topicId] || student.completedParshiot[topicId]);
+      const newVal = !currentVal;
+      student.completedTopics[topicId] = newVal;
+      student.completedParshiot[topicId] = newVal;
+
       saveStudentsToStorage(true);
       if (APP_STATE.cloud.client) pushStudentToCloud(student);
       renderAllViews();
@@ -10099,7 +10915,7 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
         renderStudentDrawer(studentId, true);
       }
       const isHe = APP_STATE.lang === 'he';
-      showToast(student.completedTopics[topicId] ?
+      showToast(newVal ?
         (isHe ? "שיעור סומן כנלמד" : "Lesson marked as taught") :
         (isHe ? "סימון השיעור בוטל" : "Lesson unchecked"));
     }

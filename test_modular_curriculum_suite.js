@@ -55,10 +55,16 @@ const sandbox = {
   tailwind: { config: {} },
   lucide: { createIcons() {} },
   localStorage: mockLocalStorage,
+  confirm: () => true,
+  alert: () => {},
+  prompt: () => '',
   window: {
     location: { href: 'https://bar-mitzvah-tutor.pages.dev' },
     addEventListener() {},
-    lucide: { createIcons() {} }
+    lucide: { createIcons() {} },
+    confirm: () => true,
+    alert: () => {},
+    prompt: () => ''
   },
   document: {
     documentElement: { setAttribute() {} },
@@ -79,6 +85,14 @@ const sandbox = {
 vm.createContext(sandbox);
 
 try {
+  const topicsScript = fs.readFileSync(path.resolve(__dirname, 'src/jewish_topics_data.js'), 'utf8');
+  const bereishitScript = fs.readFileSync(path.resolve(__dirname, 'src/chumash_bereishit_data.js'), 'utf8');
+  const shemotScript = fs.readFileSync(path.resolve(__dirname, 'src/chumash_shemot_data.js'), 'utf8');
+
+  vm.runInContext(topicsScript, sandbox);
+  vm.runInContext(bereishitScript, sandbox);
+  vm.runInContext(shemotScript, sandbox);
+
   vm.runInContext(mainScript, sandbox);
   sandbox.APP_STATE = sandbox.window.APP_STATE;
   console.log('✓ Successfully compiled and loaded application scripts into VM');
@@ -188,38 +202,47 @@ sandbox.APP_STATE.currentUser = { email: 'math_teacher@school.edu' };
 assert(sandbox.getCustomCoursesStorageKey() === 'tutor_custom_courses_math_teacher_school_edu', 'External courses storage key is scoped');
 assert(sandbox.getStudyMaterialsStorageKey() === 'tutor_study_additions_math_teacher_school_edu', 'External materials storage key is scoped');
 
-// Test course selector population
-sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
-sandbox.populateCourseSelector();
-const masterSelectHtml = getOrCreateElem('study-course-select').innerHTML;
-assert(masterSelectHtml.includes('concepts') && masterSelectHtml.includes('chumash'), 'Master course selector includes Concepts and Chumash');
-
+// Option A: External tutor starts with empty courses and blank state
 sandbox.APP_STATE.currentUser = { email: 'math_teacher@school.edu' };
 sandbox.APP_STATE.customCourses = [];
 sandbox.populateCourseSelector();
 const extSelectHtml = getOrCreateElem('study-course-select').innerHTML;
-assert(!extSelectHtml.includes('concepts') && !extSelectHtml.includes('chumash'), 'External course selector omits Concepts and Chumash');
+assert(!extSelectHtml.includes('course_bar_mitzvah_concepts') && !extSelectHtml.includes('course_bar_mitzvah_chumash'), 'External course selector omits Bar Mitzvah courses');
+assert(extSelectHtml.includes('No courses created yet'), 'External course selector shows empty state placeholder');
 
-// Test Lessons Category View isolation
-sandbox.APP_STATE.currentUser = { email: 'math_teacher@school.edu' };
 sandbox.renderLessonsCategoryView();
-const tutorHub = getOrCreateElem('study-section-tutor-hub');
 const tutorBlank = getOrCreateElem('tutor-hub-blank-state');
-const secConcepts = getOrCreateElem('study-section-concepts');
-const secChumash = getOrCreateElem('study-section-chumash');
-assert(!tutorHub.classList.contains('hidden'), 'External user has tutor hub unhidden');
+const tutorActive = getOrCreateElem('tutor-hub-active-lessons');
 assert(!tutorBlank.classList.contains('hidden'), 'External user with zero courses sees blank state');
-assert(secConcepts.classList.contains('hidden'), 'External user has Jewish Concepts hidden');
-assert(secChumash.classList.contains('hidden'), 'External user has Chumash hidden');
+assert(tutorActive.classList.contains('hidden'), 'External user with zero courses has active lessons hidden');
 
-// Test Lessons Category View for Master
+// Option A: Master user account seeding
 sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
-sandbox.APP_STATE.studySection = 'concepts';
-sandbox.renderLessonsCategoryView();
-assert(tutorHub.classList.contains('hidden'), 'Master account has tutor hub hidden');
-assert(!secConcepts.classList.contains('hidden'), 'Master account has Jewish Concepts unhidden');
+assert(typeof sandbox.seedBarMitzvahCoursesToAccount === 'function', 'seedBarMitzvahCoursesToAccount is a function');
+sandbox.seedBarMitzvahCoursesToAccount(true);
 
-// Gate 7: Reading & Speech Multi-Tenant Isolation
+assert(sandbox.APP_STATE.customCourses.some(c => c.id === 'course_bar_mitzvah_concepts'), 'Master account has 13 Jewish Concepts seeded into customCourses');
+assert(sandbox.APP_STATE.customCourses.some(c => c.id === 'course_bar_mitzvah_chumash'), 'Master account has 23 Chumash Parshiot seeded into customCourses');
+
+const conceptsCourse = sandbox.APP_STATE.customCourses.find(c => c.id === 'course_bar_mitzvah_concepts');
+assert(conceptsCourse && conceptsCourse.lessons.length === 13, 'Seeded Jewish Concepts course contains exactly 13 lessons');
+const chumashCourse = sandbox.APP_STATE.customCourses.find(c => c.id === 'course_bar_mitzvah_chumash');
+assert(chumashCourse && chumashCourse.lessons.length === 23, 'Seeded Chumash course contains exactly 23 lessons');
+
+// Test Course Selector for Master with Seeded Courses
+sandbox.populateCourseSelector();
+const masterSelectHtml = getOrCreateElem('study-course-select').innerHTML;
+assert(masterSelectHtml.includes('course_bar_mitzvah_concepts') && masterSelectHtml.includes('course_bar_mitzvah_chumash'), 'Master course selector includes seeded Concepts and Chumash');
+
+// Test Lessons Category View for Master with Seeded Courses
+sandbox.APP_STATE.activeCourseId = 'course_bar_mitzvah_concepts';
+sandbox.renderLessonsCategoryView();
+assert(tutorBlank.classList.contains('hidden'), 'Master account with seeded courses has blank state hidden');
+assert(!tutorActive.classList.contains('hidden'), 'Master account with seeded courses has active lessons unhidden');
+const activeLessonsHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+assert(activeLessonsHtml.includes('Shabbat') && activeLessonsHtml.includes('Tefillin'), 'Active lessons container renders seeded Bar Mitzvah lessons');
+
+// Gate 7: Reading & Speech Multi-Tenant Isolation (Option A)
 console.log('\n--- Gate 7: Reading & Speech Multi-Tenant Isolation ---');
 assert(typeof sandbox.getCustomReadingStorageKey === 'function', 'getCustomReadingStorageKey is a function');
 assert(typeof sandbox.getCustomMilestonesStorageKey === 'function', 'getCustomMilestonesStorageKey is a function');
@@ -234,43 +257,61 @@ assert(sandbox.getCustomReadingStorageKey() === 'tutor_custom_reading_science_tu
 assert(sandbox.getCustomMilestonesStorageKey() === 'tutor_custom_milestones_science_tutor_academy_org', 'External milestones storage key is scoped');
 
 // Test Reading View Isolation
+// External Tutor with zero reading units
 sandbox.APP_STATE.currentUser = { email: 'science_tutor@academy.org' };
 sandbox.APP_STATE.customReadingMaterials = [];
 sandbox.renderReadingCategoryView();
-const masterReadingContent = getOrCreateElem('study-reading-master-content');
-const tutorReadingHub = getOrCreateElem('study-reading-tutor-hub');
 const tutorReadingBlank = getOrCreateElem('tutor-reading-blank-state');
-assert(masterReadingContent.classList.contains('hidden'), 'External tutor has master reading content hidden');
-assert(!tutorReadingHub.classList.contains('hidden'), 'External tutor has reading tutor hub unhidden');
+const tutorReadingActive = getOrCreateElem('tutor-reading-active-container');
 assert(!tutorReadingBlank.classList.contains('hidden'), 'External tutor with 0 reading units sees blank state');
+assert(tutorReadingActive.classList.contains('hidden'), 'External tutor with 0 reading units has active container hidden');
 
+// Master Account with seeded reading units
 sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
+sandbox.seedBarMitzvahCoursesToAccount(true);
+assert(Array.isArray(sandbox.APP_STATE.customReadingMaterials) && sandbox.APP_STATE.customReadingMaterials.length === 4, 'Master account has 4 leveled reading units seeded');
 sandbox.renderReadingCategoryView();
-assert(!masterReadingContent.classList.contains('hidden'), 'Master account has master reading content unhidden');
-assert(tutorReadingHub.classList.contains('hidden'), 'Master account has reading tutor hub hidden');
+assert(tutorReadingBlank.classList.contains('hidden'), 'Master account with seeded reading units has blank state hidden');
+assert(!tutorReadingActive.classList.contains('hidden'), 'Master account with seeded reading units has active container unhidden');
+const readingGridHtml = getOrCreateElem('tutor-reading-units-grid').innerHTML;
+assert(readingGridHtml.includes('Red Booklet') || readingGridHtml.includes('חוברת אדומה') || readingGridHtml.includes('bm_reading_red'), 'Reading units grid renders seeded booklets');
 
 // Test Speech View Isolation
+// External Tutor with zero milestones
 sandbox.APP_STATE.currentUser = { email: 'science_tutor@academy.org' };
 sandbox.APP_STATE.customMilestones = [];
 sandbox.renderSpeechCategoryView();
-const masterSpeechContent = getOrCreateElem('study-speech-master-content');
-const tutorSpeechHub = getOrCreateElem('study-speech-tutor-hub');
 const tutorSpeechBlank = getOrCreateElem('tutor-speech-blank-state');
-assert(masterSpeechContent.classList.contains('hidden'), 'External tutor has master speech content hidden');
-assert(!tutorSpeechHub.classList.contains('hidden'), 'External tutor has speech tutor hub unhidden');
+const tutorSpeechActive = getOrCreateElem('tutor-speech-active-container');
 assert(!tutorSpeechBlank.classList.contains('hidden'), 'External tutor with 0 milestones sees blank state');
+assert(tutorSpeechActive.classList.contains('hidden'), 'External tutor with 0 milestones has active container hidden');
 
+// Master Account with seeded milestones
 sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
+sandbox.seedBarMitzvahCoursesToAccount(true);
+assert(Array.isArray(sandbox.APP_STATE.customMilestones) && sandbox.APP_STATE.customMilestones.length === 5, 'Master account has 5 speech stages seeded');
 sandbox.renderSpeechCategoryView();
-assert(!masterSpeechContent.classList.contains('hidden'), 'Master account has master speech content unhidden');
-assert(tutorSpeechHub.classList.contains('hidden'), 'Master account has speech tutor hub hidden');
+assert(tutorSpeechBlank.classList.contains('hidden'), 'Master account with seeded milestones has blank state hidden');
+assert(!tutorSpeechActive.classList.contains('hidden'), 'Master account with seeded milestones has active container unhidden');
+const speechGridHtml = getOrCreateElem('tutor-milestones-grid').innerHTML;
+assert(speechGridHtml.includes('Stage 1') || speechGridHtml.includes('שלב 1') || speechGridHtml.includes('bm_stage_1'), 'Milestones grid renders seeded speech stages');
 
 // Gate 8: Authoring Modals & Student Drawer Synchronization
 console.log('\n--- Gate 8: Authoring Modals & Student Drawer Synchronization ---');
+assert(indexHtml.includes('modal-create-course'), 'HTML contains modal-create-course');
+assert(indexHtml.includes('modal-add-custom-lesson'), 'HTML contains modal-add-custom-lesson');
 assert(indexHtml.includes('modal-add-custom-reading'), 'HTML contains modal-add-custom-reading');
 assert(indexHtml.includes('modal-ai-reading-builder'), 'HTML contains modal-ai-reading-builder');
 assert(indexHtml.includes('modal-add-custom-milestone'), 'HTML contains modal-add-custom-milestone');
 assert(indexHtml.includes('modal-ai-milestone-builder'), 'HTML contains modal-ai-milestone-builder');
+
+assert(typeof sandbox.openCreateCourseModal === 'function', 'openCreateCourseModal is a function');
+assert(typeof sandbox.handleSaveCustomCourse === 'function', 'handleSaveCustomCourse is a function');
+assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDeleteActiveCustomCourse is a function');
+assert(typeof sandbox.openAddCustomLessonModal === 'function', 'openAddCustomLessonModal is a function');
+assert(typeof sandbox.openEditCustomLessonModal === 'function', 'openEditCustomLessonModal is a function');
+assert(typeof sandbox.handleSaveCustomLesson === 'function', 'handleSaveCustomLesson is a function');
+assert(typeof sandbox.handleDeleteCustomLesson === 'function', 'handleDeleteCustomLesson is a function');
 
 assert(typeof sandbox.openAddCustomReadingModal === 'function', 'openAddCustomReadingModal is a function');
 assert(typeof sandbox.openAiReadingBuilderModal === 'function', 'openAiReadingBuilderModal is a function');
@@ -303,6 +344,78 @@ assert(customReadingCardHtml.includes('Level 1: Phonics') || customReadingCardHt
 
 const customSpeechCardHtml = sandbox.renderStudentCustomSpeechCard(testExtStudent);
 assert(customSpeechCardHtml.includes('Mars Rover') || customSpeechCardHtml.includes('Stage 1: Outline'), 'Custom speech card renders tutor topic and stages');
+
+// Gate 9: Course & Lesson Authoring and Sound / Audio Studio
+console.log('\n--- Gate 9: Course & Lesson Studio and Sound / Audio Studio ---');
+assert(indexHtml.includes('voice-recording-hud'), 'HTML contains voice-recording-hud');
+assert(indexHtml.includes('voice-recording-timer'), 'HTML contains voice-recording-timer');
+assert(indexHtml.includes('lesson-audio-file-input'), 'HTML contains lesson-audio-file-input');
+assert(indexHtml.includes('reading-audio-file-input'), 'HTML contains reading-audio-file-input');
+
+assert(typeof sandbox.startVoiceRecording === 'function', 'startVoiceRecording is a function');
+assert(typeof sandbox.stopVoiceRecording === 'function', 'stopVoiceRecording is a function');
+assert(typeof sandbox.cancelVoiceRecording === 'function', 'cancelVoiceRecording is a function');
+assert(typeof sandbox.saveRecordedAudioToTarget === 'function', 'saveRecordedAudioToTarget is a function');
+
+assert(typeof sandbox.triggerLessonAudioUpload === 'function', 'triggerLessonAudioUpload is a function');
+assert(typeof sandbox.handleLessonAudioFileSelected === 'function', 'handleLessonAudioFileSelected is a function');
+assert(typeof sandbox.promptLessonAudioLink === 'function', 'promptLessonAudioLink is a function');
+assert(typeof sandbox.deleteLessonAudio === 'function', 'deleteLessonAudio is a function');
+
+assert(typeof sandbox.triggerReadingAudioUpload === 'function', 'triggerReadingAudioUpload is a function');
+assert(typeof sandbox.handleReadingAudioFileSelected === 'function', 'handleReadingAudioFileSelected is a function');
+assert(typeof sandbox.promptReadingAudioLink === 'function', 'promptReadingAudioLink is a function');
+assert(typeof sandbox.deleteReadingAudio === 'function', 'deleteReadingAudio is a function');
+
+// Test Course Creation execution
+getOrCreateElem('input-create-course-title-en').value = 'Mishnah Berurah';
+getOrCreateElem('input-create-course-title-he').value = 'משנה ברורה';
+getOrCreateElem('input-create-course-category').value = 'Halachah';
+getOrCreateElem('input-create-course-level').value = 'High School';
+getOrCreateElem('input-create-course-desc').value = 'Laws of daily conduct';
+getOrCreateElem('input-create-course-icon').value = '📖';
+
+const initialCourseCount = sandbox.APP_STATE.customCourses.length;
+sandbox.handleSaveCustomCourse({ preventDefault() {} });
+assert(sandbox.APP_STATE.customCourses.length === initialCourseCount + 1, 'handleSaveCustomCourse successfully created and appended a new course');
+const createdCourse = sandbox.APP_STATE.customCourses.find(c => c.title_en === 'Mishnah Berurah');
+assert(createdCourse !== undefined, 'Created course found in APP_STATE.customCourses');
+assert(sandbox.APP_STATE.activeCourseId === createdCourse.id, 'Created course is set as activeCourseId');
+
+// Test Lesson Creation execution on the new course
+getOrCreateElem('input-custom-lesson-title-en').value = 'Siman 1: Awakening in the Morning';
+getOrCreateElem('input-custom-lesson-title-he').value = 'סימן א: השכמת הבוקר';
+getOrCreateElem('input-custom-lesson-hook').value = 'How you start your day sets the tone for your entire life.';
+getOrCreateElem('input-custom-lesson-anchors').value = 'Be strong as a lion\nModeh Ani upon waking\nHand washing';
+getOrCreateElem('input-custom-lesson-life-app').value = 'Discipline beats motivation every single morning.';
+getOrCreateElem('input-custom-lesson-discussion').value = 'Why is the lion chosen as the symbol for waking up?';
+
+sandbox.handleSaveCustomLesson({ preventDefault() {} });
+assert(createdCourse.lessons.length === 1, 'handleSaveCustomLesson successfully added a lesson to the course');
+const createdLesson = createdCourse.lessons[0];
+assert(createdLesson.title_en === 'Siman 1: Awakening in the Morning', 'Lesson title matches input');
+
+// Test Audio Attachment via saveRecordedAudioToTarget
+sandbox.saveRecordedAudioToTarget(
+  { type: 'lesson', courseId: createdCourse.id, targetId: createdLesson.id },
+  'data:audio/webm;base64,GkXfo59ChoEBQveBAULygQ8=',
+  'Voice Memo - Siman 1 Overview'
+);
+assert(Array.isArray(createdLesson.recordings) && createdLesson.recordings.length === 1, 'Audio recording successfully attached to lesson');
+assert(createdLesson.recordings[0].title === 'Voice Memo - Siman 1 Overview', 'Attached audio title matches');
+
+// Test Audio player rendering in expanded lesson
+if (!sandbox.APP_STATE.expandedCustomLessonIds) sandbox.APP_STATE.expandedCustomLessonIds = {};
+sandbox.APP_STATE.expandedCustomLessonIds[createdLesson.id] = true;
+sandbox.renderLessonsCategoryView();
+const activeLessonsHtmlAfterAudio = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+assert(activeLessonsHtmlAfterAudio.includes('<audio controls') || activeLessonsHtmlAfterAudio.includes('audio/webm'), 'Expanded lesson renders HTML5 audio player');
+assert(activeLessonsHtmlAfterAudio.includes('Voice Memo - Siman 1 Overview'), 'Expanded lesson renders audio recording title');
+assert(activeLessonsHtmlAfterAudio.includes('Record Voice Memo'), 'Expanded lesson renders Record Voice Memo button');
+
+// Test Audio Deletion
+sandbox.deleteLessonAudio(createdCourse.id, createdLesson.id, createdLesson.recordings[0].id);
+assert(createdLesson.recordings.length === 0, 'deleteLessonAudio successfully removed recording');
 
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
