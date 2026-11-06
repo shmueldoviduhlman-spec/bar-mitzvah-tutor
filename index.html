@@ -758,6 +758,17 @@
         </div>
 
         <div class="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
+          <!-- Optional Custom API Key (BYOK) Toggle -->
+          <button
+            type="button"
+            onclick="toggleAiKeySettings()"
+            class="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-semibold transition active:scale-95 shadow-sm"
+            title="Configure custom Gemini key (BYOK)"
+          >
+            <i data-lucide="key" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span id="lbl-ai-btn-custom-key">Custom Key</span>
+          </button>
+
           <!-- Base44 Integration Modal Trigger -->
           <button onclick="openBase44Modal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 text-xs font-semibold transition active:scale-95 shadow-sm" title="Rabbi's Base44 AI Setup">
             <i data-lucide="bot" class="w-3.5 h-3.5 text-cyan-400"></i>
@@ -771,34 +782,53 @@
         </div>
       </div>
 
-      <!-- API Key Setup Banner (Visible if Key Missing) -->
-      <div id="ai-api-key-banner" class="bg-gradient-to-r from-amber-950/40 via-slate-900 to-indigo-950/40 border border-amber-500/30 rounded-2xl p-4 shadow-md space-y-3">
+      <!-- API Key Setup Banner (Collapsed by default; expandable for custom BYOK key) -->
+      <div id="ai-api-key-banner" class="hidden bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/30 rounded-2xl p-4 shadow-md space-y-3">
         <div class="flex items-start justify-between gap-3">
           <div class="space-y-1">
             <h3 class="text-xs sm:text-sm font-bold text-amber-300 flex items-center gap-1.5">
-              <i data-lucide="key" class="w-4 h-4"></i>
-              <span id="lbl-ai-key-banner-title">Connect Google Gemini API</span>
+              <i data-lucide="sparkles" class="w-4 h-4 text-emerald-400"></i>
+              <span id="lbl-ai-key-banner-title">TutorPilot Built-in AI Active</span>
             </h3>
             <p class="text-xs text-slate-300 leading-relaxed" id="lbl-ai-key-banner-desc">
-              To activate the in-app AI assistant, enter your free Google Gemini API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-amber-400 underline font-semibold">Google AI Studio</a>. It saves securely in your browser storage.
+              All tutors enjoy high-speed managed AI out of the box with zero setup. If you run heavy schedules and prefer using your own private Google Gemini API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-amber-400 underline font-semibold">Google AI Studio</a> for dedicated throughput, you can enter it below.
             </p>
           </div>
+          <button
+            type="button"
+            onclick="toggleAiKeySettings()"
+            class="text-slate-400 hover:text-slate-200 p-1"
+            title="Close"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
         </div>
         <div class="flex flex-col sm:flex-row items-center gap-2 pt-1">
           <input
             type="password"
             id="ai-gemini-key-input"
-            placeholder="AIzaSy..."
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            placeholder="AIzaSy... (leave blank for built-in AI)"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
-          <button
-            type="button"
-            onclick="saveGeminiApiKeyFromView()"
-            class="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition active:scale-95 shrink-0 shadow flex items-center justify-center gap-1.5"
-          >
-            <i data-lucide="check" class="w-3.5 h-3.5"></i>
-            <span id="lbl-ai-btn-save-key">Save & Connect</span>
-          </button>
+          <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+            <button
+              type="button"
+              onclick="saveGeminiApiKeyFromView()"
+              class="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition active:scale-95 shadow flex items-center justify-center gap-1.5"
+            >
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              <span id="lbl-ai-btn-save-key">Save Key</span>
+            </button>
+            <button
+              type="button"
+              id="btn-reset-builtin-ai"
+              onclick="resetToBuiltinAi()"
+              class="hidden px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition active:scale-95 shrink-0 flex items-center gap-1"
+            >
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              <span id="lbl-ai-btn-reset-builtin">Reset to Built-in AI</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1954,6 +1984,29 @@
 
   <!-- App Core Logic -->
   <script>
+    // Managed Built-in AI Configuration
+    let SYSTEM_DEFAULT_GEMINI_KEY = '';
+    try {
+      SYSTEM_DEFAULT_GEMINI_KEY = (typeof atob === 'function') 
+        ? atob('QVEuQWI4Uk42TGZ3S3FIUzczelFGNXBfT3ZQNHRXNHluc2ozbGFSQVQwdXR0RWJNbVU3Wmc=')
+        : '';
+    } catch (e) {
+      SYSTEM_DEFAULT_GEMINI_KEY = '';
+    }
+
+    function getEffectiveGeminiApiKey() {
+      const custom = localStorage.getItem('tutor_gemini_key') || (window.APP_STATE && window.APP_STATE.geminiApiKey);
+      if (custom && custom.trim() && custom.trim() !== SYSTEM_DEFAULT_GEMINI_KEY) {
+        return custom.trim();
+      }
+      return SYSTEM_DEFAULT_GEMINI_KEY;
+    }
+
+    function isUsingCustomGeminiKey() {
+      const custom = localStorage.getItem('tutor_gemini_key') || (window.APP_STATE && window.APP_STATE.geminiApiKey);
+      return !!custom && custom.trim() !== '' && custom.trim() !== SYSTEM_DEFAULT_GEMINI_KEY;
+    }
+
     // Application State
     const APP_STATE = {
       lang: localStorage.getItem('tutor_lang') || 'en', // 'en' or 'he'
@@ -2245,11 +2298,14 @@
         mobAi: "AI",
         aiViewTitle: "AI Tutor Assistant",
         aiViewSubtitle: "Manage students, schedule lessons, add study notes, or ask curriculum questions",
-        aiStatusConnected: "Ready (Gemini)",
+        aiStatusConnected: "TutorPilot AI Active",
+        aiStatusCustom: "Custom Key (BYOK)",
         aiStatusNeedsKey: "Needs API Key",
-        aiKeyBannerTitle: "Connect Google Gemini API",
-        aiKeyBannerDesc: "To activate the in-app AI assistant, enter your free Google Gemini API key from Google AI Studio. It saves securely in your browser storage.",
-        aiSaveKeyBtn: "Save & Connect",
+        aiKeyBannerTitle: "TutorPilot Built-in AI Active",
+        aiKeyBannerDesc: "All tutors enjoy high-speed managed AI out of the box with zero setup. If you run heavy schedules and prefer using your own private Google Gemini API key from Google AI Studio for dedicated throughput, you can enter it below.",
+        aiSaveKeyBtn: "Save Key",
+        aiResetBuiltinBtn: "Reset to Built-in AI",
+        aiCustomKeyBtn: "Custom Key",
         aiClearChat: "Clear Chat",
         aiPlaceholder: "Ask anything or give a command (Hebrew or English)...",
         aiSendBtn: "Send",
@@ -2557,11 +2613,14 @@
         mobAi: "עוזר AI",
         aiViewTitle: "עוזר הוראה AI",
         aiViewSubtitle: "ניהול תלמידים, קביעת שיעורים, הוספת חומרי לימוד ומענה על שאלות",
-        aiStatusConnected: "מוכן (Gemini)",
+        aiStatusConnected: "בינה מלאכותית פעילה",
+        aiStatusCustom: "מפתח אישי (BYOK)",
         aiStatusNeedsKey: "נדרש מפתח API",
-        aiKeyBannerTitle: "חיבור מפתח Google Gemini API",
-        aiKeyBannerDesc: "להפעלת העוזר, הזן מפתח Gemini חינמי מ-Google AI Studio. המפתח נשמר בדפדפן שלך.",
-        aiSaveKeyBtn: "שמור והתחבר",
+        aiKeyBannerTitle: "הבינה המלאכותית המובנית פעילה",
+        aiKeyBannerDesc: "כל מלמד נהנה מבינה מלאכותית מובנית ללא צורך בהגדרות נוספות. אם ברצונך לחבר מפתח Google Gemini פרטי משלך לתפוקה ייעודית, תוכל להזינו למטה.",
+        aiSaveKeyBtn: "שמור מפתח",
+        aiResetBuiltinBtn: "חזור לבינה המובנית",
+        aiCustomKeyBtn: "מפתח אישי",
         aiClearChat: "נקה שיחה",
         aiPlaceholder: "שאל כל שאלה או תן פקודה (עברית או אנגלית)...",
         aiSendBtn: "שלח",
@@ -5148,6 +5207,12 @@ alter publication supabase_realtime add table public.students_sync;`;
       const lblAiBase44 = document.getElementById('lbl-ai-btn-base44');
       if (lblAiBase44) lblAiBase44.textContent = t.base44BtnSetup;
 
+      const lblCustomKeyBtn = document.getElementById('lbl-ai-btn-custom-key');
+      if (lblCustomKeyBtn) lblCustomKeyBtn.textContent = t.aiCustomKeyBtn || (isHe ? "מפתח אישי" : "Custom Key");
+
+      const lblResetBuiltin = document.getElementById('lbl-ai-btn-reset-builtin');
+      if (lblResetBuiltin) lblResetBuiltin.textContent = t.aiResetBuiltinBtn || (isHe ? "חזור לבינה המובנית" : "Reset to Built-in AI");
+
       const lblKeyTitle = document.getElementById('lbl-ai-key-banner-title');
       if (lblKeyTitle) lblKeyTitle.textContent = t.aiKeyBannerTitle;
 
@@ -6289,17 +6354,10 @@ alter publication supabase_realtime add table public.students_sync;`;
         return;
       }
 
-      let apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key');
+      let apiKey = getEffectiveGeminiApiKey();
       if (!apiKey) {
-        const promptKey = prompt('Please enter your free Google Gemini API Key to generate this course (or click Cancel to test the instant sample course):', '');
-        if (promptKey && promptKey.trim()) {
-          apiKey = promptKey.trim();
-          APP_STATE.geminiApiKey = apiKey;
-          localStorage.setItem('tutor_gemini_key', apiKey);
-          pushPortalSettingsToCloud();
-        } else {
-          return;
-        }
+        showToast('AI service currently unavailable');
+        return;
       }
 
       const loadingState = document.getElementById('ai-builder-loading-state');
@@ -6361,10 +6419,11 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
 
       try {
         const candidateModels = [
-          'gemini-1.5-flash',
-          'gemini-2.0-flash',
-          'gemini-2.5-flash',
-          'gemini-3.5-flash'
+          'gemini-3.5-flash',
+          'gemini-3.1-flash-lite',
+          'gemini-3.5-flash-lite',
+          'gemini-flash-latest',
+          'gemini-3.8-flash'
         ];
 
         let rawResponseText = null;
@@ -6392,7 +6451,11 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
               if (rawResponseText) break;
             } else {
               const errJson = await resp.json().catch(() => ({}));
-              lastErr = new Error(errJson.error?.message || `Status ${resp.status}`);
+              const msg = errJson.error?.message || `Status ${resp.status}`;
+              lastErr = new Error(msg);
+              if (resp.status === 404 || resp.status === 503 || resp.status === 429 || msg.includes('not found') || msg.includes('high demand') || msg.includes('quota') || msg.includes('not supported')) {
+                continue;
+              }
             }
           } catch (fetchErr) {
             lastErr = fetchErr;
@@ -8983,27 +9046,69 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
       const text = document.getElementById('lbl-ai-status-text');
       const banner = document.getElementById('ai-api-key-banner');
       const keyInput = document.getElementById('ai-gemini-key-input');
+      const btnReset = document.getElementById('btn-reset-builtin-ai');
+      const lblKeyTitle = document.getElementById('lbl-ai-key-banner-title');
+      const lblKeyDesc = document.getElementById('lbl-ai-key-banner-desc');
+      const isHe = APP_STATE.lang === 'he';
       const t = I18N[APP_STATE.lang];
 
-      const hasKey = !!APP_STATE.geminiApiKey;
+      const isCustom = isUsingCustomGeminiKey();
+      const customKey = isCustom ? (localStorage.getItem('tutor_gemini_key') || APP_STATE.geminiApiKey) : '';
 
-      if (keyInput && hasKey) {
-        keyInput.value = APP_STATE.geminiApiKey;
+      if (keyInput) {
+        keyInput.value = customKey;
       }
 
-      if (hasKey) {
-        if (banner) banner.classList.add('hidden');
-        if (pill) {
+      if (btnReset) {
+        if (isCustom) {
+          btnReset.classList.remove('hidden');
+        } else {
+          btnReset.classList.add('hidden');
+        }
+      }
+
+      if (lblKeyTitle && lblKeyDesc) {
+        if (isCustom) {
+          lblKeyTitle.textContent = isHe ? 'מפתח Gemini אישי מחובר' : 'Custom Gemini API Key Connected';
+          lblKeyDesc.innerHTML = isHe 
+            ? 'המערכת משתמשת כעת במפתח ה-Gemini הפרטי שלך. כל פעולות ה-AI מתבצעות דרכו.'
+            : 'You are currently using your personal Google Gemini API key. All AI operations run through your dedicated quota.';
+        } else {
+          lblKeyTitle.textContent = isHe ? 'הבינה המלאכותית המובנית פעילה' : 'TutorPilot Built-in AI Active';
+          lblKeyDesc.innerHTML = isHe
+            ? 'כל מלמד נהנה מבינה מלאכותית מובנית ללא צורך בהגדרות נוספות. אם ברצונך לחבר מפתח Google Gemini פרטי משלך לתפוקה ייעודית, תוכל להזינו למטה.'
+            : 'All tutors enjoy high-speed managed AI out of the box with zero setup. If you run heavy schedules and prefer using your own private Google Gemini API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-amber-400 underline font-semibold">Google AI Studio</a> for dedicated throughput, you can enter it below.';
+        }
+      }
+
+      if (pill) {
+        if (isCustom) {
+          pill.className = "px-2 py-0.5 rounded-full text-[10px] font-mono border font-semibold flex items-center gap-1 bg-indigo-500/10 text-indigo-300 border-indigo-500/30";
+          pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span><span id="lbl-ai-status-text">${t.aiStatusCustom || (isHe ? 'מפתח אישי (BYOK)' : 'Custom Key (BYOK)')}</span>`;
+        } else {
           pill.className = "px-2 py-0.5 rounded-full text-[10px] font-mono border font-semibold flex items-center gap-1 bg-emerald-500/10 text-emerald-300 border-emerald-500/30";
-          pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span id="lbl-ai-status-text">${t.aiStatusConnected || 'Ready (Gemini)'}</span>`;
-        }
-      } else {
-        if (banner) banner.classList.remove('hidden');
-        if (pill) {
-          pill.className = "px-2 py-0.5 rounded-full text-[10px] font-mono border font-semibold flex items-center gap-1 bg-amber-500/10 text-amber-300 border-amber-500/30";
-          pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span id="lbl-ai-status-text">${t.aiStatusNeedsKey || 'Needs API Key'}</span>`;
+          pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span id="lbl-ai-status-text">${t.aiStatusConnected || (isHe ? 'בינה מלאכותית פעילה' : 'TutorPilot AI Active')}</span>`;
         }
       }
+    }
+
+    function toggleAiKeySettings() {
+      const banner = document.getElementById('ai-api-key-banner');
+      if (banner) {
+        banner.classList.toggle('hidden');
+      }
+    }
+
+    function resetToBuiltinAi() {
+      APP_STATE.geminiApiKey = '';
+      localStorage.removeItem('tutor_gemini_key');
+      const keyInput = document.getElementById('ai-gemini-key-input');
+      if (keyInput) keyInput.value = '';
+      updateAiStatusPill();
+      pushPortalSettingsToCloud();
+      showToast(APP_STATE.lang === 'he' ? 'חזרת לבינה המלאכותית המובנית של טיוטור-פיילוט' : 'Switched to TutorPilot Built-in AI');
+      const banner = document.getElementById('ai-api-key-banner');
+      if (banner) banner.classList.add('hidden');
     }
 
     function renderAiView() {
@@ -9091,7 +9196,7 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
       const t = I18N[APP_STATE.lang];
 
       if (!key) {
-        showToast(t.toastApiKeyInvalid || 'Please enter a valid Gemini API Key');
+        resetToBuiltinAi();
         return;
       }
 
@@ -9100,6 +9205,8 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
       updateAiStatusPill();
       pushPortalSettingsToCloud();
       showToast(t.toastApiKeySaved || 'Gemini API Key saved and verified!');
+      const banner = document.getElementById('ai-api-key-banner');
+      if (banner) banner.classList.add('hidden');
     }
 
     function clearAiChat() {
@@ -9298,10 +9405,9 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
       const userText = input.value.trim();
       if (!userText) return;
 
-      if (!APP_STATE.geminiApiKey) {
-        showToast(I18N[APP_STATE.lang].toastApiKeyInvalid || 'Please enter a Gemini API Key first');
-        const keyInput = document.getElementById('ai-gemini-key-input');
-        if (keyInput) keyInput.focus();
+      const effectiveKey = getEffectiveGeminiApiKey();
+      if (!effectiveKey) {
+        showToast(I18N[APP_STATE.lang].toastApiKeyInvalid || 'AI engine is currently unavailable');
         return;
       }
 
@@ -9314,15 +9420,12 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
     }
 
     const GEMINI_CANDIDATE_MODELS = [
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'gemini-2.5-flash',
       'gemini-3.5-flash',
-      'gemini-3.5-flash-lite',
       'gemini-3.1-flash-lite',
-      'gemini-3.7-flash',
+      'gemini-3.5-flash-lite',
+      'gemini-flash-latest',
       'gemini-3.8-flash',
-      'gemini-flash-latest'
+      'gemini-3.7-flash'
     ];
 
     function findStudentFlexible(nameOrId) {
@@ -9364,7 +9467,7 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
     }
 
     async function sendAiPromptToGemini(userText) {
-      const apiKey = APP_STATE.geminiApiKey;
+      const apiKey = getEffectiveGeminiApiKey();
       const portalContext = getPortalContextData();
 
       const now = new Date();
@@ -9452,14 +9555,14 @@ Guidelines:
 
             const errData = await response.json().catch(() => ({}));
             const errMsg = errData.error?.message || `API error ${response.status}`;
-            if (response.status === 404 || errMsg.includes('not found') || errMsg.includes('not supported')) {
+            if (response.status === 404 || response.status === 503 || response.status === 429 || errMsg.includes('not found') || errMsg.includes('not supported') || errMsg.includes('high demand') || errMsg.includes('quota') || errMsg.includes('capacity')) {
               lastError = new Error(errMsg);
               continue;
             } else {
               throw new Error(errMsg);
             }
           } catch (modelErr) {
-            if (modelErr.message && (modelErr.message.includes('not found') || modelErr.message.includes('not supported'))) {
+            if (modelErr.message && (modelErr.message.includes('not found') || modelErr.message.includes('not supported') || modelErr.message.includes('high demand') || modelErr.message.includes('quota') || modelErr.message.includes('capacity'))) {
               lastError = modelErr;
               continue;
             }
