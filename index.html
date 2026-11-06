@@ -252,6 +252,15 @@
           <i data-lucide="log-in" class="w-4 h-4"></i>
           <span id="btn-signin-text">Log In to TutorPilot</span>
         </button>
+
+        <div class="text-center pt-0.5">
+          <p class="text-xs text-slate-400">
+            <span id="lbl-signin-switch-prompt">First time here?</span>
+            <button type="button" onclick="handleAuthTabSwitch('signup')" class="text-brand-400 hover:text-brand-300 font-semibold underline ml-1" id="lbl-signin-switch-btn">
+              Create an Account (Sign Up)
+            </button>
+          </p>
+        </div>
       </form>
 
       <!-- ============================================== -->
@@ -332,6 +341,15 @@
         <p class="text-xs text-slate-400 text-center" id="lbl-signup-subtext">
           14-day full access • No credit card required • Instant setup
         </p>
+
+        <div class="text-center pt-0.5">
+          <p class="text-xs text-slate-400">
+            <span id="lbl-signup-switch-prompt">Already have an account?</span>
+            <button type="button" onclick="handleAuthTabSwitch('signin')" class="text-brand-400 hover:text-brand-300 font-semibold underline ml-1" id="lbl-signup-switch-btn">
+              Log In
+            </button>
+          </p>
+        </div>
       </form>
 
       <div id="auth-footer-text" class="pt-2 text-[11px] text-slate-500 text-center border-t border-slate-800">
@@ -5020,6 +5038,18 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       const lblSignupSubtext = document.getElementById('lbl-signup-subtext');
       if (lblSignupSubtext) lblSignupSubtext.textContent = isHe ? "14 יום גישה מלאה • ללא צורך בכרטיס אשראי • גישה מיידית" : "14-day full access • No credit card required • Instant setup";
+
+      const lblSigninSwitchPrompt = document.getElementById('lbl-signin-switch-prompt');
+      if (lblSigninSwitchPrompt) lblSigninSwitchPrompt.textContent = isHe ? "פעם ראשונה כאן?" : "First time here?";
+
+      const lblSigninSwitchBtn = document.getElementById('lbl-signin-switch-btn');
+      if (lblSigninSwitchBtn) lblSigninSwitchBtn.textContent = isHe ? "צור חשבון חדש (הרשמה)" : "Create an Account (Sign Up)";
+
+      const lblSignupSwitchPrompt = document.getElementById('lbl-signup-switch-prompt');
+      if (lblSignupSwitchPrompt) lblSignupSwitchPrompt.textContent = isHe ? "כבר יש לך חשבון?" : "Already have an account?";
+
+      const lblSignupSwitchBtn = document.getElementById('lbl-signup-switch-btn');
+      if (lblSignupSwitchBtn) lblSignupSwitchBtn.textContent = isHe ? "התחבר למערכת" : "Log In";
 
       const authFooterText = document.getElementById('auth-footer-text');
       if (authFooterText) authFooterText.textContent = isHe ? "🔒 אבטחת סיסמה מוצפנת • נשאר מחובר במכשיר זה ל-30 יום" : "🔒 Secure Password Protection • Stays Open on this Device for 30 Days";
