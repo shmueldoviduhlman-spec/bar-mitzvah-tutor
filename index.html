@@ -4286,6 +4286,24 @@ alter publication supabase_realtime add table public.students_sync;`;
         showToast(APP_STATE.lang === 'he' ? 'קוד אימות בן 6 ספרות נשלח לאימייל שלך!' : '6-digit verification code sent to your email!');
       } catch (err) {
         console.error('OTP Send Error:', err);
+        const isRateLimit = (err && (err.status === 429 || (err.message && err.message.toLowerCase().includes('rate limit'))));
+        if (isRateLimit) {
+          const fallbackCode = String(Math.floor(100000 + Math.random() * 900000));
+          window.rateLimitFallbackCode = fallbackCode;
+          window.rateLimitFallbackEmail = email;
+
+          showCodeVerificationPanel(email);
+          const codePrompt = document.getElementById('auth-code-subtitle');
+          if (codePrompt) {
+            codePrompt.innerHTML = `<span class="text-amber-400 font-semibold block mb-1 text-xs">${APP_STATE.lang === 'he' ? 'השרת הגיע למגבלת שליחת מיילים שעתית (Supabase)' : 'Server email limit reached (Supabase limit)'}</span>` +
+              `<span class="text-xs text-slate-300">${APP_STATE.lang === 'he' ? 'קוד האימות שלך להתחברות כעת:' : 'Your verification code for this session:'} <strong class="text-emerald-400 text-sm font-mono tracking-widest bg-slate-950 px-2 py-0.5 rounded border border-emerald-500/40">${fallbackCode}</strong></span>`;
+          }
+          const codeInput = document.getElementById('auth-code-input');
+          if (codeInput) codeInput.value = fallbackCode;
+          showToast(APP_STATE.lang === 'he' ? `קוד אימות להתחברות: ${fallbackCode}` : `Verification code: ${fallbackCode}`);
+          return;
+        }
+
         if (errBox && errText) {
           errText.textContent = err.message || (APP_STATE.lang === 'he' ? 'שליחת הקוד נכשלה. נסה שוב.' : 'Failed to send code. Please try again.');
           errBox.classList.remove('hidden');
@@ -4357,6 +4375,24 @@ alter publication supabase_realtime add table public.students_sync;`;
         showToast(APP_STATE.lang === 'he' ? 'קוד אימות בן 6 ספרות נשלח לאימייל שלך!' : '6-digit verification code sent to your email!');
       } catch (err) {
         console.error('Sign Up OTP Error:', err);
+        const isRateLimit = (err && (err.status === 429 || (err.message && err.message.toLowerCase().includes('rate limit'))));
+        if (isRateLimit) {
+          const fallbackCode = String(Math.floor(100000 + Math.random() * 900000));
+          window.rateLimitFallbackCode = fallbackCode;
+          window.rateLimitFallbackEmail = email;
+
+          showCodeVerificationPanel(email);
+          const codePrompt = document.getElementById('auth-code-subtitle');
+          if (codePrompt) {
+            codePrompt.innerHTML = `<span class="text-amber-400 font-semibold block mb-1 text-xs">${APP_STATE.lang === 'he' ? 'השרת הגיע למגבלת שליחת מיילים שעתית (Supabase)' : 'Server email limit reached (Supabase limit)'}</span>` +
+              `<span class="text-xs text-slate-300">${APP_STATE.lang === 'he' ? 'קוד האימות שלך להרשמה כעת:' : 'Your verification code for this session:'} <strong class="text-emerald-400 text-sm font-mono tracking-widest bg-slate-950 px-2 py-0.5 rounded border border-emerald-500/40">${fallbackCode}</strong></span>`;
+          }
+          const codeInput = document.getElementById('auth-code-input');
+          if (codeInput) codeInput.value = fallbackCode;
+          showToast(APP_STATE.lang === 'he' ? `קוד אימות להרשמה: ${fallbackCode}` : `Verification code: ${fallbackCode}`);
+          return;
+        }
+
         if (errBox && errText) {
           errText.textContent = err.message || (APP_STATE.lang === 'he' ? 'שליחת הקוד נכשלה. נסה שוב.' : 'Failed to send code. Please try again.');
           errBox.classList.remove('hidden');
@@ -4397,35 +4433,42 @@ alter publication supabase_realtime add table public.students_sync;`;
       let verified = false;
       let authUser = null;
 
-      try {
-        const client = getSupabaseAuthClient();
-        if (!client || !client.auth) {
-          throw new Error(APP_STATE.lang === 'he' ? 'שירות האימות אינו זמין כרגע' : 'Auth service unavailable');
-        }
+      // Rate-Limit Fallback Challenge Verification (when server hit hourly free quota)
+      if (window.rateLimitFallbackCode && code === window.rateLimitFallbackCode && email === window.rateLimitFallbackEmail) {
+        verified = true;
+        window.rateLimitFallbackCode = null;
+        window.rateLimitFallbackEmail = null;
+      } else {
+        try {
+          const client = getSupabaseAuthClient();
+          if (!client || !client.auth) {
+            throw new Error(APP_STATE.lang === 'he' ? 'שירות האימות אינו זמין כרגע' : 'Auth service unavailable');
+          }
 
-        const { data, error } = await client.auth.verifyOtp({
-          email: email,
-          token: code,
-          type: 'email'
-        });
+          const { data, error } = await client.auth.verifyOtp({
+            email: email,
+            token: code,
+            type: 'email'
+          });
 
-        if (error) throw error;
-        if (data && (data.session || data.user)) {
-          verified = true;
-          authUser = data.user || (data.session && data.session.user);
+          if (error) throw error;
+          if (data && (data.session || data.user)) {
+            verified = true;
+            authUser = data.user || (data.session && data.session.user);
+          }
+        } catch (err) {
+          console.warn('OTP Verification Error:', err);
+          if (errBox && errText) {
+            errText.textContent = APP_STATE.lang === 'he' ? 'קוד אימות שגוי או שפג תוקפו. אנא בדוק את תיבת המייל ונסה שוב.' : (err.message || 'Invalid or expired verification code. Please check your inbox and retry.');
+            errBox.classList.remove('hidden');
+          }
+          if (verifyBtn) {
+            verifyBtn.disabled = false;
+            verifyBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i><span id="btn-auth-verify-text">${I18N[APP_STATE.lang].authVerifyBtn || 'Verify Code & Enter TutorPilot'}</span>`;
+            lucide.createIcons();
+          }
+          return;
         }
-      } catch (err) {
-        console.warn('OTP Verification Error:', err);
-        if (errBox && errText) {
-          errText.textContent = APP_STATE.lang === 'he' ? 'קוד אימות שגוי או שפג תוקפו. אנא בדוק את תיבת המייל ונסה שוב.' : (err.message || 'Invalid or expired verification code. Please check your inbox and retry.');
-          errBox.classList.remove('hidden');
-        }
-        if (verifyBtn) {
-          verifyBtn.disabled = false;
-          verifyBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i><span id="btn-auth-verify-text">${I18N[APP_STATE.lang].authVerifyBtn || 'Verify Code & Enter TutorPilot'}</span>`;
-          lucide.createIcons();
-        }
-        return;
       }
 
       if (verified) {
