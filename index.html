@@ -153,7 +153,7 @@
 
       <!-- Main Step 1 Container (Tabs & Email Dispatch Forms) -->
       <div id="auth-step-email-container" class="space-y-4">
-        <!-- Auth Tabs: Sign In vs Create Account -->
+        <!-- Auth Tabs: Log In vs Sign Up -->
         <div class="flex items-center bg-slate-950/80 p-1 rounded-xl border border-slate-800/80">
           <button
             type="button"
@@ -161,7 +161,7 @@
             onclick="handleAuthTabSwitch('signin')"
             class="flex-1 py-2 text-xs font-bold rounded-lg transition bg-brand-600 text-white shadow"
           >
-            <span id="lbl-auth-tab-signin">Sign In</span>
+            <span id="lbl-auth-tab-signin">Log In</span>
           </button>
           <button
             type="button"
@@ -169,90 +169,46 @@
             onclick="handleAuthTabSwitch('signup')"
             class="flex-1 py-2 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-slate-200"
           >
-            <span id="lbl-auth-tab-signup">Create Account</span>
+            <span id="lbl-auth-tab-signup">Sign Up</span>
           </button>
         </div>
 
         <!-- ============================================== -->
-        <!-- TAB 1: SIGN IN FORM                             -->
+        <!-- TAB 1: LOG IN FORM                              -->
         <!-- ============================================== -->
-        <form id="form-auth-signin" onsubmit="handleSendSignInCode(event)" class="space-y-3 pt-1">
-          <!-- Google One-Click Sign In -->
-          <button
-            type="button"
-            onclick="handleGoogleSignIn()"
-            class="w-full py-2.5 px-4 bg-slate-950 hover:bg-slate-800 text-slate-200 text-xs sm:text-sm font-semibold rounded-xl border border-slate-700/80 transition duration-150 active:scale-95 shadow-sm flex items-center justify-center gap-2.5"
-          >
-            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-            </svg>
-            <span id="lbl-google-signin-text">Continue with Google</span>
-          </button>
-
-          <!-- Divider -->
-          <div class="relative flex py-1 items-center">
-            <div class="flex-grow border-t border-slate-800"></div>
-            <span class="flex-shrink mx-2 text-[10px] text-slate-500 uppercase tracking-wider" id="lbl-or-signin-divider">or with email code</span>
-            <div class="flex-grow border-t border-slate-800"></div>
-          </div>
-
+        <form id="form-auth-signin" onsubmit="handleSendSignInCode(event)" class="space-y-4 pt-1">
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-signin-email">Email Address</label>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5" id="lbl-signin-email">Email Address</label>
             <input
               type="email"
               id="signin-email"
               placeholder="name@example.com"
               autocomplete="email"
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 px-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
               required
             >
-            <p class="text-[11px] text-slate-400 mt-1" id="lbl-signin-helper">We'll send an authentic 6-digit verification code to your email.</p>
+            <p class="text-xs text-slate-400 mt-1.5" id="lbl-signin-helper">We'll email you a secure 6-digit code to log in.</p>
           </div>
 
           <div id="signin-error" class="hidden text-xs text-rose-400 font-medium flex items-center gap-1.5 p-2.5 rounded-xl bg-rose-950/30 border border-rose-900/40">
             <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
-            <span id="signin-error-text">Could not send verification code.</span>
+            <span id="signin-error-text">Could not send login code.</span>
           </div>
 
           <button
             type="submit"
             id="btn-signin-submit"
-            class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white text-xs sm:text-sm font-bold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
+            class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-500 text-white text-sm font-bold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
           >
             <i data-lucide="mail" class="w-4 h-4"></i>
-            <span id="btn-signin-text">Send 6-Digit Code</span>
+            <span id="btn-signin-text">Send Login Code</span>
           </button>
         </form>
 
         <!-- ============================================== -->
-        <!-- TAB 2: CREATE ACCOUNT FORM                      -->
+        <!-- TAB 2: SIGN UP FORM                             -->
         <!-- ============================================== -->
-        <form id="form-auth-signup" onsubmit="handleSendSignUpCode(event)" class="space-y-3 pt-1 hidden">
-          <!-- Google One-Click Sign Up -->
-          <button
-            type="button"
-            onclick="handleGoogleSignIn()"
-            class="w-full py-2.5 px-4 bg-slate-950 hover:bg-slate-800 text-slate-200 text-xs sm:text-sm font-semibold rounded-xl border border-slate-700/80 transition duration-150 active:scale-95 shadow-sm flex items-center justify-center gap-2.5"
-          >
-            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-            </svg>
-            <span id="lbl-google-signup-text">Continue with Google</span>
-          </button>
-
-          <!-- Divider -->
-          <div class="relative flex py-1 items-center">
-            <div class="flex-grow border-t border-slate-800"></div>
-            <span class="flex-shrink mx-2 text-[10px] text-slate-500 uppercase tracking-wider" id="lbl-or-signup-divider">or register with email code</span>
-            <div class="flex-grow border-t border-slate-800"></div>
-          </div>
-
+        <form id="form-auth-signup" onsubmit="handleSendSignUpCode(event)" class="space-y-3.5 pt-1 hidden">
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-signup-name">Full Name *</label>
             <input
@@ -260,7 +216,7 @@
               id="signup-name"
               placeholder="e.g. Rabbi David Cohen"
               autocomplete="name"
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
               required
             >
           </div>
@@ -271,7 +227,7 @@
               type="text"
               id="signup-org"
               placeholder="e.g. Congregation Beth Tefillah"
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
             >
           </div>
 
@@ -282,10 +238,10 @@
               id="signup-email"
               placeholder="name@example.com"
               autocomplete="email"
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
               required
             >
-            <p class="text-[11px] text-slate-400 mt-1" id="lbl-signup-helper">We'll send a 6-digit code to verify your email and activate your trial.</p>
+            <p class="text-xs text-slate-400 mt-1.5" id="lbl-signup-helper">We'll email you a 6-digit code to activate your 14-day free trial.</p>
           </div>
 
           <div id="signup-error" class="hidden text-xs text-rose-400 font-medium flex items-center gap-1.5 p-2.5 rounded-xl bg-rose-950/30 border border-rose-900/40">
@@ -296,13 +252,13 @@
           <button
             type="submit"
             id="btn-signup-submit"
-            class="w-full py-2.5 px-4 bg-gradient-to-r from-brand-600 to-amber-500 hover:from-brand-500 hover:to-amber-400 text-white text-xs sm:text-sm font-bold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
+            class="w-full py-3 px-4 bg-gradient-to-r from-brand-600 to-amber-500 hover:from-brand-500 hover:to-amber-400 text-white text-sm font-bold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
           >
             <i data-lucide="sparkles" class="w-4 h-4 text-amber-200"></i>
-            <span id="btn-signup-text">Send Code & Start 14-Day Trial</span>
+            <span id="btn-signup-text">Start 14-Day Free Trial</span>
           </button>
 
-          <p class="text-[11px] text-slate-400 text-center" id="lbl-signup-subtext">
+          <p class="text-xs text-slate-400 text-center" id="lbl-signup-subtext">
             14-day full access • No credit card required • Instant setup
           </p>
         </form>
@@ -312,18 +268,18 @@
       <!-- STEP 2: CODE VERIFICATION PANEL                 -->
       <!-- ============================================== -->
       <div id="auth-panel-code" class="space-y-4 hidden">
-        <div class="text-center space-y-1">
-          <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mb-1">
-            <i data-lucide="mail-check" class="w-5 h-5"></i>
+        <div class="text-center space-y-1.5">
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 mb-1 shadow-inner">
+            <i data-lucide="mail-check" class="w-6 h-6"></i>
           </div>
-          <h3 class="text-base font-bold text-white tracking-tight" id="auth-code-title">Enter 6-Digit Code</h3>
+          <h3 class="text-lg font-bold text-white tracking-tight" id="auth-code-title">Check Your Email</h3>
           <p class="text-xs text-slate-400">
-            <span id="auth-code-subtitle">Code sent to:</span>
-            <span id="auth-code-target-email" class="font-mono font-bold text-emerald-400 block truncate mt-0.5"></span>
+            <span id="auth-code-subtitle">We sent a 6-digit code to:</span>
+            <span id="auth-code-target-email" class="font-mono font-bold text-emerald-400 block truncate mt-1 text-sm"></span>
           </p>
         </div>
 
-        <form id="form-auth-verify" onsubmit="handleVerifyAuthOtp(event)" class="space-y-3">
+        <form id="form-auth-verify" onsubmit="handleVerifyAuthOtp(event)" class="space-y-3.5">
           <div>
             <input
               type="text"
@@ -332,7 +288,7 @@
               pattern="[0-9]*"
               placeholder="••••••"
               maxlength="6"
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 px-3 text-center text-2xl font-mono tracking-widest text-white placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 px-3 text-center text-3xl font-mono tracking-widest text-white placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               required
               autocomplete="one-time-code"
             >
@@ -346,14 +302,14 @@
           <button
             type="submit"
             id="btn-auth-verify"
-            class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
+            class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
           >
             <i data-lucide="check" class="w-4 h-4"></i>
-            <span id="btn-auth-verify-text">Verify Code & Enter TutorPilot</span>
+            <span id="btn-auth-verify-text">Verify & Open TutorPilot</span>
           </button>
         </form>
 
-        <div class="flex items-center justify-between text-xs pt-1 px-1">
+        <div class="flex items-center justify-between text-xs pt-1 px-1 text-slate-400">
           <button type="button" id="btn-auth-resend" onclick="handleResendOtp()" class="text-brand-400 hover:text-brand-300 font-medium underline">
             Resend Code
           </button>
@@ -364,7 +320,7 @@
       </div>
 
       <div id="auth-footer-text" class="pt-2 text-[11px] text-slate-500 text-center border-t border-slate-800">
-        🔒 Verified Email Code Authentication • Stays Open on this Device for 30 Days
+        🔒 Secure Email Verification • Stays Open on this Device for 30 Days
       </div>
     </div>
   </div>
@@ -5041,77 +4997,64 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (authSubtitle) authSubtitle.textContent = t.authSubtitle;
 
       const lblAuthTabSignin = document.getElementById('lbl-auth-tab-signin');
-      if (lblAuthTabSignin) lblAuthTabSignin.textContent = t.authSignInTab;
+      if (lblAuthTabSignin) lblAuthTabSignin.textContent = isHe ? "התחברות" : "Log In";
 
       const lblAuthTabSignup = document.getElementById('lbl-auth-tab-signup');
-      if (lblAuthTabSignup) lblAuthTabSignup.textContent = t.authSignUpTab;
+      if (lblAuthTabSignup) lblAuthTabSignup.textContent = isHe ? "הרשמה" : "Sign Up";
 
-      // Tab 1: Sign In
+      // Tab 1: Log In
       const lblSigninEmail = document.getElementById('lbl-signin-email');
-      if (lblSigninEmail) lblSigninEmail.textContent = t.authEmailLabel;
+      if (lblSigninEmail) lblSigninEmail.textContent = isHe ? "כתובת אימייל" : "Email Address";
 
       const signinEmail = document.getElementById('signin-email');
-      if (signinEmail) signinEmail.placeholder = t.authEmailPlaceholder;
+      if (signinEmail) signinEmail.placeholder = "name@example.com";
 
       const lblSigninHelper = document.getElementById('lbl-signin-helper');
-      if (lblSigninHelper) lblSigninHelper.textContent = isHe ? "נשלח קוד אימות אותנטי בן 6 ספרות לתיבת האימייל שלך." : "We'll send an authentic 6-digit verification code to your email.";
+      if (lblSigninHelper) lblSigninHelper.textContent = isHe ? "נשלח לך קוד מאובטח בן 6 ספרות לכניסה." : "We'll email you a secure 6-digit code to log in.";
 
       const btnSigninText = document.getElementById('btn-signin-text');
-      if (btnSigninText) btnSigninText.textContent = isHe ? "שלח קוד בן 6 ספרות" : "Send 6-Digit Code";
+      if (btnSigninText) btnSigninText.textContent = isHe ? "שלח קוד כניסה" : "Send Login Code";
 
-      // Google Buttons & Dividers
-      const lblGoogleSignin = document.getElementById('lbl-google-signin-text');
-      if (lblGoogleSignin) lblGoogleSignin.textContent = isHe ? "המשך באמצעות גוגל" : "Continue with Google";
-
-      const lblGoogleSignup = document.getElementById('lbl-google-signup-text');
-      if (lblGoogleSignup) lblGoogleSignup.textContent = isHe ? "המשך באמצעות גוגל" : "Continue with Google";
-
-      const lblOrSignin = document.getElementById('lbl-or-signin-divider');
-      if (lblOrSignin) lblOrSignin.textContent = isHe ? "או באמצעות קוד אימות במייל" : "or with email code";
-
-      const lblOrSignup = document.getElementById('lbl-or-signup-divider');
-      if (lblOrSignup) lblOrSignup.textContent = isHe ? "או הרשמה עם קוד אימות במייל" : "or register with email code";
-
-      // Tab 2: Create Account (Sign Up)
+      // Tab 2: Sign Up
       const lblSignupName = document.getElementById('lbl-signup-name');
       if (lblSignupName) lblSignupName.textContent = isHe ? "שם מלא *" : "Full Name *";
 
       const signupName = document.getElementById('signup-name');
-      if (signupName) signupName.placeholder = t.authFullNamePlaceholder;
+      if (signupName) signupName.placeholder = isHe ? "לדוגמה: הרב דוד כהן" : "e.g. Rabbi David Cohen";
 
       const lblSignupOrg = document.getElementById('lbl-signup-org');
-      if (lblSignupOrg) lblSignupOrg.textContent = t.authOrgLabel;
+      if (lblSignupOrg) lblSignupOrg.textContent = isHe ? "קהילה / מוסד (אופציונלי)" : "Synagogue / School (Optional)";
 
       const signupOrg = document.getElementById('signup-org');
-      if (signupOrg) signupOrg.placeholder = t.authOrgPlaceholder;
+      if (signupOrg) signupOrg.placeholder = isHe ? "לדוגמה: קהילת בית ישראל" : "e.g. Congregation Beth Tefillah";
 
       const lblSignupEmail = document.getElementById('lbl-signup-email');
       if (lblSignupEmail) lblSignupEmail.textContent = isHe ? "כתובת אימייל *" : "Email Address *";
 
       const signupEmail = document.getElementById('signup-email');
-      if (signupEmail) signupEmail.placeholder = t.authEmailPlaceholder;
+      if (signupEmail) signupEmail.placeholder = "name@example.com";
 
       const lblSignupHelper = document.getElementById('lbl-signup-helper');
-      if (lblSignupHelper) lblSignupHelper.textContent = isHe ? "נשלח קוד בן 6 ספרות לאימות האימייל והפעלת הניסיון." : "We'll send a 6-digit code to verify your email and activate your trial.";
+      if (lblSignupHelper) lblSignupHelper.textContent = isHe ? "נשלח לך קוד בן 6 ספרות להפעלת 14 יום ניסיון חינם." : "We'll email you a 6-digit code to activate your 14-day free trial.";
 
       const btnSignupText = document.getElementById('btn-signup-text');
-      if (btnSignupText) btnSignupText.textContent = isHe ? "שלח קוד והתחל 14 יום ניסיון" : "Send Code & Start 14-Day Trial";
+      if (btnSignupText) btnSignupText.textContent = isHe ? "התחל 14 יום ניסיון חינם" : "Start 14-Day Free Trial";
 
       const lblSignupSubtext = document.getElementById('lbl-signup-subtext');
-      if (lblSignupSubtext) lblSignupSubtext.textContent = t.authTrialSubtext;
+      if (lblSignupSubtext) lblSignupSubtext.textContent = isHe ? "14 יום גישה מלאה • ללא צורך בכרטיס אשראי • גישה מיידית" : "14-day full access • No credit card required • Instant setup";
 
       // Step 2: Code Verification Panel
       const authCodeTitle = document.getElementById('auth-code-title');
-      if (authCodeTitle) authCodeTitle.textContent = isHe ? "הזן קוד בן 6 ספרות" : "Enter 6-Digit Code";
+      if (authCodeTitle) authCodeTitle.textContent = isHe ? "בדוק את תיבת המייל שלך" : "Check Your Email";
 
       const authCodeSubtitle = document.getElementById('auth-code-subtitle');
-      if (authCodeSubtitle) authCodeSubtitle.textContent = isHe ? "קוד אימות נשלח אל:" : "Code sent to:";
+      if (authCodeSubtitle) authCodeSubtitle.textContent = isHe ? "שלחנו קוד בן 6 ספרות אל:" : "We sent a 6-digit code to:";
 
       const authCodeInput = document.getElementById('auth-code-input');
       if (authCodeInput) authCodeInput.placeholder = "••••••";
 
       const btnAuthVerifyText = document.getElementById('btn-auth-verify-text');
-      if (btnAuthVerifyText) btnAuthVerifyText.textContent = isHe ? "אמת קוד והיכנס לטיוטור-פיילוט" : "Verify Code & Enter TutorPilot";
+      if (btnAuthVerifyText) btnAuthVerifyText.textContent = isHe ? "אמת והיכנס למערכת" : "Verify & Open TutorPilot";
 
       const btnAuthResend = document.getElementById('btn-auth-resend');
       if (btnAuthResend && resendCooldownSeconds <= 0) btnAuthResend.textContent = isHe ? "שלח קוד שוב" : "Resend Code";
@@ -5120,7 +5063,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (btnAuthBack) btnAuthBack.textContent = isHe ? "← החלף אימייל" : "← Change Email";
 
       const authFooterText = document.getElementById('auth-footer-text');
-      if (authFooterText) authFooterText.textContent = t.authConfidentialFooter;
+      if (authFooterText) authFooterText.textContent = isHe ? "🔒 אימות אימייל מאובטח • נשאר מחובר במכשיר זה ל-30 יום" : "🔒 Secure Email Verification • Stays Open on this Device for 30 Days";
 
       const authLangIndicator = document.getElementById('auth-lang-indicator');
       if (authLangIndicator) authLangIndicator.textContent = isHe ? "English" : "עברית";
