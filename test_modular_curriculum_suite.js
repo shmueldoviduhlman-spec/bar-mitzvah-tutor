@@ -544,6 +544,70 @@ assert(sandbox.APP_STATE.activeCourseId === chassidusCourse.id, 'navigateToCours
 sandbox.navigateToLesson(chassidusCourse.id, chassidusLesson.id);
 assert(sandbox.APP_STATE.expandedCustomLessonIds[chassidusLesson.id] === true, 'navigateToLesson expanded custom lesson');
 
+// Gate 11: Lesson Accordion, Student Profile Navigation & Voice Recording Studio
+console.log('\n--- Gate 11: Lesson Accordion, Student Navigation & Audio Studio ---');
+
+// Test toggleCustomLessonAccordion
+assert(typeof sandbox.toggleCustomLessonAccordion === 'function', 'toggleCustomLessonAccordion is a function');
+sandbox.toggleCustomLessonAccordion(chassidusLesson.id);
+assert(sandbox.APP_STATE.expandedCustomLessonIds[chassidusLesson.id] === false, 'toggleCustomLessonAccordion collapses expanded lesson');
+sandbox.toggleCustomLessonAccordion(chassidusLesson.id);
+assert(sandbox.APP_STATE.expandedCustomLessonIds[chassidusLesson.id] === true, 'toggleCustomLessonAccordion re-expands lesson');
+
+// Test navigateToLesson closes student drawer
+sandbox.APP_STATE.activeStudentDrawerId = dummyStudent.id;
+sandbox.navigateToLesson(chassidusCourse.id, chassidusLesson.id);
+assert(sandbox.APP_STATE.activeStudentDrawerId === null, 'navigateToLesson automatically closes student drawer');
+
+// Test toggleTopicForStudent with dual keys and clean uncheck
+assert(typeof sandbox.toggleTopicForStudent === 'function', 'toggleTopicForStudent is a function');
+const testTopicKey = 'course_test_lesson_1';
+const testLessonId = 'lesson_1';
+sandbox.toggleTopicForStudent(dummyStudent.id, testTopicKey, testLessonId);
+assert(dummyStudent.completedTopics[testTopicKey] === true, 'toggleTopicForStudent marked topicKey true');
+assert(dummyStudent.completedTopics[testLessonId] === true, 'toggleTopicForStudent marked lessonId true');
+assert(dummyStudent.completed_topics[testTopicKey] === true, 'toggleTopicForStudent synced completed_topics topicKey');
+assert(dummyStudent.completed_topics[testLessonId] === true, 'toggleTopicForStudent synced completed_topics lessonId');
+
+// Uncheck
+sandbox.toggleTopicForStudent(dummyStudent.id, testTopicKey, testLessonId);
+assert(dummyStudent.completedTopics[testTopicKey] === undefined, 'toggleTopicForStudent deleted topicKey on uncheck');
+assert(dummyStudent.completedTopics[testLessonId] === undefined, 'toggleTopicForStudent deleted lessonId on uncheck');
+assert(dummyStudent.completed_topics[testTopicKey] === undefined, 'toggleTopicForStudent cleared completed_topics on uncheck');
+
+// Test toggleParshaForStudent
+assert(typeof sandbox.toggleParshaForStudent === 'function', 'toggleParshaForStudent is a function');
+sandbox.toggleParshaForStudent(dummyStudent.id, 'parsha_noach');
+assert(dummyStudent.completedParshiot['parsha_noach'] === true, 'toggleParshaForStudent marked parsha completed');
+assert(dummyStudent.completed_parshiot['parsha_noach'] === true, 'toggleParshaForStudent synced completed_parshiot');
+sandbox.toggleParshaForStudent(dummyStudent.id, 'parsha_noach');
+assert(dummyStudent.completedParshiot['parsha_noach'] === undefined, 'toggleParshaForStudent cleared parsha on uncheck');
+
+// Test student voice recording via saveRecordedAudioToTarget
+assert(typeof sandbox.saveRecordedAudioToTarget === 'function', 'saveRecordedAudioToTarget is a function');
+sandbox.saveRecordedAudioToTarget(
+  { type: 'student_parsha', studentId: dummyStudent.id },
+  'data:audio/webm;base64,GkXfo59ChoEBQveBAULygQ8=',
+  'Trope Practice - Aliyah 1'
+);
+assert(Array.isArray(dummyStudent.skills.parshaReading.recordings), 'Student parshaReading recordings is an array');
+const studentRecording = dummyStudent.skills.parshaReading.recordings.find(r => r.title === 'Trope Practice - Aliyah 1');
+assert(studentRecording !== undefined, 'Voice memo successfully attached to student parsha reading recordings');
+assert(studentRecording.url.startsWith('data:audio/webm'), 'Student recording retained audio data URL');
+
+// Test student audio UI and error recovery functions
+assert(typeof sandbox.handleParshaAudioSelected === 'function', 'handleParshaAudioSelected is a function');
+assert(typeof sandbox.promptAddParshaAudioLink === 'function', 'promptAddParshaAudioLink is a function');
+assert(typeof sandbox.promptReplaceParshaAudioUrl === 'function', 'promptReplaceParshaAudioUrl is a function');
+assert(typeof sandbox.deleteParshaRecording === 'function', 'deleteParshaRecording is a function');
+assert(typeof sandbox.handleAudioPlaybackError === 'function', 'handleAudioPlaybackError is a function');
+
+// Test HTML elements and handlers in indexHtml
+assert(indexHtml.includes('handleAudioPlaybackError'), 'HTML includes handleAudioPlaybackError handler');
+assert(indexHtml.includes('promptReplaceParshaAudioUrl'), 'HTML includes promptReplaceParshaAudioUrl action');
+assert(indexHtml.includes("startVoiceRecording('student_parsha'"), 'HTML includes in-browser student voice recording button');
+assert(indexHtml.includes('id="voice-recording-hud" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-[100]'), 'Voice recording HUD has z-[100] z-index');
+
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
 console.log(`========================================\n`);
