@@ -404,7 +404,7 @@
           <div class="relative">
             <button onclick="toggleUserDropdown()" id="btn-user-profile-menu" class="flex items-center gap-1.5 px-2.5 py-1.5 min-h-[36px] sm:min-h-[38px] rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition active:scale-95 shadow-sm" title="User Profile">
               <span id="user-avatar-badge" class="w-5 h-5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/40 flex items-center justify-center text-[10px] font-bold">S</span>
-              <span id="user-display-name-short" class="max-w-[70px] sm:max-w-[100px] truncate hidden xs:inline">Shmuel Dovid</span>
+              <span id="user-display-name-short" class="max-w-[70px] sm:max-w-[100px] truncate hidden sm:inline">Shmuel Dovid</span>
               <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
             </button>
 
@@ -475,21 +475,21 @@
     <section id="view-study" class="space-y-6">
 
       <!-- Study Top Category Tabs (3 Unified Sections) -->
-      <div class="max-w-4xl mx-auto flex items-center justify-between gap-1.5 p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-lg backdrop-blur overflow-x-auto no-scrollbar">
-        <button onclick="switchStudyCategory('lessons')" id="btn-study-cat-lessons" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition active:scale-95 bg-brand-600 text-white shadow-sm whitespace-nowrap">
-          <i data-lucide="book-open" class="w-4 h-4"></i>
+      <div class="max-w-4xl mx-auto flex items-center justify-between gap-1 sm:gap-1.5 p-1 sm:p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-lg backdrop-blur overflow-x-auto no-scrollbar">
+        <button onclick="switchStudyCategory('lessons')" id="btn-study-cat-lessons" class="flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition active:scale-95 bg-brand-600 text-white shadow-sm whitespace-nowrap">
+          <i data-lucide="book-open" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
           <span id="lbl-study-cat-lessons">Lessons & Classes</span>
         </button>
-        <button onclick="switchStudyCategory('reading')" id="btn-study-cat-reading" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap">
-          <i data-lucide="book-marked" class="w-4 h-4"></i>
+        <button onclick="switchStudyCategory('reading')" id="btn-study-cat-reading" class="flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap">
+          <i data-lucide="book-marked" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
           <span id="lbl-study-cat-reading">Reading & Skills</span>
         </button>
-        <button onclick="switchStudyCategory('speech')" id="btn-study-cat-speech" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap">
-          <i data-lucide="mic" class="w-4 h-4"></i>
+        <button onclick="switchStudyCategory('speech')" id="btn-study-cat-speech" class="flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap">
+          <i data-lucide="mic" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
           <span id="lbl-study-cat-speech">Speech & Capstone</span>
         </button>
-        <button onclick="switchStudyCategory('custom')" id="btn-study-cat-custom" class="hidden flex-1 items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap">
-          <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+        <button onclick="switchStudyCategory('custom')" id="btn-study-cat-custom" class="hidden flex-1 items-center justify-center gap-1 sm:gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0"></i>
           <span id="lbl-study-cat-custom">Custom & AI Courses</span>
         </button>
       </div>
@@ -517,22 +517,22 @@
           </div>
 
           <!-- Action Buttons: AI Class, AI Lesson, Add Lesson, Review Notes -->
-          <div class="flex items-center gap-2 w-full md:w-auto justify-end shrink-0">
-            <button onclick="openAiCurriculumBuilderModal('full')" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/20 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Generate an entire class/course with AI">
+          <div class="flex items-center gap-1.5 sm:gap-2 w-full md:w-auto justify-start sm:justify-end overflow-x-auto no-scrollbar py-0.5">
+            <button onclick="openAiCurriculumBuilderModal('full')" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/20 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Generate an entire class/course with AI">
               <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
               <span class="hidden sm:inline">AI Class</span>
               <span class="sm:hidden">AI Class</span>
             </button>
-            <button onclick="openAiCurriculumBuilderModal('single')" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Create a single connected lesson with AI">
+            <button onclick="openAiCurriculumBuilderModal('single')" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Create a single connected lesson with AI">
               <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
               <span class="hidden sm:inline">AI Lesson</span>
               <span class="sm:hidden">AI Lesson</span>
             </button>
-            <button onclick="openAddCustomLessonModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition active:scale-95 shrink-0 shadow" title="Add a lesson to the current course">
+            <button onclick="openAddCustomLessonModal()" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition active:scale-95 shrink-0 shadow" title="Add a lesson to the current course">
               <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
               <span>+ Add Lesson</span>
             </button>
-            <button onclick="openReviewStudyMaterialsModal()" id="btn-review-study-materials" class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-950/80 hover:bg-slate-800/80 text-amber-300 border border-amber-500/30 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Review custom added materials across all lessons">
+            <button onclick="openReviewStudyMaterialsModal()" id="btn-review-study-materials" class="flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-slate-950/80 hover:bg-slate-800/80 text-amber-300 border border-amber-500/30 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Review custom added materials across all lessons">
               <i data-lucide="bookmark-check" class="w-3.5 h-3.5 text-amber-400"></i>
               <span id="lbl-review-study-materials">Notes</span>
               <span id="badge-total-study-materials" class="hidden px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-amber-500/20 text-amber-200 border border-amber-500/40">0</span>
@@ -825,9 +825,9 @@
 
               <textarea id="study-speech-test-input" oninput="handleStudySpeechCalcInput(this.value)" rows="5" placeholder="Type or paste a speech draft here to test word count and speaking duration in real time..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans leading-relaxed"></textarea>
 
-              <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-400 pt-1">
                 <span class="text-[11px]">Calibrated to normal conversational podium pace: ~125 words per minute.</span>
-                <button onclick="handleStudySpeechInsertTemplate()" class="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 text-[11px] font-semibold transition active:scale-95">
+                <button onclick="handleStudySpeechInsertTemplate()" class="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 text-[11px] font-semibold transition active:scale-95 self-start sm:self-auto">
                   Insert Dvar Torah Outline Template
                 </button>
               </div>
@@ -1735,16 +1735,16 @@
   <input type="file" id="reading-audio-file-input" accept="audio/*" class="hidden" onchange="handleReadingAudioFileSelected(event)">
 
   <!-- Fixed Recording HUD -->
-  <div id="voice-recording-hud" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] hidden">
-    <div class="flex items-center gap-3 px-4 py-2.5 rounded-full bg-slate-900/95 border border-red-500/50 shadow-2xl backdrop-blur-md text-white">
-      <span class="w-3 h-3 rounded-full bg-red-500 animate-ping"></span>
-      <span class="text-xs font-bold text-red-400 font-mono" id="voice-recording-timer">00:00</span>
-      <span class="text-xs font-semibold text-slate-200" id="voice-recording-label">Recording Voice Memo...</span>
-      <button type="button" onclick="stopVoiceRecording()" class="px-3 py-1 rounded-full bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition active:scale-95 flex items-center gap-1 shadow-md">
+  <div id="voice-recording-hud" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] max-w-[95vw] hidden">
+    <div class="flex items-center gap-2 sm:gap-3 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full bg-slate-900/95 border border-red-500/50 shadow-2xl backdrop-blur-md text-white whitespace-nowrap">
+      <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500 animate-ping shrink-0"></span>
+      <span class="text-xs font-bold text-red-400 font-mono shrink-0" id="voice-recording-timer">00:00</span>
+      <span class="text-xs font-semibold text-slate-200 hidden sm:inline" id="voice-recording-label">Recording Voice Memo...</span>
+      <button type="button" onclick="stopVoiceRecording()" class="px-2.5 sm:px-3 py-1 rounded-full bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition active:scale-95 flex items-center gap-1 shadow-md shrink-0">
         <i data-lucide="square" class="w-3 h-3 fill-current"></i>
         <span>Stop & Save</span>
       </button>
-      <button type="button" onclick="cancelVoiceRecording()" class="p-1 text-slate-400 hover:text-white transition" title="Cancel">
+      <button type="button" onclick="cancelVoiceRecording()" class="p-1 text-slate-400 hover:text-white transition shrink-0" title="Cancel">
         <i data-lucide="x" class="w-3.5 h-3.5"></i>
       </button>
     </div>
@@ -2310,7 +2310,7 @@
   <!-- MODAL: ADD STUDENT (Clean & Simple)            -->
   <!-- ============================================== -->
   <div id="modal-add-student" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 hidden backdrop-blur-sm">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto">
       <button onclick="closeAddStudentModal()" class="absolute top-4 right-4 rtl:right-auto rtl:left-4 text-slate-400 hover:text-slate-200">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
@@ -2371,7 +2371,7 @@
   <!-- MODAL: MONTH & YEAR PICKER                     -->
   <!-- ============================================== -->
   <div id="modal-month-picker" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 hidden backdrop-blur-sm transition-opacity duration-200" onclick="closeMonthPickerModal()">
-    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-sm w-full p-5 sm:p-6 shadow-2xl relative space-y-4" onclick="event.stopPropagation()">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-sm w-full p-5 sm:p-6 shadow-2xl relative space-y-4 max-h-[92vh] overflow-y-auto" onclick="event.stopPropagation()">
       
       <!-- Modal Header -->
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -2706,7 +2706,7 @@
   <!-- MODAL: APP SETTINGS (Cloud, Share, Backup)     -->
   <!-- ============================================== -->
   <div id="modal-settings" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 hidden backdrop-blur-sm">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-6 shadow-2xl relative">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-5 sm:p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto">
       <button onclick="closeSettingsModal()" class="absolute top-4 right-4 rtl:right-auto rtl:left-4 text-slate-400 hover:text-slate-200">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
@@ -2883,14 +2883,14 @@
             </span>
             <span class="text-[10px] text-slate-400 font-mono" id="lbl-school-join-code-sub">Give this to other tutors</span>
           </div>
-          <div class="flex items-center justify-between gap-2 p-3 rounded-xl bg-slate-950/90 border border-slate-700">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-xl bg-slate-950/90 border border-slate-700">
             <span id="school-join-code-value" class="text-xl sm:text-2xl font-black font-mono tracking-widest text-amber-400 select-all">770770</span>
             <div class="flex items-center gap-1.5 shrink-0">
-              <button onclick="copySchoolJoinCode()" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition active:scale-95 shadow flex items-center gap-1.5">
+              <button onclick="copySchoolJoinCode()" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition active:scale-95 shadow flex items-center justify-center gap-1.5">
                 <i data-lucide="copy" class="w-3.5 h-3.5"></i>
                 <span id="btn-copy-code-text">Copy Code</span>
               </button>
-              <button onclick="shareSchoolJoinCodeWhatsApp()" class="px-2.5 py-1.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition active:scale-95 flex items-center gap-1" title="Share via WhatsApp">
+              <button onclick="shareSchoolJoinCodeWhatsApp()" class="px-2.5 py-1.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition active:scale-95 flex items-center justify-center gap-1" title="Share via WhatsApp">
                 <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
               </button>
             </div>
@@ -2929,7 +2929,7 @@
   <!-- MODAL: JOIN SCHOOL WITH CODE                   -->
   <!-- ============================================== -->
   <div id="modal-join-school" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-5 hidden backdrop-blur-sm">
-    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative space-y-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-sm w-full p-5 sm:p-6 shadow-2xl relative space-y-4 max-h-[92vh] overflow-y-auto">
       <button onclick="closeJoinSchoolModal()" class="absolute top-4 right-4 rtl:right-auto rtl:left-4 text-slate-400 hover:text-white">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
