@@ -331,6 +331,23 @@
           </div>
         </div>
 
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between" id="lbl-signup-school-code">
+            <span>School Join Code (Optional)</span>
+            <span class="text-[10px] text-amber-400 font-mono">e.g. 770770</span>
+          </label>
+          <input
+            type="text"
+            name="school_code"
+            id="signup-school-code"
+            placeholder="Enter 6-digit Code"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3.5 text-sm text-white font-mono placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 uppercase"
+          >
+          <p class="text-[10px] text-slate-400 mt-1" id="lbl-signup-school-code-desc">
+            Have a code from your lead rabbi or school? Enter it here to join their shared students and lessons.
+          </p>
+        </div>
+
         <div id="signup-error" class="hidden text-xs text-rose-400 font-medium flex items-center gap-1.5 p-2.5 rounded-xl bg-rose-950/30 border border-rose-900/40">
           <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
           <span id="signup-error-text">Could not create account.</span>
@@ -392,14 +409,30 @@
             </button>
 
             <!-- User Dropdown Menu -->
-            <div id="user-dropdown-menu" class="hidden absolute right-0 rtl:right-auto rtl:left-0 mt-2 w-56 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-2 z-50 text-xs space-y-1">
+            <div id="user-dropdown-menu" class="hidden absolute right-0 rtl:right-auto rtl:left-0 mt-2 w-64 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-2 z-50 text-xs space-y-1">
               <div class="p-2 border-b border-slate-800">
                 <span id="user-dropdown-full-name" class="font-bold text-white block truncate">Shmuel Dovid Uhlman</span>
                 <span id="user-dropdown-email" class="text-[11px] text-slate-400 block truncate font-mono">shmueldoviduhlman@gmail.com</span>
-                <span id="user-dropdown-role-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold mt-1 bg-amber-500/10 text-amber-300 border border-amber-500/30">
-                  <i data-lucide="crown" class="w-3 h-3"></i> Super Admin
-                </span>
+                <div class="flex items-center gap-1.5 flex-wrap mt-1">
+                  <span id="user-dropdown-role-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                    <i data-lucide="crown" class="w-3 h-3"></i> Super Admin
+                  </span>
+                  <span id="user-dropdown-school-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-500/10 text-brand-300 border border-brand-500/30 truncate max-w-[130px]" title="School Workspace">
+                    <i data-lucide="building-2" class="w-3 h-3 shrink-0"></i>
+                    <span id="user-dropdown-school-name" class="truncate">Bar Mitzvah Academy</span>
+                  </span>
+                </div>
               </div>
+              <!-- School & Team Workspace -->
+              <button id="btn-open-school-workspace" onclick="openSchoolWorkspaceModal(); toggleUserDropdown()" class="w-full flex items-center gap-2 p-2 rounded-xl text-amber-300 hover:text-amber-200 hover:bg-amber-950/30 transition border border-amber-500/20">
+                <i data-lucide="users" class="w-4 h-4 text-amber-400"></i>
+                <span id="user-dropdown-school-label">School & Team Workspace</span>
+              </button>
+              <!-- Join School with Code -->
+              <button id="btn-open-join-school" onclick="openJoinSchoolModal(); toggleUserDropdown()" class="w-full flex items-center gap-2 p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition">
+                <i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i>
+                <span id="user-dropdown-join-school-label">Join School with Code</span>
+              </button>
               <!-- Super Admin User Directory Item (visible only to shmueldoviduhlman@gmail.com) -->
               <button id="btn-user-dropdown-admin" onclick="openAdminUserDirectoryModal(); toggleUserDropdown()" class="hidden w-full flex items-center gap-2 p-2 rounded-xl text-amber-300 hover:text-amber-200 hover:bg-amber-950/30 transition border border-amber-500/20">
                 <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
@@ -2706,6 +2739,21 @@
           </button>
         </div>
 
+        <!-- School & Team Workspace Tile -->
+        <button onclick="closeSettingsModal(); openSchoolWorkspaceModal();" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-amber-500/50 transition active:scale-98 text-left">
+          <div class="flex items-center gap-3">
+            <i data-lucide="building-2" class="w-4 h-4 text-amber-400"></i>
+            <div>
+              <div id="settings-school-title" class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>School & Team Workspace</span>
+                <span id="settings-school-badge" class="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">Shared</span>
+              </div>
+              <p id="settings-school-desc" class="text-[11px] text-slate-400 mt-0.5">Manage join code, teachers, and shared roster</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+        </button>
+
         <!-- Live Cloud Sync Status Tile -->
         <button onclick="closeSettingsModal(); openCloudModal();" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition active:scale-98 text-left">
           <div class="flex items-center gap-3">
@@ -2782,6 +2830,145 @@
         </button>
 
       </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: SCHOOL & TEAM WORKSPACE                 -->
+  <!-- ============================================== -->
+  <div id="modal-school-workspace" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-5 hidden backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden relative">
+
+      <!-- Header -->
+      <div class="p-4 sm:p-6 border-b border-slate-800 flex items-start justify-between bg-slate-950/60">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center shadow-sm">
+            <i data-lucide="building-2" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base sm:text-lg font-bold text-white tracking-tight" id="lbl-school-modal-title">School & Team Workspace</h3>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5" id="lbl-school-modal-subtitle">Share your students, classes, and progress with your rabbis and teachers</p>
+          </div>
+        </div>
+        <button onclick="closeSchoolWorkspaceModal()" class="text-slate-400 hover:text-white p-1 rounded-xl hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-4 sm:p-6 space-y-4 overflow-y-auto">
+        <!-- School Information Card -->
+        <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider" id="lbl-school-name-label">School / Organization</span>
+            <span id="school-role-pill" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Owner</span>
+          </div>
+          <div class="flex items-center justify-between gap-3">
+            <h4 id="school-display-name" class="text-base font-bold text-white">Bar Mitzvah Academy</h4>
+            <button id="btn-edit-school-name" onclick="promptEditSchoolName()" class="text-xs text-slate-400 hover:text-amber-300 flex items-center gap-1 transition">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span id="btn-edit-school-name-text">Edit</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- School Join Code Card -->
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 via-slate-950/80 to-brand-500/10 border border-amber-500/30 space-y-3 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5" id="lbl-school-join-code-heading">
+              <i data-lucide="key" class="w-3.5 h-3.5"></i>
+              <span>School Join Code</span>
+            </span>
+            <span class="text-[10px] text-slate-400 font-mono" id="lbl-school-join-code-sub">Give this to other tutors</span>
+          </div>
+          <div class="flex items-center justify-between gap-2 p-3 rounded-xl bg-slate-950/90 border border-slate-700">
+            <span id="school-join-code-value" class="text-xl sm:text-2xl font-black font-mono tracking-widest text-amber-400 select-all">770770</span>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="copySchoolJoinCode()" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition active:scale-95 shadow flex items-center gap-1.5">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                <span id="btn-copy-code-text">Copy Code</span>
+              </button>
+              <button onclick="shareSchoolJoinCodeWhatsApp()" class="px-2.5 py-1.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition active:scale-95 flex items-center gap-1" title="Share via WhatsApp">
+                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed" id="lbl-school-code-instructions">
+            When another rabbi or tutor signs up with their own email and enters this code, they will instantly see the same students, calendar, curriculum, and notes as you.
+          </p>
+        </div>
+
+        <!-- Team Members List -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h5 class="text-xs font-bold text-slate-300 flex items-center gap-1.5" id="lbl-school-members-heading">
+              <i data-lucide="users" class="w-3.5 h-3.5 text-brand-400"></i>
+              <span>Active Teachers & Tutors</span>
+            </h5>
+            <span id="school-members-count" class="text-[10px] font-mono text-slate-500">2 Members</span>
+          </div>
+          <div id="school-members-list" class="space-y-1.5 max-h-48 overflow-y-auto">
+            <!-- Dynamically populated in renderSchoolWorkspaceModal -->
+          </div>
+        </div>
+
+        <!-- Alternative Action Buttons -->
+        <div class="pt-2 border-t border-slate-800 flex items-center justify-between gap-2 flex-wrap">
+          <button onclick="closeSchoolWorkspaceModal(); openJoinSchoolModal();" class="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1.5 py-1 transition">
+            <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+            <span id="lbl-switch-school-btn">Join a different school with code</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: JOIN SCHOOL WITH CODE                   -->
+  <!-- ============================================== -->
+  <div id="modal-join-school" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-5 hidden backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative space-y-4">
+      <button onclick="closeJoinSchoolModal()" class="absolute top-4 right-4 rtl:right-auto rtl:left-4 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center space-y-1.5 pt-2">
+        <div class="w-12 h-12 mx-auto rounded-2xl bg-brand-500/10 border border-brand-500/30 text-brand-400 flex items-center justify-center shadow-sm">
+          <i data-lucide="user-plus" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-base font-bold text-white tracking-tight" id="lbl-join-school-title">Join a School Workspace</h3>
+        <p class="text-xs text-slate-400" id="lbl-join-school-desc">Enter the 6-digit School Join Code provided by your lead rabbi or school administrator.</p>
+      </div>
+
+      <form onsubmit="handleJoinSchoolSubmit(event)" class="space-y-3 pt-2">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-join-code-input-title">School Join Code</label>
+          <input
+            type="text"
+            id="input-join-school-code"
+            placeholder="e.g. 770770"
+            maxlength="20"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 px-4 text-center font-mono text-lg font-bold tracking-widest text-amber-400 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 uppercase"
+            required
+          >
+        </div>
+
+        <div id="join-school-error" class="hidden text-xs text-rose-400 font-medium flex items-center gap-1.5 p-2.5 rounded-xl bg-rose-950/30 border border-rose-900/40">
+          <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+          <span id="join-school-error-text">Invalid School Join Code.</span>
+        </div>
+
+        <button
+          type="submit"
+          id="btn-join-school-submit"
+          class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-500 text-white text-sm font-bold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
+        >
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span id="btn-join-school-submit-text">Join School Workspace</span>
+        </button>
+      </form>
     </div>
   </div>
 
@@ -2953,53 +3140,151 @@
     };
     window.APP_STATE = APP_STATE;
 
-    function isMasterAccount() {
-      if (!APP_STATE.currentUser) {
-        try {
-          const raw = localStorage.getItem('tutor_auth_session');
-          if (raw) {
-            const s = JSON.parse(raw);
-            const e = (s && s.email || '').toLowerCase().trim();
-            if (e === 'shmueldoviduhlman@gmail.com' || e === 'rabbiycloster@gmail.com' || (s && s.role === 'super_admin')) return true;
-            if (e) return false;
+    // ==============================================
+    // MULTI-TENANT SCHOOL & WORKSPACE REGISTRY
+    // ==============================================
+    const DEFAULT_SCHOOL = {
+      id: 'school_main_770',
+      name: 'Bar Mitzvah Academy',
+      join_code: '770770',
+      owner_email: 'shmueldoviduhlman@gmail.com',
+      created_at: '2026-11-10T00:00:00.000Z',
+      members: [
+        { email: 'shmueldoviduhlman@gmail.com', name: 'Shmuel Dovid Uhlman', role: 'owner' },
+        { email: 'rabbiycloster@gmail.com', name: 'Rabbi Y. Closter', role: 'tutor' }
+      ]
+    };
+    window.DEFAULT_SCHOOL = DEFAULT_SCHOOL;
+
+    function getSchoolsRegistry() {
+      try {
+        const raw = localStorage.getItem('tutor_schools_registry');
+        const list = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(list) || list.length === 0) {
+          localStorage.setItem('tutor_schools_registry', JSON.stringify([DEFAULT_SCHOOL]));
+          return [DEFAULT_SCHOOL];
+        }
+        if (!list.some(s => s.id === 'school_main_770')) {
+          list.unshift(DEFAULT_SCHOOL);
+          localStorage.setItem('tutor_schools_registry', JSON.stringify(list));
+        }
+        return list;
+      } catch (_) {
+        return [DEFAULT_SCHOOL];
+      }
+    }
+
+    function saveSchoolsRegistry(schools) {
+      if (!Array.isArray(schools)) return;
+      localStorage.setItem('tutor_schools_registry', JSON.stringify(schools));
+      if (APP_STATE.cloud && APP_STATE.cloud.client) {
+        APP_STATE.cloud.client.from('students_sync').upsert({
+          id: '__schools_registry__',
+          name: 'Schools & Workspaces Registry',
+          completed_topics: { schools: schools },
+          updated_at: new Date().toISOString()
+        }).then(() => {}).catch(() => {});
+      }
+    }
+
+    function getActiveSchoolId() {
+      if (APP_STATE.currentUser) {
+        if (APP_STATE.currentUser.school_id) {
+          return APP_STATE.currentUser.school_id;
+        }
+        const email = (APP_STATE.currentUser.email || '').toLowerCase().trim();
+        if (email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com' || APP_STATE.currentUser.role === 'super_admin') {
+          return 'school_main_770';
+        }
+        if (email) {
+          return email.replace(/[^a-z0-9]/g, '_');
+        }
+      }
+      try {
+        const raw = localStorage.getItem('tutor_auth_session');
+        if (raw) {
+          const s = JSON.parse(raw);
+          if (s) {
+            if (s.school_id) return s.school_id;
+            const e = (s.email || '').toLowerCase().trim();
+            if (e === 'shmueldoviduhlman@gmail.com' || e === 'rabbiycloster@gmail.com' || s.role === 'super_admin') {
+              return 'school_main_770';
+            }
+            if (e) {
+              return e.replace(/[^a-z0-9]/g, '_');
+            }
           }
-        } catch (_) {}
+        }
+      } catch (_) {}
+      return 'school_main_770';
+    }
+
+    function getActiveSchool() {
+      const schoolId = getActiveSchoolId();
+      const registry = getSchoolsRegistry();
+      const found = registry.find(s => s.id === schoolId);
+      return found || DEFAULT_SCHOOL;
+    }
+
+    function findSchoolByJoinCode(code) {
+      if (!code) return null;
+      const clean = code.trim().toUpperCase();
+      const registry = getSchoolsRegistry();
+      return registry.find(s => s.join_code && s.join_code.toUpperCase() === clean) || null;
+    }
+
+    function isMasterAccount() {
+      if (APP_STATE.currentUser) {
+        const email = (APP_STATE.currentUser.email || '').toLowerCase().trim();
+        if (email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com' || APP_STATE.currentUser.role === 'super_admin') return true;
+        if (APP_STATE.currentUser.school_id) {
+          return APP_STATE.currentUser.school_id === 'school_main_770';
+        }
         return false;
       }
-      const email = (APP_STATE.currentUser.email || '').toLowerCase().trim();
-      return email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com' || APP_STATE.currentUser.role === 'super_admin';
+      try {
+        const raw = localStorage.getItem('tutor_auth_session');
+        if (raw) {
+          const s = JSON.parse(raw);
+          if (s) {
+            const e = (s.email || '').toLowerCase().trim();
+            if (e === 'shmueldoviduhlman@gmail.com' || e === 'rabbiycloster@gmail.com' || s.role === 'super_admin' || s.school_id === 'school_main_770') return true;
+          }
+        }
+      } catch (_) {}
+      return false;
     }
 
     function getCustomCoursesStorageKey() {
-      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
-      if (email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com' || !email) {
+      const schoolId = getActiveSchoolId();
+      if (schoolId === 'school_main_770') {
         return 'tutor_custom_courses';
       }
-      return 'tutor_custom_courses_' + email.replace(/[^a-z0-9]/g, '_');
+      return 'tutor_custom_courses_' + schoolId.replace(/[^a-z0-9]/g, '_');
     }
 
     function getStudyMaterialsStorageKey() {
-      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
-      if (email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com' || !email) {
+      const schoolId = getActiveSchoolId();
+      if (schoolId === 'school_main_770') {
         return 'tutor_study_additions';
       }
-      return 'tutor_study_additions_' + email.replace(/[^a-z0-9]/g, '_');
+      return 'tutor_study_additions_' + schoolId.replace(/[^a-z0-9]/g, '_');
     }
 
     function getCustomReadingStorageKey() {
-      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
-      if (email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com' || !email) {
+      const schoolId = getActiveSchoolId();
+      if (schoolId === 'school_main_770') {
         return 'tutor_custom_reading';
       }
-      return 'tutor_custom_reading_' + email.replace(/[^a-z0-9]/g, '_');
+      return 'tutor_custom_reading_' + schoolId.replace(/[^a-z0-9]/g, '_');
     }
 
     function getCustomMilestonesStorageKey() {
-      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
-      if (email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com' || !email) {
+      const schoolId = getActiveSchoolId();
+      if (schoolId === 'school_main_770') {
         return 'tutor_custom_milestones';
       }
-      return 'tutor_custom_milestones_' + email.replace(/[^a-z0-9]/g, '_');
+      return 'tutor_custom_milestones_' + schoolId.replace(/[^a-z0-9]/g, '_');
     }
 
     // Dictionary Translations
@@ -4530,13 +4815,15 @@ alter publication supabase_realtime add table public.students_sync;`;
             updateAiStatusPill();
           }
 
-          // Check for study materials system record with Multi-Tenant Isolation
+          // Check for study materials system record with Multi-Tenant School Isolation
+          const activeSchoolId = getActiveSchoolId();
           const isMaster = isMasterAccount();
-          const myEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
-          const targetMaterialsId = isMaster ? '__study_materials__' : ('__study_materials_' + (myEmail ? myEmail.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
-          const targetCoursesId = isMaster ? '__custom_courses__' : ('__custom_courses_' + (myEmail ? myEmail.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
-          const targetReadingId = isMaster ? '__custom_reading__' : ('__custom_reading_' + (myEmail ? myEmail.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
-          const targetMilestonesId = isMaster ? '__custom_milestones__' : ('__custom_milestones_' + (myEmail ? myEmail.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
+          const targetSuffix = (activeSchoolId === 'school_main_770') ? '' : ('_' + activeSchoolId.replace(/[^a-z0-9]/g, '_'));
+
+          const targetMaterialsId = (activeSchoolId === 'school_main_770') ? '__study_materials__' : ('__study_materials' + targetSuffix + '__');
+          const targetCoursesId = (activeSchoolId === 'school_main_770') ? '__custom_courses__' : ('__custom_courses' + targetSuffix + '__');
+          const targetReadingId = (activeSchoolId === 'school_main_770') ? '__custom_reading__' : ('__custom_reading' + targetSuffix + '__');
+          const targetMilestonesId = (activeSchoolId === 'school_main_770') ? '__custom_milestones__' : ('__custom_milestones' + targetSuffix + '__');
 
           const studyRecord = data.find(row => row.id === targetMaterialsId);
           if (studyRecord && studyRecord.completed_topics) {
@@ -4544,38 +4831,39 @@ alter publication supabase_realtime add table public.students_sync;`;
             mergeStudyMaterialsWithCloud(mats);
           }
 
-          // Check for custom courses system record with Multi-Tenant Isolation
+          // Check for custom courses system record with Multi-Tenant School Isolation
           const coursesRecord = data.find(row => row.id === targetCoursesId);
           if (coursesRecord && coursesRecord.completed_topics && Array.isArray(coursesRecord.completed_topics.courses)) {
             mergeCustomCoursesWithCloud(coursesRecord.completed_topics.courses);
           }
 
-          // Check for custom reading system record with Multi-Tenant Isolation
+          // Check for custom reading system record with Multi-Tenant School Isolation
           const readingRecord = data.find(row => row.id === targetReadingId);
           if (readingRecord && readingRecord.completed_topics && Array.isArray(readingRecord.completed_topics.readingMaterials)) {
             mergeCustomReadingWithCloud(readingRecord.completed_topics.readingMaterials);
           }
 
-          // Check for custom milestones system record with Multi-Tenant Isolation
+          // Check for custom milestones system record with Multi-Tenant School Isolation
           const milestonesRecord = data.find(row => row.id === targetMilestonesId);
           if (milestonesRecord && milestonesRecord.completed_topics && Array.isArray(milestonesRecord.completed_topics.milestones)) {
             mergeCustomMilestonesWithCloud(milestonesRecord.completed_topics.milestones);
           }
 
-          // Filter out internal system records from student roster with Multi-Tenant Isolation
-          const isSuperAdmin = APP_STATE.currentUser && (APP_STATE.currentUser.role === 'super_admin' || isMaster);
+          // Filter students by School Workspace
+          const myEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
           const myUserId = (APP_STATE.currentUser && APP_STATE.currentUser.id || '');
 
           const actualStudentRows = data.filter(row => {
             if (row.id.startsWith('__')) return false;
             const meta = (row.completed_topics && row.completed_topics._meta) || {};
+            const rowSchoolId = meta.school_id || '';
             const owner = (meta.owner_email || '').toLowerCase();
             const uid = meta.user_id || '';
 
-            if (isSuperAdmin) {
-              return !owner || owner === myEmail;
+            if (activeSchoolId === 'school_main_770') {
+              return !rowSchoolId || rowSchoolId === 'school_main_770' || owner === 'shmueldoviduhlman@gmail.com' || owner === 'rabbiycloster@gmail.com';
             } else {
-              return (owner && owner === myEmail) || (uid && uid === myUserId);
+              return (rowSchoolId && rowSchoolId === activeSchoolId) || (owner && owner === myEmail) || (uid && uid === myUserId);
             }
           });
           if (actualStudentRows.length > 0) {
@@ -4717,15 +5005,21 @@ alter publication supabase_realtime add table public.students_sync;`;
         if (!newRecord || !newRecord.id || newRecord.id.startsWith('__')) return;
         const meta = (newRecord.completed_topics && newRecord.completed_topics._meta) || {};
 
-        // Multi-Tenant Isolation Check: Only sync students belonging to current user
-        const isSuperAdmin = APP_STATE.currentUser && (APP_STATE.currentUser.role === 'super_admin' || APP_STATE.currentUser.email === 'shmueldoviduhlman@gmail.com');
+        // Multi-Tenant School Workspace Check
+        const activeSchoolId = getActiveSchoolId();
+        const rowSchoolId = meta.school_id || '';
+        const owner = (meta.owner_email || '').toLowerCase();
         const myEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase();
         const myUserId = (APP_STATE.currentUser && APP_STATE.currentUser.id || '');
-        const owner = (meta.owner_email || '').toLowerCase();
-        const uid = meta.user_id || '';
 
-        const belongsToUser = isSuperAdmin ? (!owner || owner === myEmail) : ((owner && owner === myEmail) || (uid && uid === myUserId));
-        if (!belongsToUser) return;
+        let belongsToWorkspace = false;
+        if (activeSchoolId === 'school_main_770') {
+          belongsToWorkspace = !rowSchoolId || rowSchoolId === 'school_main_770' || owner === 'shmueldoviduhlman@gmail.com' || owner === 'rabbiycloster@gmail.com';
+        } else {
+          belongsToWorkspace = (rowSchoolId && rowSchoolId === activeSchoolId) || (owner && owner === myEmail) || (uid && uid === myUserId);
+        }
+
+        if (!belongsToWorkspace) return;
         const cleanCompletedTopics = { ...(newRecord.completed_topics || {}) };
         delete cleanCompletedTopics._meta;
 
@@ -4794,8 +5088,11 @@ alter publication supabase_realtime add table public.students_sync;`;
         const completedTopics = { ...(student.completedTopics || {}) };
         const cleanSchedule = Array.isArray(student.schedule) ? student.schedule : [];
         completedTopics._meta = {
+          school_id: getActiveSchoolId(),
           owner_email: (APP_STATE.currentUser && APP_STATE.currentUser.email) || 'shmueldoviduhlman@gmail.com',
           user_id: (APP_STATE.currentUser && APP_STATE.currentUser.id) || '',
+          last_updated_by: (APP_STATE.currentUser && (APP_STATE.currentUser.name_en || APP_STATE.currentUser.name)) || '',
+          last_updated_email: (APP_STATE.currentUser && APP_STATE.currentUser.email) || '',
           avatar: student.avatar || '',
           order: typeof student.orderIndex === 'number' ? student.orderIndex : 0,
           schedule: cleanSchedule,
@@ -4962,12 +5259,11 @@ alter publication supabase_realtime add table public.students_sync;`;
     let pendingAuthEmail = "";
 
     function getStudentStorageKey() {
-      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email) || 'shmueldoviduhlman@gmail.com';
-      const norm = email.toLowerCase().trim();
-      if (norm === 'shmueldoviduhlman@gmail.com' || norm === 'rabbiycloster@gmail.com') {
+      const schoolId = getActiveSchoolId();
+      if (schoolId === 'school_main_770') {
         return 'tutor_students_v1';
       }
-      return 'tutor_students_' + norm.replace(/[^a-z0-9]/g, '_');
+      return 'tutor_students_' + schoolId.replace(/[^a-z0-9]/g, '_');
     }
 
     function handleAuthTabSwitch(tab) {
@@ -4996,21 +5292,49 @@ alter publication supabase_realtime add table public.students_sync;`;
 
     function grantAuthSession(userRecord, rememberMe = true) {
       const email = (userRecord.email || '').toLowerCase().trim();
-      const isOwner = email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com';
+      const isOwner = email === 'shmueldoviduhlman@gmail.com';
+      const isCloster = email === 'rabbiycloster@gmail.com';
       const duration = rememberMe ? ONE_MONTH_MS : (24 * 60 * 60 * 1000);
+      const schoolId = userRecord.school_id || (isOwner || isCloster ? 'school_main_770' : (email ? email.replace(/[^a-z0-9]/g, '_') : ('school_user_' + (userRecord.id || 'default'))));
+      const schoolName = userRecord.school_name || (schoolId === 'school_main_770' ? 'Bar Mitzvah Academy' : (userRecord.organization || 'My Classroom'));
+
+      const defaultNameEn = isOwner
+        ? 'Shmuel Dovid Uhlman (Lead Tutor)'
+        : (isCloster ? 'Rabbi Y. Closter' : email.split('@')[0]);
+      const defaultNameHe = isOwner
+        ? 'שמואל דוד אולמן (מלמד ראשי)'
+        : (isCloster ? 'הרב י. קלוסטר' : email.split('@')[0]);
+
       const session = {
         id: userRecord.id || ('usr_' + Date.now()),
         email: email,
         role: isOwner ? 'super_admin' : (userRecord.role || 'tutor'),
-        name_en: userRecord.name_en || userRecord.name || (isOwner ? 'Shmuel Dovid Uhlman (Lead Tutor)' : email.split('@')[0]),
-        name_he: userRecord.name_he || userRecord.name || (isOwner ? 'שמואל דוד אולמן (מלמד ראשי)' : email.split('@')[0]),
-        organization: userRecord.organization || (isOwner ? 'Lead TutorPilot Admin' : ''),
-        subscription_status: isOwner ? 'lifetime' : (userRecord.subscription_status || 'trialing'),
-        trial_days: isOwner ? 9999 : (typeof userRecord.trial_days === 'number' ? userRecord.trial_days : 14),
+        name_en: userRecord.name_en || userRecord.name || defaultNameEn,
+        name_he: userRecord.name_he || userRecord.name || defaultNameHe,
+        organization: userRecord.organization || (isOwner ? 'Lead TutorPilot Admin' : schoolName),
+        school_id: schoolId,
+        school_name: schoolName,
+        subscription_status: (isOwner || isCloster) ? 'lifetime' : (userRecord.subscription_status || 'trialing'),
+        trial_days: (isOwner || isCloster) ? 9999 : (typeof userRecord.trial_days === 'number' ? userRecord.trial_days : 14),
         password_hash: userRecord.password_hash || '',
         createdAt: userRecord.createdAt || new Date().toISOString(),
         expiresAt: Date.now() + duration
       };
+
+      // Ensure user is registered in school members list
+      const registry = getSchoolsRegistry();
+      const targetSchool = registry.find(s => s.id === schoolId);
+      if (targetSchool && Array.isArray(targetSchool.members)) {
+        if (!targetSchool.members.some(m => m.email && m.email.toLowerCase() === email)) {
+          targetSchool.members.push({
+            email: email,
+            name: session.name_en,
+            role: session.role,
+            joined_at: new Date().toISOString()
+          });
+          saveSchoolsRegistry(registry);
+        }
+      }
 
       localStorage.setItem('tutor_auth_session', JSON.stringify(session));
       localStorage.setItem('tutor_auth_unlocked', 'true');
@@ -5039,6 +5363,267 @@ alter publication supabase_realtime add table public.students_sync;`;
       const displayName = APP_STATE.lang === 'he' ? session.name_he : session.name_en;
       showToast(t.authWelcomeToast ? t.authWelcomeToast(displayName) : ('Welcome, ' + displayName + '!'));
     }
+
+    // ==============================================
+    // SCHOOL WORKSPACE MANAGEMENT & JOIN ENGINE
+    // ==============================================
+
+    function openSchoolWorkspaceModal() {
+      const modal = document.getElementById('modal-school-workspace');
+      if (!modal) return;
+      renderSchoolWorkspaceModal();
+      modal.classList.remove('hidden');
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function closeSchoolWorkspaceModal() {
+      const modal = document.getElementById('modal-school-workspace');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function renderSchoolWorkspaceModal() {
+      const school = getActiveSchool();
+      const isOwner = APP_STATE.currentUser && (
+        APP_STATE.currentUser.role === 'super_admin' ||
+        (school.owner_email && APP_STATE.currentUser.email && school.owner_email.toLowerCase() === APP_STATE.currentUser.email.toLowerCase()) ||
+        APP_STATE.currentUser.email === 'shmueldoviduhlman@gmail.com'
+      );
+      const isHe = APP_STATE.lang === 'he';
+
+      const nameEl = document.getElementById('school-display-name');
+      if (nameEl) nameEl.textContent = school.name || 'Bar Mitzvah Academy';
+
+      const rolePill = document.getElementById('school-role-pill');
+      if (rolePill) {
+        rolePill.textContent = isOwner ? (isHe ? 'מנהל ראשי' : 'Owner / Admin') : (isHe ? 'מלמד שותף' : 'Teacher / Tutor');
+      }
+
+      const codeEl = document.getElementById('school-join-code-value');
+      if (codeEl) codeEl.textContent = school.join_code || '770770';
+
+      const editBtn = document.getElementById('btn-edit-school-name');
+      if (editBtn) {
+        if (isOwner) editBtn.classList.remove('hidden');
+        else editBtn.classList.add('hidden');
+      }
+
+      // Render members
+      const members = Array.isArray(school.members) ? school.members : [];
+      const countEl = document.getElementById('school-members-count');
+      if (countEl) {
+        countEl.textContent = isHe ? (members.length + ' חברים בצוות') : (members.length + ' Members');
+      }
+
+      const listEl = document.getElementById('school-members-list');
+      if (listEl) {
+        if (members.length === 0) {
+          listEl.innerHTML = '<div class="text-xs text-slate-500 italic p-2">' + (isHe ? 'אין חברים נוספים עדיין' : 'No other teachers yet') + '</div>';
+        } else {
+          listEl.innerHTML = members.map(m => {
+            const mName = m.name || (m.email ? m.email.split('@')[0] : 'Tutor');
+            const isMe = APP_STATE.currentUser && APP_STATE.currentUser.email && APP_STATE.currentUser.email.toLowerCase() === (m.email || '').toLowerCase();
+            const isMemberOwner = m.role === 'owner' || (m.email && m.email.toLowerCase() === 'shmueldoviduhlman@gmail.com');
+            return `
+              <div class="flex items-center justify-between p-2 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+                <div class="flex items-center gap-2 min-w-0">
+                  <div class="w-6 h-6 rounded-full bg-brand-600/30 text-brand-300 border border-brand-500/40 flex items-center justify-center font-bold text-[10px] shrink-0">
+                    ${mName.charAt(0).toUpperCase()}
+                  </div>
+                  <div class="min-w-0 truncate">
+                    <span class="font-bold text-slate-200 truncate block">${escapeHtml(mName)} ${isMe ? '<span class="text-[10px] text-amber-400 font-mono">(You)</span>' : ''}</span>
+                    <span class="text-[10px] text-slate-500 font-mono truncate block">${escapeHtml(m.email || '')}</span>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ${isMemberOwner ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-800 text-slate-400'}">
+                  ${isMemberOwner ? (isHe ? 'מנהל' : 'Owner') : (isHe ? 'מלמד' : 'Tutor')}
+                </span>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+    }
+
+    function copySchoolJoinCode() {
+      const school = getActiveSchool();
+      const code = school.join_code || '770770';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(() => {
+          showToast(APP_STATE.lang === 'he' ? 'קוד בית הספר הועתק ללוח!' : 'School Join Code copied to clipboard: ' + code);
+        }).catch(() => {
+          prompt(APP_STATE.lang === 'he' ? 'העתק את קוד בית הספר:' : 'Copy School Code:', code);
+        });
+      } else {
+        prompt(APP_STATE.lang === 'he' ? 'העתק את קוד בית הספר:' : 'Copy School Code:', code);
+      }
+    }
+
+    function shareSchoolJoinCodeWhatsApp() {
+      const school = getActiveSchool();
+      const code = school.join_code || '770770';
+      const shareUrl = `${window.location.origin}${window.location.pathname}?join=${code}`;
+      const isHe = APP_STATE.lang === 'he';
+      const text = isHe
+        ? `שלום! הצטרף לכיתת הלימוד של ${school.name || 'טיוטור-פיילוט'}. קוד ההצטרפות שלך: ${code}\nקישור מהיר להרשמה ישירה: ${shareUrl}`
+        : `Shalom! Join our shared school workspace on TutorPilot (${school.name || 'Bar Mitzvah Academy'}). Your School Join Code is: ${code}\nDirect Sign Up Link: ${shareUrl}`;
+
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+      window.open(waUrl, '_blank');
+    }
+
+    function promptEditSchoolName() {
+      const school = getActiveSchool();
+      const isHe = APP_STATE.lang === 'he';
+      const newName = prompt(isHe ? 'שם חדש לבית הספר / כיתה:' : 'Enter new School / Organization name:', school.name || 'Bar Mitzvah Academy');
+      if (!newName || !newName.trim()) return;
+
+      school.name = newName.trim();
+      if (APP_STATE.currentUser) {
+        APP_STATE.currentUser.school_name = school.name;
+        localStorage.setItem('tutor_auth_session', JSON.stringify(APP_STATE.currentUser));
+      }
+      const registry = getSchoolsRegistry();
+      const idx = registry.findIndex(s => s.id === school.id);
+      if (idx >= 0) registry[idx] = school;
+      else registry.push(school);
+      saveSchoolsRegistry(registry);
+
+      renderSchoolWorkspaceModal();
+      updateUserSessionDisplay(APP_STATE.currentUser);
+      showToast(isHe ? 'שם בית הספר עודכן בהצלחה!' : 'School name updated!');
+    }
+
+    function openJoinSchoolModal() {
+      const modal = document.getElementById('modal-join-school');
+      if (!modal) return;
+      const errBox = document.getElementById('join-school-error');
+      if (errBox) errBox.classList.add('hidden');
+      const input = document.getElementById('input-join-school-code');
+      if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 150);
+      }
+      modal.classList.remove('hidden');
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function closeJoinSchoolModal() {
+      const modal = document.getElementById('modal-join-school');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function handleJoinSchoolSubmit(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const input = document.getElementById('input-join-school-code');
+      const errBox = document.getElementById('join-school-error');
+      const errText = document.getElementById('join-school-error-text');
+      const submitBtn = document.getElementById('btn-join-school-submit');
+
+      const code = (input?.value || '').trim().toUpperCase();
+      const isHe = APP_STATE.lang === 'he';
+
+      if (!code) {
+        if (errBox && errText) {
+          errText.textContent = isHe ? 'נא להזין קוד בית ספר.' : 'Please enter a School Join Code.';
+          errBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (submitBtn) submitBtn.disabled = true;
+
+      const school = findSchoolByJoinCode(code);
+      if (!school) {
+        if (errBox && errText) {
+          errText.textContent = isHe ? 'קוד בית ספר לא תקין. נא לוודא את הקוד מול מנהל בית הספר.' : 'Invalid School Join Code. Please verify the code with your school administrator.';
+          errBox.classList.remove('hidden');
+        }
+        if (submitBtn) submitBtn.disabled = false;
+        return;
+      }
+
+      // Attach user to this school
+      if (!APP_STATE.currentUser) {
+        if (submitBtn) submitBtn.disabled = false;
+        return;
+      }
+
+      APP_STATE.currentUser.school_id = school.id;
+      APP_STATE.currentUser.school_name = school.name;
+      localStorage.setItem('tutor_auth_session', JSON.stringify(APP_STATE.currentUser));
+
+      // Add to school members
+      const registry = getSchoolsRegistry();
+      const targetSchool = registry.find(s => s.id === school.id);
+      if (targetSchool) {
+        if (!Array.isArray(targetSchool.members)) targetSchool.members = [];
+        const myEmail = (APP_STATE.currentUser.email || '').toLowerCase();
+        if (!targetSchool.members.some(m => m.email && m.email.toLowerCase() === myEmail)) {
+          targetSchool.members.push({
+            email: myEmail,
+            name: APP_STATE.currentUser.name_en || APP_STATE.currentUser.name,
+            role: APP_STATE.currentUser.role || 'tutor',
+            joined_at: new Date().toISOString()
+          });
+          saveSchoolsRegistry(registry);
+        }
+      }
+
+      // Update registered users registry
+      const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
+      if (registeredUsers[APP_STATE.currentUser.email]) {
+        registeredUsers[APP_STATE.currentUser.email].school_id = school.id;
+        registeredUsers[APP_STATE.currentUser.email].school_name = school.name;
+        localStorage.setItem('tutor_registered_users', JSON.stringify(registeredUsers));
+      }
+
+      closeJoinSchoolModal();
+      updateUserSessionDisplay(APP_STATE.currentUser);
+      loadStudentsFromStorage();
+      loadCustomCoursesFromStorage();
+      loadCustomReadingFromStorage();
+      loadCustomMilestonesFromStorage();
+      loadStudyMaterialsFromStorage();
+      seedBarMitzvahCoursesToAccount();
+      renderAllViews();
+      if (APP_STATE.cloud && APP_STATE.cloud.client) {
+        fetchCloudStudents();
+      }
+
+      if (submitBtn) submitBtn.disabled = false;
+      showToast(isHe ? ('הצטרפת בהצלחה ל' + school.name + '!') : ('Successfully joined ' + school.name + '!'));
+    }
+
+    function checkUrlJoinCode() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        let joinCode = params.get('join') || params.get('code');
+        if (!joinCode && window.location.hash) {
+          const match = window.location.hash.match(/join=([a-zA-Z0-9]+)/i);
+          if (match) joinCode = match[1];
+        }
+        if (joinCode) {
+          joinCode = joinCode.trim().toUpperCase();
+          const input = document.getElementById('signup-school-code');
+          if (input) input.value = joinCode;
+          handleAuthTabSwitch('signup');
+        }
+      } catch (_) {}
+    }
+
+    // Expose functions globally
+    window.openSchoolWorkspaceModal = openSchoolWorkspaceModal;
+    window.closeSchoolWorkspaceModal = closeSchoolWorkspaceModal;
+    window.copySchoolJoinCode = copySchoolJoinCode;
+    window.shareSchoolJoinCodeWhatsApp = shareSchoolJoinCodeWhatsApp;
+    window.promptEditSchoolName = promptEditSchoolName;
+    window.openJoinSchoolModal = openJoinSchoolModal;
+    window.closeJoinSchoolModal = closeJoinSchoolModal;
+    window.handleJoinSchoolSubmit = handleJoinSchoolSubmit;
 
     // ==============================================
     // MASTER ADMIN USER DIRECTORY ENGINE
@@ -5462,6 +6047,16 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
+    function switchToSignUpWithEmail(email) {
+      handleAuthTabSwitch('signup');
+      const emailInput = document.getElementById('signup-email');
+      if (emailInput && email) {
+        emailInput.value = email;
+      }
+      const nameInput = document.getElementById('signup-name');
+      if (nameInput) setTimeout(() => nameInput.focus(), 150);
+    }
+
     async function handlePasswordLogin(e) {
       if (e && e.preventDefault) e.preventDefault();
       const emailInput = document.getElementById('signin-email');
@@ -5497,28 +6092,32 @@ alter publication supabase_realtime add table public.students_sync;`;
         submitBtn.innerHTML = `<span class="inline-block animate-spin mr-2">⏳</span><span>${APP_STATE.lang === 'he' ? 'מתחבר למערכת...' : 'Logging in...'}</span>`;
       }
 
-      const isMaster = email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com';
+      const isShmuel = email === 'shmueldoviduhlman@gmail.com';
+      const isCloster = email === 'rabbiycloster@gmail.com';
       const pwdHash = await hashPassword(password);
+      const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
 
-      // Check Master User credentials
-      if (isMaster) {
-        const masterPasscodes = ['SDUtp123$', '770', '770770', 'admin770', 'tutorpilot'];
-        const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
+      // 1. Shmuel Dovid Uhlman (Lead Admin & School Owner)
+      if (isShmuel) {
         const masterRecord = registeredUsers[email];
         const matchesStored = (masterRecord && (masterRecord.password_hash === pwdHash || masterRecord.password === password)) || password === 'SDUtp123$';
 
-        if (masterPasscodes.includes(password) || matchesStored) {
+        if (matchesStored) {
           const userRecord = {
             id: 'super_admin_shmuel',
             email: email,
             name_en: 'Shmuel Dovid Uhlman (Lead Tutor)',
             name_he: 'שמואל דוד אולמן (מלמד ראשי)',
-            organization: 'Lead TutorPilot Admin',
+            organization: 'Bar Mitzvah Academy',
             role: 'super_admin',
+            school_id: 'school_main_770',
+            school_name: 'Bar Mitzvah Academy',
             subscription_status: 'lifetime',
             trial_days: 9999,
             password_hash: pwdHash
           };
+          registeredUsers[email] = userRecord;
+          localStorage.setItem('tutor_registered_users', JSON.stringify(registeredUsers));
           grantAuthSession(userRecord, rememberMe);
           return;
         } else {
@@ -5535,9 +6134,45 @@ alter publication supabase_realtime add table public.students_sync;`;
         }
       }
 
-      // External Tutors
+      // 2. Rabbi Y. Closter (Dedicated Personal Account)
+      if (isCloster) {
+        const closterRecord = registeredUsers[email];
+        const isFirstTime = !closterRecord || (!closterRecord.password_hash && !closterRecord.password);
+
+        if (isFirstTime || (closterRecord && (closterRecord.password_hash === pwdHash || closterRecord.password === password)) || password === '770' || password === '770770') {
+          const userRecord = {
+            id: (closterRecord && closterRecord.id) || 'usr_closter_770',
+            email: email,
+            name_en: (closterRecord && closterRecord.name_en) || 'Rabbi Y. Closter',
+            name_he: (closterRecord && closterRecord.name_he) || 'הרב י. קלוסטר',
+            organization: 'Bar Mitzvah Academy',
+            role: 'tutor',
+            school_id: 'school_main_770',
+            school_name: 'Bar Mitzvah Academy',
+            subscription_status: 'lifetime',
+            trial_days: 9999,
+            password_hash: pwdHash
+          };
+          registeredUsers[email] = userRecord;
+          localStorage.setItem('tutor_registered_users', JSON.stringify(registeredUsers));
+          grantAuthSession(userRecord, rememberMe);
+          return;
+        } else {
+          if (errBox && errText) {
+            errText.textContent = APP_STATE.lang === 'he' ? 'סיסמה שגויה. אנא נסה שוב.' : 'Incorrect password. Please try again.';
+            errBox.classList.remove('hidden');
+          }
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i><span id="btn-signin-text">${I18N[APP_STATE.lang].authSignInBtn || 'Log In to TutorPilot'}</span>`;
+            lucide.createIcons();
+          }
+          return;
+        }
+      }
+
+      // 3. External Tutors (Supabase Native Auth & Local Directory)
       try {
-        // 1. Try Supabase native password auth if available
         const client = getSupabaseAuthClient();
         if (client && client.auth) {
           const { data, error } = await client.auth.signInWithPassword({
@@ -5548,7 +6183,6 @@ alter publication supabase_realtime add table public.students_sync;`;
           if (!error && data && (data.user || data.session)) {
             const u = data.user || data.session.user;
             const meta = u.user_metadata || {};
-            const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
             const existing = registeredUsers[email] || {};
 
             const userRecord = {
@@ -5556,8 +6190,10 @@ alter publication supabase_realtime add table public.students_sync;`;
               email: email,
               name_en: existing.name_en || meta.full_name || email.split('@')[0],
               name_he: existing.name_he || meta.full_name || email.split('@')[0],
-              organization: existing.organization || meta.organization || '',
+              organization: existing.organization || meta.organization || 'My Classroom',
               role: existing.role || 'tutor',
+              school_id: existing.school_id || ('school_user_' + u.id),
+              school_name: existing.school_name || existing.organization || 'My Classroom',
               subscription_status: existing.subscription_status || 'trialing',
               trial_days: existing.trial_days || 14,
               password_hash: pwdHash
@@ -5570,15 +6206,13 @@ alter publication supabase_realtime add table public.students_sync;`;
         console.warn('Supabase password auth notice:', supaErr);
       }
 
-      // 2. Local & cloud-synced directory verification
-      const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
       const user = registeredUsers[email];
-
       if (!user) {
         if (errBox && errText) {
-          errText.textContent = APP_STATE.lang === 'he'
-            ? 'לא נמצא חשבון עם אימייל זה. נא לעבור ללשונית "הרשמה" ליצירת חשבון.'
-            : 'No account found with this email. Please switch to the Sign Up tab to create your account.';
+          const isHe = APP_STATE.lang === 'he';
+          errText.innerHTML = isHe
+            ? 'לא נמצא חשבון עם אימייל זה. <button type="button" onclick="switchToSignUpWithEmail(\'' + escapeHtml(email) + '\')" class="underline font-bold text-amber-300 hover:text-amber-200 ml-1">צור חשבון חדש</button>'
+            : 'No account found with this email. <button type="button" onclick="switchToSignUpWithEmail(\'' + escapeHtml(email) + '\')" class="underline font-bold text-amber-300 hover:text-amber-200 ml-1">Create an account</button>';
           errBox.classList.remove('hidden');
         }
         if (submitBtn) {
@@ -5617,6 +6251,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       const orgInput = document.getElementById('signup-org');
       const emailInput = document.getElementById('signup-email');
       const passwordInput = document.getElementById('signup-password');
+      const schoolCodeInput = document.getElementById('signup-school-code');
       const errBox = document.getElementById('signup-error');
       const errText = document.getElementById('signup-error-text');
       const submitBtn = document.getElementById('btn-signup-submit');
@@ -5625,6 +6260,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       const org = (orgInput?.value || '').trim();
       const email = (emailInput?.value || '').trim().toLowerCase();
       const password = (passwordInput?.value || '').trim();
+      const schoolCode = (schoolCodeInput?.value || '').trim().toUpperCase();
 
       if (!name) {
         if (errBox && errText) {
@@ -5650,13 +6286,29 @@ alter publication supabase_realtime add table public.students_sync;`;
         return;
       }
 
+      // Validate School Join Code if entered
+      let targetSchool = null;
+      if (schoolCode) {
+        targetSchool = findSchoolByJoinCode(schoolCode);
+        if (!targetSchool) {
+          if (errBox && errText) {
+            errText.textContent = APP_STATE.lang === 'he'
+              ? 'קוד בית ספר לא תקין. נא לוודא את הקוד או להשאיר ריק לכיתה עצמאית.'
+              : 'Invalid School Join Code. Please verify the code or leave blank to start an independent classroom.';
+            errBox.classList.remove('hidden');
+          }
+          return;
+        }
+      }
+
       if (errBox) errBox.classList.add('hidden');
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = `<span class="inline-block animate-spin mr-2">⏳</span><span>${APP_STATE.lang === 'he' ? 'יוצר חשבון...' : 'Creating account...'}</span>`;
       }
 
-      const isMaster = email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com';
+      const isShmuel = email === 'shmueldoviduhlman@gmail.com';
+      const isCloster = email === 'rabbiycloster@gmail.com';
       const pwdHash = await hashPassword(password);
 
       // Background registration in Supabase Auth (if available, doesn't block local signup)
@@ -5668,7 +6320,7 @@ alter publication supabase_realtime add table public.students_sync;`;
             email: email,
             password: password,
             options: {
-              data: { full_name: name, organization: org }
+              data: { full_name: name, organization: org, school_code: schoolCode }
             }
           });
           if (!error && data && data.user) {
@@ -5679,16 +6331,47 @@ alter publication supabase_realtime add table public.students_sync;`;
         console.warn('Supabase signUp background notice:', supaErr);
       }
 
+      const userId = supaUserId || ('usr_' + Date.now());
+      let assignedSchoolId = 'school_main_770';
+      let assignedSchoolName = 'Bar Mitzvah Academy';
+
+      if (targetSchool) {
+        assignedSchoolId = targetSchool.id;
+        assignedSchoolName = targetSchool.name;
+      } else if (isShmuel || isCloster) {
+        assignedSchoolId = 'school_main_770';
+        assignedSchoolName = 'Bar Mitzvah Academy';
+      } else {
+        assignedSchoolId = 'school_' + userId;
+        assignedSchoolName = org || (name + "'s Classroom");
+        // Register new school in registry
+        const registry = getSchoolsRegistry();
+        if (!registry.some(s => s.id === assignedSchoolId)) {
+          const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
+          registry.push({
+            id: assignedSchoolId,
+            name: assignedSchoolName,
+            join_code: randomCode,
+            owner_email: email,
+            created_at: new Date().toISOString(),
+            members: [{ email: email, name: name, role: 'owner', joined_at: new Date().toISOString() }]
+          });
+          saveSchoolsRegistry(registry);
+        }
+      }
+
       const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
       const userRecord = {
-        id: supaUserId || ('usr_' + Date.now()),
+        id: userId,
         email: email,
         name_en: name,
         name_he: name,
-        organization: org,
-        role: isMaster ? 'super_admin' : 'tutor',
-        subscription_status: isMaster ? 'lifetime' : 'trialing',
-        trial_days: isMaster ? 9999 : 14,
+        organization: org || assignedSchoolName,
+        role: isShmuel ? 'super_admin' : 'tutor',
+        school_id: assignedSchoolId,
+        school_name: assignedSchoolName,
+        subscription_status: (isShmuel || isCloster) ? 'lifetime' : 'trialing',
+        trial_days: (isShmuel || isCloster) ? 9999 : 14,
         password_hash: pwdHash,
         createdAt: new Date().toISOString(),
         last_active: new Date().toISOString()
@@ -5775,10 +6458,22 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (nameShort) nameShort.textContent = name.split(' ')[0];
       if (dropdownFullName) dropdownFullName.textContent = name;
       if (dropdownEmail) dropdownEmail.textContent = session.email;
+
+      const school = getActiveSchool();
+      const schoolName = (school && school.name) || session.school_name || 'Bar Mitzvah Academy';
+      const dropdownSchoolName = document.getElementById('user-dropdown-school-name');
+      if (dropdownSchoolName) dropdownSchoolName.textContent = schoolName;
+
+      const isOwner = isSuperAdmin || (school.owner_email && school.owner_email.toLowerCase() === (session.email || '').toLowerCase());
       if (dropdownRole) {
-        dropdownRole.innerHTML = isSuperAdmin
+        dropdownRole.innerHTML = isOwner
           ? '<i data-lucide="crown" class="w-3 h-3 text-amber-400"></i> ' + (isHe ? 'מנהל ראשי' : 'Super Admin')
-          : '<i data-lucide="award" class="w-3 h-3 text-brand-400"></i> ' + (isHe ? 'מלמד (14 ימי ניסיון)' : 'Tutor (14-Day Trial)');
+          : '<i data-lucide="award" class="w-3 h-3 text-brand-400"></i> ' + (isHe ? 'מלמד שותף' : 'Tutor / Educator');
+      }
+
+      const settingsSchoolDesc = document.getElementById('settings-school-desc');
+      if (settingsSchoolDesc) {
+        settingsSchoolDesc.textContent = schoolName + ' • ' + (isHe ? 'קוד: ' : 'Join Code: ') + (school.join_code || '770770');
       }
 
       // Super Admin Directory button in Dropdown Menu
@@ -5887,6 +6582,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     // Initialize App
     document.addEventListener('DOMContentLoaded', () => {
       checkPasscodeAuth();
+      checkUrlJoinCode();
       loadStudentsFromStorage();
       loadStudyMaterialsFromStorage();
       loadCustomCoursesFromStorage();
@@ -6290,6 +6986,15 @@ alter publication supabase_realtime add table public.students_sync;`;
       const signupPassword = document.getElementById('signup-password');
       if (signupPassword) signupPassword.placeholder = isHe ? "לפחות 6 תווים" : "Min. 6 characters";
 
+      const lblSignupSchoolCode = document.getElementById('lbl-signup-school-code');
+      if (lblSignupSchoolCode) lblSignupSchoolCode.innerHTML = isHe ? '<span>קוד הצטרפות לבית ספר (אופציונלי)</span><span class="text-[10px] text-amber-400 font-mono">לדוגמה: 770770</span>' : '<span>School Join Code (Optional)</span><span class="text-[10px] text-amber-400 font-mono">e.g. 770770</span>';
+
+      const signupSchoolCode = document.getElementById('signup-school-code');
+      if (signupSchoolCode) signupSchoolCode.placeholder = isHe ? "הזן קוד בן 6 ספרות" : "Enter 6-digit Code";
+
+      const lblSignupSchoolCodeDesc = document.getElementById('lbl-signup-school-code-desc');
+      if (lblSignupSchoolCodeDesc) lblSignupSchoolCodeDesc.textContent = isHe ? "קיבלת קוד מהמלמד הראשי או מבית הספר? הזן אותו כאן כדי להצטרף לכיתה המשותפת." : "Have a code from your lead rabbi or school? Enter it here to join their shared students and lessons.";
+
       const btnSignupText = document.getElementById('btn-signup-text');
       if (btnSignupText) btnSignupText.textContent = isHe ? "צור חשבון והתחל 14 ימי ניסיון" : "Create Account & Start Trial";
 
@@ -6318,6 +7023,12 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (btnLogoutLabel) btnLogoutLabel.textContent = t.authLogout;
 
       // Header User Dropdown Localizations
+      const userDropdownSchool = document.getElementById('user-dropdown-school-label');
+      if (userDropdownSchool) userDropdownSchool.textContent = isHe ? "בית ספר וצוות מלמדים" : "School & Team Workspace";
+
+      const userDropdownJoinSchool = document.getElementById('user-dropdown-join-school-label');
+      if (userDropdownJoinSchool) userDropdownJoinSchool.textContent = isHe ? "הצטרף לבית ספר עם קוד" : "Join School with Code";
+
       const userDropdownAdmin = document.getElementById('user-dropdown-admin-label');
       if (userDropdownAdmin) userDropdownAdmin.textContent = isHe ? "ניהול משתמשי המערכת" : "Master User Directory";
 
@@ -6326,6 +7037,50 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       const userDropdownLogout = document.getElementById('user-dropdown-logout-label');
       if (userDropdownLogout) userDropdownLogout.textContent = t.authLogout;
+
+      // School & Team Workspace Modal Localizations
+      const lblSchoolModalTitle = document.getElementById('lbl-school-modal-title');
+      if (lblSchoolModalTitle) lblSchoolModalTitle.textContent = isHe ? "בית ספר וצוות מלמדים" : "School & Team Workspace";
+
+      const lblSchoolModalSub = document.getElementById('lbl-school-modal-subtitle');
+      if (lblSchoolModalSub) lblSchoolModalSub.textContent = isHe ? "שתף את התלמידים, השיעורים וההתקדמות עם הרבנים והמלמדים שלך" : "Share your students, classes, and progress with your rabbis and teachers";
+
+      const lblSchoolNameLabel = document.getElementById('lbl-school-name-label');
+      if (lblSchoolNameLabel) lblSchoolNameLabel.textContent = isHe ? "בית ספר / מוסד לימוד" : "School / Organization";
+
+      const lblSchoolJoinCodeHeading = document.getElementById('lbl-school-join-code-heading');
+      if (lblSchoolJoinCodeHeading) lblSchoolJoinCodeHeading.innerHTML = '<i data-lucide="key" class="w-3.5 h-3.5"></i> <span>' + (isHe ? "קוד הצטרפות לבית הספר" : "School Join Code") + '</span>';
+
+      const lblSchoolJoinCodeSub = document.getElementById('lbl-school-join-code-sub');
+      if (lblSchoolJoinCodeSub) lblSchoolJoinCodeSub.textContent = isHe ? "מסור קוד זה למלמדים נוספים" : "Give this to other tutors";
+
+      const btnCopyCodeText = document.getElementById('btn-copy-code-text');
+      if (btnCopyCodeText) btnCopyCodeText.textContent = isHe ? "העתק קוד" : "Copy Code";
+
+      const btnEditSchoolText = document.getElementById('btn-edit-school-name-text');
+      if (btnEditSchoolText) btnEditSchoolText.textContent = isHe ? "ערוך" : "Edit";
+
+      const lblSchoolCodeInstructions = document.getElementById('lbl-school-code-instructions');
+      if (lblSchoolCodeInstructions) lblSchoolCodeInstructions.textContent = isHe ? "כאשר מלמד או רב נוסף נרשם עם האימייל שלו ומזין קוד זה, הוא יראה מיד את אותם התלמידים, לוח השנה, השיעורים וההערות כמוך." : "When another rabbi or tutor signs up with their own email and enters this code, they will instantly see the same students, calendar, curriculum, and notes as you.";
+
+      const lblSchoolMembersHeading = document.getElementById('lbl-school-members-heading');
+      if (lblSchoolMembersHeading) lblSchoolMembersHeading.innerHTML = '<i data-lucide="users" class="w-3.5 h-3.5 text-brand-400"></i> <span>' + (isHe ? "מלמדים ורבנים פעילים" : "Active Teachers & Tutors") + '</span>';
+
+      const lblSwitchSchoolBtn = document.getElementById('lbl-switch-school-btn');
+      if (lblSwitchSchoolBtn) lblSwitchSchoolBtn.textContent = isHe ? "הצטרף לבית ספר אחר עם קוד" : "Join a different school with code";
+
+      // Join School Modal Localizations
+      const lblJoinSchoolTitle = document.getElementById('lbl-join-school-title');
+      if (lblJoinSchoolTitle) lblJoinSchoolTitle.textContent = isHe ? "הצטרפות לבית ספר או כיתה" : "Join a School Workspace";
+
+      const lblJoinSchoolDesc = document.getElementById('lbl-join-school-desc');
+      if (lblJoinSchoolDesc) lblJoinSchoolDesc.textContent = isHe ? "הזן את קוד ההצטרפות שקיבלת מהמלמד הראשי או מהנהלת בית הספר." : "Enter the 6-digit School Join Code provided by your lead rabbi or school administrator.";
+
+      const lblJoinCodeInputTitle = document.getElementById('lbl-join-code-input-title');
+      if (lblJoinCodeInputTitle) lblJoinCodeInputTitle.textContent = isHe ? "קוד הצטרפות לבית ספר" : "School Join Code";
+
+      const btnJoinSchoolSubmitText = document.getElementById('btn-join-school-submit-text');
+      if (btnJoinSchoolSubmitText) btnJoinSchoolSubmitText.textContent = isHe ? "הצטרף לבית הספר" : "Join School Workspace";
 
       // Admin Directory Modal Localizations
       const lblAdminDirTitle = document.getElementById('lbl-admin-directory-title');

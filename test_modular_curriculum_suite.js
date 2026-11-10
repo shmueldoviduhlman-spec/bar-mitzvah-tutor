@@ -97,6 +97,7 @@ try {
 
   vm.runInContext(mainScript, sandbox);
   sandbox.APP_STATE = sandbox.window.APP_STATE;
+  sandbox.DEFAULT_SCHOOL = sandbox.window.DEFAULT_SCHOOL;
   console.log('✓ Successfully compiled and loaded application scripts into VM');
 } catch (err) {
   console.error('Script loading error:', err);
@@ -607,6 +608,108 @@ assert(indexHtml.includes('handleAudioPlaybackError'), 'HTML includes handleAudi
 assert(indexHtml.includes('promptReplaceParshaAudioUrl'), 'HTML includes promptReplaceParshaAudioUrl action');
 assert(indexHtml.includes("startVoiceRecording('student_parsha'"), 'HTML includes in-browser student voice recording button');
 assert(indexHtml.includes('id="voice-recording-hud" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-[100]'), 'Voice recording HUD has z-[100] z-index');
+
+// Gate 12: Individual User Authentication & Shared School Workspace Architecture
+console.log('\n--- Gate 12: Individual User Authentication & Shared School Workspaces ---');
+
+// 1. Registry & School Model
+assert(sandbox.DEFAULT_SCHOOL !== undefined, 'DEFAULT_SCHOOL constant is defined');
+assert(sandbox.DEFAULT_SCHOOL.id === 'school_main_770', 'DEFAULT_SCHOOL id is school_main_770');
+assert(sandbox.DEFAULT_SCHOOL.join_code === '770770', 'DEFAULT_SCHOOL join_code is 770770');
+assert(typeof sandbox.getSchoolsRegistry === 'function', 'getSchoolsRegistry is a function');
+const schools = sandbox.getSchoolsRegistry();
+assert(Array.isArray(schools), 'getSchoolsRegistry returns an array');
+assert(schools.some(s => s.id === 'school_main_770'), 'Registry contains default Bar Mitzvah Academy');
+
+// 2. School Lookup by Join Code
+assert(typeof sandbox.findSchoolByJoinCode === 'function', 'findSchoolByJoinCode is a function');
+const foundSchool = sandbox.findSchoolByJoinCode('770770');
+assert(foundSchool !== null && foundSchool.id === 'school_main_770', 'findSchoolByJoinCode correctly resolves code 770770 to default school');
+const foundSchoolWhitespace = sandbox.findSchoolByJoinCode('  770770  ');
+assert(foundSchoolWhitespace !== null && foundSchoolWhitespace.id === 'school_main_770', 'findSchoolByJoinCode handles whitespace trimming');
+const invalidSchool = sandbox.findSchoolByJoinCode('INVALID999');
+assert(invalidSchool === null, 'findSchoolByJoinCode returns null for nonexistent code');
+
+// 3. Dynamic School Scoping via getActiveSchoolId
+sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
+assert(sandbox.getActiveSchoolId() === 'school_main_770', 'Shmuel resolves to school_main_770');
+sandbox.APP_STATE.currentUser = { email: 'rabbiycloster@gmail.com' };
+assert(sandbox.getActiveSchoolId() === 'school_main_770', 'Rabbi Closter resolves to school_main_770');
+sandbox.APP_STATE.currentUser = { email: 'tutor@external.edu' };
+assert(sandbox.getActiveSchoolId() === 'tutor_external_edu', 'External tutor without school resolves to user-scoped ID');
+sandbox.APP_STATE.currentUser = { email: 'tutor@external.edu', school_id: 'school_main_770' };
+assert(sandbox.getActiveSchoolId() === 'school_main_770', 'External tutor who joined school resolves to school_main_770');
+
+// 4. Strict Individual Authentication via grantAuthSession
+assert(typeof sandbox.grantAuthSession === 'function', 'grantAuthSession is a function');
+
+// Test Shmuel Login: Super Admin identity preserved
+sandbox.grantAuthSession({
+  email: 'shmueldoviduhlman@gmail.com',
+  name_en: 'Shmuel Dovid Uhlman (Lead Tutor)'
+});
+assert(sandbox.APP_STATE.currentUser.email === 'shmueldoviduhlman@gmail.com', 'Shmuel session has his own email');
+assert(sandbox.APP_STATE.currentUser.role === 'super_admin', 'Shmuel session receives super_admin role');
+assert(sandbox.APP_STATE.currentUser.name_en === 'Shmuel Dovid Uhlman (Lead Tutor)', 'Shmuel session preserves Shmuel full name');
+assert(sandbox.APP_STATE.currentUser.school_id === 'school_main_770', 'Shmuel session attached to school_main_770');
+
+// Test Rabbi Closter Login: Individual identity preserved (NOT overwritten with Shmuel's identity)
+sandbox.grantAuthSession({
+  email: 'rabbiycloster@gmail.com',
+  name_en: 'Rabbi Y. Closter'
+});
+assert(sandbox.APP_STATE.currentUser.email === 'rabbiycloster@gmail.com', 'Rabbi Closter session has his own email');
+assert(sandbox.APP_STATE.currentUser.name_en === 'Rabbi Y. Closter', 'Rabbi Closter session preserves his own name (not Shmuel)');
+assert(sandbox.APP_STATE.currentUser.school_id === 'school_main_770', 'Rabbi Closter attached to shared school_main_770');
+assert(sandbox.APP_STATE.currentUser.role === 'tutor', 'Rabbi Closter role is tutor');
+
+// 5. External Tutor Registration & Dynamic School Attachment
+// Case A: External tutor signs up with code 770770 -> joins shared school
+sandbox.grantAuthSession({
+  email: 'assistant@shul.org',
+  name_en: 'Assistant Levi',
+  school_id: 'school_main_770',
+  school_name: 'Bar Mitzvah Academy'
+});
+assert(sandbox.APP_STATE.currentUser.school_id === 'school_main_770', 'Assistant with code 770770 joined school_main_770');
+assert(sandbox.getStudentStorageKey() === 'tutor_students_v1', 'Assistant accesses shared student roster storage');
+
+// Case B: External tutor signs up WITHOUT code -> gets isolated workspace
+sandbox.grantAuthSession({
+  email: 'private_tutor@math.com',
+  name_en: 'Private Math Tutor'
+});
+assert(sandbox.APP_STATE.currentUser.school_id === 'private_tutor_math_com', 'Private tutor receives isolated school_id');
+assert(sandbox.getStudentStorageKey() === 'tutor_students_private_tutor_math_com', 'Private tutor receives isolated student storage');
+
+// 6. In-App School Join Engine
+assert(typeof sandbox.handleJoinSchoolSubmit === 'function', 'handleJoinSchoolSubmit is a function');
+assert(typeof sandbox.openJoinSchoolModal === 'function', 'openJoinSchoolModal is a function');
+assert(typeof sandbox.closeJoinSchoolModal === 'function', 'closeJoinSchoolModal is a function');
+
+// Simulate private tutor joining Bar Mitzvah Academy via modal
+getOrCreateElem('input-join-school-code').value = '770770';
+sandbox.handleJoinSchoolSubmit({ preventDefault() {} });
+assert(sandbox.APP_STATE.currentUser.school_id === 'school_main_770', 'handleJoinSchoolSubmit transitioned private tutor into school_main_770');
+assert(sandbox.APP_STATE.currentUser.school_name === 'Bar Mitzvah Academy', 'handleJoinSchoolSubmit updated school_name');
+
+// Verify member was recorded into school registry
+const updatedSchools = sandbox.getSchoolsRegistry();
+const targetAcademy = updatedSchools.find(s => s.id === 'school_main_770');
+assert(targetAcademy && targetAcademy.members.some(m => m.email === 'private_tutor@math.com'), 'New member recorded in school registry');
+
+// 7. URL Join Code Detection
+assert(typeof sandbox.checkUrlJoinCode === 'function', 'checkUrlJoinCode is a function');
+
+// 8. HTML Components & Modals
+assert(indexHtml.includes('id="modal-school-workspace"'), 'HTML contains modal-school-workspace');
+assert(indexHtml.includes('id="modal-join-school"'), 'HTML contains modal-join-school');
+assert(indexHtml.includes('id="signup-school-code"'), 'HTML contains signup-school-code input field');
+assert(indexHtml.includes('id="btn-open-school-workspace"'), 'HTML contains btn-open-school-workspace in profile menu');
+assert(indexHtml.includes('id="btn-open-join-school"'), 'HTML contains btn-open-join-school in profile menu');
+assert(indexHtml.includes('id="school-join-code-value"'), 'HTML contains school-join-code-value element');
+assert(indexHtml.includes('copySchoolJoinCode'), 'HTML includes copySchoolJoinCode handler');
+assert(indexHtml.includes('shareSchoolJoinCodeWhatsApp'), 'HTML includes shareSchoolJoinCodeWhatsApp handler');
 
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
