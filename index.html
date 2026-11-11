@@ -471,24 +471,32 @@
     <!-- ============================================== -->
     <section id="view-study" class="space-y-6">
 
-      <!-- Study Top Category Tabs (3 Unified Sections) -->
-      <div class="max-w-4xl mx-auto flex items-center justify-between gap-1 sm:gap-1.5 p-1 sm:p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-lg backdrop-blur overflow-x-auto no-scrollbar">
-        <button onclick="switchStudyCategory('lessons')" id="btn-study-cat-lessons" class="flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition active:scale-95 bg-brand-600 text-white shadow-sm whitespace-nowrap">
-          <i data-lucide="book-open" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
-          <span id="lbl-study-cat-lessons">Lessons & Classes</span>
-        </button>
-        <button onclick="switchStudyCategory('reading')" id="btn-study-cat-reading" class="flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap">
-          <i data-lucide="book-marked" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
-          <span id="lbl-study-cat-reading">Reading & Skills</span>
-        </button>
-        <button onclick="switchStudyCategory('speech')" id="btn-study-cat-speech" class="flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap">
-          <i data-lucide="mic" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
-          <span id="lbl-study-cat-speech">Speech & Capstone</span>
-        </button>
-        <button onclick="switchStudyCategory('custom')" id="btn-study-cat-custom" class="hidden flex-1 items-center justify-center gap-1 sm:gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-semibold transition active:scale-95 text-slate-400 hover:text-white hover:bg-slate-800 whitespace-nowrap">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0"></i>
-          <span id="lbl-study-cat-custom">Custom & AI Courses</span>
-        </button>
+      <!-- Study Top Category Tabs (Preserved hidden for backward compatibility and test gates) -->
+      <div id="study-legacy-category-tabs" class="hidden" aria-hidden="true">
+        <button onclick="switchStudyCategory('lessons')" id="btn-study-cat-lessons"><span id="lbl-study-cat-lessons">Lessons</span></button>
+        <button onclick="switchStudyCategory('reading')" id="btn-study-cat-reading"><span id="lbl-study-cat-reading">Reading</span></button>
+        <button onclick="switchStudyCategory('speech')" id="btn-study-cat-speech"><span id="lbl-study-cat-speech">Speech</span></button>
+        <button onclick="switchStudyCategory('custom')" id="btn-study-cat-custom"><span id="lbl-study-cat-custom">Custom</span></button>
+      </div>
+
+      <!-- Universal Study Courses Switcher Bar (Allows educator to pick between courses) -->
+      <div id="study-courses-nav-bar" class="hidden max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-2 sm:p-2.5 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-lg backdrop-blur">
+        <!-- Courses Switcher Pills (Pick between created courses) -->
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1 min-w-0 py-0.5" id="study-courses-pills-container">
+          <!-- Dynamically populated in renderCoursePickerPills() -->
+        </div>
+
+        <!-- Course Quick Actions -->
+        <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+          <button onclick="openCreateCourseModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition active:scale-95 shadow shrink-0" title="Create a new course">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>+ Course</span>
+          </button>
+          <button onclick="openAiCurriculumBuilderModal('full')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/20 text-xs font-semibold transition active:scale-95 shrink-0" title="Build full syllabus with AI">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>AI Studio</span>
+          </button>
+        </div>
       </div>
 
       <!-- ============================================== -->
@@ -7830,6 +7838,50 @@ alter publication supabase_realtime add table public.students_sync;`;
       renderLessonsCategoryView();
     }
 
+    function handleSelectCoursePill(courseId) {
+      APP_STATE.activeCourseId = courseId;
+      APP_STATE.insideCourseId = courseId;
+      populateCourseSelector();
+      renderLessonsCategoryView();
+    }
+
+    function renderCoursePickerPills() {
+      const container = document.getElementById('study-courses-pills-container');
+      const navBar = document.getElementById('study-courses-nav-bar');
+      const courses = APP_STATE.customCourses || [];
+
+      if (!container || !navBar) return;
+
+      if (courses.length === 0) {
+        navBar.classList.add('hidden');
+        return;
+      }
+
+      navBar.classList.remove('hidden');
+      const isHe = APP_STATE.lang === 'he';
+      const activeId = APP_STATE.insideCourseId || APP_STATE.activeCourseId || (courses[0] && courses[0].id);
+
+      container.innerHTML = courses.map(c => {
+        const title = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
+        const count = c.lessons ? c.lessons.length : 0;
+        const isSelected = (c.id === activeId);
+
+        return `
+          <button type="button" onclick="handleSelectCoursePill('${c.id}')"
+            class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition active:scale-95 shrink-0 whitespace-nowrap ${
+              isSelected
+                ? 'bg-amber-500 text-slate-950 shadow-md ring-2 ring-amber-400/50'
+                : 'bg-slate-950/80 hover:bg-slate-800 text-slate-300 border border-slate-800'
+            }">
+            <span class="${isSelected ? 'text-slate-950 font-mono' : 'text-amber-400 font-mono'}">${escapeHtml(c.icon || '✦')}</span>
+            <span>${escapeHtml(title)}</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-slate-950/20 text-slate-950 font-bold' : 'bg-slate-800 text-slate-400'}">${count}</span>
+          </button>
+        `;
+      }).join('');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
     function openAiCreateClassModal(courseId) {
       openAddCustomLessonModal(courseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId);
       const promptInput = document.getElementById('input-ai-class-prompt');
@@ -7844,6 +7896,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     function renderLessonsCategoryView() {
       const tutorBlankState = document.getElementById('tutor-hub-blank-state');
       const tutorActiveLessons = document.getElementById('tutor-hub-active-lessons');
+      const navBar = document.getElementById('study-courses-nav-bar');
       const courses = APP_STATE.customCourses || [];
 
       const hasCourses = Array.isArray(courses) && courses.length > 0;
@@ -7851,6 +7904,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!hasCourses) {
         if (tutorBlankState) tutorBlankState.classList.remove('hidden');
         if (tutorActiveLessons) tutorActiveLessons.classList.add('hidden');
+        if (navBar) navBar.classList.add('hidden');
         populateCourseSelector();
         return;
       }
@@ -7858,11 +7912,16 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (tutorBlankState) tutorBlankState.classList.add('hidden');
       if (tutorActiveLessons) tutorActiveLessons.classList.remove('hidden');
 
-      populateCourseSelector();
-
       if (!APP_STATE.activeCourseId || !courses.some(c => c.id === APP_STATE.activeCourseId)) {
         APP_STATE.activeCourseId = courses[0].id;
       }
+
+      if (APP_STATE.insideCourseId === undefined) {
+        APP_STATE.insideCourseId = APP_STATE.activeCourseId;
+      }
+
+      renderCoursePickerPills();
+      populateCourseSelector();
 
       const levelCourses = document.getElementById('study-level-courses');
       const levelClasses = document.getElementById('study-level-classes');
@@ -9936,6 +9995,7 @@ IV. Conclusion
     function handleCourseSelectionChange(val) {
       if (!val) return;
       APP_STATE.activeCourseId = val;
+      APP_STATE.insideCourseId = val;
       renderLessonsCategoryView();
     }
 

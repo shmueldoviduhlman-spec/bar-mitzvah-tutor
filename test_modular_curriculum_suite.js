@@ -1190,6 +1190,22 @@ savedReadingCourse.lessons = [{ id: 'les_test_1', title_en: 'Alphabet Mastery', 
 sandbox.openEditCustomLessonModal(savedReadingCourse.id, 'les_test_1');
 assert(aiTitleElem.textContent.includes('AI Class Assistant') && aiTitleElem.textContent.includes('Refine'), 'Edit modal configures AI Assistant for class refinement');
 
+// Test Universal Course Picker Navigation Bar
+assert(indexHtml.includes('id="study-courses-nav-bar"'), 'HTML contains study-courses-nav-bar');
+assert(indexHtml.includes('id="study-courses-pills-container"'), 'HTML contains study-courses-pills-container');
+assert(typeof sandbox.renderCoursePickerPills === 'function', 'renderCoursePickerPills is a function');
+assert(typeof sandbox.handleSelectCoursePill === 'function', 'handleSelectCoursePill is a function');
+
+sandbox.renderCoursePickerPills();
+const navBarElem = getOrCreateElem('study-courses-nav-bar');
+assert(!navBarElem.classList.contains('hidden'), 'study-courses-nav-bar is visible when courses exist');
+const pillsContainer = getOrCreateElem('study-courses-pills-container');
+assert(pillsContainer.innerHTML.includes('Graded Hebrew Reading'), 'Course picker renders pills for active courses');
+
+sandbox.handleSelectCoursePill(savedReadingCourse.id);
+assert(sandbox.APP_STATE.activeCourseId === savedReadingCourse.id, 'handleSelectCoursePill updates activeCourseId');
+assert(sandbox.APP_STATE.insideCourseId === savedReadingCourse.id, 'handleSelectCoursePill updates insideCourseId');
+
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
 console.log(`========================================\n`);
