@@ -1058,6 +1058,17 @@
         </div>
 
         <div class="flex items-center gap-2">
+          <!-- Plan Breakdown Button -->
+          <button
+            onclick="openBreakdownPlannerModal()"
+            id="btn-calendar-plan-breakdown"
+            class="px-2.5 py-1 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition active:scale-95 flex items-center gap-1.5"
+            title="Plan Curriculum Breakdown"
+          >
+            <i data-lucide="calendar-range" class="w-3.5 h-3.5 text-indigo-400"></i>
+            <span id="calendar-breakdown-btn-label">Plan Classes</span>
+          </button>
+
           <!-- Today Quick Button -->
           <button onclick="resetCalendarToToday()" class="px-2.5 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-semibold transition active:scale-95 flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
@@ -1647,6 +1658,18 @@
           >
         </div>
 
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Class Format Type *</label>
+          <select
+            id="input-create-course-format-type"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+          >
+            <option value="standard">Standard Lessons (Bilingual, Hook, 7 Knowledge Anchors, Audio Studio)</option>
+            <option value="reading">Graded Reading Ladder (Target Words, Phonetic Units & Fluency Levels)</option>
+            <option value="milestones">Milestone Project Roadmap (Stages, Deliverables & Rehearsal Timing)</option>
+          </select>
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Subject / Discipline</label>
@@ -1724,6 +1747,143 @@
           >
             <i data-lucide="check" class="w-4 h-4"></i>
             <span>Create Course</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: CURRICULUM BREAKDOWN & CLASS PLANNER    -->
+  <!-- ============================================== -->
+  <div id="modal-curriculum-breakdown-planner" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
+    <div class="max-w-xl w-full max-h-[92vh] bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4 overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+          <i data-lucide="calendar-range" class="w-5 h-5 text-amber-400"></i>
+          <span id="txt-breakdown-planner-title">Curriculum Breakdown & Class Planner</span>
+        </h3>
+        <button type="button" onclick="closeBreakdownPlannerModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-400">
+        Map out the exact sequence of lessons across upcoming calendar dates for a student. Set how many classes or sessions you plan to give, and the system will auto-distribute the curriculum across their schedule.
+      </p>
+
+      <form onsubmit="handleExecuteBreakdownPlan(event)" class="space-y-4">
+        <!-- Student Selection -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Select Student *</label>
+          <select
+            id="planner-student-select"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            required
+            onchange="handlePlannerStudentChange(this.value)"
+          ></select>
+        </div>
+
+        <!-- Course / Class Selection -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Select Class / Curriculum *</label>
+          <select
+            id="planner-course-select"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            required
+            onchange="handlePlannerCourseChange(this.value)"
+          ></select>
+        </div>
+
+        <!-- Total Classes & Start Date Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Number of Classes to Plan *</label>
+            <input
+              type="number"
+              id="planner-classes-count"
+              min="1"
+              max="60"
+              value="15"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+              required
+              oninput="updatePlannerPreviewList()"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Starting Date *</label>
+            <input
+              type="date"
+              id="planner-start-date"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+              required
+              onchange="updatePlannerPreviewList()"
+            />
+          </div>
+        </div>
+
+        <!-- Meeting Days of Week & Time Slot Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Schedule Cadence *</label>
+            <select
+              id="planner-cadence-select"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+              onchange="updatePlannerPreviewList()"
+            >
+              <option value="twice_weekly">Twice a Week (Monday & Wednesday)</option>
+              <option value="tues_thurs">Twice a Week (Tuesday & Thursday)</option>
+              <option value="once_weekly_sun">Once a Week (Sunday)</option>
+              <option value="once_weekly_mon">Once a Week (Monday)</option>
+              <option value="once_weekly_tues">Once a Week (Tuesday)</option>
+              <option value="once_weekly_wed">Once a Week (Wednesday)</option>
+              <option value="once_weekly_thurs">Once a Week (Thursday)</option>
+              <option value="thrice_weekly">Three Times a Week (Sun, Tue, Thu)</option>
+              <option value="daily_weekdays">Daily (Monday through Thursday)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Lesson Time *</label>
+            <input
+              type="text"
+              id="planner-time-slot"
+              value="4:30 PM"
+              placeholder="e.g. 4:30 PM, 5:00 PM"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Live Preview of Mapped Lessons -->
+        <div class="space-y-1.5 pt-2 border-t border-slate-800">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-300">Generated Lesson Distribution Preview</span>
+            <button
+              type="button"
+              onclick="updatePlannerPreviewList()"
+              class="text-[11px] text-amber-400 hover:text-amber-300 font-semibold"
+            >Refresh Preview</button>
+          </div>
+          <div id="planner-preview-container" class="max-h-48 overflow-y-auto pr-1 space-y-1 bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-xs">
+            <p class="text-slate-500 italic">Select student and class to preview mapped dates...</p>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+          <button
+            type="button"
+            onclick="closeBreakdownPlannerModal()"
+            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
+          >Cancel</button>
+          <button
+            type="submit"
+            id="btn-confirm-breakdown-plan"
+            class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition flex items-center gap-1.5 shadow-md active:scale-95"
+          >
+            <i data-lucide="calendar-check" class="w-4 h-4"></i>
+            <span>Save & Schedule Classes</span>
           </button>
         </div>
       </form>
@@ -2462,19 +2622,30 @@
 
       <!-- Booking Form -->
       <form id="schedule-lesson-form" onsubmit="handleSaveScheduledLesson(event)" class="space-y-3.5 border-t border-slate-800/80 pt-3.5">
-        <div class="flex items-center justify-between pb-1">
+        <div class="flex items-center justify-between pb-1 flex-wrap gap-2">
           <span class="text-xs font-bold text-white flex items-center gap-1.5">
             <i data-lucide="user-plus" class="w-3.5 h-3.5 text-brand-400"></i>
             <span id="lbl-form-section-title">Schedule New Lesson</span>
           </span>
-          <button
-            type="button"
-            id="btn-hide-schedule-form"
-            onclick="toggleScheduleAddForm(false)"
-            class="text-[11px] text-slate-400 hover:text-white hidden"
-          >
-            Hide Form
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              onclick="closeScheduleLessonModal(); openBreakdownPlannerModal(null, null, APP_STATE.calendar.selectedDateStr)"
+              class="text-[11px] text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20"
+              title="Plan multi-class breakdown starting on this date"
+            >
+              <i data-lucide="calendar-range" class="w-3.5 h-3.5"></i>
+              <span>Plan 15 Classes</span>
+            </button>
+            <button
+              type="button"
+              id="btn-hide-schedule-form"
+              onclick="toggleScheduleAddForm(false)"
+              class="text-[11px] text-slate-400 hover:text-white hidden"
+            >
+              Hide Form
+            </button>
+          </div>
         </div>
 
         <!-- Student Selector -->
@@ -9599,7 +9770,14 @@ IV. Conclusion
       const category = document.getElementById('input-create-course-category').value;
       const level = document.getElementById('input-create-course-level').value;
       const desc = document.getElementById('input-create-course-desc').value.trim();
-      const icon = document.getElementById('input-create-course-icon').value.trim() || '✦';
+      const formatType = document.getElementById('input-create-course-format-type')?.value || 'standard';
+      let icon = document.getElementById('input-create-course-icon').value.trim();
+
+      if (!icon) {
+        if (formatType === 'reading') icon = '📖';
+        else if (formatType === 'milestones') icon = '🎯';
+        else icon = '📚';
+      }
 
       if (!titleEn) return;
 
@@ -9607,6 +9785,7 @@ IV. Conclusion
         id: 'course_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
         title_en: titleEn,
         title_he: titleHe || titleEn,
+        format_type: formatType,
         category: category,
         target_level: level,
         description_en: desc,
@@ -12144,10 +12323,19 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
             ` : APP_STATE.customCourses.map(course => {
               const cTitle = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
               const lessons = course.lessons || [];
+              let lastCompletedLesson = null;
+              let nextLessonToTeach = null;
+
               const completedCount = lessons.filter(l => {
                 const isConceptsOrChumash = (course.id === 'course_bar_mitzvah_concepts' || course.id === 'course_bar_mitzvah_chumash');
                 const key = isConceptsOrChumash ? l.id : (course.id + '_' + l.id);
-                return !!((student.completedTopics && (student.completedTopics[key] || student.completedTopics[l.id])) || (student.completedParshiot && student.completedParshiot[l.id]));
+                const isDone = !!((student.completedTopics && (student.completedTopics[key] || student.completedTopics[l.id])) || (student.completedParshiot && student.completedParshiot[l.id]));
+                if (isDone) {
+                  lastCompletedLesson = l;
+                } else if (!nextLessonToTeach) {
+                  nextLessonToTeach = l;
+                }
+                return isDone;
               }).length;
               const pct = lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0;
 
@@ -12161,6 +12349,50 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
                     <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${pct === 100 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-300'} border border-slate-700">
                       ${completedCount} / ${lessons.length} (${pct}%)
                     </span>
+                  </div>
+
+                  <!-- Last Completed & Recommended Next Lesson Guidance Bar -->
+                  <div class="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-xs flex-wrap">
+                    <div class="flex items-center gap-3 flex-wrap text-[11px]">
+                      <div>
+                        <span class="text-slate-400">${isHe ? 'שיעור אחרון שלמד:' : 'Last Finished:'}</span>
+                        <span class="text-white font-semibold">
+                          ${lastCompletedLesson ? escapeHtml(cleanCurriculumName(isHe ? (lastCompletedLesson.title_he || lastCompletedLesson.title_en) : (lastCompletedLesson.title_en || lastCompletedLesson.title_he))) : (isHe ? 'טרם התחיל' : 'Not started yet')}
+                        </span>
+                      </div>
+                      ${nextLessonToTeach ? `
+                        <span class="text-slate-600 font-bold">•</span>
+                        <div>
+                          <span class="text-amber-400 font-semibold">${isHe ? 'מומלץ לשיעור הבא:' : 'Next to Teach:'}</span>
+                          <span class="text-amber-200 font-bold">
+                            ${escapeHtml(cleanCurriculumName(isHe ? (nextLessonToTeach.title_he || nextLessonToTeach.title_en) : (nextLessonToTeach.title_en || nextLessonToTeach.title_he)))}
+                          </span>
+                        </div>
+                      ` : ''}
+                    </div>
+
+                    <div class="flex items-center gap-1.5 shrink-0">
+                      ${nextLessonToTeach ? `
+                        <button
+                          type="button"
+                          onclick="navigateToLesson('${course.id}', '${nextLessonToTeach.id}')"
+                          class="px-2.5 py-1 rounded-md bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] transition active:scale-95 flex items-center gap-1 shadow-sm"
+                          title="${isHe ? 'פתח שיעור מומלץ בלשונית לימוד' : 'Open next lesson in Study hub'}"
+                        >
+                          <i data-lucide="play" class="w-3 h-3 fill-current"></i>
+                          <span>${isHe ? 'למד שיעור הבא' : 'Teach Next'}</span>
+                        </button>
+                      ` : ''}
+                      <button
+                        type="button"
+                        onclick="openBreakdownPlannerModal('${student.id}', '${course.id}')"
+                        class="px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-semibold transition active:scale-95 flex items-center gap-1 border border-slate-700"
+                        title="${isHe ? 'תכנן חלוקת שיעורים ביומן' : 'Plan schedule breakdown'}"
+                      >
+                        <i data-lucide="calendar-range" class="w-3 h-3 text-indigo-400"></i>
+                        <span>${isHe ? 'חלוקה לשיעורים' : 'Plan Breakdown'}</span>
+                      </button>
+                    </div>
                   </div>
 
                   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
@@ -13535,6 +13767,314 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
     }
 
     // ==============================================
+    // CURRICULUM BREAKDOWN & CLASS PLANNER CONTROLLER
+    // ==============================================
+
+    function calculateNextScheduleDates(startDateStr, cadence, count) {
+      const targetCount = Math.max(1, parseInt(count, 10) || 15);
+      const dates = [];
+      const parts = (startDateStr || '').split('-');
+      let curr;
+      if (parts.length === 3) {
+        curr = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      } else {
+        curr = new Date();
+        curr.setDate(curr.getDate() + 1);
+      }
+
+      const cadenceDaysMap = {
+        'twice_weekly': [1, 3], // Mon, Wed
+        'tues_thurs': [2, 4],   // Tue, Thu
+        'once_weekly_sun': [0],
+        'once_weekly_mon': [1],
+        'once_weekly_tues': [2],
+        'once_weekly_wed': [3],
+        'once_weekly_thurs': [4],
+        'thrice_weekly': [0, 2, 4], // Sun, Tue, Thu
+        'daily_weekdays': [1, 2, 3, 4] // Mon, Tue, Wed, Thu
+      };
+      const allowedDays = cadenceDaysMap[cadence] || [1, 3];
+
+      let safetyLimit = 600;
+      while (dates.length < targetCount && safetyLimit > 0) {
+        safetyLimit--;
+        const dayOfWeek = curr.getDay();
+        if (allowedDays.includes(dayOfWeek)) {
+          const y = curr.getFullYear();
+          const m = String(curr.getMonth() + 1).padStart(2, '0');
+          const d = String(curr.getDate()).padStart(2, '0');
+          dates.push(`${y}-${m}-${d}`);
+        }
+        curr.setDate(curr.getDate() + 1);
+      }
+      return dates;
+    }
+
+    function openBreakdownPlannerModal(studentId, courseId, defaultStartDate) {
+      const modal = document.getElementById('modal-curriculum-breakdown-planner');
+      if (!modal) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      const studentSelect = document.getElementById('planner-student-select');
+      const courseSelect = document.getElementById('planner-course-select');
+      const startDateInput = document.getElementById('planner-start-date');
+      const countInput = document.getElementById('planner-classes-count');
+
+      // Populate student selector
+      if (studentSelect) {
+        const students = APP_STATE.students || [];
+        if (students.length === 0) {
+          studentSelect.innerHTML = `<option value="">-- ${isHe ? 'אין תלמידים רשומים' : 'No students found'} --</option>`;
+        } else {
+          studentSelect.innerHTML = students.map(s => `
+            <option value="${s.id}" ${(studentId && s.id === studentId) ? 'selected' : ''}>${escapeHtml(s.name)}</option>
+          `).join('');
+          if (!studentId && students[0]) {
+            studentSelect.value = students[0].id;
+          }
+        }
+      }
+
+      // Populate course selector
+      if (courseSelect) {
+        const courses = APP_STATE.customCourses || [];
+        if (courses.length === 0) {
+          courseSelect.innerHTML = `<option value="">-- ${isHe ? 'אין קורסים זמינים' : 'No courses found'} --</option>`;
+        } else {
+          courseSelect.innerHTML = courses.map(c => {
+            const cTitle = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
+            const lessonCount = (c.lessons || []).length;
+            return `<option value="${c.id}" ${(courseId && c.id === courseId) ? 'selected' : ''}>${escapeHtml(c.icon || '✦')} ${escapeHtml(cTitle)} (${lessonCount} ${isHe ? 'שיעורים' : 'lessons'})</option>`;
+          }).join('');
+          if (!courseId) {
+            const activeCourse = courses.find(c => c.id === APP_STATE.activeCourseId) || courses[0];
+            if (activeCourse) courseSelect.value = activeCourse.id;
+          }
+        }
+      }
+
+      // Set default start date: tomorrow or passed date
+      if (startDateInput) {
+        if (defaultStartDate) {
+          startDateInput.value = defaultStartDate;
+        } else {
+          const tom = new Date();
+          tom.setDate(tom.getDate() + 1);
+          const y = tom.getFullYear();
+          const m = String(tom.getMonth() + 1).padStart(2, '0');
+          const d = String(tom.getDate()).padStart(2, '0');
+          startDateInput.value = `${y}-${m}-${d}`;
+        }
+      }
+
+      // Pre-calculate count if course selected
+      if (countInput) {
+        const selCourseId = courseSelect?.value;
+        const selCourse = (APP_STATE.customCourses || []).find(c => c.id === selCourseId);
+        if (selCourse && Array.isArray(selCourse.lessons) && selCourse.lessons.length > 0) {
+          countInput.value = selCourse.lessons.length;
+        } else {
+          countInput.value = 15;
+        }
+      }
+
+      updatePlannerPreviewList();
+      modal.classList.remove('hidden');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function closeBreakdownPlannerModal() {
+      const modal = document.getElementById('modal-curriculum-breakdown-planner');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function handlePlannerStudentChange(studentId) {
+      updatePlannerPreviewList();
+    }
+
+    function handlePlannerCourseChange(courseId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const countInput = document.getElementById('planner-classes-count');
+      if (course && Array.isArray(course.lessons) && course.lessons.length > 0 && countInput) {
+        countInput.value = course.lessons.length;
+      }
+      updatePlannerPreviewList();
+    }
+
+    function updatePlannerPreviewList() {
+      const container = document.getElementById('planner-preview-container');
+      if (!container) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      const studentId = document.getElementById('planner-student-select')?.value;
+      const courseId = document.getElementById('planner-course-select')?.value;
+      const count = parseInt(document.getElementById('planner-classes-count')?.value, 10) || 15;
+      const startDateStr = document.getElementById('planner-start-date')?.value;
+      const cadence = document.getElementById('planner-cadence-select')?.value || 'twice_weekly';
+      const timeSlot = document.getElementById('planner-time-slot')?.value?.trim() || '4:30 PM';
+
+      const student = (APP_STATE.students || []).find(s => s.id === studentId);
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+
+      if (!student || !course) {
+        container.innerHTML = `<p class="text-slate-500 italic text-center py-3">${isHe ? 'בחר תלמיד וקורס כדי להציג את התפלגות השיעורים' : 'Select student and class to preview mapped dates...'}</p>`;
+        return;
+      }
+
+      const lessons = course.lessons || [];
+      const dates = calculateNextScheduleDates(startDateStr, cadence, count);
+
+      if (dates.length === 0) {
+        container.innerHTML = `<p class="text-amber-400 italic text-center py-3">${isHe ? 'לא נוצרו תאריכים. בדוק את תאריך ההתחלה.' : 'No dates could be generated. Check start date.'}</p>`;
+        return;
+      }
+
+      const previewRows = dates.map((dStr, idx) => {
+        const parts = dStr.split('-');
+        const dateObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        const dayNames = isHe 
+          ? ['יום ראשון', 'יום שני', 'יום שלישי', 'יום רביעי', 'יום חמישי', 'יום שישי', 'שבת']
+          : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const dayName = dayNames[dateObj.getDay()];
+
+        let lessonTitle = '';
+        let lessonBadge = '';
+        if (lessons.length > 0) {
+          if (idx < lessons.length) {
+            const l = lessons[idx];
+            lessonTitle = isHe ? (l.title_he || l.title_en) : (l.title_en || l.title_he);
+            lessonBadge = `${isHe ? 'שיעור' : 'Lesson'} ${idx + 1}`;
+          } else {
+            const extraIdx = (idx - lessons.length) + 1;
+            lessonTitle = isHe ? `חזרה, תרגול מעשי וסיכום כללי #${extraIdx}` : `Review, Capstone Practice & Synthesis #${extraIdx}`;
+            lessonBadge = isHe ? 'חזרה' : 'Review';
+          }
+        } else {
+          lessonTitle = `${course.title_en} — ${isHe ? 'מפגש' : 'Session'} #${idx + 1}`;
+          lessonBadge = `#${idx + 1}`;
+        }
+
+        return `
+          <div class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-900 border border-slate-800 text-[11px]">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-5 h-5 rounded-md bg-amber-500/20 text-amber-300 font-mono font-bold flex items-center justify-center text-[10px] shrink-0">
+                ${idx + 1}
+              </span>
+              <div class="min-w-0">
+                <div class="text-white font-semibold truncate">${escapeHtml(lessonTitle)}</div>
+                <div class="text-slate-400 font-mono text-[10px]">
+                  ${dayName}, ${dStr} • ${escapeHtml(timeSlot)}
+                </div>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-amber-300/90 border border-slate-700 shrink-0">
+              ${escapeHtml(lessonBadge)}
+            </span>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = previewRows;
+    }
+
+    function handleExecuteBreakdownPlan(e) {
+      if (e && e.preventDefault) e.preventDefault();
+
+      const isHe = APP_STATE.lang === 'he';
+      const studentId = document.getElementById('planner-student-select')?.value;
+      const courseId = document.getElementById('planner-course-select')?.value;
+      const count = parseInt(document.getElementById('planner-classes-count')?.value, 10) || 15;
+      const startDateStr = document.getElementById('planner-start-date')?.value;
+      const cadence = document.getElementById('planner-cadence-select')?.value || 'twice_weekly';
+      const timeSlot = document.getElementById('planner-time-slot')?.value?.trim() || '4:30 PM';
+
+      const student = (APP_STATE.students || []).find(s => s.id === studentId);
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+
+      if (!student) {
+        alert(isHe ? 'אנא בחר תלמיד' : 'Please select a student.');
+        return;
+      }
+      if (!course) {
+        alert(isHe ? 'אנא בחר קורס / תוכנית לימודים' : 'Please select a course / curriculum.');
+        return;
+      }
+
+      const lessons = course.lessons || [];
+      const dates = calculateNextScheduleDates(startDateStr, cadence, count);
+
+      if (dates.length === 0) {
+        alert(isHe ? 'לא נוצרו תאריכים' : 'No schedule dates could be generated.');
+        return;
+      }
+
+      if (!Array.isArray(student.schedule)) student.schedule = [];
+      if (!student.completed_topics) student.completed_topics = {};
+      if (!student.completed_topics._meta) student.completed_topics._meta = {};
+      if (!Array.isArray(student.completed_topics._meta.lessons)) student.completed_topics._meta.lessons = [];
+
+      dates.forEach((dStr, idx) => {
+        const parts = dStr.split('-');
+        const dateObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+
+        let lessonTitle = '';
+        let lessonId = null;
+        if (lessons.length > 0 && idx < lessons.length) {
+          const l = lessons[idx];
+          lessonTitle = isHe ? (l.title_he || l.title_en) : (l.title_en || l.title_he);
+          lessonId = l.id;
+        } else if (lessons.length > 0) {
+          const extraIdx = (idx - lessons.length) + 1;
+          lessonTitle = isHe ? `חזרה, תרגול מעשי וסיכום כללי #${extraIdx}` : `Review, Capstone Practice & Synthesis #${extraIdx}`;
+          lessonId = 'review_' + extraIdx;
+        } else {
+          lessonTitle = `${course.title_en} — ${isHe ? 'שיעור' : 'Lesson'} #${idx + 1}`;
+          lessonId = 'session_' + (idx + 1);
+        }
+
+        const sessionId = 'les_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+        const newSession = {
+          id: sessionId,
+          dateStr: dStr,
+          dayOfWeek: dateObj.getDay(),
+          time: timeSlot,
+          repeatWeekly: false,
+          topic: lessonTitle,
+          course_id: course.id,
+          lesson_id: lessonId
+        };
+
+        student.schedule.push(newSession);
+
+        student.completed_topics._meta.lessons.push({
+          id: sessionId,
+          date: dStr,
+          timeSlot: timeSlot,
+          subject: lessonTitle,
+          notes: lessonTitle,
+          course_id: course.id,
+          lesson_id: lessonId
+        });
+      });
+
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud.client) {
+        pushStudentToCloud(student);
+      }
+
+      closeBreakdownPlannerModal();
+      renderCalendar();
+      if (APP_STATE.activeStudentDrawerId === student.id) {
+        renderStudentDrawer(student.id, true);
+      }
+
+      showToast(isHe 
+        ? `נקבעו בהצלחה ${dates.length} שיעורים עבור ${student.name}!` 
+        : `Successfully scheduled ${dates.length} classes for ${student.name}!`);
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    // ==============================================
     // AI TUTOR ASSISTANT & BASE44 INTEGRATION ENGINE
     // ==============================================
 
@@ -13657,6 +14197,70 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
             <div class="max-w-[85%] sm:max-w-[80%] rounded-2xl p-3 text-xs leading-relaxed ${isUser ? 'bg-brand-600 text-white rounded-tr-none' : 'bg-slate-950/80 border border-slate-800 text-slate-200 rounded-tl-none'} space-y-1.5">
               ${msg.actionBadges ? `<div class="space-y-1">${msg.actionBadges.map(b => `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono mr-1 mb-1"><i data-lucide="check" class="w-3 h-3"></i>${escapeHtml(b)}</span>`).join('')}</div>` : ''}
               <div class="whitespace-pre-wrap">${formatAiMarkdown(msg.content)}</div>
+              ${(msg.actionCards && msg.actionCards.length > 0) ? `
+                <div class="space-y-1.5 pt-1">
+                  ${msg.actionCards.map(card => {
+                    if (card.type === 'calendar') {
+                      return `
+                        <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-2 shadow-sm">
+                          <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold text-xs shrink-0">
+                              <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                            </span>
+                            <div class="min-w-0">
+                              <div class="text-xs font-bold text-white truncate">${escapeHtml(card.title || 'Scheduled Session')}</div>
+                              <div class="text-[10px] text-amber-300/80 truncate">${escapeHtml(card.detail || card.date || '')}</div>
+                            </div>
+                          </div>
+                          <button type="button" onclick="switchTab('calendar'); openScheduleLessonModal('${card.date}')" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] transition active:scale-95 shrink-0 flex items-center gap-1 shadow">
+                            <span>${isHe ? 'צפה ביומן' : 'View on Calendar'}</span>
+                            <i data-lucide="arrow-right" class="w-3 h-3 rtl:rotate-180"></i>
+                          </button>
+                        </div>
+                      `;
+                    }
+                    if (card.type === 'student') {
+                      return `
+                        <div class="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-between gap-2 shadow-sm">
+                          <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-xs shrink-0">
+                              <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                            </span>
+                            <div class="min-w-0">
+                              <div class="text-xs font-bold text-white truncate">${escapeHtml(card.title || card.studentName)}</div>
+                              <div class="text-[10px] text-indigo-300/80 truncate">${escapeHtml(card.studentName)}</div>
+                            </div>
+                          </div>
+                          <button type="button" onclick="openStudentDrawer('${card.studentId}')" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[10px] transition active:scale-95 shrink-0 flex items-center gap-1 shadow">
+                            <span>${isHe ? 'תיק תלמיד' : 'Open Student'}</span>
+                            <i data-lucide="arrow-right" class="w-3 h-3 rtl:rotate-180"></i>
+                          </button>
+                        </div>
+                      `;
+                    }
+                    if (card.type === 'lesson') {
+                      return `
+                        <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-2 shadow-sm">
+                          <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold text-xs shrink-0">
+                              <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+                            </span>
+                            <div class="min-w-0">
+                              <div class="text-xs font-bold text-white truncate">${escapeHtml(card.title || card.lessonTitle)}</div>
+                              <div class="text-[10px] text-amber-300/80 truncate">${escapeHtml(card.lessonTitle || '')}</div>
+                            </div>
+                          </div>
+                          <button type="button" onclick="navigateToLesson('${card.courseId}', '${card.lessonId}')" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] transition active:scale-95 shrink-0 flex items-center gap-1 shadow">
+                            <span>${isHe ? 'צפה בחומר' : 'Review Lesson'}</span>
+                            <i data-lucide="arrow-right" class="w-3 h-3 rtl:rotate-180"></i>
+                          </button>
+                        </div>
+                      `;
+                    }
+                    return '';
+                  }).join('')}
+                </div>
+              ` : ''}
               ${msg.createdLesson ? `
                 <div class="mt-2.5 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3 shadow-sm">
                   <div class="flex items-center gap-2.5 min-w-0">
@@ -14047,6 +14651,22 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
               },
               required: ["course_title_en", "lessons"]
             }
+          },
+          {
+            name: "plan_curriculum_breakdown",
+            description: "Automatically break down and schedule a curriculum of lessons across upcoming calendar dates for a student based on a cadence (e.g. 15 classes, twice a week).",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                studentNameOrId: { type: "STRING", description: "Student name or ID to schedule for" },
+                courseIdOrName: { type: "STRING", description: "Course/class name or ID whose lessons will be scheduled" },
+                totalClasses: { type: "NUMBER", description: "Number of classes/sessions to schedule (default 15)" },
+                startDate: { type: "STRING", description: "Starting date (YYYY-MM-DD), defaults to tomorrow if omitted" },
+                cadence: { type: "STRING", description: "Schedule cadence: twice_weekly, tues_thurs, once_weekly_sun, once_weekly_mon, once_weekly_tues, once_weekly_wed, once_weekly_thurs, thrice_weekly, daily_weekdays" },
+                timeSlot: { type: "STRING", description: "Time of day e.g. '4:30 PM', '5:00 PM'" }
+              },
+              required: ["studentNameOrId"]
+            }
           }
         ]
       }];
@@ -14249,6 +14869,7 @@ Guidelines:
 
         let modelText = '';
         const actionBadges = [];
+        const actionCards = [];
         const functionResponses = [];
         let createdLessonInfo = null;
         let createdCourseInfo = null;
@@ -14261,6 +14882,9 @@ Guidelines:
             const result = executeAiToolCall(part.functionCall);
             if (result && result.message) {
               actionBadges.push(result.message);
+            }
+            if (result && Array.isArray(result.actionCards)) {
+              actionCards.push(...result.actionCards);
             }
             if (result && result.createdLesson) {
               createdLessonInfo = result.createdLesson;
@@ -14315,6 +14939,7 @@ Guidelines:
           role: 'model',
           content: modelText || (APP_STATE.lang === 'he' ? 'הפעולה הושלמה בהצלחה!' : 'Operation executed successfully!'),
           actionBadges: actionBadges.length > 0 ? actionBadges : null,
+          actionCards: actionCards.length > 0 ? actionCards : null,
           createdLesson: createdLessonInfo,
           createdCourse: createdCourseInfo
         });
@@ -14505,6 +15130,21 @@ Guidelines:
           studentName: student.name,
           date: newSession.dateStr,
           timeSlot: newSession.time,
+          actionCards: [
+            {
+              type: 'calendar',
+              title: isHe ? `שיעור נקבע: ${student.name}` : `Lesson Scheduled: ${student.name}`,
+              date: newSession.dateStr,
+              studentName: student.name,
+              detail: `${newSession.dateStr} • ${newSession.time}`
+            },
+            {
+              type: 'student',
+              title: isHe ? `תיק תלמיד: ${student.name}` : `Student: ${student.name}`,
+              studentId: student.id,
+              studentName: student.name
+            }
+          ],
           message: isHe
             ? `שיעור נקבע עבור ${student.name} בתאריך ${newSession.dateStr} (${newSession.time})${createdNote}`
             : `Scheduled lesson for ${student.name} on ${newSession.dateStr} (${newSession.time})${createdNote}`
@@ -14880,6 +15520,132 @@ Guidelines:
         };
       }
 
+      if (name === 'plan_curriculum_breakdown') {
+        const rawStudent = (args.studentNameOrId || '').trim().toLowerCase();
+        let student = APP_STATE.students.find(s =>
+          s.id === args.studentNameOrId ||
+          (s.name && s.name.toLowerCase() === rawStudent) ||
+          (s.name && s.name.toLowerCase().includes(rawStudent))
+        );
+
+        if (!student) {
+          return { success: false, error: `Student "${args.studentNameOrId}" not found in roster.` };
+        }
+
+        let targetCourse = null;
+        if (args.courseIdOrName) {
+          const rawCourse = String(args.courseIdOrName).toLowerCase().trim();
+          targetCourse = (APP_STATE.customCourses || []).find(c =>
+            c.id === args.courseIdOrName ||
+            (c.title_en && c.title_en.toLowerCase().includes(rawCourse)) ||
+            (c.title_he && c.title_he.toLowerCase().includes(rawCourse))
+          );
+        }
+        if (!targetCourse) {
+          targetCourse = (APP_STATE.customCourses || []).find(c => c.id === APP_STATE.activeCourseId) || (APP_STATE.customCourses || [])[0];
+        }
+
+        if (!targetCourse) {
+          return { success: false, error: 'No course/class found to break down.' };
+        }
+
+        const totalClasses = parseInt(args.totalClasses, 10) || 15;
+        const startDate = args.startDate || '';
+        const cadence = args.cadence || 'twice_weekly';
+        const timeSlot = args.timeSlot || '4:30 PM';
+
+        const dates = calculateNextScheduleDates(startDate, cadence, totalClasses);
+        const lessons = targetCourse.lessons || [];
+
+        if (!Array.isArray(student.schedule)) student.schedule = [];
+        if (!student.completed_topics) student.completed_topics = {};
+        if (!student.completed_topics._meta) student.completed_topics._meta = {};
+        if (!Array.isArray(student.completed_topics._meta.lessons)) student.completed_topics._meta.lessons = [];
+
+        dates.forEach((dStr, idx) => {
+          const parts = dStr.split('-');
+          const dateObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+
+          let lessonTitle = '';
+          let lessonId = null;
+          if (lessons.length > 0 && idx < lessons.length) {
+            const l = lessons[idx];
+            lessonTitle = isHe ? (l.title_he || l.title_en) : (l.title_en || l.title_he);
+            lessonId = l.id;
+          } else if (lessons.length > 0) {
+            const extraIdx = (idx - lessons.length) + 1;
+            lessonTitle = isHe ? `חזרה וסיכום כללי #${extraIdx}` : `Review & Synthesis #${extraIdx}`;
+            lessonId = 'review_' + extraIdx;
+          } else {
+            lessonTitle = `${targetCourse.title_en} — ${isHe ? 'שיעור' : 'Lesson'} #${idx + 1}`;
+            lessonId = 'session_' + (idx + 1);
+          }
+
+          const sessionId = 'les_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+          const newSession = {
+            id: sessionId,
+            dateStr: dStr,
+            dayOfWeek: dateObj.getDay(),
+            time: timeSlot,
+            repeatWeekly: false,
+            topic: lessonTitle,
+            course_id: targetCourse.id,
+            lesson_id: lessonId
+          };
+
+          student.schedule.push(newSession);
+
+          student.completed_topics._meta.lessons.push({
+            id: sessionId,
+            date: dStr,
+            timeSlot: timeSlot,
+            subject: lessonTitle,
+            notes: lessonTitle,
+            course_id: targetCourse.id,
+            lesson_id: lessonId
+          });
+        });
+
+        saveStudentsToStorage(true);
+        if (APP_STATE.cloud && APP_STATE.cloud.client) {
+          pushStudentToCloud(student);
+        }
+        renderCalendar();
+        if (APP_STATE.activeStudentDrawerId === student.id) {
+          renderStudentDrawer(student.id, true);
+        }
+
+        const courseDisplayTitle = isHe ? (targetCourse.title_he || targetCourse.title_en) : (targetCourse.title_en || targetCourse.title_he);
+        return {
+          success: true,
+          studentId: student.id,
+          studentName: student.name,
+          courseId: targetCourse.id,
+          courseTitle: courseDisplayTitle,
+          scheduledCount: dates.length,
+          startDate: dates[0],
+          endDate: dates[dates.length - 1],
+          actionCards: [
+            {
+              type: 'calendar',
+              title: isHe ? `לוח שיעורים: ${dates.length} מפגשים` : `Calendar: ${dates.length} Sessions`,
+              date: dates[0],
+              studentName: student.name,
+              detail: `${courseDisplayTitle} • ${timeSlot}`
+            },
+            {
+              type: 'student',
+              title: isHe ? `תיק תלמיד: ${student.name}` : `Student Portfolio: ${student.name}`,
+              studentId: student.id,
+              studentName: student.name
+            }
+          ],
+          message: isHe
+            ? `תוכננו ונשמרו בהצלחה ${dates.length} שיעורים עבור ${student.name} בקורס "${courseDisplayTitle}" החל מתאריך ${dates[0]}`
+            : `Successfully planned and scheduled ${dates.length} classes for ${student.name} in "${courseDisplayTitle}" starting ${dates[0]}`
+        };
+      }
+
       return { success: false, error: `Unknown tool: ${name}` };
     }
 
@@ -14970,9 +15736,21 @@ Guidelines:
       const el = document.getElementById('base44-prompt-textarea');
       if (!el) return;
 
+      const activeSchoolId = typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770';
+      const tutorName = APP_STATE.currentUser?.name || 'Tutor';
+      const customCourses = APP_STATE.customCourses || [];
+
+      let customCoursesSection = '';
+      if (customCourses.length > 0) {
+        customCoursesSection = '\n\nACTIVE CLASSES & COURSES IN THIS WORKSPACE:\n' + customCourses.map(c => {
+          const lNames = (c.lessons || []).map((l, i) => `    ${i + 1}. [${l.id}] ${l.title_en || l.title_he}`).join('\n');
+          return `• Class: ${c.title_en || c.title_he} (ID: ${c.id}, Format: ${c.format_type || 'standard'})\n${lNames || '    (No lessons added yet)'}`;
+        }).join('\n\n');
+      }
+
       el.value = `@Base44 SYSTEM INTEGRATION PROTOCOL: TUTORPILOT MULTI-ACTION DATABASE ACTIVATION
 
-Base44, you are the official Bar Mitzvah Tutoring Copilot for Rabbi Closter and Shmuel Dovid in this WhatsApp chat.
+Base44, you are the official Tutoring Copilot for ${tutorName} (School Workspace: ${activeSchoolId}) in this chat.
 You have direct read and write access to our live TutorPilot database via REST API.
 
 1. DATABASE REST API CONFIGURATION:
@@ -14983,6 +15761,7 @@ You have direct read and write access to our live TutorPilot database via REST A
 • Required Header 'Authorization': Bearer sb_publishable_hVy0YYOOT9k_LD_ZMe24zg_iuqTC538
 • Upsert Header 'Prefer': resolution=merge-duplicates
 • Content Type: application/json
+• Active School Filter: completed_topics->'_meta'->>'school_id'=eq.${activeSchoolId}
 
 2. THE 36 CANONICAL CURRICULUM LESSONS:
 When checking off progress, evaluating remaining topics, or adding materials, match against these exact 36 lessons:
@@ -15005,11 +15784,11 @@ When checking off progress, evaluating remaining topics, or adding materials, ma
   vayetzei, vayishlach, vayeshev, mikeitz, vayigash, vayechi
 • 11 Parshiot of Shemot:
   shemot, vaera, bo, beshalach, yitro, mishpatim,
-  terumah, tetzaveh, ki_tisa, vayakhel, pekudei
+  terumah, tetzaveh, ki_tisa, vayakhel, pekudei${customCoursesSection}
 
 3. DEDICATED ACTION KEYWORDS & WORKFLOWS:
 
-Whenever either of us messages you in this WhatsApp chat, look for these 4 primary action keywords:
+Whenever either of us messages you in this chat, look for these primary action keywords:
 
 KEYWORD 1: SCHEDULE (or BOOK, CALENDAR, קבע שיעור)
 • When to use: The tutor wants to book a lesson on the calendar.
@@ -15051,11 +15830,7 @@ KEYWORD 2: DEBRIEF (or FINISHED CLASS, TODAY'S LESSON, סיכום שיעור)
      - If the student was tested or mastered a concept, set completed_topics[topicId] = true.
      - If the student mastered a Chumash parsha, set completed_parshiot[parshaId] = true.
   4. Post upsert to /students_sync.
-  5. Reply in WhatsApp with:
-     • Debrief summary logged to profile.
-     • Core skills holding: Booklet color & page, Letter & Vowel holding, Parsha lines holding, active homework assigned.
-     • Topics checked off as completed (e.g. "Checked off: Tefillin").
-     • List of remaining topics the student still needs to learn.
+  5. Reply with debrief summary, skills holding, checked off topics, and remaining topics.
 
 KEYWORD 3: NEXT LESSON (or SCHEDULE NEXT, שיעור הבא)
 • When to use: The tutor wants to schedule the upcoming class with an automatic intelligent study plan.
@@ -15067,7 +15842,7 @@ KEYWORD 3: NEXT LESSON (or SCHEDULE NEXT, שיעור הבא)
      • Check if active homework exists.
      • Calculate next step for Hebrew reading (e.g. next page / vowel).
      • Calculate next lines for Torah Parsha reading (e.g. advance to next verses).
-     • Determine next unlearned topic from the 36 curriculum lessons.
+     • Determine next unlearned topic from curriculum classes.
   3. Formulate the preparation plan as clean bullet points for the calendar card:
      • Check Homework: [Active homework task]
      • Hebrew Reading: Advance to page [N] ([letter / vowel])
@@ -15076,13 +15851,13 @@ KEYWORD 3: NEXT LESSON (or SCHEDULE NEXT, שיעור הבא)
      • Concept: [Next unlearned topic e.g. Kashrut]
   4. Inside student.completed_topics._meta.schedule, add the session with topic set to these bullet points.
   5. Post upsert to /students_sync.
-  6. Reply in WhatsApp confirming the scheduled lesson and the bullet point preparation checklist that will appear on the tutor's calendar day view!
+  6. Reply confirming the scheduled lesson and the bullet point preparation checklist.
 
 KEYWORD 4: ADD MATERIAL (or ENRICH, הוסף חומר)
-• When to use: The tutor or Rabbi wants to add a teaching tip, story, explanation, or source link to any of the 36 lessons.
+• When to use: The tutor or Rabbi wants to add a teaching tip, story, explanation, or source link to any lesson.
 • Syntax: ADD MATERIAL [Lesson Name e.g. Shabbat, Tefillin, Noach]. Title: [Headline]. Content: [Explanation or notes].
 • Action:
-  1. Identify the target lesson ID from the 36 lessons.
+  1. Identify the target lesson ID from curriculum classes.
   2. Fetch existing materials: GET /students_sync?id=eq.__study_materials__
   3. Append to completed_topics[targetLessonId]:
      {
@@ -15095,7 +15870,18 @@ KEYWORD 4: ADD MATERIAL (or ENRICH, הוסף חומר)
        "targetTitle": "[Target Lesson Name]"
      }
   4. Post upsert to /students_sync under id "__study_materials__".
-  5. Reply in WhatsApp confirming that the new study material has been added to the curriculum and is immediately visible on the website.
+  5. Reply confirming that the new study material has been added to the curriculum.
+
+KEYWORD 5: BREAKDOWN (or PLAN BREAKDOWN, חלק שיעורים)
+• When to use: The tutor wants to automatically break down a full course into a sequence of scheduled classes across upcoming calendar dates (e.g. 15 classes).
+• Syntax: BREAKDOWN [Student Name] into [X] classes for [Class Name/ID] starting [Date YYYY-MM-DD] [Cadence: twice_weekly, tues_thurs, once_weekly, etc.] at [Time e.g. 4:30 PM].
+• Action:
+  1. Fetch student and course records from /students_sync.
+  2. Compute upcoming schedule dates based on starting date and cadence.
+  3. Map sequential lessons onto each date (Session 1 -> Lesson 1, Session 2 -> Lesson 2...).
+  4. Append sessions to student.completed_topics._meta.schedule and mirror to student.completed_topics._meta.lessons.
+  5. Post upsert to /students_sync.
+  6. Reply confirming the planned breakdown and total scheduled dates.
 
 4. CHAINING COMMANDS:
 Tutors can combine commands in one message:
@@ -15103,7 +15889,7 @@ Example: "DEBRIEF Ethan Miller: We practiced Tefillin blessings and wrapping. He
 Execute both: log the debrief, check off Tefillin, identify the next curriculum topic, and schedule Tuesday's lesson with that preparation note ready on the calendar.
 
 5. CONFIRMATION PROTOCOL:
-Always reply in WhatsApp with a clean, bulleted summary:
+Always reply with a clean, bulleted summary:
 • Action Taken
 • Student Name
 • Date & Time (if applicable)
@@ -15111,7 +15897,7 @@ Always reply in WhatsApp with a clean, bulleted summary:
 • Curriculum Topics Checked Off / Added
 • Status: Synced live to TutorPilot portal (https://bar-mitzvah-tutor.pages.dev)
 
-Base44, please confirm receipt of this protocol and let us know that you are ready. (If you require the Custom Integration tool to be enabled in your dashboard settings by Rabbi Closter, please let us know in your reply).`;
+Base44, please confirm receipt of this protocol and let us know that you are ready.`;
     }
 
     function copyBase44Prompt() {

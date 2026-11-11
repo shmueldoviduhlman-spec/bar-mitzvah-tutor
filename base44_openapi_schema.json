@@ -258,7 +258,9 @@
                         "dayOfWeek": { "type": "integer", "example": 4 },
                         "time": { "type": "string", "example": "4:30 PM" },
                         "repeatWeekly": { "type": "boolean", "default": false },
-                        "topic": { "type": "string", "example": "Next to teach: Kashrut (Meat & dairy separation rules)" }
+                        "topic": { "type": "string", "example": "Next to teach: Kashrut (Meat & dairy separation rules)" },
+                        "course_id": { "type": "string", "example": "course_bar_mitzvah_concepts" },
+                        "lesson_id": { "type": "string", "example": "tefillin" }
                       }
                     }
                   },
@@ -272,7 +274,9 @@
                         "date": { "type": "string", "example": "2026-11-12" },
                         "timeSlot": { "type": "string", "example": "4:30 PM" },
                         "subject": { "type": "string" },
-                        "notes": { "type": "string" }
+                        "notes": { "type": "string" },
+                        "course_id": { "type": "string", "example": "course_bar_mitzvah_concepts" },
+                        "lesson_id": { "type": "string", "example": "tefillin" }
                       }
                     }
                   }

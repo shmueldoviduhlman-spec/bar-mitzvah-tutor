@@ -996,6 +996,139 @@ assert(indexHtml.includes('id="modal-ai-milestone-builder"'), 'HTML contains mod
 assert(indexHtml.includes('id="ai-chat-input"'), 'HTML contains ai-chat-input');
 assert(indexHtml.includes('handleSendAiMessage'), 'HTML binds handleSendAiMessage');
 
+// ==============================================
+// GATE 14: UNIVERSAL CURRICULUM BREAKDOWN & CLASS PLANNER SUITE
+// ==============================================
+console.log('\n--- Gate 14: Universal Curriculum Breakdown & Class Planner ---');
+
+// 1. Function existence
+assert(typeof sandbox.calculateNextScheduleDates === 'function', 'calculateNextScheduleDates is a function');
+assert(typeof sandbox.openBreakdownPlannerModal === 'function', 'openBreakdownPlannerModal is a function');
+assert(typeof sandbox.closeBreakdownPlannerModal === 'function', 'closeBreakdownPlannerModal is a function');
+assert(typeof sandbox.updatePlannerPreviewList === 'function', 'updatePlannerPreviewList is a function');
+assert(typeof sandbox.handleExecuteBreakdownPlan === 'function', 'handleExecuteBreakdownPlan is a function');
+
+// 2. Date calculation across cadences
+const twiceWeeklyDates = sandbox.calculateNextScheduleDates('2026-11-16', 'twice_weekly', 15);
+assert(Array.isArray(twiceWeeklyDates), 'calculateNextScheduleDates returns an array');
+assert(twiceWeeklyDates.length === 15, 'calculateNextScheduleDates returns exactly 15 dates');
+const allMonWed = twiceWeeklyDates.every(d => {
+  const day = new Date(d + 'T12:00:00').getDay();
+  return day === 1 || day === 3;
+});
+assert(allMonWed, 'twice_weekly cadence generates strictly Mondays and Wednesdays');
+
+const tuesThursDates = sandbox.calculateNextScheduleDates('2026-11-17', 'tues_thurs', 10);
+assert(tuesThursDates.length === 10, 'tues_thurs cadence generates 10 dates');
+const allTueThu = tuesThursDates.every(d => {
+  const day = new Date(d + 'T12:00:00').getDay();
+  return day === 2 || day === 4;
+});
+assert(allTueThu, 'tues_thurs cadence generates strictly Tuesdays and Thursdays');
+
+const sundayDates = sandbox.calculateNextScheduleDates('2026-11-15', 'once_weekly_sun', 8);
+assert(sundayDates.length === 8, 'once_weekly_sun generates 8 dates');
+const allSun = sundayDates.every(d => new Date(d + 'T12:00:00').getDay() === 0);
+assert(allSun, 'once_weekly_sun generates strictly Sundays');
+
+// 3. HTML Containers & Modals
+assert(indexHtml.includes('id="modal-curriculum-breakdown-planner"'), 'HTML contains modal-curriculum-breakdown-planner');
+assert(indexHtml.includes('id="planner-student-select"'), 'HTML contains planner-student-select');
+assert(indexHtml.includes('id="planner-course-select"'), 'HTML contains planner-course-select');
+assert(indexHtml.includes('id="planner-classes-count"'), 'HTML contains planner-classes-count');
+assert(indexHtml.includes('id="planner-start-date"'), 'HTML contains planner-start-date');
+assert(indexHtml.includes('id="planner-cadence-select"'), 'HTML contains planner-cadence-select');
+assert(indexHtml.includes('id="planner-time-slot"'), 'HTML contains planner-time-slot');
+assert(indexHtml.includes('id="planner-preview-container"'), 'HTML contains planner-preview-container');
+assert(indexHtml.includes('btn-calendar-plan-breakdown'), 'HTML contains Calendar toolbar breakdown planner trigger');
+
+// 4. Modal lifecycle
+sandbox.openBreakdownPlannerModal();
+const plannerModalEl = getOrCreateElem('modal-curriculum-breakdown-planner');
+assert(!plannerModalEl.classList.contains('hidden'), 'openBreakdownPlannerModal unhides modal');
+sandbox.closeBreakdownPlannerModal();
+assert(plannerModalEl.classList.contains('hidden'), 'closeBreakdownPlannerModal hides modal');
+
+// 5. Test Live Execution of Breakdown Plan
+const testStudentForPlan = {
+  id: 'stu_planner_test',
+  name: 'Planner Student',
+  schedule: [],
+  completedTopics: {},
+  completed_topics: { _meta: { lessons: [] } }
+};
+sandbox.APP_STATE.students = [testStudentForPlan];
+const testCourseForPlan = {
+  id: 'course_plan_math',
+  title_en: 'Universal Math',
+  title_he: 'מתמטיקה אוניברסלית',
+  format_type: 'standard',
+  lessons: [
+    { id: 'les_m1', title_en: 'Algebra Foundations', title_he: 'יסודות האלגברה' },
+    { id: 'les_m2', title_en: 'Linear Equations', title_he: 'משוואות לינאריות' },
+    { id: 'les_m3', title_en: 'Quadratic Systems', title_he: 'מערכות ריבועיות' }
+  ]
+};
+sandbox.APP_STATE.customCourses = [testCourseForPlan];
+
+getOrCreateElem('planner-student-select').value = 'stu_planner_test';
+getOrCreateElem('planner-course-select').value = 'course_plan_math';
+getOrCreateElem('planner-classes-count').value = '5';
+getOrCreateElem('planner-start-date').value = '2026-11-16';
+getOrCreateElem('planner-cadence-select').value = 'twice_weekly';
+getOrCreateElem('planner-time-slot').value = '5:00 PM';
+
+sandbox.updatePlannerPreviewList();
+const previewContent = getOrCreateElem('planner-preview-container').innerHTML;
+assert(previewContent.includes('Algebra Foundations'), 'Preview contains Lesson 1 title');
+assert(previewContent.includes('Linear Equations'), 'Preview contains Lesson 2 title');
+
+// Execute plan
+sandbox.handleExecuteBreakdownPlan({ preventDefault: () => {} });
+assert(testStudentForPlan.schedule.length === 5, 'Student schedule received exactly 5 planned sessions');
+assert(testStudentForPlan.completed_topics._meta.lessons.length === 5, 'Mirror lessons received 5 planned sessions');
+assert(testStudentForPlan.schedule[0].topic.includes('Algebra Foundations'), 'First session mapped to Lesson 1');
+assert(testStudentForPlan.schedule[0].course_id === 'course_plan_math', 'Session recorded course_id');
+assert(testStudentForPlan.schedule[0].time === '5:00 PM', 'Session recorded time slot');
+
+// 6. Test AI Tool: plan_curriculum_breakdown
+const g14_tools = sandbox.buildGeminiToolsDeclaration();
+const g14_toolNames = g14_tools[0].functionDeclarations.map(f => f.name);
+assert(g14_toolNames.includes('plan_curriculum_breakdown'), 'Tool "plan_curriculum_breakdown" declared in Gemini tools manifest');
+
+const aiBreakdownResult = sandbox.executeAiToolCall({
+  name: 'plan_curriculum_breakdown',
+  args: {
+    studentNameOrId: 'Planner Student',
+    courseIdOrName: 'Universal Math',
+    totalClasses: 3,
+    startDate: '2026-12-01',
+    cadence: 'twice_weekly',
+    timeSlot: '4:00 PM'
+  }
+});
+assert(aiBreakdownResult.success === true, 'AI plan_curriculum_breakdown executed successfully');
+assert(aiBreakdownResult.scheduledCount === 3, 'AI scheduled exact class count');
+assert(Array.isArray(aiBreakdownResult.actionCards), 'AI returned actionCards array');
+assert(aiBreakdownResult.actionCards.some(c => c.type === 'calendar'), 'Action card includes calendar jump');
+assert(aiBreakdownResult.actionCards.some(c => c.type === 'student'), 'Action card includes student drawer link');
+
+// 7. Base44 Dynamic Prompt with KEYWORD 5: BREAKDOWN
+sandbox.populateBase44PromptTextarea();
+const g14_base44Val = getOrCreateElem('base44-prompt-textarea').value;
+assert(g14_base44Val.includes('KEYWORD 5: BREAKDOWN'), 'Base44 prompt defines KEYWORD 5: BREAKDOWN');
+assert(g14_base44Val.includes('Active School Filter'), 'Base44 prompt defines dynamic Active School Filter');
+
+// 8. Class Format Type in Save Custom Course
+assert(indexHtml.includes('id="input-create-course-format-type"'), 'HTML contains input-create-course-format-type');
+getOrCreateElem('input-create-course-title-en').value = 'Graded Hebrew Reading';
+getOrCreateElem('input-create-course-format-type').value = 'reading';
+sandbox.handleSaveCustomCourse({ preventDefault: () => {} });
+const savedReadingCourse = sandbox.APP_STATE.customCourses.find(c => c.title_en === 'Graded Hebrew Reading');
+assert(savedReadingCourse !== undefined, 'Saved course exists in customCourses');
+assert(savedReadingCourse.format_type === 'reading', 'Course format_type saved as reading');
+assert(savedReadingCourse.icon === '📖', 'Reading course default icon is 📖');
+
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
 console.log(`========================================\n`);
