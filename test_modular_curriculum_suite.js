@@ -711,6 +711,291 @@ assert(indexHtml.includes('id="school-join-code-value"'), 'HTML contains school-
 assert(indexHtml.includes('copySchoolJoinCode'), 'HTML includes copySchoolJoinCode handler');
 assert(indexHtml.includes('shareSchoolJoinCodeWhatsApp'), 'HTML includes shareSchoolJoinCodeWhatsApp handler');
 
+// Gate 13: Pan-System AI Agents & Tool Execution Engine
+console.log('\n--- Gate 13: Pan-System AI Agents & Tool Execution Engine ---');
+
+// 1. Tool Declarations Coverage
+assert(typeof sandbox.buildGeminiToolsDeclaration === 'function', 'buildGeminiToolsDeclaration is a function');
+const allToolsDecl = sandbox.buildGeminiToolsDeclaration();
+assert(Array.isArray(allToolsDecl) && allToolsDecl.length > 0, 'Tools declaration returns an array');
+const declaredFuncs = allToolsDecl[0].functionDeclarations || [];
+const g13_toolNames = declaredFuncs.map(f => f.name);
+
+const requiredTools = [
+  'add_student',
+  'update_student',
+  'schedule_lesson',
+  'cancel_lesson',
+  'mark_topic_progress',
+  'mark_parsha_progress',
+  'add_study_material',
+  'get_portal_data',
+  'create_lesson',
+  'create_course',
+  'create_full_class'
+];
+
+requiredTools.forEach(tool => {
+  assert(g13_toolNames.includes(tool), `Tool "${tool}" is declared in Gemini tools manifest`);
+});
+
+// 2. Tool Execution: add_student with full schema & school_id
+sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com', school_id: 'school_main_770' };
+sandbox.APP_STATE.students = [];
+const addRes = sandbox.executeAiToolCall({
+  name: 'add_student',
+  args: {
+    name: 'Gavriel Cohen',
+    parsha: 'Parshat Terumah',
+    barMitzvahDate: '2027-02-15',
+    notes: 'Initial evaluation by AI agent'
+  }
+});
+
+assert(addRes.success === true, 'executeAiToolCall add_student succeeded');
+const createdStu = sandbox.APP_STATE.students.find(s => s.name === 'Gavriel Cohen');
+assert(createdStu !== undefined, 'Created student found in APP_STATE.students');
+assert(createdStu.parsha === 'Parshat Terumah', 'Student parsha initialized correctly');
+assert(Array.isArray(createdStu.schedule), 'Student schedule initialized as an array');
+assert(typeof createdStu.completedTopics === 'object', 'Student completedTopics initialized as an object');
+assert(typeof createdStu.completedParshiot === 'object', 'Student completedParshiot initialized as an object');
+assert(createdStu.skills && createdStu.skills.parshaReading.parshaName === 'Parshat Terumah', 'Student skills initialized with parshaName');
+assert(createdStu.completed_topics._meta.school_id === 'school_main_770', 'Student stamped with school_main_770');
+
+// 3. Tool Execution: update_student
+const updateRes = sandbox.executeAiToolCall({
+  name: 'update_student',
+  args: {
+    studentNameOrId: 'Gavriel Cohen',
+    newName: 'Gavriel (Gabi) Cohen',
+    notes: 'Updated notes: excellent trope pronunciation',
+    parsha: 'Parshat Tetzaveh'
+  }
+});
+assert(updateRes.success === true, 'executeAiToolCall update_student succeeded');
+assert(createdStu.name === 'Gavriel (Gabi) Cohen', 'Student name updated to new name');
+assert(createdStu.notes.includes('excellent trope'), 'Student notes updated');
+assert(createdStu.parsha === 'Parshat Tetzaveh', 'Student parsha updated');
+assert(createdStu.skills.parshaReading.parshaName === 'Parshat Tetzaveh', 'Skills parsha reading synchronized');
+
+// 4. Tool Execution: schedule_lesson & dual-store synchronization
+const schedRes = sandbox.executeAiToolCall({
+  name: 'schedule_lesson',
+  args: {
+    studentNameOrId: 'Gavriel (Gabi) Cohen',
+    date: '2026-12-10',
+    timeSlot: '5:00 PM',
+    subject: 'Tetzaveh Aliyah 1 & Tefillin Review'
+  }
+});
+assert(schedRes.success === true, 'executeAiToolCall schedule_lesson succeeded');
+assert(createdStu.schedule.length === 1, 'Lesson appended to student.schedule');
+assert(createdStu.schedule[0].dateStr === '2026-12-10', 'Lesson date recorded in schedule');
+assert(createdStu.schedule[0].time === '5:00 PM', 'Lesson time recorded in schedule');
+assert(createdStu.completed_topics._meta.lessons.length === 1, 'Lesson mirrored to completed_topics._meta.lessons');
+assert(createdStu.completed_topics._meta.lessons[0].subject === 'Tetzaveh Aliyah 1 & Tefillin Review', 'Subject recorded in mirrored lesson');
+
+// Test on-the-fly student creation via schedule_lesson
+const onTheFlyRes = sandbox.executeAiToolCall({
+  name: 'schedule_lesson',
+  args: {
+    studentNameOrId: 'Daniel Newstudent',
+    date: '2026-12-12',
+    timeSlot: '4:30 PM',
+    subject: 'First Intro Session'
+  }
+});
+assert(onTheFlyRes.success === true, 'schedule_lesson on-the-fly creation succeeded');
+const onTheFlyStu = sandbox.APP_STATE.students.find(s => s.name === 'Daniel Newstudent');
+assert(onTheFlyStu !== undefined, 'On-the-fly student created in APP_STATE.students');
+assert(onTheFlyStu.completed_topics._meta.school_id === 'school_main_770', 'On-the-fly student stamped with active school ID');
+
+// 5. Tool Execution: cancel_lesson
+const cancelRes = sandbox.executeAiToolCall({
+  name: 'cancel_lesson',
+  args: {
+    studentNameOrId: 'Gavriel (Gabi) Cohen',
+    date: '2026-12-10'
+  }
+});
+assert(cancelRes.success === true, 'executeAiToolCall cancel_lesson succeeded');
+assert(createdStu.schedule.length === 0, 'Lesson removed from student.schedule');
+assert(createdStu.completed_topics._meta.lessons.length === 0, 'Lesson removed from completed_topics._meta.lessons');
+
+// 6. Tool Execution: mark_topic_progress dual-store toggle
+const markTopicRes = sandbox.executeAiToolCall({
+  name: 'mark_topic_progress',
+  args: {
+    studentNameOrId: 'Gavriel (Gabi) Cohen',
+    topicId: 'tefillin',
+    completed: true
+  }
+});
+assert(markTopicRes.success === true, 'executeAiToolCall mark_topic_progress true succeeded');
+assert(createdStu.completedTopics['tefillin'] === true, 'completedTopics tefillin is true');
+assert(createdStu.completed_topics['tefillin'] === true, 'completed_topics tefillin is true');
+
+const unmarkTopicRes = sandbox.executeAiToolCall({
+  name: 'mark_topic_progress',
+  args: {
+    studentNameOrId: 'Gavriel (Gabi) Cohen',
+    topicId: 'tefillin',
+    completed: false
+  }
+});
+assert(unmarkTopicRes.success === true, 'executeAiToolCall mark_topic_progress false succeeded');
+assert(createdStu.completedTopics['tefillin'] === undefined, 'completedTopics tefillin was cleared');
+assert(createdStu.completed_topics['tefillin'] === undefined, 'completed_topics tefillin was cleared');
+
+// 7. Tool Execution: mark_parsha_progress dual-store toggle
+const markParshaRes = sandbox.executeAiToolCall({
+  name: 'mark_parsha_progress',
+  args: {
+    studentNameOrId: 'Gavriel (Gabi) Cohen',
+    parshaId: 'bereishit',
+    completed: true
+  }
+});
+assert(markParshaRes.success === true, 'executeAiToolCall mark_parsha_progress true succeeded');
+assert(createdStu.completedParshiot['bereishit'] === true, 'completedParshiot bereishit is true');
+assert(createdStu.completed_parshiot['bereishit'] === true, 'completed_parshiot bereishit is true');
+
+const unmarkParshaRes = sandbox.executeAiToolCall({
+  name: 'mark_parsha_progress',
+  args: {
+    studentNameOrId: 'Gavriel (Gabi) Cohen',
+    parshaId: 'bereishit',
+    completed: false
+  }
+});
+assert(unmarkParshaRes.success === true, 'executeAiToolCall mark_parsha_progress false succeeded');
+assert(createdStu.completedParshiot['bereishit'] === undefined, 'completedParshiot bereishit was cleared');
+assert(createdStu.completed_parshiot['bereishit'] === undefined, 'completed_parshiot bereishit was cleared');
+
+// 8. Tool Execution: add_study_material
+const addMatRes = sandbox.executeAiToolCall({
+  name: 'add_study_material',
+  args: {
+    targetNameOrId: 'tefillin',
+    title: 'The Rebbe on Tefillin in the Modern World',
+    content: 'Story of how putting on Tefillin protects the Jewish nation spiritually and physically.'
+  }
+});
+assert(addMatRes.success === true, 'executeAiToolCall add_study_material succeeded');
+assert(sandbox.APP_STATE.studyAdditions && sandbox.APP_STATE.studyAdditions['tefillin'].length > 0, 'Material attached to tefillin concept');
+assert(sandbox.APP_STATE.studyAdditions['tefillin'][0].title === 'The Rebbe on Tefillin in the Modern World', 'Material title recorded');
+
+// 9. Tool Execution: get_portal_data
+const portalData = sandbox.executeAiToolCall({
+  name: 'get_portal_data',
+  args: {}
+});
+assert(portalData !== null && typeof portalData === 'object', 'get_portal_data returns object');
+assert(portalData.totalStudents >= 2, 'get_portal_data returns accurate student count');
+assert(portalData.activeSchoolId === 'school_main_770', 'get_portal_data returns active school ID');
+assert(portalData.totalCustomMaterialsAdded >= 1, 'get_portal_data includes custom materials count');
+assert(Array.isArray(portalData.students), 'portalData.students is an array');
+assert(Array.isArray(portalData.courses), 'portalData.courses is an array');
+
+// 10. Tool Execution: create_course, create_lesson & create_full_class
+const g13_createCourseRes = sandbox.executeAiToolCall({
+  name: 'create_course',
+  args: {
+    title_en: 'Jewish Ethics & Middot',
+    title_he: 'מידות ומוסר',
+    category: 'Mussar',
+    target_level: 'Bar Mitzvah',
+    description_en: 'Building character and fine character traits',
+    icon: '💎'
+  }
+});
+assert(g13_createCourseRes.success === true, 'executeAiToolCall create_course succeeded');
+const g13_createdCourse = sandbox.APP_STATE.customCourses.find(c => c.id === g13_createCourseRes.courseId);
+assert(g13_createdCourse !== undefined, 'Created course exists in APP_STATE.customCourses');
+assert(g13_createdCourse.title_en === 'Jewish Ethics & Middot', 'Course English title preserved');
+assert(g13_createdCourse.icon === '💎', 'Course icon preserved');
+
+const g13_createLessonRes = sandbox.executeAiToolCall({
+  name: 'create_lesson',
+  args: {
+    courseIdOrName: g13_createdCourse.id,
+    title_en: 'True Humility: Learning from Moshe',
+    title_he: 'ענווה אמיתית: ללמוד ממשה רבנו',
+    hook_en: 'Is true humility being a pushover or knowing your infinite soul value?',
+    anchors_en: [
+      '**Definition**: Humility is not thinking less of yourself, it is thinking of yourself less.',
+      '**Moshe Rabbeinu**: The most humble man on earth, yet stood strong before Pharaoh.',
+      '**Inner Strength**: Humility gives you peace because ego is silenced.'
+    ],
+    midrash_en: 'Why did God give the Torah on Mount Sinai and not on Mount Tabor?',
+    life_app_en: 'When someone insults you in school, remember who you are inside without reacting.',
+    discussion_en: 'Can a champion athlete or CEO be genuinely humble?'
+  }
+});
+assert(g13_createLessonRes.success === true, 'executeAiToolCall create_lesson succeeded');
+assert(g13_createdCourse.lessons.length === 1, 'Lesson appended to createdCourse');
+const g13_createdLesson = g13_createdCourse.lessons[0];
+assert(g13_createdLesson.title_en.includes('True Humility'), 'Lesson title matches');
+assert(g13_createdLesson.anchors_en.length === 3, 'Lesson has 3 anchors');
+assert(g13_createdLesson.anchors_en[0].includes('**Definition**'), 'Anchor formatted with bold keyword');
+assert(g13_createdLesson.midrash_en.includes('Mount Sinai'), 'Midrash nugget recorded');
+assert(g13_createdLesson.life_app_en.includes('someone insults you'), 'Life app recorded');
+
+// 11. Dedicated AI Builders: Reading Ladder Generator
+assert(typeof sandbox.handleGenerateReadingLadder === 'function', 'handleGenerateReadingLadder is a function');
+getOrCreateElem('ai-reading-topic').value = 'Haftarah Tropes & Accents';
+getOrCreateElem('ai-reading-level').value = 'Intermediate';
+getOrCreateElem('ai-reading-count').value = '4';
+getOrCreateElem('ai-reading-guidance').value = 'Focus on Munach, Etnachta, and Sof Pasuk';
+sandbox.APP_STATE.customReadingMaterials = [];
+
+sandbox.handleGenerateReadingLadder({ preventDefault() {} });
+assert(sandbox.APP_STATE.customReadingMaterials.length === 4, 'handleGenerateReadingLadder generated 4 reading levels');
+assert(sandbox.APP_STATE.customReadingMaterials[0].title.includes('Level 1'), 'Reading unit has Level 1 title');
+assert(sandbox.APP_STATE.customReadingMaterials[0].targets.length > 0, 'Reading unit has target vocabulary');
+
+// 12. Dedicated AI Builders: Milestone Roadmap Generator
+assert(typeof sandbox.handleGenerateMilestoneRoadmap === 'function', 'handleGenerateMilestoneRoadmap is a function');
+getOrCreateElem('ai-milestone-topic').value = 'Bar Mitzvah Dvar Torah';
+getOrCreateElem('ai-milestone-level').value = 'Teens';
+getOrCreateElem('ai-milestone-count').value = '5';
+getOrCreateElem('ai-milestone-guidance').value = 'Stage by stage speech preparation';
+sandbox.APP_STATE.customMilestones = [];
+
+sandbox.handleGenerateMilestoneRoadmap({ preventDefault() {} });
+assert(sandbox.APP_STATE.customMilestones.length === 5, 'handleGenerateMilestoneRoadmap generated 5 milestone stages');
+assert(sandbox.APP_STATE.customMilestones[0].stage_num === 1, 'First milestone stage is stage 1');
+assert(sandbox.APP_STATE.customMilestones[0].deliverables.length > 0, 'Milestone stage has deliverables');
+
+// 13. External AI Base44 Integration & OpenAPI Schema
+const base44SchemaRaw = fs.readFileSync('base44_openapi_schema.json', 'utf8');
+const base44Schema = JSON.parse(base44SchemaRaw);
+assert(base44Schema.openapi === '3.0.3', 'Base44 OpenAPI schema version is 3.0.3');
+assert(base44Schema.paths['/students_sync'] !== undefined, 'Base44 OpenAPI schema defines /students_sync endpoint');
+assert(base44Schema.paths['/students_sync'].get !== undefined, 'Base44 schema declares GET /students_sync');
+assert(base44Schema.paths['/students_sync'].post !== undefined, 'Base44 schema declares POST /students_sync');
+assert(base44Schema.paths['/students_sync'].delete !== undefined, 'Base44 schema declares DELETE /students_sync');
+
+// Verify Base44 Prompt population
+assert(typeof sandbox.populateBase44PromptTextarea === 'function', 'populateBase44PromptTextarea is a function');
+sandbox.populateBase44PromptTextarea();
+const base44PromptVal = getOrCreateElem('base44-prompt-textarea').value;
+assert(base44PromptVal.includes('@Base44 SYSTEM INTEGRATION PROTOCOL'), 'Base44 prompt textarea populated with protocol');
+assert(base44PromptVal.includes('shabbat (Shabbat & Sacred Time)'), 'Base44 prompt includes 13 Jewish concepts');
+assert(base44PromptVal.includes('bereishit, noach, lech_lecha'), 'Base44 prompt includes Chumash parshiot');
+assert(base44PromptVal.includes('KEYWORD 1: SCHEDULE'), 'Base44 prompt defines SCHEDULE keyword');
+assert(base44PromptVal.includes('KEYWORD 2: DEBRIEF'), 'Base44 prompt defines DEBRIEF keyword');
+assert(base44PromptVal.includes('KEYWORD 3: NEXT LESSON'), 'Base44 prompt defines NEXT LESSON keyword');
+assert(base44PromptVal.includes('KEYWORD 4: ADD MATERIAL'), 'Base44 prompt defines ADD MATERIAL keyword');
+
+// 14. HTML UI Check for AI Assistant & Modals
+assert(indexHtml.includes('id="modal-base44-integration"'), 'HTML contains modal-base44-integration');
+assert(indexHtml.includes('id="modal-ai-curriculum-builder"'), 'HTML contains modal-ai-curriculum-builder');
+assert(indexHtml.includes('id="modal-ai-reading-builder"'), 'HTML contains modal-ai-reading-builder');
+assert(indexHtml.includes('id="modal-ai-milestone-builder"'), 'HTML contains modal-ai-milestone-builder');
+assert(indexHtml.includes('id="ai-chat-input"'), 'HTML contains ai-chat-input');
+assert(indexHtml.includes('handleSendAiMessage'), 'HTML binds handleSendAiMessage');
+
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
 console.log(`========================================\n`);

@@ -5147,17 +5147,19 @@ alter publication supabase_realtime add table public.students_sync;`;
     async function pushStudyMaterialsToCloud() {
       if (!APP_STATE.cloud.client) return;
       try {
+        const activeSchoolId = typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770';
         const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
-        const isMaster = isMasterAccount();
-        const recordId = isMaster ? '__study_materials__' : ('__study_materials_' + (email ? email.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
+        const recordId = (activeSchoolId === 'school_main_770')
+          ? '__study_materials__'
+          : ('__study_materials_' + activeSchoolId.replace(/[^a-z0-9]/g, '_') + '__');
         const payload = {
           id: recordId,
-          name: isMaster ? 'SYSTEM_STUDY_MATERIALS' : ('STUDY_MATERIALS_' + email),
+          name: (activeSchoolId === 'school_main_770') ? 'SYSTEM_STUDY_MATERIALS' : ('STUDY_MATERIALS_' + activeSchoolId),
           parsha_or_date: 'system',
-          notes: 'Custom curriculum additions by ' + (email || 'tutor'),
+          notes: 'Custom curriculum additions for ' + activeSchoolId,
           completed_topics: {
             materials: APP_STATE.studyAdditions || {},
-            _meta: { owner_email: email, user_id: APP_STATE.currentUser?.id || '' }
+            _meta: { school_id: activeSchoolId, owner_email: email, user_id: APP_STATE.currentUser?.id || '' }
           },
           completed_parshiot: {},
           updated_at: new Date().toISOString()
@@ -8162,17 +8164,19 @@ alter publication supabase_realtime add table public.students_sync;`;
     async function pushCustomCoursesToCloud() {
       if (!APP_STATE.cloud.client) return;
       try {
+        const activeSchoolId = typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770';
         const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
-        const isMaster = isMasterAccount();
-        const recordId = isMaster ? '__custom_courses__' : ('__custom_courses_' + (email ? email.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
+        const recordId = (activeSchoolId === 'school_main_770')
+          ? '__custom_courses__'
+          : ('__custom_courses_' + activeSchoolId.replace(/[^a-z0-9]/g, '_') + '__');
         const payload = {
           id: recordId,
-          name: isMaster ? 'SYSTEM_CUSTOM_COURSES' : ('CUSTOM_COURSES_' + email),
+          name: (activeSchoolId === 'school_main_770') ? 'SYSTEM_CUSTOM_COURSES' : ('CUSTOM_COURSES_' + activeSchoolId),
           parsha_or_date: 'system',
-          notes: 'Custom Curricula for ' + (email || 'tutor'),
+          notes: 'Custom Curricula for ' + activeSchoolId,
           completed_topics: {
             courses: APP_STATE.customCourses || [],
-            _meta: { owner_email: email, user_id: APP_STATE.currentUser?.id || '' }
+            _meta: { school_id: activeSchoolId, owner_email: email, user_id: APP_STATE.currentUser?.id || '' }
           },
           completed_parshiot: {},
           updated_at: new Date().toISOString()
@@ -8251,17 +8255,19 @@ alter publication supabase_realtime add table public.students_sync;`;
     async function pushCustomReadingToCloud() {
       if (!APP_STATE.cloud.client) return;
       try {
+        const activeSchoolId = typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770';
         const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
-        const isMaster = isMasterAccount();
-        const recordId = isMaster ? '__custom_reading__' : ('__custom_reading_' + (email ? email.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
+        const recordId = (activeSchoolId === 'school_main_770')
+          ? '__custom_reading__'
+          : ('__custom_reading_' + activeSchoolId.replace(/[^a-z0-9]/g, '_') + '__');
         const payload = {
           id: recordId,
-          name: isMaster ? 'SYSTEM_CUSTOM_READING' : ('CUSTOM_READING_' + email),
+          name: (activeSchoolId === 'school_main_770') ? 'SYSTEM_CUSTOM_READING' : ('CUSTOM_READING_' + activeSchoolId),
           parsha_or_date: 'system',
-          notes: 'Custom Reading Units for ' + (email || 'tutor'),
+          notes: 'Custom Reading Units for ' + activeSchoolId,
           completed_topics: {
             readingMaterials: APP_STATE.customReadingMaterials || [],
-            _meta: { owner_email: email, user_id: APP_STATE.currentUser?.id || '' }
+            _meta: { school_id: activeSchoolId, owner_email: email, user_id: APP_STATE.currentUser?.id || '' }
           },
           completed_parshiot: {},
           updated_at: new Date().toISOString()
@@ -8578,24 +8584,43 @@ Topic: ${topic}
 Level: ${level}
 Guidance: ${guidance || 'Provide clear target words, progressive phonetic difficulty, and colors red, orange, amber, emerald, blue, purple.'}`;
 
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ role: 'user', parts: [{ text: sys + '\n\n' + prompt }] }],
-              generationConfig: { responseMimeType: 'application/json' }
-            })
-          });
+          const candidateModels = [
+            'gemini-3.5-flash',
+            'gemini-3.1-flash-lite',
+            'gemini-3.5-flash-lite',
+            'gemini-flash-latest',
+            'gemini-3.8-flash'
+          ];
 
-          if (res.ok) {
-            const data = await res.json();
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (text) {
-              const clean = text.replace(/```json/gi, '').replace(/```/g, '').trim();
-              const parsed = JSON.parse(clean);
-              if (parsed && Array.isArray(parsed.levels)) {
-                generatedLevels = parsed.levels;
+          for (const model of candidateModels) {
+            try {
+              const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  contents: [{ role: 'user', parts: [{ text: sys + '\n\n' + prompt }] }],
+                  generationConfig: { responseMimeType: 'application/json' }
+                })
+              });
+
+              if (res.ok) {
+                const data = await res.json();
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) {
+                  let clean = text.trim();
+                  if (clean.startsWith('```json')) clean = clean.replace(/^```json/, '');
+                  if (clean.startsWith('```')) clean = clean.replace(/^```/, '');
+                  if (clean.endsWith('```')) clean = clean.replace(/```$/, '');
+                  clean = clean.trim();
+                  const parsed = JSON.parse(clean);
+                  if (parsed && Array.isArray(parsed.levels) && parsed.levels.length > 0) {
+                    generatedLevels = parsed.levels;
+                    break;
+                  }
+                }
               }
+            } catch (errLoop) {
+              // Try next model candidate
             }
           }
         } catch (err) {
@@ -8682,17 +8707,19 @@ Guidance: ${guidance || 'Provide clear target words, progressive phonetic diffic
     async function pushCustomMilestonesToCloud() {
       if (!APP_STATE.cloud.client) return;
       try {
+        const activeSchoolId = typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770';
         const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
-        const isMaster = isMasterAccount();
-        const recordId = isMaster ? '__custom_milestones__' : ('__custom_milestones_' + (email ? email.replace(/[^a-z0-9]/g, '_') : 'guest') + '__');
+        const recordId = (activeSchoolId === 'school_main_770')
+          ? '__custom_milestones__'
+          : ('__custom_milestones_' + activeSchoolId.replace(/[^a-z0-9]/g, '_') + '__');
         const payload = {
           id: recordId,
-          name: isMaster ? 'SYSTEM_CUSTOM_MILESTONES' : ('CUSTOM_MILESTONES_' + email),
+          name: (activeSchoolId === 'school_main_770') ? 'SYSTEM_CUSTOM_MILESTONES' : ('CUSTOM_MILESTONES_' + activeSchoolId),
           parsha_or_date: 'system',
-          notes: 'Custom Milestones for ' + (email || 'tutor'),
+          notes: 'Custom Milestones for ' + activeSchoolId,
           completed_topics: {
             milestones: APP_STATE.customMilestones || [],
-            _meta: { owner_email: email, user_id: APP_STATE.currentUser?.id || '' }
+            _meta: { school_id: activeSchoolId, owner_email: email, user_id: APP_STATE.currentUser?.id || '' }
           },
           completed_parshiot: {},
           updated_at: new Date().toISOString()
@@ -8972,24 +8999,43 @@ Project Type: ${topic}
 Target Audience / Level: ${level}
 Guidance: ${guidance || 'Provide clear deliverables per stage, speech rehearsal at ~125 words per minute, and final presentation completion.'}`;
 
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ role: 'user', parts: [{ text: sys + '\n\n' + prompt }] }],
-              generationConfig: { responseMimeType: 'application/json' }
-            })
-          });
+          const candidateModels = [
+            'gemini-3.5-flash',
+            'gemini-3.1-flash-lite',
+            'gemini-3.5-flash-lite',
+            'gemini-flash-latest',
+            'gemini-3.8-flash'
+          ];
 
-          if (res.ok) {
-            const data = await res.json();
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (text) {
-              const clean = text.replace(/```json/gi, '').replace(/```/g, '').trim();
-              const parsed = JSON.parse(clean);
-              if (parsed && Array.isArray(parsed.stages)) {
-                generatedStages = parsed.stages;
+          for (const model of candidateModels) {
+            try {
+              const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  contents: [{ role: 'user', parts: [{ text: sys + '\n\n' + prompt }] }],
+                  generationConfig: { responseMimeType: 'application/json' }
+                })
+              });
+
+              if (res.ok) {
+                const data = await res.json();
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) {
+                  let clean = text.trim();
+                  if (clean.startsWith('```json')) clean = clean.replace(/^```json/, '');
+                  if (clean.startsWith('```')) clean = clean.replace(/^```/, '');
+                  if (clean.endsWith('```')) clean = clean.replace(/```$/, '');
+                  clean = clean.trim();
+                  const parsed = JSON.parse(clean);
+                  if (parsed && Array.isArray(parsed.stages) && parsed.stages.length > 0) {
+                    generatedStages = parsed.stages;
+                    break;
+                  }
+                }
               }
+            } catch (errLoop) {
+              // Try next candidate model
             }
           }
         } catch (err) {
@@ -14294,24 +14340,49 @@ Guidelines:
         const studentName = (args.name || '').trim();
         if (!studentName) return { success: false, error: 'Student name required' };
 
+        const parshaVal = (args.parsha || '').trim();
+        const dateVal = (args.barMitzvahDate || '').trim();
+        let parshaOrDate = parshaVal;
+        if (dateVal) {
+          parshaOrDate = parshaOrDate ? (parshaOrDate + ' (' + dateVal + ')') : dateVal;
+        }
+
         const newStudent = {
           id: 'stu_' + Date.now(),
           name: studentName,
-          parsha_or_date: (args.parsha || args.barMitzvahDate || '').trim(),
+          parsha: parshaVal,
+          barMitzvahDate: dateVal,
+          parshaOrDate: parshaOrDate,
+          parsha_or_date: parshaOrDate,
+          avatar: '',
+          orderIndex: (APP_STATE.students || []).length,
           notes: (args.notes || '').trim(),
+          skills: typeof getDefaultStudentSkills === 'function' ? getDefaultStudentSkills() : {
+            hebrewReading: { booklet: 'Red Booklet', currentPage: '1', letter: '', vowel: '', letterOrVowel: '', nextTarget: '' },
+            parshaReading: { parshaName: parshaVal, aliyah: 'Aliyah 1', linesLearned: '', currentLine: '', notes: '', recordings: [] },
+            dvarTorah: { stage: '1. Topic & Theme', lengthMinutes: '3-4 min', outlineReady: false, notes: '' },
+            homework: { currentAssignment: '', targetDate: '', completed: false }
+          },
+          schedule: [],
+          completedTopics: {},
+          completedParshiot: {},
           completed_topics: {
             _meta: {
-              parsha: (args.parsha || '').trim(),
-              barMitzvahDate: (args.barMitzvahDate || '').trim(),
+              school_id: typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770',
+              parsha: parshaVal,
+              barMitzvahDate: dateVal,
               lessons: []
             }
           },
           completed_parshiot: {}
         };
+        if (newStudent.skills && newStudent.skills.parshaReading) {
+          newStudent.skills.parshaReading.parshaName = parshaVal;
+        }
 
         APP_STATE.students.push(newStudent);
-        saveStudentsToStorage();
-        pushStudentToCloud(newStudent);
+        saveStudentsToStorage(true);
+        if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(newStudent);
         renderStudents();
         renderCalendar();
 
@@ -14330,14 +14401,20 @@ Guidelines:
         if (args.newName) student.name = args.newName.trim();
         if (args.notes !== undefined) student.notes = args.notes.trim();
         if (args.parsha) {
-          student.parsha_or_date = args.parsha.trim();
+          const parshaTrimmed = args.parsha.trim();
+          student.parsha = parshaTrimmed;
+          student.parshaOrDate = parshaTrimmed;
+          student.parsha_or_date = parshaTrimmed;
           if (student.completed_topics && student.completed_topics._meta) {
-            student.completed_topics._meta.parsha = args.parsha.trim();
+            student.completed_topics._meta.parsha = parshaTrimmed;
+          }
+          if (student.skills && student.skills.parshaReading) {
+            student.skills.parshaReading.parshaName = parshaTrimmed;
           }
         }
 
-        saveStudentsToStorage();
-        pushStudentToCloud(student);
+        saveStudentsToStorage(true);
+        if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
         renderStudents();
         renderCalendar();
 
@@ -14359,11 +14436,26 @@ Guidelines:
           student = {
             id: 'stu_' + Date.now(),
             name: cleanName,
+            parsha: '',
+            barMitzvahDate: '',
             parshaOrDate: '',
+            parsha_or_date: '',
+            avatar: '',
+            orderIndex: (APP_STATE.students || []).length,
             notes: isHe ? 'נוסף אוטומטית בעת קביעת שיעור' : 'Added automatically when scheduling lesson',
+            skills: typeof getDefaultStudentSkills === 'function' ? getDefaultStudentSkills() : {},
             schedule: [],
             completedTopics: {},
-            completedParshiot: {}
+            completedParshiot: {},
+            completed_topics: {
+              _meta: {
+                school_id: typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770',
+                parsha: '',
+                barMitzvahDate: '',
+                lessons: []
+              }
+            },
+            completed_parshiot: {}
           };
           APP_STATE.students.push(student);
           createdOnTheFly = true;
@@ -14373,6 +14465,7 @@ Guidelines:
         const dateObj = new Date(lessonDate + 'T12:00:00');
         const dayOfWeek = isNaN(dateObj.getDay()) ? 0 : dateObj.getDay();
         const formattedTime = formatFriendlyTimeSlot(args.timeSlot);
+        const lessonTopic = args.subject || (isHe ? 'שיעור בר מצווה' : 'Bar Mitzvah Tutoring');
 
         if (!Array.isArray(student.schedule)) student.schedule = [];
 
@@ -14382,13 +14475,23 @@ Guidelines:
           dayOfWeek: dayOfWeek,
           time: formattedTime,
           repeatWeekly: false,
-          topic: args.subject || (isHe ? 'שיעור בר מצווה' : 'Bar Mitzvah Tutoring')
+          topic: lessonTopic
         };
 
         student.schedule.push(newSession);
 
+        if (!student.completed_topics) student.completed_topics = {};
+        if (!student.completed_topics._meta) student.completed_topics._meta = {};
+        if (!Array.isArray(student.completed_topics._meta.lessons)) student.completed_topics._meta.lessons = [];
+        student.completed_topics._meta.lessons.push({
+          id: newSession.id,
+          date: lessonDate,
+          timeSlot: formattedTime,
+          subject: lessonTopic
+        });
+
         saveStudentsToStorage(true);
-        pushStudentToCloud(student);
+        if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
         renderStudents();
         renderCalendar();
 
@@ -14414,10 +14517,14 @@ Guidelines:
 
         if (Array.isArray(student.schedule)) {
           student.schedule = student.schedule.filter(l => l.dateStr !== args.date && l.id !== args.lessonId);
-          saveStudentsToStorage(true);
-          pushStudentToCloud(student);
-          renderCalendar();
         }
+        if (student.completed_topics && student.completed_topics._meta && Array.isArray(student.completed_topics._meta.lessons)) {
+          student.completed_topics._meta.lessons = student.completed_topics._meta.lessons.filter(l => l.date !== args.date && l.id !== args.lessonId);
+        }
+
+        saveStudentsToStorage(true);
+        if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
+        renderCalendar();
 
         return {
           success: true,
@@ -14429,11 +14536,19 @@ Guidelines:
         const student = findStudentFlexible(args.studentNameOrId);
         if (!student) return { success: false, error: `Student not found: ${args.studentNameOrId}` };
 
+        if (!student.completedTopics) student.completedTopics = {};
         if (!student.completed_topics) student.completed_topics = {};
-        student.completed_topics[args.topicId] = !!args.completed;
 
-        saveStudentsToStorage();
-        pushStudentToCloud(student);
+        if (args.completed) {
+          student.completedTopics[args.topicId] = true;
+          student.completed_topics[args.topicId] = true;
+        } else {
+          delete student.completedTopics[args.topicId];
+          delete student.completed_topics[args.topicId];
+        }
+
+        saveStudentsToStorage(true);
+        if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
         renderStudents();
 
         return {
@@ -14448,11 +14563,19 @@ Guidelines:
         const student = findStudentFlexible(args.studentNameOrId);
         if (!student) return { success: false, error: `Student not found: ${args.studentNameOrId}` };
 
+        if (!student.completedParshiot) student.completedParshiot = {};
         if (!student.completed_parshiot) student.completed_parshiot = {};
-        student.completed_parshiot[args.parshaId] = !!args.completed;
 
-        saveStudentsToStorage();
-        pushStudentToCloud(student);
+        if (args.completed) {
+          student.completedParshiot[args.parshaId] = true;
+          student.completed_parshiot[args.parshaId] = true;
+        } else {
+          delete student.completedParshiot[args.parshaId];
+          delete student.completed_parshiot[args.parshaId];
+        }
+
+        saveStudentsToStorage(true);
+        if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
         renderStudents();
 
         return {
@@ -14761,19 +14884,39 @@ Guidelines:
     }
 
     function getPortalContextData() {
+      const activeSchool = typeof getActiveSchool === 'function' ? getActiveSchool() : { id: 'school_main_770', name: 'Bar Mitzvah Academy' };
       const studentsSummary = (APP_STATE.students || []).map(s => {
-        const lessons = (s.completed_topics?._meta?.lessons || []).map(l => ({
-          date: l.date,
-          timeSlot: l.timeSlot,
-          subject: l.subject
+        const schedList = (Array.isArray(s.schedule) ? s.schedule : []).map(l => ({
+          id: l.id,
+          date: l.dateStr || l.date,
+          timeSlot: l.time || l.timeSlot,
+          subject: l.topic || l.subject
         }));
+        const metaList = (s.completed_topics?._meta?.lessons || []).map(l => ({
+          id: l.id,
+          date: l.date || l.dateStr,
+          timeSlot: l.timeSlot || l.time,
+          subject: l.subject || l.topic
+        }));
+        const combinedLessons = [...schedList];
+        metaList.forEach(ml => {
+          if (!combinedLessons.some(sl => sl.date === ml.date && sl.timeSlot === ml.timeSlot)) {
+            combinedLessons.push(ml);
+          }
+        });
+
+        const topicsCompleted = Object.keys(s.completedTopics || s.completed_topics || {}).filter(k => k !== '_meta' && (s.completedTopics?.[k] || s.completed_topics?.[k]));
+        const parshiotCompleted = Object.keys(s.completedParshiot || s.completed_parshiot || {}).filter(k => s.completedParshiot?.[k] || s.completed_parshiot?.[k]);
+
         return {
           id: s.id,
           name: s.name,
-          parsha: s.completed_topics?._meta?.parsha || s.parsha_or_date,
-          barMitzvahDate: s.completed_topics?._meta?.barMitzvahDate || '',
-          notes: s.notes,
-          scheduledLessons: lessons
+          parsha: s.parsha || s.completed_topics?._meta?.parsha || s.parsha_or_date || s.parshaOrDate || '',
+          barMitzvahDate: s.barMitzvahDate || s.completed_topics?._meta?.barMitzvahDate || '',
+          notes: s.notes || '',
+          completedTopicsCount: topicsCompleted.length,
+          completedParshiotCount: parshiotCompleted.length,
+          scheduledLessons: combinedLessons
         };
       });
 
@@ -14802,6 +14945,8 @@ Guidelines:
 
       return {
         activeTutorLang: APP_STATE.lang,
+        activeSchoolId: activeSchool.id,
+        activeSchoolName: activeSchool.name,
         totalStudents: studentsSummary.length,
         students: studentsSummary,
         courses: coursesSummary,
