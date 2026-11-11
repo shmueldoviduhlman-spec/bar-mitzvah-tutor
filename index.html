@@ -332,19 +332,16 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between" id="lbl-signup-school-code">
-            <span>School Join Code (Optional)</span>
-            <span class="text-[10px] text-amber-400 font-mono">e.g. 770770</span>
-          </label>
+          <label class="block text-xs font-semibold text-slate-300 mb-1" id="lbl-signup-school-code">School Join Code (Optional)</label>
           <input
             type="text"
             name="school_code"
             id="signup-school-code"
-            placeholder="Enter 6-digit Code"
+            placeholder="Only if invited to an existing team"
             class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3.5 text-sm text-white font-mono placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 uppercase"
           >
           <p class="text-[10px] text-slate-400 mt-1" id="lbl-signup-school-code-desc">
-            Have a code from your school or lead teacher? Enter it here to join their shared students and lessons.
+            Leave blank to create your own independent workspace, or enter a code if a colleague invited you.
           </p>
         </div>
 
@@ -3146,7 +3143,7 @@
           <input
             type="text"
             id="input-join-school-code"
-            placeholder="e.g. 770770"
+            placeholder="Enter 6-digit code"
             maxlength="20"
             class="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 px-4 text-center font-mono text-lg font-bold tracking-widest text-amber-400 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 uppercase"
             required
@@ -3419,11 +3416,18 @@
         return userEmail.replace(/[^a-z0-9]/g, '_');
       }
 
-      return 'school_main_770';
+      return null;
     }
 
     function getActiveSchool() {
       const schoolId = getActiveSchoolId();
+      if (!schoolId) {
+        return {
+          id: 'unauthenticated',
+          name: 'TutorPilot',
+          members: []
+        };
+      }
       const registry = getSchoolsRegistry();
       const found = registry.find(s => s.id === schoolId);
       return found || DEFAULT_SCHOOL;
@@ -3484,6 +3488,7 @@
 
     function getCustomCoursesStorageKey() {
       const schoolId = getActiveSchoolId();
+      if (!schoolId) return 'tutor_custom_courses_unauthenticated';
       if (schoolId === 'school_main_770') {
         return 'tutor_custom_courses';
       }
@@ -3492,6 +3497,7 @@
 
     function getStudyMaterialsStorageKey() {
       const schoolId = getActiveSchoolId();
+      if (!schoolId) return 'tutor_study_additions_unauthenticated';
       if (schoolId === 'school_main_770') {
         return 'tutor_study_additions';
       }
@@ -3500,6 +3506,7 @@
 
     function getCustomReadingStorageKey() {
       const schoolId = getActiveSchoolId();
+      if (!schoolId) return 'tutor_custom_reading_unauthenticated';
       if (schoolId === 'school_main_770') {
         return 'tutor_custom_reading';
       }
@@ -3508,6 +3515,7 @@
 
     function getCustomMilestonesStorageKey() {
       const schoolId = getActiveSchoolId();
+      if (!schoolId) return 'tutor_custom_milestones_unauthenticated';
       if (schoolId === 'school_main_770') {
         return 'tutor_custom_milestones';
       }
@@ -5016,7 +5024,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     async function fetchCloudStudents() {
-      if (!APP_STATE.cloud.client) return;
+      if (!APP_STATE.currentUser || !APP_STATE.cloud.client) return;
       try {
         const { data, error } = await APP_STATE.cloud.client
           .from('students_sync')
@@ -5487,6 +5495,9 @@ alter publication supabase_realtime add table public.students_sync;`;
 
     function getStudentStorageKey() {
       const schoolId = getActiveSchoolId();
+      if (!schoolId) {
+        return 'tutor_students_unauthenticated';
+      }
       if (schoolId === 'school_main_770') {
         return 'tutor_students_v1';
       }
@@ -5590,6 +5601,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       loadCustomMilestonesFromStorage();
       seedBarMitzvahCoursesToAccount();
       renderAllViews();
+      initSupabaseCloud();
 
       const lockScreen = document.getElementById('lock-screen');
       if (lockScreen) {
@@ -6909,21 +6921,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     // Initialize App
-    document.addEventListener('DOMContentLoaded', () => {
-      checkPasscodeAuth();
-      checkUrlJoinCode();
-      loadStudentsFromStorage();
-      loadStudyMaterialsFromStorage();
-      loadCustomCoursesFromStorage();
-      loadCustomReadingFromStorage();
-      loadCustomMilestonesFromStorage();
-      seedBarMitzvahCoursesToAccount();
-      checkUrlHashSync();
-      applyLanguageDirection();
-      renderAllViews();
-      initSupabaseCloud();
-      lucide.createIcons();
-
+    document.addEventListener('DOMContentLoaded', async () => {
       // Outside click listener for User Profile Menu
       document.addEventListener('click', (e) => {
         const userDropdown = document.getElementById('user-dropdown-menu');
@@ -6934,6 +6932,26 @@ alter publication supabase_realtime add table public.students_sync;`;
           }
         }
       });
+
+      applyLanguageDirection();
+      lucide.createIcons();
+
+      const isAuthed = await checkPasscodeAuth();
+      if (!isAuthed) {
+        return; // Strict Zero-State Protection: halt immediately if not logged in
+      }
+
+      checkUrlJoinCode();
+      loadStudentsFromStorage();
+      loadStudyMaterialsFromStorage();
+      loadCustomCoursesFromStorage();
+      loadCustomReadingFromStorage();
+      loadCustomMilestonesFromStorage();
+      seedBarMitzvahCoursesToAccount();
+      checkUrlHashSync();
+      renderAllViews();
+      initSupabaseCloud();
+      lucide.createIcons();
     });
 
     // Language Toggle
@@ -7316,10 +7334,10 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (signupPassword) signupPassword.placeholder = isHe ? "לפחות 6 תווים" : "Min. 6 characters";
 
       const lblSignupSchoolCode = document.getElementById('lbl-signup-school-code');
-      if (lblSignupSchoolCode) lblSignupSchoolCode.innerHTML = isHe ? '<span>קוד הצטרפות לבית ספר (אופציונלי)</span><span class="text-[10px] text-amber-400 font-mono">לדוגמה: 770770</span>' : '<span>School Join Code (Optional)</span><span class="text-[10px] text-amber-400 font-mono">e.g. 770770</span>';
+      if (lblSignupSchoolCode) lblSignupSchoolCode.innerHTML = isHe ? '<span>קוד הצטרפות לבית ספר (אופציונלי)</span>' : '<span>School Join Code (Optional)</span>';
 
       const signupSchoolCode = document.getElementById('signup-school-code');
-      if (signupSchoolCode) signupSchoolCode.placeholder = isHe ? "הזן קוד בן 6 ספרות" : "Enter 6-digit Code";
+      if (signupSchoolCode) signupSchoolCode.placeholder = isHe ? "רק אם הוזמנת לצוות קיים" : "Only if invited to an existing team";
 
       const lblSignupSchoolCodeDesc = document.getElementById('lbl-signup-school-code-desc');
       if (lblSignupSchoolCodeDesc) lblSignupSchoolCodeDesc.textContent = isHe ? "קיבלת קוד מבית הספר או מהמלמד הראשי? הזן אותו כאן כדי להצטרף לכיתה המשותפת." : "Have a code from your school or lead teacher? Enter it here to join their shared students and lessons.";
@@ -16209,6 +16227,7 @@ Base44, please confirm receipt of this protocol and let us know that you are rea
     }
 
     function checkUrlHashSync() {
+      if (!APP_STATE.currentUser) return;
       const hash = window.location.hash;
       if (hash && hash.startsWith('#sync=')) {
         try {

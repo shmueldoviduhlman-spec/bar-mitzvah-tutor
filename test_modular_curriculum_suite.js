@@ -195,6 +195,16 @@ assert(sandbox.isMasterAccount() === false, 'External tutor is NOT identified as
 
 sandbox.APP_STATE.currentUser = null;
 assert(sandbox.isMasterAccount() === false, 'Unauthenticated user is NOT identified as master account');
+assert(sandbox.getActiveSchoolId() === null, 'Unauthenticated user has null active school ID');
+assert(sandbox.getStudentStorageKey() === 'tutor_students_unauthenticated', 'Unauthenticated student storage key is isolated');
+assert(sandbox.getCustomCoursesStorageKey() === 'tutor_custom_courses_unauthenticated', 'Unauthenticated courses storage key is isolated');
+assert(sandbox.getStudyMaterialsStorageKey() === 'tutor_study_additions_unauthenticated', 'Unauthenticated materials storage key is isolated');
+assert(sandbox.getCustomReadingStorageKey() === 'tutor_custom_reading_unauthenticated', 'Unauthenticated reading storage key is isolated');
+assert(sandbox.getCustomMilestonesStorageKey() === 'tutor_custom_milestones_unauthenticated', 'Unauthenticated milestones storage key is isolated');
+
+// Verify public signup form does not leak private join code
+assert(!indexHtml.includes('e.g. 770770'), 'Signup form does NOT expose 770770 join code example');
+assert(!indexHtml.includes('לדוגמה: 770770'), 'Hebrew signup form does NOT expose 770770 join code example');
 
 // Test storage key scoping
 sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
