@@ -557,6 +557,10 @@
               <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
               <span id="lbl-tutor-hub-ai-btn">AI Curriculum Builder</span>
             </button>
+            <button onclick="handleLoadStarterBarMitzvahTemplate()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 text-amber-300 font-medium text-xs border border-amber-500/30 transition active:scale-95" title="Optionally load pre-made Bar Mitzvah topics and Chumash lessons">
+              <i data-lucide="book-open" class="w-4 h-4 text-amber-400"></i>
+              <span id="lbl-load-template-btn">Load Bar Mitzvah Template</span>
+            </button>
           </div>
         </div>
 
@@ -2997,6 +3001,18 @@
           <i data-lucide="shield" class="w-4 h-4 text-slate-500"></i>
         </button>
 
+        <!-- Reset Workspace to Blank Canvas Tile -->
+        <button onclick="handleResetWorkspaceToCleanSlate()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-rose-900/50 text-rose-300 transition active:scale-98 text-left">
+          <div class="flex items-center gap-3">
+            <i data-lucide="rotate-ccw" class="w-4 h-4 text-rose-400"></i>
+            <div>
+              <div id="settings-reset-title" class="text-xs font-bold text-rose-300">Reset Workspace to Blank Canvas</div>
+              <p id="settings-reset-desc" class="text-[11px] text-slate-500 mt-0.5">Start with 0 students and courses to build from scratch</p>
+            </div>
+          </div>
+          <i data-lucide="trash-2" class="w-4 h-4 text-slate-500"></i>
+        </button>
+
       </div>
     </div>
   </div>
@@ -3114,6 +3130,10 @@
           <button onclick="closeSchoolWorkspaceModal(); openJoinSchoolModal();" class="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1.5 py-1 transition">
             <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
             <span id="lbl-switch-school-btn">Join a different school with code</span>
+          </button>
+          <button onclick="closeSchoolWorkspaceModal(); handleResetWorkspaceToCleanSlate();" class="text-xs text-rose-400/80 hover:text-rose-300 flex items-center gap-1.5 py-1 transition" title="Clear all students and courses to start fresh">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span id="lbl-reset-workspace-btn">Reset Workspace to Blank Canvas</span>
           </button>
         </div>
       </div>
@@ -5138,9 +5158,16 @@ alter publication supabase_realtime add table public.students_sync;`;
             });
 
             mergeStudentsWithCloud(cloudStudents);
-          } else if (APP_STATE.students.length > 0) {
-            for (const s of APP_STATE.students) {
-              await pushStudentToCloud(s);
+          } else {
+            const cleanKey = 'tutor_canvas_reset_v1_' + (myEmail || '').replace(/[^a-z0-9]/g, '_');
+            if (localStorage.getItem(cleanKey)) {
+              APP_STATE.students = [];
+              const sKey = getStudentStorageKey();
+              if (sKey) localStorage.setItem(sKey, '[]');
+            } else if (APP_STATE.students.length > 0) {
+              for (const s of APP_STATE.students) {
+                await pushStudentToCloud(s);
+              }
             }
           }
         }
@@ -5599,7 +5626,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       loadCustomCoursesFromStorage();
       loadCustomReadingFromStorage();
       loadCustomMilestonesFromStorage();
-      seedBarMitzvahCoursesToAccount();
+      checkCleanCanvasReset();
       renderAllViews();
       initSupabaseCloud();
 
@@ -5924,7 +5951,6 @@ alter publication supabase_realtime add table public.students_sync;`;
       loadCustomReadingFromStorage();
       loadCustomMilestonesFromStorage();
       loadStudyMaterialsFromStorage();
-      seedBarMitzvahCoursesToAccount();
       renderAllViews();
       if (APP_STATE.cloud && APP_STATE.cloud.client) {
         fetchCloudStudents();
@@ -6947,7 +6973,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       loadCustomCoursesFromStorage();
       loadCustomReadingFromStorage();
       loadCustomMilestonesFromStorage();
-      seedBarMitzvahCoursesToAccount();
+      checkCleanCanvasReset();
       checkUrlHashSync();
       renderAllViews();
       initSupabaseCloud();
@@ -10703,6 +10729,86 @@ IV. Conclusion
       } catch (_) {}
     }
 
+    function checkCleanCanvasReset() {
+      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      if (!email) return;
+      const markerKey = 'tutor_canvas_reset_v1_' + email.replace(/[^a-z0-9]/g, '_');
+      if (!localStorage.getItem(markerKey)) {
+        localStorage.setItem(markerKey, 'true');
+        const sKey = getStudentStorageKey();
+        const cKey = getCustomCoursesStorageKey();
+        const mKey = getStudyMaterialsStorageKey();
+        const rKey = getCustomReadingStorageKey();
+        const msKey = getCustomMilestonesStorageKey();
+        if (sKey) localStorage.setItem(sKey, '[]');
+        if (cKey) localStorage.setItem(cKey, '[]');
+        if (mKey) localStorage.setItem(mKey, '[]');
+        if (rKey) localStorage.setItem(rKey, '[]');
+        if (msKey) localStorage.setItem(msKey, '[]');
+        localStorage.removeItem('bm_curriculum_seeded_v2_' + email);
+        localStorage.removeItem('bm_curriculum_seeded_v2_master');
+        APP_STATE.students = [];
+        APP_STATE.customCourses = [];
+        APP_STATE.customReadingMaterials = [];
+        APP_STATE.customMilestones = [];
+        APP_STATE.studyAdditions = [];
+      }
+    }
+
+    function handleResetWorkspaceToCleanSlate() {
+      const isHe = APP_STATE.lang === 'he';
+      const confirmMsg = isHe
+        ? 'האם אתה בטוח שברצונך לאפס את סביבת העבודה לדף חלק? כל התלמידים והקורסים יימחקו כדי שתוכל לבנות אותם מחדש מאפס. קובץ גיבוי יורד אוטומטית למחשבך.'
+        : 'Are you sure you want to reset your workspace to a clean slate? All current students and courses will be cleared so you can test building them from scratch. An automatic backup JSON file will be downloaded.';
+      if (!confirm(confirmMsg)) return;
+
+      // 1. Download full backup
+      exportDataJson();
+
+      // 2. Clear local storage
+      const sKey = getStudentStorageKey();
+      const cKey = getCustomCoursesStorageKey();
+      const mKey = getStudyMaterialsStorageKey();
+      const rKey = getCustomReadingStorageKey();
+      const msKey = getCustomMilestonesStorageKey();
+      if (sKey) localStorage.setItem(sKey, '[]');
+      if (cKey) localStorage.setItem(cKey, '[]');
+      if (mKey) localStorage.setItem(mKey, '[]');
+      if (rKey) localStorage.setItem(rKey, '[]');
+      if (msKey) localStorage.setItem(msKey, '[]');
+
+      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      localStorage.setItem('tutor_canvas_reset_v1_' + email.replace(/[^a-z0-9]/g, '_'), 'true');
+      localStorage.removeItem('bm_curriculum_seeded_v2_' + email);
+      localStorage.removeItem('bm_curriculum_seeded_v2_master');
+
+      // 3. Clear in-memory
+      APP_STATE.students = [];
+      APP_STATE.customCourses = [];
+      APP_STATE.customReadingMaterials = [];
+      APP_STATE.customMilestones = [];
+      APP_STATE.studyAdditions = [];
+      APP_STATE.activeStudentId = null;
+      APP_STATE.activeCourseId = null;
+
+      // 4. Render
+      renderAllViews();
+
+      showToast(isHe ? 'סביבת העבודה אופסה לדף חלק בהצלחה!' : 'Workspace successfully reset to a clean slate!');
+    }
+
+    function handleLoadStarterBarMitzvahTemplate() {
+      const isHe = APP_STATE.lang === 'he';
+      const confirmMsg = isHe
+        ? 'לטעון תבנית בר מצווה מוכנה (13 מושגי יסוד ו-23 פרשיות חומש)?'
+        : 'Load the ready-made Bar Mitzvah curriculum template (13 Jewish Concepts & 23 Chumash Parshiot)?';
+      if (!confirm(confirmMsg)) return;
+
+      seedBarMitzvahCoursesToAccount(true);
+      renderAllViews();
+      showToast(isHe ? 'תבנית הלימוד נטענה בהצלחה!' : 'Bar Mitzvah template loaded successfully!');
+    }
+
     function loadStarterSampleCourse(sampleKey) {
       const isHe = APP_STATE.lang === 'he';
       const sampleCourse = {
@@ -14356,7 +14462,7 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
               <i data-lucide="bot" class="w-6 h-6"></i>
             </div>
             <div class="space-y-1">
-              <h3 class="text-sm font-bold text-white">${isHe ? 'שלום! אני עוזר ה-AI שלך להוראת בר מצווה' : 'Welcome to your AI Bar Mitzvah Tutor Assistant'}</h3>
+              <h3 class="text-sm font-bold text-white">${isHe ? 'שלום! אני עוזר ה-AI שלך ב-TutorPilot' : 'Welcome to your TutorPilot AI Assistant'}</h3>
               <p class="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
                 ${isHe
                   ? 'אני יכול להוסיף תלמידים, לשנות שמות, לקבוע שיעורים ביומן, לסמן התקדמות ולהוסיף הערות וסיפורים לכרטיסי הלימוד.'
@@ -16081,7 +16187,7 @@ Always reply with a clean, bulleted summary:
 • Date & Time (if applicable)
 • Lesson Focus / Teaching Notes
 • Curriculum Topics Checked Off / Added
-• Status: Synced live to TutorPilot portal (https://bar-mitzvah-tutor.pages.dev)
+• Status: Synced live to TutorPilot portal (https://tutorpilot.pages.dev)
 
 Base44, please confirm receipt of this protocol and let us know that you are ready.`;
     }
@@ -16216,14 +16322,21 @@ Base44, please confirm receipt of this protocol and let us know that you are rea
 
     function exportDataJson() {
       const t = I18N[APP_STATE.lang];
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(APP_STATE.students, null, 2));
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        students: APP_STATE.students || [],
+        customCourses: APP_STATE.customCourses || [],
+        customReadingMaterials: APP_STATE.customReadingMaterials || [],
+        customMilestones: APP_STATE.customMilestones || []
+      };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", "bar_mitzvah_tracker_backup_" + new Date().toISOString().slice(0,10) + ".json");
+      downloadAnchor.setAttribute("download", "tutorpilot_backup_" + new Date().toISOString().slice(0,10) + ".json");
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
-      showToast(t.toastBackupDownloaded);
+      showToast(t.toastBackupDownloaded || 'Backup downloaded successfully!');
     }
 
     function checkUrlHashSync() {

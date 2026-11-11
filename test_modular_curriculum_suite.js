@@ -1143,6 +1143,13 @@ assert(savedReadingCourse !== undefined, 'Saved course exists in customCourses')
 assert(savedReadingCourse.format_type === 'reading', 'Course format_type saved as reading');
 assert(savedReadingCourse.icon === '📖', 'Reading course default icon is 📖');
 
+// 9. Clean Canvas Reset & On-Demand Template Seeding
+assert(typeof sandbox.checkCleanCanvasReset === 'function', 'checkCleanCanvasReset is a function');
+assert(typeof sandbox.handleResetWorkspaceToCleanSlate === 'function', 'handleResetWorkspaceToCleanSlate is a function');
+assert(typeof sandbox.handleLoadStarterBarMitzvahTemplate === 'function', 'handleLoadStarterBarMitzvahTemplate is a function');
+assert(indexHtml.includes('id="lbl-load-template-btn"'), 'HTML contains Load Bar Mitzvah Template trigger in blank state');
+assert(indexHtml.includes('id="lbl-reset-workspace-btn"'), 'HTML contains Reset Workspace to Blank Canvas trigger');
+
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
 console.log(`========================================\n`);

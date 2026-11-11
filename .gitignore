@@ -5,3 +5,5 @@
 .env*
 !.env.example
 scratch/
+backup_students_sync_full.json
+*.backup.json
