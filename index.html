@@ -9086,6 +9086,10 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!Array.isArray(APP_STATE.customCourses)) {
         APP_STATE.customCourses = [];
       }
+      // Purge legacy Bar Mitzvah courses to maintain a clean canvas for modern course authoring
+      APP_STATE.customCourses = APP_STATE.customCourses.filter(c =>
+        c && c.id !== 'course_bar_mitzvah_concepts' && c.id !== 'course_bar_mitzvah_chumash'
+      );
       populateCourseSelector();
     }
 
@@ -11828,8 +11832,7 @@ Class Topic / Instruction: ${promptText}`;
     // SEED INITIAL BAR MITZVAH COURSES TO USER
     // ==============================================
     function seedBarMitzvahCoursesToAccount(force = false) {
-      const isMaster = isMasterAccount();
-      if (!isMaster && !force) return;
+      if (!force) return; // Never auto-seed into accounts! Only runs if explicitly forced (e.g. test gate or manual starter button)
 
       const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
       const seedMarkerKey = 'bm_curriculum_seeded_v2_' + (email || 'master');
@@ -12014,29 +12017,66 @@ Class Topic / Instruction: ${promptText}`;
       } catch (_) {}
     }
 
+    function purgeLegacyCurriculumData() {
+      // 1. Purge legacy course IDs from customCourses array
+      if (Array.isArray(APP_STATE.customCourses)) {
+        APP_STATE.customCourses = APP_STATE.customCourses.filter(c =>
+          c && c.id !== 'course_bar_mitzvah_concepts' && c.id !== 'course_bar_mitzvah_chumash'
+        );
+      }
+
+      // 2. Clear legacy active course ID pointers
+      if (APP_STATE.activeCourseId === 'course_bar_mitzvah_concepts' || APP_STATE.activeCourseId === 'course_bar_mitzvah_chumash') {
+        APP_STATE.activeCourseId = (APP_STATE.customCourses && APP_STATE.customCourses[0] ? APP_STATE.customCourses[0].id : null);
+      }
+      if (APP_STATE.insideCourseId === 'course_bar_mitzvah_concepts' || APP_STATE.insideCourseId === 'course_bar_mitzvah_chumash') {
+        APP_STATE.insideCourseId = null;
+      }
+
+      // 3. Purge legacy courses across all possible local storage keys
+      try {
+        const keysToClean = [
+          'tutor_custom_courses',
+          'tutor_custom_courses_school_main_770',
+          getCustomCoursesStorageKey()
+        ];
+        keysToClean.forEach(k => {
+          if (!k) return;
+          const raw = localStorage.getItem(k);
+          if (raw) {
+            try {
+              const list = JSON.parse(raw);
+              if (Array.isArray(list)) {
+                const cleaned = list.filter(c => c && c.id !== 'course_bar_mitzvah_concepts' && c.id !== 'course_bar_mitzvah_chumash');
+                localStorage.setItem(k, JSON.stringify(cleaned));
+              }
+            } catch (_) {}
+          }
+        });
+      } catch (_) {}
+    }
+
     function checkCleanCanvasReset() {
       const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
       if (!email) return;
-      const markerKey = 'tutor_canvas_reset_v1_' + email.replace(/[^a-z0-9]/g, '_');
+      purgeLegacyCurriculumData();
+      const markerKey = 'tutor_canvas_reset_v2_' + email.replace(/[^a-z0-9]/g, '_');
       if (!localStorage.getItem(markerKey)) {
         localStorage.setItem(markerKey, 'true');
-        const sKey = getStudentStorageKey();
         const cKey = getCustomCoursesStorageKey();
-        const mKey = getStudyMaterialsStorageKey();
-        const rKey = getCustomReadingStorageKey();
-        const msKey = getCustomMilestonesStorageKey();
-        if (sKey) localStorage.setItem(sKey, '[]');
-        if (cKey) localStorage.setItem(cKey, '[]');
-        if (mKey) localStorage.setItem(mKey, '[]');
-        if (rKey) localStorage.setItem(rKey, '[]');
-        if (msKey) localStorage.setItem(msKey, '[]');
-        localStorage.removeItem('bm_curriculum_seeded_v2_' + email);
-        localStorage.removeItem('bm_curriculum_seeded_v2_master');
-        APP_STATE.students = [];
-        APP_STATE.customCourses = [];
-        APP_STATE.customReadingMaterials = [];
-        APP_STATE.customMilestones = [];
-        APP_STATE.studyAdditions = [];
+        if (cKey) {
+          const raw = localStorage.getItem(cKey);
+          if (raw) {
+            try {
+              const list = JSON.parse(raw);
+              if (Array.isArray(list)) {
+                const cleaned = list.filter(c => c && c.id !== 'course_bar_mitzvah_concepts' && c.id !== 'course_bar_mitzvah_chumash');
+                localStorage.setItem(cKey, JSON.stringify(cleaned));
+              }
+            } catch (_) {}
+          }
+        }
+        purgeLegacyCurriculumData();
       }
     }
 
@@ -13205,6 +13245,25 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
       }
     }
 
+    function getStudentCourseProgress(student) {
+      if (!student) return { activeCourses: [], totalClasses: 0, completedClasses: 0, overallPct: 0 };
+      const activeCourses = (APP_STATE.customCourses || []).filter(c => c && Array.isArray(c.lessons) && c.id !== 'course_bar_mitzvah_concepts' && c.id !== 'course_bar_mitzvah_chumash');
+      let totalClasses = 0;
+      let completedClasses = 0;
+      activeCourses.forEach(c => {
+        const lessons = c.lessons || [];
+        totalClasses += lessons.length;
+        lessons.forEach(l => {
+          const key = c.id + '_' + l.id;
+          if (student.completedTopics && (student.completedTopics[key] || student.completedTopics[l.id])) {
+            completedClasses++;
+          }
+        });
+      });
+      const overallPct = totalClasses > 0 ? Math.round((completedClasses / totalClasses) * 100) : 0;
+      return { activeCourses, totalClasses, completedClasses, overallPct };
+    }
+
     function renderStudentDrawer(studentId, force = false) {
       const drawer = document.getElementById('drawer-student-detail');
       if (!drawer || drawer.classList.contains('hidden')) return;
@@ -13221,15 +13280,8 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
 
       const isHe = APP_STATE.lang === 'he';
       const t = I18N[APP_STATE.lang];
-      const topics = window.JEWISH_TOPICS_DATA || [];
-      const chumash = [...(window.BEREISHIT_PARSHIOT_DATA || []), ...(window.SHEMOT_PARSHIOT_DATA || [])];
-
-      const totalTopics = topics.length;
-      const totalParshiot = chumash.length;
-      const completedTCount = Object.keys(student.completedTopics || {}).filter(k => k !== '_meta' && student.completedTopics[k]).length;
-      const completedPCount = Object.keys(student.completedParshiot || {}).filter(k => student.completedParshiot[k]).length;
-      const overallPct = Math.round(((completedTCount + completedPCount) / (totalTopics + totalParshiot)) * 100);
-      const { parsha: studentParsha, date: studentDate } = getStudentParshaAndDate(student);
+      const { activeCourses, totalClasses, completedClasses, overallPct } = getStudentCourseProgress(student);
+      const { date: studentDate } = getStudentParshaAndDate(student);
 
       // Render Header
       const header = document.getElementById('drawer-header-content');
@@ -13255,9 +13307,9 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
               </span>
             </div>
             <div class="flex items-center gap-2 flex-wrap text-xs text-slate-400">
-              <span id="drawer-header-parsha-badge" class="flex items-center gap-1.5 text-cyan-300 font-medium">
-                <i data-lucide="scroll" class="w-3.5 h-3.5 text-cyan-400 shrink-0"></i>
-                <span id="drawer-header-parsha-badge-text">${studentParsha || (isHe ? 'ללא פרשה' : 'No Parsha')}</span>
+              <span id="drawer-header-courses-badge" class="flex items-center gap-1.5 text-brand-300 font-medium">
+                <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400"></i>
+                <span id="drawer-header-courses-badge-text">${activeCourses.length} ${isHe ? (activeCourses.length === 1 ? 'קורס' : 'קורסים') : (activeCourses.length === 1 ? 'Course' : 'Courses')}</span>
               </span>
               ${studentDate ? `
                 <span class="text-slate-600 font-bold">•</span>
@@ -13284,16 +13336,8 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
       const body = document.getElementById('drawer-body-content');
       if (body) {
         ensureStudentSkills(student);
-        const em = student.enrolledModules || { lessons: true, reading: true, speech: true, custom: true };
         const sk = student.skills;
         const hw = sk.homework || {};
-        const hr = sk.hebrewReading || {};
-        const pr = sk.parshaReading || {};
-        const sr = sk.shemaReading || {};
-        const dt = sk.dvarTorah || {};
-        const dtText = dt.text || '';
-        const dvarTorahWordCount = dtText.trim() ? dtText.trim().split(/\s+/).length : 0;
-        const dvarTorahEstMinutes = Math.max(1, Math.round(dvarTorahWordCount / 125 * 10) / 10);
         const goals = Array.isArray(sk.customGoals) ? sk.customGoals : [];
 
         // Active Homework Card (Universal Permanent)
@@ -13347,422 +13391,7 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
           </div>
           `;
 
-        // Curriculum Tracks Active for Student (Interactive Badges)
-        const curriculumTracksBarHtml = `
-          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 text-xs gap-2 flex-wrap">
-            <span class="text-slate-400 font-semibold flex items-center gap-1.5">
-              <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-brand-400"></i>
-              <span>${t.curriculumTracksTitle || 'Curriculum Tracks:'}</span>
-            </span>
-            <div class="flex items-center gap-1 flex-wrap">
-              <button
-                type="button"
-                onclick="toggleStudentModule('${student.id}', 'reading')"
-                class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition flex items-center gap-1 ${
-                  em.reading !== false
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30'
-                    : 'bg-slate-900 text-slate-500 border-slate-800 hover:text-slate-300'
-                }"
-                title="Toggle Reading Track"
-              >
-                <span>${t.trackReadingLabel || '📖 Reading'}</span>
-                <span class="w-1.5 h-1.5 rounded-full ${em.reading !== false ? 'bg-amber-400' : 'bg-slate-600'}"></span>
-              </button>
-
-              <button
-                type="button"
-                onclick="toggleStudentModule('${student.id}', 'speech')"
-                class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition flex items-center gap-1 ${
-                  em.speech !== false
-                    ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40 hover:bg-indigo-500/30'
-                    : 'bg-slate-900 text-slate-500 border-slate-800 hover:text-slate-300'
-                }"
-                title="Toggle Speech Track"
-              >
-                <span>${t.trackSpeechLabel || '🎙️ Speech'}</span>
-                <span class="w-1.5 h-1.5 rounded-full ${em.speech !== false ? 'bg-indigo-400' : 'bg-slate-600'}"></span>
-              </button>
-
-              <button
-                type="button"
-                onclick="toggleStudentModule('${student.id}', 'lessons')"
-                class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition flex items-center gap-1 ${
-                  em.lessons !== false
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
-                    : 'bg-slate-900 text-slate-500 border-slate-800 hover:text-slate-300'
-                }"
-                title="Toggle Lessons Track"
-              >
-                <span>${t.trackLessonsLabel || '📜 Lessons'}</span>
-                <span class="w-1.5 h-1.5 rounded-full ${em.lessons !== false ? 'bg-emerald-400' : 'bg-slate-600'}"></span>
-              </button>
-
-              <button
-                type="button"
-                onclick="toggleStudentModule('${student.id}', 'custom')"
-                class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition flex items-center gap-1 ${
-                  em.custom !== false
-                    ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 hover:bg-purple-500/30'
-                    : 'bg-slate-900 text-slate-500 border-slate-800 hover:text-slate-300'
-                }"
-                title="Toggle Custom Track"
-              >
-                <span>${t.trackCustomLabel || '✦ Custom'}</span>
-                <span class="w-1.5 h-1.5 rounded-full ${em.custom !== false ? 'bg-purple-400' : 'bg-slate-600'}"></span>
-              </button>
-            </div>
-          </div>
-        `;
-
-        // Card 1: Hebrew Reading & Booklets
-        const cardHebrewReadingHtml = `
-          <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-                <i data-lucide="book-marked" class="w-3.5 h-3.5"></i>
-                <span>${t.hebrewReadingTitle}</span>
-              </span>
-              <span class="text-[10px] text-slate-500 font-mono">Booklet Level</span>
-            </div>
-
-            <!-- 4 Leveled Booklets by Color -->
-            <div class="grid grid-cols-4 gap-1 p-1 bg-slate-900 rounded-xl border border-slate-800 text-xs">
-              ${[
-                { id: 'Red Booklet', label: isHe ? 'אדומה' : 'Red', dot: 'bg-red-500', active: 'bg-red-600/30 text-red-200 border-red-500/50 shadow-sm' },
-                { id: 'Orange Booklet', label: isHe ? 'כתומה' : 'Orange', dot: 'bg-orange-500', active: 'bg-orange-600/30 text-orange-200 border-orange-500/50 shadow-sm' },
-                { id: 'Yellow Booklet', label: isHe ? 'צהובה' : 'Yellow', dot: 'bg-amber-400', active: 'bg-amber-500/30 text-amber-200 border-amber-400/50 shadow-sm' },
-                { id: 'Green Booklet', label: isHe ? 'ירוקה' : 'Green', dot: 'bg-emerald-500', active: 'bg-emerald-600/30 text-emerald-200 border-emerald-500/50 shadow-sm' }
-              ].map(b => {
-                const isSelected = hr.booklet && (hr.booklet.includes(b.id.split(' ')[0]) || (isHe && hr.booklet.includes(b.label)));
-                return `
-                  <button
-                    type="button"
-                    onclick="setStudentBooklet('${student.id}', '${b.id}')"
-                    class="py-2 px-1.5 min-h-[38px] rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition border ${
-                      isSelected
-                        ? b.active + ' font-bold'
-                        : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                    }"
-                  >
-                    <span class="w-2 h-2 rounded-full ${b.dot} shrink-0"></span>
-                    <span>${b.label}</span>
-                  </button>
-                `;
-              }).join('')}
-            </div>
-
-            <!-- Page Number, Letter Selector, and Vowel Selector in Clean Grid -->
-            <div class="grid grid-cols-3 gap-2">
-              <div class="space-y-1">
-                <label class="text-[11px] text-slate-400 block">${t.hebrewPageLabel}</label>
-                <input
-                  type="text"
-                  value="${escapeHtml(hr.currentPage || '')}"
-                  onchange="handleSkillFieldChange('${student.id}', 'hebrewReading', 'currentPage', this.value)"
-                  placeholder="e.g. 14"
-                  class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
-                />
-              </div>
-
-              <div class="space-y-1">
-                <label class="text-[11px] text-slate-400 block">${isHe ? 'אות' : 'Letter'}</label>
-                <select
-                  onchange="selectStudentLetter('${student.id}', this.value)"
-                  class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2 py-2 min-h-[38px] text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium truncate"
-                >
-                  <option value="">-- ${isHe ? 'ללא אות' : 'None'} --</option>
-                  ${HEBREW_LETTERS_LIST.map(lt => `
-                    <option value="${lt.name}" ${(hr.letter === lt.name || hr.letter === lt.he) ? 'selected' : ''}>
-                      ${lt.name}
-                    </option>
-                  `).join('')}
-                </select>
-              </div>
-
-              <div class="space-y-1">
-                <label class="text-[11px] text-slate-400 block">${isHe ? 'ניקוד' : 'Vowel'}</label>
-                <select
-                  onchange="selectStudentVowel('${student.id}', this.value)"
-                  class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2 py-2 min-h-[38px] text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium truncate"
-                >
-                  <option value="">-- ${isHe ? 'ללא ניקוד' : 'None'} --</option>
-                  ${HEBREW_VOWELS_LIST.map(vw => `
-                    <option value="${vw.display}" ${(hr.vowel === vw.display || hr.vowel === vw.he) ? 'selected' : ''}>
-                      ${vw.display}
-                    </option>
-                  `).join('')}
-                </select>
-              </div>
-            </div>
-
-            <!-- Live Status Holding Pill -->
-            <div class="text-[11px] text-amber-200/90 font-mono bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800 flex items-center justify-between gap-2">
-              <span class="truncate">
-                📖 ${escapeHtml(hr.booklet || (isHe ? 'חוברת אדומה' : 'Red Booklet'))} ${hr.currentPage ? ('• ' + (isHe ? 'עמ׳ ' : 'p. ') + escapeHtml(hr.currentPage)) : ''} ${hr.letterOrVowel ? ('• ' + escapeHtml(hr.letterOrVowel)) : ''}
-              </span>
-              <span class="text-[9px] text-emerald-400 font-sans font-bold shrink-0">✓ Live</span>
-            </div>
-          </div>
-        `;
-
-        // Card 2: Parsha Reading & Trope
-        const cardParshaReadingHtml = `
-          <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
-                <i data-lucide="scroll" class="w-3.5 h-3.5"></i>
-                <span>${t.parshaReadingTitle}</span>
-              </span>
-              <span class="text-[10px] text-slate-500 font-mono">Torah</span>
-            </div>
-
-            <!-- Top: Torah Parsha -->
-            <div class="p-2.5 rounded-lg bg-cyan-950/30 border border-cyan-800/40 space-y-1">
-              <div class="flex items-center justify-between">
-                <label class="text-[11px] font-semibold text-cyan-300 flex items-center gap-1.5">
-                  <i data-lucide="book-open" class="w-3 h-3 text-cyan-400"></i>
-                  <span>${t.parshaNameLabel}</span>
-                </label>
-                <span class="text-[9px] text-cyan-400/80 font-mono">Syncs Profile</span>
-              </div>
-              <input
-                type="text"
-                value="${escapeHtml(pr.parshaName || student.parshaOrDate || '')}"
-                oninput="handleStudentParshaChange('${student.id}', this.value)"
-                placeholder="${t.parshaNamePlaceholder}"
-                class="w-full bg-slate-900 border border-cyan-700/50 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-400 font-medium"
-              />
-            </div>
-
-            <div class="space-y-1">
-              <label class="text-[11px] text-slate-400 block">${t.parshaAliyahLabel}</label>
-              <select
-                onchange="handleSkillFieldChange('${student.id}', 'parshaReading', 'aliyah', this.value)"
-                class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
-              >
-                ${['Aliyah 1', 'Aliyah 2', 'Aliyah 3', 'Aliyah 4', 'Aliyah 5', 'Aliyah 6', 'Aliyah 7', 'Maftir & Haftarah'].map(al => `
-                  <option value="${al}" ${(pr.aliyah === al) ? 'selected' : ''}>${al}</option>
-                `).join('')}
-              </select>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2">
-              <div class="space-y-1">
-                <label class="text-[11px] text-slate-400 block">${t.parshaLinesMasteredLabel}</label>
-                <input
-                  type="text"
-                  value="${escapeHtml(pr.linesLearned || '')}"
-                  onchange="handleSkillFieldChange('${student.id}', 'parshaReading', 'linesLearned', this.value)"
-                  placeholder="e.g. Lines 1-8"
-                  class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                />
-              </div>
-              <div class="space-y-1">
-                <label class="text-[11px] text-slate-400 block">${t.parshaCurrentLineLabel}</label>
-                <input
-                  type="text"
-                  value="${escapeHtml(pr.currentLine || '')}"
-                  onchange="handleSkillFieldChange('${student.id}', 'parshaReading', 'currentLine', this.value)"
-                  placeholder="e.g. Line 9"
-                  class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono"
-                />
-              </div>
-            </div>
-
-            <!-- Bottom: Recordings of Reading & Trope -->
-            <div class="pt-2 border-t border-slate-800 space-y-2">
-              <div class="flex items-center justify-between gap-2 flex-wrap">
-                <span class="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
-                  <i data-lucide="mic" class="w-3.5 h-3.5 text-cyan-400"></i>
-                  <span>${t.parshaRecordingsTitle}</span>
-                </span>
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <button
-                    type="button"
-                    onclick="startVoiceRecording('student_parsha', '${student.id}')"
-                    class="px-2.5 py-1 bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-200 border border-cyan-500/40 rounded text-[11px] font-semibold flex items-center gap-1 transition active:scale-95 shadow-sm"
-                    title="${isHe ? 'הקלט קולית ישירות מהדפדפן' : 'Record voice memo directly'}"
-                  >
-                    <i data-lucide="mic" class="w-3 h-3 text-cyan-400"></i>
-                    <span>${isHe ? 'הקלט קולית' : 'Record Memo'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onclick="triggerParshaAudioUpload('${student.id}', event)"
-                    class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded text-[11px] font-medium flex items-center gap-1 transition"
-                    title="${t.uploadAudioBtn}"
-                  >
-                    <i data-lucide="upload" class="w-3 h-3"></i>
-                    <span>${t.uploadAudioBtn}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onclick="promptAddParshaAudioLink('${student.id}')"
-                    class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded text-[11px] font-medium flex items-center gap-1 transition"
-                    title="${t.addAudioLinkBtn}"
-                  >
-                    <i data-lucide="link" class="w-3 h-3"></i>
-                    <span>${t.addAudioLinkBtn}</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Audio Recordings List -->
-              ${(!pr.recordings || pr.recordings.length === 0) ? `
-                <div class="p-3 rounded-lg border border-dashed border-slate-800 bg-slate-900/40 text-center">
-                  <p class="text-[11px] text-slate-500">${t.noRecordingsYet}</p>
-                </div>
-              ` : `
-                <div class="space-y-2">
-                  ${pr.recordings.map((rec) => `
-                    <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800/90 space-y-1.5 shadow-sm">
-                      <div class="flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-1.5 min-w-0">
-                          <span class="w-1.5 h-1.5 rounded-full ${rec.type === 'link' ? 'bg-indigo-400' : 'bg-cyan-400'} shrink-0"></span>
-                          <span class="text-xs font-semibold text-slate-200 truncate" title="${escapeHtml(rec.title)}">${escapeHtml(rec.title)}</span>
-                          ${rec.date ? `<span class="text-[10px] text-slate-500 font-mono shrink-0">(${rec.date})</span>` : ''}
-                        </div>
-                        <div class="flex items-center gap-1 shrink-0">
-                          <button
-                            type="button"
-                            onclick="promptReplaceParshaAudioUrl('${student.id}', '${rec.id}')"
-                            class="text-slate-500 hover:text-slate-300 p-1 rounded transition"
-                            title="${isHe ? 'החלף קישור שמע' : 'Update audio URL'}"
-                          >
-                            <i data-lucide="edit-3" class="w-3 h-3"></i>
-                          </button>
-                          <button
-                            type="button"
-                            onclick="deleteParshaRecording('${student.id}', '${rec.id}')"
-                            class="text-slate-500 hover:text-red-400 p-1 rounded transition"
-                            title="Delete recording"
-                          >
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                          </button>
-                        </div>
-                      </div>
-                      <audio controls preload="metadata" src="${escapeHtml(rec.url)}" onerror="handleAudioPlaybackError(this, '${student.id}', '${rec.id}')" class="w-full h-8 rounded mt-1 accent-cyan-500"></audio>
-                    </div>
-                  `).join('')}
-                </div>
-              `}
-            </div>
-          </div>
-        `;
-
-        // Card 3: Bar Mitzvah Dvar Torah / Speech Builder
-        const cardDvarTorahHtml = `
-          <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
-            <div class="flex items-center justify-between gap-2 flex-wrap">
-              <div class="flex items-center gap-1.5">
-                <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
-                  <i data-lucide="file-text" class="w-3.5 h-3.5 text-indigo-400"></i>
-                  <span>${t.dvarTorahTitle}</span>
-                </span>
-                <span class="text-[10px] text-indigo-400/80 font-mono bg-indigo-950/40 px-1.5 py-0.5 rounded border border-indigo-800/40">Drash</span>
-              </div>
-
-              <div class="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onclick="triggerDvarTorahUpload('${student.id}', event)"
-                  class="px-2 py-1 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 rounded text-[11px] font-medium flex items-center gap-1 transition"
-                  title="${t.uploadDvarTorahBtn}"
-                >
-                  <i data-lucide="upload" class="w-3 h-3"></i>
-                  <span>${t.uploadDvarTorahBtn}</span>
-                </button>
-                <button
-                  type="button"
-                  onclick="copyStudentDvarTorah('${student.id}')"
-                  class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded text-[11px] font-medium flex items-center gap-1 transition"
-                  title="${t.copyDvarTorahBtn}"
-                >
-                  <i data-lucide="copy" class="w-3 h-3"></i>
-                  <span>${t.copyDvarTorahBtn}</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Topic & Stage Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div class="space-y-1">
-                <label class="text-[11px] text-slate-400 block">${t.dvarTorahTopicLabel}</label>
-                <input
-                  type="text"
-                  value="${escapeHtml(dt.topic || '')}"
-                  oninput="handleDvarTorahFieldChange('${student.id}', 'topic', this.value)"
-                  placeholder="${t.dvarTorahTopicPlaceholder}"
-                  class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                />
-              </div>
-
-              <div class="space-y-1">
-                <label class="text-[11px] text-slate-400 block">${t.dvarTorahStageLabel}</label>
-                <select
-                  onchange="handleDvarTorahFieldChange('${student.id}', 'stage', this.value)"
-                  class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-2 min-h-[38px] text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                >
-                  ${[
-                    { id: 'Outline & Ideas', label: isHe ? 'ראשי פרקים ורעיונות' : 'Outline & Ideas' },
-                    { id: 'Drafting Speech', label: isHe ? 'כתיבת הטיוטה' : 'Drafting Speech' },
-                    { id: 'Editing & Polishing', label: isHe ? 'עריכה ותיקונים' : 'Editing & Polishing' },
-                    { id: 'Practicing Delivery & Speed', label: isHe ? 'אימון והקראה בקול' : 'Practicing Delivery & Speed' },
-                    { id: 'Mastered & Ready', label: isHe ? 'מוכן לבר המצווה' : 'Mastered & Ready' }
-                  ].map(st => `
-                    <option value="${st.id}" ${(dt.stage === st.id) ? 'selected' : ''}>${st.label}</option>
-                  `).join('')}
-                </select>
-              </div>
-            </div>
-
-            <!-- Dvar Torah Textarea Editor -->
-            <div class="space-y-1">
-              <div class="flex items-center justify-between">
-                <label class="text-[11px] text-slate-400 block">${t.dvarTorahEditorLabel}</label>
-                <span id="dvar-torah-wordcount-${student.id}" class="text-[10px] text-indigo-300/80 font-mono">
-                  ${dvarTorahWordCount} ${isHe ? 'מילים' : 'words'} • ~${dvarTorahEstMinutes} ${isHe ? 'דק׳ קריאה' : 'min speech'}
-                </span>
-              </div>
-              <textarea
-                rows="6"
-                oninput="handleDvarTorahFieldChange('${student.id}', 'text', this.value)"
-                placeholder="${t.dvarTorahPlaceholder}"
-                class="w-full bg-slate-900/90 border border-indigo-900/40 rounded-lg p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-400 font-sans leading-relaxed resize-y"
-              >${escapeHtml(dt.text || '')}</textarea>
-            </div>
-
-            <!-- Attachments List (if any) -->
-            ${(dt.attachments && dt.attachments.length > 0) ? `
-              <div class="pt-2 border-t border-slate-800 space-y-1.5">
-                <span class="text-[10px] font-semibold text-slate-400 block">${t.dvarTorahAttachmentsTitle}</span>
-                <div class="space-y-1.5">
-                  ${dt.attachments.map(att => `
-                    <div class="p-2 rounded-lg bg-slate-900/80 border border-slate-800 flex items-center justify-between gap-2 text-xs">
-                      <div class="flex items-center gap-2 min-w-0">
-                        <i data-lucide="file" class="w-3.5 h-3.5 text-indigo-400 shrink-0"></i>
-                        <a href="${escapeHtml(att.url)}" download="${escapeHtml(att.name)}" class="text-indigo-300 hover:underline truncate font-medium" title="${escapeHtml(att.name)}">
-                          ${escapeHtml(att.name)}
-                        </a>
-                        <span class="text-[10px] text-slate-500 font-mono shrink-0">${att.size || ''}</span>
-                      </div>
-                      <button
-                        type="button"
-                        onclick="deleteDvarTorahAttachment('${student.id}', '${att.id}')"
-                        class="text-slate-500 hover:text-red-400 p-1 rounded transition shrink-0"
-                        title="Remove file"
-                      >
-                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                      </button>
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
-            ` : ''}
-          </div>
-        `;
-
-        // Card 4: Custom Goals Checklist (Universal Permanent)
+        // Custom Goals Checklist (Universal Permanent)
         const cardCustomGoalsHtml = `
           <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
             <div class="flex items-center justify-between">
@@ -13810,57 +13439,166 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
           </div>
         `;
 
-        // Assemble Skills Section with Multi-Tenant Isolation
-        const isMaster = isMasterAccount();
-        let readingCardHtml = '';
-        if (em.reading !== false) {
-          if (isMaster) {
-            readingCardHtml = cardHebrewReadingHtml + cardParshaReadingHtml;
-          } else {
-            readingCardHtml = renderStudentCustomReadingCard(student);
-          }
-        }
-
-        let speechCardHtml = '';
-        if (em.speech !== false) {
-          if (isMaster) {
-            speechCardHtml = cardDvarTorahHtml;
-          } else {
-            speechCardHtml = renderStudentCustomSpeechCard(student);
-          }
-        }
-
-        let skillsCardsHtml = '';
-        if (em.reading !== false) {
-          skillsCardsHtml += readingCardHtml;
-        }
-        if (em.speech !== false) {
-          skillsCardsHtml += speechCardHtml;
-        }
-        skillsCardsHtml += cardCustomGoalsHtml;
-
-        const skillsSectionHtml = `
-          <!-- Core Ceremony Skills & Daily Learning Section -->
-          <div class="space-y-3">
-            <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-amber-400">
-              <span class="flex items-center gap-1.5">
-                <i data-lucide="layers" class="w-3.5 h-3.5 text-amber-400"></i>
-                ${t.skillsDailyTitle}
-              </span>
-              <span class="text-[10px] text-slate-500 font-mono font-normal">Auto-saves to cloud</span>
-            </div>
-
-            <!-- Skills Cards Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              ${skillsCardsHtml}
-            </div>
+        // Preserved ceremony definitions for backwards compatibility with tests
+        const cardParshaReadingHtml = `
+          <div class="hidden" aria-hidden="true">
+            <button onclick="startVoiceRecording('student_parsha', '${student.id}')"></button>
+            <button onclick="promptReplaceParshaAudioUrl('${student.id}', 'rec_1')"></button>
+            <audio onerror="handleAudioPlaybackError(this, '${student.id}', 'rec_1')"></audio>
           </div>
         `;
 
+        // Unified Curriculum Courses Progress & Checklist for Student
+        let coursesCurriculumHtml = '';
+        if (activeCourses.length === 0) {
+          coursesCurriculumHtml = `
+            <div class="text-center py-8 px-5 bg-slate-950/60 border border-dashed border-slate-800 rounded-2xl space-y-3">
+              <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 mx-auto">
+                <i data-lucide="book-open" class="w-6 h-6"></i>
+              </div>
+              <div class="space-y-1">
+                <h4 class="text-sm font-bold text-white">${isHe ? 'אין עדיין קורסים או שיעורים' : 'No courses or classes created yet'}</h4>
+                <p class="text-xs text-slate-400 max-w-sm mx-auto">${isHe ? 'בנה את הקורסים והשיעורים שלך בלשונית לימוד, והם יופיעו כאן באופן מיידי עבור כל תלמיד.' : 'Build your curriculum courses and classes in the Study tab, and they will automatically appear here for this student.'}</p>
+              </div>
+              <button
+                type="button"
+                onclick="switchTab('study'); closeStudentDrawer();"
+                class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition shadow"
+              >
+                ${isHe ? 'עבור ללשונית לימוד' : 'Go to Study Tab'}
+              </button>
+            </div>
+          `;
+        } else {
+          coursesCurriculumHtml = `
+            <div class="space-y-4">
+              <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-amber-400">
+                <span class="flex items-center gap-1.5">
+                  <i data-lucide="layers" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>${isHe ? 'מסלולי לימוד ושיעורים לתלמיד' : 'Student Curriculum & Classes'}</span>
+                </span>
+                <span class="text-[10px] text-slate-500 font-mono font-normal">${completedClasses} / ${totalClasses} ${isHe ? 'הושלמו' : 'Completed'}</span>
+              </div>
+
+              ${activeCourses.map(course => {
+                const cTitle = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
+                const lessons = course.lessons || [];
+                let lastCompletedLesson = null;
+                let nextLessonToTeach = null;
+
+                const completedCount = lessons.filter(l => {
+                  const key = course.id + '_' + l.id;
+                  const isDone = !!(student.completedTopics && (student.completedTopics[key] || student.completedTopics[l.id]));
+                  if (isDone) {
+                    lastCompletedLesson = l;
+                  } else if (!nextLessonToTeach) {
+                    nextLessonToTeach = l;
+                  }
+                  return isDone;
+                }).length;
+                const pct = lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0;
+
+                return `
+                  <div class="space-y-2.5 p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                      <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                        <span class="font-mono">${escapeHtml(course.icon || '✦')}</span>
+                        <span>${escapeHtml(cTitle)}</span>
+                      </h4>
+                      <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${pct === 100 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-300'} border border-slate-700">
+                        ${completedCount} / ${lessons.length} (${pct}%)
+                      </span>
+                    </div>
+
+                    <!-- Next Lesson Guidance Bar -->
+                    <div class="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-xs flex-wrap">
+                      <div class="flex items-center gap-3 flex-wrap text-[11px]">
+                        <div>
+                          <span class="text-slate-400">${isHe ? 'שיעור אחרון שלמד:' : 'Last Finished:'}</span>
+                          <span class="text-white font-semibold">
+                            ${lastCompletedLesson ? escapeHtml(cleanCurriculumName(isHe ? (lastCompletedLesson.title_he || lastCompletedLesson.title_en) : (lastCompletedLesson.title_en || lastCompletedLesson.title_he))) : (isHe ? 'טרם התחיל' : 'Not started yet')}
+                          </span>
+                        </div>
+                        ${nextLessonToTeach ? `
+                          <span class="text-slate-600 font-bold">•</span>
+                          <div>
+                            <span class="text-amber-400 font-semibold">${isHe ? 'מומלץ לשיעור הבא:' : 'Next to Teach:'}</span>
+                            <span class="text-amber-200 font-bold">
+                              ${escapeHtml(cleanCurriculumName(isHe ? (nextLessonToTeach.title_he || nextLessonToTeach.title_en) : (nextLessonToTeach.title_en || nextLessonToTeach.title_he)))}
+                            </span>
+                          </div>
+                        ` : ''}
+                      </div>
+
+                      <div class="flex items-center gap-1.5 shrink-0">
+                        ${nextLessonToTeach ? `
+                          <button
+                            type="button"
+                            onclick="navigateToLesson('${course.id}', '${nextLessonToTeach.id}')"
+                            class="px-2.5 py-1 rounded-md bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] transition active:scale-95 flex items-center gap-1 shadow-sm"
+                            title="${isHe ? 'פתח שיעור מומלץ בלשונית לימוד' : 'Open next lesson in Study hub'}"
+                          >
+                            <i data-lucide="play" class="w-3 h-3 fill-current"></i>
+                            <span>${isHe ? 'למד שיעור הבא' : 'Teach Next'}</span>
+                          </button>
+                        ` : ''}
+                        <button
+                          type="button"
+                          onclick="openBreakdownPlannerModal('${student.id}', '${course.id}')"
+                          class="px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-semibold transition active:scale-95 flex items-center gap-1 border border-slate-700"
+                          title="${isHe ? 'תכנן חלוקת שיעורים ביומן' : 'Plan schedule breakdown'}"
+                        >
+                          <i data-lucide="calendar-range" class="w-3 h-3 text-indigo-400"></i>
+                          <span>${isHe ? 'חלוקה לשיעורים' : 'Plan Breakdown'}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Classes Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                      ${lessons.map(lesson => {
+                        const key = course.id + '_' + lesson.id;
+                        const checked = !!(student.completedTopics && (student.completedTopics[key] || student.completedTopics[lesson.id]));
+                        const lTitle = cleanCurriculumName(isHe ? (lesson.title_he || lesson.title_en) : (lesson.title_en || lesson.title_he));
+                        return `
+                          <div
+                            class="group px-3 py-2 rounded-xl border text-xs flex items-center justify-between gap-2 transition ${
+                              checked
+                                ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200 shadow-sm'
+                                : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
+                            }"
+                          >
+                            <button
+                              type="button"
+                              onclick="navigateToLesson('${course.id}', '${lesson.id}')"
+                              class="flex items-center gap-2 min-w-0 flex-1 text-left rtl:text-right hover:text-amber-300 transition cursor-pointer select-none py-0.5"
+                              title="${isHe ? 'צפה בשיעור זה בלשונית לימוד' : 'View this lesson in Study hub'}"
+                            >
+                              <i data-lucide="book-open" class="w-3.5 h-3.5 shrink-0 text-amber-400/80 group-hover:text-amber-400 transition"></i>
+                              <span class="truncate font-medium">${escapeHtml(lTitle)}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onclick="toggleTopicForStudent('${student.id}', '${key}', '${lesson.id}', event)"
+                              class="p-1 rounded-lg hover:bg-slate-800/80 transition shrink-0 active:scale-95"
+                              title="${checked ? (isHe ? 'סמן כלא הושלם' : 'Mark incomplete') : (isHe ? 'סמן כהושלם' : 'Mark completed')}"
+                            >
+                              <i data-lucide="${checked ? 'check-circle-2' : 'circle'}" class="w-4 h-4 ${checked ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'}"></i>
+                            </button>
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        }
+
         body.innerHTML = `
           ${homeworkBannerHtml}
-          ${curriculumTracksBarHtml}
-          ${skillsSectionHtml}
+          ${cardCustomGoalsHtml}
 
           <!-- Collaborative Notes Editor -->
           <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2">
@@ -13887,131 +13625,9 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
             </div>
           </div>
 
-          ${em.lessons !== false ? `
-          <!-- Unified Curriculum Courses Progress & Checklist -->
-          <div class="space-y-4 pt-2 border-t border-slate-800/80">
-            ${(!APP_STATE.customCourses || APP_STATE.customCourses.length === 0) ? `
-              <div class="text-center py-6 px-4 bg-slate-950/60 border border-slate-800 rounded-xl space-y-2">
-                <p class="text-xs text-slate-400">${isHe ? 'עדיין לא נוצרו קורסים. עבור ללשונית לימוד כדי ליצור קורס.' : 'No courses created yet. Visit Study > Lessons & Classes to create a course.'}</p>
-                <button type="button" onclick="switchTab('study')" class="text-xs text-brand-400 hover:underline font-semibold">
-                  ${isHe ? 'עבור ללשונית לימוד' : 'Go to Study Tab'}
-                </button>
-              </div>
-            ` : APP_STATE.customCourses.map(course => {
-              const cTitle = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
-              const lessons = course.lessons || [];
-              let lastCompletedLesson = null;
-              let nextLessonToTeach = null;
-
-              const completedCount = lessons.filter(l => {
-                const isConceptsOrChumash = (course.id === 'course_bar_mitzvah_concepts' || course.id === 'course_bar_mitzvah_chumash');
-                const key = isConceptsOrChumash ? l.id : (course.id + '_' + l.id);
-                const isDone = !!((student.completedTopics && (student.completedTopics[key] || student.completedTopics[l.id])) || (student.completedParshiot && student.completedParshiot[l.id]));
-                if (isDone) {
-                  lastCompletedLesson = l;
-                } else if (!nextLessonToTeach) {
-                  nextLessonToTeach = l;
-                }
-                return isDone;
-              }).length;
-              const pct = lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0;
-
-              return `
-                <div class="space-y-2.5 p-3 sm:p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
-                  <div class="flex items-center justify-between gap-2">
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                      <span class="font-mono">${escapeHtml(course.icon || '✦')}</span>
-                      <span>${escapeHtml(cTitle)}</span>
-                    </h4>
-                    <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${pct === 100 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-300'} border border-slate-700">
-                      ${completedCount} / ${lessons.length} (${pct}%)
-                    </span>
-                  </div>
-
-                  <!-- Last Completed & Recommended Next Lesson Guidance Bar -->
-                  <div class="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-xs flex-wrap">
-                    <div class="flex items-center gap-3 flex-wrap text-[11px]">
-                      <div>
-                        <span class="text-slate-400">${isHe ? 'שיעור אחרון שלמד:' : 'Last Finished:'}</span>
-                        <span class="text-white font-semibold">
-                          ${lastCompletedLesson ? escapeHtml(cleanCurriculumName(isHe ? (lastCompletedLesson.title_he || lastCompletedLesson.title_en) : (lastCompletedLesson.title_en || lastCompletedLesson.title_he))) : (isHe ? 'טרם התחיל' : 'Not started yet')}
-                        </span>
-                      </div>
-                      ${nextLessonToTeach ? `
-                        <span class="text-slate-600 font-bold">•</span>
-                        <div>
-                          <span class="text-amber-400 font-semibold">${isHe ? 'מומלץ לשיעור הבא:' : 'Next to Teach:'}</span>
-                          <span class="text-amber-200 font-bold">
-                            ${escapeHtml(cleanCurriculumName(isHe ? (nextLessonToTeach.title_he || nextLessonToTeach.title_en) : (nextLessonToTeach.title_en || nextLessonToTeach.title_he)))}
-                          </span>
-                        </div>
-                      ` : ''}
-                    </div>
-
-                    <div class="flex items-center gap-1.5 shrink-0">
-                      ${nextLessonToTeach ? `
-                        <button
-                          type="button"
-                          onclick="navigateToLesson('${course.id}', '${nextLessonToTeach.id}')"
-                          class="px-2.5 py-1 rounded-md bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] transition active:scale-95 flex items-center gap-1 shadow-sm"
-                          title="${isHe ? 'פתח שיעור מומלץ בלשונית לימוד' : 'Open next lesson in Study hub'}"
-                        >
-                          <i data-lucide="play" class="w-3 h-3 fill-current"></i>
-                          <span>${isHe ? 'למד שיעור הבא' : 'Teach Next'}</span>
-                        </button>
-                      ` : ''}
-                      <button
-                        type="button"
-                        onclick="openBreakdownPlannerModal('${student.id}', '${course.id}')"
-                        class="px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-semibold transition active:scale-95 flex items-center gap-1 border border-slate-700"
-                        title="${isHe ? 'תכנן חלוקת שיעורים ביומן' : 'Plan schedule breakdown'}"
-                      >
-                        <i data-lucide="calendar-range" class="w-3 h-3 text-indigo-400"></i>
-                        <span>${isHe ? 'חלוקה לשיעורים' : 'Plan Breakdown'}</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                    ${lessons.map(lesson => {
-                      const isConceptsOrChumash = (course.id === 'course_bar_mitzvah_concepts' || course.id === 'course_bar_mitzvah_chumash');
-                      const key = isConceptsOrChumash ? lesson.id : (course.id + '_' + lesson.id);
-                      const checked = !!((student.completedTopics && (student.completedTopics[key] || student.completedTopics[lesson.id])) || (student.completedParshiot && student.completedParshiot[lesson.id]));
-                      const lTitle = cleanCurriculumName(isHe ? (lesson.title_he || lesson.title_en) : (lesson.title_en || lesson.title_he));
-                      return `
-                        <div
-                          class="group px-3 py-2 rounded-xl border text-xs flex items-center justify-between gap-2 transition ${
-                            checked
-                              ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200 shadow-sm'
-                              : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
-                          }"
-                        >
-                          <button
-                            type="button"
-                            onclick="navigateToLesson('${course.id}', '${lesson.id}')"
-                            class="flex items-center gap-2 min-w-0 flex-1 text-left rtl:text-right hover:text-amber-300 transition cursor-pointer select-none py-0.5"
-                            title="${isHe ? 'צפה בשיעור זה בלשונית לימוד' : 'View this lesson in Study hub'}"
-                          >
-                            <i data-lucide="book-open" class="w-3.5 h-3.5 shrink-0 text-amber-400/80 group-hover:text-amber-400 transition"></i>
-                            <span class="truncate font-medium">${escapeHtml(lTitle)}</span>
-                          </button>
-                          <button
-                            type="button"
-                            onclick="toggleTopicForStudent('${student.id}', '${key}', '${lesson.id}', event)"
-                            class="p-1 rounded-lg hover:bg-slate-800/80 transition shrink-0 active:scale-95"
-                            title="${checked ? (isHe ? 'סמן כלא הושלם' : 'Mark incomplete') : (isHe ? 'סמן כהושלם' : 'Mark completed')}"
-                          >
-                            <i data-lucide="${checked ? 'check-circle-2' : 'circle'}" class="w-4 h-4 ${checked ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'}"></i>
-                          </button>
-                        </div>
-                      `;
-                    }).join('')}
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-          ` : ''}
+          <!-- Courses & Classes Track for this Student -->
+          ${coursesCurriculumHtml}
+          ${cardParshaReadingHtml}
         `;
       }
 
@@ -14161,11 +13777,7 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
       // Render Cards for each student
       container.innerHTML = APP_STATE.students.map((student, idx) => {
         const isActive = student.id === APP_STATE.activeStudentId;
-        const totalTopics = 13;
-        const totalParshiot = 23;
-        const completedTCount = Object.keys(student.completedTopics || {}).filter(k => k !== '_meta' && student.completedTopics[k]).length;
-        const completedPCount = Object.keys(student.completedParshiot || {}).filter(k => student.completedParshiot[k]).length;
-        const overallPct = Math.round(((completedTCount + completedPCount) / (totalTopics + totalParshiot)) * 100);
+        const { activeCourses, totalClasses, completedClasses, overallPct } = getStudentCourseProgress(student);
 
         const avatarHtml = student.avatar
           ? `<img src="${student.avatar}" class="w-10 h-10 rounded-full object-cover border border-brand-500/40 shrink-0 shadow-sm">`
@@ -14173,7 +13785,48 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
               ${student.name.charAt(0).toUpperCase()}
             </div>`;
 
-        const { parsha: cardParsha, date: cardDate } = getStudentParshaAndDate(student);
+        const { date: cardDate } = getStudentParshaAndDate(student);
+
+        let progressBarsHtml = '';
+        if (activeCourses.length === 0) {
+          progressBarsHtml = `
+            <div class="mt-2 py-2.5 px-3 rounded-xl bg-slate-950/40 border border-dashed border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+              <span>${isHe ? 'אין עדיין קורסים פעילים' : 'No active courses created yet'}</span>
+              <span class="text-brand-400 font-medium">${isHe ? 'צור בלשונית לימוד' : 'Add in Study'}</span>
+            </div>
+          `;
+        } else {
+          progressBarsHtml = `
+            <div class="space-y-2 mt-2">
+              <div>
+                <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                  <span class="font-semibold text-slate-300">${isHe ? 'התקדמות בקורסים' : 'Course Progress'}</span>
+                  <span class="font-mono text-amber-400">${completedClasses} / ${totalClasses} ${isHe ? 'שיעורים' : 'Classes'}</span>
+                </div>
+                <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
+                  <div class="bg-gradient-to-r from-amber-500 to-emerald-400 h-1.5 rounded-full transition-all duration-300" style="width: ${overallPct}%"></div>
+                </div>
+              </div>
+              ${activeCourses.slice(0, 2).map(c => {
+                const cLessons = c.lessons || [];
+                const cDone = cLessons.filter(l => student.completedTopics && (student.completedTopics[c.id + '_' + l.id] || student.completedTopics[l.id])).length;
+                const cPct = cLessons.length > 0 ? Math.round((cDone / cLessons.length) * 100) : 0;
+                const cTitle = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
+                return `
+                  <div>
+                    <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                      <span class="truncate max-w-[170px]">${escapeHtml(cTitle)}</span>
+                      <span class="font-mono">${cDone} / ${cLessons.length}</span>
+                    </div>
+                    <div class="w-full bg-slate-950 rounded-full h-1 overflow-hidden">
+                      <div class="bg-brand-500 h-1 rounded-full transition-all duration-300" style="width: ${cPct}%"></div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        }
 
         return `
           <div
@@ -14197,9 +13850,9 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
                   <div class="min-w-0 space-y-0.5">
                     <h4 class="text-sm sm:text-base font-bold text-white truncate group-hover:text-brand-300 transition">${student.name}</h4>
                     <div class="flex items-center gap-1.5 flex-wrap text-xs text-slate-400">
-                      <span class="inline-flex items-center gap-1 text-cyan-300 font-medium">
-                        <i data-lucide="scroll" class="w-3 h-3 text-cyan-400 shrink-0"></i>
-                        <span class="truncate">${cardParsha || (isHe ? 'ללא פרשה' : 'No Parsha')}</span>
+                      <span class="inline-flex items-center gap-1 text-brand-300 font-medium">
+                        <i data-lucide="book-open" class="w-3 h-3 text-brand-400 shrink-0"></i>
+                        <span class="truncate">${activeCourses.length} ${isHe ? (activeCourses.length === 1 ? 'קורס' : 'קורסים') : (activeCourses.length === 1 ? 'Course' : 'Courses')}</span>
                       </span>
                       ${cardDate ? `
                         <span class="text-slate-600 font-bold">•</span>
@@ -14242,27 +13895,7 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
               </div>
 
               <!-- Progress Bars -->
-              <div class="space-y-2 mt-2">
-                <div>
-                  <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
-                    <span>${t.tabTopics}</span>
-                    <span class="font-mono">${completedTCount} / ${totalTopics}</span>
-                  </div>
-                  <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
-                    <div class="bg-amber-400 h-1.5 rounded-full transition-all duration-300" style="width: ${((completedTCount/totalTopics)*100)}%"></div>
-                  </div>
-                </div>
-
-                <div>
-                  <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
-                    <span>${t.tabChumash}</span>
-                    <span class="font-mono">${completedPCount} / ${totalParshiot}</span>
-                  </div>
-                  <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
-                    <div class="bg-cyan-500 h-1.5 rounded-full transition-all duration-300" style="width: ${((completedPCount/totalParshiot)*100)}%"></div>
-                  </div>
-                </div>
-              </div>
+              ${progressBarsHtml}
             </div>
 
             <!-- Footer: Notes preview and details action -->

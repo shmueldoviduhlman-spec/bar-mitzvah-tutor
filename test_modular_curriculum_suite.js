@@ -1284,6 +1284,89 @@ assert(anchor0Text.classList.contains('line-through'), 'Toggling anchor marks it
 sandbox.closeTutorTeleprompter();
 assert(teleprompterModal.classList.contains('hidden'), 'Closing teleprompter hides modal');
 
+// ==============================================
+// GATE 17: DYNAMIC STUDENT CURRICULUM & LEGACY PURGE
+// ==============================================
+console.log('\n--- Gate 17: Dynamic Student Curriculum & Legacy Purge ---');
+
+// 1. Function existence
+assert(typeof sandbox.getStudentCourseProgress === 'function', 'getStudentCourseProgress is a function');
+assert(typeof sandbox.purgeLegacyCurriculumData === 'function', 'purgeLegacyCurriculumData is a function');
+
+// 2. Clean Canvas Zero Courses State
+const testDynamicStudent = {
+  id: 'stu_dynamic_test',
+  name: 'Dynamic Student',
+  completedTopics: {},
+  completed_topics: {},
+  skills: { customGoals: [], homework: { task: '' } }
+};
+sandbox.APP_STATE.students = [testDynamicStudent];
+sandbox.APP_STATE.customCourses = [];
+
+const zeroProgress = sandbox.getStudentCourseProgress(testDynamicStudent);
+assert(zeroProgress.totalClasses === 0, 'Zero courses yields 0 totalClasses');
+assert(zeroProgress.completedClasses === 0, 'Zero courses yields 0 completedClasses');
+assert(zeroProgress.overallPct === 0, 'Zero courses yields 0% overallPct');
+
+// Test renderStudents with zero courses
+sandbox.renderStudents();
+const studentListHtml = getOrCreateElem('students-list').innerHTML;
+assert(!studentListHtml.includes('13 / 13') && !studentListHtml.includes('23 / 23'), 'Student card does NOT render hardcoded 13 or 23 totals');
+assert(!studentListHtml.includes('No Parsha') && !studentListHtml.includes('ללא פרשה'), 'Student card does NOT render hardcoded No Parsha badge');
+assert(studentListHtml.includes('0 Courses') || studentListHtml.includes('0 קורסים'), 'Student card displays active course count');
+
+// 3. Dynamic Course Creation and Student Profile Binding
+const testCustomCourse = {
+  id: 'course_ai_prep',
+  title_en: 'AI & Coding Fundamentals',
+  title_he: 'יסודות AI ותכנות',
+  icon: '💻',
+  category: 'Computer Science',
+  lessons: [
+    { id: 'les_ai_1', lesson_num: 1, title_en: 'Intro to Neural Networks', title_he: 'מבוא לרשתות עצביות' },
+    { id: 'les_ai_2', lesson_num: 2, title_en: 'Prompt Architecture', title_he: 'ארכיטקטורת הנחיות' }
+  ]
+};
+sandbox.APP_STATE.customCourses = [testCustomCourse];
+
+const initialProgress = sandbox.getStudentCourseProgress(testDynamicStudent);
+assert(initialProgress.totalClasses === 2, 'Two classes recorded in student progress');
+assert(initialProgress.completedClasses === 0, '0 classes completed initially');
+assert(initialProgress.overallPct === 0, '0% overall completion');
+
+// Mark Lesson 1 as completed for student
+sandbox.toggleTopicForStudent(testDynamicStudent.id, 'course_ai_prep_les_ai_1', 'les_ai_1');
+const updatedProgress = sandbox.getStudentCourseProgress(testDynamicStudent);
+assert(updatedProgress.completedClasses === 1, 'Completed classes increments to 1');
+assert(updatedProgress.overallPct === 50, 'Overall progress updates dynamically to 50%');
+
+// Test renderStudents updates progress bar dynamically
+sandbox.renderStudents();
+const updatedListHtml = getOrCreateElem('students-list').innerHTML;
+assert(updatedListHtml.includes('1 / 2') || updatedListHtml.includes('50%'), 'Student card renders dynamic 1 / 2 classes or 50%');
+
+// 4. Test Student Drawer Rendering
+const drawerDetailEl = getOrCreateElem('drawer-student-detail');
+drawerDetailEl.classList.remove('hidden');
+getOrCreateElem('drawer-header-content');
+getOrCreateElem('drawer-body-content');
+sandbox.openStudentDrawer(testDynamicStudent.id);
+const drawerBodyHtml = getOrCreateElem('drawer-body-content').innerHTML;
+assert(drawerBodyHtml.includes('Coding Fundamentals'), 'Student drawer renders educator custom course title');
+assert(drawerBodyHtml.includes('Intro to Neural Networks'), 'Student drawer renders custom lesson title in checklist');
+assert(!drawerBodyHtml.includes('Red Booklet') && !drawerBodyHtml.includes('חוברת אדומה'), 'Student drawer does NOT render old reading booklets');
+assert(!drawerBodyHtml.includes('Aliyah 1') && !drawerBodyHtml.includes('עליה 1'), 'Student drawer does NOT render old ceremony aliyot');
+
+// 5. Test Legacy Curriculum Purge
+sandbox.APP_STATE.customCourses.push(
+  { id: 'course_bar_mitzvah_concepts', title_en: 'Legacy Concepts', lessons: [] },
+  { id: 'course_bar_mitzvah_chumash', title_en: 'Legacy Chumash', lessons: [] }
+);
+sandbox.purgeLegacyCurriculumData();
+assert(!sandbox.APP_STATE.customCourses.some(c => c.id === 'course_bar_mitzvah_concepts'), 'purgeLegacyCurriculumData removed legacy concepts');
+assert(!sandbox.APP_STATE.customCourses.some(c => c.id === 'course_bar_mitzvah_chumash'), 'purgeLegacyCurriculumData removed legacy chumash');
+
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
 console.log(`========================================\n`);
