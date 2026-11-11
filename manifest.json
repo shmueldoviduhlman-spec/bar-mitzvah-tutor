@@ -1,7 +1,7 @@
 {
   "short_name": "TutorPilot",
-  "name": "TutorPilot — The Operating System for Tutors & Rabbis",
-  "description": "The complete teaching companion and student management operating system for tutors, rabbis, and educators.",
+  "name": "TutorPilot — The Operating System for Tutors & Educators",
+  "description": "The complete teaching companion and student management operating system for tutors and educators.",
   "icons": [
     {
       "src": "icons/icon-192.png",

@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>TutorPilot | The Operating System for Tutors & Rabbis</title>
+  <title>TutorPilot | The Operating System for Tutors & Educators</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -148,7 +148,7 @@
 
       <div class="text-center">
         <h2 id="auth-title" class="text-xl font-bold text-white tracking-tight">TutorPilot</h2>
-        <p id="auth-subtitle" class="text-xs text-slate-400 mt-1">The Ultimate Operating System for Tutors & Rabbis</p>
+        <p id="auth-subtitle" class="text-xs text-slate-400 mt-1">The Operating System for Tutors & Educators</p>
       </div>
 
       <!-- Continue with Google Button -->
@@ -275,7 +275,7 @@
             type="text"
             name="name"
             id="signup-name"
-            placeholder="e.g. Rabbi David Cohen"
+            placeholder="e.g. David Cohen"
             autocomplete="name"
             class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
             required
@@ -344,7 +344,7 @@
             class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3.5 text-sm text-white font-mono placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 uppercase"
           >
           <p class="text-[10px] text-slate-400 mt-1" id="lbl-signup-school-code-desc">
-            Have a code from your lead rabbi or school? Enter it here to join their shared students and lessons.
+            Have a code from your school or lead teacher? Enter it here to join their shared students and lessons.
           </p>
         </div>
 
@@ -984,7 +984,7 @@
     </section>
 
     <!-- ============================================== -->
-    <!-- VIEW 2: STUDENTS & RABBI SYNC                 -->
+    <!-- VIEW 2: STUDENTS & TEAM SYNC                   -->
     <!-- ============================================== -->
     <section id="view-students" class="space-y-6 hidden">
 
@@ -1017,7 +1017,7 @@
           </div>
           <h3 id="empty-title" class="text-base font-bold text-slate-200">No Students Added Yet</h3>
           <p id="empty-desc" class="text-xs text-slate-400 max-w-sm mx-auto mt-1 mb-4">
-            Add your Bar Mitzvah students to start checking off completed topics, tracking progress, and syncing with the Rabbi.
+            Add your students to start checking off completed topics, tracking progress, and syncing across your team.
           </p>
           <button onclick="openAddStudentModal()" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-lg transition">
             <span id="empty-btn-add">Add First Student</span>
@@ -1125,7 +1125,7 @@
           </button>
 
           <!-- Base44 Integration Modal Trigger -->
-          <button onclick="openBase44Modal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 text-xs font-semibold transition active:scale-95 shadow-sm" title="Rabbi's Base44 AI Setup">
+          <button onclick="openBase44Modal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 text-xs font-semibold transition active:scale-95 shadow-sm" title="External Base44 AI Setup">
             <i data-lucide="bot" class="w-3.5 h-3.5 text-cyan-400"></i>
             <span id="lbl-ai-btn-base44">Base44 Setup</span>
           </button>
@@ -2020,7 +2020,7 @@
           </div>
           <div>
             <h3 class="text-base sm:text-lg font-bold text-white" id="txt-base44-modal-title">Base44 & External AI Integration</h3>
-            <p class="text-xs text-slate-400" id="txt-base44-modal-subtitle">Connect Rabbi Closter's Base44 AI agent directly to TutorPilot in real time</p>
+            <p class="text-xs text-slate-400" id="txt-base44-modal-subtitle">Connect your external Base44 AI agent directly to TutorPilot in real time</p>
           </div>
         </div>
         <button type="button" onclick="closeBase44Modal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
@@ -2093,7 +2093,7 @@
               <span id="lbl-base44-btn-copy-prompt">Copy Prompt</span>
             </button>
           </div>
-          <p class="text-xs text-slate-400" id="lbl-base44-prompt-desc">Paste this prompt into Rabbi Closter's Base44 AI agent configuration so it knows the exact database schema and operations:</p>
+          <p class="text-xs text-slate-400" id="lbl-base44-prompt-desc">Paste this prompt into your Base44 AI agent configuration so it knows the exact database schema and operations:</p>
           <textarea
             id="base44-prompt-textarea"
             readonly
@@ -2757,7 +2757,7 @@
   <input type="file" id="dvar-torah-file-input" accept=".txt,.md,.pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" class="hidden" onchange="handleDvarTorahFileSelected(event)">
 
   <!-- ============================================== -->
-  <!-- MODAL: SHARE WITH RABBI (Instant Sync)         -->
+  <!-- MODAL: SHARE WORKSPACE (Instant Sync)          -->
   <!-- ============================================== -->
   <div id="modal-share" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 hidden backdrop-blur-sm">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
@@ -2770,14 +2770,14 @@
           <i data-lucide="share-2" class="w-5 h-5"></i>
         </div>
         <div>
-          <h3 id="modal-share-title" class="text-base font-bold text-white">Share Live Progress with Rabbi</h3>
+          <h3 id="modal-share-title" class="text-base font-bold text-white">Share Live Workspace</h3>
           <p id="modal-share-desc" class="text-xs text-slate-400">100% Free • No account or cloud login required</p>
         </div>
       </div>
 
       <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 my-4 space-y-3">
         <p id="modal-share-instructions" class="text-xs text-slate-300 leading-relaxed">
-          The Rabbi can scan this QR code with his phone camera or open the link below. It will automatically load the exact student list, all checked-off lessons, and notes directly onto his phone!
+          Your co-teacher or team member can scan this QR code with their phone camera or open the link below to load the live workspace, students, and progress directly onto their device.
         </p>
 
         <!-- QR Code Container -->
@@ -2826,7 +2826,7 @@
       </div>
 
       <p id="modal-cloud-desc" class="text-xs text-slate-300 leading-relaxed mb-4">
-        Connect to your free Supabase project once. Any checkmark toggled or note written by you or the Rabbi will update live across all phones and laptops automatically with zero effort!
+        Connect to your free Supabase project once. Any checkmark toggled or note written will update live across all phones and laptops automatically with zero effort!
       </p>
 
       <form onsubmit="handleSaveCloudSettings(event)" class="space-y-3.5">
@@ -2940,13 +2940,13 @@
           <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
         </button>
 
-        <!-- Share with Rabbi (Link / QR) Tile -->
+        <!-- Share Workspace (Link / QR) Tile -->
         <button onclick="closeSettingsModal(); openShareModal();" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition active:scale-98 text-left">
           <div class="flex items-center gap-3">
             <i data-lucide="share-2" class="w-4 h-4 text-emerald-400"></i>
             <div>
               <div id="settings-share-title" class="text-xs font-bold text-white">Share QR / WhatsApp Link</div>
-              <p id="settings-share-desc" class="text-[11px] text-slate-400 mt-0.5">Send instant link or QR to Rabbi</p>
+              <p id="settings-share-desc" class="text-[11px] text-slate-400 mt-0.5">Send instant link or QR to co-teachers</p>
             </div>
           </div>
           <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
@@ -2958,7 +2958,7 @@
             <i data-lucide="bot" class="w-4 h-4 text-cyan-400"></i>
             <div>
               <div id="settings-base44-title" class="text-xs font-bold text-white">Base44 & External AI</div>
-              <p id="settings-base44-desc" class="text-[11px] text-slate-400 mt-0.5">Prompt, keys, and OpenAPI schema for Rabbi's AI</p>
+              <p id="settings-base44-desc" class="text-[11px] text-slate-400 mt-0.5">Prompt, keys, and OpenAPI schema for external AI</p>
             </div>
           </div>
           <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
@@ -3020,7 +3020,7 @@
             <div class="flex items-center gap-2">
               <h3 class="text-base sm:text-lg font-bold text-white tracking-tight" id="lbl-school-modal-title">School & Team Workspace</h3>
             </div>
-            <p class="text-xs text-slate-400 mt-0.5" id="lbl-school-modal-subtitle">Share your students, classes, and progress with your rabbis and teachers</p>
+            <p class="text-xs text-slate-400 mt-0.5" id="lbl-school-modal-subtitle">Share your students, classes, and progress with your co-teachers and tutors</p>
           </div>
         </div>
         <button onclick="closeSchoolWorkspaceModal()" class="text-slate-400 hover:text-white p-1 rounded-xl hover:bg-slate-800 transition">
@@ -3067,7 +3067,34 @@
             </div>
           </div>
           <p class="text-[11px] text-slate-400 leading-relaxed" id="lbl-school-code-instructions">
-            When another rabbi or tutor signs up with their own email and enters this code, they will instantly see the same students, calendar, curriculum, and notes as you.
+            When another tutor or teacher signs up with their own email and enters this code, they will instantly see the same students, calendar, curriculum, and notes as you.
+          </p>
+        </div>
+
+        <!-- Add Co-Teacher by Email -->
+        <div id="school-add-teacher-card" class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2.5">
+          <label class="block text-xs font-bold text-slate-300 flex items-center gap-1.5" id="lbl-school-invite-heading">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5 text-brand-400"></i>
+            <span>Add Co-Teacher by Email</span>
+          </label>
+          <div class="flex gap-2">
+            <input
+              type="email"
+              id="input-school-invite-email"
+              placeholder="e.g. colleague@example.com"
+              class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            >
+            <button
+              type="button"
+              onclick="handleAddTeacherToSchool()"
+              class="px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition active:scale-95 shadow flex items-center gap-1.5 shrink-0"
+            >
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span id="btn-add-teacher-to-school-text">Add</span>
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed" id="lbl-school-invite-desc">
+            Directly invite colleagues or assistants to your school workspace. They can log in with their own account and immediately access all shared students.
           </p>
         </div>
 
@@ -3110,7 +3137,7 @@
           <i data-lucide="user-plus" class="w-6 h-6"></i>
         </div>
         <h3 class="text-base font-bold text-white tracking-tight" id="lbl-join-school-title">Join a School Workspace</h3>
-        <p class="text-xs text-slate-400" id="lbl-join-school-desc">Enter the 6-digit School Join Code provided by your lead rabbi or school administrator.</p>
+        <p class="text-xs text-slate-400" id="lbl-join-school-desc">Enter the 6-digit School Join Code provided by your lead administrator or school.</p>
       </div>
 
       <form onsubmit="handleJoinSchoolSubmit(event)" class="space-y-3 pt-2">
@@ -3321,8 +3348,7 @@
       owner_email: 'shmueldoviduhlman@gmail.com',
       created_at: '2026-11-10T00:00:00.000Z',
       members: [
-        { email: 'shmueldoviduhlman@gmail.com', name: 'Shmuel Dovid Uhlman', role: 'owner' },
-        { email: 'rabbiycloster@gmail.com', name: 'Rabbi Y. Closter', role: 'tutor' }
+        { email: 'shmueldoviduhlman@gmail.com', name: 'Shmuel Dovid Uhlman', role: 'owner' }
       ]
     };
     window.DEFAULT_SCHOOL = DEFAULT_SCHOOL;
@@ -3359,16 +3385,14 @@
     }
 
     function getActiveSchoolId() {
+      let userEmail = '';
       if (APP_STATE.currentUser) {
         if (APP_STATE.currentUser.school_id) {
           return APP_STATE.currentUser.school_id;
         }
-        const email = (APP_STATE.currentUser.email || '').toLowerCase().trim();
-        if (email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com' || APP_STATE.currentUser.role === 'super_admin') {
+        userEmail = (APP_STATE.currentUser.email || '').toLowerCase().trim();
+        if (userEmail === 'shmueldoviduhlman@gmail.com' || APP_STATE.currentUser.role === 'super_admin') {
           return 'school_main_770';
-        }
-        if (email) {
-          return email.replace(/[^a-z0-9]/g, '_');
         }
       }
       try {
@@ -3378,15 +3402,23 @@
           if (s) {
             if (s.school_id) return s.school_id;
             const e = (s.email || '').toLowerCase().trim();
-            if (e === 'shmueldoviduhlman@gmail.com' || e === 'rabbiycloster@gmail.com' || s.role === 'super_admin') {
+            if (e === 'shmueldoviduhlman@gmail.com' || s.role === 'super_admin') {
               return 'school_main_770';
             }
-            if (e) {
-              return e.replace(/[^a-z0-9]/g, '_');
-            }
+            if (!userEmail) userEmail = e;
           }
         }
       } catch (_) {}
+
+      if (userEmail) {
+        const registry = getSchoolsRegistry();
+        const memberSchool = registry.find(s => Array.isArray(s.members) && s.members.some(m => (m.email || '').toLowerCase().trim() === userEmail));
+        if (memberSchool) {
+          return memberSchool.id;
+        }
+        return userEmail.replace(/[^a-z0-9]/g, '_');
+      }
+
       return 'school_main_770';
     }
 
@@ -3405,24 +3437,48 @@
     }
 
     function isMasterAccount() {
+      let userEmail = '';
+      let userSchoolId = '';
+      let userRole = '';
+
       if (APP_STATE.currentUser) {
-        const email = (APP_STATE.currentUser.email || '').toLowerCase().trim();
-        if (email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com' || APP_STATE.currentUser.role === 'super_admin') return true;
-        if (APP_STATE.currentUser.school_id) {
-          return APP_STATE.currentUser.school_id === 'school_main_770';
-        }
+        userEmail = (APP_STATE.currentUser.email || '').toLowerCase().trim();
+        userSchoolId = APP_STATE.currentUser.school_id || '';
+        userRole = APP_STATE.currentUser.role || '';
+      } else {
+        try {
+          const raw = localStorage.getItem('tutor_auth_session');
+          if (raw) {
+            const s = JSON.parse(raw);
+            if (s) {
+              userEmail = (s.email || '').toLowerCase().trim();
+              userSchoolId = s.school_id || '';
+              userRole = s.role || '';
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (!userEmail && !userSchoolId) {
         return false;
       }
-      try {
-        const raw = localStorage.getItem('tutor_auth_session');
-        if (raw) {
-          const s = JSON.parse(raw);
-          if (s) {
-            const e = (s.email || '').toLowerCase().trim();
-            if (e === 'shmueldoviduhlman@gmail.com' || e === 'rabbiycloster@gmail.com' || s.role === 'super_admin' || s.school_id === 'school_main_770') return true;
-          }
+
+      if (userEmail === 'shmueldoviduhlman@gmail.com' || userRole === 'super_admin') {
+        return true;
+      }
+
+      if (userSchoolId) {
+        return userSchoolId === 'school_main_770';
+      }
+
+      if (userEmail) {
+        const registry = getSchoolsRegistry();
+        const mainSchool = registry.find(s => s.id === 'school_main_770');
+        if (mainSchool && Array.isArray(mainSchool.members) && mainSchool.members.some(m => (m.email || '').toLowerCase().trim() === userEmail)) {
+          return true;
         }
-      } catch (_) {}
+      }
+
       return false;
     }
 
@@ -3462,8 +3518,8 @@
     const I18N = {
       en: {
         appTitle: "TutorPilot",
-        appSubtitle: "The Operating System for Tutors & Rabbis",
-        shareRabbi: "Share with Rabbi",
+        appSubtitle: "The Operating System for Tutors & Educators",
+        shareRabbi: "Share Workspace",
         searchPlaceholder: "Search topics, Rashis, stories, keywords...",
         tabStudy: "Study",
         tabTopics: "Jewish Concepts",
@@ -3502,10 +3558,10 @@
         bereishitBook: "Bereishit (12)",
         shemotBook: "Shemot (11)",
         trackerTitle: "Students",
-        trackerDesc: "Check off lessons you or the Rabbi taught, log private student notes, and share live via QR/link.",
+        trackerDesc: "Check off completed lessons, log private student notes, and share live via QR/link.",
         addStudent: "+ Add New Student",
         noStudentsTitle: "No Students Added Yet",
-        noStudentsDesc: "Add your Bar Mitzvah students to track lessons taught and share with the Rabbi.",
+        noStudentsDesc: "Add your students to track lessons taught and share with your team.",
         addFirstStudent: "Add First Student",
         modernHook: "The Teen Hook",
         coreNuggets: "Core Knowledge Anchors",
@@ -3537,9 +3593,9 @@
 
         // Active Student Workspace
         activeStudentDefault: "Active Student",
-        studentTrackerInstructions: "Toggle completed lessons below to save and synchronize with the Rabbi.",
+        studentTrackerInstructions: "Toggle completed lessons below to save and synchronize in real time.",
         jumpToCurriculum: "Jump to Curriculum",
-        collaborativeNotesTitle: "Tutor & Rabbi Collaborative Notes",
+        collaborativeNotesTitle: "Collaborative Teacher & Student Notes",
         filterAllLessons: "All Lessons",
         filterConcepts: "Concepts",
         filterChumash: "Chumash",
@@ -3549,12 +3605,12 @@
         noNotesText: "No notes recorded",
 
         // Lock Screen
-        lockTitle: "Tutor & Rabbi Portal",
+        lockTitle: "TutorPilot Portal",
         lockSubtitle: "Authorized Access Only • Enter Tutor PIN",
         lockPlaceholder: "Enter PIN",
         lockError: "Incorrect PIN. Try again.",
         lockButton: "Unlock Portal",
-        lockFooter: "Confidential Bar Mitzvah Student Records",
+        lockFooter: "Confidential Student Records",
 
         // Settings Modal
         settingsTitle: "Tutor Settings",
@@ -3563,26 +3619,26 @@
         settingsSyncBadge: "Live",
         settingsSyncDesc: "Connected to Supabase Cloud",
         settingsShareTitle: "Share QR / WhatsApp Link",
-        settingsShareDesc: "Send instant link or QR to Rabbi",
+        settingsShareDesc: "Send instant link or QR to co-teachers",
         settingsBackupTitle: "Download Student Backup",
         settingsBackupDesc: "Save offline JSON file to device",
         settingsLockTitle: "Lock Portal",
         settingsLockDesc: "Lock screen and require password to access",
 
         // Share Modal
-        shareModalTitle: "Share Live Progress with Rabbi",
+        shareModalTitle: "Share Live Workspace",
         shareModalSubtitle: "100% Free • No account or cloud login required",
-        shareModalInstructions: "The Rabbi can scan this QR code with his phone camera or open the link below. It will automatically load the exact student list, all checked-off lessons, and notes directly onto his phone!",
+        shareModalInstructions: "Your co-teacher or team member can scan this QR code with their phone camera or open the link below to load the live workspace, students, and progress directly onto their device.",
         copyBtn: "Copy",
         copiedBtn: "Copied!",
         whatsappBtn: "Send via WhatsApp",
         downloadBackupBtn: "Download Backup",
-        whatsappShareMsg: (url) => "Shalom Rabbi! Here is our updated Bar Mitzvah student progress tracker:\n\n" + url,
+        whatsappShareMsg: (url) => "Shalom! Here is our updated student progress tracker:\n\n" + url,
 
         // Cloud Modal
         cloudModalTitle: "Live Multi-Tutor Cloud Sync",
         cloudModalSubtitle: "Powered by Free Supabase • Real-Time Database",
-        cloudModalDesc: "Connect to your free Supabase project once. Any checkmark toggled or note written by you or the Rabbi will update live across all phones and laptops automatically with zero effort!",
+        cloudModalDesc: "Connect to your free Supabase project once. Any checkmark toggled or note written will update live across all phones and laptops automatically with zero effort!",
         cloudUrlLabel: "Supabase Project URL",
         cloudKeyLabel: "Supabase Public Anon Key",
         cloudGuideTitle: "1-Minute Free Setup Guide",
@@ -3596,11 +3652,11 @@
 
         // Multi-Tenant Authentication & Session Gate
         authTitle: "TutorPilot",
-        authSubtitle: "The Ultimate Operating System for Tutors & Rabbis",
+        authSubtitle: "The Operating System for Tutors & Educators",
         authSignInTab: "Sign In",
         authSignUpTab: "Create Account",
         authFullNameLabel: "Full Name",
-        authFullNamePlaceholder: "e.g. Rabbi David Cohen",
+        authFullNamePlaceholder: "e.g. David Cohen",
         authEmailLabel: "Email Address",
         authEmailPlaceholder: "name@example.com",
         authPasswordLabel: "Password",
@@ -3679,7 +3735,7 @@
         noLessonsDay: "No lessons scheduled for this day yet.",
         addLessonBtn: "Save Lesson to Calendar",
         deleteLessonConfirm: (name) => 'Remove scheduled lesson for ' + name + '?',
-        toastLessonScheduled: "Lesson scheduled and synced with Rabbi!",
+        toastLessonScheduled: "Lesson scheduled and synced with team!",
         toastLessonRemoved: "Scheduled lesson removed",
         weeklyBadge: "Weekly",
         oneTimeBadge: "Single",
@@ -3727,7 +3783,7 @@
         aiChipSummarize: "Summarize roster",
         base44BtnSetup: "Base44 Setup",
         base44ModalTitle: "Base44 & External AI Integration",
-        base44ModalSubtitle: "Connect Rabbi Closter's Base44 AI agent directly to TutorPilot in real time",
+        base44ModalSubtitle: "Connect your Base44 AI agent directly to TutorPilot in real time",
         base44CopyPromptBtn: "Copy Prompt",
         base44DownloadSchemaBtn: "Download Schema",
         toastApiKeySaved: "Gemini API Key saved and verified!",
@@ -3792,8 +3848,8 @@
       },
       he: {
         appTitle: "טיוטור-פיילוט",
-        appSubtitle: "מערכת ההפעלה המובילה למלמדים ורבנים",
-        shareRabbi: "שתף עם הרב",
+        appSubtitle: "מערכת ההפעלה המובילה למלמדים ואנשי חינוך",
+        shareRabbi: "שתף כיתה",
         searchPlaceholder: "חיפוש מושגים, רש״י, סיפורים, מילות מפתח...",
         tabStudy: "לימוד",
         tabTopics: "מושגי יסוד",
@@ -3832,10 +3888,10 @@
         bereishitBook: "בראשית (12)",
         shemotBook: "שמות (11)",
         trackerTitle: "תלמידים",
-        trackerDesc: "סמן שיעורים שלימדת אתה או הרב, כתוב הערות מעקב פרטיות ושתף בזמן אמת באמצעות קוד QR או קישור.",
+        trackerDesc: "סמן שיעורים שנלמדו, כתוב הערות מעקב פרטיות ושתף בזמן אמת באמצעות קוד QR או קישור.",
         addStudent: "+ הוסף תלמיד חדש",
         noStudentsTitle: "עדיין לא נוספו תלמידים",
-        noStudentsDesc: "הוסף את תלמידי הבר מצווה שלך כדי לעקוב אחר החומרים שנלמדו ולשתף עם הרב.",
+        noStudentsDesc: "הוסף את התלמידים שלך כדי לעקוב אחר החומרים שנלמדו ולשתף עם הצוות.",
         addFirstStudent: "הוסף תלמיד ראשון",
         modernHook: "החיבור המרתק לנער (The Hook)",
         coreNuggets: "עוגני ידע מרכזיים",
@@ -3867,9 +3923,9 @@
 
         // Active Student Workspace
         activeStudentDefault: "תלמיד פעיל",
-        studentTrackerInstructions: "סמן את השיעורים שהושלמו למטה כדי לשמור ולסנכרן אוטומטית עם הרב.",
+        studentTrackerInstructions: "סמן את השיעורים שהושלמו למטה כדי לשמור ולסנכרן אוטומטית בזמן אמת.",
         jumpToCurriculum: "עבור לחומרי הלימוד",
-        collaborativeNotesTitle: "הערות משותפות למלמד ולרב",
+        collaborativeNotesTitle: "הערות משותפות לצוות ההוראה",
         filterAllLessons: "כל השיעורים",
         filterConcepts: "מושגי יסוד",
         filterChumash: "חומש",
@@ -3879,7 +3935,7 @@
         noNotesText: "אין הערות שמורות",
 
         // Lock Screen
-        lockTitle: "פורטל המלמד והרב",
+        lockTitle: "פורטל טיוטור-פיילוט",
         lockSubtitle: "גישה מורשית בלבד • דורש אימות דוא״ל",
         lockPlaceholder: "הזן דוא״ל מאושר",
         lockError: "אימייל לא מורשה. נסה שוב.",
@@ -3893,26 +3949,26 @@
         settingsSyncBadge: "פעיל",
         settingsSyncDesc: "מחובר לענן סופבייס (Supabase)",
         settingsShareTitle: "שיתוף קישור או קוד QR",
-        settingsShareDesc: "שלח קישור ישיר או קוד QR לרב",
+        settingsShareDesc: "שלח קישור ישיר או קוד QR למלמדים שותפים",
         settingsBackupTitle: "הורדת גיבוי תלמידים",
         settingsBackupDesc: "שמור קובץ JSON למכשיר",
         settingsLockTitle: "נעילת מערכת",
         settingsLockDesc: "נעילת המסך ודרישת סיסמה לכניסה",
 
         // Share Modal
-        shareModalTitle: "שיתוף התקדמות עם הרב",
+        shareModalTitle: "שיתוף כיתה בזמן אמת",
         shareModalSubtitle: "חינם לחלוטין • ללא צורך בהתחברות לחשבון",
-        shareModalInstructions: "הרב יכול לסרוק קוד QR זה עם מצלמת הטלפון שלו או לפתוח את הקישור למטה כדי לראות את רשימת התלמידים, השיעורים שהושלמו וההערות שלך בזמן אמת!",
+        shareModalInstructions: "מלמד שותף או חבר צוות יכול לסרוק קוד QR זה עם מצלמת הטלפון שלו או לפתוח את הקישור למטה כדי לראות את רשימת התלמידים, השיעורים שהושלמו וההערות שלך בזמן אמת!",
         copyBtn: "העתק קישור",
         copiedBtn: "הועתק!",
         whatsappBtn: "שלח ב-WhatsApp",
         downloadBackupBtn: "הורד קובץ גיבוי",
-        whatsappShareMsg: (url) => "שלום כבוד הרב! הנה מעקב התקדמות תלמידי הבר מצווה המעודכן שלנו:\n\n" + url,
+        whatsappShareMsg: (url) => "שלום! הנה מעקב התקדמות התלמידים המעודכן שלנו:\n\n" + url,
 
         // Cloud Modal
         cloudModalTitle: "סנכרון ענן בין מלמדים",
         cloudModalSubtitle: "באמצעות ענן סופבייס החינמי • מסד נתונים בזמן אמת",
-        cloudModalDesc: "התחבר פעם אחת לפרויקט סופבייס החינמי שלך. כל סימון שיעור או הערה שתכתוב אתה או הרב יתעדכנו אוטומטית ובזמן אמת בכל המכשירים ללא שום מאמץ!",
+        cloudModalDesc: "התחבר פעם אחת לפרויקט סופבייס החינמי שלך. כל סימון שיעור או הערה שתכתוב יתעדכנו אוטומטית ובזמן אמת בכל המכשירים ללא שום מאמץ!",
         cloudUrlLabel: "כתובת פרויקט סופבייס (URL)",
         cloudKeyLabel: "מפתח ציבורי (Anon Key)",
         cloudGuideTitle: "מדריך התקנה מהיר בדקה אחת",
@@ -3926,11 +3982,11 @@
 
         // Multi-Tenant Authentication & Session Gate
         authTitle: "טיוטור-פיילוט",
-        authSubtitle: "מערכת ההפעלה המובילה למלמדים ורבנים",
+        authSubtitle: "מערכת ההפעלה המובילה למלמדים ואנשי חינוך",
         authSignInTab: "כניסה",
         authSignUpTab: "הרשמה",
         authFullNameLabel: "שם מלא",
-        authFullNamePlaceholder: "לדוגמה: הרב דוד כהן",
+        authFullNamePlaceholder: "לדוגמה: דוד כהן",
         authEmailLabel: "כתובת אימייל",
         authEmailPlaceholder: "name@example.com",
         authPasswordLabel: "סיסמה",
@@ -4935,12 +4991,12 @@ alter publication supabase_realtime add table public.students_sync;`;
               const u = session.user;
               const email = (u.email || '').toLowerCase().trim();
               const meta = u.user_metadata || {};
-              const isMaster = email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com';
+              const isMaster = email === 'shmueldoviduhlman@gmail.com';
               grantAuthSession({
                 id: u.id,
                 email: email,
-                name_en: meta.full_name || meta.name || (isMaster ? 'Shmuel Dovid Uhlman (Lead Tutor)' : email.split('@')[0]),
-                name_he: isMaster ? 'שמואל דוד אולמן (מלמד ראשי)' : (meta.full_name || meta.name || email.split('@')[0]),
+                name_en: meta.full_name || meta.name || (isMaster ? 'Shmuel Dovid Uhlman' : email.split('@')[0]),
+                name_he: isMaster ? 'שמואל דוד אולמן' : (meta.full_name || meta.name || email.split('@')[0]),
                 organization: meta.organization || (isMaster ? 'Lead TutorPilot Admin' : ''),
                 role: isMaster ? 'super_admin' : 'tutor',
                 subscription_status: isMaster ? 'lifetime' : 'trialing',
@@ -5032,7 +5088,10 @@ alter publication supabase_realtime add table public.students_sync;`;
             const uid = meta.user_id || '';
 
             if (activeSchoolId === 'school_main_770') {
-              return !rowSchoolId || rowSchoolId === 'school_main_770' || owner === 'shmueldoviduhlman@gmail.com' || owner === 'rabbiycloster@gmail.com';
+              const reg = getSchoolsRegistry();
+              const mainSchool = reg.find(s => s.id === 'school_main_770');
+              const mainMembers = (mainSchool && Array.isArray(mainSchool.members)) ? mainSchool.members.map(m => (m.email || '').toLowerCase()) : ['shmueldoviduhlman@gmail.com'];
+              return !rowSchoolId || rowSchoolId === 'school_main_770' || owner === 'shmueldoviduhlman@gmail.com' || mainMembers.includes(owner);
             } else {
               return (rowSchoolId && rowSchoolId === activeSchoolId) || (owner && owner === myEmail) || (uid && uid === myUserId);
             }
@@ -5185,7 +5244,10 @@ alter publication supabase_realtime add table public.students_sync;`;
 
         let belongsToWorkspace = false;
         if (activeSchoolId === 'school_main_770') {
-          belongsToWorkspace = !rowSchoolId || rowSchoolId === 'school_main_770' || owner === 'shmueldoviduhlman@gmail.com' || owner === 'rabbiycloster@gmail.com';
+          const reg = getSchoolsRegistry();
+          const mainSchool = reg.find(s => s.id === 'school_main_770');
+          const mainMembers = (mainSchool && Array.isArray(mainSchool.members)) ? mainSchool.members.map(m => (m.email || '').toLowerCase()) : ['shmueldoviduhlman@gmail.com'];
+          belongsToWorkspace = !rowSchoolId || rowSchoolId === 'school_main_770' || owner === 'shmueldoviduhlman@gmail.com' || mainMembers.includes(owner);
         } else {
           belongsToWorkspace = (rowSchoolId && rowSchoolId === activeSchoolId) || (owner && owner === myEmail) || (uid && uid === myUserId);
         }
@@ -5415,16 +5477,8 @@ alter publication supabase_realtime add table public.students_sync;`;
         id: "super_admin_shmuel",
         email: "shmueldoviduhlman@gmail.com",
         role: "super_admin",
-        name_en: "Shmuel Dovid Uhlman (Lead Tutor)",
-        name_he: "שמואל דוד אולמן (מלמד ראשי)",
-        subscription_status: "lifetime"
-      },
-      "rabbiycloster@gmail.com": {
-        id: "rabbi_closter",
-        email: "rabbiycloster@gmail.com",
-        role: "rabbi",
-        name_en: "Rabbi Closter",
-        name_he: "הרב קלוסטר",
+        name_en: "Shmuel Dovid Uhlman",
+        name_he: "שמואל דוד אולמן",
         subscription_status: "lifetime"
       }
     };
@@ -5466,17 +5520,30 @@ alter publication supabase_realtime add table public.students_sync;`;
     function grantAuthSession(userRecord, rememberMe = true) {
       const email = (userRecord.email || '').toLowerCase().trim();
       const isOwner = email === 'shmueldoviduhlman@gmail.com';
-      const isCloster = email === 'rabbiycloster@gmail.com';
       const duration = rememberMe ? ONE_MONTH_MS : (24 * 60 * 60 * 1000);
-      const schoolId = userRecord.school_id || (isOwner || isCloster ? 'school_main_770' : (email ? email.replace(/[^a-z0-9]/g, '_') : ('school_user_' + (userRecord.id || 'default'))));
-      const schoolName = userRecord.school_name || (schoolId === 'school_main_770' ? 'Bar Mitzvah Academy' : (userRecord.organization || 'My Classroom'));
+
+      let schoolId = userRecord.school_id;
+      if (!schoolId) {
+        const registry = getSchoolsRegistry();
+        const memberSchool = registry.find(s => Array.isArray(s.members) && s.members.some(m => (m.email || '').toLowerCase().trim() === email));
+        if (memberSchool) {
+          schoolId = memberSchool.id;
+        } else if (isOwner) {
+          schoolId = 'school_main_770';
+        } else {
+          schoolId = email ? email.replace(/[^a-z0-9]/g, '_') : ('school_user_' + (userRecord.id || 'default'));
+        }
+      }
+
+      const activeSchool = getActiveSchool();
+      const schoolName = userRecord.school_name || (schoolId === 'school_main_770' ? (activeSchool.name || 'Bar Mitzvah Academy') : (userRecord.organization || 'My Classroom'));
 
       const defaultNameEn = isOwner
-        ? 'Shmuel Dovid Uhlman (Lead Tutor)'
-        : (isCloster ? 'Rabbi Y. Closter' : email.split('@')[0]);
+        ? 'Shmuel Dovid Uhlman'
+        : (userRecord.name_en || userRecord.name || email.split('@')[0]);
       const defaultNameHe = isOwner
-        ? 'שמואל דוד אולמן (מלמד ראשי)'
-        : (isCloster ? 'הרב י. קלוסטר' : email.split('@')[0]);
+        ? 'שמואל דוד אולמן'
+        : (userRecord.name_he || userRecord.name || email.split('@')[0]);
 
       const session = {
         id: userRecord.id || ('usr_' + Date.now()),
@@ -5487,8 +5554,8 @@ alter publication supabase_realtime add table public.students_sync;`;
         organization: userRecord.organization || (isOwner ? 'Lead TutorPilot Admin' : schoolName),
         school_id: schoolId,
         school_name: schoolName,
-        subscription_status: (isOwner || isCloster) ? 'lifetime' : (userRecord.subscription_status || 'trialing'),
-        trial_days: (isOwner || isCloster) ? 9999 : (typeof userRecord.trial_days === 'number' ? userRecord.trial_days : 14),
+        subscription_status: isOwner ? 'lifetime' : (userRecord.subscription_status || 'active'),
+        trial_days: isOwner ? 9999 : (typeof userRecord.trial_days === 'number' ? userRecord.trial_days : 14),
         password_hash: userRecord.password_hash || '',
         createdAt: userRecord.createdAt || new Date().toISOString(),
         expiresAt: Date.now() + duration
@@ -5609,14 +5676,98 @@ alter publication supabase_realtime add table public.students_sync;`;
                     <span class="text-[10px] text-slate-500 font-mono truncate block">${escapeHtml(m.email || '')}</span>
                   </div>
                 </div>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ${isMemberOwner ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-800 text-slate-400'}">
-                  ${isMemberOwner ? (isHe ? 'מנהל' : 'Owner') : (isHe ? 'מלמד' : 'Tutor')}
-                </span>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ${isMemberOwner ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-800 text-slate-400'}">
+                    ${isMemberOwner ? (isHe ? 'מנהל' : 'Owner') : (isHe ? 'מלמד' : 'Tutor')}
+                  </span>
+                  ${(isOwner && !isMemberOwner) ? `
+                    <button type="button" onclick="handleRemoveTeacherFromSchool('${escapeHtml(m.email || '')}')" class="p-1 rounded-lg hover:bg-rose-950/60 text-slate-500 hover:text-rose-400 transition" title="${isHe ? 'הסר מלמד' : 'Remove Teacher'}">
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                  ` : ''}
+                </div>
               </div>
             `;
           }).join('');
         }
       }
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function handleAddTeacherToSchool() {
+      const input = document.getElementById('input-school-invite-email');
+      const email = (input?.value || '').trim().toLowerCase();
+      const isHe = APP_STATE.lang === 'he';
+
+      if (!email || !email.includes('@')) {
+        showToast(isHe ? 'נא להזין כתובת אימייל תקינה' : 'Please enter a valid email address');
+        return;
+      }
+
+      const school = getActiveSchool();
+      const registry = getSchoolsRegistry();
+      const target = registry.find(s => s.id === school.id);
+      if (!target) return;
+
+      if (!Array.isArray(target.members)) target.members = [];
+      if (target.members.some(m => (m.email || '').toLowerCase() === email)) {
+        showToast(isHe ? 'משתמש זה כבר חבר בבית הספר' : 'This user is already a member of this school');
+        return;
+      }
+
+      const newMember = {
+        email: email,
+        name: email.split('@')[0],
+        role: 'tutor',
+        joined_at: new Date().toISOString()
+      };
+      target.members.push(newMember);
+      saveSchoolsRegistry(registry);
+
+      // Pre-provision user record in local registered users so they can log in seamlessly
+      const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
+      if (!registeredUsers[email]) {
+        registeredUsers[email] = {
+          id: 'usr_' + Date.now(),
+          email: email,
+          name_en: email.split('@')[0],
+          name_he: email.split('@')[0],
+          role: 'tutor',
+          school_id: school.id,
+          school_name: school.name,
+          subscription_status: 'active',
+          trial_days: 9999,
+          createdAt: new Date().toISOString(),
+          last_active: new Date().toISOString()
+        };
+        localStorage.setItem('tutor_registered_users', JSON.stringify(registeredUsers));
+      } else {
+        registeredUsers[email].school_id = school.id;
+        registeredUsers[email].school_name = school.name;
+        localStorage.setItem('tutor_registered_users', JSON.stringify(registeredUsers));
+      }
+
+      if (input) input.value = '';
+      renderSchoolWorkspaceModal();
+      showToast(isHe ? ('המלמד ' + email + ' נוסף בהצלחה!') : ('Added ' + email + ' to your school workspace!'));
+    }
+
+    function handleRemoveTeacherFromSchool(teacherEmail) {
+      if (!teacherEmail) return;
+      const isHe = APP_STATE.lang === 'he';
+      if (!confirm(isHe ? ('להסיר את ' + teacherEmail + ' מבית הספר?') : ('Remove ' + teacherEmail + ' from school workspace?'))) return;
+
+      const school = getActiveSchool();
+      const registry = getSchoolsRegistry();
+      const target = registry.find(s => s.id === school.id);
+      if (!target || !Array.isArray(target.members)) return;
+
+      target.members = target.members.filter(m => (m.email || '').toLowerCase() !== teacherEmail.toLowerCase());
+      saveSchoolsRegistry(registry);
+      renderSchoolWorkspaceModal();
+      showToast(isHe ? 'המלמד הוסר מבית הספר' : 'Teacher removed from school');
     }
 
     function copySchoolJoinCode() {
@@ -5797,6 +5948,8 @@ alter publication supabase_realtime add table public.students_sync;`;
     window.openJoinSchoolModal = openJoinSchoolModal;
     window.closeJoinSchoolModal = closeJoinSchoolModal;
     window.handleJoinSchoolSubmit = handleJoinSchoolSubmit;
+    window.handleAddTeacherToSchool = handleAddTeacherToSchool;
+    window.handleRemoveTeacherFromSchool = handleRemoveTeacherFromSchool;
 
     // ==============================================
     // MASTER ADMIN USER DIRECTORY ENGINE
@@ -5829,7 +5982,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     async function syncUserToCloudDirectory(userRecord) {
       if (!userRecord || !userRecord.email) return;
       const email = userRecord.email.toLowerCase().trim();
-      const isOwner = email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com';
+      const isOwner = email === 'shmueldoviduhlman@gmail.com';
 
       try {
         const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
@@ -5853,8 +6006,8 @@ alter publication supabase_realtime add table public.students_sync;`;
           registeredUsers['shmueldoviduhlman@gmail.com'] = {
             id: 'super_admin_shmuel',
             email: 'shmueldoviduhlman@gmail.com',
-            name_en: 'Shmuel Dovid Uhlman (Lead Tutor)',
-            name_he: 'שמואל דוד אולמן (מלמד ראשי)',
+            name_en: 'Shmuel Dovid Uhlman',
+            name_he: 'שמואל דוד אולמן',
             organization: 'Lead TutorPilot Admin',
             role: 'super_admin',
             subscription_status: 'lifetime',
@@ -5988,7 +6141,7 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       container.innerHTML = filtered.map(u => {
         const email = u.email;
-        const isOwner = email === 'shmueldoviduhlman@gmail.com' || email === 'rabbiycloster@gmail.com';
+        const isOwner = email === 'shmueldoviduhlman@gmail.com';
         const name = isHe ? (u.name_he || u.name_en || email.split('@')[0]) : (u.name_en || u.name_he || email.split('@')[0]);
         const initial = name.charAt(0).toUpperCase();
         const org = u.organization || (isHe ? 'ללא מוסד' : 'Individual Tutor');
@@ -6266,7 +6419,6 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
 
       const isShmuel = email === 'shmueldoviduhlman@gmail.com';
-      const isCloster = email === 'rabbiycloster@gmail.com';
       const pwdHash = await hashPassword(password);
       const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
 
@@ -6279,8 +6431,8 @@ alter publication supabase_realtime add table public.students_sync;`;
           const userRecord = {
             id: 'super_admin_shmuel',
             email: email,
-            name_en: 'Shmuel Dovid Uhlman (Lead Tutor)',
-            name_he: 'שמואל דוד אולמן (מלמד ראשי)',
+            name_en: 'Shmuel Dovid Uhlman',
+            name_he: 'שמואל דוד אולמן',
             organization: 'Bar Mitzvah Academy',
             role: 'super_admin',
             school_id: 'school_main_770',
@@ -6307,44 +6459,7 @@ alter publication supabase_realtime add table public.students_sync;`;
         }
       }
 
-      // 2. Rabbi Y. Closter (Dedicated Personal Account)
-      if (isCloster) {
-        const closterRecord = registeredUsers[email];
-        const isFirstTime = !closterRecord || (!closterRecord.password_hash && !closterRecord.password);
-
-        if (isFirstTime || (closterRecord && (closterRecord.password_hash === pwdHash || closterRecord.password === password)) || password === '770' || password === '770770') {
-          const userRecord = {
-            id: (closterRecord && closterRecord.id) || 'usr_closter_770',
-            email: email,
-            name_en: (closterRecord && closterRecord.name_en) || 'Rabbi Y. Closter',
-            name_he: (closterRecord && closterRecord.name_he) || 'הרב י. קלוסטר',
-            organization: 'Bar Mitzvah Academy',
-            role: 'tutor',
-            school_id: 'school_main_770',
-            school_name: 'Bar Mitzvah Academy',
-            subscription_status: 'lifetime',
-            trial_days: 9999,
-            password_hash: pwdHash
-          };
-          registeredUsers[email] = userRecord;
-          localStorage.setItem('tutor_registered_users', JSON.stringify(registeredUsers));
-          grantAuthSession(userRecord, rememberMe);
-          return;
-        } else {
-          if (errBox && errText) {
-            errText.textContent = APP_STATE.lang === 'he' ? 'סיסמה שגויה. אנא נסה שוב.' : 'Incorrect password. Please try again.';
-            errBox.classList.remove('hidden');
-          }
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i><span id="btn-signin-text">${I18N[APP_STATE.lang].authSignInBtn || 'Log In to TutorPilot'}</span>`;
-            lucide.createIcons();
-          }
-          return;
-        }
-      }
-
-      // 3. External Tutors (Supabase Native Auth & Local Directory)
+      // 2. External Tutors (Supabase Native Auth & Local Directory)
       try {
         const client = getSupabaseAuthClient();
         if (client && client.auth) {
@@ -6379,8 +6494,33 @@ alter publication supabase_realtime add table public.students_sync;`;
         console.warn('Supabase password auth notice:', supaErr);
       }
 
-      const user = registeredUsers[email];
+      let user = registeredUsers[email];
       if (!user) {
+        // Check if pre-invited into a school by a school owner
+        const registry = getSchoolsRegistry();
+        const memberSchool = registry.find(s => Array.isArray(s.members) && s.members.some(m => (m.email || '').toLowerCase() === email));
+        if (memberSchool) {
+          user = {
+            id: 'usr_' + Date.now(),
+            email: email,
+            name_en: email.split('@')[0],
+            name_he: email.split('@')[0],
+            organization: memberSchool.name,
+            role: 'tutor',
+            school_id: memberSchool.id,
+            school_name: memberSchool.name,
+            subscription_status: 'active',
+            trial_days: 9999,
+            password_hash: pwdHash,
+            createdAt: new Date().toISOString(),
+            last_active: new Date().toISOString()
+          };
+          registeredUsers[email] = user;
+          localStorage.setItem('tutor_registered_users', JSON.stringify(registeredUsers));
+          grantAuthSession(user, rememberMe);
+          return;
+        }
+
         if (errBox && errText) {
           const isHe = APP_STATE.lang === 'he';
           errText.innerHTML = isHe
@@ -6393,6 +6533,16 @@ alter publication supabase_realtime add table public.students_sync;`;
           submitBtn.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i><span id="btn-signin-text">${I18N[APP_STATE.lang].authSignInBtn || 'Log In to TutorPilot'}</span>`;
           lucide.createIcons();
         }
+        return;
+      }
+
+      // Check if user was pre-provisioned without password yet
+      if (!user.password_hash && !user.password) {
+        user.password_hash = pwdHash;
+        user.last_active = new Date().toISOString();
+        registeredUsers[email] = user;
+        localStorage.setItem('tutor_registered_users', JSON.stringify(registeredUsers));
+        grantAuthSession(user, rememberMe);
         return;
       }
 
@@ -6481,7 +6631,6 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
 
       const isShmuel = email === 'shmueldoviduhlman@gmail.com';
-      const isCloster = email === 'rabbiycloster@gmail.com';
       const pwdHash = await hashPassword(password);
 
       // Background registration in Supabase Auth (if available, doesn't block local signup)
@@ -6511,25 +6660,32 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (targetSchool) {
         assignedSchoolId = targetSchool.id;
         assignedSchoolName = targetSchool.name;
-      } else if (isShmuel || isCloster) {
+      } else if (isShmuel) {
         assignedSchoolId = 'school_main_770';
         assignedSchoolName = 'Bar Mitzvah Academy';
       } else {
-        assignedSchoolId = 'school_' + userId;
-        assignedSchoolName = org || (name + "'s Classroom");
-        // Register new school in registry
+        // Check if pre-invited into a school by a school owner
         const registry = getSchoolsRegistry();
-        if (!registry.some(s => s.id === assignedSchoolId)) {
-          const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
-          registry.push({
-            id: assignedSchoolId,
-            name: assignedSchoolName,
-            join_code: randomCode,
-            owner_email: email,
-            created_at: new Date().toISOString(),
-            members: [{ email: email, name: name, role: 'owner', joined_at: new Date().toISOString() }]
-          });
-          saveSchoolsRegistry(registry);
+        const preSchool = registry.find(s => Array.isArray(s.members) && s.members.some(m => (m.email || '').toLowerCase() === email));
+        if (preSchool) {
+          assignedSchoolId = preSchool.id;
+          assignedSchoolName = preSchool.name;
+        } else {
+          assignedSchoolId = 'school_' + userId;
+          assignedSchoolName = org || (name + "'s Classroom");
+          // Register new school in registry
+          if (!registry.some(s => s.id === assignedSchoolId)) {
+            const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
+            registry.push({
+              id: assignedSchoolId,
+              name: assignedSchoolName,
+              join_code: randomCode,
+              owner_email: email,
+              created_at: new Date().toISOString(),
+              members: [{ email: email, name: name, role: 'owner', joined_at: new Date().toISOString() }]
+            });
+            saveSchoolsRegistry(registry);
+          }
         }
       }
 
@@ -6543,8 +6699,8 @@ alter publication supabase_realtime add table public.students_sync;`;
         role: isShmuel ? 'super_admin' : 'tutor',
         school_id: assignedSchoolId,
         school_name: assignedSchoolName,
-        subscription_status: (isShmuel || isCloster) ? 'lifetime' : 'trialing',
-        trial_days: (isShmuel || isCloster) ? 9999 : 14,
+        subscription_status: isShmuel ? 'lifetime' : 'trialing',
+        trial_days: isShmuel ? 9999 : 14,
         password_hash: pwdHash,
         createdAt: new Date().toISOString(),
         last_active: new Date().toISOString()
@@ -7139,7 +7295,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (lblSignupName) lblSignupName.textContent = isHe ? "שם מלא *" : "Full Name *";
 
       const signupName = document.getElementById('signup-name');
-      if (signupName) signupName.placeholder = isHe ? "לדוגמה: הרב דוד כהן" : "e.g. Rabbi David Cohen";
+      if (signupName) signupName.placeholder = isHe ? "לדוגמה: דוד כהן" : "e.g. David Cohen";
 
       const lblSignupOrg = document.getElementById('lbl-signup-org');
       if (lblSignupOrg) lblSignupOrg.textContent = isHe ? "קהילה / מוסד (אופציונלי)" : "Synagogue / School (Optional)";
@@ -7166,7 +7322,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (signupSchoolCode) signupSchoolCode.placeholder = isHe ? "הזן קוד בן 6 ספרות" : "Enter 6-digit Code";
 
       const lblSignupSchoolCodeDesc = document.getElementById('lbl-signup-school-code-desc');
-      if (lblSignupSchoolCodeDesc) lblSignupSchoolCodeDesc.textContent = isHe ? "קיבלת קוד מהמלמד הראשי או מבית הספר? הזן אותו כאן כדי להצטרף לכיתה המשותפת." : "Have a code from your lead rabbi or school? Enter it here to join their shared students and lessons.";
+      if (lblSignupSchoolCodeDesc) lblSignupSchoolCodeDesc.textContent = isHe ? "קיבלת קוד מבית הספר או מהמלמד הראשי? הזן אותו כאן כדי להצטרף לכיתה המשותפת." : "Have a code from your school or lead teacher? Enter it here to join their shared students and lessons.";
 
       const btnSignupText = document.getElementById('btn-signup-text');
       if (btnSignupText) btnSignupText.textContent = isHe ? "צור חשבון והתחל 14 ימי ניסיון" : "Create Account & Start Trial";
@@ -7216,7 +7372,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (lblSchoolModalTitle) lblSchoolModalTitle.textContent = isHe ? "בית ספר וצוות מלמדים" : "School & Team Workspace";
 
       const lblSchoolModalSub = document.getElementById('lbl-school-modal-subtitle');
-      if (lblSchoolModalSub) lblSchoolModalSub.textContent = isHe ? "שתף את התלמידים, השיעורים וההתקדמות עם הרבנים והמלמדים שלך" : "Share your students, classes, and progress with your rabbis and teachers";
+      if (lblSchoolModalSub) lblSchoolModalSub.textContent = isHe ? "שתף את התלמידים, השיעורים וההתקדמות עם המלמדים השותפים שלך" : "Share your students, classes, and progress with your co-teachers and tutors";
 
       const lblSchoolNameLabel = document.getElementById('lbl-school-name-label');
       if (lblSchoolNameLabel) lblSchoolNameLabel.textContent = isHe ? "בית ספר / מוסד לימוד" : "School / Organization";
@@ -7234,10 +7390,22 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (btnEditSchoolText) btnEditSchoolText.textContent = isHe ? "ערוך" : "Edit";
 
       const lblSchoolCodeInstructions = document.getElementById('lbl-school-code-instructions');
-      if (lblSchoolCodeInstructions) lblSchoolCodeInstructions.textContent = isHe ? "כאשר מלמד או רב נוסף נרשם עם האימייל שלו ומזין קוד זה, הוא יראה מיד את אותם התלמידים, לוח השנה, השיעורים וההערות כמוך." : "When another rabbi or tutor signs up with their own email and enters this code, they will instantly see the same students, calendar, curriculum, and notes as you.";
+      if (lblSchoolCodeInstructions) lblSchoolCodeInstructions.textContent = isHe ? "כאשר מלמד שותף נרשם עם האימייל שלו ומזין קוד זה, הוא יראה מיד את אותם התלמידים, לוח השנה, השיעורים וההערות כמוך." : "When another tutor or teacher signs up with their own email and enters this code, they will instantly see the same students, calendar, curriculum, and notes as you.";
+
+      const lblSchoolInviteHeading = document.getElementById('lbl-school-invite-heading');
+      if (lblSchoolInviteHeading) lblSchoolInviteHeading.innerHTML = '<i data-lucide="user-plus" class="w-3.5 h-3.5 text-brand-400"></i> <span>' + (isHe ? "הוסף מלמד שותף לפי אימייל" : "Add Co-Teacher by Email") + '</span>';
+
+      const inputSchoolInviteEmail = document.getElementById('input-school-invite-email');
+      if (inputSchoolInviteEmail) inputSchoolInviteEmail.placeholder = isHe ? "לדוגמה: colleague@example.com" : "e.g. colleague@example.com";
+
+      const btnAddTeacherToSchoolText = document.getElementById('btn-add-teacher-to-school-text');
+      if (btnAddTeacherToSchoolText) btnAddTeacherToSchoolText.textContent = isHe ? "הוסף" : "Add";
+
+      const lblSchoolInviteDesc = document.getElementById('lbl-school-invite-desc');
+      if (lblSchoolInviteDesc) lblSchoolInviteDesc.textContent = isHe ? "הזמן ישירות מלמדים או עוזרי הוראה לכיתה שלך. הם יוכלו להתחבר עם החשבון שלהם ולגשת מיד לכל התלמידים המשותפים." : "Directly invite colleagues or assistants to your school workspace. They can log in with their own account and immediately access all shared students.";
 
       const lblSchoolMembersHeading = document.getElementById('lbl-school-members-heading');
-      if (lblSchoolMembersHeading) lblSchoolMembersHeading.innerHTML = '<i data-lucide="users" class="w-3.5 h-3.5 text-brand-400"></i> <span>' + (isHe ? "מלמדים ורבנים פעילים" : "Active Teachers & Tutors") + '</span>';
+      if (lblSchoolMembersHeading) lblSchoolMembersHeading.innerHTML = '<i data-lucide="users" class="w-3.5 h-3.5 text-brand-400"></i> <span>' + (isHe ? "מלמדים פעילים בצוות" : "Active Teachers & Tutors") + '</span>';
 
       const lblSwitchSchoolBtn = document.getElementById('lbl-switch-school-btn');
       if (lblSwitchSchoolBtn) lblSwitchSchoolBtn.textContent = isHe ? "הצטרף לבית ספר אחר עם קוד" : "Join a different school with code";
@@ -7247,7 +7415,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (lblJoinSchoolTitle) lblJoinSchoolTitle.textContent = isHe ? "הצטרפות לבית ספר או כיתה" : "Join a School Workspace";
 
       const lblJoinSchoolDesc = document.getElementById('lbl-join-school-desc');
-      if (lblJoinSchoolDesc) lblJoinSchoolDesc.textContent = isHe ? "הזן את קוד ההצטרפות שקיבלת מהמלמד הראשי או מהנהלת בית הספר." : "Enter the 6-digit School Join Code provided by your lead rabbi or school administrator.";
+      if (lblJoinSchoolDesc) lblJoinSchoolDesc.textContent = isHe ? "הזן את קוד ההצטרפות שקיבלת מהנהלת בית הספר או המלמד הראשי." : "Enter the 6-digit School Join Code provided by your lead administrator or school.";
 
       const lblJoinCodeInputTitle = document.getElementById('lbl-join-code-input-title');
       if (lblJoinCodeInputTitle) lblJoinCodeInputTitle.textContent = isHe ? "קוד הצטרפות לבית ספר" : "School Join Code";
@@ -14749,8 +14917,8 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
       const todayStr = now.toISOString().split('T')[0];
       const weekdayStr = now.toLocaleDateString('en-US', { weekday: 'long' });
 
-      const systemInstruction = `You are TutorPilot AI, the intelligent assistant for the Bar Mitzvah Tutor Companion web portal.
-The portal is used by tutors and Rabbi Closter to prepare Bar Mitzvah boys.
+      const systemInstruction = `You are TutorPilot AI, the intelligent assistant for the TutorPilot web portal.
+The portal is used by tutors and educators to manage students, courses, schedules, and learning progress.
 
 Current Reference Date:
 Today is ${weekdayStr}, ${todayStr}.
@@ -15854,7 +16022,7 @@ KEYWORD 3: NEXT LESSON (or SCHEDULE NEXT, שיעור הבא)
   6. Reply confirming the scheduled lesson and the bullet point preparation checklist.
 
 KEYWORD 4: ADD MATERIAL (or ENRICH, הוסף חומר)
-• When to use: The tutor or Rabbi wants to add a teaching tip, story, explanation, or source link to any lesson.
+• When to use: The tutor or educator wants to add a teaching tip, story, explanation, or source link to any lesson.
 • Syntax: ADD MATERIAL [Lesson Name e.g. Shabbat, Tefillin, Noach]. Title: [Headline]. Content: [Explanation or notes].
 • Action:
   1. Identify the target lesson ID from curriculum classes.
@@ -15865,7 +16033,7 @@ KEYWORD 4: ADD MATERIAL (or ENRICH, הוסף חומר)
        "title": "[Headline]",
        "content": "[Content]",
        "createdAt": new Date().toISOString(),
-       "author": "Base44 / Rabbi",
+       "author": "TutorPilot / Educator",
        "targetType": "concept" or "parsha",
        "targetTitle": "[Target Lesson Name]"
      }
@@ -16049,7 +16217,7 @@ Base44, please confirm receipt of this protocol and let us know that you are rea
           const data = JSON.parse(jsonStr);
 
           if (data && data.students && Array.isArray(data.students)) {
-            const confirmSync = confirm(`Received updated student tracker from the Rabbi with ${data.students.length} students. Would you like to merge and update your tracker now?`);
+            const confirmSync = confirm(`Received updated student tracker from your team with ${data.students.length} students. Would you like to merge and update your tracker now?`);
             if (confirmSync) {
               APP_STATE.students = data.students;
               saveStudentsToStorage();
@@ -16064,7 +16232,7 @@ Base44, please confirm receipt of this protocol and let us know that you are rea
       }
     }
 
-    // Auto-resync whenever the tutor or Rabbi switches back to the app or unlocks their phone
+    // Auto-resync whenever the tutor or co-teacher switches back to the app or unlocks their phone
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && APP_STATE.cloud.client) {
         fetchCloudStudents();

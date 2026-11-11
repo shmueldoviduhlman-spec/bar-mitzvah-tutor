@@ -183,8 +183,8 @@ assert(typeof sandbox.isMasterAccount === 'function', 'isMasterAccount is a func
 sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
 assert(sandbox.isMasterAccount() === true, 'shmueldoviduhlman@gmail.com is identified as master account');
 
-sandbox.APP_STATE.currentUser = { email: 'RABBIYCLOSTER@GMAIL.COM' };
-assert(sandbox.isMasterAccount() === true, 'rabbiycloster@gmail.com is identified as master account (case insensitive)');
+sandbox.APP_STATE.currentUser = { email: 'coteacher@school.org', school_id: 'school_main_770' };
+assert(sandbox.isMasterAccount() === true, 'coteacher in school_main_770 is identified as master account');
 
 sandbox.APP_STATE.currentUser = { email: 'admin@tutors.org', role: 'super_admin' };
 assert(sandbox.isMasterAccount() === true, 'super_admin role is identified as master account');
@@ -633,8 +633,8 @@ assert(invalidSchool === null, 'findSchoolByJoinCode returns null for nonexisten
 // 3. Dynamic School Scoping via getActiveSchoolId
 sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
 assert(sandbox.getActiveSchoolId() === 'school_main_770', 'Shmuel resolves to school_main_770');
-sandbox.APP_STATE.currentUser = { email: 'rabbiycloster@gmail.com' };
-assert(sandbox.getActiveSchoolId() === 'school_main_770', 'Rabbi Closter resolves to school_main_770');
+sandbox.APP_STATE.currentUser = { email: 'coteacher@school.org', school_id: 'school_main_770' };
+assert(sandbox.getActiveSchoolId() === 'school_main_770', 'Co-teacher with school_main_770 resolves to school_main_770');
 sandbox.APP_STATE.currentUser = { email: 'tutor@external.edu' };
 assert(sandbox.getActiveSchoolId() === 'tutor_external_edu', 'External tutor without school resolves to user-scoped ID');
 sandbox.APP_STATE.currentUser = { email: 'tutor@external.edu', school_id: 'school_main_770' };
@@ -645,23 +645,27 @@ assert(typeof sandbox.grantAuthSession === 'function', 'grantAuthSession is a fu
 
 // Test Shmuel Login: Super Admin identity preserved
 sandbox.grantAuthSession({
-  email: 'shmueldoviduhlman@gmail.com',
-  name_en: 'Shmuel Dovid Uhlman (Lead Tutor)'
+  email: 'shmueldoviduhlman@gmail.com'
 });
 assert(sandbox.APP_STATE.currentUser.email === 'shmueldoviduhlman@gmail.com', 'Shmuel session has his own email');
 assert(sandbox.APP_STATE.currentUser.role === 'super_admin', 'Shmuel session receives super_admin role');
-assert(sandbox.APP_STATE.currentUser.name_en === 'Shmuel Dovid Uhlman (Lead Tutor)', 'Shmuel session preserves Shmuel full name');
+assert(sandbox.APP_STATE.currentUser.name_en === 'Shmuel Dovid Uhlman', 'Shmuel session preserves Shmuel full name');
 assert(sandbox.APP_STATE.currentUser.school_id === 'school_main_770', 'Shmuel session attached to school_main_770');
 
-// Test Rabbi Closter Login: Individual identity preserved (NOT overwritten with Shmuel's identity)
+// Test Co-Teacher Login: Individual identity preserved (NOT overwritten with Shmuel's identity)
 sandbox.grantAuthSession({
-  email: 'rabbiycloster@gmail.com',
-  name_en: 'Rabbi Y. Closter'
+  email: 'coteacher@school.org',
+  name_en: 'Yossi Cohen',
+  school_id: 'school_main_770'
 });
-assert(sandbox.APP_STATE.currentUser.email === 'rabbiycloster@gmail.com', 'Rabbi Closter session has his own email');
-assert(sandbox.APP_STATE.currentUser.name_en === 'Rabbi Y. Closter', 'Rabbi Closter session preserves his own name (not Shmuel)');
-assert(sandbox.APP_STATE.currentUser.school_id === 'school_main_770', 'Rabbi Closter attached to shared school_main_770');
-assert(sandbox.APP_STATE.currentUser.role === 'tutor', 'Rabbi Closter role is tutor');
+assert(sandbox.APP_STATE.currentUser.email === 'coteacher@school.org', 'Co-teacher session has their own email');
+assert(sandbox.APP_STATE.currentUser.name_en === 'Yossi Cohen', 'Co-teacher session preserves their own name (not Shmuel)');
+assert(sandbox.APP_STATE.currentUser.school_id === 'school_main_770', 'Co-teacher attached to shared school_main_770');
+assert(sandbox.APP_STATE.currentUser.role === 'tutor', 'Co-teacher role is tutor');
+
+// Test Add/Remove Co-Teacher Handlers
+assert(typeof sandbox.handleAddTeacherToSchool === 'function', 'handleAddTeacherToSchool is a function');
+assert(typeof sandbox.handleRemoveTeacherFromSchool === 'function', 'handleRemoveTeacherFromSchool is a function');
 
 // 5. External Tutor Registration & Dynamic School Attachment
 // Case A: External tutor signs up with code 770770 -> joins shared school
