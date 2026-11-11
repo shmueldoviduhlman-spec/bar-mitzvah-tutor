@@ -1206,6 +1206,84 @@ sandbox.handleSelectCoursePill(savedReadingCourse.id);
 assert(sandbox.APP_STATE.activeCourseId === savedReadingCourse.id, 'handleSelectCoursePill updates activeCourseId');
 assert(sandbox.APP_STATE.insideCourseId === savedReadingCourse.id, 'handleSelectCoursePill updates insideCourseId');
 
+// Gate 16: Perfect Lesson Builder and Tutor Teleprompter Invariants
+console.log('\n--- Gate 16: Perfect Lesson Builder & Tutor Teleprompter ---');
+assert(indexHtml.includes('id="pill-block-sources"'), 'HTML contains pill-block-sources');
+assert(indexHtml.includes('id="pill-block-pitfalls"'), 'HTML contains pill-block-pitfalls');
+assert(indexHtml.includes('id="pill-block-cheat_sheet"'), 'HTML contains pill-block-cheat_sheet');
+assert(indexHtml.includes('id="pill-block-steps"'), 'HTML contains pill-block-steps');
+assert(indexHtml.includes('id="pill-block-homework"'), 'HTML contains pill-block-homework');
+
+assert(indexHtml.includes('id="input-block-sources"'), 'HTML contains input-block-sources');
+assert(indexHtml.includes('id="input-block-pitfalls"'), 'HTML contains input-block-pitfalls');
+assert(indexHtml.includes('id="input-block-cheat-sheet"'), 'HTML contains input-block-cheat-sheet');
+assert(indexHtml.includes('id="input-block-steps"'), 'HTML contains input-block-steps');
+assert(indexHtml.includes('id="input-block-homework"'), 'HTML contains input-block-homework');
+
+assert(indexHtml.includes('id="modal-tutor-teleprompter"'), 'HTML contains modal-tutor-teleprompter');
+assert(indexHtml.includes('id="teleprompter-timer-display"'), 'HTML contains teleprompter-timer-display');
+assert(indexHtml.includes('id="teleprompter-content-container"'), 'HTML contains teleprompter-content-container');
+
+assert(typeof sandbox.toggleLessonBlock === 'function', 'toggleLessonBlock is a function');
+assert(typeof sandbox.showLessonBlock === 'function', 'showLessonBlock is a function');
+assert(typeof sandbox.hideLessonBlock === 'function', 'hideLessonBlock is a function');
+assert(typeof sandbox.handleMiniBlockAi === 'function', 'handleMiniBlockAi is a function');
+assert(typeof sandbox.openTutorTeleprompter === 'function', 'openTutorTeleprompter is a function');
+assert(typeof sandbox.closeTutorTeleprompter === 'function', 'closeTutorTeleprompter is a function');
+assert(typeof sandbox.toggleTeleprompterTimer === 'function', 'toggleTeleprompterTimer is a function');
+assert(typeof sandbox.resetTeleprompterTimer === 'function', 'resetTeleprompterTimer is a function');
+assert(typeof sandbox.toggleTeleprompterAnchorCheck === 'function', 'toggleTeleprompterAnchorCheck is a function');
+
+// Test Modular Block Toggling
+const sourcesContainer = getOrCreateElem('block-container-sources');
+assert(sourcesContainer.classList.contains('hidden'), 'sources block is hidden initially');
+sandbox.toggleLessonBlock('sources');
+assert(!sourcesContainer.classList.contains('hidden'), 'toggleLessonBlock unhides sources block');
+sandbox.toggleLessonBlock('sources');
+assert(sourcesContainer.classList.contains('hidden'), 'toggleLessonBlock hides sources block again');
+
+// Test Saving Lesson with Modular Blocks
+sandbox.openAddCustomLessonModal(savedReadingCourse.id);
+getOrCreateElem('input-custom-lesson-title-en').value = 'Mastering the Shulchan Aruch';
+getOrCreateElem('input-custom-lesson-hook').value = 'Why do we need a set table for laws?';
+getOrCreateElem('input-custom-lesson-anchors').value = '**Tur**: Four core pillars of Jewish law.\n**Beit Yosef**: Decisive halachic authority.\n**Rema**: Ashkenazi customary glosses.';
+getOrCreateElem('input-custom-lesson-life-app').value = 'Navigating modern moral dilemmas with clear guidance.';
+getOrCreateElem('input-custom-lesson-discussion').value = 'Can tradition evolve without losing its core?';
+getOrCreateElem('input-block-sources').value = 'Tur Orach Chaim 1:1: Be strong like a lion to serve the Creator.';
+getOrCreateElem('input-block-pitfalls').value = 'Students think the Rema argues on everything; in reality he supplements customs.';
+getOrCreateElem('input-block-cheat-sheet').value = 'Remember to highlight the metaphor of a set table and tablecloth.';
+getOrCreateElem('input-block-steps').value = '1. Identify the Mishna source.\n2. Trace the Talmudic debate.\n3. Read the Shulchan Aruch ruling.';
+getOrCreateElem('input-block-homework').value = 'Find one halachic ruling in your home prayer book.';
+
+sandbox.handleSaveCustomLesson({ preventDefault: () => {} });
+
+const createdModularLesson = savedReadingCourse.lessons.find(l => l.title_en === 'Mastering the Shulchan Aruch');
+assert(createdModularLesson !== undefined, 'Modular lesson was created and saved to course');
+assert(createdModularLesson.sources_text.includes('Be strong like a lion'), 'Lesson saved sources text');
+assert(createdModularLesson.pitfalls_text.includes('supplements customs'), 'Lesson saved pitfalls text');
+assert(createdModularLesson.cheat_sheet_text.includes('set table and tablecloth'), 'Lesson saved cheat sheet text');
+assert(createdModularLesson.steps_text.includes('Trace the Talmudic debate'), 'Lesson saved steps text');
+assert(createdModularLesson.homework_text.includes('Find one halachic ruling'), 'Lesson saved homework text');
+
+// Test Tutor Teleprompter Launch and Rendering
+sandbox.openTutorTeleprompter(savedReadingCourse.id, createdModularLesson.id);
+const teleprompterModal = getOrCreateElem('modal-tutor-teleprompter');
+assert(!teleprompterModal.classList.contains('hidden'), 'Teleprompter modal is visible when launched');
+const teleprompterContent = getOrCreateElem('teleprompter-content-container');
+assert(teleprompterContent.innerHTML.includes('Be strong like a lion'), 'Teleprompter renders primary source quote');
+assert(teleprompterContent.innerHTML.includes('supplements customs'), 'Teleprompter renders misconception watch out box');
+assert(teleprompterContent.innerHTML.includes('set table and tablecloth'), 'Teleprompter renders secret cheat sheet');
+assert(teleprompterContent.innerHTML.includes('Tur'), 'Teleprompter renders anchor checklist');
+
+// Test Anchor Checklist Interactive Toggling
+sandbox.toggleTeleprompterAnchorCheck(0);
+const anchor0Text = getOrCreateElem('teleprompter-anchor-text-0');
+assert(anchor0Text.classList.contains('line-through'), 'Toggling anchor marks it completed with line-through');
+
+// Test Closing Teleprompter
+sandbox.closeTutorTeleprompter();
+assert(teleprompterModal.classList.contains('hidden'), 'Closing teleprompter hides modal');
+
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
 console.log(`========================================\n`);
