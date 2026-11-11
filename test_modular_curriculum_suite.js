@@ -1150,6 +1150,46 @@ assert(typeof sandbox.handleLoadStarterBarMitzvahTemplate === 'function', 'handl
 assert(indexHtml.includes('id="lbl-load-template-btn"'), 'HTML contains Load Bar Mitzvah Template trigger in blank state');
 assert(indexHtml.includes('id="lbl-reset-workspace-btn"'), 'HTML contains Reset Workspace to Blank Canvas trigger');
 
+// Gate 15: Two-Part Study Section (Courses & Classes) & In-Modal AI Assistant
+console.log('\n--- Gate 15: Two-Part Study Section (Courses & Classes) & In-Modal AI Assistant ---');
+assert(indexHtml.includes('id="study-level-courses"'), 'HTML contains study-level-courses container');
+assert(indexHtml.includes('id="study-level-classes"'), 'HTML contains study-level-classes container');
+assert(indexHtml.includes('id="courses-cards-grid"'), 'HTML contains courses-cards-grid');
+assert(indexHtml.includes('id="inside-course-header-card"'), 'HTML contains inside-course-header-card');
+assert(indexHtml.includes('id="input-ai-class-prompt"'), 'HTML contains input-ai-class-prompt in lesson modal');
+assert(indexHtml.includes('id="btn-run-ai-class-assistant"'), 'HTML contains btn-run-ai-class-assistant');
+
+assert(typeof sandbox.showAllCoursesView === 'function', 'showAllCoursesView is a function');
+assert(typeof sandbox.openCourseClassesView === 'function', 'openCourseClassesView is a function');
+assert(typeof sandbox.renderCoursesCardsGrid === 'function', 'renderCoursesCardsGrid is a function');
+assert(typeof sandbox.renderInsideCourseHeader === 'function', 'renderInsideCourseHeader is a function');
+assert(typeof sandbox.openAiCreateClassModal === 'function', 'openAiCreateClassModal is a function');
+assert(typeof sandbox.handleAiClassAssist === 'function', 'handleAiClassAssist is a function');
+assert(typeof sandbox.applyAiQuickPrompt === 'function', 'applyAiQuickPrompt is a function');
+
+// Test Course Navigation Transitions
+sandbox.openCourseClassesView(savedReadingCourse.id);
+assert(sandbox.APP_STATE.insideCourseId === savedReadingCourse.id, 'insideCourseId updated on course navigation');
+const levelCoursesElem = getOrCreateElem('study-level-courses');
+const levelClassesElem = getOrCreateElem('study-level-classes');
+assert(levelCoursesElem.classList.contains('hidden'), 'study-level-courses is hidden when viewing classes');
+assert(!levelClassesElem.classList.contains('hidden'), 'study-level-classes is visible when viewing classes');
+
+sandbox.showAllCoursesView();
+assert(sandbox.APP_STATE.insideCourseId === null, 'insideCourseId reset to null in all courses view');
+assert(!levelCoursesElem.classList.contains('hidden'), 'study-level-courses is visible in all courses view');
+assert(levelClassesElem.classList.contains('hidden'), 'study-level-classes is hidden in all courses view');
+
+// Test In-Modal AI Assistant Setup for Creation vs Refinement
+sandbox.openAddCustomLessonModal(savedReadingCourse.id);
+const aiTitleElem = getOrCreateElem('ai-class-tool-heading');
+assert(aiTitleElem.textContent.includes('AI Class Assistant') && aiTitleElem.textContent.includes('Create'), 'Add modal configures AI Assistant for class creation');
+
+// Seed a lesson into savedReadingCourse to test edit modal
+savedReadingCourse.lessons = [{ id: 'les_test_1', title_en: 'Alphabet Mastery', hook_en: 'Why learn letters?' }];
+sandbox.openEditCustomLessonModal(savedReadingCourse.id, 'les_test_1');
+assert(aiTitleElem.textContent.includes('AI Class Assistant') && aiTitleElem.textContent.includes('Refine'), 'Edit modal configures AI Assistant for class refinement');
+
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
 console.log(`========================================\n`);

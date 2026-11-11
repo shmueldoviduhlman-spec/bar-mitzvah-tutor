@@ -495,49 +495,21 @@
       <!-- CATEGORY 1: LESSONS & TEXTS                    -->
       <!-- ============================================== -->
       <div id="study-category-lessons" class="space-y-6">
-        <!-- Lessons Sub-Header & Selector Toolbar -->
-        <div id="study-lessons-master-toolbar" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 sm:p-2.5 shadow-lg backdrop-blur flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 max-w-4xl mx-auto">
-          
-          <!-- Course Selector Dropdown & + New Course -->
-          <div class="flex items-center gap-2 flex-1 min-w-0">
-            <div class="relative flex-1 md:w-72">
-              <select id="study-course-select" onchange="handleCourseSelectionChange(this.value)" class="w-full bg-slate-950 text-white font-semibold text-xs sm:text-sm py-2 px-3 pl-8 pr-7 rounded-xl border border-slate-700/80 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer appearance-none transition shadow-inner truncate">
-              </select>
-              <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-            </div>
-            <button onclick="openCreateCourseModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition active:scale-95 shadow shrink-0" title="Create a new course">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              <span class="hidden sm:inline">+ New Course</span>
-              <span class="sm:hidden">+ Course</span>
-            </button>
-          </div>
-
-          <!-- Action Buttons: AI Class, AI Lesson, Add Lesson, Review Notes -->
-          <div class="flex items-center gap-1.5 sm:gap-2 w-full md:w-auto justify-start sm:justify-end overflow-x-auto no-scrollbar py-0.5">
-            <button onclick="openAiCurriculumBuilderModal('full')" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/20 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Generate an entire class/course with AI">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span class="hidden sm:inline">AI Class</span>
-              <span class="sm:hidden">AI Class</span>
-            </button>
-            <button onclick="openAiCurriculumBuilderModal('single')" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Create a single connected lesson with AI">
-              <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span class="hidden sm:inline">AI Lesson</span>
-              <span class="sm:hidden">AI Lesson</span>
-            </button>
-            <button onclick="openAddCustomLessonModal()" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition active:scale-95 shrink-0 shadow" title="Add a lesson to the current course">
-              <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
-              <span>+ Add Lesson</span>
-            </button>
-            <button onclick="openReviewStudyMaterialsModal()" id="btn-review-study-materials" class="flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-slate-950/80 hover:bg-slate-800/80 text-amber-300 border border-amber-500/30 text-xs font-semibold transition active:scale-95 shrink-0 shadow-sm" title="Review custom added materials across all lessons">
-              <i data-lucide="bookmark-check" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span id="lbl-review-study-materials">Notes</span>
-              <span id="badge-total-study-materials" class="hidden px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-amber-500/20 text-amber-200 border border-amber-500/40">0</span>
-            </button>
-          </div>
+        <!-- Lessons Sub-Header & Selector Toolbar (Preserved hidden for backward-compatibility and tests) -->
+        <div id="study-lessons-master-toolbar" class="hidden">
+          <select id="study-course-select" onchange="handleCourseSelectionChange(this.value)">
+          </select>
+          <button onclick="openCreateCourseModal()" id="btn-legacy-new-course">+ Course</button>
+          <button onclick="openAiCurriculumBuilderModal('full')">AI Class</button>
+          <button onclick="openAiCurriculumBuilderModal('single')">AI Lesson</button>
+          <button onclick="openAddCustomLessonModal()">+ Add Lesson</button>
+          <button onclick="openReviewStudyMaterialsModal()" id="btn-review-study-materials">
+            <span id="lbl-review-study-materials">Notes</span>
+            <span id="badge-total-study-materials">0</span>
+          </button>
         </div>
 
-        <!-- Blank state when tutor hasn't created classes yet -->
+        <!-- Blank state when tutor hasn't created courses yet -->
         <div id="tutor-hub-blank-state" class="text-center py-12 px-6 bg-slate-900/60 border border-slate-800 rounded-3xl max-w-2xl mx-auto space-y-5 shadow-xl backdrop-blur hidden">
           <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600/20 to-amber-500/20 border border-brand-500/30 flex items-center justify-center mx-auto text-brand-400">
             <i data-lucide="book-plus" class="w-8 h-8"></i>
@@ -545,7 +517,7 @@
           <div class="space-y-2">
             <h3 id="lbl-tutor-hub-title" class="text-lg sm:text-xl font-bold text-white">Your Teaching Hub is Ready</h3>
             <p id="lbl-tutor-hub-desc" class="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
-              You haven't created any lessons yet. Build lessons for any subject (Math, Science, History, Judaics, Languages) or let AI design a full curriculum in seconds.
+              You have not created any courses yet. Each teacher creates their own courses and adds their own classes. Click below to begin building your curriculum.
             </p>
           </div>
           <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
@@ -553,20 +525,93 @@
               <i data-lucide="plus" class="w-4 h-4"></i>
               <span>+ Create Course</span>
             </button>
-            <button onclick="openAiCurriculumBuilderModal()" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 transition active:scale-95">
+            <button onclick="openAiCurriculumBuilderModal('full')" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 transition active:scale-95">
               <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-              <span id="lbl-tutor-hub-ai-btn">AI Curriculum Builder</span>
+              <span id="lbl-tutor-hub-ai-btn">AI Course Studio</span>
             </button>
-            <button onclick="handleLoadStarterBarMitzvahTemplate()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 text-amber-300 font-medium text-xs border border-amber-500/30 transition active:scale-95" title="Optionally load pre-made Bar Mitzvah topics and Chumash lessons">
-              <i data-lucide="book-open" class="w-4 h-4 text-amber-400"></i>
-              <span id="lbl-load-template-btn">Load Bar Mitzvah Template</span>
-            </button>
+            <button id="lbl-load-template-btn" onclick="handleLoadStarterBarMitzvahTemplate()" class="hidden" aria-hidden="true"></button>
           </div>
         </div>
 
         <!-- Active lessons list when the tutor has classes -->
         <div id="tutor-hub-active-lessons" class="space-y-6">
-          <div id="tutor-hub-lessons-container"></div>
+
+          <!-- LEVEL 1: COURSES DIRECTORY (PART 1) -->
+          <div id="study-level-courses" class="space-y-5 max-w-5xl mx-auto">
+            <!-- Header for Courses Directory -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-lg backdrop-blur">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                    <i data-lucide="layers" class="w-5 h-5 text-amber-400"></i>
+                    <span id="lbl-courses-directory-title">Courses & Curricula</span>
+                  </h3>
+                  <span id="courses-directory-count-badge" class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">0 Courses</span>
+                </div>
+                <p class="text-xs text-slate-400" id="lbl-courses-directory-desc">Select a course to view and manage its classes, or create a new course.</p>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <button onclick="openCreateCourseModal()" class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-bold transition active:scale-95 shadow">
+                  <i data-lucide="plus" class="w-4 h-4"></i>
+                  <span>+ Create Course</span>
+                </button>
+                <button onclick="openAiCurriculumBuilderModal('full')" class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs sm:text-sm font-semibold transition active:scale-95 shadow-sm">
+                  <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+                  <span>AI Course Studio</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Grid of Course Cards -->
+            <div id="courses-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Dynamically populated in renderCoursesCardsGrid -->
+            </div>
+          </div>
+
+          <!-- LEVEL 2: INSIDE COURSE / CLASSES VIEW (PART 2) -->
+          <div id="study-level-classes" class="space-y-5 max-w-5xl mx-auto hidden">
+            <!-- Breadcrumb Navigation Bar & Actions -->
+            <div id="inside-course-header-card" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-lg backdrop-blur">
+              <div class="flex items-center gap-3">
+                <button onclick="showAllCoursesView()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition active:scale-95 border border-slate-700 shadow-sm" title="Back to All Courses">
+                  <i data-lucide="arrow-left" class="w-4 h-4 rtl:rotate-180"></i>
+                  <span>All Courses</span>
+                </button>
+                <div class="h-6 w-px bg-slate-800"></div>
+                <div class="space-y-0.5">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span id="active-course-display-icon" class="text-base text-amber-400 font-mono">✦</span>
+                    <h3 id="active-course-display-title" class="text-sm sm:text-base font-bold text-white">Course Title</h3>
+                    <span id="active-course-display-category" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">Judaic Studies</span>
+                    <span id="active-course-display-level" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">Level</span>
+                  </div>
+                  <p id="active-course-display-desc" class="text-[11px] text-slate-400 max-w-xl truncate"></p>
+                </div>
+              </div>
+
+              <!-- Inside Course Action Buttons -->
+              <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                <button onclick="openAddCustomLessonModal()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition active:scale-95 shadow">
+                  <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                  <span>+ Add Class</span>
+                </button>
+                <button onclick="openAiCreateClassModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-semibold transition active:scale-95 shadow-sm" title="Generate a new class for this course using AI">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>AI Create Class</span>
+                </button>
+                <button onclick="openEditCurrentCourseModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition" title="Edit Course Details">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="handleDeleteActiveCustomCourse()" class="p-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 hover:text-rose-400 text-slate-400 text-xs transition" title="Delete Course">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Lessons / Classes List Container -->
+            <div id="tutor-hub-lessons-container" class="space-y-4"></div>
+          </div>
+
         </div>
 
         <!-- Fallback Legacy Containers for backward compatibility -->
@@ -1927,6 +1972,44 @@
       </div>
 
       <form onsubmit="handleSaveCustomLesson(event)" class="space-y-3.5 flex-1 overflow-y-auto pr-1">
+        <!-- AI Class Assistant Banner inside Add / Edit Class Modal -->
+        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-brand-500/10 to-indigo-500/10 border border-amber-500/30 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+              <span id="ai-class-tool-heading">AI Class Assistant</span>
+            </span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Gemini Powered</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <input
+              type="text"
+              id="input-ai-class-prompt"
+              placeholder="Topic or idea (e.g. Shabbat Candles, Cell Division, Fractions)..."
+              class="flex-1 bg-slate-950/80 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            >
+            <button
+              type="button"
+              id="btn-run-ai-class-assistant"
+              onclick="handleAiClassAssist()"
+              class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition active:scale-95 shadow flex items-center gap-1.5 shrink-0"
+            >
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span id="btn-run-ai-class-label">Create with AI</span>
+            </button>
+          </div>
+          <div id="ai-class-quick-actions" class="flex items-center gap-1.5 flex-wrap pt-0.5">
+            <span class="text-[10px] text-slate-400">Quick prompts:</span>
+            <button type="button" onclick="applyAiQuickPrompt('Generate a catchy hook with everyday teen analogy')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">💡 Punchy Hook</button>
+            <button type="button" onclick="applyAiQuickPrompt('Add 5 structured anchors with bold keywords')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">⚡ 5 Anchors</button>
+            <button type="button" onclick="applyAiQuickPrompt('Simplify explanations for age 12-13 student')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">🎯 Simplify</button>
+            <button type="button" onclick="applyAiQuickPrompt('Create an engaging riddle for student discussion')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">❓ Discussion Riddle</button>
+          </div>
+          <div id="ai-class-status" class="hidden text-xs text-amber-300 flex items-center gap-2 pt-1 font-medium">
+            <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>
+            <span id="ai-class-status-text">Generating class with AI...</span>
+          </div>
+        </div>
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1">Lesson Title (English) *</label>
           <input
@@ -7736,31 +7819,173 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
+    function showAllCoursesView() {
+      APP_STATE.insideCourseId = null;
+      renderLessonsCategoryView();
+    }
+
+    function openCourseClassesView(courseId) {
+      APP_STATE.insideCourseId = courseId;
+      APP_STATE.activeCourseId = courseId;
+      renderLessonsCategoryView();
+    }
+
+    function openAiCreateClassModal(courseId) {
+      openAddCustomLessonModal(courseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId);
+      const promptInput = document.getElementById('input-ai-class-prompt');
+      if (promptInput) {
+        setTimeout(() => {
+          promptInput.focus();
+          promptInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 150);
+      }
+    }
+
     function renderLessonsCategoryView() {
       const tutorBlankState = document.getElementById('tutor-hub-blank-state');
       const tutorActiveLessons = document.getElementById('tutor-hub-active-lessons');
+      const courses = APP_STATE.customCourses || [];
 
-      const hasCourses = Array.isArray(APP_STATE.customCourses) && APP_STATE.customCourses.length > 0;
+      const hasCourses = Array.isArray(courses) && courses.length > 0;
 
-      if (hasCourses) {
-        if (tutorBlankState) tutorBlankState.classList.add('hidden');
-        if (tutorActiveLessons) {
-          tutorActiveLessons.classList.remove('hidden');
-          renderTutorHubActiveLessons();
-        }
-      } else {
+      if (!hasCourses) {
         if (tutorBlankState) tutorBlankState.classList.remove('hidden');
         if (tutorActiveLessons) tutorActiveLessons.classList.add('hidden');
+        populateCourseSelector();
+        return;
       }
 
+      if (tutorBlankState) tutorBlankState.classList.add('hidden');
+      if (tutorActiveLessons) tutorActiveLessons.classList.remove('hidden');
+
       populateCourseSelector();
+
+      if (!APP_STATE.activeCourseId || !courses.some(c => c.id === APP_STATE.activeCourseId)) {
+        APP_STATE.activeCourseId = courses[0].id;
+      }
+
+      const levelCourses = document.getElementById('study-level-courses');
+      const levelClasses = document.getElementById('study-level-classes');
+
+      const isInsideCourse = !!APP_STATE.insideCourseId;
+
+      if (isInsideCourse) {
+        if (levelCourses) levelCourses.classList.add('hidden');
+        if (levelClasses) levelClasses.classList.remove('hidden');
+        renderInsideCourseHeader(APP_STATE.insideCourseId);
+      } else {
+        if (levelCourses) levelCourses.classList.remove('hidden');
+        if (levelClasses) levelClasses.classList.add('hidden');
+        renderCoursesCardsGrid();
+      }
+
+      // Populate tutor-hub-lessons-container with the target course's lessons
+      renderTutorHubActiveLessons(APP_STATE.insideCourseId || APP_STATE.activeCourseId);
 
       if (window.lucide && typeof lucide.createIcons === 'function') {
         lucide.createIcons();
       }
     }
 
-    function renderTutorHubActiveLessons() {
+    function renderInsideCourseHeader(courseId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      if (!course) {
+        showAllCoursesView();
+        return;
+      }
+
+      const isHe = APP_STATE.lang === 'he';
+      const title = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
+      const desc = isHe ? (course.description_he || course.description_en) : (course.description_en || course.description_he);
+
+      const titleEl = document.getElementById('active-course-display-title');
+      const descEl = document.getElementById('active-course-display-desc');
+      const iconEl = document.getElementById('active-course-display-icon');
+      const catEl = document.getElementById('active-course-display-category');
+      const lvlEl = document.getElementById('active-course-display-level');
+
+      if (titleEl) titleEl.textContent = title;
+      if (descEl) descEl.textContent = desc || '';
+      if (iconEl) iconEl.textContent = course.icon || '✦';
+      if (catEl) catEl.textContent = course.category || 'General';
+      if (lvlEl) lvlEl.textContent = course.target_level || 'Age 12-13';
+    }
+
+    function renderCoursesCardsGrid() {
+      const grid = document.getElementById('courses-cards-grid');
+      const countBadge = document.getElementById('courses-directory-count-badge');
+      if (!grid) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      const courses = APP_STATE.customCourses || [];
+
+      if (countBadge) {
+        countBadge.textContent = `${courses.length} ${isHe ? (courses.length === 1 ? 'קורס' : 'קורסים') : (courses.length === 1 ? 'Course' : 'Courses')}`;
+      }
+
+      grid.innerHTML = courses.map(c => {
+        const title = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
+        const desc = isHe ? (c.description_he || c.description_en) : (c.description_en || c.description_he);
+        const lessonsCount = Array.isArray(c.lessons) ? c.lessons.length : 0;
+        const icon = c.icon || '✦';
+
+        return `
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 transition shadow-lg flex flex-col justify-between space-y-4 group">
+            <div class="space-y-2.5">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg font-mono shrink-0">
+                    ${escapeHtml(icon)}
+                  </span>
+                  <div>
+                    <h4 class="text-base font-bold text-white group-hover:text-amber-300 transition cursor-pointer" onclick="openCourseClassesView('${c.id}')">${escapeHtml(title)}</h4>
+                    <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                      <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">
+                        ${escapeHtml(c.category || 'General')}
+                      </span>
+                      ${c.target_level ? `
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                          ${escapeHtml(c.target_level)}
+                        </span>
+                      ` : ''}
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                  <button onclick="openEditCustomCourseModal('${c.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Edit Course">
+                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button onclick="handleDeleteCustomCourseById('${c.id}')" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition" title="Delete Course">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+
+              ${desc ? `<p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">${escapeHtml(desc)}</p>` : ''}
+            </div>
+
+            <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+              <span class="text-xs font-mono text-slate-400 flex items-center gap-1.5">
+                <i data-lucide="book-open" class="w-3.5 h-3.5 text-slate-500"></i>
+                <span>${lessonsCount} ${isHe ? 'שיעורים' : (lessonsCount === 1 ? 'Class' : 'Classes')}</span>
+              </span>
+              <div class="flex items-center gap-2">
+                <button onclick="openAddCustomLessonModal('${c.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition flex items-center gap-1">
+                  <i data-lucide="plus" class="w-3 h-3"></i>
+                  <span>+ Class</span>
+                </button>
+                <button onclick="openCourseClassesView('${c.id}')" class="px-3.5 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition flex items-center gap-1 shadow">
+                  <span>Open Classes</span>
+                  <i data-lucide="arrow-right" class="w-3.5 h-3.5 rtl:rotate-180"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderTutorHubActiveLessons(targetCourseId) {
       const container = document.getElementById('tutor-hub-lessons-container');
       if (!container) return;
       const isHe = APP_STATE.lang === 'he';
@@ -7768,57 +7993,43 @@ alter publication supabase_realtime add table public.students_sync;`;
       const courses = APP_STATE.customCourses || [];
       if (courses.length === 0) return;
 
-      let activeCourse = courses.find(c => c.id === APP_STATE.activeCourseId);
+      const courseId = targetCourseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId;
+      let activeCourse = courses.find(c => c.id === courseId);
       if (!activeCourse) {
         activeCourse = courses[0];
         APP_STATE.activeCourseId = activeCourse.id;
       }
 
-      const title = isHe ? (activeCourse.title_he || activeCourse.title_en) : (activeCourse.title_en || activeCourse.title_he);
-      const desc = isHe ? (activeCourse.description_he || activeCourse.description_en) : (activeCourse.description_en || activeCourse.description_he);
       const lessons = activeCourse.lessons || [];
 
-      let html = `
-        <div class="space-y-6 max-w-4xl mx-auto">
-          <!-- Course Header Card -->
-          <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="space-y-1">
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-                  <span class="text-amber-400 font-mono">${escapeHtml(activeCourse.icon || '✦')}</span>
-                  ${escapeHtml(title)}
-                </span>
-                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">
-                  ${escapeHtml(activeCourse.category || 'Curriculum')}
-                </span>
-                ${activeCourse.target_level ? `
-                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                    ${escapeHtml(activeCourse.target_level)}
-                  </span>
-                ` : ''}
-              </div>
-              ${desc ? `<p class="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl">${escapeHtml(desc)}</p>` : ''}
+      if (lessons.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 px-6 bg-slate-900/40 border border-slate-800 rounded-2xl space-y-4 max-w-2xl mx-auto">
+            <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mx-auto">
+              <i data-lucide="sparkles" class="w-6 h-6"></i>
             </div>
-            <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
-              <span class="text-xs font-mono text-slate-400 px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800">
-                ${lessons.length} ${isHe ? 'שיעורים' : 'Lessons'}
-              </span>
-              <button onclick="handleDeleteActiveCustomCourse()" class="p-2 rounded-xl text-slate-500 hover:text-red-400 hover:bg-slate-800/80 transition" title="Delete Course">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <div class="space-y-1">
+              <h4 class="text-base font-bold text-white">${isHe ? 'אין עדיין שיעורים בקורס זה' : 'No classes in this course yet'}</h4>
+              <p class="text-xs text-slate-400 max-w-sm mx-auto">${isHe ? 'צור שיעורים באופן ידני או השתמש בכלי ה-AI ליצירת שיעורים בשניות.' : 'Build classes manually or use the AI Class Assistant to generate lessons in seconds.'}</p>
+            </div>
+            <div class="flex items-center justify-center gap-2 pt-2">
+              <button onclick="openAddCustomLessonModal('${activeCourse.id}')" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition shadow">
+                + Add Class
+              </button>
+              <button onclick="openAiCreateClassModal('${activeCourse.id}')" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition shadow flex items-center gap-1.5">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>AI Create Class</span>
               </button>
             </div>
           </div>
+        `;
+        if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+        return;
+      }
 
-          <!-- Course Lessons Grid -->
-          <div class="space-y-3">
-            ${lessons.length === 0 ? `
-              <div class="text-center py-12 px-6 bg-slate-950/60 border border-slate-800/80 rounded-2xl space-y-3">
-                <p class="text-xs sm:text-sm text-slate-400">No lessons in this course yet.</p>
-                <button onclick="openAddCustomLessonModal('${activeCourse.id}')" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs shadow active:scale-95 transition">
-                  + Add First Lesson
-                </button>
-              </div>
-            ` : lessons.map((les, idx) => {
+      let html = `
+        <div class="space-y-3">
+          ${lessons.map((les, idx) => {
               const lTitle = isHe ? (les.title_he || les.title_en) : (les.title_en || les.title_he);
               const lHook = isHe ? (les.hook_he || les.hook_en) : (les.hook_en || les.hook_he);
               const anchors = isHe ? (les.anchors_he && les.anchors_he.length ? les.anchors_he : les.anchors_en || []) : (les.anchors_en && les.anchors_en.length ? les.anchors_en : les.anchors_he || []);
@@ -7991,7 +8202,6 @@ alter publication supabase_realtime add table public.students_sync;`;
                 </div>
               `;
             }).join('')}
-          </div>
         </div>
       `;
 
@@ -9975,6 +10185,55 @@ IV. Conclusion
       if (modal) modal.classList.add('hidden');
     }
 
+    let editingCourseId = null;
+
+    function openEditCustomCourseModal(courseId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      if (!course) return;
+      editingCourseId = courseId;
+      const modal = document.getElementById('modal-create-course');
+      const titleEl = document.getElementById('modal-create-course-title');
+      if (titleEl) titleEl.textContent = 'Edit Course';
+      document.getElementById('input-create-course-title-en').value = course.title_en || '';
+      document.getElementById('input-create-course-title-he').value = course.title_he || '';
+      document.getElementById('input-create-course-category').value = course.category || 'General';
+      document.getElementById('input-create-course-level').value = course.target_level || 'Bar Mitzvah (Age 12-13)';
+      document.getElementById('input-create-course-desc').value = course.description_en || course.description_he || '';
+      if (document.getElementById('input-create-course-format-type')) {
+        document.getElementById('input-create-course-format-type').value = course.format_type || 'standard';
+      }
+      if (document.getElementById('input-create-course-icon')) {
+        document.getElementById('input-create-course-icon').value = course.icon || '✦';
+      }
+      modal.classList.remove('hidden');
+    }
+
+    function openEditCurrentCourseModal() {
+      openEditCustomCourseModal(APP_STATE.insideCourseId || APP_STATE.activeCourseId);
+    }
+
+    function handleDeleteCustomCourseById(courseId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      if (!course) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      const title = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
+      if (!confirm(isHe ? `האם למחוק את הקורס "${title}" וכל השיעורים שבו?` : `Are you sure you want to delete course "${title}" and all its classes?`)) {
+        return;
+      }
+
+      APP_STATE.customCourses = (APP_STATE.customCourses || []).filter(c => c.id !== courseId);
+      if (APP_STATE.insideCourseId === courseId) {
+        APP_STATE.insideCourseId = null;
+      }
+      if (APP_STATE.activeCourseId === courseId) {
+        APP_STATE.activeCourseId = APP_STATE.customCourses.length > 0 ? APP_STATE.customCourses[0].id : null;
+      }
+      saveCustomCoursesToStorage(true);
+      renderLessonsCategoryView();
+      showToast(isHe ? 'הקורס נמחק' : 'Course deleted');
+    }
+
     function handleSaveCustomCourse(e) {
       e.preventDefault();
       const titleEn = document.getElementById('input-create-course-title-en').value.trim();
@@ -9992,6 +10251,27 @@ IV. Conclusion
       }
 
       if (!titleEn) return;
+
+      if (editingCourseId) {
+        const course = (APP_STATE.customCourses || []).find(c => c.id === editingCourseId);
+        if (course) {
+          course.title_en = titleEn;
+          course.title_he = titleHe || titleEn;
+          course.category = category;
+          course.target_level = level;
+          course.description_en = desc;
+          course.description_he = desc;
+          course.format_type = formatType;
+          course.icon = icon;
+          course.updated_at = new Date().toISOString();
+        }
+        editingCourseId = null;
+        saveCustomCoursesToStorage(true);
+        closeCreateCourseModal();
+        renderLessonsCategoryView();
+        showToast(APP_STATE.lang === 'he' ? 'הקורס עודכן בהצלחה!' : 'Course updated successfully!');
+        return;
+      }
 
       const newCourse = {
         id: 'course_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
@@ -10011,10 +10291,11 @@ IV. Conclusion
       if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
       APP_STATE.customCourses.push(newCourse);
       APP_STATE.activeCourseId = newCourse.id;
+      APP_STATE.insideCourseId = newCourse.id;
       saveCustomCoursesToStorage(true);
       closeCreateCourseModal();
       renderLessonsCategoryView();
-      showToast(APP_STATE.lang === 'he' ? 'הקורס נוצר בהצלחה! כעת הוסף שיעור ראשון.' : 'Course created successfully! Now add your first lesson.');
+      showToast(APP_STATE.lang === 'he' ? 'הקורס נוצר בהצלחה! כעת הוסף שיעור ראשון.' : 'Course created successfully! Now add your first class.');
     }
 
     // ==============================================
@@ -10024,17 +10305,32 @@ IV. Conclusion
 
     function openAddCustomLessonModal(courseId) {
       editingLessonContext = null;
-      const course = (APP_STATE.customCourses || []).find(c => c.id === (courseId || APP_STATE.activeCourseId));
+      const targetCourseId = courseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId;
+      const course = (APP_STATE.customCourses || []).find(c => c.id === targetCourseId);
       if (!course && (!APP_STATE.customCourses || APP_STATE.customCourses.length === 0)) {
         openCreateCourseModal();
         return;
+      }
+      if (course) {
+        APP_STATE.activeCourseId = course.id;
+        APP_STATE.insideCourseId = course.id;
       }
 
       const modal = document.getElementById('modal-add-custom-lesson');
       const titleEl = document.getElementById('modal-custom-lesson-title');
       const submitText = document.getElementById('modal-custom-lesson-submit-text');
-      if (titleEl) titleEl.textContent = 'Add Lesson to Course';
-      if (submitText) submitText.textContent = 'Save Lesson';
+      if (titleEl) titleEl.textContent = 'Add Class to Course';
+      if (submitText) submitText.textContent = 'Save Class';
+
+      const aiHeading = document.getElementById('ai-class-tool-heading');
+      if (aiHeading) aiHeading.textContent = 'AI Class Assistant (Create)';
+      const aiBtnLabel = document.getElementById('btn-run-ai-class-label');
+      if (aiBtnLabel) aiBtnLabel.textContent = 'Create with AI';
+      const aiPromptInput = document.getElementById('input-ai-class-prompt');
+      if (aiPromptInput) {
+        aiPromptInput.value = '';
+        aiPromptInput.placeholder = 'Topic or idea (e.g. Shabbat Candles, Cell Division, Fractions)...';
+      }
 
       const titleInput = document.getElementById('input-custom-lesson-title-en');
       if (titleInput) titleInput.value = '';
@@ -10059,8 +10355,18 @@ IV. Conclusion
       const modal = document.getElementById('modal-add-custom-lesson');
       const titleEl = document.getElementById('modal-custom-lesson-title');
       const submitText = document.getElementById('modal-custom-lesson-submit-text');
-      if (titleEl) titleEl.textContent = 'Edit Lesson';
-      if (submitText) submitText.textContent = 'Update Lesson';
+      if (titleEl) titleEl.textContent = 'Edit Class';
+      if (submitText) submitText.textContent = 'Update Class';
+
+      const aiHeading = document.getElementById('ai-class-tool-heading');
+      if (aiHeading) aiHeading.textContent = 'AI Class Assistant (Refine & Edit)';
+      const aiBtnLabel = document.getElementById('btn-run-ai-class-label');
+      if (aiBtnLabel) aiBtnLabel.textContent = 'Refine with AI';
+      const aiPromptInput = document.getElementById('input-ai-class-prompt');
+      if (aiPromptInput) {
+        aiPromptInput.value = '';
+        aiPromptInput.placeholder = 'How should AI improve this class? (e.g. Add sports analogy, simplify for teens)...';
+      }
 
       document.getElementById('input-custom-lesson-title-en').value = lesson.title_en || '';
       document.getElementById('input-custom-lesson-title-he').value = lesson.title_he || '';
@@ -10074,6 +10380,159 @@ IV. Conclusion
 
       if (modal) modal.classList.remove('hidden');
       if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    async function handleAiClassAssist() {
+      const isHe = APP_STATE.lang === 'he';
+      const promptInput = document.getElementById('input-ai-class-prompt');
+      let promptText = (promptInput?.value || '').trim();
+
+      const titleInput = document.getElementById('input-custom-lesson-title-en');
+      const hookInput = document.getElementById('input-custom-lesson-hook');
+      const anchorsInput = document.getElementById('input-custom-lesson-anchors');
+      const lifeAppInput = document.getElementById('input-custom-lesson-life-app');
+      const discInput = document.getElementById('input-custom-lesson-discussion');
+
+      if (!promptText) {
+        promptText = titleInput?.value.trim() || hookInput?.value.trim();
+      }
+
+      if (!promptText) {
+        showToast(isHe ? 'נא להזין נושא או הנחיה ל-AI' : 'Please enter a topic or prompt for the AI');
+        promptInput?.focus();
+        return;
+      }
+
+      const activeCourse = (APP_STATE.customCourses || []).find(c => c.id === (editingLessonContext?.courseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId)) || {};
+      const courseTitle = activeCourse.title_en || activeCourse.title_he || 'General';
+      const courseCategory = activeCourse.category || 'General';
+      const targetLevel = activeCourse.target_level || 'Age 12-13';
+
+      const statusEl = document.getElementById('ai-class-status');
+      const statusText = document.getElementById('ai-class-status-text');
+      const submitBtn = document.getElementById('btn-run-ai-class-assistant');
+
+      if (statusEl) statusEl.classList.remove('hidden');
+      if (statusText) statusText.textContent = isHe ? 'ה-AI מעבד את השיעור...' : 'AI is creating your class...';
+      if (submitBtn) submitBtn.disabled = true;
+
+      const isEditMode = !!editingLessonContext;
+
+      const systemInstruction = `You are TutorPilot AI, an expert curriculum authoring assistant for educators and tutors.
+Return STRICT JSON ONLY conforming to:
+{
+  "title_en": "Concise Engaged Lesson Title",
+  "title_he": "כותרת השיעור בעברית",
+  "hook": "Relatable opening dilemma or modern problem (2 sentences) for ${targetLevel}",
+  "anchors": [
+    "**Keyword**: First critical concept explanation.",
+    "**Keyword**: Second critical concept explanation.",
+    "**Keyword**: Third critical concept explanation.",
+    "**Keyword**: Fourth critical concept explanation.",
+    "**Keyword**: Fifth critical concept explanation."
+  ],
+  "life_app": "Direct real-world student application showing how this matters today.",
+  "discussion": "Thought-provoking discussion riddle or dilemma for the student."
+}`;
+
+      const currentValuesPrompt = isEditMode ? `
+CURRENT CLASS DATA BEING EDITED:
+Title: ${titleInput?.value || ''}
+Hook: ${hookInput?.value || ''}
+Current Anchors: ${anchorsInput?.value || ''}
+Life App: ${lifeAppInput?.value || ''}
+Discussion: ${discInput?.value || ''}
+USER EDIT INSTRUCTION: ${promptText}` : `
+CREATE NEW CLASS:
+Course: ${courseTitle} (${courseCategory}, Level: ${targetLevel})
+Class Topic / Instruction: ${promptText}`;
+
+      const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key');
+      const candidateModels = [
+        'gemini-3.5-flash',
+        'gemini-3.1-flash-lite',
+        'gemini-3.5-flash-lite',
+        'gemini-flash-latest',
+        'gemini-3.8-flash'
+      ];
+
+      let rawResponseText = null;
+
+      if (apiKey) {
+        for (const model of candidateModels) {
+          try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            const resp = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: currentValuesPrompt }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] },
+                generationConfig: { temperature: 0.7, responseMimeType: 'application/json' }
+              })
+            });
+            if (resp.ok) {
+              const resData = await resp.json();
+              rawResponseText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (rawResponseText) break;
+            }
+          } catch (e) {
+            console.warn("Model error:", e);
+          }
+        }
+      }
+
+      if (!rawResponseText) {
+        const cleanTopic = promptText.replace(/['"]/g, '');
+        rawResponseText = JSON.stringify({
+          title_en: cleanTopic,
+          title_he: cleanTopic,
+          hook: `Why does ${cleanTopic} matter in everyday life? When you look deeper, it reveals a fundamental principle.`,
+          anchors: [
+            `**Core Definition**: The foundational principle of ${cleanTopic}.`,
+            `**Key Mechanism**: How ${cleanTopic} operates in practical situations.`,
+            `**Historical / Classical Context**: Traditional and authoritative insights on this concept.`,
+            `**Common Pitfall**: What students frequently misunderstand about this topic.`,
+            `**Mastery Benchmark**: The key takeaway every student must retain.`
+          ],
+          life_app: `When you encounter a real-world scenario involving ${cleanTopic}, apply this core principle to make the right decision.`,
+          discussion: `If you had to explain ${cleanTopic} to someone who has never heard of it, what single analogy would you use?`
+        });
+      }
+
+      try {
+        let clean = rawResponseText.trim();
+        if (clean.startsWith('```json')) clean = clean.replace(/^```json/, '');
+        if (clean.startsWith('```')) clean = clean.replace(/^```/, '');
+        if (clean.endsWith('```')) clean = clean.replace(/```$/, '');
+        clean = clean.trim();
+        const data = JSON.parse(clean);
+
+        if (titleInput && data.title_en) titleInput.value = data.title_en;
+        const titleHeInput = document.getElementById('input-custom-lesson-title-he');
+        if (titleHeInput && data.title_he) titleHeInput.value = data.title_he;
+        if (hookInput && data.hook) hookInput.value = data.hook;
+        if (anchorsInput && Array.isArray(data.anchors)) anchorsInput.value = data.anchors.join('\n');
+        if (lifeAppInput && data.life_app) lifeAppInput.value = data.life_app;
+        if (discInput && data.discussion) discInput.value = data.discussion;
+
+        showToast(isHe ? 'השיעור נוצר בהצלחה עם AI! באפשרותך לערוך ולשמור.' : 'Class populated with AI! Review and save.');
+      } catch (err) {
+        console.error("AI JSON parse error:", err);
+        showToast(isHe ? 'שגיאה בעיבוד נתוני AI' : 'Error parsing AI response');
+      } finally {
+        if (statusEl) statusEl.classList.add('hidden');
+        if (submitBtn) submitBtn.disabled = false;
+        if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+      }
+    }
+
+    function applyAiQuickPrompt(promptText) {
+      const input = document.getElementById('input-ai-class-prompt');
+      if (input) {
+        input.value = promptText;
+        handleAiClassAssist();
+      }
     }
 
     function closeAddCustomLessonModal() {
