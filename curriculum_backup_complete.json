@@ -1,0 +1,1530 @@
+{
+  "preserved_at": "2026-11-11T23:16:00.481Z",
+  "concepts_count": 13,
+  "parshiot_count": 23,
+  "total_lessons": 36,
+  "jewish_concepts": [
+    {
+      "id": "shabbat",
+      "title_en": "Shabbat",
+      "title_he": "שבת קודש",
+      "category": "foundations",
+      "hook_en": "Imagine if Apple designed a feature that forced you to put down your phone, pause homework, eat gourmet meals with family, and recharge 100% of your energy every 7 days. That is Shabbat.",
+      "hook_he": "דמיין לעצמך שחברת אפל הייתה ממציאה פיצ'ר שמחייב אותך להניח את הטלפון, לעצור שיעורי בית, לאכול סעודות משפחתיות ולטעון את המצברים ב-100% כל 7 ימים. זוהי בדיוק השבת.",
+      "nuggets_en": [
+        "<strong>Menucha (Soul Expansion):</strong> Not mere physical resting from work, but active soul rejuvenation, mindfulness, and stepping out of the weekly rat race.",
+        "<strong>39 Creative Melachot:</strong> Not hard physical exertion, but creative mastery over nature; on Shabbat, we step back and let Hashem run the world.",
+        "<strong>The Secret Spice:</strong> Rabbi Yehudah HaNasi told Emperor Antoninus that Shabbat itself is a divine spice that only those who observe it can taste.",
+        "<strong>Neshamah Yeteirah:</strong> An expanded spiritual capacity and elevated mindfulness granted to every Jew to perceive deeper meaning and peace.",
+        "<strong>Shamor & Zachor:</strong> Zachor through Kiddush (verbalizing sacred time over wine) and Shamor through candle lighting (peace in the home and spiritual illumination).",
+        "<strong>Three Festive Banquets:</strong> Celebrating Friday night, Shabbat day, and Seudah Shlishit at twilight with singing, delicious food, and deep family talk.",
+        "<strong>Digital Sovereignty:</strong> Unplugging screens for 25 hours gives you freedom; the real flex is being the master of your devices, not their slave."
+      ],
+      "nuggets_he": [
+        "<strong>מנוחת הנפש:</strong> לא סתם שביתה ממאמץ גופני, אלא התחדשות הנשמה, שלווה פנימית ועצירה מוחלטת ממרוץ החיים.",
+        "<strong>ל״ט מלאכות:</strong> איסור המלאכה אינו על עבודה קשה, אלא על שינוי הבריאה; בשבת אנו מעידים שהעולם שייך לבורא.",
+        "<strong>תבלין השבת:</strong> רבי יהודה הנשיא גילה לקיסר אנטונינוס שהשבת היא תבלין אלוקי מיוחד שרק מי ששומר אותה זוכה לטעום את טעמו.",
+        "<strong>נשמה יתירה:</strong> ממד עמוק של מודעות, רוגע והרחבת הלב המוענק לכל יהודי ביום קדוש זה.",
+        "<strong>שמור וזכור:</strong> זכור באמצעות קידוש על היין (הצהרה על קדושת הזמן), ושמור בהדלקת נרות שבת (אור ושלום בית).",
+        "<strong>שלוש סעודות:</strong> סעודת ליל שבת, סעודת היום וסעודה שלישית של רעווא דרעווין עם שירים, מטעמים ושיחות נפש משפחתיות.",
+        "<strong>חירות דיגיטלית:</strong> התנתקות ממסכים ל-25 שעות מעניקה שליטה עצמית; החופש האמיתי הוא להיות הבוס של המסך שלך ולא עבד שלו."
+      ],
+      "life_app_en": "When you game 6 hours straight, do you feel recharged or drained? Shabbat teaches boundary power: being the master of your screen, not its slave. The freedom to unplug is the ultimate flex.",
+      "life_app_he": "כשאתה משחק 6 שעות רצוף במסך, אתה מרגיש טעון או מרוקן? שבת מלמדת שליטה עצמית: להיות הבוס של המסך שלך ולא עבד שלו. היכולת להתנתק היא העוצמה האמיתית.",
+      "midrash_en": "The Emperor Antoninus asked Rabbi Yehuda HaNasi: 'Why does your Shabbat food smell and taste so incredible?' The Rabbi answered: 'We have a special spice called Shabbat. Whoever keeps Shabbat gets the taste; whoever doesn't, can never taste it.'",
+      "midrash_he": "הקיסר אנטונינוס שאל את רבי יהודה הנשיא: 'מדוע לתבשילי השבת יש ריח וטעם כה מיוחדים?' השיב לו רבי: 'תבלין אחד יש לנו ושמו שבת. מי ששומר שבת טועם אותו, ומי שאינו שומר אינו יכול לקלוט את טעמו'.",
+      "discussion_en": "If you had to unplug from all devices for 24 hours, what would you actually do that you currently never have time for?",
+      "discussion_he": "אם היית צריך להתנתק מכל המסכים ל-24 שעות, מה היית עושה שכרגע אף פעם אין לך זמן אליו?"
+    },
+    {
+      "id": "kashrut",
+      "title_en": "Kashrut",
+      "title_he": "כשרות",
+      "category": "foundations",
+      "hook_en": "If you owned a $2,000,000 Ferrari, would you put dirty vegetable oil in the fuel tank? Your body and soul are worth infinitely more.",
+      "hook_he": "אם היה לך רכב פרארי בשווי 2 מיליון דולר, היית ממלא בו שמן בישול משומש? הגוף והנשמה שלך שווים לאין שיעור יותר.",
+      "nuggets_en": [
+        "<strong>Spiritual Calibration:</strong> Kashrut literally means 'fit' or 'suitable'; what enters the mouth directly tunes the sensitivity of the Jewish soul.",
+        "<strong>Timtum HaLev:</strong> The Talmud explains that forbidden foods spiritually coarsen the heart, while kosher food keeps the soul receptive and alert.",
+        "<strong>Land Animals:</strong> Must chew their cud (thoughtful digestion before reacting) and have split hooves (standing firm and grounded in values).",
+        "<strong>Creatures of Water:</strong> Must possess fins (direction to swim upstream against trends) and scales (armor defending against toxic influences).",
+        "<strong>Separation of Milk & Meat:</strong> Meat represents mortality and taking life, while milk represents motherly nurturing; Torah keeps these distinct.",
+        "<strong>Compassion in Shechitah:</strong> Humane and instantaneous slaughter with a razor-sharp blade, forbidding cruelty and banning hunting for entertainment.",
+        "<strong>Conscious Mastery:</strong> Animals eat impulsively whatever is in front of them; a human pauses, checks the source, and elevates food with a blessing."
+      ],
+      "nuggets_he": [
+        "<strong>כיול רוחני:</strong> כשרות מלשון 'כשיר' או 'מתאים'; המאכלים שנכנסים לגוף משפיעים ישירות על עדינות הנשמה וצלילות המחשבה.",
+        "<strong>טמטום הלב:</strong> חז״ל לימדו שמאכלות אסורים אוטמים את הרגש הרוחני, בעוד מזון כשר שומר על הלב קשוב, ערכי ופתוח.",
+        "<strong>סימני בהמה:</strong> העלאת גרה (סמל לחשיבה מעמיקה ואיפוק לפני פעולה) ופרסות שסועות (יציבות איתנה בערכים ובקרקע).",
+        "<strong>סימני דגים:</strong> סנפיר (מעניק כוח לשחות נגד הזרם החברתי) וקשקשת (שריון מגן מפני השפעות שליליות מסביב).",
+        "<strong>הפרדת בשר וחלב:</strong> בשר מסמל נטילת חיים ומעשיות; חלב מסמל הענקת חיים וגידול; התורה אוסרת לערבב בין התחומים.",
+        "<strong>צער בעלי חיים ושחיטה:</strong> הליך מדויק ומהיר בסכין חלקה לחלוטין ללא כאב, עם איסור מוחלט על התאכזרות וציד לשם שעשוע.",
+        "<strong>בחירה מודעת:</strong> בעלי חיים אוכלים באימפולסיביות; בן אדם עוצר, בודק, מברך ומקדש את הפעולה הבסיסית ביותר."
+      ],
+      "life_app_en": "Animals eat whatever is in front of them impulsively. Humans pause, check, and choose. Kashrut trains you to have self-control in an impulsive, snack-driven world.",
+      "life_app_he": "בעלי חיים אוכלים כל מה שנמצא מולם מתוך דחף רגעי. בן אדם עוצר, בודק ובוחר. כשרות מפתחת משמעת עצמית ואיפוק בעולם של פיתויים מיידיים.",
+      "midrash_en": "The Talmud teaches that what goes into your mouth affects your sensitivity: coarse, forbidden foods harden the spiritual heart ('Timtum HaLev'), while kosher mindfulness keeps the soul receptive and alert.",
+      "midrash_he": "חז״ל מלמדים שמה שנכנס לפינו משפיע על עדינות הנפש: מאכלות אסורים גורמים ל'טמטום הלב', בעוד אכילה כשרה שומרת על נשמה רגישה, צלולה וערנית.",
+      "discussion_en": "What is harder: stopping yourself from eating food that smells delicious, or walking away when someone insults you? How does training one help the other?",
+      "discussion_he": "מה יותר קשה: לעצור את עצמך ממאכל מפתה, או להבליג כשמישהו מעליב אותך? איך אימון באחד עוזר לשני?"
+    },
+    {
+      "id": "tefillin",
+      "title_en": "Tefillin",
+      "title_he": "תפילין",
+      "category": "mitzvot",
+      "hook_en": "Athletes wear heart monitors and smartwatches. Tefillin are the original biofeedback hardware: aligning your logic, your passions, and your hands to do good.",
+      "hook_he": "ספורטאים עונדים שעונים חכמים ומדדי דופק. תפילין הן החומרה המקורית: חיבור וכיול של ההיגיון במוח, הרגשות בלב והמעשים בידיים.",
+      "nuggets_en": [
+        "<strong>Biofeedback Circuit:</strong> Connecting the head (intellect), heart (emotions), and arm (strength) into unified service of high moral purpose.",
+        "<strong>Shel Yad on the Bicep:</strong> Bound next to the heart and wrapped 7 times, channeling our passions and physical actions toward doing good.",
+        "<strong>Shel Rosh on the Crown:</strong> Rested directly over the brain's decision-making frontal lobe, sanctifying our logic, thoughts, and perception.",
+        "<strong>Four Sacred Passages:</strong> Handwritten by an expert Sofer on parchment, declaring the Shema and our covenant of eternal freedom.",
+        "<strong>Black Solid Batim:</strong> Formed from a single piece of kosher hide into exact geometric squares, dyed pure black to symbolize unyielding integrity.",
+        "<strong>Quiet Inner Dignity:</strong> Rabbi Eliezer taught that nations revere the Jew on whose head the Name of Hashem is bound.",
+        "<strong>The Adult Milestone:</strong> The prime daily mitzvah unique to adulthood, starting from your Bar Mitzvah and connecting you for life."
+      ],
+      "nuggets_he": [
+        "<strong>מעגל כיול פנימי:</strong> חיבור עוצמתי בין המוח (השכל), הלב (הרגשות) והיד (המעשים) למטרה מוסרית ורוחנית אחת.",
+        "<strong>תפילין של יד:</strong> מונחות על שריר הזרוע כנגד הלב ונכרכות 7 פעמים, לרתום את תשוקות הלב והמעשים היומיומיים לטוב.",
+        "<strong>תפילין של ראש:</strong> מונחות מעל קו השיער כנגד האונה המרכזית במוח, לקדש את המחשבות, כושר השיפוט והראייה.",
+        "<strong>ארבע פרשיות קודש:</strong> כתובות בדיו שחור על קלף בידי סופר סת״ם, ובראשן קבלת עול מלכות שמים וברית היציאה מעבדות לחירות.",
+        "<strong>בתים שחורים ומרובעים:</strong> עשויים מעור בהמה טהורה בדיוק גיאומטרי מופתי ומושחרים, סמל ליושרה ונאמנות בלתי מתפשרת.",
+        "<strong>כבוד פנימי ושקט:</strong> רבי אליעזר אמר: 'וראו כל עמי הארץ כי שם ה' נקרא עליך' — אלו תפילין שבראש המעניקות יראת כבוד ועוצמה.",
+        "<strong>שער הבגרות:</strong> המצווה היומית הראשונה המייחדת את הבחור שהגיע לגיל 13 ומקשרת אותו ישירות לאביו שבשמים בכל בוקר."
+      ],
+      "life_app_en": "How often do you know the right thing to do in your brain, but your feelings want to do the opposite? Tefillin connects the cable between your brain's wisdom and your heart's desires.",
+      "life_app_he": "כמה פעמים קורה שאתה יודע במוח מה הדבר הנכון, אבל הלב והחשק רוצים בדיוק ההפך? התפילין מחברות את הכבל בין שכל ישר לרגש נכון.",
+      "midrash_en": "Rabbi Eliezer taught: 'All the nations of the earth shall see that Hashem's name is called upon you and they shall respect you (Deut 28:10) — these are the Tefillin on the head.' It gives a young man quiet, unshakable dignity.",
+      "midrash_he": "רבי אליעזר אומר: 'וראו כל עמי הארץ כי שם ה' נקרא עליך ויראו ממך — אלו תפילין שבראש'. התפילין מעניקות לצעיר עוצמה וכבוד פנימי בלתי מעורער.",
+      "discussion_en": "If you could wear a bracelet that reminds you of your highest personal standard every morning, what motto would you write on it?",
+      "discussion_he": "אם היית עונד צמיד שמזכיר לך כל בוקר את הערך הכי חשוב שלך, איזה משפט היית כותב עליו?"
+    },
+    {
+      "id": "jewish_wedding",
+      "title_en": "The Jewish Wedding",
+      "title_he": "חתונה יהודית",
+      "category": "life_cycle",
+      "hook_en": "Why does the biggest, happiest party in a Jewish life pause at the absolute climax to smash a glass on the floor?",
+      "hook_he": "מדוע בחגיגה הכי גדולה ושמחה של החיים, רגע לפני הריקודים, החתן עוצר הכל ושובר כוס זכוכית ברגל?",
+      "nuggets_en": [
+        "<strong>Bashert (Soul Reunion):</strong> Kabbalah teaches that before birth, one soul splits into two; holy marriage is the reunion of matched halves.",
+        "<strong>The Open Chuppah:</strong> Open on all four sides like the tent of Abraham and Sarah, promising their home will be welcoming to guests in need.",
+        "<strong>Smooth Gold Ring:</strong> A pure circular band without stones or gems, reflecting authentic value, transparent honesty, and endless dedication.",
+        "<strong>The Historic Ketubah:</strong> The world's first legal charter protecting women's rights, establishing financial security, respect, and marital devotion.",
+        "<strong>Breaking the Glass:</strong> Halting personal joy to remember Jerusalem's destruction, demonstrating that true leaders remember the world's pain.",
+        "<strong>Sheva Berachot:</strong> Seven festive blessings recited over wine celebrating love, joy, friendship, and the future restoration of world peace.",
+        "<strong>Loyalty Over Moods:</strong> While pop culture treats relationships as temporary, a Jewish marriage builds an unbreakable sanctuary through every storm."
+      ],
+      "nuggets_he": [
+        "<strong>בשערט (איחוד נשמות):</strong> תורת הסוד מלמדת שטרם ירידתן לעולם נשמות מתפצלות; החתונה היהודית היא איחוד שמח של שני חלקי נשמה.",
+        "<strong>החופה הפתוחה:</strong> פתוחה מארבע רוחותיה כמו אוהל אברהם ושרה, הבטחה שהבית החדש יוקדש לחסד, נתינה והכנסת אורחים.",
+        "<strong>טבעת זהב חלקה:</strong> עגולה ופשוטה ללא יהלומים או חריטות, המבטאת שווי אמיתי, כנות נקייה והתקשרות נצחית שאינה תלויה במראית עין.",
+        "<strong>הכתובה ההיסטורית:</strong> המסמך המשפטי החלוצי בעולם המבטיח את כבודה, זכויותיה וביטחונה הכלכלי והאישי של האישה.",
+        "<strong>שבירת הכוס:</strong> עצירת שיא השמחה כדי לזכור את חורבן ירושלים, מסר מוסרי שבוגר אמיתי לעולם אינו שוכח את כאב הזולת.",
+        "<strong>שבע ברכות:</strong> שבע ברכות על כוס ייין המקדשות אהבה, אחווה, שלום ורעות ומברכות את בניין ירושלים וגאולת העולם.",
+        "<strong>נאמנות מעל רגשות חולפים:</strong> בעוד התרבות מסביב מציגה קשרים כדבר בר-החלפה, חתונה יהודית בונה מבצר נצחי של שותפות אמת."
+      ],
+      "life_app_en": "Popular culture treats relationships as disposable. A Jewish wedding teaches loyalty, teamwork, and building something stronger than temporary moods.",
+      "life_app_he": "התרבות מסביב מציגה קשרים כדבר חולף שניתן להחליף בקלות. חתונה יהודית מלמדת על נאמנות, עבודת צוות ובניית בית יציב שעומד בכל סערה.",
+      "midrash_en": "A Roman matron asked Rabbi Yose ben Halafta: 'What has your God been doing since He finished creating the world in six days?' He replied: 'He sits and arranges marriages, connecting matching souls.'",
+      "midrash_he": "מטרוניתא רומית שאלה את רבי יוסי בן חלפתא: 'מה עושה אלוהיכם מאז שסיים את ששת ימי בראשית?' ענה לה: 'יושב ומזווג זיווגים — מחבר בין נשמות'.",
+      "discussion_en": "Why is it important to remember people who are struggling or hurting even on your most joyful birthday or celebration?",
+      "discussion_he": "למה חשוב לזכור אנשים שקשה להם דווקא ביום ההולדת או בחגיגה הכי גדולה ושמחה שלך?"
+    },
+    {
+      "id": "avot",
+      "title_en": "The Avot & Imahot",
+      "title_he": "האבות והאמהות",
+      "category": "history",
+      "hook_en": "Who were your great-great-great grandparents? In Judaism, you aren't just an individual; you are the continuation of a 3,800-year dynastic family tree.",
+      "hook_he": "מי היו סבא וסבתא של הסבא שלך? ביהדות אתה לא אדם בודד שנחת משום מקום; אתה ממשיך של שושלת אבות בת 3,800 שנה.",
+      "nuggets_en": [
+        "<strong>Abraham (Chesed & Courage):</strong> Radically generous, smashed the idols of conformity in Ur Kasdim, and stood proud against the entire world.",
+        "<strong>Sarah the Prophetess:</strong> Partner in destiny whose prophetic vision surpassed Abraham's, nurturing the moral purity of the next generation.",
+        "<strong>Isaac (Gevurah & Persistence):</strong> Inner strength, supreme dedication at the Akeidah, and persistent digging of water wells despite disputes.",
+        "<strong>Rebecca the Discernment:</strong> Courageous kindness drawing water for thirsty camels, possessing intuitive clarity to guide Yaakov toward blessing.",
+        "<strong>Jacob (Tiferet & Resilience):</strong> Endurance through 20 years of deception with Laban, wrestling an angel until dawn, and building the 12 tribes.",
+        "<strong>Rachel & Leah:</strong> Rachel giving away the secret signs out of sheer empathy; Leah mastering heartfelt gratitude by naming Yehudah.",
+        "<strong>Ma'aseh Avot Siman L'Banim:</strong> The founding ancestors established the spiritual DNA, moral bravery, and survival roadmap for every Jew today."
+      ],
+      "nuggets_he": [
+        "<strong>אברהם אבינו (חסד ועצמאות):</strong> הכנסת אורחים מופלאה, ניפוץ אלילי השקר באור כשדים ועמידה גאה לבדו מול כל העולם כ'עברי'.",
+        "<strong>שרה אמנו (נבואה ועוצמה):</strong> שותפה שווה למסע שרוח קודשה עלתה על של אברהם, בשמירה קפדנית על חינוך הדור הבא.",
+        "<strong>יצחק אבינו (גבורה ועקביות):</strong> משמעת עצמית מוחלטת, מסירות נפש בעקידה ועקשנות שקטה בחפירת בארות מים מול סכסוכי פלשתים.",
+        "<strong>רבקה אמנו (חסד ותבונה):</strong> טוב לב יוצא דופן בהשקיית עשרה גמלים בבאר, וראייה נבואית צלולה בהכוונת יעקב לקבלת הברכות.",
+        "<strong>יעקב אבינו (אמת ותפארת):</strong> חוסן נפשי מול 20 שנות מרמה של לבן, מאבק אמיץ עם שרו של עשיו והעמדת שבטי י-ה ללא פגם.",
+        "<strong>רחל ולאה:</strong> רחל המוסרת את הסימנים במסירות נפש עילאית; לאה המייסדת את ערך ההודאה כשקראה לבנה יהודה: 'הפעם אודה את ה''.",
+        "<strong>מעשה אבות סימן לבנים:</strong> הניסיונות והניצחונות של האבות והאימהות הם הקוד הגנטי והמפה הרוחנית שפועלים בקרבנו עד היום."
+      ],
+      "life_app_en": "When all your friends at school follow an unhealthy trend, remember Abraham: he was called 'HaIvri' because the entire world stood on one side, and he stood proudly on the other.",
+      "life_app_he": "כשכל החברים בבית הספר נגררים אחרי טרנד מטופש או פוגעני, תיזכר באברהם: הוא נקרא 'העברי' כי כל העולם עמד מעבר אחד והוא בחר לעמוד בצד של האמת.",
+      "midrash_en": "The Midrash says Abraham was thrown into a fiery furnace at Nimrod's court for refusing to bow down to statues, proving that truth is worth standing for even under maximum heat.",
+      "midrash_he": "המדרש מספר שנמרוד השליך את אברהם לכבשן האש כי סירב להשתחוות לפסלים — ללמד שערכי אמת חזקים יותר מכל לחץ חברתי.",
+      "discussion_en": "Which trait do you admire most in a leader: someone super kind, someone super disciplined, or someone who never gives up when life gets unfair?",
+      "discussion_he": "איזו תכונה אתה הכי מעריך במנהיג: אדם שכולו טוב לב, אדם בעל משמעת ברזל, או אדם שלעולם אינו נשבר גם כשקשה?"
+    },
+    {
+      "id": "eretz_yisrael",
+      "title_en": "Eretz Yisrael",
+      "title_he": "ארץ ישראל",
+      "category": "foundations",
+      "hook_en": "Every other ancient empire (Rome, Babylon, Greece) faded into dusty museums. Why is the Jewish nation alive and thriving on the exact soil promised to Abraham?",
+      "hook_he": "כל האימפריות העתיקות (רומא, בבל, מצרים) נעלמו למוזיאונים. איך ייתכן שעם ישראל חי, נושם ומשגשג בדיוק על אותה האדמה שהובטחה לאברהם?",
+      "nuggets_en": [
+        "<strong>The Promised Homeland:</strong> Not a random refuge, but the unique spiritual ecosystem where the Jewish nation fulfills its highest destiny.",
+        "<strong>The Responsive Soil:</strong> Lay desolate for nearly 2,000 years under foreign conquerors, yet miraculously burst into fruit and high tech upon our return.",
+        "<strong>Jerusalem & Kotel:</strong> The focal point of Jewish prayers worldwide for over three millennia, facing Mount Moriah where the Shechinah never departs.",
+        "<strong>Land-Dependent Mitzvot:</strong> Special agricultural commandments (Shmittah, Terumot, Ma'asrot) sanctifying nature and connecting land with God.",
+        "<strong>Avraham's Walking Deed:</strong> 'Arise and walk through the length and breadth of the land' — personal physical connection to holy terrain.",
+        "<strong>Ingathering of Exiles:</strong> The ongoing modern miracle of gathering millions of Jews from over 100 countries back into one vibrant home.",
+        "<strong>An Unshakable Anchor:</strong> No matter where a Jewish boy travels in the world, in Israel he is never a stranger or tourist; he is home."
+      ],
+      "nuggets_he": [
+        "<strong>האקוסיסטם הרוחני:</strong> ארץ ישראל איננה רק מקלט פיזי, אלא האדמה הייחודית שבה עם ישראל פורח ומגשים את ייעודו השלם.",
+        "<strong>הארץ המגיבה לבניה:</strong> שממה מוחלטת במשך 2,000 שנות כיבוש זר, שהתעוררה לחיים ולמעצמת חקלאות, מדע והייטק עם שיבת בניה.",
+        "<strong>ירושלים והכותל המערבי:</strong> מוקד התפילות והכיסופים מכל פינה בעולם; שער השמים של הר המוריה שממנו לא זזה שכינה מעולם.",
+        "<strong>מצוות התלויות בארץ:</strong> שמיטה, תרומות, מעשרות וביכורים המחברים את עבודת האדמה הפשוטה לחסד חברתי ולקדושת הבורא.",
+        "<strong>קניין ההליכה:</strong> 'קום התהלך בארץ לאורכה ולרוחבה כי לך אתננה' — חיבור פיזי וממשי של כל יהודי לשבילי המולדת.",
+        "<strong>קיבוץ גלויות:</strong> התגשמות נבואות התנ״ך בעיניים שלנו: חזרת מיליוני יהודים מלמעלה מ-100 גלויות לחיות ולבנות יחד.",
+        "<strong>עוגן נצחי:</strong> לא משנה היכן יסתובב נער יהודי בעולם, בארץ ישראל הוא לעולם אינו זר או תייר — הוא בבית של המשפחה."
+      ],
+      "life_app_en": "No matter where you live in the world, you have an eternal home where you are never an outsider or a stranger.",
+      "life_app_he": "לא משנה היכן אתה גר בעולם, תמיד יש לך בית אחד שבו לעולם אינך זר או אורח.",
+      "midrash_en": "The Talmud says: 'Ten measures of beauty descended to the world; nine were taken by Jerusalem and one by the rest of the entire earth.'",
+      "midrash_he": "אמרו חז״ל: 'עשרה קבים של יופי ירדו לעולם — תשעה נטלה ירושלים ואחד כל העולם כולו'.",
+      "discussion_en": "If you could bring three things from your room to Israel right now, what would you bring, and what is the first place you'd visit?",
+      "discussion_he": "אם היית נוחת מחר בבוקר בישראל, מה המקום הראשון שהיית רוצה לראות בעיניים שלך?"
+    },
+    {
+      "id": "lashon_hakodesh",
+      "title_en": "Lashon HaKodesh",
+      "title_he": "לשון הקודש",
+      "category": "wisdom",
+      "hook_en": "In English, a 'dog' is just an arbitrary word we made up. In Hebrew, every word is the actual spiritual blueprint and source code of what it names.",
+      "hook_he": "באנגלית המילה Dog היא סתם צליל שהומצא באקראי. בעברית, כל מילה היא שורש ה-DNA והתוכנה הפנימית של הבריאה.",
+      "nuggets_en": [
+        "<strong>Creation Source Code:</strong> Hashem formed reality with words: 'Let there be light'; Hebrew letters are the energetic building blocks of creation.",
+        "<strong>Gematria & Architecture:</strong> Every Hebrew letter contains a numeric value and inner meaning linking physical matter with spiritual reality.",
+        "<strong>Precision of Meaning:</strong> No random synonyms; words like Ahava (love), Simcha (joy), and Sasson (outburst of joy) map distinct emotional states.",
+        "<strong>Inherent Holiness:</strong> Classical Hebrew contains zero native curse or vulgar words; vulgar slang in modern Hebrew had to be imported from outside.",
+        "<strong>Life & Death in the Tongue:</strong> King Solomon taught that speech holds creative and destructive power; words spoken cannot be pulled back.",
+        "<strong>The Irreversible Arrow:</strong> The Midrash compares a harsh word to an arrow; once released from the bow, you cannot control the damage it inflicts.",
+        "<strong>Lashon Hara Defense:</strong> The Chafetz Chaim proved that guarding speech preserves self-respect, mental peace, and lifelong friendships."
+      ],
+      "nuggets_he": [
+        "<strong>שורש תוכנת הבריאה:</strong> העולם נברא בעשרה מאמרות: 'ויאמר אלוהים יהי אור' — האותיות העבריות הן אבני הבניין של המציאות.",
+        "<strong>גימטריה ומשמעות פנימית:</strong> לכל אות יש ערך מספרי, צורה ומשמעות עמוקה המחברים בין החפץ הגשמי למקורו הרוחני.",
+        "<strong>דיוק פסיכולוגי:</strong> אין מילים נרדפות סתם; מילים כמו שמחה, ששון, גילה ודיצה מגדירות שלבים שונים ומדויקים בהרגשת הנפש.",
+        "<strong>שפה נקייה מטבעה:</strong> בלשון הקודש המקורית אין מילות גנאי או קללות; כל הקללות בסלנג הישראלי הושאלו משפות זרות.",
+        "<strong>מוות וחיים ביד הלשון:</strong> שלמה המלך לימד שדיבור הוא כוח יוצר או הורס; מילה אחת מרוממת ומילה אחת מסוגלת לרסק.",
+        "<strong>חץ שנורה מהקשת:</strong> המדרש מדמה מילה פוגענית לחץ; ברגע שעזב את המיתר, אי אפשר להחזירו או לעצור את פגיעתו.",
+        "<strong>שמירת הלשון כעוצמה:</strong> החפץ חיים הוכיח ששמירה על דיבור נקי מביאה בריאות נפשית, אריכות ימים וכבוד אמיתי מהחברים."
+      ],
+      "life_app_en": "The words you text or say in a group chat can build someone's confidence for weeks, or destroy their day in seconds. Words are physical power.",
+      "life_app_he": "משפט אחד שאתה שולח בקבוצת וואטסאפ יכול לבנות לחבר ביטחון לשבועות, או לרסק לו את המצב רוח בשנייה. מילים הן נשק חם.",
+      "midrash_en": "King Solomon said: 'Death and life are in the power of the tongue' (Proverbs 18:21). Like an arrow released from a bow, once a word leaves your lips, you cannot bring it back.",
+      "midrash_he": "שלמה המלך אמר: 'מוות וחיים ביד לשון'. כמו חץ שנורה מהקשת, ברגע שמילה יצאה מהפה אי אפשר להחזיר אותה.",
+      "discussion_en": "Has someone ever said something that changed how you felt about yourself for days? How do you choose what words you type online?",
+      "discussion_he": "האם מישהו אמר לך פעם משהו שגרם לך להרגיש שונה לגמרי לגבי עצמך? איך אתה בוחר אילו מילים לכתוב ברשתות או בוואטסאפ?"
+    },
+    {
+      "id": "kiddush_hashem",
+      "title_en": "Kiddush Hashem",
+      "title_he": "קידוש השם",
+      "category": "values",
+      "hook_en": "When an athlete puts on the jersey of their national team, every single thing they do reflects on their entire country. You wear that jersey every day.",
+      "hook_he": "כששחקן עולה למגרש עם חולצת נבחרת, כל תנועה שלו מייצגת מדינה שלמה. אתה לובש את החולצה הזו בכל יום מחייך.",
+      "nuggets_en": [
+        "<strong>Sanctifying the Name:</strong> Living with such integrity and grace that strangers say: 'Blessed is the God of this person.'",
+        "<strong>Chilul Hashem (Desecration):</strong> Dishonesty, rudeness, or cheating committed by a Jew damages the moral reputation of the entire nation.",
+        "<strong>Quiet Everyday Honesty:</strong> Returning lost change, holding doors, saying thank you, and never cheating on an exam even when unseen.",
+        "<strong>Rabbi Shimon & the Diamond:</strong> Rabbi Shimon ben Shetach returned a diamond found on a purchased donkey, moving a merchant to praise Hashem.",
+        "<strong>Or LaGoyim (Moral Beacon):</strong> Demonstrating that Jewish life is about being an ethical lighthouse and raising the moral bar for society.",
+        "<strong>Wearing the National Jersey:</strong> When identified as Jewish in sports or school, your personal choices uplift or drag down the collective team.",
+        "<strong>Courage Under Heat:</strong> Standing up for your values with quiet self-assurance rather than shrinking under social pressure."
+      ],
+      "nuggets_he": [
+        "<strong>קידוש השם ברבים:</strong> התנהגות מופתית, אמיצה ואצילית הגורמת לרואים לומר: 'אשרי מי שלמדו תורה, ברוך אלוקיו'.",
+        "<strong>איסור חילול השם:</strong> חוסר הגינות, שקר או זלזול בזולת מצד יהודי פוגעים בשם הטוב ובאמון של עם ישראל כולו.",
+        "<strong>יושרה שקטה ביומיום:</strong> החזרת עודף מיותר בקיוסק, נימוס, להגיד תודה לעובד ניקיון, והגינות מוחלטת במבחנים גם ללא השגחה.",
+        "<strong>מעשה החמור והיהלום:</strong> רבי שמעון בן שטח מצא יהלום יקר בצוואר חמור שקנה והחזירו מיד לנוכרי, שזעק בהתרגשות: 'ברוך אלוקי ישראל!'.",
+        "<strong>אור לגויים:</strong> תפקידנו להיות מגדלור מוסרי המוביל עזרה הדדית, חסד עולמי ותיקון עולם בכל תחום.",
+        "<strong>חולצת הנבחרת:</strong> כנער יהודי, כל תנועה והתנהגות שלך ברחוב או בספורט מייצגת את המשפחה, הקהילה והעם כולו.",
+        "<strong>גבורת אופי פנימית:</strong> היכולת לעמוד על העקרונות שלך בביטחון שקט מול לחץ חברתי מבלי להיגרר."
+      ],
+      "life_app_en": "When you act with class, patience, and honesty at school or on the court, you earn massive respect for your whole family and community without saying a single sermon.",
+      "life_app_he": "כשאתה מתנהג בג'נטלמניות ובסבלנות במגרש או בכיתה, אתה מרוויח כבוד עצום לעצמך ולמשפחה שלך בלי צורך להטיף מוסר לאף אחד.",
+      "midrash_en": "Rabbi Shimon ben Shetach bought a donkey from an Arab merchant and found a precious diamond hanging from its neck. He immediately returned it. The merchant cried out: 'Blessed is the God of Shimon ben Shetach!'",
+      "midrash_he": "רבי שמעון בן שטח קנה חמור מסוחר נוכרי ומצא יהלום יקר בצווארו. מיד רץ והחזיר לו. זעק הסוחר: 'ברוך אלוהי שמעון בן שטח!'.",
+      "discussion_en": "Think of a time someone did the right thing even though they could have cheated and gotten away with it. How did you feel about them?",
+      "discussion_he": "חשוב על פעם שראית מישהו שנהג ביושר מוחלט אפילו כשיכל לרמות בקלות ואף אחד לא היה יודע. מה חשבת עליו באותו רגע?"
+    },
+    {
+      "id": "ahavat_yisrael",
+      "title_en": "Ahavat Yisrael & Chesed",
+      "title_he": "אהבת ישראל וחסד",
+      "category": "values",
+      "hook_en": "If you break your pinky finger, does your left hand get mad at it? No, it immediately bandages it. The Jewish people are one single body.",
+      "hook_he": "אם נשברת לך הזרת ברגל, היד שלך תכעס עליה? לא, היא מיד תחבוש אותה. עם ישראל הוא גוף אחד שלם.",
+      "nuggets_en": [
+        "<strong>The Master Principle:</strong> Rabbi Akiva declared 'Love your fellow as yourself' to be the supreme core foundation of the entire Torah.",
+        "<strong>Hillel's Golden Maxim:</strong> 'What is hateful to you, do not do to your friend; this is the whole Torah, the rest is commentary; go study!'",
+        "<strong>Chesed Outweighs Charity:</strong> Tzedakah gives money, but Chesed gives your personal time, your heart, your smile, and your listening ear.",
+        "<strong>One Living Organism:</strong> If one foot stumbles, the hands rush to protect it; all Jewish souls are interconnected limbs of one body.",
+        "<strong>Dan L'Chaf Zechut:</strong> The moral obligation to judge others favorably, assuming positive intentions before jumping to negative judgment.",
+        "<strong>Ahavat Chinam Restores All:</strong> The Temple was destroyed because of baseless hatred; our world will only be repaired through unconditional love.",
+        "<strong>The Kid in the Corner:</strong> Spotting the classmate sitting alone at lunch or omitted from group plans and including them is real Jewish DNA."
+      ],
+      "nuggets_he": [
+        "<strong>הכלל הגדול בתורה:</strong> רבי עקיבא לימד ש'ואהבת לרעך כמוך' הוא הציר המרכזי שממנו צומחות כל המצוות כולן.",
+        "<strong>כלל הזהב של הלל:</strong> 'דעלך סני לחברך לא תעביד' (מה ששנוא עליך אל תעשה לחברך) — זו כל התורה כולה והשאר פירושה.",
+        "<strong>גמילות חסדים מול צדקה:</strong> צדקה היא בכסף בלבד, אך חסד נעשה בגופך, בזמנך, בחיוך חם ובאוזן קשבת ללא עלות כספית.",
+        "<strong>גוף אחד חי:</strong> אם רגל אחת נתקלת, הידיים ממהרות לעזור לה; כל נשמות ישראל מחוברות יחד כאברים בגוף אחד.",
+        "<strong>כף זכות ועין טובה:</strong> החובה המוסרית לדון את החבר לכף זכות, לחפש הסבר חיובי להתנהגותו ולא למהר לחרוץ דין.",
+        "<strong>אהבת חינם בונה עולם:</strong> בית המקדש חרב בעוון שנאת חינם; העולם נבנה ונגאל אך ורק בזכות אהבת חינם ללא תנאים.",
+        "<strong>הילד שיושב בצד:</strong> לשים לב למי שיושב לבד בהפסקה או שלא הוזמן לקבוצה ולהכניס אותו פנימה — זהו המבחן האמיתי של מנהיג."
+      ],
+      "life_app_en": "Spotting the kid sitting alone at lunch or getting left out of the group chat and pulling them in isn't just nice — it is the core DNA of being a Jew.",
+      "life_app_he": "לראות את הילד שיושב לבד בהפסקה או שלא צורף לקבוצה ולגשת אליו — זה לא סתם מעשה נחמד, זה הלב של היותך יהודי.",
+      "midrash_en": "The Beit HaMikdash (Temple) was destroyed because of Sinat Chinam (baseless hatred). It will only be rebuilt through Ahavat Chinam (unconditional love).",
+      "midrash_he": "בית המקדש חרב בעוון שנאת חינם. הוא ייבנה מחדש אך ורק בזכות אהבת חינם.",
+      "discussion_en": "Why is it sometimes harder to be patient and kind with people closest to us than with complete strangers?",
+      "discussion_he": "למה לפעמים הרבה יותר קשה להיות סבלניים ונחמדים דווקא לאנשים הכי קרובים אלינו מאשר לאנשים זרים ברחוב?"
+    },
+    {
+      "id": "jewish_holidays",
+      "title_en": "The Holiday Cycle",
+      "title_he": "מעגל השנה והחגים",
+      "category": "life_cycle",
+      "hook_en": "Jewish holidays are not anniversaries of old historical events. They are annual cosmic power outlets where you plug into specific energies.",
+      "hook_he": "חגי ישראל אינם ימי זיכרון להיסטוריה עתיקה. הם תחנות כוח שנתיות שבהן אתה מתחבר לאנרגיות מיוחדות.",
+      "nuggets_en": [
+        "<strong>Cosmic Portals, Not History:</strong> Holidays return each year with concentrated spiritual power to recharge our mindset and soul.",
+        "<strong>Rosh Hashanah & Coronation:</strong> Resetting life goals, crowning Hashem as King, and blowing the Shofar to awaken our inner potential.",
+        "<strong>Yom Kippur Clean Slate:</strong> The holiest day of forgiveness; fasting to detach from bodily distractions and emerge completely cleansed.",
+        "<strong>Sukkot & Simchat Torah:</strong> Leaving solid mansions for fragile huts under the stars, learning joy is about relationships, not luxury.",
+        "<strong>Chanukah & Spiritual Light:</strong> A tiny jar of pure oil defying empires; proving that quality, courage, and light always beat brute force.",
+        "<strong>Purim & Hidden Miracles:</strong> Discovering Hashem running history behind masks and coincidences; transforming anxiety into joy.",
+        "<strong>Pesach & Seder Freedom:</strong> Escaping our personal mental pharaohs, ego, and addictions; passing the torch of freedom to the next generation."
+      ],
+      "nuggets_he": [
+        "<strong>תחנות כוח שנתיות:</strong> החגים אינם רק היסטוריה שחלפה, אלא חלונות זמן קוסמיים המביאים עימם אנרגיה מיוחדת לשינוי עצמי.",
+        "<strong>ראש השנה והמלכה:</strong> אתחול היעדים לשנה החדשה, המלכת הבורא ותקיעת שופר המעוררת את הנשמה מתרדמת השגרה.",
+        "<strong>יום כיפור ודף נקי:</strong> היום הקדוש בשנה שבו מוחלים כל העוונות; צום המרומם אותנו לדרגת מלאכים ומעניק התחלה חדשה ונקייה.",
+        "<strong>סוכות ושמחת תורה:</strong> יציאה לדירת ארעי תחת הסכך, המלמדת ששמחה וביטחון אמיתיים נובעים מחיבור לנצח ולא מרכוש גשמי.",
+        "<strong>חנוכה וניצחון האור:</strong> פך שמן טהור אחד שמנצח אימפריה עצומה; ההוכחה שמעט מן האור דוחה הרבה מן החושך.",
+        "<strong>פורים וההשגחה הנסתרת:</strong> גילוי יד ה' מאחורי מסכות המקריות והאירועים; הפיכת אבל לשמחה על ידי נתינה וערבות הדדית.",
+        "<strong>פסח וחירות אמיתית:</strong> שחרור מהפרעה הפנימי, מהרגלים שליליים ומהאגו; ליל הסדר שבו האב מעביר את לפיד האמונה לבנו."
+      ],
+      "life_app_en": "Life isn't a flat circle where each year repeats identically; it is a spiral staircase. Each holiday you meet gives you an opportunity to climb one level higher.",
+      "life_app_he": "החיים אינם מעגל שטוח שחוזר על עצמו; הם מדרגות ספירלה. בכל חג שמגיע אתה מקבל הזדמנות לעלות עוד קומה באישיות שלך.",
+      "midrash_en": "The word for year in Hebrew is 'Shanah' (which shares a root with Shinui - change, and Sheninah - repetition). You either repeat your old habits, or you transform.",
+      "midrash_he": "המילה 'שנה' מגיעה משני שורשים: שינון (חזרה על הישן) או שינוי (התחדשות וצמיחה). הבחירה בידיך.",
+      "discussion_en": "Which Jewish holiday is your favorite to celebrate with family, and what special feeling does it give you that ordinary days don't?",
+      "discussion_he": "איזה חג יהודי אתה הכי אוהב לחגוג עם המשפחה, ואיזו תחושה מיוחדת הוא מעניק לך שאין בימים רגילים?"
+    },
+    {
+      "id": "jewish_identity",
+      "title_en": "Jewish Identity & The Soul",
+      "title_he": "הנשמה והזהות היהודית",
+      "category": "wisdom",
+      "hook_en": "You don't *have* a soul. You *are* a soul — that happens to live temporarily inside a physical body.",
+      "hook_he": "אין לך נשמה בכיס. אתה *הנשמה* בעצמך — שקיבלה גוף פיזי ככלי שליחות בעולם הזה.",
+      "nuggets_en": [
+        "<strong>Chelek Elokah Mima'al:</strong> The soul is a literal divine spark breathed into you by the Creator; your true identity is infinite and eternal.",
+        "<strong>The Gold in the Mud:</strong> A 24-karat gold coin dropped in mud remains pure gold; wash off the mud, and it glitters without a scratch.",
+        "<strong>The Pintele Yid:</strong> The indestructible ember in every Jewish heart that awakens whenever a call of courage or tradition sounds.",
+        "<strong>Irreplaceable Cosmic Mission:</strong> The Arizal taught that every single soul has a specific destiny; if you are here, the universe needs you.",
+        "<strong>Unconditional Divine Love:</strong> The Baal Shem Tov taught that Hashem loves every Jew more than elderly parents love an only child born in old age.",
+        "<strong>Defying the Laws of History:</strong> Mark Twain marveled at how the tiny Jewish nation outlasted all ancient superpowers through spiritual strength.",
+        "<strong>Inner Dignity Over Likes:</strong> Your value is intrinsic from God, not determined by social media follower counts or fleeting peer approval."
+      ],
+      "nuggets_he": [
+        "<strong>חלק אלוק ממעל:</strong> הנשמה היא ניצוץ אלוקי חי שנפח בך הבורא; הזהות האמיתית שלך היא נצחית, רוחנית ובעלת ערך אינסופי.",
+        "<strong>מטבע הזהב בבוץ:</strong> מטבע זהב טהור שנפל לרפש אינו מאבד מערכו; מנקים את הלכלוך החיצוני והוא זורח שוב במלוא תפארתו.",
+        "<strong>הפינטעלע ייד:</strong> הניצוץ היהודי הפנימי שלעולם אינו כבה, ומתעורר בעוצמה בכל רגע של מבחן, שייכות או גבורה.",
+        "<strong>שליחות שאין לה תחליף:</strong> האר״י הקדוש לימד שכל נשמה יורדת עם תפקיד ייחודי; אם אתה חי כעת, סימן שהעולם אינו יכול להסתדר בלעדיך.",
+        "<strong>אהבה ללא תנאי:</strong> הבעל שם טוב אמר שהקב״ה אוהב כל יהודי יותר ממה שהורים מבוגרים אוהבים את בן זקוניהם היחיד.",
+        "<strong>חוקי ההיסטוריה הופרו:</strong> הסופר מארק טווין תמה כיצד עם קטן שרד את כל האימפריות הכבירות בזכות נאמנותו לספר ולרוח.",
+        "<strong>ערך עצמי בלתי תלוי:</strong> השווי הפנימי שלך נתון ישירות מבורא עולם, ולא נקבע על פי מספר הלייקים או דעת הסביבה ברשת."
+      ],
+      "life_app_en": "Whenever you doubt yourself, feel insecure, or compare your social media likes to other kids, remember: your worth is infinite and unconditional.",
+      "life_app_he": "כשאתה מתלבט לגבי עצמך, משווה לייקים או מרגיש חסר ביטחון, תזכור: הערך שלך לא תלוי במה שאחרים חושבים, הוא אינסופי מלידה.",
+      "midrash_en": "The Baal Shem Tov taught: God loves every single Jew more than elderly parents love their only child born in their old age.",
+      "midrash_he": "הבעל שם טוב אמר: הקב״ה אוהב כל יהודי יותר ממה שהורים מבוגרים אוהבים את בן זקוניהם היחיד.",
+      "discussion_en": "What makes you feel most proud to be Jewish, especially when standing out among friends who have different backgrounds?",
+      "discussion_he": "מה גורם לך להרגיש הכי גאה בזהות היהודית שלך, במיוחד כשאתה נמצא בסביבה מגוונת עם חברים בעלי רקע שונה?"
+    },
+    {
+      "id": "bar_mitzvah",
+      "title_en": "Bar Mitzvah & Maturity",
+      "title_he": "בר מצווה ואחריות",
+      "category": "life_cycle",
+      "hook_en": "Until age 13, you were in the passenger seat. At Bar Mitzvah, you take the driver's steering wheel of your own soul.",
+      "hook_he": "עד גיל 13 ישבת במושב הנוסע ברכב. בבר מצווה אתה עובר למושב הנהג ואוחז בהגה של החיים שלך.",
+      "nuggets_en": [
+        "<strong>Taking the Steering Wheel:</strong> Stepping out of the passenger seat of childhood to steer your own moral choices and destiny.",
+        "<strong>Son of the Covenant:</strong> Bar Mitzvah literally means 'son of the commandment' — becoming a trusted partner in Hashem's covenant.",
+        "<strong>Awakening of Yetzer Tov:</strong> At 13, your full moral conscience and capacity for spiritual maturity and self-discipline activate.",
+        "<strong>Completing the Sacred Minyan:</strong> Your presence is essential; without you, an entire room of adults cannot say Kaddish, Kedushah, or Borchu.",
+        "<strong>Aliyah to the Living Torah:</strong> Ascending before the congregation to touch the parchment and proclaim blessings on our eternal heritage.",
+        "<strong>From Consumer to Contributor:</strong> A child merely receives and takes; a mature young man understands how to give, protect, and make an impact.",
+        "<strong>Accountability Over Excuses:</strong> True maturity is looking in the mirror and owning your mistakes with integrity, instead of blaming others."
+      ],
+      "nuggets_he": [
+        "<strong>אחיזה בהגה החיים:</strong> מעבר ממושב הנוסע הפסיבי של הילדות אל מושב הנהג המנווט את חייו המוסריים והרוחניים.",
+        "<strong>שותף לברית:</strong> בר מצווה פירושו בן הברית והמצווה — אדם בוגר שעליו אפשר לסמוך כשותף נאמן במפעל של העם היהודי.",
+        "<strong>כניסת יצר הטוב:</strong> בגיל 13 מתעורר במלואו המצפון המוסרי, כושר ההבחנה בין טוב לרע והרצון להשפיע טוב על העולם.",
+        "<strong>השלמת מניין קדוש:</strong> הנוכחות שלך חיונית ומכרעת! בלעדיך ציבור שלם אינו יכול לומר קדיש, קדושה או לקרוא בתורה.",
+        "<strong>עלייה לתורה:</strong> עמידה נרגשת על הבמה מול הקהל, נגיעה בקלף הקדוש והצהרה שאתה לוקח אחריות להמשיך את השרשרת.",
+        "<strong>מצרכן ליוצר ומשפיע:</strong> ילד קטן רק צורך תשומת לב ומשאבים; גבר בוגר לומד להעניק, לעזור בבית ולהנהיג אחרים.",
+        "<strong>אחריות ללא תירוצים:</strong> סימן הבגרות האמיתי הוא היכולת להסתכל במראה ולקחת אחריות כשאתה טועה, בלי להאשים אחרים."
+      ],
+      "life_app_en": "Maturity isn't shaving or growing taller; maturity is taking responsibility when you mess up, instead of blaming parents, teachers, or referees.",
+      "life_app_he": "בגרות היא לא רק גובה או גילוח; בגרות היא היכולת לקחת אחריות כשאתה טועה, במקום להאשים את ההורים או את השופט במגרש.",
+      "midrash_en": "King Solomon was called 'Kohelet' because he gathered wisdom. At your Bar Mitzvah, you gather the strength of all your ancestors to write your own chapter.",
+      "midrash_he": "חז״ל אומרים שביום הבר מצווה האדם הופך לעץ שעומד בפני עצמו ומוציא פירות.",
+      "discussion_en": "Now that you are turning 13, what is one major area of your life where you want to make your own decisions and take full responsibility?",
+      "discussion_he": "כעת כשאתה מגיע לגיל 13, מהו התחום הראשון בחייך שבו אתה רוצה לקבל החלטות עצמאיות ולקחת אחריות מלאה של בוגר?"
+    },
+    {
+      "id": "tefillah",
+      "title_en": "Tefillah & Prayer",
+      "title_he": "תפילה והתקשרות",
+      "category": "mitzvot",
+      "hook_en": "You don't need a secretary, a password, or a VIP pass. You have a direct, free, 24/7 unblockable line straight to the Creator of the universe.",
+      "hook_he": "אינך זקוק לפרוטקציה, ססמה או אישור מיוחד. יש לך קו פתוח וישיר 24/7 לבורא היקום כולו בכל רגע שתרצה.",
+      "nuggets_en": [
+        "<strong>Connection & Introspection:</strong> Tefillah comes from 'Toefel' (to bind/connect) and 'Hitpallel' (to self-judge and evaluate one's direction).",
+        "<strong>Direct Line to the King:</strong> No intermediaries, secretaries, or passes required; any young man can speak openly to Hashem at any moment.",
+        "<strong>Three Daily Anchors:</strong> Shacharit (morning renewal by Abraham), Mincha (midday pause by Isaac), and Maariv (night faith by Jacob).",
+        "<strong>Shemoneh Esrei Blueprint:</strong> Structured with master psychological insight: Praise first, heartfelt requests for wisdom/healing, and deep gratitude.",
+        "<strong>Kavanah Over Speed:</strong> Focus of the heart; the rabbis taught that prayer recited without intentional heart is like a body without a soul.",
+        "<strong>Gratitude as First Breath:</strong> Opening the morning with Modeh Ani trains the mind to see the daily miracle of awakening and breathing.",
+        "<strong>Never Despair:</strong> The sages taught: Even if a sharp sword rests upon a person's neck, they should never abandon prayer and Hashem's mercy."
+      ],
+      "nuggets_he": [
+        "<strong>חיבור והתבוננות פנימית:</strong> תפילה מלשון חיבור (הטופל כלי) וחשבון נפש אישי (להתפלל — לשפוט את עצמי בכנות מול הבורא).",
+        "<strong>קו ישיר למלך:</strong> בלי פרוטקציה ובלי מתווכים; כל נער יכול לפנות לבורא עולם בשפה שלו, מכל מקום ובכל רגע נתון.",
+        "<strong>שלוש תפילות ביום:</strong> שחרית (חסד ואור הבוקר של אברהם), מנחה (עצירת סערת היום של יצחק), וערבית (ביטחון בחושך של יעקב).",
+        "<strong>מבנה שמונה עשרה:</strong> חוכמה פסיכולוגית מופלאה: שבח תחילה (להבין מול מי עומדים), בקשות (חוכמה, בריאות, צדק) והודיה מעומק הלב.",
+        "<strong>כוונה עדיפה על מהירות:</strong> כוונת הלב היא העיקר; חז״ל לימדו שתפילה ללא כוונה היא כגוף ללא נשמה.",
+        "<strong>הכרת הטוב בנשימה ראשונה:</strong> פתיחת הבוקר ב'מודה אני' מחנכת את המוח לזהות את הנס היומיומי של התעוררות, ראייה ונשימה.",
+        "<strong>תקווה בלתי נשברת:</strong> אפילו חרב חדה מונחת על צווארו של אדם, אל ימנע עצמו מן הרחמים ומהכוח האדיר של תפילה כנה."
+      ],
+      "life_app_en": "Prayer isn't just asking for things like an Amazon wish list. It's taking 5 minutes to breathe, center your mind, express gratitude for health, and ask for strength before an exam or game.",
+      "life_app_he": "תפילה היא לא רשימת קניות של אמזון. היא הרגע שלך לעצור, להודות על החיים והבריאות, ולבקש כוח אמיתי לפני מבחן או אתגר בחיים.",
+      "midrash_en": "Rabbi Yehoshua taught: Even if a sharp sword rests upon a person's neck, they should never despair of Hashem's mercy and the power of sincere prayer.",
+      "midrash_he": "אמרו חז״ל: אפילו חרב חדה מונחת על צווארו של אדם, אל ימנע עצמו מן הרחמים.",
+      "discussion_en": "If you could have a direct one-on-one conversation with Hashem right now, what is the single most important thing you would talk about?",
+      "discussion_he": "אם הייתה לך עכשיו שיחה ישירה של אחד על אחד עם בורא עולם, מהו הדבר הכי חשוב שהיית רוצה לדבר עליו או לבקש?"
+    }
+  ],
+  "chumash_parshiot": [
+    {
+      "id": "bereishit",
+      "book": "bereishit",
+      "name_en": "Bereishit",
+      "name_he": "בראשית",
+      "plot_en": [
+        "Creation in 6 days out of absolute nothingness ('Yesh Me'Ayin'); Hashem rests on the 7th day, creating Shabbat.",
+        "Adam & Chava placed in Gan Eden; the Tree of Knowledge test; eating the fruit and experiencing vulnerability/hiding.",
+        "Cain & Abel: Jealousy over offerings leads to the world's first murder; Cain's mark and wandering.",
+        "Generations from Adam to Noach: 10 generations as society degenerates morally."
+      ],
+      "plot_he": [
+        "בריאת העולם יש מאין בששת ימי המעשה; שביתה ביום השביעי ויצירת קדושת השבת.",
+        "אדם וחוה בגן עדן; ציווי עץ הדעת, החטא וההסתתרות מקול ה'.",
+        "קין והבל: קנאה על קבלת המנחה מובילה לרצח הראשון בהיסטוריה; אות קין והנדודים.",
+        "עשרה דורות מאדם ועד נח: שקיעה מוסרית הדרגתית של האנושות."
+      ],
+      "key_topics_en": [
+        "<strong>Order from Chaos:</strong> Hashem creates light out of darkness and purpose out of Tohu VaVohu; whenever life feels messy, we can create order.",
+        "<strong>B'Tzelem Elokim:</strong> Every single human carries infinite dignity and worth as a reflection of God; bullying or disrespecting another desecrates the Divine image.",
+        "<strong>The First Human Question ('Ayeka?'):</strong> Hashem asks Adam 'Where are you?' not for geographic coordinates, but to test accountability: stop hiding and own your actions.",
+        "<strong>Cain & Abel's Fatal Jealousy:</strong> Comparison is the thief of joy; unchecked rivalry over offerings led to history's first murder.",
+        "<strong>My Brother's Keeper:</strong> When Cain asks 'Am I my brother's keeper?', the Torah's resounding eternal answer across all generations is YES.",
+        "<strong>Coats of Compassion:</strong> Even after Adam and Chava failed the test, God personally crafted them garments of skin ('Kotnot Or'), teaching supreme empathy.",
+        "<strong>Shabbat as Crown of Creation:</strong> Finishing all work in 6 days and halting on the 7th sanctifies time over space, teaching that true power is the ability to pause."
+      ],
+      "key_topics_he": [
+        "<strong>סדר מתוך כאוס:</strong> הקב״ה בורא אור מתוך החושך וסדר מתוך תוהו ובוהו; לקח לחיים שגם כשמבולבל ומורכב, בכוחנו לברוא סדר וטוב.",
+        "<strong>בצלם אלוקים:</strong> כל אדם נברא יחידי ובעל ערך אינסופי ללא תחליף; פגיעה או זלזול באחר הם פגיעה ישירה בצלם הבורא.",
+        "<strong>השאלה הראשונה לאדם ('איֶכָּה?'):</strong> הקב״ה שואל את אדם 'איכה' לא כדי לדעת איפה הוא מתחבא, אלא לקרוא לו לקחת אחריות ולא לברוח.",
+        "<strong>קנאת קין והבל:</strong> קנאה והשוואה עצמית לאחרים הן הרסניות; תסכול על אי-קבלת המנחה הוביל לרצח הראשון בתולדות האנושות.",
+        "<strong>'השומר אחי אנוכי?':</strong> שאלתו המפורסמת של קין נענית על ידי התורה בצעקה מהדהדת לכל הדורות: כן, כולנו אחראים וערבים זה לזה!",
+        "<strong>כתנות עור של חסד:</strong> אפילו לאחר הכישלון של אדם וחוה, הקב״ה עושה להם בגדים בעצמו ומלביש אותם — מופת של חסד וחמלה למי שנפל.",
+        "<strong>שבת כנזר הבריאה:</strong> סיום המלאכה בששת הימים ושביתה ביום השביעי מעלים את הזמן על החומר, ומלמדים שהעוצמה האמיתית היא לדעת לעצור."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on 1:1: Why start with creation instead of Mitzvah #1? To prove to the world that Hashem owns the entire earth and gave Eretz Yisrael to the Jewish people.",
+        "Midrash on Light: The primordial light created on Day 1 was so pure it was hidden away for righteous souls in the World to Come.",
+        "Rashi on Adam & Chava: God made them coats of skin ('Kotnot Or') — showing supreme compassion even after they failed."
+      ],
+      "rashi_midrash_he": [
+        "רש״י א, א: למה פתח בבראשית ולא ב'החודש הזה לכם'? כדי להודיע כוח מעשיו שהארץ כולה שלו ונתנה לבני ישראל.",
+        "אור הגנוז: האור של היום הראשון היה כה רוחני ועצום שנגנז לצדיקים לעתיד לבוא.",
+        "כתנות עור: הקב״ה בעצמו עשה להם לבוש — גמילות חסדים אפילו עם מי שנכשל."
+      ],
+      "life_app_en": "When you do something wrong at school or home, your first instinct is to blame someone else ('She told me to do it!'). Hashem's question 'Where are you?' is about owning your choices and taking responsibility.",
+      "life_app_he": "כשאתה עושה טעות, האינסטינקט הראשון הוא להאשים אחרים ('הוא התחיל!'). השאלה 'איֶכָּה?' מלמדת להסתכל במראה, להפסיק להאשים ולהיות גבר שלוקח אחריות."
+    },
+    {
+      "id": "noach",
+      "name_en": "Noach",
+      "book": "bereishit",
+      "name_he": "נח",
+      "plot_en": [
+        "The world is filled with violence and theft (Chamas); Hashem decides to reset creation.",
+        "Noach is commanded to build a massive Tevah (Ark) for 120 years; pairs of animals enter.",
+        "The Mabul rains for 40 days; the water recedes; Noach sends the Raven and the Dove.",
+        "The Rainbow Covenant (Brit HaKeshet) promise never to destroy the earth by flood; Tower of Babel attempt at uniformity."
+      ],
+      "plot_he": [
+        "העולם מושחת בגזל ואלימות; הקב״ה מחליט על איתחול הבריאה.",
+        "נח מצטווה לבנות תיבה במשך 120 שנה; החיות נכנסות זוגות זוגות.",
+        "מי המבול במשך 40 יום; המים פוחתים; שילוח העורב והיונה עם עלה זית.",
+        "ברית הקשת בענן; מגדל בבל — ניסיון למרד ואחידות שמסתיים בבלילת השפות והפיזור."
+      ],
+      "key_topics_en": [
+        "<strong>Moral Courage vs Peer Pressure:</strong> Noach stood righteous in an entire generation of corruption (Chamas), showing you don't have to follow the crowd.",
+        "<strong>The 120-Year Construction:</strong> Hashem commanded Noach to build the Teivah slowly over 120 years to give people every opportunity to ask questions and repent.",
+        "<strong>The Raven and the Dove:</strong> The aggressive raven flew aimlessly, while the gentle dove returned with an olive branch, proving patience and hope always prevail.",
+        "<strong>The Rainbow Covenant:</strong> Hashem placed the rainbow in the clouds as an eternal promise never to destroy all life again; diversity of colors uniting in light.",
+        "<strong>The 7 Noahide Universal Laws:</strong> Foundational universal ethics for all humanity (forbidding murder, theft, cruelty to animals, and establishing justice).",
+        "<strong>Tower of Bavel (Arrogant Conformity):</strong> Humankind attempting to build a tower to the heavens to make a name for themselves; forced uniformity collapsed into scattered tongues.",
+        "<strong>Avraham's Arrival:</strong> Ten generations from Noach until Avraham; when collective society lost its moral compass, one truth-seeker stepped forward to transform the world."
+      ],
+      "key_topics_he": [
+        "<strong>אומץ מוסרי מול לחץ חברתי:</strong> נח עמד כצדיק תמים בדור של חמס ושחיתות כוללת, והוכיח שלא חייבים להיגרר אחרי הרוב.",
+        "<strong>בנייה בת 120 שנה:</strong> הקב״ה ציווה לבנות את התיבה במשך 120 שנה כדי לתת לבני דורו הזדמנות לשאול, לחשוב מחדש ולתקן.",
+        "<strong>העורב והיונה:</strong> העורב נע בחוסר שקט, בעוד היונה חזרה עם עלה זית בפיה — סמל לעקביות, עדינות ותקווה שמנצחות תמיד.",
+        "<strong>ברית הקשת בענן:</strong> הקשת הוצבה כברית עולמית שלא יהיה עוד מבול לשחת כל בשר; מגוון צבעים שמתלכד לאור אחד של שלום.",
+        "<strong>שבע מצוות בני נח:</strong> תשתית המוסר האנושי האוניברסלי לכל עמי העולם (איסור רצח, גזל, אבר מן החי, והקמת מערכת משפט וצדק).",
+        "<strong>מגדל בבל והאחידות הכפויה:</strong> ניסיון שחצני של האנושות למרוד ולעשות להם שם; קונפורמיות קיצונית שהתפרקה לבלבול שפות ופיזור.",
+        "<strong>עליית אברהם אבינו:</strong> עשרה דורות מנח ועד אברהם; כשהעולם שקע באלילות, קם נער אחד שחיפש את האמת והחל את המהפכה המונותאיסטית."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on 'In his generations': Some praise Noach (even in an evil generation he was righteous); others contrast him with Abraham (Abraham prayed for others, Noach didn't).",
+        "Midrash on the Ark: Noach and his sons worked day and night feeding animals according to their specific meal schedules — practicing relentless Chesed.",
+        "Rashi on the Olive Leaf: The dove preferred bitter food directly from Hashem over sweet food from human hands."
+      ],
+      "rashi_midrash_he": [
+        "רש״י 'בדורותיו': יש דורשים לשבח (שאילו היה בדור צדיקים היה צדיק יותר) ויש לגנאי (לעומת אברהם שהתפלל על דורו).",
+        "המדרש בתיבה: נח לא ישן שנה שלמה כי טיפל והאכיל כל בעל חיים בזמנו — בית ספר למסירות ולחסד.",
+        "עלה זית טרף בפיה: אמרה היונה: יהיו מזונותיי מרורים כזית מידי שמים ולא מתוקים כדבש מבשר ודם."
+      ],
+      "life_app_en": "It is easy to be nice when all your friends are nice. True character is being the person who does the right thing when the whole crowd around you is acting toxic.",
+      "life_app_he": "קל להיות בסדר כשכולם סביבך נחמדים. הגדלות האמיתית היא לשמור על הערכים שלך גם כשכל החבר'ה מסביב מתנהגים בצורה רעילה או מלגלגת."
+    },
+    {
+      "id": "lech_lecha",
+      "name_en": "Lech Lecha",
+      "book": "bereishit",
+      "name_he": "לך לך",
+      "plot_en": [
+        "God calls 75-year-old Avram: 'Leave your land, birthplace, and father's house to the land I will show you.'",
+        "Famine in Canaan forces descent to Egypt; Sarai's protection from Pharaoh.",
+        "Lot parts ways with Avram and settles in corrupt Sodom; War of the 4 Kings and Avram's rescue mission.",
+        "Brit Bein HaBetarim (Covenant of Parts): Prophecy of 400 years of exile and ultimate redemption; Brit Milah at age 99."
+      ],
+      "plot_he": [
+        "קריאת ה' לאברם בן ה-75: 'לך לך מארצך וממולדתך אל הארץ אשר אראך'.",
+        "רעב בארץ מביא לירידה למצרים; שרי ניצלת מפרעה בזכות השגחה.",
+        "פרידת לוט לכיוון סדום החומרית; מלחמת 4 המלכים ואברם מחלץ את לוט באומץ.",
+        "ברית בין הבתרים: נבואת גלות מצרים והגאולה; ברית המילה בגיל 99."
+      ],
+      "key_topics_en": [
+        "<strong>Lech Lecha (Go to Yourself):</strong> Leaving comfort zones, hometowns, and old habits to discover your true potential and spiritual mission.",
+        "<strong>The Ten Trials of Avraham:</strong> True greatness is forged through resistance; every test was an exercise designed to develop his spiritual strength.",
+        "<strong>Rescuing Lot & Family Loyalty:</strong> Even after his nephew Lot chose decadent Sodom, Avraham mobilized an army and risked his life to save him.",
+        "<strong>Refusing the Spoils of Sodom:</strong> Avraham told the King of Sodom he would not take a single shoe-strap, proving his mission came solely from God.",
+        "<strong>Brit Bein HaBetarim:</strong> The dramatic night covenant where Hashem revealed the future exile and promised the Holy Land to Avraham's descendants.",
+        "<strong>Yishmael & Hagar's Tears:</strong> An angel comforted Hagar in the desert and heard the boy's cry 'where he was', showing Hashem hears every prayer.",
+        "<strong>Brit Milah at Age 99:</strong> Avraham circumcised himself at 99, proving that personal growth, discipline, and dedication to the covenant have no expiration date."
+      ],
+      "key_topics_he": [
+        "<strong>'לך לך' מאזור הנוחות:</strong> לעזוב את ההרגלים הנוחים, ארצך ומולדתך כדי לגלות את הייעוד והזהות האמיתית שלך בעולם.",
+        "<strong>עשרת הניסיונות של אברהם:</strong> גדלות אופי אינה נולדת בקלות; כל ניסיון היה אימון כוח רוחני שחשף את עוצמותיו הפנימיות.",
+        "<strong>נאמנות והצלת לוט:</strong> למרות שלוט בחר להתרחק ולגור בסדום, ברגע שנשבה אברהם גייס את כל כוחותיו וסיכן את חייו להצילו.",
+        "<strong>סירוב לשלל סדום:</strong> אברהם סירב לקחת מחוט ועד שרוך נעל ממלך סדום, כדי שאיש לא יגיד 'אני העשרתי את אברם' — יושרה ללא פשרות.",
+        "<strong>ברית בין הבתרים:</strong> הברית ההיסטורית בלילה שבה נגלתה גלות מצרים והובטחה ארץ ישראל לנצח מנהר מצרים ועד נהר פרת.",
+        "<strong>דמעות הגר ותפילת ישמעאל:</strong> המלאך שומע את קול הנער 'באשר הוא שם' — מסר נצחי שהקב״ה קשוב לכל נער במקום שבו הוא נמצא.",
+        "<strong>ברית מילה בגיל 99:</strong> אברהם מל את עצמו בגיל 99, ללמד שלעולם לא מאוחר להתחבר, להתעלות ולקשור את חייך בברית הקודש."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on 'Lech Lecha': 'For your own benefit and your own good' — following your higher calling is what truly fulfills you.",
+        "Midrash on the 10 Trials: Avram endured 10 intense tests of faith, growing stronger through every single obstacle.",
+        "Rashi on Name Change: Avram becomes Abraham ('Father of many nations'); Sarai becomes Sarah (Princess of all humanity)."
+      ],
+      "rashi_midrash_he": [
+        "רש״י 'לך לך': לטובתך ולהנאתך — הליכה בעקבות הייעוד שלך היא זו שבאמת מעניקה לך משמעות ושמחה.",
+        "עשרה נסיונות: אברהם עמד ב-10 מבחנים קשים והפך למופת של אמונה ועוצמה.",
+        "שינוי השם: מאברם לאברהם (אב המון גויים), ומשרי לשרה (השרה על כל העולם)."
+      ],
+      "life_app_en": "Leaving your 'comfort zone': Growth never happens while you stay comfortable on the couch. Every level of life demands that you leave your past limitations behind.",
+      "life_app_he": "לצאת מאזור הנוחות: שום התקדמות אמיתית לא מתרחשת כשנשארים לרבוץ בספה. כדי לצמוח חייבים להעז ולהתגבר על הפחד משינויים."
+    },
+    {
+      "id": "vayera",
+      "name_en": "Vayera",
+      "book": "bereishit",
+      "name_he": "וירא",
+      "plot_en": [
+        "Abraham recovering from Brit Milah sits at his tent door in the heat; runs to welcome 3 stranger guests (angels).",
+        "Angels bring prophecy that 89-year-old Sarah will give birth to Yitzchak; Sarah laughs in amazement.",
+        "Abraham bargains passionately with God to spare Sodom if 10 righteous people can be found; Sodom destroyed; Lot rescued.",
+        "Birth of Yitzchak; Ishmael sent away; The Akeidah (Binding of Isaac) — the ultimate trial of absolute dedication."
+      ],
+      "plot_he": [
+        "אברהם מתאושש מברית המילה ויושב בפתח האוהל בחום היום; רץ לקבל שלושה אורחים (מלאכים).",
+        "המלאכים מבשרים ששרה בת ה-89 תלד בן; שרה צוחקת בפליאה.",
+        "משא ומתן עז של אברהם על סדום להצילה בזכות עשרה צדיקים; הפיכת סדום והצלת לוט.",
+        "הולדת יצחק; עקדת יצחק בהר המוריה — ניסיון המסירות העליון."
+      ],
+      "key_topics_en": [
+        "<strong>Hospitality in the Desert Heat:</strong> Running on the third and most painful day after his circumcision to welcome three passing strangers with a lavish feast.",
+        "<strong>Bikur Cholim (Visiting the Sick):</strong> Hashem personally visited Avraham to comfort him, establishing the sacred duty to visit and care for the ailing.",
+        "<strong>Pleading for Sodom:</strong> Avraham boldly negotiated with God to spare Sodom if even 10 righteous people were found, showing empathy for all humanity.",
+        "<strong>Lot's Wife & Looking Back:</strong> Warned not to look back at Sodom; dwelling obsessively on toxic past environments freezes our ability to move forward.",
+        "<strong>The Birth of Yitzchak:</strong> Against all physical odds, Sarah gave birth at 90 and laughed with holy joy, proving nothing is impossible for Hashem.",
+        "<strong>Akeidat Yitzchak (Supreme Loyalty):</strong> Father and son walking together with undivided hearts to Mount Moriah, demonstrating total devotion to divine purpose.",
+        "<strong>The Ram in the Thicket:</strong> Hashem halted the sacrifice, declaring human sacrifice an abomination and teaching that devotion is expressed through life, not death."
+      ],
+      "key_topics_he": [
+        "<strong>הכנסת אורחים בחום היום:</strong> ריצה מלאת התלהבות ביום השלישי למילתו כדי לארח שלושה עוברי אורח זרים בסעודת מלכים.",
+        "<strong>ביקור חולים מאת הבורא:</strong> הקב״ה בעצמו בא לבקר את אברהם הפצוע, ולימד אותנו את המצווה הנעלה של ביקור ועידוד חולים.",
+        "<strong>הסנגוריה על סדום:</strong> אברהם מתייצב בשיח אמיץ מול ה' להציל עיר שלמה אם יימצאו בה עשרה צדיקים — אכפתיות אינסופית לכל נברא.",
+        "<strong>אשת לוט ומבט לאחור:</strong> האיסור להביט אחורה בעת הבריחה; מי שנתקע במבט על העבר השלילי קופא במקום כנציב מלח.",
+        "<strong>לידת יצחק וצחוק השמחה:</strong> נגד כל חוקי הטבע שרה יולדת בגיל 90 וצוחקת באושר — עדות לכך שאין שום דבר בלתי אפשרי אצל הבורא.",
+        "<strong>עקידת יצחק וההליכה יחדיו:</strong> 'וילכו שניהם יחדיו' — אב ובן הפוסעים בלב אחד מתוך מסירות נפש עילאית לנצח ישראל.",
+        "<strong>האיל שנאחז בסבך:</strong> ה' עוצר את העקידה ברגע האחרון, ומוכיח שהיהדות מקדשת חיים ומעשים בעולם ולא הקרבת אדם."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on Tent Flaps: Abraham's tent was open on all 4 directions so travelers wouldn't have to search for the entrance.",
+        "Midrash on Sarah's Laugh: God changed Sarah's words when speaking to Abraham to preserve marital peace (Shalom Bayit).",
+        "Rashi on 'Vayelechu Sheneihem Yachdav': Father and son walked together with one unified, calm heartbeat to the mountain."
+      ],
+      "rashi_midrash_he": [
+        "רש״י: פתחי אוהלו היו פתוחים לארבע רוחות כדי שאורחים לא יטרחו לחפש את הכניסה.",
+        "שינוי מפני השלום: הקב״ה שינה מניסוח דברי שרה לאברהם כדי לשמור על שלום בית.",
+        "'וילכו שניהם יחדיו': אב ובן צועדים בלב אחד שלם ובשלווה עילאית לקראת הציווי."
+      ],
+      "life_app_en": "Welcoming people: Notice who is feeling awkward or left out at a party or in class. Stepping up to make someone feel at home shows the highest level of social confidence.",
+      "life_app_he": "לראות את האחר: שים לב מי עומד בצד במסיבה או בהפסקה ומרגיש לא קשור. לגשת אליו בחיוך זוהי מנהיגות ועוצמה חברתית אמיתית."
+    },
+    {
+      "id": "chayei_sarah",
+      "name_en": "Chayei Sarah",
+      "book": "bereishit",
+      "name_he": "חיי שרה",
+      "plot_en": [
+        "Sarah passes away at age 127; Abraham negotiates with Ephron the Hittite to buy the Cave of Machpelah in Hebron.",
+        "Abraham charges his servant Eliezer with a solemn oath to find a wife for Yitzchak from his family, not Canaanites.",
+        "Eliezer arrives at the Charan well; devises a kindness test: whoever offers water to him and his 10 camels is the one.",
+        "Rivka passes the test with flying colors; Eliezer presents gifts, meets Betuel and Lavan; Rivka leaves and marries Yitzchak."
+      ],
+      "plot_he": [
+        "פטירת שרה בגיל 127; אברהם מנהל משא ומתן קפדני וקונה את מערת המכפלה בחברון מאפרון החתי.",
+        "אברהם משביע את אליעזר עבדו הנאמן לצאת למולדתו למצוא אישה ליצחק שתתאים לערכי המשפחה.",
+        "אליעזר מגיע לבאר בחרן ומציב מבחן אופי של חסד: הנערה שתציע להשקות גם אותו וגם את 10 גמליו היא הנבחרת.",
+        "רבקה עומדת במבחן בגבורה; אליעזר מעניק תכשיטים, פוגש את לבן; רבקה מסכימה לצאת ונישאת ליצחק באהבה."
+      ],
+      "key_topics_en": [
+        "<strong>Purchasing Me'arat HaMachpelah:</strong> Avraham insisted on paying full market price (400 silver shekels) in public, securing eternal legal ownership in Hebron.",
+        "<strong>Sarah's Enduring Legacy:</strong> Sarah's life was measured by spiritual depth; her Shabbat candles, blessed dough, and cloud of holiness remained in her tent.",
+        "<strong>Eliezer's Kindness Character Test:</strong> Eliezer chose Rivkah not by asking about pedigree or wealth, but by watching her voluntarily draw water for 10 tired camels.",
+        "<strong>Rivkah's Decisive Courage:</strong> When asked if she would travel into the unknown to marry Yitzchak, she answered in one confident word: 'Elech' (I will go).",
+        "<strong>Yitzchak's Field Prayer:</strong> Yitzchak instituted the afternoon Mincha prayer while meditating peacefully in the field before meeting Rivkah.",
+        "<strong>Consolation & Matriarchal Continuity:</strong> Yitzchak brought Rivkah into his mother's tent; the divine cloud returned, and his grief over Sarah was healed.",
+        "<strong>Avraham's Complete Life:</strong> Passing away 'old and satisfied in days', having transformed history from an obscure nomad to the father of nations."
+      ],
+      "key_topics_he": [
+        "<strong>קניין מערת המכפלה:</strong> אברהם מתעקש לשלם 400 שקל כסף עובר לסוחר מול כל בני חת, כדי לקבוע בעלות חוקית ונצחית בחברון.",
+        "<strong>חיי שרה והמורשת:</strong> חייה של שרה נמדדו באיכות ולא רק בשנים; נרות השבת שלה, ברכת העיסה וענן הקודש הותירו חותם נצחי.",
+        "<strong>מבחן המידות של אליעזר:</strong> אליעזר מחפש כלה ליצחק לא לפי עושר או יופי, אלא בודק טוב לב אקטיבי בהשקיית עשרה גמלים צמאים.",
+        "<strong>הכרעת רבקה ('אלך'):</strong> כשמשפחתה שואלת אותה האם היא מוכנה לצאת למסע הלא-נודע, היא משיבה במילה אחת של עוצמה ובחירה: 'אלך!'.",
+        "<strong>תפילת מנחה בשדה:</strong> יצחק אבינו יוצא 'לשוח בשדה לפנות ערב' ומייסד את תפילת מנחה — היכולת לעצור את יום העבודה ולהתחבר.",
+        "<strong>הנחמה באוהל שרה:</strong> יצחק מביא את רבקה לאוהל אמו, ענן הכבוד חוזר לפרוש עליו כנפיו, והוא מתנחם על פטירת שרה.",
+        "<strong>'זקן ושבע ימים':</strong> אברהם נפטר מתוך שלמות חיים מלאה, לאחר שהפך מרועה בודד לאבי האומה ומפיץ האמונה בעולם כולו."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on Sarah's Age: '100 years, 20 years, and 7 years' — at 100 she was as pure from sin as a 20-year-old, and at 20 as beautiful as a 7-year-old.",
+        "Midrash on Camels: 10 thirsty camels drink up to 250 gallons of water! Rivka ran back and forth tirelessly to draw water for total strangers.",
+        "Rashi on Ephron: Ephron talked big about giving it for free, but demanded an exorbitant 400 silver shekels."
+      ],
+      "rashi_midrash_he": [
+        "רש״י על שנות שרה: בת ק' כבת כ' לחטא, ובת כ' כבת ז' ליופי — צדקות וטוהר ללא פגם.",
+        "עמל רבקה: 10 גמלים צמאים שותים מאות ליטרים של מים! רבקה רצה שוב ושוב לשאוב מים בענווה ובמרץ.",
+        "אפרון אומר הרבה ואפילו מעט אינו עושה: דיבר על מתנת חינם אך דרש 400 שקל כסף עובר לסוחר."
+      ],
+      "life_app_en": "Look for friends based on character, not popularity or clothes. The people who show genuine kindness when no one is watching are the real champions you want on your team.",
+      "life_app_he": "איך לבחור חברים: אל תסתכל על מי הכי 'מקובל' או לובש מותגים. תסתכל מי מתייחס בכבוד לאנשים חלשים. אופי טוב וחסד הם המדד האמיתי."
+    },
+    {
+      "id": "toldot",
+      "name_en": "Toldot",
+      "book": "bereishit",
+      "name_he": "תולדות",
+      "plot_en": [
+        "Yitzchak & Rivka pray for children; twin boys wrestle in the womb; prophecy that 'the elder shall serve the younger.'",
+        "Birth of Esav (red, hairy hunter) and Yaakov (holding Esav's heel, simple dweller of tents).",
+        "Esav returns exhausted from hunting; sells his Firstborn Birthright (Bechorah) to Yaakov for a bowl of red lentil stew.",
+        "Yitzchak grows blind in his old age; Rivka orchestrates Yaakov receiving the prime blessing; Esav vows revenge; Yaakov flees."
+      ],
+      "plot_he": [
+        "יצחק ורבקה מתפללים לפרי בטן; תאומים מתרוצצים בקרבה; נבואת 'ורב יעבוד צעיר'.",
+        "לידת עשו (אדמוני ושעיר, איש ציד) ויעקב (אוחז בעקב עשו, איש תם יושב אוהלים).",
+        "עשו חוזר רעב מהשדה ומוכר את הבכורה ליעקב תמורת נזיד עדשים אדום מתוך זלזול.",
+        "יצחק מזקין ועיניו כהות; רבקה דואגת שיעקב יקבל את ברכת הבכור; עשו מאיים לנקום ויעקב בורח לחרן."
+      ],
+      "key_topics_en": [
+        "<strong>Two Opposite Paths:</strong> Yaakov the thoughtful student of truth ('Ish Tam') vs Esav the impulsive hunter living for instant thrill ('Ish Sadeh').",
+        "<strong>Selling the Birthright for Stew:</strong> Esav traded eternal spiritual leadership for a momentary bowl of red lentils, illustrating the folly of instant gratification.",
+        "<strong>Yitzchak's Disputed Wells:</strong> When the Philistines stopped up his water wells (Esek, Sitnah), Yitzchak refused to fight, persevered, and finally found peace at Rechovot.",
+        "<strong>Blindness & Deeper Perception:</strong> Yitzchak's physical eyes were dim, but spiritual destiny required blessings tailored to the unique potential of both sons.",
+        "<strong>The Voice of Jacob:</strong> 'The voice is the voice of Jacob, but the hands are the hands of Esav' — Jewish strength lies in moral conviction, prayer, and intellect.",
+        "<strong>The Stolen Blessing:</strong> Rivkah recognized that the future covenant demanded Yaakov's ethical leadership rather than Esav's impulsive violence.",
+        "<strong>Journey to the Unknown:</strong> Yaakov set out alone toward Charan with only his walking staff, stepping into his destiny with faith and courage."
+      ],
+      "key_topics_he": [
+        "<strong>שתי דרכים ושני עולמות:</strong> יעקב איש תם יושב אוהלים המעמיק בערכים ורוח, מול עשיו איש ציד החי את הרגע והדחף המיידי.",
+        "<strong>מכירת הבכורה בנזיד עדשים:</strong> עשיו מוכר הנהגה רוחנית נצחית בשביל קערת מרק עדשים אדום — לקח על הסכנה שבהתמכרות לסיפוקים רגעיים.",
+        "<strong>בארות המים והעקביות:</strong> פלשתים סותמים את בארות יצחק (עשק ושטנה), אך הוא אינו נגרר למלחמה, מתמיד בחפירה ומוצא מרחב ברחובות.",
+        "<strong>ראייה פנימית מול מראה עיניים:</strong> עיני יצחק כבדות מראות, אך ברכותיו המדויקות נועדו להעניק לכל בן את הכלים המתאימים לתפקידו.",
+        "<strong>'הקול קול יעקב':</strong> 'הקול קול יעקב והידיים ידי עשיו' — כוחו ועוצמתו של עם ישראל הם בתורה, בתפילה, במוסר ובחכמה ולא באגרוף.",
+        "<strong>תבונת רבקה בברכות:</strong> רבקה קולטת ברוח קודשה שברכת אברהם חייבת לעבור להנהגה הרוחנית של יעקב ולא לכוח החרב של עשיו.",
+        "<strong>היציאה לבד עם מקל:</strong> יעקב נאלץ לברוח לחרן בלי רכוש ועם מקלו בלבד, ויוצא לבנות את עתידו באמונה ובחריצות."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on Esav's hunting: Esav trapped not just animals, but trapped his father with clever deceitful words.",
+        "Midrash on Lentils: Yaakov was cooking lentils for Yitzchak who was in mourning for Abraham who passed away that day.",
+        "Rashi on the Smell of Yaakov's Garments: When Yaakov entered, Yitzchak smelled the scent of Gan Eden entering with him."
+      ],
+      "rashi_midrash_he": [
+        "רש״י 'יודע ציד': עשו ידע לצוד את אביו בפיו ולשאול שאלות מיתממות כמו 'איך מעשרין את המלח'.",
+        "נזיד עדשים: יעקב בישל סעודת הבראה ליצחק שהתאבל על אברהם שנפטר באותו יום.",
+        "ריח בגדיו של יעקב: הריח ריח גן עדן שנכנס עמו, ואילו עם עשו נכנס ריח גיהנום."
+      ],
+      "life_app_en": "Instant gratification vs Long-term goals: Winning in life requires saying NO to immediate short-term impulses (video game binges, junk food, quitting when it's hard) to build long-term greatness.",
+      "life_app_he": "הנאה רגעית מול הצלחה לטווח ארוך: האם למכור את העתיד שלך בשביל 'נזיד עדשים'? הצלחה בחיים דורשת ויתור על סיפוקים מיידיים לטובת מטרות גדולות."
+    },
+    {
+      "id": "vayetzei",
+      "name_en": "Vayetzei",
+      "book": "bereishit",
+      "name_he": "ויצא",
+      "plot_en": [
+        "Yaakov leaves Be'er Sheva toward Charan; sleeps on stones on Mount Moriah and dreams of a ladder reaching heaven.",
+        "Hashem promises to guard him and give him the Land; Yaakov vows that Hashem will be his God and erects a monument.",
+        "Arrives in Charan, rolls the giant stone off the well for Rachel; works 7 years for Rachel, but deceitful Lavan switches her for Leah.",
+        "Yaakov works another 7 years for Rachel; 11 sons and 1 daughter born; builds immense livestock wealth; flees Lavan's house."
+      ],
+      "plot_he": [
+        "יעקב יוצא מבאר שבע לכיוון חרן; ישן על אבני המקום בהר המוריה וחולם על סולם שראשו מגיע השמימה.",
+        "ה' מבטיח לשומרו ולהחזירו לארץ; יעקב מקים מצבה ונודר נדר נאמנות.",
+        "מגיע לבאר, גולל את האבן הענקית עבור רחל; עובד 7 שנים עבורה ולבן מחליף אותה בליל החתונה בלאה.",
+        "יעקב עובד עוד 7 שנים עבור רחל; לידת 11 השבטים ודינה; צבירת צאן ברכוש גדול ובריחה מחצר לבן."
+      ],
+      "key_topics_en": [
+        "<strong>The Dream of the Ladder:</strong> Angels ascending and descending on a ladder rooted in earth with its top in heaven, uniting physical work with spiritual purpose.",
+        "<strong>Hashem in the Darkest Places:</strong> 'Surely Hashem was in this place and I did not know it' — discovering holiness exists even when feeling lonely and vulnerable.",
+        "<strong>Meeting Rachel at the Well:</strong> Yaakov single-handedly rolled away the massive well stone out of love and strength to help the shepherds.",
+        "<strong>Resilience Through 20 Years of Deceit:</strong> Working tirelessly through Laban's 100 contract alterations without ever compromising his own integrity.",
+        "<strong>Rachel's Supreme Selflessness:</strong> Handing over the secret wedding signals to Leah so her sister would not be publicly humiliated under the Chuppah.",
+        "<strong>Birth of the 12 Tribes:</strong> Leah's naming of Yehudah ('This time I will praise Hashem'), embedding gratitude as the foundational essence of being a 'Yehudi'.",
+        "<strong>Galeed (The Monument of Peace):</strong> Establishing a covenant heap of stones with Laban, setting healthy boundaries and returning toward home."
+      ],
+      "key_topics_he": [
+        "<strong>חלום הסולם והמלאכים:</strong> סולם מוצב ארצה וראשו מגיע השמימה — אדם מחבר את חיי המעשה הארציים לפסגות רוחניות ומוסריות.",
+        "<strong>אלוקים במקומות הנסתרים:</strong> 'אכן יש ה' במקום הזה ואנוכי לא ידעתי' — הגילוי שההשגחה האלוקית מלווה אותך גם ברגעי בדידות ופחד.",
+        "<strong>המפגש עם רחל ליד הבאר:</strong> יעקב גולל לבדו את האבן הכבדה מפי הבאר בכוח האהבה, העזרה לזולת והגבורה הפנימית.",
+        "<strong>20 שנות עבודה ויושרה:</strong> יעקב עובד במסירות עצומה תחת לבן שהחליף את משכורתו עשרת מונים, מבלי למעול או להפר הבטחה.",
+        "<strong>מסירות הנפש של רחל:</strong> רחל מוסרת ללאה את הסימנים כדי למנוע את ביושה מתחת לחופה — שיא עולמי של חמלה ואהבת אחות.",
+        "<strong>לידת שבטי ישראל וההודאה:</strong> לאה קוראת לבנה יהודה 'הפעם אודה את ה'' — ומכאן נקרא כל העם 'יהודים', עם שיודע להודות.",
+        "<strong>גלעד וגבולות בריאים:</strong> יעקב מקים גל אבנים להסכם שלום עם לבן, ומלמד להציב גבולות ברורים כדי להתקדם בביטחון הביתה."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on the Stones: The stones under Yaakov's head argued with each other: 'Let the Tzaddik rest his head on me!' until Hashem merged them into one.",
+        "Rashi on the 7 Years: 'They seemed to him like a few days because of the love he had for her.'",
+        "Midrash on the Ladder: The angels going up were the guardian angels of Eretz Yisrael; the angels going down were angels of the diaspora."
+      ],
+      "rashi_midrash_he": [
+        "רש״י על האבנים: התחילו מריבות זו עם זו ואמרו 'עליי יניח צדיק ראשו', עד שעשאן הקב״ה אבן אחת.",
+        "שבע שנים כרגע אחד: 'ויהיו בעיניו כימים אחדים באהבתו אותה' — כשמשהו נעשה מתוך אהבה ומטרה, המאמץ טס.",
+        "מלאכים עולים ויורדים: מלאכי ארץ ישראל עולים למעלה ומלאכי חוץ לארץ יורדים ללוותו."
+      ],
+      "life_app_en": "When someone cheats or treats you unfairly (like Lavan did to Yaakov), don't become toxic yourself. Outwork them with honesty and resilience — your integrity will always win in the long game.",
+      "life_app_he": "איך להגיב כשמישהו מרמה אותך: אל תרד לרמה שלו. יעקב המשיך לעבוד ביושר מוחלט ובסוף יצא ברכוש גדול ובמשפחה מפוארת. יושרה תמיד מנצחת בטווח הארוך."
+    },
+    {
+      "id": "vayishlach",
+      "name_en": "Vayishlach",
+      "book": "bereishit",
+      "name_he": "וישלח",
+      "plot_en": [
+        "Yaakov prepares to meet Esav who approaches with 400 armed warriors; Yaakov prepares 3 strategies: gifts, prayer, and war.",
+        "Yaakov crosses the Yabok stream alone; wrestles all night with an angelic adversary; his hip socket is dislocated at dawn.",
+        "The angel renames him: 'Your name shall no longer be Yaakov, but Yisrael — for you have struggled with the divine and man and prevailed.'",
+        "Peaceful encounter with Esav; settlement in Shechem; tragedy of Dinah; return to Beit El; passing of Rachel giving birth to Binyamin."
+      ],
+      "plot_he": [
+        "יעקב נערך לפגישה עם עשו הצועד לקראתו עם 400 לוחמים; נוקט ב-3 דרכים: דורון (מתנות), תפילה, ומלחמה.",
+        "יעקב עובר את מעבר יבוק בלילה לבדו ונאבק עד עלות השחר עם שרו של עשו; פגיעתו בגיד הנשה.",
+        "שינוי השם ל'ישראל': 'כי שרית עם אלוהים ועם אנשים ותוכל' — סמל הניצחון והמאבק של עם ישראל לדורותיו.",
+        "מפגש הפיוס עם עשו; פרשת שכם ודינה; פטירת רחל בלדתה את בנימין וקבורתה בבית לחם."
+      ],
+      "key_topics_en": [
+        "<strong>Three-Pronged Strategy:</strong> Facing Esav's army of 400 men with diplomatic gifts, heartfelt prayer, and strategic defense readiness.",
+        "<strong>Wrestling the Angel in the Night:</strong> Yaakov battled the celestial minister of Esav until the break of dawn, refusing to let go without a blessing.",
+        "<strong>The Name 'Yisrael':</strong> 'For you have striven with the divine and with men and have prevailed' — defining the Jewish destiny of resilience.",
+        "<strong>Gid HaNasheh (The Sciatic Nerve):</strong> The prohibition against eating the hind sciatic nerve commemorates Yaakov's injured hip and the Jewish spirit.",
+        "<strong>The Emotional Reunion:</strong> Bowing seven times and greeting Esav with respectful diplomacy, proving composure can defuse ancient hatred.",
+        "<strong>The Tragedy of Dinah:</strong> Shimon and Levi taking violent vengeance in Shechem; Yaakov rebuking their uncontrolled wrath.",
+        "<strong>Binyamin's Birth & Rachel's Tomb:</strong> Rachel buried on the lonely roadside of Beit Lechem so her soul could pray for future exiles returning home."
+      ],
+      "key_topics_he": [
+        "<strong>אסטרטגיה משולשת מול איום:</strong> יעקב נערך למפגש עם 400 לוחמי עשיו בשלושה צירים: דורון (דיפלומטיה), תפילה ומלחמה.",
+        "<strong>מאבק הלילה עם המלאך:</strong> יעקב נאבק לבדו באיש עד עלות השחר, ומסרב להרפות עד אשר יקבל ברכה ואישור על דרכו.",
+        "<strong>השם 'ישראל':</strong> 'כי שרית עם אלוהים ועם אנשים ותוכל' — הגדרת הזהות היהודית של התגברות מתמדת על משברים ומאבקים.",
+        "<strong>גיד הנשה וזיכרון הגוף:</strong> איסור אכילת גיד הנשה לזכר פציעת ירך יעקב; עם ישראל צולע לעיתים בהיסטוריה אך לעולם אינו נכנע.",
+        "<strong>מפגש האחים המפויס:</strong> יעקב משתחווה שבע פעמים ומדבר בכבוד, ומוכיח שסבלנות וקור רוח יכולים להפיג שנאה עתיקה.",
+        "<strong>מעשה דינה ותוכחת יעקב:</strong> שמעון ולוי נוקמים באלימות קשה בשכם; יעקב מוכיח אותם על חוסר איפוק וזעם שאינו מרוסן.",
+        "<strong>לידת בנימין וקבורת רחל:</strong> רחל נקברת בדרך אפרת בבית לחם, כדי שנשמתה תתפלל ותבכה על בניה השבים מן הגלות."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on Small Pitchers (Pachim Ketanim): Yaakov went back across the river alone to retrieve small inexpensive jars — a Tzaddik values their possessions because they were earned with honest sweat.",
+        "Midrash on the Angel: The angel was the celestial guardian angel of Esav (Samael) trying to break Yaakov's spiritual legacy.",
+        "Rashi on Kever Rachel: Yaakov buried Rachel on the road to Beit Lechem so she could weep and pray for the Jewish exiles marching into Babylon."
+      ],
+      "rashi_midrash_he": [
+        "פכים קטנים: יעקב חזר בלילה בשביל צנצנות קטנות — צדיקים ממונם חביב עליהם לפי שאין פושטים ידיהם בגזל.",
+        "שרו של עשו: המאבק היה מול הכוח הרוחני של הרע שניסה לשבור את רוחו של יעקב טרם עלות השחר.",
+        "קבורת רחל בדרך: כדי שכאשר יגלו בני ישראל לבבל, תצא רחל על קברה ותבקש עליהם רחמים."
+      ],
+      "life_app_en": "You are called 'Yisrael' because you never give up. True toughness isn't never getting knocked down; toughness is getting back up and demanding a blessing from your hardest struggles.",
+      "life_app_he": "למה אנחנו נקראים 'עם ישראל'? כי ישראל זה מי שנאבק, מתמודד ומנצח. גבורה אמיתית היא לא מי שמעולם לא נפל, אלא מי שקם מהקרשים וחזק יותר מכל משבר."
+    },
+    {
+      "id": "vayeshev",
+      "name_en": "Vayeshev",
+      "book": "bereishit",
+      "name_he": "וישב",
+      "plot_en": [
+        "Yaakov favors 17-year-old Yosef, making him a coat of many colors; Yosef dreams of sheaves and stars bowing down to him.",
+        "Brothers become jealous and bitter; when Yosef visits them in Dotan, they throw him into an empty pit and sell him to Midianites.",
+        "Brothers dip Yosef's tunic in goat blood and show it to Yaakov, who mourns inconsolably.",
+        "Yosef is sold in Egypt to Potiphar, head of the royal guard; resists Potiphar's wife's daily seduction; thrown into dungeon; interprets dreams of the Cupbearer and Baker."
+      ],
+      "plot_he": [
+        "יעקב מעניק ליוסף בן ה-17 כתונת פסים מיוחדת; יוסף חולם על אלומות השדה וכוכבי השמים המשתחווים לו.",
+        "האחים מתקנאים בו; כשהוא נשלח לשלומם בדותן, הם משליכים אותו לבור ומוכרים אותו לשיירת סוחרים למצרים.",
+        "האחים מטבילים את הכתונת בדם שעיר עזים ומציגים אותה ליעקב; יעקב מתאבל וממאן להתנחם.",
+        "יוסף נמכר לפוטיפר שר הטבחים; עומד בניסיון הגבורה מול אשת פוטיפר; מושלך לבית הסוהר ופותר את חלומות שר המשקים והאופים."
+      ],
+      "key_topics_en": [
+        "<strong>The Coat of Many Colors:</strong> Yaakov singling out Yosef with a colorful tunic ('Ketoret Passim'), showing how parental favoritism breeds toxic sibling jealousy.",
+        "<strong>Dreams of Sheaves & Stars:</strong> Yosef's prophetic visions of family leadership; sharing ambitious dreams without emotional sensitivity sparked resentment.",
+        "<strong>The Pit of Scorpions:</strong> The brothers threw Yosef into an empty pit (no water, but scorpions inside) and sold him to Ishmaelites for 20 silver pieces.",
+        "<strong>Yehuda's Moral Courage:</strong> Admitting guilt publicly with Tamar ('She is more righteous than I'), displaying the rare bravery of owning wrongdoing.",
+        "<strong>Resisting Temptation in Potiphar's House:</strong> Yosef fleeing Potiphar's wife, declaring he could not betray his master or sin against Hashem.",
+        "<strong>The Image of His Father:</strong> The Talmud reveals that the image of Yaakov appeared before Yosef's eyes, giving him moral power to withstand temptation.",
+        "<strong>The Prison of Dreams:</strong> Interpreting the dreams of the royal Butler and Baker, showing empathy and excellence even while wrongfully imprisoned."
+      ],
+      "key_topics_he": [
+        "<strong>כתונת הפסים והאפליה:</strong> יעקב מעניק ליוסף כתונת פסים מיוחדת, ומלמד הורים ומחנכים שהעדפה גלויה עלולה להצית קנאה הרסנית.",
+        "<strong>חלומות האלומות והכוכבים:</strong> יוסף חולם על מנהיגות עתידית; שיתוף שאיפות גדולות ללא רגישות לרגשות האחים עורר טינה.",
+        "<strong>הבור והמכירה לישמעאלים:</strong> האחים משליכים את יוסף לבור ריק ממים אך מלא עקרבים, ומוכרים אותו בשערי מצרים לעבדות.",
+        "<strong>גבורת ההודאה של יהודה:</strong> יהודה מודה באומץ מול כולם בפרשת תמר: 'צדקה ממני' — המנהיג האמיתי הוא זה שמודה בטעותו בגלוי.",
+        "<strong>עמידה בניסיון בבית פוטיפר:</strong> יוסף בורח מאשת פוטיפר ומסרב לבגוד באדונו ובבוראו: 'ואיך אעשה הרעה הגדולה הזאת וחטאתי לאלוהים?'.",
+        "<strong>דמות דיוקנו של אביו:</strong> חז״ל מספרים שדמות יעקב נראתה לעיני יוסף בחלון ברגע הפיתוי, והעניקה לו כוח פנימי לשמור על קדושתו.",
+        "<strong>פיתרון חלומות השרים בבור:</strong> יוסף פותר במדויק את חלומות שר המשקים והאופים, ומפגין מקצועיות, חמלה ואמונה גם בעומק הכלא."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on Potiphar's Wife: Yosef saw the spiritual image of his father Yaakov's face in the window, giving him the mental power to break free.",
+        "Midrash on the Merchant Caravan: God arranged that the caravan carried fragrant spices instead of tar and petroleum to protect Yosef from foul smells.",
+        "Rashi on the Baker & Cupbearer: Yosef noticed they looked worried in the morning and genuinely asked: 'Why are your faces sad today?' — empathy inside a prison."
+      ],
+      "rashi_midrash_he": [
+        "דמות דיוקנו של אביו: ברגע הניסיון הקשה ביותר, ראה יוסף את פני יעקב אביו וזה נתן לו את העוצמה לברוח.",
+        "שיירת בשמים: במקום שיירה של נפט וריח רע, זימן ה' סוחרים עם בשמים כדי להקל על יוסף בצערו.",
+        "'מדוע פניכם רעים היום': יוסף, אסיר בעצמו, שם לב למצוקה של אסירים אחרים — שיא הרגישות והאכפתיות."
+      ],
+      "life_app_en": "Character is who you are when nobody is watching. What you do online in private when the door is closed defines your future greatness.",
+      "life_app_he": "מיהו גבר אמיתי: מה שאתה עושה כשאף אחד לא רואה אותך. כשאתה לבד בחדר עם הטלפון, הבחירות שאתה עושה שם מעצבות את העתיד שלך."
+    },
+    {
+      "id": "miketz",
+      "name_en": "Miketz",
+      "book": "bereishit",
+      "name_he": "מקץ",
+      "plot_en": [
+        "2 full years pass; Pharaoh has twin dreams of fat vs thin cows, and healthy vs withered stalks of wheat; no wise man can interpret.",
+        "Cupbearer finally remembers Yosef; Yosef is rushed from dungeon, shaved, dressed, and stands before Pharaoh.",
+        "Yosef interprets: 7 years of abundance followed by 7 years of severe famine; proposes an economic emergency plan.",
+        "Pharaoh makes Yosef Viceroy over Egypt at age 30; famine strikes; the brothers travel to Egypt to buy grain; Yosef tests them."
+      ],
+      "plot_he": [
+        "שנתיים ימים חולפות; פרעה חולם על שבע פרות יפות מול שבע פרות רעות, ושבע שיבולים מלאות מול דקות; חרטומי מצרים חסרי אונים.",
+        "שר המשקים נזכר ביוסף; מריצים את יוסף מן הבור, מגלחים ומלבישים אותו לפני התייצבותו אצל פרעה.",
+        "יוסף פותר: 7 שנות שובע ואחריהן 7 שנות רעב כבד; מציע תוכנית כלכלית מבריקה לאגירת תבואה.",
+        "פרעה ממנה את יוסף למשנה למלך בגיל 30; הרעב מתפשט; האחים יורדים למצרים לשבור בר; יוסף מזהה אותם ובוחן אותם."
+      ],
+      "key_topics_en": [
+        "<strong>Pharaoh's Puzzling Dreams:</strong> Fat cows devoured by gaunt cows; healthy wheat swallowed by scorched wheat; earthly magicians baffled by the riddle.",
+        "<strong>From Dungeon to Viceroy in an Hour:</strong> Yosef brought from the dungeon, bathed, and promoted to Prime Minister of Egypt before the sun set.",
+        "<strong>Visionary Crisis Management:</strong> Not just interpreting the dream, but providing a brilliant strategic solution: storing grain during 7 years of abundance for the famine.",
+        "<strong>The Royal Garments & Inner Purity:</strong> Dressed in royal Egyptian linen with a gold chain, yet preserving his inner Hebrew identity without assimilating.",
+        "<strong>Brothers Bowing in Egypt:</strong> Prophecy fulfilled 22 years later as Yosef's brothers prostrated before him, seeking food without recognizing him.",
+        "<strong>The Psychological Test:</strong> Yosef concealing his identity to test whether the brothers had truly repented and would protect Rachel's younger son, Binyamin.",
+        "<strong>The Planted Silver Goblet:</strong> Framing Binyamin with the stolen royal cup to confront the brothers with the exact crisis of jealousy they failed 20 years earlier."
+      ],
+      "key_topics_he": [
+        "<strong>חלומות פרעה המסתוריים:</strong> שבע פרות רזות בולעות את הבריאות, ושבע שיבולים שדופות בולעות את המלאות; חרטומי מצרים חסרי אונים.",
+        "<strong>מבור הכלא לכס המלוכה:</strong> יוסף מגולח ומוצא מבור האסירים, ותוך שעה קלה מתמנה למשנה למלך מצרים — ישועת ה' כהרף עין.",
+        "<strong>ניהול משבר גאוני:</strong> יוסף אינו מסתפק בפתרון החלום, אלא מציג תוכנית כלכלית מבריקה לאגירת מזון בשנות השובע לקראת שנות הרעב.",
+        "<strong>בגדי מלכות וזהות שמורה:</strong> יוסף לובש בגדי שש ורביד זהב ונקרא 'צפנת פענח', אך שומר על זהותו, צניעותו ושפתו המקורית.",
+        "<strong>השתחוות האחים במצרים:</strong> החלום מתגשם לאחר 22 שנה כשהאחים יורדים לשבור בר ומשתחווים ליוסף, מבלי לזהות את אחיהם האבוד.",
+        "<strong>המבחן הפסיכולוגי של יוסף:</strong> יוסף מתנכר לאחיו כדי לבדוק האם עשו תשובה אמיתית והאם יגנו על בנימין, בנה השני של רחל.",
+        "<strong>גביע הכסף באמתחת בנימין:</strong> יוסף טומן את הגביע אצל בנימין כדי להעמיד את האחים בדיוק באותו הניסיון שבו נכשלו במכירת יוסף."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on 'MiKetz': Exactly at the end of the appointed time — Hashem sets a precise stopwatch for every challenge in life.",
+        "Midrash on the 70 Languages: The angel Gabriel taught Yosef 70 world languages overnight so he could converse with international dignitaries.",
+        "Rashi on Yosef's Weeping: Yosef had to turn aside repeatedly to cry because his love for his brothers was burning inside him."
+      ],
+      "rashi_midrash_he": [
+        "רש״י 'מקץ': קץ שם לחושך — לכל קושי ומשבר יש תאריך תפוגה מדויק שנקבע מראש.",
+        "שבעים לשונות: המלאך גבריאל לימד את יוסף שבעים שפות בלילה אחד כדי שיוכל לנהל את הממלכה.",
+        "דמעות יוסף: יוסף פנה שוב ושוב הצידה לבכות מרוב אהבה וגעגועים לאחיו."
+      ],
+      "life_app_en": "Things can change in 24 hours. No matter how stuck, stressed, or discouraged you feel about school or a situation, keep working hard — breakthroughs often happen all at once.",
+      "life_app_he": "הגלגל יכול להסתובב ברגע אחד. גם אם לפעמים מרגיש תקוע או מתסכל, תמשיך לתת את המקסימום. ההזדמנות הגדולה תמיד מגיעה בהפתעה למי שמוכן."
+    },
+    {
+      "id": "vayigash",
+      "name_en": "Vayigash",
+      "book": "bereishit",
+      "name_he": "ויגש",
+      "plot_en": [
+        "Judah steps forward courageously to confront the Viceroy of Egypt, offering himself as a lifelong slave instead of Binyamin.",
+        "Yosef cannot contain himself any longer, orders Egyptian guards out, and weeps aloud: 'Ani Yosef! Ha'Od Avi Chai?'",
+        "Brothers are terrified and speechless with shame; Yosef comforts them: 'It was not you who sent me here, but God, to preserve life.'",
+        "Pharaoh invites the family; Jacob learns Yosef is alive; his spirit revives; the entire 70-member family moves to Goshen."
+      ],
+      "plot_he": [
+        "יהודה ניגש באומץ מול שליט מצרים, נושא נאום מופת ומציע את עצמו כעבד עולם במקום בנימין.",
+        "יוסף אינו יכול להתאפק עוד, מוציא כל איש מעליו ופורץ בבכי: 'אני יוסף! העוד אבי חי?'.",
+        "האחים נבהלים ומתמלאים בושה; יוסף מרגיע ומחבק: 'לא אתם שלחתם אותי הנה כי אם האלוהים למחיה'.",
+        "פרעה מזמין את המשפחה; יעקב מתבשר שיוסף חי ורוחו שבה אליו; 70 נפש יורדים להשתקע בארץ גושן."
+      ],
+      "key_topics_en": [
+        "<strong>Yehuda's Heroic Standoff:</strong> Stepping forward to challenge the ruler of Egypt, offering his own freedom and life as a hostage for Binyamin.",
+        "<strong>Responsibility for a Brother:</strong> Yehuda fulfilling his pledge to his father: 'If I do not bring him back, I will bear the guilt forever.'",
+        "<strong>'Ani Yosef!' (I am Joseph!):</strong> Yosef broke down weeping, ordering guards to leave, and revealed himself: 'I am Joseph! Does my father still live?'",
+        "<strong>Reframing Tragedy into Providence:</strong> Yosef comforted his terrified brothers: 'It was not you who sent me here, but God, to preserve life.'",
+        "<strong>Reconciliation Over Revenge:</strong> The most emotionally powerful moment in Chumash; weeping upon Binyamin's neck and forgiving his brothers completely.",
+        "<strong>The Wagons of Torah:</strong> Yosef sent royal wagons to transport Yaakov, subtly hinting at the last Torah passage they studied together (Eglah Arufah).",
+        "<strong>Yaakov's Soul Revived:</strong> Hearing that Yosef was alive and spiritually intact, the prophetic spirit returned to Yaakov after 22 years of mourning."
+      ],
+      "key_topics_he": [
+        "<strong>העימות ההרואי של יהודה:</strong> יהודה ניגש באומץ מול שליט מצרים ומוכן למסור את חירותו וחייו כעבד תמורת שחרורו של בנימין.",
+        "<strong>ערבות מוחלטת לאח:</strong> יהודה מקיים את הבטחתו לאביו: 'אנכי אערבנו מידי תבקשנו' — מנהיגות שנמדדת בנכונות לשלם מחיר אישי למען הזולת.",
+        "<strong>'אני יוסף העוד אבי חי?':</strong> יוסף אינו יכול עוד להתאפק, מוציא את כל המצרים מן החדר וחושף את זהותו בבכי מטלטל.",
+        "<strong>הפיכת הטרגדיה לשליחות:</strong> יוסף מרגיע את אחיו המבוהלים: 'לא אתם שלחתם אותי הנה כי האלוהים' — מבט אמוני עמוק הרואה השגחה בתוך כאב.",
+        "<strong>סליחה ואהבה מעל נקמה:</strong> רגע השיא המרגש בספר בראשית; יוסף מחבק ובוכה על צווארי בנימין ואחיו וסולח להם בלב שלם.",
+        "<strong>עגלות הרמז ללימוד:</strong> יוסף שולח עגלות להעלות את יעקב, רמז לסוגיית 'עגלה ערופה' שלמדו יחד לפני שנפרדו, להראות שלא שכח תלמודו.",
+        "<strong>'ותחי רוח יעקב אביהם':</strong> הידיעה שיוסף חי ושמר על אמונתו משיבה את רוח הקודש והנבואה ליעקב אחרי 22 שנות אבל ויגון."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on 'Ani Yosef': The Midrash says if the brothers were so paralyzed with shame before a human king, how much more so on the Day of Judgment before Hashem!",
+        "Rashi on Yosef's Neck: Yosef wept on Binyamin's neck for the two Temples destined to be destroyed in Binyamin's territory; Binyamin wept for the Tabernacle of Shiloh in Yosef's territory.",
+        "Midrash on Serach bat Asher: Serach gently revealed to Jacob that Yosef was alive by playing a harp so the shock wouldn't give him a heart attack."
+      ],
+      "rashi_midrash_he": [
+        "תוכחת 'אני יוסף': אמרו חז״ל אוי לנו מיום הדין ואוי לנו מיום התוכחה — מילה אחת של אמת משתקת כל שקר.",
+        "בכי על הצוואר: יוסף בכה על שני בתי המקדש שיחרבו בחלקו של בנימין, ובנימין בכה על משכן שילה שיחרב בחלקו של יוסף.",
+        "סרח בת אשר: ניגנה בכינור בעדינות 'עוד יוסף חי' כדי שלא ייבהל יעקב מרוב בשורה פתאומית."
+      ],
+      "life_app_en": "Forgiveness is true strength. Weak people hold bitter grudges forever; strong leaders have the confidence to let go of hurt, forgive, and move forward together.",
+      "life_app_he": "לסלוח זו לא חולשה, זו עוצמת-על. אנשים חלשים נוטרים טינה ושומרים כעס; מנהיגים חזקים יודעים למחול, לחבר ולפתוח דף חדש."
+    },
+    {
+      "id": "vayechi",
+      "name_en": "Vayechi",
+      "book": "bereishit",
+      "name_he": "ויחי",
+      "plot_en": [
+        "Jacob lives his best 17 years peacefully in Egypt; approaches the end of his life at age 147.",
+        "Jacob blesses Yosef's sons Menashe and Ephraim, crossing his hands to place the right hand on younger Ephraim.",
+        "Jacob gathers all 12 sons around his deathbed, revealing their unique characters, strengths, and tribal blessings.",
+        "Jacob passes away; embalmed and buried with massive royal funeral in the Cave of Machpelah; Yosef reaffirms love to brothers; Sefer Bereishit concludes: 'Chazak Chazak V'Nitchazek!'"
+      ],
+      "plot_he": [
+        "יעקב חי 17 שנה של נחת ושלווה בארץ מצרים; מתקרב לגיל 147 ומבקש להיקבר בארץ ישראל.",
+        "יעקב מברך את מנשה ואפרים בני יוסף, משכל את ידיו ומניח ימינו על אפרים הצעיר.",
+        "יעקב אוסף את 12 בניו סביב מיטתו, מנתח את אישיותם ומעניק לכל שבט את ברכתו ותפקידו הייחודי.",
+        "פטירת יעקב; מסע לוויה ממלכתי לחברון לקבורה במערת המכפלה; יוסף מרגיע שוב את אחיו; חתימת ספר בראשית: 'חזק חזק ונתחזק!'."
+      ],
+      "key_topics_en": [
+        "<strong>The Oath in Egypt:</strong> Yaakov making Yosef place his hand under his thigh, swearing not to bury him in Egypt but in the cave of Machpelah.",
+        "<strong>Ephraim & Menashe's Blessing:</strong> Switching his hands to place the right hand on younger Ephraim; establishing the blessing parents give sons every Friday night.",
+        "<strong>Sibling Peace Across Generations:</strong> Ephraim and Menashe were the first brothers in Genesis to live in total harmony with zero jealousy over blessings.",
+        "<strong>Prophetic Character Analysis:</strong> Yaakov reviewing each son's unique strengths: Yehuda's lion leadership, Zevulun's maritime commerce, Dan's judicial defense.",
+        "<strong>Royal Scepter to Yehuda:</strong> 'The scepter shall not depart from Judah' — cementing the Davidic dynasty and eternal leadership of the Jewish people.",
+        "<strong>Yosef's Unbroken Compassion:</strong> When the brothers feared retribution after Yaakov's death, Yosef cried: 'Am I in place of God? You intended evil, but God meant it for good.'",
+        "<strong>'Pakod Yifkod' (The Promise of Redemption):</strong> Yosef's final words before death, promising that God would surely redeem the children of Israel and bring his bones home."
+      ],
+      "key_topics_he": [
+        "<strong>שבועת הקבורה בארץ:</strong> יעקב משביע את יוסף שלא לקבור אותו במצרים אלא לשאת אותו אל קברי אבותיו במערת המכפלה בחברון.",
+        "<strong>שׂיכול הידיים וברכת הבנים:</strong> יעקב מניח את יד ימינו על אפרים הצעיר; ומייסד את ברכת הבנים הנצחית בכל ליל שבת: 'ישימך אלוהים כאפרים וכמנשה'.",
+        "<strong>שלום ואחווה ללא קנאה:</strong> אפרים ומנשה הם האחים הראשונים בספר בראשית שחיו בהרמוניה מוחלטת ללא טיפה של קנאה ותחרות על הבכורה.",
+        "<strong>ברכות השבטים והכוחות:</strong> יעקב מגדיר את הכישרון הייחודי של כל שבט: מנהיגות ארי ליהודה, מסחר ימי לזבולון, צדק לדן ועוצמה לנפתלי.",
+        "<strong>שרביט המלוכה ליהודה:</strong> 'לא יסור שבט מיהודה ומחוקק מבין רגליו' — ייסוד מלכות בית דוד וההנהגה הלאומית הנצחית.",
+        "<strong>'התחת אלוהים אני?':</strong> לאחר פטירת יעקב האחים חוששים מנקמה, ויוסף בוכה ומרגיעם: 'אתם חשבתם עלי רעה אלוהים חשבה לטובה'.",
+        "<strong>'פקוד יפקוד אלוהים אתכם':</strong> מילותיו האחרונות של יוסף, המעניקות לעם ישראל את קוד הגאולה הנצחי ומצוות העלאת עצמותיו לארץ."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on 'Parsha Setumah': Why does Vayechi have no blank space before it? Because with Jacob's death, the hearts and eyes of Israel were closed from the impending bondage.",
+        "Midrash on 'Shema Yisrael': When Jacob gathered his sons, he feared one might abandon the path. The 12 sons cried out in unison: 'Shema Yisrael, Hashem Elokeinu Hashem Echad!'",
+        "Rashi on Ephraim & Menashe: Raised in the corrupt capital of Egypt, yet remained 100% committed to the Torah path of their grandfather."
+      ],
+      "rashi_midrash_he": [
+        "פרשה סתומה: פרשת ויחי סתומה ללא רווח — כיוון שנפטר יעקב נסתמו עיניהם ולבם של ישראל מצרת השעבוד שהחל.",
+        "קבלת עול מלכות שמים: יעקב דאג שמא יש פסול בזרעו; ענו כל 12 השבטים כאחד: 'שמע ישראל ה' אלוקינו ה' אחד!'.",
+        "אפרים ומנשה: גדלו בארמון מלוכה מצרי מלא פיתויים, ובכל זאת שמרו על נאמנות מוחלטת לבית סבא."
+      ],
+      "life_app_en": "You have your own unique superpower. You don't need to copy your brother, your friend, or an influencer. Figure out what makes you uniquely you, and use that to build the world.",
+      "life_app_he": "הכישרון המיוחד שלך: אל תנסה לחקות מישהו אחר. יעקב לימד שכל שבט מביא עוצמה אחרת לשולחן. גלה את הכישרון שלך ותהפוך למקצוען בתחום שלך."
+    },
+    {
+      "id": "shemot",
+      "book": "shemot",
+      "name_en": "Shemot",
+      "name_he": "שמות",
+      "plot_en": [
+        "A new Pharaoh rises who 'did not know Yosef'; enslaves the Hebrews with brutal hard labor; decrees drowning baby boys in the Nile.",
+        "Shiphrah & Puah (heroic midwives) defy Pharaoh; Moshe is born, hidden for 3 months, placed in a basket in the Nile reed.",
+        "Batya (Pharaoh's daughter) rescues Moshe; Miriam arranges his mother Yocheved as nurse; Moshe grows up in royal palace.",
+        "Moshe steps out to see his brothers' pain, slays an Egyptian taskmaster beating a Hebrew; flees to Midian; marries Tzipporah; the Burning Bush revelation and mission."
+      ],
+      "plot_he": [
+        "קם מלך חדש אשר 'לא ידע את יוסף'; משעבד את ישראל בעבודת פרך; גוזר להשליך כל בן הנולד ליאור.",
+        "שפרה ופועה המיילדות האמיצות מסרבות לפקודת הרצח; לידת משה, הטמנתו 3 חודשים בתיבה בגומא.",
+        "בתיה בת פרעה מושה אותו מן המים; מרים דואגת שיוכבד אמו תיניק אותו; משה גדל בבית המלוכה.",
+        "משה יוצא לראות בסבל אחיו, מכה את המצרי המכה איש עברי; בורח למדין; נושא את צפורה; מעמד הסנה הבוער והשליחות."
+      ],
+      "key_topics_en": [
+        "<strong>Slavery & Soul Resilience:</strong> A new Pharaoh arose who did not know Joseph; ruthless bondage failed to break the Jewish spirit.",
+        "<strong>The Heroic Midwives (Shifrah & Puah):</strong> Defying Pharaoh's imperial decree to drown Hebrew baby boys, placing moral conscience above tyranny.",
+        "<strong>Yocheved & Miriam at the River:</strong> Yocheved placing baby Moshe in a wicker basket; young sister Miriam watching from the reeds with unwavering faith.",
+        "<strong>Batya's Empathy:</strong> Pharaoh's daughter drawing the weeping child from the Nile, naming him Moshe and raising him in the royal palace.",
+        "<strong>Standing Up for Brothers:</strong> Moshe leaving royal privilege to witness his brothers' burdens, striking down an Egyptian taskmaster abusing a Hebrew.",
+        "<strong>The Burning Bush ('Sneh'):</strong> Hashem appearing in a humble desert thornbush that burns without being consumed, symbolizing Jewish survival through history.",
+        "<strong>Moshe's Humility:</strong> Resisting the mission for 7 days because of his speech impediment, showing authentic leaders lead with modesty, not ego."
+      ],
+      "key_topics_he": [
+        "<strong>השעבוד וחוסן הנפש:</strong> קם מלך חדש על מצרים אשר לא ידע את יוסף; גזירות עבודת פרך אכזריות שלא הצליחו לשבור את רוח העם.",
+        "<strong>המיילדות הגיבורות (שפרה ופועה):</strong> סירוב אמיץ לפקודת פרעה להמית את הילדים הזכרים, תוך העמדת צו המצפון מעל עריצות שלטונית.",
+        "<strong>יוכבד ומרים על שפת היאור:</strong> יוכבד מניחה את משה בתיבת גומא; מרים אחותו עומדת מרחוק באמונה שלמה לראות מה ייעשה בו.",
+        "<strong>חמלת בתיה בת פרעה:</strong> בת המלך שומעת את בכי הילד מתוך המים, שולחת את אמתה להצילו, מעניקה לו את השם משה ומגדלת אותו בארמון.",
+        "<strong>יציאה אל סבל האחים:</strong> משה עוזב את תפנוקי הארמון כדי לראות בסבלות אחיו, ומכה את הנוגש המצרי שהכה איש עברי.",
+        "<strong>הסנה הבוער באש:</strong> התגלות ה' בסנה קוצני בוער שאיננו אוכל — סמל נצחי לעם ישראל ששורד את כל להבות ההיסטוריה ללא כליה.",
+        "<strong>ענוותנותו של משה:</strong> משה ממאן לקבל את השליחות שבעה ימים בשל כובד פיו ולשונו — מנהיג אמיתי בורח מן השררה ומוביל בענווה."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on 'New King': Did he die or pretend not to know? He made himself like he didn't know Yosef's immense contributions — ingratitude at its worst.",
+        "Midrash on Moshe as Shepherd: Why did God choose Moshe? A little lamb ran away to drink water; Moshe carried it gently on his shoulders. God said: 'One who has mercy on animals shall shepherd My people.'",
+        "Rashi on Moses' Speech Impediment: 'Heavy of mouth and heavy of tongue' — God wanted the world to follow the truth of the message, not flashy slick marketing."
+      ],
+      "rashi_midrash_he": [
+        "כפיות טובה: פרעה ידע היטב מי היה יוסף, אך בחר להתעלם ולכפור בטובתו — שיא הבוגדנות והשחיתות.",
+        "משה והגדי: משה רץ אחרי גדי צמא שנמלט ונשא אותו על כתפיו ברחמים. אמר ה': מי שיודע לנהוג בחמלה כזו בצאן, ירעה את צאני ישראל.",
+        "כבד פה וכבד לשון: ה' בחר מנהיג שלא נשען על קסם רטורי חיצוני, אלא על תוכן של אמת צרופה."
+      ],
+      "life_app_en": "Stand up for the underdog. When you see someone in school being bullied or picked on, don't look away just because you are safe. True courage is speaking up for those who cannot defend themselves.",
+      "life_app_he": "לא לעמוד מנגד: משה היה בשיא הפריווילגיה כנסיך בארמון, ובכל זאת סיכן הכל כשרכש עזרה לעבד מוכה. כשיש חרם או הצקה בכיתה, תהיה זה שקם ומגן."
+    },
+    {
+      "id": "vaera",
+      "book": "shemot",
+      "name_en": "Va'era",
+      "name_he": "וארא",
+      "plot_en": [
+        "Hashem reveals His four-letter essential name (Havayah) and confirms the Covenant with the Patriarchs.",
+        "The 4 Expressions of Freedom: 'V'Hotzeiti, V'Hitzalti, V'Ga'alti, V'Lakachti' (foundation for the 4 cups of wine on Pesach).",
+        "Aaron's staff turns into a serpent and swallows the Egyptian magicians' staffs.",
+        "The first 7 Plagues strike Egypt: Blood (Dam), Frogs (Tzefardea), Lice (Kinim), Wild Beasts (Arov), Livestock Pestilence (Dever), Boils (Shechin), and Hail with Fire (Barad)."
+      ],
+      "plot_he": [
+        "ה' מתגלה בשמו המפורש ומאשר את שבועת הברית שכרת עם אברהם, יצחק ויעקב.",
+        "ארבע לשונות של גאולה: 'והוצאתי, והצלתי, וגאלתי, ולקחתי' (הבסיס לארבע כוסות של ליל הסדר).",
+        "מטה אהרן הופך לתנין ובולע את מטות חרטומי מצרים.",
+        "שבע המכות הראשונות: דם, צפרדע, כינים, ערוב, דבר, שחין, וברד שבתוכו אש מתלקחת."
+      ],
+      "key_topics_en": [
+        "<strong>The Four Expressions of Redemption:</strong> 'V'Hotzeiti, V'Hitzalti, V'Ga'alti, V'Lakachti' (I will bring out, rescue, redeem, and take as a people) — matching our 4 cups of wine.",
+        "<strong>Pharaoh's Hardened Heart:</strong> The psychological trap of arrogance; repeatedly ignoring moral warnings until one's heart becomes hardened by stubbornness.",
+        "<strong>The First 7 Plagues:</strong> Blood, Frogs, Lice, Wild Beasts, Pestilence, Boils, and Hail — dismantling Egypt's pantheon of nature deities step by step.",
+        "<strong>Aharon Strikes the Nile:</strong> Moshe could not strike the Nile because the water saved him as a baby, establishing the fundamental duty of gratitude ('Hakarat HaTov').",
+        "<strong>Fire Inside Ice:</strong> The miracle of Hail (Barad), where roaring fire and frozen ice coexisted in divine harmony to fulfill God's command.",
+        "<strong>Separation of Goshen:</strong> While Egypt was submerged in devastation, the Jewish province of Goshen experienced peace and light, proving Hashem's focused protection.",
+        "<strong>The Purpose of the Plagues:</strong> 'So that you shall know that I am Hashem in the midst of the earth' — teaching divine sovereignty and moral justice to all empires."
+      ],
+      "key_topics_he": [
+        "<strong>ארבע לשונות של גאולה:</strong> 'והוצאתי, והצלתי, וגאלתי, ולקחתי' — כנגדן תיקנו חכמים ארבע כוסות של יין בליל הסדר.",
+        "<strong>הכבדת לב פרעה:</strong> המלכודת הפסיכולוגית של הגאווה; התעלמות חוזרת מאזהרות מוסריות עד שהלב נאטם לחלוטין בעקשנותו.",
+        "<strong>שבע המכות הראשונות:</strong> דם, צפרדע, כינים, ערוב, דבר, שחין וברד — פירוק שיטתי של פולחן הטבע המצרי לעיני כל העולם.",
+        "<strong>אהרן מכה את היאור:</strong> משה לא היכה את היאור מפני שהמים הגנו עליו בתיבה — חינוך עמוק להכרת הטוב אפילו לדומם.",
+        "<strong>אש מתלקחת בתוך הברד:</strong> נס הברד שבו אש לוהטת וקרח קפוא שוכנים בשלום יחדיו כדי לקיים את רצון בוראם.",
+        "<strong>הבדלת ארץ גושן:</strong> מצרים שוקעת בחורבן ואילו במושבות ישראל בגושן שוררים שקט ואור — אות להשגחה מדויקת ומופלאה.",
+        "<strong>תכלית המכות והמוסר:</strong> 'למען תדע כי אני ה' בקרב הארץ' — לימוד שליטה מוחלטת של הבורא בבריאה ועשיית צדק עם עשוקים."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on Aaron's Rod: Aaron's *rod* swallowed their rods after turning back into dry wood — an extra miracle showing Egyptian black magic was completely inferior.",
+        "Midrash on Frogs: One courageous giant frog jumped into the Nile and called out, and all frogs followed straight into Pharaoh's hot ovens — dedication without fear.",
+        "Rashi on Goshen's Exemption: While Egypt was drowning in plagues, Goshen was bright, peaceful, and completely untouched."
+      ],
+      "rashi_midrash_he": [
+        "מטה אהרן בלע את מטותם: לאחר שחזר להיות עץ יבש בלע את כולם — נס בתוך נס להראות את אפסות הכשפים.",
+        "מסירות נפש של הצפרדעים: קפצו ישר לתוך התנורים הרותחים מתוך ציות לציווי.",
+        "הבדלה מוחלטת בארץ גושן: בכל מצרים חושך ומגפה, ובגושן אור שליו וללא שום פגע."
+      ],
+      "life_app_en": "Gratitude (Hakarat HaTov): Moshe didn't even hit the river mud because it once helped him. If you must show respect to dirt and water, how much more respect, gratitude, and thank-yous do you owe your parents and teachers!",
+      "life_app_he": "הכרת הטוב: משה רבנו לא מכה את היאור והעפר כי הגנו עליו. אם לאבנים ולמים צריך להכיר טובה, כמה תודה והערכה אנחנו חייבים להורים ולמורים שלנו בכל יום!"
+    },
+    {
+      "id": "bo",
+      "book": "shemot",
+      "name_en": "Bo",
+      "name_he": "בא",
+      "plot_en": [
+        "Final 3 Plagues: Locusts (Arbeh) devour remaining crops; Thick tangible Darkness (Choshech) paralyzes Egypt for 6 days.",
+        "First National Mitzvah: Rosh Chodesh (New Moon lunar calendar); taking a lamb on the 10th of Nisan and inspecting it.",
+        "Tenth Plague: Plague of the Firstborn (Makat Bechorot) strikes at midnight; cry across Egypt; Pharaoh runs through streets begging Moshe to leave.",
+        "Exodus of 600,000 men plus families; Matzah baked in haste because dough had no time to rise; Mitzvah of Tefillin commanded."
+      ],
+      "plot_he": [
+        "שלוש המכות האחרונות: ארבה המכסה את עין הארץ; חושך כבד ואפל המשליך קיפאון על מצרים במשך 6 ימים.",
+        "המצווה הראשונה של עם ישראל: קידוש החודש על פי מולד הלבנה; לקיחת שה ב-י' בניסן וקשירתו למיטה.",
+        "מכת בכורות בחצות הלילה; זעקה גדולה בכל ארץ מצרים; פרעה מתחנן למשה בלילה שייצאו מיד.",
+        "יציאת 600 אלף גברים מלבד נשים וטף; אפיית מצות בחיפזון כי לא הספיק הבצק להחמיץ; ציווי מצוות תפילין."
+      ],
+      "key_topics_en": [
+        "<strong>The Final Three Plagues:</strong> Locusts devouring crops, palpable Darkness paralyzing Egypt, and the striking of the Egyptian Firstborn at midnight.",
+        "<strong>Rosh Chodesh (The First National Mitzvah):</strong> Sanctifying the new moon; teaching that time belongs to us, and Jews renew themselves like the moon.",
+        "<strong>The Korban Pesach:</strong> Taking the lamb (worshipped by Egyptians), tying it to the bedposts, and slaughtering it publicly with fearless conviction.",
+        "<strong>Blood on the Doorposts:</strong> Placing blood on the lintel and posts as an outer sign of commitment to the covenant, protecting the home within.",
+        "<strong>Midnight Exodus:</strong> Six hundred thousand men plus families marching out in broad daylight with dignity, leaving no straggler behind.",
+        "<strong>Matzah & Speed of Redemption:</strong> Dough baked on their backs before it could rise, symbolizing the urgency of divine liberation and humble gratitude.",
+        "<strong>The Mitzvah of Tefillin:</strong> Commemorating the mighty outstretched arm of Hashem with black leather boxes bound on the head and heart forever."
+      ],
+      "key_topics_he": [
+        "<strong>שלוש המכות האחרונות:</strong> ארבה המכסה את עין הארץ, חושך סמיך ומוחשי המשתק את מצרים, ומכת בכורות המדויקת בחצות הלילה.",
+        "<strong>קידוש החודש (מצווה ראשונה):</strong> המצווה הלאומית הראשונה לעם ישראל; בעלות על הזמן והיכולת להתחדש ולהאיר מחדש כמו הלבנה.",
+        "<strong>קרבן פסח ואומץ האמונה:</strong> לקיחת השה (אליל מצרים), קשירתו למיטה ושחיטתו בגלוי מתוך שחרור מוחלט מפחד העבדות.",
+        "<strong>דם הברית על המשקוף:</strong> סימון המזוזות והמשקוף בדם כהצהרת נאמנות אישית ומשפחתית המגנה על הבית מן המשחית.",
+        "<strong>יציאת מצרים בחצות:</strong> שש מאות אלף רגלי יוצאים ביד רמה, לא כגנבים הנמלטים בחשאי אלא כבני חורין גאים ומרוממים.",
+        "<strong>מצות החירות והענווה:</strong> בצק שנאפה במהירות על גבם טרם החמיץ, לחם עוני שמסמל את המהירות האלוקית וענווה מפני גאווה.",
+        "<strong>מצוות תפילין לדורות:</strong> זכר ליד החזקה ולזרוע הנטויה; הנחת בתים שחורים על הראש והלב בכל יום כדי לחברנו לעולם לברית החירות."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on the Darkness: For 3 days no one could see; for the next 3 days the darkness was so thick no one could stand up or move from their chair.",
+        "Midrash on Egyptian Gold: During the darkness, Jews entered Egyptian homes not to steal, but to politely note locations of valuables they later borrowed honestly.",
+        "Rashi on Pharaoh in Pajamas: Pharaoh ran through the alleys of Goshen at midnight shouting: 'Where does Moshe live? Go, leave my people!'"
+      ],
+      "rashi_midrash_he": [
+        "חושך שניתן למששו: שלושה ימים ראשונים לא ראה איש את אחיו; שלושה ימים נוספים לא קם איש מתחתיו מרוב כובד החושך.",
+        "יושר בעיצומו של חושך: ישראל נכנסו לבתי המצרים בחושך ויכלו לבזוז הכל, אך לא נגעו בדבר כדי לקדש שם שמים.",
+        "פרעה בפיג'מה: פרעה רץ בעצמו בלילה בין בתי גושן וזעק: איפה גר משה? קומו צאו מתוך עמי!"
+      ],
+      "life_app_en": "Ego vs. Humble confidence: Chometz blows itself up with hot air and breaks easily. Matzah stays solid and doesn't fake anything. Be real — you don't need to put on a fake boastful persona to be cool.",
+      "life_app_he": "אגו מול ביטחון אמיתי: החמץ מתנפח מאוויר חם ונשבר ברגע. המצה אמיתית, פשוטה וחזקה. אל תנסה להרשים עם 'פוזות' מזויפות — אותנטיות פנימית היא הכוח האמיתי."
+    },
+    {
+      "id": "beshalach",
+      "book": "shemot",
+      "name_en": "Beshalach",
+      "name_he": "בשלח",
+      "plot_en": [
+        "Pharaoh regrets letting the people go; pursues with 600 elite chariots; Jews trapped between the stormy Sea and Egyptian army.",
+        "Nachshon ben Aminadav jumps into the raging waters first; Hashem splits the Sea of Reeds; Israel walks on dry seabed.",
+        "Egyptians pursue and are swept away by the returning walls of water; Moshe and Israel sing the epic 'Shirat HaYam' (Song of the Sea).",
+        "Bitter waters of Marah sweetened by a tree; Manna (heavenly bread) falls daily with a double portion on Friday; battle with Amalek."
+      ],
+      "plot_he": [
+        "פרעה מתחרט על שילוח העם ורודף עם 600 רכב בחור; בני ישראל לכודים בין הים הסוער לצבא מצרים.",
+        "נחשון בן עמינדב קופץ ראשון למים הסוערים באמונה; הים נבקע ליבשה ובני ישראל עוברים בתוכו.",
+        "צבא מצרים טובע במי הים החוזרים; משה ובני ישראל שרים את 'שירת הים' הנצחית; מרים מובילה את תופי הנשים.",
+        "מי מרה המרים מומתקים בעץ; ירידת המן מן השמים עם 'לחם משנה' בערב שבת; מלחמת עמלק ברפידים."
+      ],
+      "key_topics_en": [
+        "<strong>The Longer Scenic Route:</strong> Hashem did not lead them along the short coastal road through the Philistines so they wouldn't panic and return to slavery; personal growth takes patience.",
+        "<strong>Pillar of Cloud & Fire:</strong> Divine escort leading the nation with a cloud by day and a beacon of fire by night through the wilderness.",
+        "<strong>Splitting of the Red Sea:</strong> Trapped between Pharaoh's chariots and the raging sea, Nachshon ben Aminadav stepped in up to his nose before the waters miraculously parted.",
+        "<strong>Shirat HaYam (Song of the Sea):</strong> The joyful spontaneous anthem chanted by Moshe and the men, followed by Miriam leading the women with timbrels and dancing.",
+        "<strong>Manna from Heaven:</strong> Fresh heavenly dew providing daily sustenance, teaching reliance on Hashem and training the nation to keep the holy Shabbat.",
+        "<strong>Water from the Rock:</strong> Hashem commanding Moshe to strike the rock at Chorev to bring forth fresh water for the thirsty multitude.",
+        "<strong>The Battle of Amalek:</strong> Amalek attacking the weak stragglers from behind; Moshe raising his hands to heaven in prayer while Yehoshua led the soldiers."
+      ],
+      "key_topics_he": [
+        "<strong>הדרך הארוכה שהיא קצרה:</strong> 'ולא נחם אלוהים דרך ארץ פלשתים כי קרוב הוא פן ינחם העם' — תהליך של צמיחה אישית דורש סבלנות ולא קיצורי דרך.",
+        "<strong>עמוד ענן ועמוד אש:</strong> ליווי והגנה שמימיים של עמוד ענן ביום להתוות את הדרך ועמוד אש בלילה להאיר את החושך.",
+        "<strong>קריעת ים סוף וקפיצת נחשון:</strong> המצרים מאחור והים מלפנים; נחשון בן עמינדב קופץ למים עד צווארו מתוך אמונה, ורק אז נבקע הים לגזרים.",
+        "<strong>שירת הים ותופי מרים:</strong> שיר הודיה נבואי וסוחף של משה ובני ישראל, ומרים הנביאה המובילה את הנשים בתופים ובמחולות של ביטחון.",
+        "<strong>המן מן השמים ולחם משנה:</strong> מזון רוחני יומי המלמד פרנסה באמונה, ומנת כפולה ביום שישי המחנכת ומקדשת את יום השבת.",
+        "<strong>הוצאת מים מן הצור:</strong> משה מכה על הצור בחורב ומוציא פלגי מים חיים להשקות את העם הצמא במדבר.",
+        "<strong>מלחמת עמלק וכוח התפילה:</strong> עמלק תוקף מאחור את הנחשלים; יהושע יוצא לקרב ומשה מרים ידיו לשמים — כשישראל מביטים למעלה הם מנצחים."
+      ],
+      "rashi_midrash_en": [
+        "Midrash on Nachshon: The waters reached up to Nachshon's nostrils before the sea suddenly split wide open.",
+        "Rashi on Shirat HaYam: Even the simplest maidservant at the splitting of the sea experienced a clearer prophetic vision than the great prophet Ezekiel.",
+        "Rashi on Double Manna: On Friday, double portion fell for Shabbat without any effort, teaching that Shabbat observance never costs you income."
+      ],
+      "rashi_midrash_he": [
+        "נחשון עד חוטמו: המים הגיעו עד נחיריו ורק אז נבקע הים — גבול האמונה והמסירות.",
+        "ראתה שפחה על הים: חזון הנבואה והבהירות הרוחנית בקריעת ים סוף היה גדול מנבואת יחזקאל בן בוזי.",
+        "לחם משנה בשבת: ביום שישי ירד מן כפול ולא התקלקל בשבת — עדות לכך ששמירת שבת אינה מביאה הפסד."
+      ],
+      "life_app_en": "Be the leader who jumps first. When everyone in a group is paralyzed by fear, hesitation, or peer pressure, be the Nachshon who takes the first step into action.",
+      "life_app_he": "תהיה נחשון: כשיש בלבול או היסוס ואף אחד לא מעז לדבר או לפעול למען מטרה טובה, תהיה זה שקופץ ראשון ומזיז את כולם קדימה."
+    },
+    {
+      "id": "yitro",
+      "book": "shemot",
+      "name_en": "Yitro",
+      "name_he": "יתרו",
+      "plot_en": [
+        "Yitro, high priest of Midian and Moshe's father-in-law, hears of the Exodus and arrives at the camp with Tzipporah and Moshe's sons.",
+        "Yitro observes Moshe judging the entire people from morning to night; warns him of burnout and advises establishing a hierarchy of judges (heads of thousands, hundreds, fifties, tens).",
+        "Israel camps at Mount Sinai 'as one person with one heart' (K'Ish Echad B'Lev Echad).",
+        "Thunder, lightning, heavy cloud, and the blast of the Shofar; Hashem descends in fire; proclaims the Ten Commandments (Aseret HaDibrot)."
+      ],
+      "plot_he": [
+        "יתרו, כוהן מדין וחותן משה, שומע על נסי קריעת ים סוף ומלחמת עמלק, ומגיע למדבר עם אשת משה ובניו.",
+        "יתרו רואה את משה שופט את כל העם לבדו מהבוקר עד הערב; מזהיר משחיקה ומציע מינוי שרי אלפים, מאות, חמישים ועשרות.",
+        "חניית ישראל מול הר סיני 'כאיש אחד בלב אחד' — שיא האחדות הלאומית.",
+        "קולות, ברקים, ענן כבד וקול שופר חזק מאוד; ה' יורד באש על הר סיני ומשמיע את עשרת הדיברות."
+      ],
+      "key_topics_en": [
+        "<strong>Yitro's Organizational Wisdom:</strong> Moshe's father-in-law advised him not to wear himself out alone, creating a decentralized court system of thousands, hundreds, and tens.",
+        "<strong>Preparation at Mount Sinai:</strong> Three days of sanctification and boundary-setting around the mountain; spiritual elevation requires mental preparation.",
+        "<strong>Thunder, Lightning, & Shofar:</strong> The dramatic sensory revelation at Mount Sinai; lightning flashing and the sound of the Shofar growing louder and stronger.",
+        "<strong>'Na'aseh V'Nishma' (We Will Do & We Will Understand):</strong> The supreme declaration of trust, committing to action and integrity before fully grasping every philosophical nuance.",
+        "<strong>The First Tablet (Between Man & God):</strong> Belief in God, forbidding idolatry, not taking God's name in vain, remembering Shabbat, and honoring father and mother.",
+        "<strong>The Second Tablet (Between Man & Fellow):</strong> Do not murder, do not commit adultery, do not steal (kidnap), do not bear false witness, and do not covet.",
+        "<strong>Kingdom of Priests:</strong> 'And you shall be to Me a kingdom of priests and a holy nation' — our eternal mission to elevate this physical world."
+      ],
+      "key_topics_he": [
+        "<strong>עצת יתרו וביזור סמכויות:</strong> חותן משה מייעץ לו לא לשאת את המשא לבדו, ומקים מערך שופטים מסודר של שרי אלפים, מאות, חמישים ועשרות.",
+        "<strong>שלושת ימי הגבלה וטהרה:</strong> הכנה רגשית ומחשבתית סביב הר סיני; כל עלייה רוחנית ומוסרית דורשת היערכות מוקדמת וריכוז.",
+        "<strong>קולות, ברקים ושופר חזק:</strong> מעמד הר סיני המרטיט שבו ראו את הקולות, להבות אש וקול שופר הולך וחזק מאוד המעורר את הלב.",
+        "<strong>'נעשה ונשמע':</strong> הצהרת האמון והברית העילאית של עם ישראל; הקדמת המעשה, המחויבות והנאמנות עוד לפני ההבנה השכלית המלאה.",
+        "<strong>הלוח הראשון (בין אדם למקום):</strong> אנוכי ה', לא יהיה לך, לא תשא שם ה' לשווא, זכור את יום השבת, וכבד את אביך ואת אמך המחברת להכרת הטוב.",
+        "<strong>הלוח השני (בין אדם לחברו):</strong> לא תרצח, לא תנאף, לא תגנוב (חטיפת אדם), לא תענה ברעך עד שקר, ולא תחמוד רכוש חברך.",
+        "<strong>ממלכת כהנים וגוי קדוש:</strong> ייעודו הנצחי של העם היהודי — להוות חברת מופת מוסרית המרוממת ומקדשת את המציאות כולה."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on Sinai: Why did God choose tiny Mount Sinai? To teach that Hashem rests His presence only on humility, not proud towering mountains.",
+        "Midrash on the Voice: The voice of the Ten Commandments reached every person individually according to their unique capacity.",
+        "Rashi on Birds & Waves: When the Ten Commandments were spoken, not a bird chirped, no ox lowed, the sea ceased its waves — total cosmic silence."
+      ],
+      "rashi_midrash_he": [
+        "ענוות הר סיני: כל ההרים הגבוהים התפארו, אך ה' בחר בהר סיני הנמוך מכולם ללמד שהשכינה שורה אצל ענווים.",
+        "קול לפי כוחו: הדיבור האלוקי פנה לכל אדם ואדם לפי כוח קליטתו והבנתו.",
+        "דממת הבריאה: צפור לא צייץ, עוף לא פרח, גל לא המה — כל היקום עצר נשימתו בשעת מתן תורה."
+      ],
+      "life_app_en": "Managing jealousy (Don't Covet): Someone else's success, cool sneakers, or followers on Instagram takes nothing away from your own unique path. Celebrate their wins and focus on your mission.",
+      "life_app_he": "להפסיק לקנא באחרים: ההצלחה של החבר שלך לא באה על חשבונך. לכל אחד יש מסלול ייעודי בעולם. תפרגן לו ותשקיע בלפתח את החיים שלך."
+    },
+    {
+      "id": "mishpatim",
+      "book": "shemot",
+      "name_en": "Mishpatim",
+      "name_he": "משפטים",
+      "plot_en": [
+        "Immediately following Mount Sinai, 53 detailed civil and criminal laws are given.",
+        "Laws of the Hebrew Servant (Eved Ivri); protection for bodily injury, property damage, and pit safety.",
+        "Four categories of damages: Ox, Pit, Fire, Grazing; strict penalties for thieves, predatory lenders, and bribe-takers.",
+        "Commandments to protect the widow, orphan, and stranger; Three Pilgrimage Festivals (Pesach, Shavuot, Sukkot); the nation declares: 'Na'aseh V'Nishma' (We will do and we will understand)."
+      ],
+      "plot_he": [
+        "מיד לאחר מעמד סיני הנשגב, ניתנים 53 משפטים אזרחיים, פליליים וחברתיים מפורטים.",
+        "דיני עבד עברי ושחרורו בשנה השביעית; פיצויים על נזקי גוף (נזק, צער, ריפוי, שבת, בושת).",
+        "ארבעה אבות נזיקין: השור, הבור, המבעה וההבער; איסור ריבית, שוחד והטיית משפט.",
+        "הגנה קפדנית על הגר, היתום והאלמנה; שלוש רגלים; העם מכריז בברית דם: 'נעשה ונשמע'."
+      ],
+      "key_topics_en": [
+        "<strong>Civil Law as Holy Torah:</strong> Immediately following Sinai, Torah details property damage, employee rights, and honesty in business; holiness is found in the marketplace.",
+        "<strong>The Hebrew Servant:</strong> Extreme protections for laborers; if an owner harms an employee's tooth or eye, the worker goes free immediately.",
+        "<strong>The Four Categories of Damages:</strong> Shor (Ox), Bor (Pit), Mav'eh (Tooth/Grazing), and He'ver (Fire); taking full legal and financial responsibility for what you own.",
+        "<strong>Defending the Vulnerable:</strong> Fierce prohibitions against oppressing the widow, orphan, or stranger: 'For you were strangers in the land of Egypt.'",
+        "<strong>Returning Lost Property:</strong> Even if you see the donkey of your bitter enemy collapsing under its load, you are commanded to help unpack and lift it.",
+        "<strong>Judicial Integrity:</strong> Forbidding bribery ('for a bribe blinds the eyes of the wise') and rejecting following a corrupt majority to pervert justice.",
+        "<strong>Sealing the Covenant:</strong> Moshe sprinkles the blood of the covenant, reads the Sefer HaBrit, and the people shout: 'All that Hashem has spoken we will do and hear!'"
+      ],
+      "key_topics_he": [
+        "<strong>משפט אזרחי כקודש קודשים:</strong> מיד לאחר עשרת הדיברות התורה מפרטת דיני נזיקין, פועלים ומסחר; הקדושה האמיתית נמדדת בהגינות בשוק.",
+        "<strong>עבד עברי וזכויות עובדים:</strong> חוקים מהפכניים המגבילים עבדות, מעניקים תנאים סוציאליים ומשחררים לחופשי עובד שנפגע בשינו או בעין.",
+        "<strong>ארבעה אבות נזיקין:</strong> שור, בור, מבעה והבער; לקיחת אחריות ממונית ומוסרית מלאה על נזק שגרמת או שרכושך הזיק לזולת.",
+        "<strong>הגנה על החלש בחברה:</strong> איסור חמור על הונאת הגר, היתום והאלמנה: 'כי גרים הייתם בארץ מצרים' — חברה נמדדת ביחסה לחלשים ביותר.",
+        "<strong>עזרה לשונא (פריקה וטעינה):</strong> 'כי תראה חמור שונאך רובץ תחת משאו... עזוב תעזוב עמו' — התגברות על יריבות אישית לטובת חסד וחמלה.",
+        "<strong>טוהר המשפט ואיסור שוחד:</strong> 'כי השוחד יעוור עיני פקחים' ואיסור נטיית משפט אחרי רבים לרעות — עמידה עיקשת על האמת ללא משוא פנים.",
+        "<strong>כריתת ברית ספר הברית:</strong> משה קורא את ספר הברית באוזני העם, המכריז פה אחד בקול גדול: 'כל אשר דיבר ה' נעשה ונשמע!'."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on 'And these are the judgments': Just as the Ten Commandments were given from Sinai, so too these detailed civil laws were given from Sinai.",
+        "Midrash on the Pit: If someone digs a hole in a public street, even on their own property, they are 100% financially liable for any injury it causes.",
+        "Rashi on 2 Crowns: When Israel said 'Na'aseh V'Nishma', 600,000 angels descended and placed two crowns on every single Jew's head."
+      ],
+      "rashi_midrash_he": [
+        "מה הראשונים מסיני אף אלו מסיני: דיני ממונות קדושים ומחייבים בדיוק כמו עשרת הדיברות.",
+        "אחריות על נזק ברשות הרבים: מי שפותח בור או זורק קליפה ברחוב אחראי ישירות לכל פציעה שתיגרם.",
+        "שני כתרים: כשקראו 'נעשה ונשמע', ירדו 600 אלף מלאכים וקשרו שני כתרים לראשו של כל יהודי."
+      ],
+      "life_app_en": "Honesty in school & business: Anyone can act religious or moral in a synagogue. Your real character is proven by not cheating on a test, not copying someone's homework, and owning up if you break someone's gear.",
+      "life_app_he": "הגינות במבחן ובמשחק: קל להיראות ילד טוב כשכולם מסתכלים. המבחן האמיתי הוא כשאתה לא מעתיק במבחן, לא מרמה במשחק מחשב, ומודה כששברת בטעות משהו של חבר."
+    },
+    {
+      "id": "terumah",
+      "book": "shemot",
+      "name_en": "Terumah",
+      "name_he": "תרומה",
+      "plot_en": [
+        "Hashem commands Moshe: 'Take for Me an offering from every person whose heart inspires him to give.'",
+        "15 construction materials gathered: Gold, silver, copper, blue/purple/scarlet wool, linen, goat hair, rams' skins, acacia wood, oil, spices, and precious stones.",
+        "The Blueprint of the Holy Ark (Aron) holding the Tablets, topped with the Golden Cherubs (Keruvim).",
+        "The Table of Showbread (Shulchan), the Pure Gold Menorah beaten from a single block of gold, the Altar (Mizbe'ach), and the Courtyard partitions."
+      ],
+      "plot_he": [
+        "ה' מצווה את משה: 'דבר אל בני ישראל ויקחו לי תרומה, מאת כל איש אשר ידבנו לבו'.",
+        "איסוף 15 חומרי בנייה: זהב, כסף, נחושת, תכלת, ארגמן, תולעת שני, שש, עצי שיטים, שמן למאור ואבני שוהם.",
+        "מפרט ארון הברית המצופה זהב מבית ומחוץ ובו לוחות הברית, ועליו הכפורת עם הכרובים.",
+        "שולחן לחם הפנים, מנורת הזהב הטהורה מקשה אחת, מזבח הנחושת, וחצר המשכן."
+      ],
+      "key_topics_en": [
+        "<strong>'Make Me a Sanctuary That I May Dwell in Them':</strong> The Midrash emphasizes God dwells inside each person ('in them'), not merely within physical cedar walls.",
+        "<strong>The Generosity of the Heart:</strong> Contributions collected 'from every person whose heart moves him to give' — authentic charity comes from voluntary inner desire.",
+        "<strong>The Holy Ark (Aron HaKodesh):</strong> Three nesting boxes (gold inside, acacia wood, gold outside), teaching that a person's inner private character must match their outer public appearance.",
+        "<strong>The Keruvim (Cherubim):</strong> Two golden child-faced angels atop the Ark facing each other with spread wings, representing loving connection between God and His people.",
+        "<strong>The Golden Menorah:</strong> Hammered from a single solid 100-pound ingot of pure gold with 7 glowing branches, symbolizing divine wisdom and illumination.",
+        "<strong>The Table of Showbread (Shulchan):</strong> Holding 12 fresh loaves of bread every week, representing financial blessing, physical sustenance, and hospitality.",
+        "<strong>Mishkan Tapestries & Courtyard:</strong> Silver sockets, copper pegs, and dyed wool curtains creating a portable temple moving with the people across the desert."
+      ],
+      "key_topics_he": [
+        "<strong>'ועשו לי מקדש ושכנתי בתוכם':</strong> הדגש הוא בתוכם — בתוך הלב של כל אדם ואדם, ולא רק בין כתלי עצי שיטים וזהב.",
+        "<strong>נדבת הלב והנתינה:</strong> תרומת המשכן נאספת 'מאת כל איש אשר ידבנו לבו' — ערכו של מעשה טוב נמדד לפי הרצון, השמחה והכוונה הטהורה שבלב.",
+        "<strong>ארון הברית (תוך כברו):</strong> שלושה ארונות זהב, עץ וזהב — סמל לאדם שתורתו בקרבו: פנימיותו חייבת להיות טהורה בדיוק כפי שהיא נראית בחוץ.",
+        "<strong>הכרובים ופני הילד:</strong> שני כרובים מזהב טהור בעלי פני תינוק פורשים כנפיים זה מול זה — סמל לאהבה, טוהר וקרבה בין הקב״ה לישראל.",
+        "<strong>המנורה הטהורה מקשה אחת:</strong> מנורת שבעת הקנים עשויה כולה מגוש זהב אחד במשקל כיכר — סמל לאחדות החכמה, המדע והרוח הנובעים ממקור אחד.",
+        "<strong>שולחן לחם הפנים:</strong> שולחן הזהב שעליו 12 חלות חמות בכל שבוע — סמל לברכת הפרנסה, השפע הכלכלי והכנסת האורחים המקודשת.",
+        "<strong>יריעות וחצר המשכן:</strong> אדני כסף, יתדות נחושת ויריעות תכלת וארגמן — בית מקדש נייד המלווה את העם במסעותיו ומשרה קדושה בכל תחנה."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on Acacia Wood (Azei Shittim): Where did they get wood in a desert? Jacob planted cedars in Egypt before he died, prophesying they would need them for the Mishkan.",
+        "Rashi on the Menorah: Moshe found the detailed construction of the Menorah difficult, so Hashem showed him a vision of a flaming menorah and said: 'Throw the gold into the fire and it will form itself.'",
+        "Midrash on the Poles: The carrying poles of the Ark were never allowed to be removed, showing that the Torah must always be ready to travel with us anywhere."
+      ],
+      "rashi_midrash_he": [
+        "עצי שיטים: מנין היו להם במדבר? יעקב אבינו נטע ארזים במצרים וציווה שיוציאו אותם עמם לבניית המשכן.",
+        "מנורת מקשה: נתקשה משה במעשה המנורה עד שהראה לו הקב״ה מנורה של אש ואמר לו: השלך את הזהב לאש ותצא המנורה מעצמה.",
+        "בדי הארון: לא יסורו ממנו לעולם — התורה תמיד מוכנה ללוות אותנו בכל מסע וגלות."
+      ],
+      "life_app_en": "Inside vs. Outside ('Tocho K'Varo'): Be the same person on your screen, in the locker room, and at family dinners. Don't be shiny gold on the outside and hollow plastic on the inside.",
+      "life_app_he": "תוכו כברו: תהיה אותו אדם ישר גם כשאתה ברשת, גם במגרש וגם עם ההורים. אל תציג מסכה נוצצת מבחוץ כשבפנים אתה מזלזל."
+    },
+    {
+      "id": "tetzaveh",
+      "book": "shemot",
+      "name_en": "Tetzaveh",
+      "name_he": "תצווה",
+      "plot_en": [
+        "Commandment to take pure crushed olive oil to kindle the Menorah as an eternal flame (Ner Tamid).",
+        "Moshe is commanded to appoint Aaron and his sons as Kohanim (Priests).",
+        "Creation of the 8 Holy Vestments for the Kohen Gadol (High Priest): Breastplate (Choshen), Apron (Efod), Robe (Me'il) with bells and pomegranates, Tunic (Ketonet), Turban (Mitznefet), Golden Crown (Tzitz), Belt (Avnet), and Pants (Michnasayim).",
+        "The 7-day consecration of the priests (Miluim) and the Golden Incense Altar (Mizbach HaKetoret)."
+      ],
+      "plot_he": [
+        "ציווי על הבאת שמן זית זך כתית למאור להעלות נר תמיד במנורה.",
+        "מינוי אהרן ובניו לכהנים משרתי הקודש.",
+        "יצירת שמונת בגדי הכהן הגדול: חושן משפט, אפוד, מעיל עם פעמוני זהב ורימונים, כתונת תשבץ, מצנפת, ציץ זהב ('קודש לה''), אבנט ומכנסי בד.",
+        "שבעת ימי המילואים לחנוכת הכוהנים ומזבח הקטורת מזהב."
+      ],
+      "key_topics_en": [
+        "<strong>Pure Pressed Olive Oil:</strong> Crushed not for food, but beaten for the light ('Katit LaMa'or'); like an olive, a Jew produces their brightest spiritual light under pressure.",
+        "<strong>Moshe's Self-Effacing Love:</strong> Moshe's name is not mentioned once in the parsha, because he told God: 'Erase me from Your book' to save the nation after the Golden Calf.",
+        "<strong>The Eight Priestly Vestments:</strong> Designed 'for honor and for beauty' (L'Chavod U'L'Tiferet), elevating the service of Aharon and his sons.",
+        "<strong>The Choshen (Breastplate of 12 Jewels):</strong> Resting upon Aharon's heart bearing the names of the 12 tribes, ensuring a leader carries every single person in his heart.",
+        "<strong>The Golden Bells & Pomegranates:</strong> Ringing along the hem of the robe, teaching that one should never enter another person's space or home abruptly without announcing.",
+        "<strong>The Tzitz (Golden Crown):</strong> Inscribed with 'Kodesh LaHashem' (Holy to God) resting upon the High Priest's forehead, rectifying arrogance and impure thoughts.",
+        "<strong>The Incense Altar (Mizbe'ach HaKetoret):</strong> Offering sweet fragrant spices twice daily inside the sanctuary, symbolizing sweet, quiet, intimate devotion to Hashem."
+      ],
+      "key_topics_he": [
+        "<strong>שמן זית זך כתית למאור:</strong> הזית נכתש עד דק כדי להוציא את שמנו הצלול ביותר; כמוהו נשמת היהודי מוציאה את אורה המופלא ביותר ברגעי מבחן.",
+        "<strong>היעדר שם משה ומסירותו:</strong> שמו של משה אינו מופיע בפרשה, מפני שאמר לה' 'מחני נא מספרך אשר כתבת' כדי להציל את עמו לאחר חטא העגל.",
+        "<strong>שמונה בגדי כהונה לכבוד ולתפארת:</strong> בגדים מרוממים המעניקים חגיגיות וכבוד לבית המקדש ולמשרתי הקודש בבית ה'.",
+        "<strong>חושן המשפט על הלב:</strong> 12 אבנים יקרות על לוח ליבו של אהרן הנושאות את שמות השבטים — מנהיג אמיתי נושא את כל עמו תמיד על לוח ליבו.",
+        "<strong>פעמוני זהב ורימונים:</strong> קול הפעמונים בשולי המעיל מלמד נימוס ודרך ארץ: אין להיכנס לביתו או לחדרו של אדם ללא נקישה והודעה מראש.",
+        "<strong>הציץ על המצח:</strong> טס זהב טהור הנושא את הכתובת 'קודש לה'' — לכפר על עזות פנים ומחשבות גאווה ולקדש את המחשבה.",
+        "<strong>מזבח הקטורת הפנימי:</strong> העלאת סממני קטורת ריחניים בכל בוקר וערב — עבודה שקטה, פנימית ומלאת אהבה הנעשית ללא קול ורעש."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on Olive Oil: 'Crushed for light, not for flour' — when olives are crushed and pressed, they yield the purest, cleanest light.",
+        "Midrash on Aaron's Joy: Aaron was not jealous of younger brother Moshe's leadership; he ran to greet him with pure joy, earning the privilege of wearing the Choshen on his heart.",
+        "Rashi on the Tzitz: The golden forehead headband bore the inscription 'Kodesh LaHashem' (Holy to God) and atoned for brazen arrogance."
+      ],
+      "rashi_midrash_he": [
+        "כתית למאור: כותש את הזית ומפיק ממנו שמן זך ביותר — מתוך קושי ומאמץ פורצת העוצמה הגדולה ביותר.",
+        "שמחת אהרן במשה: אהרן לא קינא באחיו הצעיר אלא שמח בליבו במינויו, ולכן זכה לשאת את אבני החושן על ליבו הטהור.",
+        "הציץ: לוח זהב על המצח ובו חקוק 'קודש לה'' — מכפר על עזות פנים וחוצפה."
+      ],
+      "life_app_en": "Respecting boundaries & manners: Even the High Priest had bells on his coat so people heard him coming. Always knock before opening a closed door, and don't snoop in someone's private messages or bag.",
+      "life_app_he": "דרך ארץ קודמת לתורה: פעמוני הזהב של הכהן השמיעו קול כדי לא להפתיע אף אחד. לעולם אל תיכנס לחדר בלי לדפוק, ואל תציץ בטלפון או בתיק של מישהו אחר."
+    },
+    {
+      "id": "ki_tisa",
+      "book": "shemot",
+      "name_en": "Ki Tisa",
+      "name_he": "כי תשא",
+      "plot_en": [
+        "Census through the Half-Shekel (Machatzit HaShekel) coin; the Copper Laver (Kiyor); Shabbat rest reiteration.",
+        "Moshe delays returning from Mount Sinai by a few hours; the mixed multitude panics and creates the Golden Calf (Egel HaZahav).",
+        "Hashem intends to destroy the nation; Moshe intercedes with fiery prayer; descends the mountain, sees the calf, and shatters the Two Tablets.",
+        "Moshe grinds the calf into dust; Tribe of Levi rallies to Moshe's call ('Mi LaHashem Elay!'); Moshe ascends Sinai again; Hashem reveals the 13 Attributes of Mercy; Moshe carves the Second Tablets."
+      ],
+      "plot_he": [
+        "מפקד העם באמצעות מחצית השקל; כיור הנחושת לרחיצת כהנים; ציווי השבת כברית אות עולם.",
+        "משה מתעכב שעות ספורות בירידתו מההר; אספסוף העם נכנס לפאניקה ויוצר את עגל הזהב.",
+        "ה' מבקש לכלות את העם; משה נלחם בתפילה עזה, יורד מההר, רואה את המחולות ושובר את לוחות הברית.",
+        "משה שורף את העגל; שבט לוי מתייצב בקריאת 'מי לה' אליי!'; משה עולה שוב לסלוח; גילוי י״ג מידות הרחמים וכתיבת הלוחות השניים."
+      ],
+      "key_topics_en": [
+        "<strong>Machatzit HaShekel (The Half Shekel):</strong> Every Jew rich or poor gives exactly half a shekel, teaching humility: no single person is complete without his fellow.",
+        "<strong>The Copper Laver (Kiyor):</strong> Crafted from mirrors donated by the righteous women of Egypt who used them to inspire hope during slavery.",
+        "<strong>Shabbat Before Sanctuary:</strong> Even the sacred construction of the Mishkan must halt for Shabbat; human creativity stops before the Creator of the universe.",
+        "<strong>The Sin of the Golden Calf:</strong> Impatience during Moshe's 40-day absence led to seeking a tangible physical idol, resulting in the smashing of the two tablets.",
+        "<strong>Moshe's Fierce Advocacy:</strong> Refusing Hashem's offer to make Moshe the father of a new nation; boldly standing in the breach to plead for his people's survival.",
+        "<strong>The 13 Attributes of Mercy:</strong> Hashem revealing the eternal formula of forgiveness: 'Hashem, Hashem, God, merciful and gracious, slow to anger...'",
+        "<strong>The Second Tablets & Glowing Face:</strong> Moshe descending on Yom Kippur with second tablets carved by human hands; his countenance radiating holy beams of light."
+      ],
+      "key_topics_he": [
+        "<strong>מחצית השקל והשוויון:</strong> עשיר לא ירבה ודל לא ימעיט ממחצית השקל — שיעור בענווה שכל יחיד הוא רק חצי, ושלמות מושגת רק יחד.",
+        "<strong>כיור הנחושת ומראות הצובאות:</strong> הכיור נוצר ממראות הנחושת שנתרמו על ידי נשות ישראל הצדקניות, שעודדו את הבעלים באמונה בשעבוד מצרים.",
+        "<strong>שבת מעל בניין המקדש:</strong> הציווי על השבת מקדים את עבודת המשכן, להורות שקדושת הזמן והשביתה קודמים לכל יצירה אנושית בעולם.",
+        "<strong>חטא העגל ושבירת הלוחות:</strong> קוצר רוח וחרדה בהיעדרו של משה הולידו צורך בפסל מוחשי; משה שובר את הלוחות מול העבודה הזרה.",
+        "<strong>מנהיגותו הבלתי מתפשרת של משה:</strong> משה מסרב להצעה להקים ממנו עם חדש, ומשליך את כל עתידו בהגנה ובסנגוריה אמיצה על ישראל.",
+        "<strong>י״ג מידות הרחמים:</strong> ה' מגלה למשה את נוסחת הסליחה והחסד הנצחית: 'ה' ה' אל רחום וחנון ארך אפים ורב חסד ואמת...'.",
+        "<strong>הלוחות השניים וקרני ההוד:</strong> משה יורד ביום הכיפורים עם לוחות שניים שפסל בעצמו, כשפניו קורנות באור אלוקי מופלא של קדושה."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on the Half-Shekel: Hashem showed Moshe a coin of fire taken from under the Heavenly Throne.",
+        "Midrash on the Shattered Tablets: The broken pieces of the first tablets were placed inside the Holy Ark right alongside the whole second tablets — respecting wounded veterans and broken hearts.",
+        "Rashi on Moshe's Radiant Face: When Moshe came down with the second tablets, his face beamed with blinding rays of spiritual light ('Karan Or Panav')."
+      ],
+      "rashi_midrash_he": [
+        "מטבע של אש: הקב״ה הוציא מטבע של אש מתחת כיסא הכבוד והראהו למשה ללמד על חום הנתינה.",
+        "לוחות ושברי לוחות מונחים בארון: התורה מעריכה גם את מה שנשבר — כבוד לחכם שנשתכח תלמודו ולאדם שקם ממשבר.",
+        "קרני הוד: פני משה האירו באור רוחני עילאי שחייב אותו להניח מסווה על פניו."
+      ],
+      "life_app_en": "Patience vs. Panic: The worst decisions in life (sending an angry text, saying something you regret, making foolish bets) happen when you panic for just 10 minutes. When stressed, pause, take a deep breath, and wait.",
+      "life_app_he": "סבלנות מונעת אסונות: הטעויות הכי גדולות בחיים (הודעה זועמת, ריב מיותר) מתרחשות כשאנחנו בפאניקה רגעית. קח נשימה עמוקה וחכה יום אחד לפני שאתה מגיב."
+    },
+    {
+      "id": "vayakhel",
+      "book": "shemot",
+      "name_en": "Vayakhel",
+      "name_he": "ויקהל",
+      "plot_en": [
+        "Moshe gathers the entire congregation of Israel the day after Yom Kippur; commands Shabbat observance before Mishkan construction.",
+        "Call for voluntary donations of materials, jewelry, and skills; men and women bring overwhelming contributions.",
+        "The master artisans Betzalel (Tribe of Judah) and Oholiav (Tribe of Dan) are appointed to lead craftsmanship.",
+        "The response is so overwhelming that the craftsmen tell Moshe: 'The people are bringing more than enough!' and Moshe orders giving to cease."
+      ],
+      "plot_he": [
+        "משה מקהיל את כל עדת בני ישראל למחרת יום הכיפורים; מזהיר על השבת קודם לבניית המשכן.",
+        "קריאה לתרומת חומרים, זהב, בדים ומלאכות; גברים ונשים נוהרים בתרומות עצומות.",
+        "מינוי האומנים בצלאל בן אורי (שבט יהודה) ואהליאב בן אחיסמך (שבט דן).",
+        "התרומות כה רבות עד שהאומנים אומרים למשה: 'מרבים העם להביא די והותר!' ומשה מצווה להפסיק להביא."
+      ],
+      "key_topics_en": [
+        "<strong>Gathering the Whole Community:</strong> Moshe gathered the entire assembly of Israel ('Vayakhel'), teaching that national holiness is achieved only through unity.",
+        "<strong>Reiterating Shabbat as Priority:</strong> Six days shall work be done, but the seventh day is holy; reminding us that sacred spiritual rest overrides physical productivity.",
+        "<strong>Generosity of the Heart:</strong> Men and women donating gold bracelets, rings, yarn, and acacia wood in such overwhelming abundance that Moshe had to order them to stop.",
+        "<strong>The Wise-Hearted Women:</strong> The women spun goat hair with extraordinary craftsmanship while the wool was still attached to the living animals.",
+        "<strong>Bezalel & Oholiav:</strong> Bezalel from royal tribe Judah and Oholiav from humble tribe Dan working side by side in artistic partnership, proving every background matters.",
+        "<strong>Chochmat Lev (Wisdom of the Heart):</strong> Artistic ability is not mere technique; it is the spiritual empathy and purity of intention poured into the work.",
+        "<strong>The Interlocking Tapestries:</strong> Fifty golden clasps linking the curtains into 'one single Tabernacle', symbolizing many different individuals becoming one community."
+      ],
+      "key_topics_he": [
+        "<strong>'ויקהל משה' — כוחה של קהילה:</strong> משה מקהיל את כל עדת ישראל יחד, להורות שהשראת שכינה ותיקון עולם מושגים אך ורק מתוך אחדות וערבות.",
+        "<strong>שביתת שבת כעוגן החיים:</strong> ששת ימים תעשה מלאכה וביום השביעי שבת קודש; עצירה קדושה המזכירה שלא העבודה מגדירה את האדם אלא נשמתו.",
+        "<strong>התגייסות נדיבה של כולם:</strong> אנשים ונשים מביאים צמידים, נזמים, בדי תכלת ועצי שיטים בשפע כה עצום עד שמשה מכריז לעצור את התרומות.",
+        "<strong>חכמת הנשים הטוות:</strong> נשים בעלות חכמת לב טוו את שיער העיזים עוד בעודן חיות על גב הבהמה במיומנות ובאומנות מרהיבה.",
+        "<strong>בצלאל ואהליאב — שילוב שבטים:</strong> בצלאל משבט יהודה המלכותי ואהליאב משבט דן הפשוט יוצרים יחד בהרמוניה — לכל אדם יש מקום וכישרון לתרום.",
+        "<strong>חכמת לב מעל טכניקה:</strong> יצירת המשכן לא הייתה רק נגרות ומלאכה; היא הייתה חכמת לב המשלבת נשמה וטוהר כוונה בכל פרט.",
+        "<strong>קרסי זהב ליריעות:</strong> חמישים קרסי זהב המחברים את היריעות להיות למשכן אחד — סמל לחיבור של אלפי אנשים שונים לגוף אחד שלם."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on Women's Mirrors: The women donated copper mirrors. Moshe hesitated, but Hashem said: 'Accept them! These mirrors are dearest to Me, for with them Jewish women comforted and encouraged their exhausted husbands in Egypt.'",
+        "Midrash on Betzalel: At just 13 years old, Betzalel possessed divine wisdom to combine the letters of creation.",
+        "Rashi on Willing Heart: The phrase 'every man whose heart stirred him' emphasizes that enthusiasm is what matters to God."
+      ],
+      "rashi_midrash_he": [
+        "מראות הצובאות: משה היסס לקבל מראות נחושת, והקב״ה אמר לו: 'חביבות הן עליי מן הכל, שבהן העמידו הנשים את צבאות ישראל במצרים'.",
+        "בצלאל בן 13: בגיל בר מצווה ידע לצרף אותיות שבהן נבראו שמים וארץ.",
+        "נדיבות לב: ההתלהבות והרצון הכן הם שמעניקים לכל פעולה את הערך הרוחני שלה."
+      ],
+      "life_app_en": "Giving back feels better than taking. When you contribute your effort, energy, or money to help a friend or community project, you feel 10 times more alive than when you just sit back and consume.",
+      "life_app_he": "השמחה שבנתינה: לתת עושה אותך מאושר יותר מלקבל. כשתתרום מכוחך ומזמנך לטובת משהו קהילתי, תרגיש סיפוק אמיתי ששום מסך או קנייה לא יכולים לתת."
+    },
+    {
+      "id": "pekudei",
+      "book": "shemot",
+      "name_en": "Pekudei",
+      "name_he": "פקודי",
+      "plot_en": [
+        "Moshe presents a complete, transparent financial audit of every ounce of gold, silver, and copper used in the Mishkan.",
+        "The priestly garments are completed exactly 'as Hashem commanded Moshe' (repeated 18 times for perfection).",
+        "All parts of the Mishkan are brought to Moshe; Moshe blesses the people for their faithful work.",
+        "On Rosh Chodesh Nisan, the Mishkan is officially erected; the Divine Cloud of Glory covers the Tent of Meeting; Sefer Shemot concludes: 'Chazak Chazak V'Nitchazek!'"
+      ],
+      "plot_he": [
+        "משה מגיש דין וחשבון כספי שקוף ומדויק על כל גרם של זהב, כסף ונחושת שנתרמו למשכן.",
+        "השלמת בגדי הכהונה בדייקנות שיא 'כאשר ציווה ה' את משה' (ביטוי שחוזר 18 פעמים).",
+        "הבאת כל חלקי המשכן אל משה; משה מברך את העם על מסירותם ועבודתם הנאמנה.",
+        "בראש חודש ניסן המשכן מוקם רשמית; ענן כבוד ה' מכסה את אוהל מועד; סיום ספר שמות בקריאת: 'חזק חזק ונתחזק!'."
+      ],
+      "key_topics_en": [
+        "<strong>Transparent Financial Accounting:</strong> Moshe gave a complete, itemized audit of every ounce of gold, silver, and copper donated, teaching public financial integrity.",
+        "<strong>Clean Before God & Man:</strong> Even Moshe, the most trusted prophet, insisted on public transparency so no cynic could ever suspect embezzlement.",
+        "<strong>Inspection of the Work:</strong> Moshe carefully examined every tapestry, peg, and vessel; seeing they were crafted exactly as God commanded, he blessed the workers.",
+        "<strong>Moshe's Blessing:</strong> 'May the pleasantness of Hashem our God be upon us, and establish the work of our hands' — praying that the Divine Presence reside in human labor.",
+        "<strong>Erecting the Tabernacle:</strong> On Rosh Chodesh Nisan, Moshe assembled the Mishkan, lit the Menorah, offered incense, and set the Table of Showbread.",
+        "<strong>The Divine Cloud Fills the Sanctuary:</strong> A glorious heavenly cloud covered the Tent of Meeting, showing Hashem accepted the repentance and love of His people.",
+        "<strong>'Chazak Chazak V'Nitchazek':</strong> Concluding Sefer Shemot with the triumphant communal cry of strength, perseverance, and dedication to our heritage."
+      ],
+      "key_topics_he": [
+        "<strong>שקיפות ציבורית ודו״ח כספי:</strong> משה רבנו מגיש חשבון מדויק עד הגרם האחרון של כל הזהב, הכסף והנחושת שנתרמו — מופת של יושרה מוחלטת.",
+        "<strong>'והייתם נקיים מה' ומישראל':</strong> אפילו משה הנאמן בכל ביתו אינו סומך על מעמדו ומציג קבלות ודו״חות שקופים לכל העם כדי למנוע לזות שפתיים.",
+        "<strong>בדיקת הכלים וברכת משה:</strong> משה בודק כל יריעה, קרס ובגד; ובראותו שנעשו בדייקנות כפי שציווה ה', הוא מברך את העושים מעומק ליבו.",
+        "<strong>'ויהי נועם ה' אלוהינו עלינו':</strong> ברכת משה הידועה ששכינה תשרה במעשה ידיהם — תפילה שכל עמל אנושי יזכה להצלחה וברכה שמימית.",
+        "<strong>הקמת המשכן בראש חודש ניסן:</strong> משה מקים את המשכן, מדליק את המנורה, מעלה את הקטורת ועורך את שולחן לחם הפנים.",
+        "<strong>ענן הכבוד ממלא את המשכן:</strong> ענן הקודש מכסה את אוהל מועד וכבוד ה' ממלא את המשכן — עדות מוחלטת לכך שנסלח חטא העגל והשכינה שבה.",
+        "<strong>'חזק חזק ונתחזק':</strong> סיום חגיגי ומרומם של ספר הגאולה, בקריאת עוצמה להמשיך להחזיק בשרשרת התורה והאמונה לכל הדורות."
+      ],
+      "rashi_midrash_en": [
+        "Rashi on the Missing Silver: Moshe momentarily lost track of 1,775 shekels of silver until a divine echo revealed they were used for the silver hooks (Vavim) on the pillars.",
+        "Midrash on Erecting the Mishkan: Human hands couldn't lift the massive heavy gold beams; Moshe tried and Hashem made it stand up miraculously on its own.",
+        "Rashi on 'Chazak': We roar 'Chazak Chazak V'Nitchazek' (Be strong, be strong, and let us be strengthened!) as we complete the second book of the Torah."
+      ],
+      "rashi_midrash_he": [
+        "חשבון ווי העמודים: משה שכח לרגע לאן הלכו 1,775 שקלי כסף, עד שיצתה בת קול והזכירה שהיו לווי העמודים.",
+        "הקמת המשכן: שום אדם לא היה מסוגל להרים את הקרשים הכבדים; משה רק נתן יד והמשכן עמד מעצמו בנס.",
+        "'חזק חזק ונתחזק': השאגה המסורתית הממלאת את בית הכנסת בסיום קריאת כל חומש."
+      ],
+      "life_app_en": "Total honesty with money: When you borrow $5 for pizza or handle sports team funds, keep a clean, transparent count. A real man of honor has zero suspicion or shady money dealings.",
+      "life_app_he": "יושרה ושקיפות בכסף: כשאתה מלווה 20 שקל מחבר או מנהל קופה של החבר'ה, תהיה מדויק ב-100%. אמינות כספית היא הבסיס לכל הכבוד שירכשו לך בחיים."
+    }
+  ]
+}

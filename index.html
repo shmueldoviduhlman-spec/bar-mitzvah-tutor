@@ -555,6 +555,10 @@
                     <span id="lbl-courses-directory-title">Courses & Curricula</span>
                   </h3>
                   <span id="courses-directory-count-badge" class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">0 Courses</span>
+                  <button id="btn-purge-all-courses" onclick="handlePurgeAllCourses()" class="text-[11px] text-slate-500 hover:text-rose-400 transition hidden items-center gap-1 ml-2" title="Clear all courses and start fresh">
+                    <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    <span>Clear All</span>
+                  </button>
                 </div>
                 <p class="text-xs text-slate-400" id="lbl-courses-directory-desc">Select a course to view and manage its classes, or create a new course.</p>
               </div>
@@ -8205,6 +8209,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     function renderCoursesCardsGrid() {
       const grid = document.getElementById('courses-cards-grid');
       const countBadge = document.getElementById('courses-directory-count-badge');
+      const purgeBtn = document.getElementById('btn-purge-all-courses');
       if (!grid) return;
 
       const isHe = APP_STATE.lang === 'he';
@@ -8212,6 +8217,47 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       if (countBadge) {
         countBadge.textContent = `${courses.length} ${isHe ? (courses.length === 1 ? 'קורס' : 'קורסים') : (courses.length === 1 ? 'Course' : 'Courses')}`;
+      }
+
+      if (purgeBtn) {
+        if (courses.length > 0) {
+          purgeBtn.classList.remove('hidden');
+          purgeBtn.classList.add('inline-flex');
+        } else {
+          purgeBtn.classList.add('hidden');
+          purgeBtn.classList.remove('inline-flex');
+        }
+      }
+
+      if (courses.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-12 px-6 bg-slate-900/40 border border-dashed border-slate-800 rounded-3xl space-y-4 max-w-xl mx-auto">
+            <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mx-auto text-2xl font-mono">
+              ✦
+            </div>
+            <div class="space-y-1.5">
+              <h4 class="text-base font-bold text-white">${isHe ? 'דף חלק: אין עדיין קורסים או שיעורים' : 'Clean Canvas: No Courses Created Yet'}</h4>
+              <p class="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+                ${isHe
+                  ? 'צור את הקורס הראשון שלך באמצעות כפתור "+ צור קורס" או סטודיו הבינה המלאכותית. כל שיעור שתבנה יסתנכרן ישירות לפרופיל התלמיד שלך.'
+                  : 'Create your first course using the "+ Create Course" button or AI Course Studio. Every class you build will automatically synchronize into your student profiles.'}
+              </p>
+            </div>
+            <div class="flex items-center justify-center gap-2 pt-2">
+              <button onclick="openCreateCourseModal()" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition shadow">
+                + ${isHe ? 'צור קורס' : 'Create Course'}
+              </button>
+              <button onclick="openAiCurriculumBuilderModal('full')" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs font-semibold transition">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 inline mr-1"></i>
+                <span>${isHe ? 'סטודיו בינה מלאכותית' : 'AI Course Studio'}</span>
+              </button>
+            </div>
+          </div>
+        `;
+        if (window.lucide && typeof lucide.createIcons === 'function') {
+          lucide.createIcons();
+        }
+        return;
       }
 
       grid.innerHTML = courses.map(c => {
@@ -9139,9 +9185,37 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!Array.isArray(cloudCourses)) return;
       if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
 
+      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      const resetTsStr = localStorage.getItem('tutor_curriculum_reset_ts_' + email) || localStorage.getItem('tutor_curriculum_reset_ts');
+      const resetTs = resetTsStr ? parseInt(resetTsStr, 10) : 0;
+
+      // Filter out legacy Bar Mitzvah courses AND courses created before clean reset timestamp
+      const validCloudCourses = cloudCourses.filter(cloudCourse => {
+        if (!cloudCourse || !cloudCourse.id) return false;
+        if (cloudCourse.id === 'course_bar_mitzvah_concepts' || cloudCourse.id === 'course_bar_mitzvah_chumash') return false;
+        if (resetTs > 0) {
+          let courseTs = 0;
+          if (cloudCourse.updated_at) courseTs = new Date(cloudCourse.updated_at).getTime();
+          else if (cloudCourse.created_at) courseTs = new Date(cloudCourse.created_at).getTime();
+          else {
+            const match = cloudCourse.id.match(/^course_(\d+)/);
+            if (match) courseTs = parseInt(match[1], 10);
+          }
+          if (courseTs > 0 && courseTs <= resetTs) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      // If cloud contained obsolete courses, clean them from cloud
+      if (validCloudCourses.length !== cloudCourses.length) {
+        pushCustomCoursesToCloud();
+      }
+
       let hasNewData = false;
       const existingIds = new Set(APP_STATE.customCourses.map(c => c.id));
-      cloudCourses.forEach(cloudCourse => {
+      validCloudCourses.forEach(cloudCourse => {
         if (!existingIds.has(cloudCourse.id)) {
           APP_STATE.customCourses.push(cloudCourse);
           existingIds.add(cloudCourse.id);
@@ -12058,26 +12132,75 @@ Class Topic / Instruction: ${promptText}`;
 
     function checkCleanCanvasReset() {
       const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
-      if (!email) return;
       purgeLegacyCurriculumData();
-      const markerKey = 'tutor_canvas_reset_v2_' + email.replace(/[^a-z0-9]/g, '_');
+
+      // Complete purge marker for custom courses and classes to ensure clean canvas
+      const markerKey = 'tutor_purge_all_courses_v1_' + (email ? email.replace(/[^a-z0-9]/g, '_') : 'global');
       if (!localStorage.getItem(markerKey)) {
         localStorage.setItem(markerKey, 'true');
-        const cKey = getCustomCoursesStorageKey();
-        if (cKey) {
-          const raw = localStorage.getItem(cKey);
-          if (raw) {
-            try {
-              const list = JSON.parse(raw);
-              if (Array.isArray(list)) {
-                const cleaned = list.filter(c => c && c.id !== 'course_bar_mitzvah_concepts' && c.id !== 'course_bar_mitzvah_chumash');
-                localStorage.setItem(cKey, JSON.stringify(cleaned));
-              }
-            } catch (_) {}
-          }
+        const resetTs = Date.now();
+        localStorage.setItem('tutor_curriculum_reset_ts', resetTs.toString());
+        if (email) {
+          localStorage.setItem('tutor_curriculum_reset_ts_' + email, resetTs.toString());
         }
+
+        // Wipe all custom courses and classes to ensure a 100% clean canvas
+        APP_STATE.customCourses = [];
+        APP_STATE.activeCourseId = null;
+        APP_STATE.insideCourseId = null;
+
+        const keysToClean = [
+          'tutor_custom_courses',
+          'tutor_custom_courses_school_main_770',
+          'tutor_custom_courses_shmueluhlman_gmail_com',
+          'tutor_custom_courses_shmueldoviduhlman_gmail_com',
+          getCustomCoursesStorageKey()
+        ];
+        keysToClean.forEach(k => {
+          if (k) {
+            try { localStorage.setItem(k, '[]'); } catch (_) {}
+          }
+        });
+
+        saveCustomCoursesToStorage(true);
         purgeLegacyCurriculumData();
       }
+    }
+
+    function handlePurgeAllCourses() {
+      const isHe = APP_STATE.lang === 'he';
+      const confirmMsg = isHe
+        ? 'האם אתה בטוח שברצונך למחוק את כל הקורסים והשיעורים? פעולה זו תאפס את תוכנית הלימודים לדף חלק. התלמידים, שיעורי הבית וההערכות שלהם יישמרו.'
+        : 'Are you sure you want to delete all courses and classes? This will reset your curriculum to a clean slate. Students, homework, and private notes will remain intact.';
+      if (!confirm(confirmMsg)) return;
+
+      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      const resetTs = Date.now();
+      localStorage.setItem('tutor_curriculum_reset_ts', resetTs.toString());
+      if (email) {
+        localStorage.setItem('tutor_curriculum_reset_ts_' + email, resetTs.toString());
+      }
+
+      APP_STATE.customCourses = [];
+      APP_STATE.activeCourseId = null;
+      APP_STATE.insideCourseId = null;
+
+      const keysToClean = [
+        'tutor_custom_courses',
+        'tutor_custom_courses_school_main_770',
+        'tutor_custom_courses_shmueluhlman_gmail_com',
+        'tutor_custom_courses_shmueldoviduhlman_gmail_com',
+        getCustomCoursesStorageKey()
+      ];
+      keysToClean.forEach(k => {
+        if (k) {
+          try { localStorage.setItem(k, '[]'); } catch (_) {}
+        }
+      });
+
+      saveCustomCoursesToStorage(true);
+      renderAllViews();
+      showToast(isHe ? 'כל הקורסים והשיעורים נמחקו לדף חלק' : 'All courses and classes removed to a clean slate');
     }
 
     function handleResetWorkspaceToCleanSlate() {

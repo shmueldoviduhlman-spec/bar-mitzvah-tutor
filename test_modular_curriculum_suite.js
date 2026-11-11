@@ -1367,6 +1367,24 @@ sandbox.purgeLegacyCurriculumData();
 assert(!sandbox.APP_STATE.customCourses.some(c => c.id === 'course_bar_mitzvah_concepts'), 'purgeLegacyCurriculumData removed legacy concepts');
 assert(!sandbox.APP_STATE.customCourses.some(c => c.id === 'course_bar_mitzvah_chumash'), 'purgeLegacyCurriculumData removed legacy chumash');
 
+// 6. Test Curriculum Archive Files and Complete Clean Slate
+assert(fs.existsSync('CURRICULUM_ARCHIVE_ALL_LESSONS.md'), 'CURRICULUM_ARCHIVE_ALL_LESSONS.md exists on disk');
+assert(fs.existsSync('curriculum_backup_complete.json'), 'curriculum_backup_complete.json exists on disk');
+
+const archiveContent = fs.readFileSync('CURRICULUM_ARCHIVE_ALL_LESSONS.md', 'utf8');
+assert(archiveContent.includes('Shabbat (שבת קודש)'), 'Curriculum archive preserves Shabbat concept');
+assert(archiveContent.includes('Parshat Bereishit'), 'Curriculum archive preserves Parshat Bereishit');
+assert(archiveContent.includes('Parshat Shemot'), 'Curriculum archive preserves Parshat Shemot');
+
+assert(typeof sandbox.handlePurgeAllCourses === 'function', 'handlePurgeAllCourses is a function');
+
+// Test Courses Grid Clean Canvas Render
+sandbox.APP_STATE.customCourses = [];
+sandbox.renderCoursesCardsGrid();
+const emptyGridHtml = getOrCreateElem('courses-cards-grid').innerHTML;
+assert(emptyGridHtml.includes('Clean Canvas') || emptyGridHtml.includes('דף חלק'), 'Courses grid renders clean canvas placeholder when 0 courses');
+assert(indexHtml.includes('id="btn-purge-all-courses"'), 'HTML contains btn-purge-all-courses element');
+
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
 console.log(`========================================\n`);
