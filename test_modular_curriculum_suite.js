@@ -1906,6 +1906,69 @@ assert(emmaSession.status === 'completed', 'AI session attendance set to complet
 assert(typeof emmaSession.completedAt === 'string', 'AI session attendance recorded completedAt');
 assert(emmaSession.topic.includes('King Lear'), 'AI session notes preserved in session topic');
 
+// ==============================================
+// Gate 22: Legacy Classes Disconnection and Second Brain Archival Verification
+// ==============================================
+console.log('\n--- Gate 22: Legacy Classes Disconnection & Second Brain Archival ---');
+
+// 1. Second Brain JSON Archive Verification
+const sbJsonPath1 = '/Users/dev/Documents/Antigravity second Brain/01_Projects/TutorPilot/BAR_MITZVAH_COMPLETE_CURRICULUM_ARCHIVE.json';
+const sbJsonPath2 = '/Users/dev/Documents/Antigravity second Brain/04_Archive/BAR_MITZVAH_COMPLETE_CURRICULUM_ARCHIVE.json';
+
+assert(fs.existsSync(sbJsonPath1), 'Second Brain TutorPilot JSON archive exists');
+assert(fs.existsSync(sbJsonPath2), 'Second Brain 04_Archive JSON archive exists');
+
+const sbData1 = JSON.parse(fs.readFileSync(sbJsonPath1, 'utf8'));
+assert(sbData1.counts.jewish_concepts === 13, 'Second Brain archive records 13 Jewish Concepts');
+assert(sbData1.counts.total_parshiot === 23, 'Second Brain archive records 23 Chumash Parshiot');
+assert(sbData1.counts.total_lessons === 36, 'Second Brain archive records 36 total lessons');
+assert(sbData1.counts.reading_booklets === 4, 'Second Brain archive records 4 leveled reading booklets');
+assert(sbData1.counts.speech_milestones === 5, 'Second Brain archive records 5 speech milestones');
+
+// 2. Second Brain Markdown Archive Verification
+const sbMdPath1 = '/Users/dev/Documents/Antigravity second Brain/01_Projects/TutorPilot/BAR_MITZVAH_COMPLETE_CURRICULUM_ARCHIVE.md';
+assert(fs.existsSync(sbMdPath1), 'Second Brain TutorPilot Markdown archive exists');
+const sbMdContent = fs.readFileSync(sbMdPath1, 'utf8');
+assert(sbMdContent.length > 80000, 'Second Brain Markdown archive contains exhaustive lesson text (>80KB)');
+assert(sbMdContent.includes('Shabbat (שבת קודש)'), 'Markdown archive contains Shabbat lesson');
+assert(sbMdContent.includes('Red Booklet'), 'Markdown archive contains Red Booklet reading unit');
+assert(sbMdContent.includes('Topic & Theme Selection'), 'Markdown archive contains speech milestones');
+
+// 3. HTML Permanent Hidden Style Verification
+assert(indexHtml.includes('id="study-section-concepts" class="hidden" style="display: none !important;"'), 'study-section-concepts has permanent display: none !important');
+assert(indexHtml.includes('id="study-section-chumash" class="hidden" style="display: none !important;"'), 'study-section-chumash has permanent display: none !important');
+
+// 4. Classes Tab Switch Isolation Verification
+const conceptsContainer = getOrCreateElem('study-section-concepts');
+const chumashContainer = getOrCreateElem('study-section-chumash');
+conceptsContainer.classList.add('hidden');
+chumashContainer.classList.add('hidden');
+
+// Inject legacy courses into APP_STATE
+sandbox.APP_STATE.customCourses = [
+  { id: 'course_bar_mitzvah_concepts', title_en: 'Bar Mitzvah: 13 Core Jewish Concepts', lessons: [] },
+  { id: 'course_bar_mitzvah_chumash', title_en: 'Bar Mitzvah: Chumash', lessons: [] }
+];
+
+// Switch to Classes / Study tab
+sandbox.switchTab('study');
+
+// Verify legacy containers remain strictly hidden
+assert(conceptsContainer.classList.contains('hidden'), 'switchTab(study) maintains study-section-concepts hidden');
+assert(chumashContainer.classList.contains('hidden'), 'switchTab(study) maintains study-section-chumash hidden');
+
+// Verify purgeLegacyCurriculumData wiped legacy courses on tab switch
+assert(!sandbox.APP_STATE.customCourses.some(c => c.id.startsWith('course_bar_mitzvah')), 'switchTab(study) purged legacy Bar Mitzvah courses from customCourses');
+
+// 5. Clean Slate Display Verification
+const blankStateElem = getOrCreateElem('tutor-hub-blank-state');
+sandbox.renderLessonsCategoryView();
+assert(!blankStateElem.classList.contains('hidden'), 'Clean slate welcome canvas is displayed when tutor has 0 courses');
+
+// 6. Template Loader Disconnection Verification
+sandbox.handleLoadStarterBarMitzvahTemplate();
+assert(!sandbox.APP_STATE.customCourses.some(c => c.id.startsWith('course_bar_mitzvah')), 'handleLoadStarterBarMitzvahTemplate does NOT load Bar Mitzvah courses into site');
+
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
 console.log(`========================================\n`);

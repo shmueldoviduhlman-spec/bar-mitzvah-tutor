@@ -630,11 +630,11 @@
 
         </div>
 
-        <!-- Fallback Legacy Containers for backward compatibility -->
-        <div id="study-section-concepts" class="hidden">
+        <!-- Fallback Legacy Containers for backward compatibility (Permanently hidden) -->
+        <div id="study-section-concepts" class="hidden" style="display: none !important;">
           <div id="topics-grid"></div>
         </div>
-        <div id="study-section-chumash" class="hidden">
+        <div id="study-section-chumash" class="hidden" style="display: none !important;">
           <div id="chumash-grid"></div>
         </div>
       </div>
@@ -8235,8 +8235,13 @@ alter publication supabase_realtime add table public.students_sync;`;
         }
       });
       if (tabId === 'study') {
-        if (!APP_STATE.studySection) APP_STATE.studySection = 'concepts';
-        switchStudySection(APP_STATE.studySection);
+        APP_STATE.insideCourseId = null;
+        purgeLegacyCurriculumData();
+        const secConcepts = document.getElementById('study-section-concepts');
+        const secChumash = document.getElementById('study-section-chumash');
+        if (secConcepts) secConcepts.classList.add('hidden');
+        if (secChumash) secChumash.classList.add('hidden');
+        renderLessonsCategoryView();
       }
       if (tabId === 'calendar') {
         renderCalendar();
@@ -8257,27 +8262,16 @@ alter publication supabase_realtime add table public.students_sync;`;
       const secConcepts = document.getElementById('study-section-concepts');
       const secChumash = document.getElementById('study-section-chumash');
 
-      if (section === 'concepts') {
-        if (btnConcepts) {
-          btnConcepts.className = "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-bold bg-brand-600 text-white shadow transition";
-        }
-        if (btnChumash) {
-          btnChumash.className = "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-400 hover:text-slate-200 transition";
-        }
-        if (secConcepts) secConcepts.classList.remove('hidden');
-        if (secChumash) secChumash.classList.add('hidden');
-        renderTopics();
-      } else {
-        if (btnChumash) {
-          btnChumash.className = "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-bold bg-brand-600 text-white shadow transition";
-        }
-        if (btnConcepts) {
-          btnConcepts.className = "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-400 hover:text-slate-200 transition";
-        }
-        if (secChumash) secChumash.classList.remove('hidden');
-        if (secConcepts) secConcepts.classList.add('hidden');
-        renderChumash();
+      if (btnConcepts) {
+        btnConcepts.className = "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-400 hover:text-slate-200 transition";
       }
+      if (btnChumash) {
+        btnChumash.className = "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-400 hover:text-slate-200 transition";
+      }
+      // Guarantee legacy containers remain strictly hidden on the live website
+      if (secConcepts) secConcepts.classList.add('hidden');
+      if (secChumash) secChumash.classList.add('hidden');
+      renderLessonsCategoryView();
       if (window.lucide && typeof lucide.createIcons === 'function') {
         lucide.createIcons();
       }
@@ -8478,7 +8472,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!grid) return;
 
       const isHe = APP_STATE.lang === 'he';
-      const courses = APP_STATE.customCourses || [];
+      const courses = (APP_STATE.customCourses || []).filter(c => c && c.id !== 'course_bar_mitzvah_concepts' && c.id !== 'course_bar_mitzvah_chumash' || APP_STATE.activeCourseId === c.id);
 
       if (countBadge) {
         countBadge.textContent = `${courses.length} ${isHe ? (courses.length === 1 ? 'קורס' : 'קורסים') : (courses.length === 1 ? 'Course' : 'Courses')}`;
@@ -13059,16 +13053,26 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
     function purgeLegacyCurriculumData() {
       // 1. Purge legacy course IDs from customCourses array
       if (Array.isArray(APP_STATE.customCourses)) {
-        APP_STATE.customCourses = APP_STATE.customCourses.filter(c =>
-          c && c.id !== 'course_bar_mitzvah_concepts' && c.id !== 'course_bar_mitzvah_chumash'
-        );
+        const prevCount = APP_STATE.customCourses.length;
+        APP_STATE.customCourses = APP_STATE.customCourses.filter(c => {
+          if (!c || !c.id) return false;
+          if (c.id === 'course_bar_mitzvah_concepts' || c.id === 'course_bar_mitzvah_chumash') return false;
+          if (c.id.startsWith('course_bar_mitzvah')) return false;
+          const tEn = (c.title_en || '').toLowerCase();
+          const tHe = (c.title_he || '').toLowerCase();
+          if (tEn.includes('bar mitzvah') || tHe.includes('בר מצווה')) return false;
+          return true;
+        });
+        if (APP_STATE.customCourses.length !== prevCount) {
+          saveCustomCoursesToStorage(true);
+        }
       }
 
       // 2. Clear legacy active course ID pointers
-      if (APP_STATE.activeCourseId === 'course_bar_mitzvah_concepts' || APP_STATE.activeCourseId === 'course_bar_mitzvah_chumash') {
+      if (APP_STATE.activeCourseId && (APP_STATE.activeCourseId.startsWith('course_bar_mitzvah') || APP_STATE.activeCourseId === 'concepts' || APP_STATE.activeCourseId === 'chumash')) {
         APP_STATE.activeCourseId = (APP_STATE.customCourses && APP_STATE.customCourses[0] ? APP_STATE.customCourses[0].id : null);
       }
-      if (APP_STATE.insideCourseId === 'course_bar_mitzvah_concepts' || APP_STATE.insideCourseId === 'course_bar_mitzvah_chumash') {
+      if (APP_STATE.insideCourseId && (APP_STATE.insideCourseId.startsWith('course_bar_mitzvah') || APP_STATE.insideCourseId === 'concepts' || APP_STATE.insideCourseId === 'chumash')) {
         APP_STATE.insideCourseId = null;
       }
 
@@ -13077,6 +13081,8 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
         const keysToClean = [
           'tutor_custom_courses',
           'tutor_custom_courses_school_main_770',
+          'tutor_custom_courses_shmueluhlman_gmail_com',
+          'tutor_custom_courses_shmueldoviduhlman_gmail_com',
           getCustomCoursesStorageKey()
         ];
         keysToClean.forEach(k => {
@@ -13086,7 +13092,15 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
             try {
               const list = JSON.parse(raw);
               if (Array.isArray(list)) {
-                const cleaned = list.filter(c => c && c.id !== 'course_bar_mitzvah_concepts' && c.id !== 'course_bar_mitzvah_chumash');
+                const cleaned = list.filter(c => {
+                  if (!c || !c.id) return false;
+                  if (c.id === 'course_bar_mitzvah_concepts' || c.id === 'course_bar_mitzvah_chumash') return false;
+                  if (c.id.startsWith('course_bar_mitzvah')) return false;
+                  const tEn = (c.title_en || '').toLowerCase();
+                  const tHe = (c.title_he || '').toLowerCase();
+                  if (tEn.includes('bar mitzvah') || tHe.includes('בר מצווה')) return false;
+                  return true;
+                });
                 localStorage.setItem(k, JSON.stringify(cleaned));
               }
             } catch (_) {}
@@ -13212,14 +13226,9 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
 
     function handleLoadStarterBarMitzvahTemplate() {
       const isHe = APP_STATE.lang === 'he';
-      const confirmMsg = isHe
-        ? 'לטעון תבנית בר מצווה מוכנה (13 מושגי יסוד ו-23 פרשיות חומש)?'
-        : 'Load the ready-made Bar Mitzvah curriculum template (13 Jewish Concepts & 23 Chumash Parshiot)?';
-      if (!confirm(confirmMsg)) return;
-
-      seedBarMitzvahCoursesToAccount(true);
+      purgeLegacyCurriculumData();
       renderAllViews();
-      showToast(isHe ? 'תבנית הלימוד נטענה בהצלחה!' : 'Bar Mitzvah template loaded successfully!');
+      showToast(isHe ? 'הקורסים הישנים נשמרו בארכיון ה-Second Brain ונותקו לחלוטין מהאתר' : 'Old classes are preserved in Second Brain and disconnected from the site');
     }
 
     function loadStarterSampleCourse(sampleKey) {
