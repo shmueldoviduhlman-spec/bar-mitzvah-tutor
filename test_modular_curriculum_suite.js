@@ -83,6 +83,7 @@ const sandbox = {
   document: {
     documentElement: { setAttribute() {} },
     getElementById: getOrCreateElem,
+    querySelector() { return null; },
     querySelectorAll() { return []; },
     addEventListener() {},
     activeElement: null
@@ -2159,6 +2160,9 @@ console.log('\n--- Gate 25: Teacher Command Center, Pedagogical AI & Printable P
 
 // 1. HTML Verification of Phase 4 Cockpit & Modals
 assert(indexHtml.includes('id="educator-command-center"'), 'HTML contains educator-command-center');
+assert(indexHtml.includes('id="btn-top-command-center-trigger"'), 'HTML contains subtle top command-center trigger pill');
+assert(indexHtml.includes('id="btn-cmd-bottom-collapse-bar"'), 'HTML contains bottom collapse bar with small arrow');
+assert(indexHtml.includes('id="educator-command-center-backdrop"'), 'HTML contains educator-command-center-backdrop');
 assert(indexHtml.includes('id="command-center-greeting"'), 'HTML contains command-center-greeting');
 assert(indexHtml.includes('id="command-center-date-pill"'), 'HTML contains command-center-date-pill');
 assert(indexHtml.includes('id="command-center-kpi-grid"'), 'HTML contains command-center-kpi-grid');
@@ -2176,6 +2180,9 @@ assert(typeof sandbox.renderCommandCenter === 'function', 'renderCommandCenter i
 assert(typeof sandbox.renderCommandCenterKPIs === 'function', 'renderCommandCenterKPIs is a function');
 assert(typeof sandbox.renderCommandCenterTodaySessions === 'function', 'renderCommandCenterTodaySessions is a function');
 assert(typeof sandbox.toggleCommandCenterCollapse === 'function', 'toggleCommandCenterCollapse is a function');
+assert(typeof sandbox.openCommandCenterDrawer === 'function', 'openCommandCenterDrawer is a function');
+assert(typeof sandbox.closeCommandCenterDrawer === 'function', 'closeCommandCenterDrawer is a function');
+assert(typeof sandbox.initCommandCenterGestures === 'function', 'initCommandCenterGestures is a function');
 assert(typeof sandbox.openPedagogicalAiModal === 'function', 'openPedagogicalAiModal is a function');
 assert(typeof sandbox.closePedagogicalAiModal === 'function', 'closePedagogicalAiModal is a function');
 assert(typeof sandbox.switchPedagogicalToolMode === 'function', 'switchPedagogicalToolMode is a function');
@@ -2217,7 +2224,7 @@ assert(g25DeckHtml.includes('Alice Cooper'), 'Today deck renders student Alice C
 assert(g25DeckHtml.includes('Algebra'), 'Today deck renders session topic Algebra');
 assert(g25DeckHtml.includes('openTutorTeleprompterForSession'), 'Today deck provides 1-tap Teach trigger');
 
-// 5. Command Center Collapsible Behavior
+// 5. Command Center Collapsible Behavior & Drawer Controls
 sandbox.APP_STATE.commandCenterCollapsed = false;
 sandbox.toggleCommandCenterCollapse();
 assert(sandbox.APP_STATE.commandCenterCollapsed === true, 'toggleCommandCenterCollapse sets collapsed to true');
@@ -2226,6 +2233,15 @@ assert(g25CmdBody.classList.contains('hidden'), 'command-center-body is hidden w
 sandbox.toggleCommandCenterCollapse();
 assert(sandbox.APP_STATE.commandCenterCollapsed === false, 'toggleCommandCenterCollapse sets collapsed to false');
 assert(!g25CmdBody.classList.contains('hidden'), 'command-center-body is visible when expanded');
+
+// Direct Drawer Controls
+sandbox.closeCommandCenterDrawer();
+assert(sandbox.APP_STATE.commandCenterCollapsed === true, 'closeCommandCenterDrawer sets collapsed to true');
+assert(g25CmdBody.classList.contains('hidden'), 'closeCommandCenterDrawer hides body');
+sandbox.openCommandCenterDrawer();
+assert(sandbox.APP_STATE.commandCenterCollapsed === false, 'openCommandCenterDrawer sets collapsed to false');
+assert(!g25CmdBody.classList.contains('hidden'), 'openCommandCenterDrawer reveals body');
+sandbox.closeCommandCenterDrawer();
 
 // 6. Pedagogical AI Tools
 sandbox.openPedagogicalAiModal('quiz', 'Quadratic Equations');
