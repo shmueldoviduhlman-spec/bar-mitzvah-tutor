@@ -1138,7 +1138,43 @@
           </button>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
+          <!-- Calendar View Mode Switcher (Month vs Week) -->
+          <div class="flex items-center p-0.5 rounded-xl bg-slate-800/80 border border-slate-700/60 shrink-0">
+            <button
+              type="button"
+              id="btn-calendar-view-month"
+              onclick="switchCalendarViewMode('month')"
+              class="px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow"
+              title="Month Grid View"
+            >
+              <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+              <span id="lbl-calendar-view-month">Month</span>
+            </button>
+            <button
+              type="button"
+              id="btn-calendar-view-week"
+              onclick="switchCalendarViewMode('week')"
+              class="px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-400 hover:text-white"
+              title="Week Timetable View"
+            >
+              <i data-lucide="columns-3" class="w-3.5 h-3.5"></i>
+              <span id="lbl-calendar-view-week">Week</span>
+            </button>
+          </div>
+
+          <!-- Calendar .ics Sync / Export Button -->
+          <button
+            type="button"
+            id="btn-export-calendar-ics"
+            onclick="exportCalendarToIcs()"
+            class="px-2.5 py-1 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-semibold transition active:scale-95 flex items-center gap-1.5"
+            title="Sync or export schedule as .ics for Google Calendar, Apple Calendar, or Outlook"
+          >
+            <i data-lucide="download" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span id="lbl-calendar-export-ics">Sync (.ics)</span>
+          </button>
+
           <!-- Plan Breakdown Button -->
           <button
             onclick="openBreakdownPlannerModal()"
@@ -1158,14 +1194,26 @@
         </div>
       </div>
 
-      <!-- 7-Day Weekdays Header (Sun to Sat) -->
-      <div id="calendar-weekdays-header" class="grid grid-cols-7 gap-1 sm:gap-2 text-center text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider w-full min-w-0 overflow-hidden">
-        <!-- Populated via JS -->
+      <!-- MONTH VIEW CONTAINER -->
+      <div id="calendar-month-view-container" class="space-y-3">
+        <!-- 7-Day Weekdays Header (Sun to Sat) -->
+        <div id="calendar-weekdays-header" class="grid grid-cols-7 gap-1 sm:gap-2 text-center text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider w-full min-w-0 overflow-hidden">
+          <!-- Populated via JS -->
+        </div>
+
+        <!-- Calendar 7-Day Month Grid (Sun to Sat) -->
+        <div id="calendar-days-grid" class="grid grid-cols-7 gap-1 sm:gap-2 w-full min-w-0 overflow-hidden">
+          <!-- Populated dynamically via JS -->
+        </div>
       </div>
 
-      <!-- Calendar 7-Day Month Grid (Sun to Sat) -->
-      <div id="calendar-days-grid" class="grid grid-cols-7 gap-1 sm:gap-2 w-full min-w-0 overflow-hidden">
-        <!-- Populated dynamically via JS -->
+      <!-- WEEK TIMETABLE VIEW CONTAINER -->
+      <div id="calendar-week-view-container" class="hidden space-y-3">
+        <div id="calendar-week-timetable-scroll" class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/80 shadow-lg backdrop-blur">
+          <div id="calendar-week-timetable" class="min-w-[720px]">
+            <!-- Populated dynamically via renderWeekTimetable -->
+          </div>
+        </div>
       </div>
 
     </section>
@@ -3902,6 +3950,8 @@
       calendar: {
         year: new Date().getFullYear(),
         month: new Date().getMonth(),
+        viewMode: (typeof localStorage !== 'undefined' && localStorage.getItem('tutor_calendar_view_mode')) || 'month',
+        currentWeekStart: null,
         selectedDateStr: null,
         selectedTimeSlot: '4:30 PM',
         selectedSessionId: null,
@@ -8179,6 +8229,12 @@ alter publication supabase_realtime add table public.students_sync;`;
       // Calendar Header Localizations
       const calTodayBtn = document.getElementById('calendar-today-btn-label');
       if (calTodayBtn) calTodayBtn.textContent = t.todayBtn;
+      const lblViewMonth = document.getElementById('lbl-calendar-view-month');
+      const lblViewWeek = document.getElementById('lbl-calendar-view-week');
+      const lblExportIcs = document.getElementById('lbl-calendar-export-ics');
+      if (lblViewMonth) lblViewMonth.textContent = isHe ? 'חודש' : 'Month';
+      if (lblViewWeek) lblViewWeek.textContent = isHe ? 'שבוע' : 'Week';
+      if (lblExportIcs) lblExportIcs.textContent = isHe ? 'סנכרון (ics.)' : 'Sync (.ics)';
 
       // Month & Year Picker Localizations
       const pickerTitle = document.getElementById('modal-month-picker-title');
@@ -15920,6 +15976,10 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
     }
 
     function changeCalendarMonth(delta) {
+      if (APP_STATE.calendar.viewMode === 'week') {
+        changeCalendarWeek(delta);
+        return;
+      }
       let { year, month } = APP_STATE.calendar;
       month += delta;
       if (month < 0) {
@@ -15934,10 +15994,77 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       renderCalendar();
     }
 
+    function changeCalendarWeek(delta) {
+      if (!APP_STATE.calendar.currentWeekStart) {
+        APP_STATE.calendar.currentWeekStart = getWeekStartDate(new Date(APP_STATE.calendar.year, APP_STATE.calendar.month, 15));
+      }
+      const cur = new Date(APP_STATE.calendar.currentWeekStart);
+      cur.setDate(cur.getDate() + (delta * 7));
+      APP_STATE.calendar.currentWeekStart = cur;
+      APP_STATE.calendar.year = cur.getFullYear();
+      APP_STATE.calendar.month = cur.getMonth();
+      renderCalendar();
+    }
+
     function resetCalendarToToday() {
       const now = new Date();
       APP_STATE.calendar.year = now.getFullYear();
       APP_STATE.calendar.month = now.getMonth();
+      APP_STATE.calendar.currentWeekStart = getWeekStartDate(now);
+      renderCalendar();
+    }
+
+    function formatDateToYMD(d) {
+      if (!d) return '';
+      const date = (d instanceof Date) ? d : new Date(d);
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function isSameDate(d1, d2) {
+      if (!d1 || !d2) return false;
+      const date1 = (d1 instanceof Date) ? d1 : new Date(d1);
+      const date2 = (d2 instanceof Date) ? d2 : new Date(d2);
+      return date1.getFullYear() === date2.getFullYear() &&
+             date1.getMonth() === date2.getMonth() &&
+             date1.getDate() === date2.getDate();
+    }
+
+    function getWeekStartDate(d) {
+      const date = d ? new Date(d) : new Date();
+      const day = date.getDay(); // 0 is Sunday
+      const diff = date.getDate() - day;
+      return new Date(date.getFullYear(), date.getMonth(), diff, 0, 0, 0, 0);
+    }
+
+    function parseTimeToHoursAndMinutes(timeStr) {
+      if (!timeStr) return { hours: 16, minutes: 0 };
+      const clean = String(timeStr).trim().toUpperCase();
+      const isPm = clean.includes('PM');
+      const isAm = clean.includes('AM');
+      const numPart = clean.replace(/[^\d:]/g, '');
+      const parts = numPart.split(':');
+      let h = parseInt(parts[0], 10) || 0;
+      const m = parseInt(parts[1], 10) || 0;
+      if (isPm && h < 12) h += 12;
+      if (isAm && h === 12) h = 0;
+      return { hours: Math.min(23, Math.max(0, h)), minutes: Math.min(59, Math.max(0, m)) };
+    }
+
+    function switchCalendarViewMode(mode) {
+      APP_STATE.calendar.viewMode = mode === 'week' ? 'week' : 'month';
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('tutor_calendar_view_mode', APP_STATE.calendar.viewMode);
+        }
+      } catch (e) {}
+
+      if (APP_STATE.calendar.viewMode === 'week' && !APP_STATE.calendar.currentWeekStart) {
+        APP_STATE.calendar.currentWeekStart = getWeekStartDate(new Date(APP_STATE.calendar.year, APP_STATE.calendar.month, 15));
+      }
+
       renderCalendar();
     }
 
@@ -15981,6 +16108,36 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
     }
 
     function renderCalendar() {
+      const monthContainer = document.getElementById('calendar-month-view-container');
+      const weekContainer = document.getElementById('calendar-week-view-container');
+      const isWeek = APP_STATE.calendar.viewMode === 'week';
+
+      // Update button toggle states
+      const btnMonth = document.getElementById('btn-calendar-view-month');
+      const btnWeek = document.getElementById('btn-calendar-view-week');
+      if (btnMonth && btnWeek) {
+        if (isWeek) {
+          btnMonth.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-400 hover:text-white';
+          btnWeek.className = 'px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow';
+        } else {
+          btnMonth.className = 'px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow';
+          btnWeek.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-400 hover:text-white';
+        }
+      }
+
+      if (isWeek) {
+        if (monthContainer) monthContainer.classList.add('hidden');
+        if (weekContainer) weekContainer.classList.remove('hidden');
+        renderWeekTimetable();
+        return;
+      }
+
+      if (monthContainer) monthContainer.classList.remove('hidden');
+      if (weekContainer) weekContainer.classList.add('hidden');
+      renderMonthCalendarGrid();
+    }
+
+    function renderMonthCalendarGrid() {
       const grid = document.getElementById('calendar-days-grid');
       const weekdaysHeader = document.getElementById('calendar-weekdays-header');
       const secularBanner = document.getElementById('calendar-secular-month-year');
@@ -16071,7 +16228,297 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       }
 
       grid.innerHTML = cellsHtml;
-      lucide.createIcons();
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function renderWeekTimetable() {
+      const timetableContainer = document.getElementById('calendar-week-timetable');
+      if (!timetableContainer) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      const t = I18N[APP_STATE.lang];
+
+      if (!APP_STATE.calendar.currentWeekStart) {
+        APP_STATE.calendar.currentWeekStart = getWeekStartDate(new Date(APP_STATE.calendar.year, APP_STATE.calendar.month, 15));
+      }
+
+      const weekStart = new Date(APP_STATE.calendar.currentWeekStart);
+      const days = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(weekStart);
+        d.setDate(d.getDate() + i);
+        days.push(d);
+      }
+
+      // Update date banner display
+      const secularBanner = document.getElementById('calendar-secular-month-year');
+      const hebrewBanner = document.getElementById('calendar-hebrew-month-year');
+      const showHebrew = !!APP_STATE.enableHebrewCalendar;
+
+      const monthNamesShortEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const monthNamesShortHe = ["ינו", "פבר", "מרץ", "אפר", "מאי", "יונ", "יול", "אוג", "ספט", "אוק", "נוב", "דצמ"];
+
+      if (secularBanner) {
+        const startM = isHe ? monthNamesShortHe[days[0].getMonth()] : monthNamesShortEn[days[0].getMonth()];
+        const endM = isHe ? monthNamesShortHe[days[6].getMonth()] : monthNamesShortEn[days[6].getMonth()];
+        const startD = days[0].getDate();
+        const endD = days[6].getDate();
+        const year = days[6].getFullYear();
+
+        if (isHe) {
+          secularBanner.textContent = `${startD} ${startM} - ${endD} ${endM} ${year}`;
+        } else {
+          secularBanner.textContent = startM === endM
+            ? `${startM} ${startD} – ${endD}, ${year}`
+            : `${startM} ${startD} – ${endM} ${endD}, ${year}`;
+        }
+      }
+
+      if (hebrewBanner) {
+        if (showHebrew) {
+          const midHebrew = getHebrewDateInfo(days[3]);
+          hebrewBanner.textContent = `${midHebrew.monthName} ${midHebrew.yearHebrewNumeral}`;
+          hebrewBanner.classList.remove('hidden');
+        } else {
+          hebrewBanner.textContent = '';
+          hebrewBanner.classList.add('hidden');
+        }
+      }
+
+      updateHebrewCalendarToggleLabel();
+
+      const today = new Date();
+      const todayYMD = formatDateToYMD(today);
+
+      // Hourly slots from 8:00 AM to 8:00 PM (8 to 20)
+      const hours = [
+        { h: 8, label: '8:00 AM' },
+        { h: 9, label: '9:00 AM' },
+        { h: 10, label: '10:00 AM' },
+        { h: 11, label: '11:00 AM' },
+        { h: 12, label: '12:00 PM' },
+        { h: 13, label: '1:00 PM' },
+        { h: 14, label: '2:00 PM' },
+        { h: 15, label: '3:00 PM' },
+        { h: 16, label: '4:00 PM' },
+        { h: 17, label: '5:00 PM' },
+        { h: 18, label: '6:00 PM' },
+        { h: 19, label: '7:00 PM' },
+        { h: 20, label: '8:00 PM' }
+      ];
+
+      // Header Row
+      let html = `
+        <div class="grid grid-cols-8 border-b border-slate-800 bg-slate-950/90 text-center sticky top-0 z-10 shadow-sm backdrop-blur">
+          <div class="p-2.5 text-[11px] font-bold text-slate-400 border-r border-slate-800/80 flex items-center justify-center">
+            ${isHe ? 'שעה' : 'Time'}
+          </div>
+      `;
+
+      days.forEach((d, idx) => {
+        const ymd = formatDateToYMD(d);
+        const isToday = ymd === todayYMD;
+        const isShabbat = showHebrew && idx === 6;
+        const dayShort = t.daysOfWeek[idx];
+        const dayNum = d.getDate();
+        const hebInfo = showHebrew ? getHebrewDateInfo(d) : null;
+
+        html += `
+          <div class="p-2 border-r border-slate-800/80 last:border-r-0 ${isToday ? 'bg-amber-500/10' : ''} ${isShabbat ? 'bg-amber-950/20' : ''}">
+            <div class="text-[11px] font-bold ${isToday ? 'text-amber-400' : isShabbat ? 'text-amber-300' : 'text-slate-300'}">
+              ${dayShort}
+            </div>
+            <div class="flex items-center justify-center gap-1 mt-0.5">
+              <span class="text-sm font-bold ${isToday ? 'text-amber-400' : 'text-white'} font-mono">${dayNum}</span>
+              ${isToday ? `<span class="px-1 py-0.2 rounded-full bg-amber-500 text-slate-950 text-[8px] font-bold uppercase tracking-tight">${isHe ? 'היום' : 'Today'}</span>` : ''}
+              ${hebInfo ? `<span class="text-[9px] text-amber-500/80 font-mono">${hebInfo.dayHebrewNumeral}</span>` : ''}
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`; // Close Header Row
+
+      // Body: Time Rows
+      hours.forEach(hour => {
+        html += `
+          <div class="grid grid-cols-8 border-b border-slate-800/60 min-h-[62px]">
+            <!-- Time Gutter -->
+            <div class="p-2 text-[10px] sm:text-[11px] font-mono text-slate-400 border-r border-slate-800/80 flex items-start justify-center pt-2.5 bg-slate-950/40 select-none">
+              ${hour.label}
+            </div>
+        `;
+
+        days.forEach(d => {
+          const dateStr = formatDateToYMD(d);
+          const sessions = getScheduledSessionsForDate(d);
+          const matchedSessions = sessions.filter(s => {
+            const parsed = parseTimeToHoursAndMinutes(s.time);
+            return parsed.hours === hour.h;
+          });
+
+          if (matchedSessions.length > 0) {
+            html += `
+              <div class="p-1 border-r border-slate-800/60 last:border-r-0 space-y-1 bg-slate-900/30">
+                ${matchedSessions.map(s => {
+                  const sessStatus = s.status || 'scheduled';
+                  let badgeStyle = 'bg-brand-950/80 hover:bg-brand-900 border-brand-500/40 text-brand-200';
+                  let statusMark = '';
+                  if (sessStatus === 'completed') {
+                    badgeStyle = 'bg-emerald-950/80 hover:bg-emerald-900 border-emerald-500/50 text-emerald-200 ring-1 ring-emerald-500/20';
+                    statusMark = '<span class="text-emerald-400 font-bold text-[8px]">✓</span>';
+                  } else if (sessStatus === 'cancelled') {
+                    badgeStyle = 'bg-slate-900/80 hover:bg-slate-850 border-slate-700/60 text-slate-500 line-through';
+                    statusMark = '<span class="text-slate-500 font-bold text-[8px]">✗</span>';
+                  } else if (sessStatus === 'no_show') {
+                    badgeStyle = 'bg-rose-950/80 hover:bg-rose-900 border-rose-500/50 text-rose-200';
+                    statusMark = '<span class="text-rose-400 font-bold text-[8px]">⚠</span>';
+                  }
+
+                  const avatar = s.studentAvatar
+                    ? `<img src="${s.studentAvatar}" class="w-3.5 h-3.5 rounded-full object-cover shrink-0">`
+                    : `<span class="w-3.5 h-3.5 rounded-full bg-brand-500/30 text-brand-300 font-bold text-[8px] flex items-center justify-center shrink-0">${s.studentName.charAt(0)}</span>`;
+
+                  return `
+                    <div
+                      onclick="event.stopPropagation(); openScheduleLessonModal('${dateStr}', '${s.id}')"
+                      title="${s.studentName} (${s.time}) [${sessStatus}]"
+                      class="p-1.5 rounded-xl border ${badgeStyle} shadow-sm cursor-pointer hover:scale-[1.02] active:scale-95 transition select-none flex flex-col justify-between"
+                    >
+                      <div class="flex items-center justify-between gap-1">
+                        <div class="flex items-center gap-1 min-w-0">
+                          ${statusMark}
+                          ${avatar}
+                          <span class="font-bold text-[10px] text-white truncate">${escapeHtml(s.studentName)}</span>
+                        </div>
+                        <span class="font-mono text-[9px] text-amber-300 shrink-0 font-medium">${escapeHtml(s.time)}</span>
+                      </div>
+                      ${s.topic ? `<div class="text-[9px] text-slate-300 truncate mt-0.5 opacity-90">${escapeHtml(s.topic)}</div>` : ''}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `;
+          } else {
+            // Open slot
+            html += `
+              <div
+                onclick="openScheduleLessonModal('${dateStr}', null, '${hour.label}')"
+                class="p-1 border-r border-slate-800/60 last:border-r-0 hover:bg-slate-800/50 cursor-pointer group transition flex items-center justify-center select-none"
+                title="${isHe ? `קבע שיעור ב-${dateStr} בשעה ${hour.label}` : `Schedule lesson on ${dateStr} at ${hour.label}`}"
+              >
+                <span class="opacity-0 group-hover:opacity-100 text-[10px] text-amber-400 font-medium flex items-center gap-1 transition-opacity">
+                  <i data-lucide="plus" class="w-3 h-3"></i>
+                  <span>${isHe ? 'קבע' : 'Add'}</span>
+                </span>
+              </div>
+            `;
+          }
+        });
+
+        html += `</div>`; // Close Time Row
+      });
+
+      timetableContainer.innerHTML = html;
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function formatIcsDateTime(date) {
+      const pad = (n) => String(n).padStart(2, '0');
+      return (
+        date.getUTCFullYear() +
+        pad(date.getUTCMonth() + 1) +
+        pad(date.getUTCDate()) +
+        'T' +
+        pad(date.getUTCHours()) +
+        pad(date.getUTCMinutes()) +
+        pad(date.getUTCSeconds()) +
+        'Z'
+      );
+    }
+
+    function generateIcsCalendarString() {
+      const now = new Date();
+      const dtstamp = formatIcsDateTime(now);
+      const students = Array.isArray(APP_STATE.students) ? APP_STATE.students : [];
+
+      let lines = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//TutorPilot//TutorPilot Schedule//EN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'X-WR-CALNAME:TutorPilot Teaching Schedule',
+        'X-WR-TIMEZONE:UTC'
+      ];
+
+      students.forEach(student => {
+        const schedule = Array.isArray(student.schedule) ? student.schedule : [];
+        schedule.forEach((s, idx) => {
+          if (!s.dateStr && !s.repeatWeekly) return;
+
+          const dateStr = s.dateStr || formatDateToYMD(now);
+          const parsed = parseTimeToHoursAndMinutes(s.time);
+          const dateParts = dateStr.split('-').map(Number);
+          const start = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2], parsed.hours, parsed.minutes, 0));
+          const end = new Date(start.getTime() + (60 * 60 * 1000)); // 1 hour duration
+
+          const uid = `tutorpilot-${student.id}-${s.id || idx}-${dateStr}@tutorpilot.pages.dev`;
+          const summary = `${student.name}: ${s.topic || 'Tutoring Lesson'}`;
+          const status = s.status === 'cancelled' ? 'CANCELLED' : 'CONFIRMED';
+          const desc = `Student: ${student.name}\\nStatus: ${s.status || 'scheduled'}${s.topic ? '\\nTopic: ' + s.topic.replace(/[\r\n]+/g, ' ') : ''}`;
+
+          lines.push('BEGIN:VEVENT');
+          lines.push(`UID:${uid}`);
+          lines.push(`DTSTAMP:${dtstamp}`);
+          lines.push(`DTSTART:${formatIcsDateTime(start)}`);
+          lines.push(`DTEND:${formatIcsDateTime(end)}`);
+          if (s.repeatWeekly) {
+            lines.push('RRULE:FREQ=WEEKLY');
+          }
+          lines.push(`SUMMARY:${summary.replace(/[\r\n]+/g, ' ')}`);
+          lines.push(`DESCRIPTION:${desc}`);
+          lines.push(`STATUS:${status}`);
+          lines.push('END:VEVENT');
+        });
+      });
+
+      lines.push('END:VCALENDAR');
+      return lines.join('\r\n');
+    }
+
+    function exportCalendarToIcs() {
+      const icsData = generateIcsCalendarString();
+      const isHe = APP_STATE.lang === 'he';
+
+      try {
+        if (typeof Blob !== 'undefined' && typeof document !== 'undefined' && document.createElement) {
+          const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `tutorpilot-schedule-${formatDateToYMD(new Date())}.ics`;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            try {
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            } catch (e) {}
+          }, 100);
+        }
+      } catch (err) {
+        console.warn('ICS download trigger fallback:', err);
+      }
+
+      showToast(isHe
+        ? 'היומן יוצא בהצלחה! ניתן לייבא את קובץ ה-ics ל-Google Calendar או Apple Calendar'
+        : 'Schedule exported! Import tutorpilot-schedule.ics into Google Calendar or Apple Calendar'
+      );
     }
 
     function updateHebrewCalendarToggleLabel() {
@@ -16203,10 +16650,10 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       openScheduleLessonModal(`${y}-${m}-${d}`);
     }
 
-    function openScheduleLessonModal(dateStr, targetSessionId) {
+    function openScheduleLessonModal(dateStr, targetSessionId, defaultTimeStr) {
       APP_STATE.calendar.selectedDateStr = dateStr;
       APP_STATE.calendar.selectedSessionId = targetSessionId || null;
-      APP_STATE.calendar.isAddFormVisible = false;
+      APP_STATE.calendar.isAddFormVisible = !targetSessionId || !!defaultTimeStr;
       const modal = document.getElementById('modal-schedule-lesson');
       if (!modal) return;
 
@@ -16294,8 +16741,16 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
         }
       }
 
-      APP_STATE.calendar.selectedTimeSlot = '4:30 PM';
-      selectQuickTimeSlot('4:30 PM');
+      const chosenTime = defaultTimeStr || '4:30 PM';
+      APP_STATE.calendar.selectedTimeSlot = chosenTime;
+      selectQuickTimeSlot(chosenTime);
+      if (customTimeInput) {
+        if (defaultTimeStr && !['3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM', '6:00 PM', '6:30 PM', '7:00 PM'].includes(defaultTimeStr)) {
+          customTimeInput.value = defaultTimeStr;
+        } else {
+          customTimeInput.value = '';
+        }
+      }
 
       const repeatWeeklyCheckbox = document.getElementById('schedule-repeat-weekly');
       if (repeatWeeklyCheckbox) repeatWeeklyCheckbox.checked = false;
@@ -16303,8 +16758,17 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       // Populate existing lessons and handle view state
       renderExistingLessonsInModal();
 
+      if (defaultTimeStr || !targetSessionId) {
+        const bookingForm = document.getElementById('schedule-lesson-form');
+        const hideFormBtn = document.getElementById('btn-hide-schedule-form');
+        if (bookingForm) bookingForm.classList.remove('hidden');
+        if (hideFormBtn) hideFormBtn.classList.remove('hidden');
+      }
+
       modal.classList.remove('hidden');
-      lucide.createIcons();
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
     }
 
     function renderExistingLessonsInModal() {
@@ -16315,6 +16779,7 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       const dateObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
       const existingSessions = getScheduledSessionsForDate(dateObj);
       const isHe = APP_STATE.lang === 'he';
+      const t = I18N[APP_STATE.lang] || I18N.en;
 
       const existingContainer = document.getElementById('schedule-existing-container');
       const existingList = document.getElementById('schedule-existing-list');

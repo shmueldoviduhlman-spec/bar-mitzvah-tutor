@@ -2047,6 +2047,111 @@ const g23LevelCoursesElem = getOrCreateElem('study-level-courses');
 assert(!g23LevelClassesElem.classList.contains('hidden'), 'study-level-classes is visible for lesson creation');
 assert(g23LevelCoursesElem.classList.contains('hidden'), 'study-level-courses is hidden when inside course');
 
+// ==============================================
+// Gate 24: Calendar Week Timetable, Quick Slot Booking & .ics Sync
+// ==============================================
+console.log('\n--- Gate 24: Calendar Week Timetable, Quick Slot Booking & .ics Sync ---');
+
+// 1. HTML Verification of Week View & Sync Controls
+assert(indexHtml.includes('id="btn-calendar-view-month"'), 'HTML contains btn-calendar-view-month');
+assert(indexHtml.includes('id="btn-calendar-view-week"'), 'HTML contains btn-calendar-view-week');
+assert(indexHtml.includes('id="btn-export-calendar-ics"'), 'HTML contains btn-export-calendar-ics');
+assert(indexHtml.includes('id="calendar-month-view-container"'), 'HTML contains calendar-month-view-container');
+assert(indexHtml.includes('id="calendar-week-view-container"'), 'HTML contains calendar-week-view-container');
+assert(indexHtml.includes('id="calendar-week-timetable"'), 'HTML contains calendar-week-timetable');
+
+// 2. Function Existence
+assert(typeof sandbox.switchCalendarViewMode === 'function', 'switchCalendarViewMode is a function');
+assert(typeof sandbox.renderWeekTimetable === 'function', 'renderWeekTimetable is a function');
+assert(typeof sandbox.changeCalendarWeek === 'function', 'changeCalendarWeek is a function');
+assert(typeof sandbox.parseTimeToHoursAndMinutes === 'function', 'parseTimeToHoursAndMinutes is a function');
+assert(typeof sandbox.getWeekStartDate === 'function', 'getWeekStartDate is a function');
+assert(typeof sandbox.formatDateToYMD === 'function', 'formatDateToYMD is a function');
+assert(typeof sandbox.generateIcsCalendarString === 'function', 'generateIcsCalendarString is a function');
+assert(typeof sandbox.exportCalendarToIcs === 'function', 'exportCalendarToIcs is a function');
+
+// 3. Time Parsing Accuracy
+const t1 = sandbox.parseTimeToHoursAndMinutes('4:30 PM');
+assert(t1.hours === 16 && t1.minutes === 30, 'parseTimeToHoursAndMinutes parses 4:30 PM to 16:30');
+
+const t2 = sandbox.parseTimeToHoursAndMinutes('9:00 AM');
+assert(t2.hours === 9 && t2.minutes === 0, 'parseTimeToHoursAndMinutes parses 9:00 AM to 09:00');
+
+const t3 = sandbox.parseTimeToHoursAndMinutes('12:00 PM');
+assert(t3.hours === 12 && t3.minutes === 0, 'parseTimeToHoursAndMinutes parses 12:00 PM to 12:00');
+
+const t4 = sandbox.parseTimeToHoursAndMinutes('12:00 AM');
+assert(t4.hours === 0 && t4.minutes === 0, 'parseTimeToHoursAndMinutes parses 12:00 AM to 00:00');
+
+const t5 = sandbox.parseTimeToHoursAndMinutes('14:45');
+assert(t5.hours === 14 && t5.minutes === 45, 'parseTimeToHoursAndMinutes parses 24h 14:45 to 14:45');
+
+// 4. Week Calculation Logic
+const testDate = new Date(2026, 10, 12); // Thursday Nov 12, 2026
+const weekSun = sandbox.getWeekStartDate(testDate);
+assert(weekSun.getDay() === 0, 'getWeekStartDate returns a Sunday');
+assert(weekSun.getDate() === 8, 'Nov 12 2026 week start is Sunday Nov 8');
+
+sandbox.APP_STATE.calendar.currentWeekStart = weekSun;
+sandbox.changeCalendarWeek(1);
+const nextWeekSun = new Date(sandbox.APP_STATE.calendar.currentWeekStart);
+assert(nextWeekSun.getDate() === 15, 'changeCalendarWeek(1) advances to next Sunday Nov 15');
+
+sandbox.changeCalendarWeek(-1);
+const prevWeekSun = new Date(sandbox.APP_STATE.calendar.currentWeekStart);
+assert(prevWeekSun.getDate() === 8, 'changeCalendarWeek(-1) returns to Sunday Nov 8');
+
+// 5. Calendar View Mode Switching
+sandbox.switchCalendarViewMode('week');
+assert(sandbox.APP_STATE.calendar.viewMode === 'week', 'switchCalendarViewMode sets viewMode to week');
+const g24MonthContainer = getOrCreateElem('calendar-month-view-container');
+const g24WeekContainer = getOrCreateElem('calendar-week-view-container');
+assert(g24MonthContainer.classList.contains('hidden'), 'Month container is hidden in week mode');
+assert(!g24WeekContainer.classList.contains('hidden'), 'Week container is visible in week mode');
+
+sandbox.switchCalendarViewMode('month');
+assert(sandbox.APP_STATE.calendar.viewMode === 'month', 'switchCalendarViewMode sets viewMode to month');
+assert(!g24MonthContainer.classList.contains('hidden'), 'Month container is visible in month mode');
+assert(g24WeekContainer.classList.contains('hidden'), 'Week container is hidden in month mode');
+
+// 6. Week Timetable Rendering with Session Integration
+sandbox.switchCalendarViewMode('week');
+sandbox.APP_STATE.students = [
+  {
+    id: 'student_sarah_101',
+    name: 'Sarah Connor',
+    schedule: [
+      { id: 'sess_sarah_1', dateStr: '2026-11-10', time: '3:00 PM', topic: 'Calculus Derivatives', status: 'completed' },
+      { id: 'sess_sarah_2', dateStr: '2026-11-12', time: '5:00 PM', topic: 'Integration by Parts', status: 'scheduled' }
+    ]
+  }
+];
+sandbox.renderWeekTimetable();
+const g24TimetableHtml = getOrCreateElem('calendar-week-timetable').innerHTML;
+assert(g24TimetableHtml.includes('Sarah Connor'), 'Week timetable renders student name');
+assert(g24TimetableHtml.includes('Calculus Derivatives'), 'Week timetable renders session topic');
+assert(g24TimetableHtml.includes('3:00 PM'), 'Week timetable renders session time');
+assert(g24TimetableHtml.includes('openScheduleLessonModal'), 'Week timetable contains open slot click handlers');
+
+// 7. Quick Slot Scheduling from Open Hour
+sandbox.openScheduleLessonModal('2026-11-12', null, '2:00 PM');
+assert(sandbox.APP_STATE.calendar.selectedDateStr === '2026-11-12', 'openScheduleLessonModal sets selected date');
+assert(sandbox.APP_STATE.calendar.selectedTimeSlot === '2:00 PM', 'openScheduleLessonModal sets selected time slot');
+assert(sandbox.APP_STATE.calendar.isAddFormVisible === true, 'openScheduleLessonModal automatically expands booking form');
+const g24ScheduleModal = getOrCreateElem('modal-schedule-lesson');
+assert(!g24ScheduleModal.classList.contains('hidden'), 'Schedule lesson modal is unhidden on quick slot click');
+
+// 8. RFC 5545 iCalendar (.ics) String Generation
+const icsOutput = sandbox.generateIcsCalendarString();
+assert(icsOutput.includes('BEGIN:VCALENDAR'), 'ICS contains BEGIN:VCALENDAR');
+assert(icsOutput.includes('VERSION:2.0'), 'ICS specifies VERSION:2.0');
+assert(icsOutput.includes('PRODID:-//TutorPilot//TutorPilot Schedule//EN'), 'ICS specifies PRODID');
+assert(icsOutput.includes('BEGIN:VEVENT'), 'ICS contains BEGIN:VEVENT');
+assert(icsOutput.includes('Sarah Connor: Calculus Derivatives'), 'ICS summary includes student and topic');
+assert(icsOutput.includes('STATUS:CONFIRMED'), 'ICS declares confirmed status');
+assert(icsOutput.includes('END:VEVENT'), 'ICS contains END:VEVENT');
+assert(icsOutput.includes('END:VCALENDAR'), 'ICS concludes with END:VCALENDAR');
+
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
 console.log(`========================================\n`);
