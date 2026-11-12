@@ -6142,19 +6142,19 @@ alter publication supabase_realtime add table public.students_sync;`;
           // Check for custom courses system record with Multi-Tenant School Isolation
           const coursesRecord = data.find(row => row.id === targetCoursesId);
           if (coursesRecord && coursesRecord.completed_topics && Array.isArray(coursesRecord.completed_topics.courses)) {
-            mergeCustomCoursesWithCloud(coursesRecord.completed_topics.courses);
+            mergeCustomCoursesWithCloud(coursesRecord.completed_topics.courses, coursesRecord.updated_at);
           }
 
           // Check for custom reading system record with Multi-Tenant School Isolation
           const readingRecord = data.find(row => row.id === targetReadingId);
           if (readingRecord && readingRecord.completed_topics && Array.isArray(readingRecord.completed_topics.readingMaterials)) {
-            mergeCustomReadingWithCloud(readingRecord.completed_topics.readingMaterials);
+            mergeCustomReadingWithCloud(readingRecord.completed_topics.readingMaterials, readingRecord.updated_at);
           }
 
           // Check for custom milestones system record with Multi-Tenant School Isolation
           const milestonesRecord = data.find(row => row.id === targetMilestonesId);
           if (milestonesRecord && milestonesRecord.completed_topics && Array.isArray(milestonesRecord.completed_topics.milestones)) {
-            mergeCustomMilestonesWithCloud(milestonesRecord.completed_topics.milestones);
+            mergeCustomMilestonesWithCloud(milestonesRecord.completed_topics.milestones, milestonesRecord.updated_at);
           }
 
           // Filter students by School Workspace
@@ -6288,8 +6288,16 @@ alter publication supabase_realtime add table public.students_sync;`;
         return;
       }
 
-      // Intercept study materials cloud synchronization
-      if (newRecord && newRecord.id === '__study_materials__') {
+      // Multi-Tenant School Workspace target IDs
+      const activeSchoolId = typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770';
+      const targetSuffix = (activeSchoolId === 'school_main_770') ? '' : ('_' + (activeSchoolId || 'default').replace(/[^a-z0-9]/g, '_'));
+      const targetMaterialsId = (activeSchoolId === 'school_main_770') ? '__study_materials__' : ('__study_materials' + targetSuffix + '__');
+      const targetCoursesId = (activeSchoolId === 'school_main_770') ? '__custom_courses__' : ('__custom_courses' + targetSuffix + '__');
+      const targetReadingId = (activeSchoolId === 'school_main_770') ? '__custom_reading__' : ('__custom_reading' + targetSuffix + '__');
+      const targetMilestonesId = (activeSchoolId === 'school_main_770') ? '__custom_milestones__' : ('__custom_milestones' + targetSuffix + '__');
+
+      // Intercept study materials cloud synchronization with strict workspace match
+      if (newRecord && newRecord.id === targetMaterialsId) {
         if (newRecord.completed_topics) {
           mergeStudyMaterialsWithCloud(newRecord.completed_topics);
           renderTopics();
@@ -6298,38 +6306,53 @@ alter publication supabase_realtime add table public.students_sync;`;
         }
         return;
       }
-      if (oldRecord && oldRecord.id === '__study_materials__') {
+      if (oldRecord && oldRecord.id === targetMaterialsId) {
         return;
       }
 
-      // Intercept custom courses cloud synchronization
-      const isCoursesRecord = (newRecord && newRecord.id && newRecord.id.startsWith('__custom_courses')) || (oldRecord && oldRecord.id && oldRecord.id.startsWith('__custom_courses'));
-      if (isCoursesRecord) {
-        if (newRecord && newRecord.completed_topics && Array.isArray(newRecord.completed_topics.courses)) {
-          mergeCustomCoursesWithCloud(newRecord.completed_topics.courses);
+      // Intercept custom courses cloud synchronization with strict workspace match
+      if (newRecord && newRecord.id === targetCoursesId) {
+        if (newRecord.completed_topics && Array.isArray(newRecord.completed_topics.courses)) {
+          mergeCustomCoursesWithCloud(newRecord.completed_topics.courses, newRecord.updated_at);
           populateCourseSelector();
-          if (APP_STATE.studySection === 'custom') {
-            renderCustomCourse();
+          renderLessonsCategoryView();
+          if (APP_STATE.insideCourseId) {
+            renderCourseClassesView(APP_STATE.insideCourseId);
           }
+          renderCommandCenter();
         }
         return;
       }
-
-      // Intercept custom reading cloud synchronization
-      const isReadingRecord = (newRecord && newRecord.id && newRecord.id.startsWith('__custom_reading')) || (oldRecord && oldRecord.id && oldRecord.id.startsWith('__custom_reading'));
-      if (isReadingRecord) {
-        if (newRecord && newRecord.completed_topics && Array.isArray(newRecord.completed_topics.readingMaterials)) {
-          mergeCustomReadingWithCloud(newRecord.completed_topics.readingMaterials);
-        }
+      if (oldRecord && oldRecord.id === targetCoursesId) {
         return;
       }
 
-      // Intercept custom milestones cloud synchronization
-      const isMilestonesRecord = (newRecord && newRecord.id && newRecord.id.startsWith('__custom_milestones')) || (oldRecord && oldRecord.id && oldRecord.id.startsWith('__custom_milestones'));
-      if (isMilestonesRecord) {
-        if (newRecord && newRecord.completed_topics && Array.isArray(newRecord.completed_topics.milestones)) {
-          mergeCustomMilestonesWithCloud(newRecord.completed_topics.milestones);
+      // Intercept custom reading cloud synchronization with strict workspace match
+      if (newRecord && newRecord.id === targetReadingId) {
+        if (newRecord.completed_topics && Array.isArray(newRecord.completed_topics.readingMaterials)) {
+          mergeCustomReadingWithCloud(newRecord.completed_topics.readingMaterials, newRecord.updated_at);
+          renderReadingCategoryView();
         }
+        return;
+      }
+      if (oldRecord && oldRecord.id === targetReadingId) {
+        return;
+      }
+
+      // Intercept custom milestones cloud synchronization with strict workspace match
+      if (newRecord && newRecord.id === targetMilestonesId) {
+        if (newRecord.completed_topics && Array.isArray(newRecord.completed_topics.milestones)) {
+          mergeCustomMilestonesWithCloud(newRecord.completed_topics.milestones, newRecord.updated_at);
+          renderSpeechCategoryView();
+        }
+        return;
+      }
+      if (oldRecord && oldRecord.id === targetMilestonesId) {
+        return;
+      }
+
+      // Drop any system records from other schools so they never cross-contaminate
+      if ((newRecord && newRecord.id && newRecord.id.startsWith('__')) || (oldRecord && oldRecord.id && oldRecord.id.startsWith('__'))) {
         return;
       }
 
@@ -9990,6 +10013,16 @@ alter publication supabase_realtime add table public.students_sync;`;
       APP_STATE.customCourses = APP_STATE.customCourses.filter(c =>
         c && c.id !== 'course_bar_mitzvah_concepts' && c.id !== 'course_bar_mitzvah_chumash'
       );
+      // Multi-Tenant Isolation Check: Non-master accounts must never inherit master or other school courses
+      if (typeof isMasterAccount === 'function' && !isMasterAccount()) {
+        const myEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+        APP_STATE.customCourses = APP_STATE.customCourses.filter(c => {
+          if (!c) return false;
+          if (c.school_id && c.school_id === 'school_main_770') return false;
+          if (c.created_by && c.created_by === 'shmueldoviduhlman@gmail.com' && myEmail !== 'shmueldoviduhlman@gmail.com') return false;
+          return true;
+        });
+      }
       populateCourseSelector();
     }
 
@@ -10035,18 +10068,22 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
-    function mergeCustomCoursesWithCloud(cloudCourses) {
+    function mergeCustomCoursesWithCloud(cloudCourses, cloudUpdatedAt) {
       if (!Array.isArray(cloudCourses)) return;
       if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
 
       const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
       const resetTsStr = localStorage.getItem('tutor_curriculum_reset_ts_' + email) || localStorage.getItem('tutor_curriculum_reset_ts');
       const resetTs = resetTsStr ? parseInt(resetTsStr, 10) : 0;
+      const isMaster = typeof isMasterAccount === 'function' ? isMasterAccount() : false;
 
       // Filter out legacy Bar Mitzvah courses AND courses created before clean reset timestamp
       const validCloudCourses = cloudCourses.filter(cloudCourse => {
         if (!cloudCourse || !cloudCourse.id) return false;
         if (cloudCourse.id === 'course_bar_mitzvah_concepts' || cloudCourse.id === 'course_bar_mitzvah_chumash') return false;
+        if (!isMaster && cloudCourse.school_id && cloudCourse.school_id === 'school_main_770') return false;
+        if (!isMaster && cloudCourse.created_by && cloudCourse.created_by === 'shmueldoviduhlman@gmail.com' && email !== 'shmueldoviduhlman@gmail.com') return false;
+
         if (resetTs > 0) {
           let courseTs = 0;
           if (cloudCourse.updated_at) courseTs = new Date(cloudCourse.updated_at).getTime();
@@ -10068,16 +10105,42 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
 
       let hasNewData = false;
-      const existingIds = new Set(APP_STATE.customCourses.map(c => c.id));
+      const cloudRecordTs = cloudUpdatedAt ? new Date(cloudUpdatedAt).getTime() : Date.now();
+      const cloudIds = new Set(validCloudCourses.map(c => c.id));
+
+      // 1. Deletion reconciliation:
+      // If a course is present locally but absent from cloud courses, and was created/updated before the cloud snapshot:
+      const retainedCourses = [];
+      APP_STATE.customCourses.forEach(localCourse => {
+        if (cloudIds.has(localCourse.id)) {
+          retainedCourses.push(localCourse);
+        } else {
+          const localTs = localCourse.updated_at ? new Date(localCourse.updated_at).getTime() : (localCourse.created_at ? new Date(localCourse.created_at).getTime() : 0);
+          if (localTs <= cloudRecordTs) {
+            // Course was deleted on another device or in cloud!
+            hasNewData = true;
+          } else {
+            // Course was created offline locally AFTER cloud snapshot
+            retainedCourses.push(localCourse);
+          }
+        }
+      });
+      APP_STATE.customCourses = retainedCourses;
+
+      // 2. Add / Update reconciliation:
       validCloudCourses.forEach(cloudCourse => {
-        if (!existingIds.has(cloudCourse.id)) {
+        const localIdx = APP_STATE.customCourses.findIndex(c => c.id === cloudCourse.id);
+        if (localIdx === -1) {
           APP_STATE.customCourses.push(cloudCourse);
-          existingIds.add(cloudCourse.id);
           hasNewData = true;
         } else {
-          const idx = APP_STATE.customCourses.findIndex(c => c.id === cloudCourse.id);
-          if (idx !== -1 && cloudCourse.updated_at && (!APP_STATE.customCourses[idx].updated_at || cloudCourse.updated_at > APP_STATE.customCourses[idx].updated_at)) {
-            APP_STATE.customCourses[idx] = cloudCourse;
+          const localCourse = APP_STATE.customCourses[localIdx];
+          const localTs = localCourse.updated_at ? new Date(localCourse.updated_at).getTime() : 0;
+          const cloudTs = cloudCourse.updated_at ? new Date(cloudCourse.updated_at).getTime() : 0;
+
+          // If cloud has newer timestamp or equal timestamp with differing lessons
+          if (cloudTs >= localTs) {
+            APP_STATE.customCourses[localIdx] = cloudCourse;
             hasNewData = true;
           }
         }
@@ -10085,6 +10148,11 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       if (hasNewData) {
         saveCustomCoursesToStorage(false);
+        renderLessonsCategoryView();
+        if (APP_STATE.insideCourseId) {
+          renderCourseClassesView(APP_STATE.insideCourseId);
+        }
+        renderCommandCenter();
       }
     }
 
@@ -10154,21 +10222,42 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
-    function mergeCustomReadingWithCloud(cloudReading) {
+    function mergeCustomReadingWithCloud(cloudReading, cloudUpdatedAt) {
       if (!Array.isArray(cloudReading)) return;
       if (!Array.isArray(APP_STATE.customReadingMaterials)) APP_STATE.customReadingMaterials = [];
 
       let hasNewData = false;
-      const existingIds = new Set(APP_STATE.customReadingMaterials.map(r => r.id));
+      const cloudRecordTs = cloudUpdatedAt ? new Date(cloudUpdatedAt).getTime() : Date.now();
+      const cloudIds = new Set(cloudReading.map(r => r.id));
+
+      // 1. Deletion reconciliation:
+      const retainedReading = [];
+      APP_STATE.customReadingMaterials.forEach(localItem => {
+        if (cloudIds.has(localItem.id)) {
+          retainedReading.push(localItem);
+        } else {
+          const localTs = localItem.updated_at ? new Date(localItem.updated_at).getTime() : (localItem.created_at ? new Date(localItem.created_at).getTime() : 0);
+          if (localTs <= cloudRecordTs) {
+            hasNewData = true;
+          } else {
+            retainedReading.push(localItem);
+          }
+        }
+      });
+      APP_STATE.customReadingMaterials = retainedReading;
+
+      // 2. Add / Update reconciliation:
       cloudReading.forEach(item => {
-        if (!existingIds.has(item.id)) {
+        const localIdx = APP_STATE.customReadingMaterials.findIndex(r => r.id === item.id);
+        if (localIdx === -1) {
           APP_STATE.customReadingMaterials.push(item);
-          existingIds.add(item.id);
           hasNewData = true;
         } else {
-          const idx = APP_STATE.customReadingMaterials.findIndex(r => r.id === item.id);
-          if (idx !== -1 && item.updated_at && (!APP_STATE.customReadingMaterials[idx].updated_at || item.updated_at > APP_STATE.customReadingMaterials[idx].updated_at)) {
-            APP_STATE.customReadingMaterials[idx] = item;
+          const localItem = APP_STATE.customReadingMaterials[localIdx];
+          const localTs = localItem.updated_at ? new Date(localItem.updated_at).getTime() : 0;
+          const cloudTs = item.updated_at ? new Date(item.updated_at).getTime() : 0;
+          if (cloudTs >= localTs) {
+            APP_STATE.customReadingMaterials[localIdx] = item;
             hasNewData = true;
           }
         }
@@ -10176,6 +10265,7 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       if (hasNewData) {
         saveCustomReadingToStorage(false);
+        renderReadingCategoryView();
       }
     }
 
@@ -10606,21 +10696,42 @@ Guidance: ${guidance || 'Provide clear target words, progressive phonetic diffic
       }
     }
 
-    function mergeCustomMilestonesWithCloud(cloudMilestones) {
+    function mergeCustomMilestonesWithCloud(cloudMilestones, cloudUpdatedAt) {
       if (!Array.isArray(cloudMilestones)) return;
       if (!Array.isArray(APP_STATE.customMilestones)) APP_STATE.customMilestones = [];
 
       let hasNewData = false;
-      const existingIds = new Set(APP_STATE.customMilestones.map(m => m.id));
+      const cloudRecordTs = cloudUpdatedAt ? new Date(cloudUpdatedAt).getTime() : Date.now();
+      const cloudIds = new Set(cloudMilestones.map(m => m.id));
+
+      // 1. Deletion reconciliation:
+      const retainedMilestones = [];
+      APP_STATE.customMilestones.forEach(localItem => {
+        if (cloudIds.has(localItem.id)) {
+          retainedMilestones.push(localItem);
+        } else {
+          const localTs = localItem.updated_at ? new Date(localItem.updated_at).getTime() : (localItem.created_at ? new Date(localItem.created_at).getTime() : 0);
+          if (localTs <= cloudRecordTs) {
+            hasNewData = true;
+          } else {
+            retainedMilestones.push(localItem);
+          }
+        }
+      });
+      APP_STATE.customMilestones = retainedMilestones;
+
+      // 2. Add / Update reconciliation:
       cloudMilestones.forEach(item => {
-        if (!existingIds.has(item.id)) {
+        const localIdx = APP_STATE.customMilestones.findIndex(m => m.id === item.id);
+        if (localIdx === -1) {
           APP_STATE.customMilestones.push(item);
-          existingIds.add(item.id);
           hasNewData = true;
         } else {
-          const idx = APP_STATE.customMilestones.findIndex(m => m.id === item.id);
-          if (idx !== -1 && item.updated_at && (!APP_STATE.customMilestones[idx].updated_at || item.updated_at > APP_STATE.customMilestones[idx].updated_at)) {
-            APP_STATE.customMilestones[idx] = item;
+          const localItem = APP_STATE.customMilestones[localIdx];
+          const localTs = localItem.updated_at ? new Date(localItem.updated_at).getTime() : 0;
+          const cloudTs = item.updated_at ? new Date(item.updated_at).getTime() : 0;
+          if (cloudTs >= localTs) {
+            APP_STATE.customMilestones[localIdx] = item;
             hasNewData = true;
           }
         }
@@ -10628,6 +10739,7 @@ Guidance: ${guidance || 'Provide clear target words, progressive phonetic diffic
 
       if (hasNewData) {
         saveCustomMilestonesToStorage(false);
+        renderSpeechCategoryView();
       }
     }
 
@@ -11924,6 +12036,7 @@ Return STRICT JSON ONLY:
       }
       saveCustomCoursesToStorage(true);
       renderLessonsCategoryView();
+      renderCommandCenter();
       showToast(isHe ? 'הקורס נמחק' : 'Course deleted');
     }
 
@@ -13159,28 +13272,18 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
       course.updated_at = new Date().toISOString();
       saveCustomCoursesToStorage(true);
       renderLessonsCategoryView();
+      if (APP_STATE.insideCourseId === courseId) {
+        renderCourseClassesView(courseId);
+      }
+      renderCommandCenter();
       showToast(isHe ? 'השיעור נמחק' : 'Lesson deleted');
     }
 
     function handleDeleteActiveCustomCourse() {
-      const course = (APP_STATE.customCourses || []).find(c => c.id === APP_STATE.activeCourseId);
-      if (!course) return;
-
-      const isHe = APP_STATE.lang === 'he';
-      const title = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
-      if (!confirm(isHe ? `האם למחוק את הקורס "${title}" וכל השיעורים שבו?` : `Are you sure you want to delete course "${title}" and all its lessons?`)) {
-        return;
+      const courseId = APP_STATE.activeCourseId || APP_STATE.insideCourseId;
+      if (courseId) {
+        handleDeleteCustomCourseById(courseId);
       }
-
-      APP_STATE.customCourses = APP_STATE.customCourses.filter(c => c.id !== course.id);
-      if (APP_STATE.customCourses.length > 0) {
-        APP_STATE.activeCourseId = APP_STATE.customCourses[0].id;
-      } else {
-        APP_STATE.activeCourseId = null;
-      }
-      saveCustomCoursesToStorage(true);
-      renderLessonsCategoryView();
-      showToast(isHe ? 'הקורס נמחק' : 'Course deleted');
     }
 
     // ==============================================

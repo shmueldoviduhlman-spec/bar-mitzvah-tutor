@@ -2298,6 +2298,97 @@ assert(g25PrintPreview.includes('Introduce dynamic equilibrium'), 'Printable she
 assert(g25PrintPreview.includes('Catalysts speed up reaction rates'), 'Printable sheet includes pitfalls');
 assert(g25PrintPreview.includes('TutorPilot Educator Plan'), 'Printable sheet includes header branding');
 
+// ==============================================
+// Gate 26: Cross-Account Realtime Isolation & Deletion Synchronization Bug Fix
+// ==============================================
+console.log('\n--- Gate 26: Cross-Account Realtime Isolation & Deletion Sync ---');
+
+// 1. External Account Realtime Isolation:
+// Set current user as external tutor with isolated school
+sandbox.APP_STATE.currentUser = {
+  id: 'usr_ext_999',
+  email: 'external_tutor@academy.org',
+  role: 'tutor',
+  school_id: 'school_ext_999'
+};
+sandbox.APP_STATE.customCourses = [
+  { id: 'course_ext_1', title_en: 'External Biology', school_id: 'school_ext_999', lessons: [] }
+];
+
+// Verify targetCoursesId for external user is scoped
+const g26SchoolId = sandbox.getActiveSchoolId();
+assert(g26SchoolId === 'school_ext_999', 'External user has school_ext_999 active school ID');
+
+// 2. Deletion Synchronization in mergeCustomCoursesWithCloud:
+// Device A deleted course_ext_1, so cloudCourses now only has course_ext_2
+const nowIso = new Date().toISOString();
+const cloudCoursesUpdate = [
+  { id: 'course_ext_2', title_en: 'External Chemistry', school_id: 'school_ext_999', updated_at: nowIso, lessons: [] }
+];
+
+// Call mergeCustomCoursesWithCloud with the newer cloud snapshot
+sandbox.mergeCustomCoursesWithCloud(cloudCoursesUpdate, nowIso);
+
+// Verify course_ext_1 was deleted and course_ext_2 was added
+const g26CourseIds = sandbox.APP_STATE.customCourses.map(c => c.id);
+assert(!g26CourseIds.includes('course_ext_1'), 'mergeCustomCoursesWithCloud removed deleted course_ext_1');
+assert(g26CourseIds.includes('course_ext_2'), 'mergeCustomCoursesWithCloud added course_ext_2');
+
+// 3. Lesson Deletion Synchronization:
+// Course has 2 lessons locally
+const courseWithLessons = sandbox.APP_STATE.customCourses.find(c => c.id === 'course_ext_2');
+courseWithLessons.lessons = [
+  { id: 'les_1', title_en: 'Lesson 1' },
+  { id: 'les_2', title_en: 'Lesson 2' }
+];
+const localUpdateIso = new Date(Date.now() + 1000).toISOString();
+courseWithLessons.updated_at = localUpdateIso;
+
+// Cloud update has les_2 deleted (only les_1 remains) with newer timestamp
+const cloudUpdateIso = new Date(Date.now() + 2000).toISOString();
+const cloudUpdatedCourse = {
+  id: 'course_ext_2',
+  title_en: 'External Chemistry',
+  school_id: 'school_ext_999',
+  updated_at: cloudUpdateIso,
+  lessons: [{ id: 'les_1', title_en: 'Lesson 1' }]
+};
+
+sandbox.mergeCustomCoursesWithCloud([cloudUpdatedCourse], cloudUpdateIso);
+const updatedCourse = sandbox.APP_STATE.customCourses.find(c => c.id === 'course_ext_2');
+assert(updatedCourse && updatedCourse.lessons.length === 1, 'mergeCustomCoursesWithCloud synced lesson deletion (only 1 lesson remains)');
+assert(updatedCourse && updatedCourse.lessons[0].id === 'les_1', 'Retained lesson is les_1');
+
+// 4. Cross-Tenant Sanity Filter on Storage Load:
+// If an external user's storage was somehow contaminated with super_admin courses
+sandbox.APP_STATE.customCourses.push({
+  id: 'course_leaked_super',
+  title_en: 'Super Admin Secret Course',
+  school_id: 'school_main_770',
+  created_by: 'shmueldoviduhlman@gmail.com',
+  lessons: []
+});
+// Save to local storage mock
+const extStorageKey = sandbox.getCustomCoursesStorageKey();
+sandbox.localStorage.setItem(extStorageKey, JSON.stringify(sandbox.APP_STATE.customCourses));
+
+// Load from storage as external user
+sandbox.loadCustomCoursesFromStorage();
+const sanitizedCourseIds = sandbox.APP_STATE.customCourses.map(c => c.id);
+assert(!sanitizedCourseIds.includes('course_leaked_super'), 'loadCustomCoursesFromStorage purges cross-tenant master courses');
+
+// 5. handleDeleteCustomCourseById resets insideCourseId and activeCourseId
+sandbox.APP_STATE.insideCourseId = 'course_ext_2';
+sandbox.APP_STATE.activeCourseId = 'course_ext_2';
+sandbox.handleDeleteCustomCourseById('course_ext_2');
+assert(sandbox.APP_STATE.insideCourseId === null, 'handleDeleteCustomCourseById cleanly resets insideCourseId');
+assert(sandbox.APP_STATE.customCourses.length === 0, 'Course was removed from customCourses array');
+
+// 6. Function existence
+assert(typeof sandbox.handleDeleteCustomCourseById === 'function', 'handleDeleteCustomCourseById is a function');
+assert(typeof sandbox.handleDeleteCustomLesson === 'function', 'handleDeleteCustomLesson is a function');
+assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDeleteActiveCustomCourse is a function');
+
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
 console.log(`========================================\n`);
