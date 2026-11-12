@@ -1655,6 +1655,257 @@ sandbox.executeAiToolCall({
 assert(aiStudent.subject === 'AP European History', 'AI tool successfully updated student subject');
 assert(aiStudent.gradeOrDate === 'Grade 11', 'AI tool successfully updated student gradeOrDate');
 
+// ==============================================
+// GATE 21: PROFESSIONAL STUDENT CRM & ATTENDANCE TRACKING
+// ==============================================
+console.log('\n--- Gate 21: Professional Student CRM & Attendance Tracking ---');
+
+// 1. HTML Markup & CRM Elements Presence
+assert(indexHtml.includes('id="student-roster-filter-bar"'), 'HTML contains student-roster-filter-bar');
+assert(indexHtml.includes('id="filter-btn-all"'), 'HTML contains filter-btn-all');
+assert(indexHtml.includes('id="filter-btn-active"'), 'HTML contains filter-btn-active');
+assert(indexHtml.includes('id="filter-btn-paused"'), 'HTML contains filter-btn-paused');
+assert(indexHtml.includes('id="filter-btn-completed"'), 'HTML contains filter-btn-completed');
+assert(indexHtml.includes('id="modal-parent-recap"'), 'HTML contains modal-parent-recap');
+assert(indexHtml.includes('id="recap-message-textarea"'), 'HTML contains recap-message-textarea');
+assert(indexHtml.includes('id="new-student-grade-level"'), 'HTML contains new-student-grade-level select');
+assert(indexHtml.includes('id="new-student-status"'), 'HTML contains new-student-status select');
+assert(indexHtml.includes('id="new-student-guardian-name"'), 'HTML contains new-student-guardian-name input');
+assert(indexHtml.includes('id="new-student-guardian-phone"'), 'HTML contains new-student-guardian-phone input');
+assert(indexHtml.includes('id="new-student-guardian-email"'), 'HTML contains new-student-guardian-email input');
+assert(indexHtml.includes('id="new-student-hourly-rate"'), 'HTML contains new-student-hourly-rate input');
+
+// 2. Student Creation with Universal CRM Schema
+getOrCreateElem('new-student-name').value = 'Liam Chen';
+getOrCreateElem('new-student-parsha-select').value = 'AP Chemistry';
+getOrCreateElem('new-student-date').value = 'June 2026';
+getOrCreateElem('new-student-grade-level').value = 'High School (9th - 12th)';
+getOrCreateElem('new-student-status').value = 'active';
+getOrCreateElem('new-student-guardian-name').value = 'Mei Chen';
+getOrCreateElem('new-student-guardian-phone').value = '+1 555-0144';
+getOrCreateElem('new-student-guardian-email').value = 'mei.chen@example.com';
+getOrCreateElem('new-student-hourly-rate').value = '$75/hr';
+getOrCreateElem('new-student-notes').value = 'Focusing on thermodynamics';
+
+sandbox.handleCreateStudent({ preventDefault() {} });
+const liamStudent = sandbox.APP_STATE.students.find(s => s.name === 'Liam Chen');
+assert(!!liamStudent, 'Liam Chen created in APP_STATE');
+assert(liamStudent.gradeLevel === 'High School (9th - 12th)', 'Student stores gradeLevel field');
+assert(liamStudent.status === 'active', 'Student stores status field');
+assert(liamStudent.parentContact && liamStudent.parentContact.name === 'Mei Chen', 'Student stores guardian name');
+assert(liamStudent.parentContact && liamStudent.parentContact.phone === '+1 555-0144', 'Student stores guardian phone');
+assert(liamStudent.parentContact && liamStudent.parentContact.email === 'mei.chen@example.com', 'Student stores guardian email');
+assert(liamStudent.hourlyRate === '$75/hr', 'Student stores hourlyRate field');
+
+// 3. Roster Status Filtering & Counter Badges
+assert(typeof sandbox.setStudentRosterFilter === 'function', 'setStudentRosterFilter is a function');
+
+// Create a paused student and a completed student for filtering verification
+const pausedStudent = {
+  id: 'stu_paused_1',
+  name: 'Noah Patel',
+  status: 'paused',
+  gradeLevel: 'College / University',
+  parentContact: { name: 'Anita Patel', phone: '+1 555-0188', email: 'anita@example.com' },
+  hourlyRate: '$80/hr',
+  schedule: [],
+  skills: sandbox.getDefaultStudentSkills()
+};
+const completedStudent = {
+  id: 'stu_completed_1',
+  name: 'Chloe Davis',
+  status: 'completed',
+  gradeLevel: 'High School (9th - 12th)',
+  parentContact: { name: 'Mark Davis', phone: '+1 555-0199', email: 'mark@example.com' },
+  hourlyRate: '$70/hr',
+  schedule: [],
+  skills: sandbox.getDefaultStudentSkills()
+};
+sandbox.APP_STATE.students.push(pausedStudent, completedStudent);
+
+sandbox.setStudentRosterFilter('active');
+assert(sandbox.APP_STATE.studentRosterFilter === 'active', 'Filter set to active');
+sandbox.renderStudents();
+let rosterHtml = getOrCreateElem('students-list').innerHTML;
+assert(rosterHtml.includes('Liam Chen'), 'Active filter displays active student Liam');
+assert(!rosterHtml.includes('Noah Patel'), 'Active filter hides paused student Noah');
+assert(!rosterHtml.includes('Chloe Davis'), 'Active filter hides completed student Chloe');
+
+sandbox.setStudentRosterFilter('paused');
+sandbox.renderStudents();
+rosterHtml = getOrCreateElem('students-list').innerHTML;
+assert(!rosterHtml.includes('Liam Chen'), 'Paused filter hides active student Liam');
+assert(rosterHtml.includes('Noah Patel'), 'Paused filter displays paused student Noah');
+
+sandbox.setStudentRosterFilter('completed');
+sandbox.renderStudents();
+rosterHtml = getOrCreateElem('students-list').innerHTML;
+assert(rosterHtml.includes('Chloe Davis'), 'Completed filter displays completed student Chloe');
+
+sandbox.setStudentRosterFilter('all');
+sandbox.renderStudents();
+rosterHtml = getOrCreateElem('students-list').innerHTML;
+assert(rosterHtml.includes('Liam Chen') && rosterHtml.includes('Noah Patel') && rosterHtml.includes('Chloe Davis'), 'All filter displays all students');
+
+// 4. Student Drawer CRM Card & Inline Updates
+sandbox.openStudentDrawer(liamStudent.id);
+const crmDrawerHtml = getOrCreateElem('drawer-body-content').innerHTML;
+assert(crmDrawerHtml.includes('Mei Chen'), 'Drawer renders guardian name');
+assert(crmDrawerHtml.includes('+1 555-0144'), 'Drawer renders guardian phone');
+assert(crmDrawerHtml.includes('mei.chen@example.com'), 'Drawer renders guardian email');
+assert(crmDrawerHtml.includes('$75/hr'), 'Drawer renders hourly rate');
+assert(crmDrawerHtml.includes('wa.me/15550144'), 'Drawer renders 1-click WhatsApp link');
+assert(crmDrawerHtml.includes('tel:+1 555-0144'), 'Drawer renders 1-click Call link');
+assert(crmDrawerHtml.includes('mailto:mei.chen@example.com'), 'Drawer renders 1-click Email link');
+
+// Test inline updating
+assert(typeof sandbox.updateStudentDrawerField === 'function', 'updateStudentDrawerField is a function');
+assert(typeof sandbox.updateStudentDrawerGuardianField === 'function', 'updateStudentDrawerGuardianField is a function');
+
+sandbox.updateStudentDrawerField(liamStudent.id, 'hourlyRate', '$85/hr');
+assert(liamStudent.hourlyRate === '$85/hr', 'updateStudentDrawerField updated hourlyRate to $85/hr');
+
+sandbox.updateStudentDrawerGuardianField(liamStudent.id, 'phone', '+1 555-9999');
+assert(liamStudent.parentContact.phone === '+1 555-9999', 'updateStudentDrawerGuardianField updated guardian phone');
+
+// 5. Attendance & Session Logging
+liamStudent.schedule = [
+  { id: 'sess_chem_1', dateStr: '2026-11-20', time: '5:00 PM', topic: 'Thermodynamics & Kinetics', status: 'scheduled' }
+];
+
+assert(typeof sandbox.updateSessionAttendance === 'function', 'updateSessionAttendance is a function');
+
+// Transition to completed
+sandbox.updateSessionAttendance(liamStudent.id, 'sess_chem_1', 'completed');
+assert(liamStudent.schedule[0].status === 'completed', 'Session status updated to completed');
+assert(typeof liamStudent.schedule[0].completedAt === 'string', 'completedAt timestamp recorded on session completion');
+
+// Transition to cancelled
+sandbox.updateSessionAttendance(liamStudent.id, 'sess_chem_1', 'cancelled');
+assert(liamStudent.schedule[0].status === 'cancelled', 'Session status updated to cancelled');
+assert(liamStudent.schedule[0].completedAt === null, 'completedAt cleared on cancellation');
+
+// Transition to no_show
+sandbox.updateSessionAttendance(liamStudent.id, 'sess_chem_1', 'no_show');
+assert(liamStudent.schedule[0].status === 'no_show', 'Session status updated to no_show');
+
+// Day Cell Rendering with Attendance Styles
+const dayCellCompletedHtml = sandbox.renderDayCell(20, '', true, false, '2026-11-20', 5, [
+  { ...liamStudent.schedule[0], status: 'completed', studentName: 'Liam Chen', studentAvatar: '' }
+]);
+assert(dayCellCompletedHtml.includes('✓'), 'renderDayCell renders checkmark for completed session');
+assert(dayCellCompletedHtml.includes('emerald'), 'renderDayCell applies emerald styling for completed session');
+
+const dayCellNoShowHtml = sandbox.renderDayCell(20, '', true, false, '2026-11-20', 5, [
+  { ...liamStudent.schedule[0], status: 'no_show', studentName: 'Liam Chen', studentAvatar: '' }
+]);
+assert(dayCellNoShowHtml.includes('⚠'), 'renderDayCell renders warning icon for no_show session');
+
+// 6. Automated 1-Tap Parent Lesson Recap
+assert(typeof sandbox.generateParentRecapText === 'function', 'generateParentRecapText is a function');
+const recapEn = sandbox.generateParentRecapText(liamStudent, liamStudent.schedule[0]);
+assert(recapEn.includes('Liam Chen'), 'English recap note includes student name');
+assert(recapEn.includes('Thermodynamics & Kinetics'), 'English recap note includes session topic');
+assert(recapEn.includes('Status:'), 'English recap note includes status label');
+
+sandbox.APP_STATE.lang = 'he';
+const recapHe = sandbox.generateParentRecapText(liamStudent, liamStudent.schedule[0]);
+assert(recapHe.includes('Liam Chen'), 'Hebrew recap note includes student name');
+assert(recapHe.includes('עדכון קצר על השיעור'), 'Hebrew recap note includes Hebrew header');
+sandbox.APP_STATE.lang = 'en';
+
+assert(typeof sandbox.openParentRecapModal === 'function', 'openParentRecapModal is a function');
+assert(typeof sandbox.closeParentRecapModal === 'function', 'closeParentRecapModal is a function');
+assert(typeof sandbox.copyParentRecapText === 'function', 'copyParentRecapText is a function');
+assert(typeof sandbox.sendParentRecapWhatsApp === 'function', 'sendParentRecapWhatsApp is a function');
+assert(typeof sandbox.sendParentRecapEmail === 'function', 'sendParentRecapEmail is a function');
+
+sandbox.openParentRecapModal(liamStudent.id, 'sess_chem_1');
+assert(sandbox.APP_STATE.activeRecapSession.sessionId === 'sess_chem_1', 'activeRecapSession recorded in APP_STATE');
+assert(!getOrCreateElem('modal-parent-recap').classList.contains('hidden'), 'modal-parent-recap is unhidden');
+assert(getOrCreateElem('recap-message-textarea').value.includes('Liam Chen'), 'Recap textarea populated with note');
+
+sandbox.closeParentRecapModal();
+assert(sandbox.APP_STATE.activeRecapSession === null, 'activeRecapSession reset to null on modal close');
+
+// 7. Multi-Model AI Tool Calling for CRM & Attendance
+const phase2ToolsDecl = sandbox.buildGeminiToolsDeclaration ? sandbox.buildGeminiToolsDeclaration() : [];
+const p2ToolList = (phase2ToolsDecl[0] && phase2ToolsDecl[0].functionDeclarations) ? phase2ToolsDecl[0].functionDeclarations : [];
+
+const p2AddStudentTool = p2ToolList.find(t => t.name === 'add_student');
+assert(!!p2AddStudentTool.parameters.properties.gradeLevel, 'add_student tool declares gradeLevel');
+assert(!!p2AddStudentTool.parameters.properties.status, 'add_student tool declares status');
+assert(!!p2AddStudentTool.parameters.properties.guardianName, 'add_student tool declares guardianName');
+assert(!!p2AddStudentTool.parameters.properties.guardianPhone, 'add_student tool declares guardianPhone');
+assert(!!p2AddStudentTool.parameters.properties.hourlyRate, 'add_student tool declares hourlyRate');
+
+const p2UpdateStudentTool = p2ToolList.find(t => t.name === 'update_student');
+assert(!!p2UpdateStudentTool.parameters.properties.gradeLevel, 'update_student tool declares gradeLevel');
+assert(!!p2UpdateStudentTool.parameters.properties.status, 'update_student tool declares status');
+assert(!!p2UpdateStudentTool.parameters.properties.guardianName, 'update_student tool declares guardianName');
+assert(!!p2UpdateStudentTool.parameters.properties.hourlyRate, 'update_student tool declares hourlyRate');
+
+const logAttendanceTool = p2ToolList.find(t => t.name === 'log_session_attendance');
+assert(!!logAttendanceTool, 'buildGeminiToolsDeclaration declares log_session_attendance tool');
+assert(!!logAttendanceTool.parameters.properties.studentNameOrId, 'log_session_attendance requires studentNameOrId');
+assert(!!logAttendanceTool.parameters.properties.date, 'log_session_attendance requires date');
+assert(!!logAttendanceTool.parameters.properties.status, 'log_session_attendance requires status');
+
+// Execute add_student with full CRM fields via AI Tool Call
+sandbox.executeAiToolCall({
+  name: 'add_student',
+  args: {
+    name: 'Emma Watson',
+    subject: 'AP English Literature',
+    gradeLevel: 'High School (9th - 12th)',
+    status: 'active',
+    guardianName: 'Chris Watson',
+    guardianPhone: '+1 555-4321',
+    guardianEmail: 'chris.watson@example.com',
+    hourlyRate: '$90/hr',
+    notes: 'Preparing for AP exam essay sections'
+  }
+});
+
+const emmaStudent = sandbox.APP_STATE.students.find(s => s.name === 'Emma Watson');
+assert(!!emmaStudent, 'AI tool created Emma Watson in APP_STATE');
+assert(emmaStudent.gradeLevel === 'High School (9th - 12th)', 'AI created student with gradeLevel');
+assert(emmaStudent.status === 'active', 'AI created student with status active');
+assert(emmaStudent.hourlyRate === '$90/hr', 'AI created student with hourlyRate $90/hr');
+assert(emmaStudent.parentContact.name === 'Chris Watson', 'AI created student with guardian name');
+assert(emmaStudent.parentContact.phone === '+1 555-4321', 'AI created student with guardian phone');
+assert(emmaStudent.parentContact.email === 'chris.watson@example.com', 'AI created student with guardian email');
+
+// Execute update_student with CRM fields via AI Tool Call
+sandbox.executeAiToolCall({
+  name: 'update_student',
+  args: {
+    studentNameOrId: 'Emma Watson',
+    status: 'paused',
+    hourlyRate: '$95/hr',
+    guardianPhone: '+1 555-8888'
+  }
+});
+assert(emmaStudent.status === 'paused', 'AI tool updated status to paused');
+assert(emmaStudent.hourlyRate === '$95/hr', 'AI tool updated hourlyRate to $95/hr');
+assert(emmaStudent.parentContact.phone === '+1 555-8888', 'AI tool updated guardian phone');
+
+// Execute log_session_attendance via AI Tool Call
+sandbox.executeAiToolCall({
+  name: 'log_session_attendance',
+  args: {
+    studentNameOrId: 'Emma Watson',
+    date: '2026-11-25',
+    status: 'completed',
+    notes: 'Analyzed King Lear Act III'
+  }
+});
+const emmaSession = emmaStudent.schedule.find(s => s.dateStr === '2026-11-25');
+assert(!!emmaSession, 'AI log_session_attendance created session entry on date');
+assert(emmaSession.status === 'completed', 'AI session attendance set to completed');
+assert(typeof emmaSession.completedAt === 'string', 'AI session attendance recorded completedAt');
+assert(emmaSession.topic.includes('King Lear'), 'AI session notes preserved in session topic');
+
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
 console.log(`========================================\n`);

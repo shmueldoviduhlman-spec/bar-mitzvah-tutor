@@ -1071,7 +1071,25 @@
       </div>
 
       <!-- Active Student Selector & Overview -->
-      <div id="students-container" class="space-y-6">
+      <div id="students-container" class="space-y-4">
+        <!-- Roster Filter Bar -->
+        <div id="student-roster-filter-bar" class="flex items-center justify-between gap-3 flex-wrap">
+          <div class="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-medium">
+            <button type="button" onclick="setStudentRosterFilter('all')" id="filter-btn-all" class="px-2.5 py-1 rounded-lg bg-brand-600 text-white font-semibold transition flex items-center gap-1 shadow-sm">
+              <span id="lbl-filter-all">All</span> <span id="count-filter-all" class="text-[10px] opacity-75 font-mono"></span>
+            </button>
+            <button type="button" onclick="setStudentRosterFilter('active')" id="filter-btn-active" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1">
+              <span id="lbl-filter-active">Active</span> <span id="count-filter-active" class="text-[10px] opacity-75 font-mono"></span>
+            </button>
+            <button type="button" onclick="setStudentRosterFilter('paused')" id="filter-btn-paused" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1">
+              <span id="lbl-filter-paused">Paused</span> <span id="count-filter-paused" class="text-[10px] opacity-75 font-mono"></span>
+            </button>
+            <button type="button" onclick="setStudentRosterFilter('completed')" id="filter-btn-completed" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1">
+              <span id="lbl-filter-completed">Completed</span> <span id="count-filter-completed" class="text-[10px] opacity-75 font-mono"></span>
+            </button>
+          </div>
+        </div>
+
         <!-- If empty state -->
         <div id="students-empty" class="text-center py-12 px-4 border border-dashed border-slate-800 rounded-2xl bg-slate-900/40">
           <div class="w-14 h-14 mx-auto rounded-full bg-slate-800/80 flex items-center justify-center text-slate-400 mb-3">
@@ -2822,6 +2840,59 @@
           <input type="text" id="new-student-date" name="student_date_fresh_1793734664717" autocomplete="off" autocorrect="off" placeholder="e.g. Grade 10 / June 2026, SAT Nov 2026" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
         </div>
 
+        <!-- Grade Level Stage & Status -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label id="lbl-student-grade-level" class="block text-xs font-medium text-slate-300 mb-1">Academic Stage</label>
+            <select id="new-student-grade-level" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+              <option value="Standard / All Levels">Standard / All Levels</option>
+              <option value="Elementary (K - 5th)">Elementary (K - 5th)</option>
+              <option value="Middle School (6th - 8th)">Middle School (6th - 8th)</option>
+              <option value="High School (9th - 12th)">High School (9th - 12th)</option>
+              <option value="College / University">College / University</option>
+              <option value="Adult Learner">Adult Learner</option>
+            </select>
+          </div>
+          <div>
+            <label id="lbl-student-status" class="block text-xs font-medium text-slate-300 mb-1">Enrollment Status</label>
+            <select id="new-student-status" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+              <option value="active">Active</option>
+              <option value="paused">Paused</option>
+              <option value="completed">Completed / Graduated</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Parent / Guardian Contact & Billing Sub-Card -->
+        <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span id="lbl-guardian-section-title" class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+              <i data-lucide="phone-call" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>Parent / Guardian & Billing (Optional)</span>
+            </span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <label id="lbl-guardian-name" class="block text-[11px] font-medium text-slate-400 mb-0.5">Guardian Name</label>
+              <input type="text" id="new-student-guardian-name" placeholder="e.g. Rachel Cohen" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+            </div>
+            <div>
+              <label id="lbl-guardian-phone" class="block text-[11px] font-medium text-slate-400 mb-0.5">Phone / WhatsApp</label>
+              <input type="tel" id="new-student-guardian-phone" placeholder="e.g. +1 555-0192" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <label id="lbl-guardian-email" class="block text-[11px] font-medium text-slate-400 mb-0.5">Guardian Email</label>
+              <input type="email" id="new-student-guardian-email" placeholder="e.g. parent@example.com" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+            </div>
+            <div>
+              <label id="lbl-hourly-rate" class="block text-[11px] font-medium text-slate-400 mb-0.5">Lesson Fee / Hourly Rate</label>
+              <input type="text" id="new-student-hourly-rate" placeholder="e.g. $60/hr or 200 ₪" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+            </div>
+          </div>
+        </div>
+
         <div>
           <label id="lbl-student-notes" class="block text-xs font-medium text-slate-300 mb-1">Tutor Initial Notes</label>
           <textarea id="new-student-notes" name="student_notes_fresh_1793734664717" autocomplete="off" autocorrect="off" rows="2" placeholder="e.g. Needs focus on fundamentals, preparing for upcoming exam, plays soccer" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
@@ -2836,6 +2907,86 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: PARENT SESSION RECAP & ATTENDANCE       -->
+  <!-- ============================================== -->
+  <div id="modal-parent-recap" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 hidden backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto space-y-4">
+      <button onclick="closeParentRecapModal()" class="absolute top-4 right-4 rtl:right-auto rtl:left-4 text-slate-400 hover:text-white transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-2.5 border-b border-slate-800 pb-3">
+        <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+          <i data-lucide="share-2" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 id="modal-recap-title" class="text-base font-bold text-white">Session Recap & Parent Update</h3>
+          <p id="modal-recap-subtitle" class="text-xs text-slate-400">Automated session note ready to send via WhatsApp or Email</p>
+        </div>
+      </div>
+
+      <!-- Quick Session Info Banner -->
+      <div id="recap-session-meta" class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between flex-wrap gap-2 text-xs">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Editable Message Textarea -->
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between text-xs">
+          <label id="lbl-recap-message-text" class="font-medium text-slate-300">Recap Message Text</label>
+          <span class="text-[10px] text-slate-500 font-mono">Editable before sending</span>
+        </div>
+        <textarea
+          id="recap-message-textarea"
+          rows="8"
+          class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 font-sans leading-relaxed resize-none"
+        ></textarea>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between gap-2 pt-2 flex-wrap">
+        <button
+          type="button"
+          onclick="closeParentRecapModal()"
+          class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
+          id="btn-recap-cancel"
+        >
+          Close
+        </button>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            onclick="copyParentRecapText()"
+            class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold flex items-center gap-1.5 border border-slate-700 transition active:scale-95 shadow"
+            id="btn-recap-copy"
+          >
+            <i data-lucide="copy" class="w-4 h-4 text-brand-400"></i>
+            <span id="lbl-recap-copy">Copy Recap</span>
+          </button>
+          <button
+            type="button"
+            onclick="sendParentRecapWhatsApp()"
+            class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-md"
+            id="btn-recap-whatsapp"
+          >
+            <i data-lucide="message-circle" class="w-4 h-4"></i>
+            <span id="lbl-recap-whatsapp">Send WhatsApp</span>
+          </button>
+          <button
+            type="button"
+            onclick="sendParentRecapEmail()"
+            class="px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-md"
+            id="btn-recap-email"
+          >
+            <i data-lucide="mail" class="w-4 h-4"></i>
+            <span id="lbl-recap-email">Email</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -3648,6 +3799,8 @@
       students: [],
       activeStudentId: null,
       activeStudentDrawerId: null,
+      studentRosterFilter: 'all', // 'all', 'active', 'paused', 'completed'
+      activeRecapSession: null,
       newStudentPendingAvatar: '',
       calendar: {
         year: new Date().getFullYear(),
@@ -3930,6 +4083,45 @@
         studentNotesPlaceholder: "e.g. Needs focus on fundamentals, preparing for upcoming exam, plays soccer",
         cancel: "Cancel",
         saveStudent: "Save Student",
+
+        // Student CRM & Guardian Contact
+        guardianSectionTitle: "Parent / Guardian Contact",
+        guardianNameLabel: "Guardian Name",
+        guardianNamePlaceholder: "e.g. Rachel Cohen (Mother)",
+        guardianPhoneLabel: "Guardian Phone / WhatsApp",
+        guardianPhonePlaceholder: "e.g. +1 (555) 234-5678",
+        guardianEmailLabel: "Guardian Email",
+        guardianEmailPlaceholder: "e.g. rachel@example.com",
+        gradeLevelLabel: "Grade Level / Stage",
+        gradeLevelPlaceholder: "e.g. High School (10th Grade)",
+        hourlyRateLabel: "Lesson Fee / Hourly Rate",
+        hourlyRatePlaceholder: "e.g. $60 / hour",
+        statusLabel: "Enrollment Status",
+        statusActive: "Active",
+        statusPaused: "Paused",
+        statusCompleted: "Completed",
+        rosterFilterAll: "All",
+        rosterFilterActive: "Active",
+        rosterFilterPaused: "Paused",
+        rosterFilterCompleted: "Completed",
+
+        // Attendance & Session Logging
+        sessionStatusScheduled: "Scheduled",
+        sessionStatusCompleted: "Completed",
+        sessionStatusCancelled: "Cancelled",
+        sessionStatusNoShow: "No-Show",
+        markSessionCompletedBtn: "Completed ✓",
+        markSessionScheduledBtn: "Scheduled 🕒",
+        markSessionCancelledBtn: "Cancelled ✗",
+        markSessionNoShowBtn: "No-Show ⚠",
+        shareRecapBtn: "Share Parent Recap",
+        recapModalTitle: "Session Recap & Parent Update",
+        recapModalSubtitle: "Automated session note ready to send via WhatsApp or Email",
+        copyRecapBtn: "Copy Recap",
+        sendWhatsAppBtn: "Send WhatsApp",
+        sendEmailBtn: "Send Email",
+        toastRecapCopied: "Session recap copied to clipboard!",
+        toastAttendanceUpdated: "Session attendance updated",
 
         // Active Student Workspace
         activeStudentDefault: "Active Student",
@@ -4260,6 +4452,45 @@
         studentNotesPlaceholder: "לדוגמה: זקוק לחיזוק ביסודות, מתכונן למבחן הקרוב, חובב ספורט",
         cancel: "ביטול",
         saveStudent: "שמור תלמיד",
+
+        // Student CRM & Guardian Contact
+        guardianSectionTitle: "פרטי התקשרות הורים / אפוטרופוס",
+        guardianNameLabel: "שם ההורה",
+        guardianNamePlaceholder: "לדוגמה: רחל כהן (אמא)",
+        guardianPhoneLabel: "טלפון / וואטסאפ הורה",
+        guardianPhonePlaceholder: "לדוגמה: 050-1234567",
+        guardianEmailLabel: "אימייל הורה",
+        guardianEmailPlaceholder: "לדוגמה: rachel@example.com",
+        gradeLevelLabel: "שכבת גיל / שלב לימוד",
+        gradeLevelPlaceholder: "לדוגמה: כיתה י׳ / תיכון",
+        hourlyRateLabel: "תעריף לשיעור / שעה",
+        hourlyRatePlaceholder: "לדוגמה: 200 ₪ / שיעור או $60",
+        statusLabel: "סטטוס תלמיד",
+        statusActive: "פעיל",
+        statusPaused: "מושהה",
+        statusCompleted: "סיים",
+        rosterFilterAll: "הכל",
+        rosterFilterActive: "פעילים",
+        rosterFilterPaused: "מושהים",
+        rosterFilterCompleted: "סיימו",
+
+        // Attendance & Session Logging
+        sessionStatusScheduled: "נקבע",
+        sessionStatusCompleted: "התקיים",
+        sessionStatusCancelled: "בוטל",
+        sessionStatusNoShow: "לא הופיע",
+        markSessionCompletedBtn: "התקיים ✓",
+        markSessionScheduledBtn: "נקבע 🕒",
+        markSessionCancelledBtn: "בוטל ✗",
+        markSessionNoShowBtn: "לא הופיע ⚠",
+        shareRecapBtn: "שלח סיכום להורים",
+        recapModalTitle: "סיכום שיעור ועדכון הורים",
+        recapModalSubtitle: "הודעת סיכום מעוצבת מוכנה לשליחה בוואטסאפ או באימייל",
+        copyRecapBtn: "העתק סיכום",
+        sendWhatsAppBtn: "שלח בוואטסאפ",
+        sendEmailBtn: "שלח באימייל",
+        toastRecapCopied: "סיכום השיעור הועתק ללוח!",
+        toastAttendanceUpdated: "סטטוס נוכחות השיעור עודכן",
 
         // Active Student Workspace
         activeStudentDefault: "תלמיד פעיל",
@@ -5454,18 +5685,32 @@ alter publication supabase_realtime add table public.students_sync;`;
                   dayOfWeek: l.date ? (new Date(l.date + 'T12:00:00')).getDay() : (l.dayOfWeek || 0),
                   time: l.timeSlot || l.time || '4:30 PM',
                   repeatWeekly: !!l.repeatWeekly,
-                  topic: l.subject || l.topic || (APP_STATE.lang === 'he' ? 'שיעור פרטי' : 'Tutoring Session')
+                  topic: l.subject || l.topic || (APP_STATE.lang === 'he' ? 'שיעור פרטי' : 'Tutoring Session'),
+                  status: l.status || 'scheduled',
+                  completedAt: l.completedAt || null
+                }));
+              } else {
+                scheduleList = scheduleList.map(l => ({
+                  ...l,
+                  status: l.status || 'scheduled',
+                  completedAt: l.completedAt || null
                 }));
               }
 
               return {
                 id: row.id,
                 name: row.name,
+                subject: meta.subject || ((row.parsha_or_date || '').split(' (')[0]) || '',
+                gradeOrDate: meta.gradeOrDate || '',
                 parshaOrDate: row.parsha_or_date || '',
                 notes: row.notes || '',
                 avatar: meta.avatar || '',
                 orderIndex: typeof meta.order === 'number' ? meta.order : 0,
                 skills: meta.skills || getDefaultStudentSkills(),
+                gradeLevel: meta.gradeLevel || 'Standard / All Levels',
+                status: meta.status || 'active',
+                parentContact: meta.parentContact || { name: '', phone: '', email: '' },
+                hourlyRate: meta.hourlyRate || '',
                 schedule: scheduleList,
                 completedTopics: cleanCompletedTopics,
                 completedParshiot: row.completed_parshiot || {},
@@ -5615,18 +5860,32 @@ alter publication supabase_realtime add table public.students_sync;`;
             dayOfWeek: l.date ? (new Date(l.date + 'T12:00:00')).getDay() : (l.dayOfWeek || 0),
             time: l.timeSlot || l.time || '4:30 PM',
             repeatWeekly: !!l.repeatWeekly,
-            topic: l.subject || l.topic || (isHe ? 'שיעור פרטי' : 'Tutoring Session')
+            topic: l.subject || l.topic || (isHe ? 'שיעור פרטי' : 'Tutoring Session'),
+            status: l.status || 'scheduled',
+            completedAt: l.completedAt || null
+          }));
+        } else {
+          scheduleList = scheduleList.map(l => ({
+            ...l,
+            status: l.status || 'scheduled',
+            completedAt: l.completedAt || null
           }));
         }
 
         const updatedStudent = {
           id: newRecord.id,
           name: newRecord.name,
+          subject: meta.subject || ((newRecord.parsha_or_date || '').split(' (')[0]) || '',
+          gradeOrDate: meta.gradeOrDate || '',
           parshaOrDate: newRecord.parsha_or_date || '',
           notes: newRecord.notes || '',
           avatar: meta.avatar || '',
           orderIndex: typeof meta.order === 'number' ? meta.order : 0,
           skills: meta.skills || getDefaultStudentSkills(),
+          gradeLevel: meta.gradeLevel || 'Standard / All Levels',
+          status: meta.status || 'active',
+          parentContact: meta.parentContact || { name: '', phone: '', email: '' },
+          hourlyRate: meta.hourlyRate || '',
           schedule: scheduleList,
           completedTopics: cleanCompletedTopics,
           completedParshiot: newRecord.completed_parshiot || {},
@@ -5679,14 +5938,26 @@ alter publication supabase_realtime add table public.students_sync;`;
           last_updated_email: (APP_STATE.currentUser && APP_STATE.currentUser.email) || '',
           avatar: student.avatar || '',
           order: typeof student.orderIndex === 'number' ? student.orderIndex : 0,
-          schedule: cleanSchedule,
+          subject: student.subject || '',
+          gradeOrDate: student.gradeOrDate || '',
+          gradeLevel: student.gradeLevel || 'Standard / All Levels',
+          status: student.status || 'active',
+          parentContact: student.parentContact || { name: '', phone: '', email: '' },
+          hourlyRate: student.hourlyRate || '',
+          schedule: cleanSchedule.map(s => ({
+            ...s,
+            status: s.status || 'scheduled',
+            completedAt: s.completedAt || null
+          })),
           skills: student.skills || getDefaultStudentSkills(),
           lessons: cleanSchedule.map(s => ({
             id: s.id,
             date: s.dateStr,
             timeSlot: s.time,
             subject: s.topic,
-            notes: s.topic
+            notes: s.topic,
+            status: s.status || 'scheduled',
+            completedAt: s.completedAt || null
           }))
         };
 
@@ -14427,9 +14698,138 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
           `;
         }
 
+        // Student CRM & Guardian Contact Card
+        const guardian = student.parentContact || { name: '', phone: '', email: '' };
+        const cleanPhone = (guardian.phone || '').replace(/[^0-9]/g, '');
+        const currentStatus = student.status || 'active';
+        const currentGradeLevel = student.gradeLevel || 'Standard / All Levels';
+        const currentHourlyRate = student.hourlyRate || '';
+
+        const cardCrmGuardianHtml = `
+          <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>${t.guardianSectionTitle || 'Student CRM & Guardian'}</span>
+              </span>
+              <div class="flex items-center gap-1.5">
+                <select
+                  id="drawer-student-status-select"
+                  onchange="updateStudentDrawerField('${student.id}', 'status', this.value)"
+                  class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] font-semibold text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                >
+                  <option value="active" ${currentStatus === 'active' ? 'selected' : ''}>${t.statusActive || 'Active'}</option>
+                  <option value="paused" ${currentStatus === 'paused' ? 'selected' : ''}>${t.statusPaused || 'Paused'}</option>
+                  <option value="completed" ${currentStatus === 'completed' ? 'selected' : ''}>${t.statusCompleted || 'Completed'}</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Grade Level & Hourly Rate Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <div class="p-2 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+                <label class="text-[10px] uppercase font-bold text-slate-400 block">${t.gradeLevelLabel || 'Academic Stage'}</label>
+                <input
+                  type="text"
+                  id="drawer-student-grade-input"
+                  value="${escapeHtml(currentGradeLevel)}"
+                  onchange="updateStudentDrawerField('${student.id}', 'gradeLevel', this.value)"
+                  placeholder="${t.gradeLevelPlaceholder || 'e.g. High School (10th)'}"
+                  class="w-full bg-slate-950 border border-slate-700/80 rounded px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
+              </div>
+              <div class="p-2 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+                <label class="text-[10px] uppercase font-bold text-slate-400 block">${t.hourlyRateLabel || 'Lesson Fee / Hourly Rate'}</label>
+                <input
+                  type="text"
+                  id="drawer-student-hourly-rate-input"
+                  value="${escapeHtml(currentHourlyRate)}"
+                  onchange="updateStudentDrawerField('${student.id}', 'hourlyRate', this.value)"
+                  placeholder="${t.hourlyRatePlaceholder || 'e.g. $60/hr or 200 ₪'}"
+                  class="w-full bg-slate-950 border border-slate-700/80 rounded px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
+              </div>
+            </div>
+
+            <!-- Parent / Guardian Contact Details with 1-Click Actions -->
+            <div class="p-2.5 rounded-lg bg-slate-900/40 border border-slate-800/80 space-y-2">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                <div>
+                  <label class="text-[10px] text-slate-400 block mb-0.5">${t.guardianNameLabel || 'Guardian Name'}</label>
+                  <input
+                    type="text"
+                    id="drawer-student-guardian-name-input"
+                    value="${escapeHtml(guardian.name || '')}"
+                    onchange="updateStudentDrawerGuardianField('${student.id}', 'name', this.value)"
+                    placeholder="e.g. Rachel Cohen"
+                    class="w-full bg-slate-950 border border-slate-700/80 rounded px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                  />
+                </div>
+                <div>
+                  <label class="text-[10px] text-slate-400 block mb-0.5">${t.guardianPhoneLabel || 'Phone / WhatsApp'}</label>
+                  <input
+                    type="tel"
+                    id="drawer-student-guardian-phone-input"
+                    value="${escapeHtml(guardian.phone || '')}"
+                    onchange="updateStudentDrawerGuardianField('${student.id}', 'phone', this.value)"
+                    placeholder="e.g. +1 555-0192"
+                    class="w-full bg-slate-950 border border-slate-700/80 rounded px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                  />
+                </div>
+                <div>
+                  <label class="text-[10px] text-slate-400 block mb-0.5">${t.guardianEmailLabel || 'Email'}</label>
+                  <input
+                    type="email"
+                    id="drawer-student-guardian-email-input"
+                    value="${escapeHtml(guardian.email || '')}"
+                    onchange="updateStudentDrawerGuardianField('${student.id}', 'email', this.value)"
+                    placeholder="e.g. parent@example.com"
+                    class="w-full bg-slate-950 border border-slate-700/80 rounded px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                  />
+                </div>
+              </div>
+
+              <!-- Quick Communication Action Bar -->
+              <div class="flex items-center gap-2 pt-1 flex-wrap">
+                ${guardian.phone ? `
+                  <a
+                    href="https://wa.me/${cleanPhone}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="px-2.5 py-1 rounded-lg bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600/30 text-[11px] font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-2xs"
+                  >
+                    <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    <span>WhatsApp</span>
+                  </a>
+                  <a
+                    href="tel:${guardian.phone}"
+                    class="px-2.5 py-1 rounded-lg bg-sky-600/20 text-sky-300 border border-sky-500/30 hover:bg-sky-600/30 text-[11px] font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-2xs"
+                  >
+                    <i data-lucide="phone-call" class="w-3.5 h-3.5 text-sky-400"></i>
+                    <span>${isHe ? 'חייג' : 'Call'}</span>
+                  </a>
+                ` : ''}
+                ${guardian.email ? `
+                  <a
+                    href="mailto:${guardian.email}?subject=${encodeURIComponent((isHe ? 'עדכון לימודי: ' : 'Tutoring Update: ') + student.name)}"
+                    class="px-2.5 py-1 rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30 text-[11px] font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-2xs"
+                  >
+                    <i data-lucide="mail" class="w-3.5 h-3.5 text-indigo-400"></i>
+                    <span>${isHe ? 'שלח אימייל' : 'Email'}</span>
+                  </a>
+                ` : ''}
+                ${!guardian.phone && !guardian.email ? `
+                  <span class="text-[11px] text-slate-500 italic">${isHe ? 'הזן טלפון או אימייל להפעלת לחצני חיוג ווואטסאפ מהירים' : 'Add phone or email above for 1-click WhatsApp, Call, and Email shortcuts'}</span>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+
         body.innerHTML = `
           ${homeworkBannerHtml}
           ${cardCustomGoalsHtml}
+          ${cardCrmGuardianHtml}
 
           <!-- Collaborative Notes Editor -->
           <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2">
@@ -14465,6 +14865,25 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       if (window.lucide && typeof lucide.createIcons === 'function') {
         lucide.createIcons();
       }
+    }
+
+    function updateStudentDrawerField(studentId, field, value) {
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      student[field] = value;
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderStudents();
+    }
+
+    function updateStudentDrawerGuardianField(studentId, field, value) {
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      if (!student.parentContact) student.parentContact = { name: '', phone: '', email: '' };
+      student.parentContact[field] = value;
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderStudents();
     }
 
     function isTopicCompleted(studentId, topicId) {
@@ -14574,6 +14993,11 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       }
     }
 
+    function setStudentRosterFilter(filter) {
+      APP_STATE.studentRosterFilter = filter || 'all';
+      renderStudents();
+    }
+
     function renderStudents() {
       const container = document.getElementById('students-list');
       const emptyState = document.getElementById('students-empty');
@@ -14588,6 +15012,42 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       if (headerCount) {
         headerCount.textContent = ' (' + APP_STATE.students.length + ')';
       }
+
+      // Update Roster Filter Counter Badges
+      const countAll = APP_STATE.students.length;
+      const countActive = APP_STATE.students.filter(s => (s.status || 'active') === 'active').length;
+      const countPaused = APP_STATE.students.filter(s => (s.status || 'active') === 'paused').length;
+      const countCompleted = APP_STATE.students.filter(s => (s.status || 'active') === 'completed').length;
+
+      const fAll = document.getElementById('count-filter-all');
+      const fActive = document.getElementById('count-filter-active');
+      const fPaused = document.getElementById('count-filter-paused');
+      const fCompleted = document.getElementById('count-filter-completed');
+      if (fAll) fAll.textContent = countAll;
+      if (fActive) fActive.textContent = countActive;
+      if (fPaused) fPaused.textContent = countPaused;
+      if (fCompleted) fCompleted.textContent = countCompleted;
+
+      // Update Roster Filter Tab Labels
+      const lblAll = document.getElementById('lbl-filter-all');
+      const lblActive = document.getElementById('lbl-filter-active');
+      const lblPaused = document.getElementById('lbl-filter-paused');
+      const lblCompleted = document.getElementById('lbl-filter-completed');
+      if (lblAll) lblAll.textContent = t.rosterFilterAll || 'All';
+      if (lblActive) lblActive.textContent = t.rosterFilterActive || 'Active';
+      if (lblPaused) lblPaused.textContent = t.rosterFilterPaused || 'Paused';
+      if (lblCompleted) lblCompleted.textContent = t.rosterFilterCompleted || 'Completed';
+
+      const currentFilter = APP_STATE.studentRosterFilter || 'all';
+      ['all', 'active', 'paused', 'completed'].forEach(f => {
+        const btn = document.getElementById('filter-btn-' + f);
+        if (!btn) return;
+        if (f === currentFilter) {
+          btn.className = 'px-2.5 py-1 rounded-lg bg-brand-600 text-white font-semibold transition flex items-center gap-1 shadow-sm';
+        } else {
+          btn.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1';
+        }
+      });
 
       if (APP_STATE.students.length === 0) {
         emptyState.classList.remove('hidden');
@@ -14605,8 +15065,28 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
         APP_STATE.activeStudentId = APP_STATE.students[0].id;
       }
 
-      // Render Cards for each student
-      container.innerHTML = APP_STATE.students.map((student, idx) => {
+      // Filter students by selected status tab
+      const filteredStudents = APP_STATE.students.filter(s => {
+        if (currentFilter === 'all') return true;
+        return (s.status || 'active') === currentFilter;
+      });
+
+      if (filteredStudents.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-12 px-4 border border-dashed border-slate-800 rounded-2xl bg-slate-900/40 space-y-2">
+            <i data-lucide="users" class="w-8 h-8 text-slate-500 mx-auto"></i>
+            <p class="text-xs text-slate-400">${isHe ? 'אין תלמידים בסינון זה' : 'No students found matching this status filter'}</p>
+            <button type="button" onclick="setStudentRosterFilter('all')" class="text-xs text-brand-400 font-semibold underline hover:text-brand-300">
+              ${isHe ? 'הצג את כל התלמידים' : 'Show all students'}
+            </button>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      // Render Cards for filtered students
+      container.innerHTML = filteredStudents.map((student, idx) => {
         const isActive = student.id === APP_STATE.activeStudentId;
         const { activeCourses, totalClasses, completedClasses, overallPct } = getStudentCourseProgress(student);
 
@@ -14617,6 +15097,20 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
             </div>`;
 
         const { date: cardDate } = getStudentParshaAndDate(student);
+
+        const statusVal = student.status || 'active';
+        let statusBadgeHtml = '';
+        if (statusVal === 'active') {
+          statusBadgeHtml = `<span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>${t.statusActive}</span>`;
+        } else if (statusVal === 'paused') {
+          statusBadgeHtml = `<span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20"><span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>${t.statusPaused}</span>`;
+        } else if (statusVal === 'completed') {
+          statusBadgeHtml = `<span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20"><span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>${t.statusCompleted}</span>`;
+        }
+
+        const stageVal = student.gradeLevel || '';
+        const guardianInfo = student.parentContact || {};
+        const hasGuardian = guardianInfo.name || guardianInfo.phone;
 
         let progressBarsHtml = '';
         if (activeCourses.length === 0) {
@@ -14679,17 +15173,34 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
                     </div>
                   </div>
                   <div class="min-w-0 space-y-0.5">
-                    <h4 class="text-sm sm:text-base font-bold text-white truncate group-hover:text-brand-300 transition">${student.name}</h4>
+                    <div class="flex items-center gap-2">
+                      <h4 class="text-sm sm:text-base font-bold text-white truncate group-hover:text-brand-300 transition">${student.name}</h4>
+                      ${statusBadgeHtml}
+                    </div>
                     <div class="flex items-center gap-1.5 flex-wrap text-xs text-slate-400">
                       <span class="inline-flex items-center gap-1 text-brand-300 font-medium">
                         <i data-lucide="book-open" class="w-3 h-3 text-brand-400 shrink-0"></i>
                         <span class="truncate">${activeCourses.length} ${isHe ? (activeCourses.length === 1 ? 'קורס' : 'קורסים') : (activeCourses.length === 1 ? 'Course' : 'Courses')}</span>
                       </span>
+                      ${stageVal && stageVal !== 'Standard / All Levels' ? `
+                        <span class="text-slate-600 font-bold">•</span>
+                        <span class="inline-flex items-center gap-1 text-slate-400 font-medium text-[11px] truncate">
+                          <i data-lucide="graduation-cap" class="w-3 h-3 text-slate-500 shrink-0"></i>
+                          <span class="truncate">${escapeHtml(stageVal)}</span>
+                        </span>
+                      ` : ''}
                       ${cardDate ? `
                         <span class="text-slate-600 font-bold">•</span>
                         <span class="inline-flex items-center gap-1 text-slate-300 font-mono text-[11px]">
                           <i data-lucide="calendar" class="w-3 h-3 text-slate-400 shrink-0"></i>
                           <span class="truncate">${cardDate}</span>
+                        </span>
+                      ` : ''}
+                      ${hasGuardian ? `
+                        <span class="text-slate-600 font-bold">•</span>
+                        <span class="inline-flex items-center gap-1 text-amber-300/90 font-medium text-[11px] truncate" title="${escapeHtml(guardianInfo.phone || '')}">
+                          <i data-lucide="user-check" class="w-3 h-3 text-amber-400 shrink-0"></i>
+                          <span class="truncate">${escapeHtml(guardianInfo.name || guardianInfo.phone)}</span>
                         </span>
                       ` : ''}
                     </div>
@@ -14709,7 +15220,7 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
                     </button>
                     <button
                       onclick="moveStudentDown('${student.id}', event)"
-                      ${idx === APP_STATE.students.length - 1 ? 'disabled' : ''}
+                      ${idx === filteredStudents.length - 1 ? 'disabled' : ''}
                       title="${t.moveDown}"
                       class="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-20 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition"
                     >
@@ -14729,18 +15240,25 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
               ${progressBarsHtml}
             </div>
 
-            <!-- Footer: Notes preview and details action -->
+            <!-- Footer: Notes preview, hourly rate and details action -->
             <div class="mt-4 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
               <span class="truncate max-w-[170px] italic text-slate-400">
                 ${student.notes ? student.notes : t.noNotesText}
               </span>
-              <div class="flex items-center gap-1">
-                <span class="text-[10px] text-brand-400 font-medium group-hover:underline flex items-center gap-0.5">
-                  ${isHe ? 'לצפייה בפרטים' : 'View details'} <i data-lucide="${isHe ? 'chevron-left' : 'chevron-right'}" class="w-3 h-3"></i>
-                </span>
-                <button onclick="event.stopPropagation(); deleteStudent('${student.id}')" title="${t.deleteStudentTitle}" class="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-slate-800 transition">
-                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                </button>
+              <div class="flex items-center gap-2">
+                ${student.hourlyRate ? `
+                  <span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] text-amber-300 font-mono font-semibold">
+                    ${escapeHtml(student.hourlyRate)}
+                  </span>
+                ` : ''}
+                <div class="flex items-center gap-1">
+                  <span class="text-[10px] text-brand-400 font-medium group-hover:underline flex items-center gap-0.5">
+                    ${isHe ? 'לצפייה בפרטים' : 'View details'} <i data-lucide="${isHe ? 'chevron-left' : 'chevron-right'}" class="w-3 h-3"></i>
+                  </span>
+                  <button onclick="event.stopPropagation(); deleteStudent('${student.id}')" title="${t.deleteStudentTitle}" class="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-slate-800 transition">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -14760,9 +15278,18 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
             if (typeof s.orderIndex !== 'number') s.orderIndex = idx;
             if (!s.avatar) s.avatar = '';
             if (!Array.isArray(s.schedule)) s.schedule = [];
+            (s.schedule || []).forEach(sess => {
+              if (!sess.status) sess.status = 'scheduled';
+            });
             const info = getStudentParshaAndDate(s);
             if (!s.parsha) s.parsha = info.parsha;
             if (!s.barMitzvahDate) s.barMitzvahDate = info.date;
+            if (!s.subject) s.subject = info.parsha;
+            if (!s.gradeOrDate) s.gradeOrDate = info.date;
+            if (!s.gradeLevel) s.gradeLevel = 'Standard / All Levels';
+            if (!s.status) s.status = 'active';
+            if (!s.parentContact) s.parentContact = { name: '', phone: '', email: '' };
+            if (!s.hourlyRate) s.hourlyRate = '';
             ensureStudentSkills(s);
           });
           APP_STATE.students.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
@@ -14832,6 +15359,19 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
         notesInput.placeholder = t.studentNotesPlaceholder;
       }
 
+      const gradeInput = document.getElementById('new-student-grade-level');
+      if (gradeInput) gradeInput.value = 'Standard / All Levels';
+      const statusInput = document.getElementById('new-student-status');
+      if (statusInput) statusInput.value = 'active';
+      const guardianNameInput = document.getElementById('new-student-guardian-name');
+      if (guardianNameInput) guardianNameInput.value = '';
+      const guardianPhoneInput = document.getElementById('new-student-guardian-phone');
+      if (guardianPhoneInput) guardianPhoneInput.value = '';
+      const guardianEmailInput = document.getElementById('new-student-guardian-email');
+      if (guardianEmailInput) guardianEmailInput.value = '';
+      const hourlyRateInput = document.getElementById('new-student-hourly-rate');
+      if (hourlyRateInput) hourlyRateInput.value = '';
+
       const cancelBtn = document.getElementById('btn-cancel-add-student');
       if (cancelBtn) cancelBtn.textContent = t.cancel;
       const saveBtn = document.getElementById('btn-save-add-student');
@@ -14863,6 +15403,18 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       if (dateInput) { dateInput.value = ''; dateInput.removeAttribute('value'); }
       if (notesInput) { notesInput.value = ''; notesInput.innerHTML = ''; }
       if (parshaCustom) { parshaCustom.value = ''; parshaCustom.classList.add('hidden'); }
+      const gradeInput = document.getElementById('new-student-grade-level');
+      if (gradeInput) gradeInput.value = 'Standard / All Levels';
+      const statusInput = document.getElementById('new-student-status');
+      if (statusInput) statusInput.value = 'active';
+      const guardianNameInput = document.getElementById('new-student-guardian-name');
+      if (guardianNameInput) { guardianNameInput.value = ''; guardianNameInput.removeAttribute('value'); }
+      const guardianPhoneInput = document.getElementById('new-student-guardian-phone');
+      if (guardianPhoneInput) { guardianPhoneInput.value = ''; guardianPhoneInput.removeAttribute('value'); }
+      const guardianEmailInput = document.getElementById('new-student-guardian-email');
+      if (guardianEmailInput) { guardianEmailInput.value = ''; guardianEmailInput.removeAttribute('value'); }
+      const hourlyRateInput = document.getElementById('new-student-hourly-rate');
+      if (hourlyRateInput) { hourlyRateInput.value = ''; hourlyRateInput.removeAttribute('value'); }
     }
 
     function handleCreateStudent(e) {
@@ -14876,6 +15428,12 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
 
       const dateVal = document.getElementById('new-student-date').value.trim();
       const notes = document.getElementById('new-student-notes').value.trim();
+      const gradeLevel = (document.getElementById('new-student-grade-level') && document.getElementById('new-student-grade-level').value) || 'Standard / All Levels';
+      const status = (document.getElementById('new-student-status') && document.getElementById('new-student-status').value) || 'active';
+      const guardianName = (document.getElementById('new-student-guardian-name') && document.getElementById('new-student-guardian-name').value.trim()) || '';
+      const guardianPhone = (document.getElementById('new-student-guardian-phone') && document.getElementById('new-student-guardian-phone').value.trim()) || '';
+      const guardianEmail = (document.getElementById('new-student-guardian-email') && document.getElementById('new-student-guardian-email').value.trim()) || '';
+      const hourlyRate = (document.getElementById('new-student-hourly-rate') && document.getElementById('new-student-hourly-rate').value.trim()) || '';
 
       if (!name) {
         showToast(t.toastNameRequired);
@@ -14895,6 +15453,14 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
         parsha: selectedParsha,
         barMitzvahDate: dateVal,
         parshaOrDate: parshaOrDate,
+        gradeLevel: gradeLevel,
+        status: status,
+        parentContact: {
+          name: guardianName,
+          phone: guardianPhone,
+          email: guardianEmail
+        },
+        hourlyRate: hourlyRate,
         avatar: APP_STATE.newStudentPendingAvatar || '',
         orderIndex: APP_STATE.students.length,
         notes: notes,
@@ -15294,13 +15860,28 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
           ? `<img src="${s.studentAvatar}" class="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full object-cover shrink-0">`
           : `<span class="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-brand-500/30 text-brand-300 font-bold text-[8px] flex items-center justify-center shrink-0">${s.studentName.charAt(0)}</span>`;
 
+        const sessStatus = s.status || 'scheduled';
+        let badgeStyle = 'bg-brand-950/80 hover:bg-brand-900 border-brand-500/30 hover:border-brand-400 text-brand-200';
+        let statusIcon = '';
+        if (sessStatus === 'completed') {
+          badgeStyle = 'bg-emerald-950/80 hover:bg-emerald-900 border-emerald-500/40 hover:border-emerald-400 text-emerald-200 ring-1 ring-emerald-500/20';
+          statusIcon = '<span class="text-emerald-400 font-bold text-[8px]">✓</span>';
+        } else if (sessStatus === 'cancelled') {
+          badgeStyle = 'bg-slate-900/80 hover:bg-slate-850 border-slate-700/60 text-slate-500 line-through';
+          statusIcon = '<span class="text-slate-500 font-bold text-[8px]">✗</span>';
+        } else if (sessStatus === 'no_show') {
+          badgeStyle = 'bg-rose-950/80 hover:bg-rose-900 border-rose-500/40 hover:border-rose-400 text-rose-200';
+          statusIcon = '<span class="text-rose-400 font-bold text-[8px]">⚠</span>';
+        }
+
         return `
           <div
             onclick="event.stopPropagation(); openScheduleLessonModal('${dateStr}', '${s.id}')"
-            title="${s.studentName} (${s.time}) - ${I18N[APP_STATE.lang].whatToTeachPrompt || 'Click to view teaching notes'}"
-            class="cursor-pointer group flex items-center justify-center sm:justify-between gap-0.5 sm:gap-1 px-1 py-0.5 rounded bg-brand-950/80 hover:bg-brand-900 border border-brand-500/30 hover:border-brand-400 text-brand-200 transition text-[9px] sm:text-[10px] leading-tight overflow-hidden w-full max-w-full shadow-2xs"
+            title="${s.studentName} (${s.time}) [${sessStatus}]"
+            class="cursor-pointer group flex items-center justify-center sm:justify-between gap-0.5 sm:gap-1 px-1 py-0.5 rounded border transition text-[9px] sm:text-[10px] leading-tight overflow-hidden w-full max-w-full shadow-2xs ${badgeStyle}"
           >
             <div class="flex items-center gap-0.5 sm:gap-1 min-w-0 overflow-hidden">
+              ${statusIcon}
               ${avatar}
               <span class="truncate font-semibold text-white hidden sm:inline">${s.studentName}</span>
               <span class="truncate font-semibold text-white sm:hidden text-[8px]">${s.studentName.split(' ')[0]}</span>
@@ -15498,6 +16079,18 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
               ? `<img src="${s.studentAvatar}" class="w-8 h-8 rounded-full object-cover shrink-0 ring-1 ring-brand-500/40">`
               : `<span class="w-8 h-8 rounded-full bg-brand-500/20 text-brand-300 font-bold text-xs flex items-center justify-center shrink-0 border border-brand-500/30">${escapeHtml(s.studentName.charAt(0))}</span>`;
 
+            const sessionStatus = s.status || 'scheduled';
+            let statusHeaderBadge = '';
+            if (sessionStatus === 'completed') {
+              statusHeaderBadge = `<span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">✓ ${t.sessionStatusCompleted || 'Completed'}</span>`;
+            } else if (sessionStatus === 'cancelled') {
+              statusHeaderBadge = `<span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-bold line-through">✗ ${t.sessionStatusCancelled || 'Cancelled'}</span>`;
+            } else if (sessionStatus === 'no_show') {
+              statusHeaderBadge = `<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-bold">⚠ ${t.sessionStatusNoShow || 'No-Show'}</span>`;
+            } else {
+              statusHeaderBadge = `<span class="px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/40 text-[10px] font-bold">🕒 ${t.sessionStatusScheduled || 'Scheduled'}</span>`;
+            }
+
             const hasSpecificTopic = !!(s.topic && s.topic.trim());
             const teachingText = hasSpecificTopic
               ? s.topic.trim()
@@ -15532,6 +16125,7 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
                     <span class="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/25 font-mono font-bold text-xs shrink-0">
                       ${s.time}
                     </span>
+                    ${statusHeaderBadge}
                     ${avatar}
                     <div class="min-w-0">
                       <span class="text-white font-bold text-xs sm:text-sm block truncate group-hover:text-brand-300 transition">
@@ -15564,6 +16158,50 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
                 <!-- Collapsible Teaching Plan Details -->
                 ${isExpanded ? `
                   <div class="px-3.5 pb-3.5 pt-1 border-t border-slate-800/80 bg-slate-900/60 space-y-2.5 text-xs">
+                    <!-- Session Attendance Status & Quick Actions Bar -->
+                    <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2 flex-wrap">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 mr-1">${isHe ? 'סטטוס נוכחות:' : 'Attendance:'}</span>
+                        <button
+                          type="button"
+                          onclick="event.stopPropagation(); updateSessionAttendance('${s.studentId}', '${s.id}', 'completed')"
+                          class="px-2.5 py-1 rounded-lg text-[10px] font-bold transition active:scale-95 ${sessionStatus === 'completed' ? 'bg-emerald-600 text-white shadow' : 'bg-slate-800 text-slate-300 hover:text-white'}"
+                        >
+                          ${t.markSessionCompletedBtn || 'Completed ✓'}
+                        </button>
+                        <button
+                          type="button"
+                          onclick="event.stopPropagation(); updateSessionAttendance('${s.studentId}', '${s.id}', 'scheduled')"
+                          class="px-2.5 py-1 rounded-lg text-[10px] font-bold transition active:scale-95 ${sessionStatus === 'scheduled' ? 'bg-brand-600 text-white shadow' : 'bg-slate-800 text-slate-300 hover:text-white'}"
+                        >
+                          ${t.markSessionScheduledBtn || 'Scheduled 🕒'}
+                        </button>
+                        <button
+                          type="button"
+                          onclick="event.stopPropagation(); updateSessionAttendance('${s.studentId}', '${s.id}', 'cancelled')"
+                          class="px-2.5 py-1 rounded-lg text-[10px] font-bold transition active:scale-95 ${sessionStatus === 'cancelled' ? 'bg-rose-900/80 text-rose-200 border border-rose-700 shadow' : 'bg-slate-800 text-slate-300 hover:text-white'}"
+                        >
+                          ${t.markSessionCancelledBtn || 'Cancelled ✗'}
+                        </button>
+                        <button
+                          type="button"
+                          onclick="event.stopPropagation(); updateSessionAttendance('${s.studentId}', '${s.id}', 'no_show')"
+                          class="px-2.5 py-1 rounded-lg text-[10px] font-bold transition active:scale-95 ${sessionStatus === 'no_show' ? 'bg-amber-600 text-white shadow' : 'bg-slate-800 text-slate-300 hover:text-white'}"
+                        >
+                          ${t.markSessionNoShowBtn || 'No-Show ⚠'}
+                        </button>
+                      </div>
+
+                      <button
+                        type="button"
+                        onclick="event.stopPropagation(); openParentRecapModal('${s.studentId}', '${s.id}')"
+                        class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold flex items-center gap-1 transition active:scale-95 shadow-sm"
+                      >
+                        <i data-lucide="share-2" class="w-3 h-3"></i>
+                        <span>${t.shareRecapBtn || 'Share Parent Recap'}</span>
+                      </button>
+                    </div>
+
                     ${activeHw ? `
                       <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-center justify-between gap-2">
                         <div class="flex items-center gap-1.5 min-w-0">
@@ -15683,6 +16321,156 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       }
 
       lucide.createIcons();
+    }
+
+    function updateSessionAttendance(studentId, sessionId, newStatus) {
+      const student = (APP_STATE.students || []).find(st => st.id === studentId);
+      if (!student || !Array.isArray(student.schedule)) return;
+      const session = student.schedule.find(s => s.id === sessionId);
+      if (!session) return;
+
+      session.status = newStatus;
+      if (newStatus === 'completed') {
+        session.completedAt = new Date().toISOString();
+      } else {
+        session.completedAt = null;
+      }
+
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
+
+      renderExistingLessonsInModal();
+      renderCalendar();
+      showToast(I18N[APP_STATE.lang].toastAttendanceUpdated || 'Session attendance updated');
+    }
+
+    function generateParentRecapText(student, session) {
+      const isHe = APP_STATE.lang === 'he';
+      const tutorName = (APP_STATE.currentUser && (APP_STATE.currentUser.name_en || APP_STATE.currentUser.name)) || (isHe ? 'המורה' : 'Tutor');
+      const dateStr = session.dateStr || (APP_STATE.calendar && APP_STATE.calendar.selectedDateStr) || new Date().toISOString().split('T')[0];
+      const timeStr = session.time || '';
+
+      const statusMap = {
+        completed: isHe ? 'התקיים בהצלחה' : 'Completed Successfully',
+        scheduled: isHe ? 'מתוכנן' : 'Scheduled',
+        cancelled: isHe ? 'בוטל' : 'Cancelled',
+        no_show: isHe ? 'לא התייצב' : 'No-Show'
+      };
+      const statusLabel = statusMap[session.status || 'completed'] || (isHe ? 'התקיים' : 'Completed');
+
+      const hw = (student.skills && student.skills.homework && student.skills.homework.task)
+        ? student.skills.homework.task
+        : (isHe ? 'אין מטלות חדשות לשבוע זה' : 'No new assignment this week');
+
+      const topicText = (session.topic && session.topic.trim())
+        ? session.topic.trim()
+        : (student.notes || (isHe ? 'חזרה והתקדמות שוטפת' : 'General progress & practice'));
+
+      if (isHe) {
+        return `שלום וברכה!\n\nעדכון קצר על השיעור של ${student.name}:\n📅 תאריך: ${dateStr}${timeStr ? ' (' + timeStr + ')' : ''}\n📌 סטטוס: ${statusLabel}\n📖 נושאי הלימוד: ${topicText}\n📝 שיעורי בית ותרגול: ${hw}\n\nהמשך שבוע מבורך,\n${tutorName}`;
+      } else {
+        return `Hello!\n\nHere is a quick update on ${student.name}'s lesson:\n📅 Date: ${dateStr}${timeStr ? ' (' + timeStr + ')' : ''}\n📌 Status: ${statusLabel}\n📖 Topics Covered: ${topicText}\n📝 Practice & Homework: ${hw}\n\nBest regards,\n${tutorName}`;
+      }
+    }
+
+    function openParentRecapModal(studentId, sessionId) {
+      const student = (APP_STATE.students || []).find(st => st.id === studentId);
+      if (!student || !Array.isArray(student.schedule)) return;
+      const session = student.schedule.find(s => s.id === sessionId);
+      if (!session) return;
+
+      APP_STATE.activeRecapSession = { studentId, sessionId };
+      const isHe = APP_STATE.lang === 'he';
+      const t = I18N[APP_STATE.lang];
+
+      const metaContainer = document.getElementById('recap-session-meta');
+      if (metaContainer) {
+        const guardian = student.parentContact || {};
+        metaContainer.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-white">${escapeHtml(student.name)}</span>
+            <span class="text-slate-500">•</span>
+            <span class="font-mono text-amber-300">${escapeHtml(session.time || '')}</span>
+            <span class="text-slate-500">•</span>
+            <span class="font-mono text-slate-300">${escapeHtml(session.dateStr || APP_STATE.calendar.selectedDateStr || '')}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            ${guardian.name ? `<span class="text-slate-400"><i data-lucide="user" class="w-3 h-3 inline"></i> ${escapeHtml(guardian.name)}</span>` : ''}
+            ${guardian.phone ? `<span class="text-emerald-400 font-mono text-[11px]"><i data-lucide="phone" class="w-3 h-3 inline"></i> ${escapeHtml(guardian.phone)}</span>` : ''}
+          </div>
+        `;
+      }
+
+      const textarea = document.getElementById('recap-message-textarea');
+      if (textarea) {
+        textarea.value = generateParentRecapText(student, session);
+      }
+
+      const modal = document.getElementById('modal-parent-recap');
+      if (modal) modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeParentRecapModal() {
+      const modal = document.getElementById('modal-parent-recap');
+      if (modal) modal.classList.add('hidden');
+      APP_STATE.activeRecapSession = null;
+    }
+
+    function copyParentRecapText() {
+      const textarea = document.getElementById('recap-message-textarea');
+      if (!textarea) return;
+      const text = textarea.value;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(I18N[APP_STATE.lang].toastRecapCopied || 'Session recap copied to clipboard!');
+        }).catch(() => {
+          showToast(I18N[APP_STATE.lang].toastRecapCopied || 'Session recap copied!');
+        });
+      } else {
+        textarea.select();
+        document.execCommand('copy');
+        showToast(I18N[APP_STATE.lang].toastRecapCopied || 'Session recap copied to clipboard!');
+      }
+    }
+
+    function sendParentRecapWhatsApp() {
+      const textarea = document.getElementById('recap-message-textarea');
+      if (!textarea) return;
+      const text = textarea.value;
+      const sessionInfo = APP_STATE.activeRecapSession;
+      let phone = '';
+      if (sessionInfo) {
+        const student = (APP_STATE.students || []).find(st => st.id === sessionInfo.studentId);
+        if (student && student.parentContact && student.parentContact.phone) {
+          phone = student.parentContact.phone.replace(/[^0-9]/g, '');
+        }
+      }
+      const encText = encodeURIComponent(text);
+      const url = phone ? `https://wa.me/${phone}?text=${encText}` : `https://wa.me/?text=${encText}`;
+      window.open(url, '_blank');
+    }
+
+    function sendParentRecapEmail() {
+      const textarea = document.getElementById('recap-message-textarea');
+      if (!textarea) return;
+      const text = textarea.value;
+      const sessionInfo = APP_STATE.activeRecapSession;
+      let email = '';
+      let studentName = '';
+      if (sessionInfo) {
+        const student = (APP_STATE.students || []).find(st => st.id === sessionInfo.studentId);
+        if (student) {
+          studentName = student.name;
+          if (student.parentContact && student.parentContact.email) {
+            email = student.parentContact.email.trim();
+          }
+        }
+      }
+      const isHe = APP_STATE.lang === 'he';
+      const subject = encodeURIComponent((isHe ? 'עדכון שיעור: ' : 'Lesson Update: ') + (studentName || 'Student'));
+      const encBody = encodeURIComponent(text);
+      window.location.href = `mailto:${email}?subject=${subject}&body=${encBody}`;
     }
 
     function toggleLessonTeachingDetails(sessionId) {
@@ -16560,13 +17348,19 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
         functionDeclarations: [
           {
             name: "add_student",
-            description: "Add a new student to the roster",
+            description: "Add a new student to the roster with CRM details",
             parameters: {
               type: "OBJECT",
               properties: {
                 name: { type: "STRING", description: "Student full name" },
                 subject: { type: "STRING", description: "Primary course, subject, or focus area (e.g. Algebra 1, SAT Prep, Hebrew)" },
                 gradeOrDate: { type: "STRING", description: "Grade level or target goal date (e.g. Grade 10, June 2026)" },
+                gradeLevel: { type: "STRING", description: "Academic stage (e.g. Elementary, Middle School, High School, College, Adult Learner)" },
+                status: { type: "STRING", description: "Enrollment status: active, paused, or completed" },
+                guardianName: { type: "STRING", description: "Parent or guardian full name" },
+                guardianPhone: { type: "STRING", description: "Parent or guardian phone / WhatsApp" },
+                guardianEmail: { type: "STRING", description: "Parent or guardian email address" },
+                hourlyRate: { type: "STRING", description: "Lesson fee or hourly rate e.g. $60/hr or 200 ₪" },
                 parsha: { type: "STRING", description: "Subject or focus area (backward compatibility alias)" },
                 barMitzvahDate: { type: "STRING", description: "Target date or grade level (backward compatibility alias)" },
                 notes: { type: "STRING", description: "Initial tutor notes" }
@@ -16576,7 +17370,7 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
           },
           {
             name: "update_student",
-            description: "Update an existing student's name, notes, subject, or goals",
+            description: "Update an existing student's name, notes, CRM fields, subject, or goals",
             parameters: {
               type: "OBJECT",
               properties: {
@@ -16584,9 +17378,29 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
                 newName: { type: "STRING", description: "New name if changing student name" },
                 notes: { type: "STRING", description: "Updated tutor notes" },
                 subject: { type: "STRING", description: "Updated primary course or subject" },
+                gradeLevel: { type: "STRING", description: "Updated academic stage" },
+                status: { type: "STRING", description: "Updated status (active, paused, completed)" },
+                guardianName: { type: "STRING", description: "Updated parent / guardian name" },
+                guardianPhone: { type: "STRING", description: "Updated guardian phone / WhatsApp" },
+                guardianEmail: { type: "STRING", description: "Updated guardian email" },
+                hourlyRate: { type: "STRING", description: "Updated lesson fee / rate" },
                 parsha: { type: "STRING", description: "Updated subject or parsha alias" }
               },
               required: ["studentNameOrId"]
+            }
+          },
+          {
+            name: "log_session_attendance",
+            description: "Log attendance status for a scheduled session (completed, scheduled, cancelled, or no_show)",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                studentNameOrId: { type: "STRING", description: "Student name or ID" },
+                date: { type: "STRING", description: "Date of the session (YYYY-MM-DD)" },
+                status: { type: "STRING", description: "Attendance status: completed, scheduled, cancelled, or no_show" },
+                notes: { type: "STRING", description: "Optional session notes or recap comments" }
+              },
+              required: ["studentNameOrId", "date", "status"]
             }
           },
           {
@@ -17063,7 +17877,14 @@ Guidelines:
         if (!studentName) return { success: false, error: 'Student name required' };
 
         const subjectVal = (args.subject || args.parsha || '').trim();
-        const dateVal = (args.targetDate || args.gradeOrDate || args.gradeLevel || args.barMitzvahDate || '').trim();
+        const dateVal = (args.targetDate || args.gradeOrDate || args.barMitzvahDate || '').trim();
+        const gradeLevel = (args.gradeLevel || 'Standard / All Levels').trim();
+        const status = (args.status || 'active').trim();
+        const guardianName = (args.guardianName || '').trim();
+        const guardianPhone = (args.guardianPhone || '').trim();
+        const guardianEmail = (args.guardianEmail || '').trim();
+        const hourlyRate = (args.hourlyRate || '').trim();
+
         let parshaOrDate = subjectVal;
         if (dateVal) {
           parshaOrDate = parshaOrDate ? (parshaOrDate + ' (' + dateVal + ')') : dateVal;
@@ -17078,6 +17899,14 @@ Guidelines:
           barMitzvahDate: dateVal,
           parshaOrDate: parshaOrDate,
           parsha_or_date: parshaOrDate,
+          gradeLevel: gradeLevel,
+          status: status,
+          parentContact: {
+            name: guardianName,
+            phone: guardianPhone,
+            email: guardianEmail
+          },
+          hourlyRate: hourlyRate,
           avatar: '',
           orderIndex: (APP_STATE.students || []).length,
           notes: (args.notes || '').trim(),
@@ -17095,6 +17924,10 @@ Guidelines:
               school_id: typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770',
               parsha: subjectVal,
               barMitzvahDate: dateVal,
+              gradeLevel: gradeLevel,
+              status: status,
+              parentContact: { name: guardianName, phone: guardianPhone, email: guardianEmail },
+              hourlyRate: hourlyRate,
               lessons: []
             }
           },
@@ -17141,6 +17974,15 @@ Guidelines:
           student.gradeOrDate = (args.targetDate || args.gradeOrDate || args.barMitzvahDate).trim();
           student.barMitzvahDate = student.gradeOrDate;
         }
+        if (args.gradeLevel !== undefined) student.gradeLevel = args.gradeLevel.trim();
+        if (args.status !== undefined) student.status = args.status.trim();
+        if (args.hourlyRate !== undefined) student.hourlyRate = args.hourlyRate.trim();
+        if (args.guardianName !== undefined || args.guardianPhone !== undefined || args.guardianEmail !== undefined) {
+          student.parentContact = student.parentContact || { name: '', phone: '', email: '' };
+          if (args.guardianName !== undefined) student.parentContact.name = args.guardianName.trim();
+          if (args.guardianPhone !== undefined) student.parentContact.phone = args.guardianPhone.trim();
+          if (args.guardianEmail !== undefined) student.parentContact.email = args.guardianEmail.trim();
+        }
 
         saveStudentsToStorage(true);
         if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
@@ -17152,6 +17994,51 @@ Guidelines:
           studentId: student.id,
           name: student.name,
           message: isHe ? `תלמיד עודכן: ${student.name}` : `Student updated: ${student.name}`
+        };
+      }
+
+      if (name === 'log_session_attendance') {
+        const student = findStudentFlexible(args.studentNameOrId);
+        if (!student) return { success: false, error: `Student not found: ${args.studentNameOrId}` };
+        const targetDate = args.date;
+        const newStatus = args.status; // 'completed', 'scheduled', 'cancelled', 'no_show'
+        if (!Array.isArray(student.schedule)) student.schedule = [];
+
+        let session = student.schedule.find(s => s.dateStr === targetDate);
+        if (!session) {
+          const dayOfWeek = (new Date(targetDate + 'T12:00:00')).getDay();
+          session = student.schedule.find(s => s.repeatWeekly && s.dayOfWeek === dayOfWeek);
+        }
+
+        if (!session) {
+          session = {
+            id: 'les_' + Date.now(),
+            dateStr: targetDate,
+            dayOfWeek: (new Date(targetDate + 'T12:00:00')).getDay(),
+            time: '4:30 PM',
+            repeatWeekly: false,
+            topic: isHe ? 'שיעור פרטי' : 'Tutoring Session'
+          };
+          student.schedule.push(session);
+        }
+
+        session.status = newStatus;
+        session.completedAt = (newStatus === 'completed') ? new Date().toISOString() : null;
+        if (args.notes) {
+          session.topic = (session.topic ? (session.topic + ' - ') : '') + args.notes.trim();
+        }
+
+        saveStudentsToStorage(true);
+        if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
+        renderStudents();
+        renderCalendar();
+
+        return {
+          success: true,
+          studentId: student.id,
+          sessionId: session.id,
+          status: newStatus,
+          message: isHe ? `נוכחות עודכנה ל-${newStatus} עבור ${student.name}` : `Session marked as ${newStatus} for ${student.name}`
         };
       }
 
