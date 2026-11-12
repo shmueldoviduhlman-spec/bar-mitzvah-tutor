@@ -60,8 +60,16 @@ const sandbox = {
   prompt: () => '',
   scrollTo: () => {},
   window: {
-    location: { href: 'https://bar-mitzvah-tutor.pages.dev' },
-    addEventListener() {},
+    location: { href: 'https://tutorpilot.pages.dev', pathname: '/', hash: '', search: '' },
+    _listeners: {},
+    addEventListener(evt, fn) {
+      if (!this._listeners[evt]) this._listeners[evt] = [];
+      this._listeners[evt].push(fn);
+    },
+    dispatchEvent(event) {
+      const list = this._listeners[event.type] || [];
+      list.forEach(fn => fn(event));
+    },
     lucide: { createIcons() {} },
     confirm: () => true,
     alert: () => {},
@@ -98,6 +106,7 @@ try {
   vm.runInContext(mainScript, sandbox);
   sandbox.APP_STATE = sandbox.window.APP_STATE;
   sandbox.DEFAULT_SCHOOL = sandbox.window.DEFAULT_SCHOOL;
+  sandbox.I18N = sandbox.window.I18N;
   console.log('✓ Successfully compiled and loaded application scripts into VM');
 } catch (err) {
   console.error('Script loading error:', err);
@@ -1493,6 +1502,67 @@ assert(lessonsContainerHtml.includes('Audio & Voice Recordings'), 'Expanded card
 sandbox.openEditCustomLessonModal(blueprintCourse.id, blueprintLesson.id);
 const rehydratedInput = getOrCreateElem(`input-section-${blueprintCourse.blueprint.sections[0].id}`);
 assert(rehydratedInput.value.length > 0, 'Edit modal rehydrated dynamic section field value');
+
+// Gate 19: Classes Tab Renaming, Course-First Clean Slate Hierarchy, AI Blueprint & Extension Bridge
+console.log('\n--- Gate 19: Classes Tab Renaming, Hierarchy & Extension Bridge ---');
+
+// 1. Tab & Dock Renaming
+assert(sandbox.I18N.en.tabStudy === 'Classes', 'I18N en tabStudy is Classes');
+assert(sandbox.I18N.he.tabStudy === 'שיעורים', 'I18N he tabStudy is שיעורים');
+assert(sandbox.I18N.en.mobStudy === 'Classes', 'I18N en mobStudy is Classes');
+assert(sandbox.I18N.he.mobStudy === 'שיעורים', 'I18N he mobStudy is שיעורים');
+assert(indexHtml.includes('id="mob-lbl-study">Classes<'), 'HTML mobile dock label is Classes');
+
+// 2. Course-First Navigation & switchTab('classes') Alias
+sandbox.switchTab('classes');
+assert(sandbox.APP_STATE.activeTab === 'study', 'switchTab classes alias activates study tab');
+assert(sandbox.APP_STATE.insideCourseId === null, 'Entering classes resets insideCourseId to null (Courses Directory)');
+
+// 3. Clean Slate Onboarding Copy & Elements
+assert(indexHtml.includes('Welcome to Classes'), 'HTML clean slate title welcomes educators to Classes');
+assert(indexHtml.includes('+ Add a Course'), 'HTML clean slate contains prominent + Add a Course button');
+assert(indexHtml.includes('Classes & Courses'), 'HTML courses directory header is Classes & Courses');
+
+// 4. Interactive AI Course Structure Assistant
+assert(indexHtml.includes('id="input-ai-blueprint-prompt"'), 'HTML contains input-ai-blueprint-prompt');
+assert(indexHtml.includes('id="btn-ai-blueprint-suggest"'), 'HTML contains btn-ai-blueprint-suggest');
+assert(typeof sandbox.handleAiSuggestBlueprint === 'function', 'handleAiSuggestBlueprint is a function');
+
+getOrCreateElem('input-ai-blueprint-prompt').value = 'Talmud Bava Metzia - Lost & Found Objects';
+sandbox.handleAiSuggestBlueprint();
+assert(getOrCreateElem('input-create-course-title-en').value.length > 0, 'AI populated course title');
+assert(sandbox.getCurrentBlueprintSections().length >= 3, 'AI configured blueprint sections');
+
+// 5. Chrome Extension & Web Clipper Bridge
+assert(indexHtml.includes('id="btn-open-extension-bridge"'), 'HTML contains Web Clipper button');
+assert(indexHtml.includes('id="modal-extension-bridge"'), 'HTML contains modal-extension-bridge');
+assert(typeof sandbox.openExtensionBridgeModal === 'function', 'openExtensionBridgeModal is a function');
+assert(typeof sandbox.closeExtensionBridgeModal === 'function', 'closeExtensionBridgeModal is a function');
+assert(typeof sandbox.copyWebClipperBookmarklet === 'function', 'copyWebClipperBookmarklet is a function');
+assert(typeof sandbox.checkUrlExtensionParams === 'function', 'checkUrlExtensionParams is a function');
+assert(typeof sandbox.initExtensionBridge === 'function', 'initExtensionBridge is a function');
+
+// 6. Extension postMessage Bridge Lesson Creation
+sandbox.initExtensionBridge();
+const msgListeners = sandbox.window._listeners['message'] || [];
+assert(msgListeners.length > 0, 'initExtensionBridge registered message listener');
+
+const extCourse = (sandbox.APP_STATE.customCourses || [])[0];
+const initialLessonCount = extCourse && extCourse.lessons ? extCourse.lessons.length : 0;
+
+msgListeners[0]({
+  data: {
+    action: 'TUTORPILOT_CREATE_LESSON',
+    courseId: extCourse.id,
+    title: 'Extension: Talmudic Gemara Text',
+    text: 'Two hold a garment, one says it is all mine and one says it is all mine...'
+  }
+});
+
+assert(extCourse.lessons.length === initialLessonCount + 1, 'Extension message successfully created a lesson');
+const extLesson = extCourse.lessons[extCourse.lessons.length - 1];
+assert(extLesson.title_en === 'Extension: Talmudic Gemara Text', 'Extension lesson title saved');
+assert(extLesson.hook_en.includes('Two hold a garment') || Object.values(extLesson.sections || {}).some(v => String(v).includes('Two hold a garment')), 'Extension lesson saved clipped text');
 
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);

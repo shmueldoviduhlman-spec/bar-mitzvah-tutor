@@ -523,15 +523,15 @@
             <i data-lucide="book-plus" class="w-8 h-8"></i>
           </div>
           <div class="space-y-2">
-            <h3 id="lbl-tutor-hub-title" class="text-lg sm:text-xl font-bold text-white">Your Teaching Hub is Ready</h3>
+            <h3 id="lbl-tutor-hub-title" class="text-lg sm:text-xl font-bold text-white">Welcome to Classes</h3>
             <p id="lbl-tutor-hub-desc" class="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
-              You have not created any courses yet. Each teacher creates their own courses and adds their own classes. Click below to begin building your curriculum.
+              Every course defines its own format blueprint for lessons. Click below to add your first course and set up its lesson structure.
             </p>
           </div>
           <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
             <button onclick="openCreateCourseModal()" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm shadow-lg transition active:scale-95">
               <i data-lucide="plus" class="w-4 h-4"></i>
-              <span>+ Create Course</span>
+              <span>+ Add a Course</span>
             </button>
             <button onclick="openAiCurriculumBuilderModal('full')" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 transition active:scale-95">
               <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
@@ -552,7 +552,7 @@
                 <div class="flex items-center gap-2">
                   <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
                     <i data-lucide="layers" class="w-5 h-5 text-amber-400"></i>
-                    <span id="lbl-courses-directory-title">Courses & Curricula</span>
+                    <span id="lbl-courses-directory-title">Classes & Courses</span>
                   </h3>
                   <span id="courses-directory-count-badge" class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">0 Courses</span>
                   <button id="btn-purge-all-courses" onclick="handlePurgeAllCourses()" class="text-[11px] text-slate-500 hover:text-rose-400 transition hidden items-center gap-1 ml-2" title="Clear all courses and start fresh">
@@ -560,12 +560,16 @@
                     <span>Clear All</span>
                   </button>
                 </div>
-                <p class="text-xs text-slate-400" id="lbl-courses-directory-desc">Select a course to view and manage its classes, or create a new course.</p>
+                <p class="text-xs text-slate-400" id="lbl-courses-directory-desc">Create your courses. Each course defines its own format blueprint for lessons.</p>
               </div>
-              <div class="flex items-center gap-2 shrink-0">
+              <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                <button onclick="openExtensionBridgeModal()" id="btn-open-extension-bridge" class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 text-xs sm:text-sm font-semibold transition active:scale-95 shadow-sm" title="Chrome Extension & Web Clipper Bridge">
+                  <i data-lucide="plug" class="w-4 h-4 text-cyan-400"></i>
+                  <span>Web Clipper</span>
+                </button>
                 <button onclick="openCreateCourseModal()" class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-bold transition active:scale-95 shadow">
                   <i data-lucide="plus" class="w-4 h-4"></i>
-                  <span>+ Create Course</span>
+                  <span>+ Add Course</span>
                 </button>
                 <button onclick="openAiCurriculumBuilderModal('full')" class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs sm:text-sm font-semibold transition active:scale-95 shadow-sm">
                   <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
@@ -1783,6 +1787,37 @@
           </div>
         </div>
 
+        <!-- AI Course Structure Assistant (Interactive) -->
+        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-brand-500/10 to-indigo-500/10 border border-amber-500/30 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+              <span>AI Course Structure Assistant</span>
+            </span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Gemini Powered</span>
+          </div>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Tell AI your course subject or teaching style, and it will configure your course identity, color theme, and format blueprint automatically.
+          </p>
+          <div class="flex items-center gap-2">
+            <input
+              type="text"
+              id="input-ai-blueprint-prompt"
+              placeholder="e.g. Chumash with Rashi, vocabulary ladder, trope audio, and teen life message..."
+              class="flex-1 bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            >
+            <button
+              type="button"
+              id="btn-ai-blueprint-suggest"
+              onclick="handleAiSuggestBlueprint()"
+              class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition flex items-center gap-1.5 shrink-0 active:scale-95 shadow"
+            >
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>Design with AI</span>
+            </button>
+          </div>
+        </div>
+
         <!-- 2. Class Format Blueprint (The Pamphlet Manual) -->
         <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
           <div class="flex items-center justify-between gap-2 flex-wrap">
@@ -1841,6 +1876,75 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: CHROME EXTENSION & WEB CLIPPER BRIDGE  -->
+  <!-- ============================================== -->
+  <div id="modal-extension-bridge" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
+    <div class="max-w-xl w-full max-h-[92vh] bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4 overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+          <i data-lucide="plug" class="w-5 h-5 text-cyan-400"></i>
+          <span>Chrome Extension & Web Clipper Bridge</span>
+        </h3>
+        <button type="button" onclick="closeExtensionBridgeModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs sm:text-sm text-slate-300">
+        <p class="leading-relaxed">
+          Clip articles, Torah texts from Sefaria or Chabad.org, and study notes directly into your courses from any web page.
+        </p>
+
+        <!-- 1-Click Bookmarklet -->
+        <div class="p-3.5 rounded-2xl bg-slate-950 border border-cyan-800/40 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-cyan-300 flex items-center gap-1.5">
+              <i data-lucide="bookmark" class="w-4 h-4 text-cyan-400"></i>
+              <span>1-Click Web Clipper (Bookmarklet)</span>
+            </span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300">Chrome, Safari, Brave</span>
+          </div>
+          <p class="text-[11px] text-slate-400">
+            Drag this button to your browser bookmarks bar, or click Copy Code to paste it into a new bookmark URL:
+          </p>
+          <div class="flex items-center gap-2 pt-1 flex-wrap">
+            <button
+              type="button"
+              onclick="copyWebClipperBookmarklet()"
+              class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center gap-1.5 shadow transition active:scale-95"
+              title="Click to copy bookmarklet JavaScript code"
+            >
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>Copy Web Clipper Code</span>
+            </button>
+            <span class="text-[11px] text-slate-500">Highlight text on any site & click to clip!</span>
+          </div>
+        </div>
+
+        <!-- Chrome Extension Messaging Protocol -->
+        <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+          <span class="font-bold text-white flex items-center gap-1.5">
+            <i data-lucide="code-2" class="w-4 h-4 text-amber-400"></i>
+            <span>Chrome Extension API & Protocol</span>
+          </span>
+          <p class="text-[11px] text-slate-400">
+            Your Chrome extension can send postMessage events or open TutorPilot with query parameters:
+          </p>
+          <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 font-mono text-[11px] text-amber-300 leading-relaxed overflow-x-auto">
+            window.open('https://tutorpilot.pages.dev/?action=add_lesson&course_id=COURSE_ID&title=TITLE&text=CONTENT', '_blank');
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end border-t border-slate-800">
+        <button type="button" onclick="closeExtensionBridgeModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition">
+          Close
+        </button>
+      </div>
     </div>
   </div>
 
@@ -3744,12 +3848,12 @@
         appSubtitle: "The Operating System for Tutors & Educators",
         shareRabbi: "Share Workspace",
         searchPlaceholder: "Search topics, Rashis, stories, keywords...",
-        tabStudy: "Study",
+        tabStudy: "Classes",
         tabTopics: "Jewish Concepts",
         tabChumash: "Chumash",
         tabStudents: "Students",
         tabCalendar: "Calendar",
-        mobStudy: "Study",
+        mobStudy: "Classes",
         mobTopics: "Concepts",
         mobChumash: "Chumash",
         mobStudents: "Students",
@@ -4074,12 +4178,12 @@
         appSubtitle: "מערכת ההפעלה המובילה למלמדים ואנשי חינוך",
         shareRabbi: "שתף כיתה",
         searchPlaceholder: "חיפוש מושגים, רש״י, סיפורים, מילות מפתח...",
-        tabStudy: "לימוד",
+        tabStudy: "שיעורים",
         tabTopics: "מושגי יסוד",
         tabChumash: "חומש",
         tabStudents: "תלמידים",
         tabCalendar: "לוח שנה",
-        mobStudy: "לימוד",
+        mobStudy: "שיעורים",
         mobTopics: "מושגים",
         mobChumash: "חומש",
         mobStudents: "תלמידים",
@@ -4400,6 +4504,9 @@
         trackCustomLabel: "✦ אישי"
       }
     };
+    if (typeof window !== 'undefined') {
+      window.I18N = I18N;
+    }
 
     const SQL_SCHEMA = `-- Create shared students table for Bar Mitzvah tutors
 create table if not exists public.students_sync (
@@ -7170,6 +7277,8 @@ alter publication supabase_realtime add table public.students_sync;`;
       loadCustomMilestonesFromStorage();
       checkCleanCanvasReset();
       checkUrlHashSync();
+      initExtensionBridge();
+      checkUrlExtensionParams();
       renderAllViews();
       initSupabaseCloud();
       lucide.createIcons();
@@ -7813,6 +7922,9 @@ alter publication supabase_realtime add table public.students_sync;`;
       } else if (tabId === 'chumash') {
         tabId = 'study';
         switchStudySection('chumash');
+      } else if (tabId === 'classes') {
+        tabId = 'study';
+        APP_STATE.insideCourseId = null;
       }
 
       APP_STATE.activeTab = tabId;
@@ -8021,7 +8133,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
 
       if (APP_STATE.insideCourseId === undefined) {
-        APP_STATE.insideCourseId = APP_STATE.activeCourseId;
+        APP_STATE.insideCourseId = null;
       }
 
       renderCoursePickerPills();
@@ -10686,27 +10798,32 @@ IV. Conclusion
 
     async function handleAiSuggestBlueprint() {
       const isHe = APP_STATE.lang === 'he';
+      const promptInput = document.getElementById('input-ai-blueprint-prompt');
       const titleInput = document.getElementById('input-create-course-title-en');
       const descInput = document.getElementById('input-create-course-desc');
-      const courseTitle = (titleInput?.value || descInput?.value || '').trim();
+      const courseTitle = (promptInput?.value || titleInput?.value || descInput?.value || '').trim();
 
       if (!courseTitle) {
-        showToast(isHe ? 'נא להזין כותרת קורס תחילה' : 'Please enter a course title first');
-        titleInput?.focus();
+        showToast(isHe ? 'נא להזין רעיון או כותרת לקורס' : 'Please enter a course idea or title first');
+        if (promptInput) promptInput.focus();
+        else if (titleInput) titleInput.focus();
         return;
       }
 
-      showToast(isHe ? 'AI מתאים את מבנה הקורס...' : 'AI is suggesting blueprint sections...');
+      showToast(isHe ? 'AI מתאים את מבנה הקורס...' : 'AI is designing course structure...');
       
       const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key');
       let resultSections = null;
 
       if (apiKey) {
         try {
-          const prompt = `Based on the course title "${courseTitle}", suggest 3 to 5 modular class sections that every lesson in this course should have.
+          const prompt = `Based on the course concept/title "${courseTitle}", suggest course identity and 3 to 5 modular class sections that every lesson in this course should have.
 Section types allowed: "text", "list", "audio", "reflection", "homework".
 Return STRICT JSON ONLY:
 {
+  "course_title_en": "Suggested English Course Title",
+  "course_title_he": "כותרת קורס בעברית",
+  "suggested_desc": "What students will master in this course",
   "suggested_color": "amber",
   "suggested_icon": "📜",
   "sections": [
@@ -10730,6 +10847,16 @@ Return STRICT JSON ONLY:
               const parsed = JSON.parse(text);
               if (parsed.sections && Array.isArray(parsed.sections)) {
                 resultSections = parsed.sections;
+                if (titleInput && (!titleInput.value || !titleInput.value.trim()) && parsed.course_title_en) {
+                  titleInput.value = parsed.course_title_en;
+                }
+                const titleHeInput = document.getElementById('input-create-course-title-he');
+                if (titleHeInput && (!titleHeInput.value || !titleHeInput.value.trim()) && parsed.course_title_he) {
+                  titleHeInput.value = parsed.course_title_he;
+                }
+                if (descInput && (!descInput.value || !descInput.value.trim()) && parsed.suggested_desc) {
+                  descInput.value = parsed.suggested_desc;
+                }
                 if (parsed.suggested_color) selectCourseColor(parsed.suggested_color);
                 if (parsed.suggested_icon && document.getElementById('input-create-course-icon')) {
                   document.getElementById('input-create-course-icon').value = parsed.suggested_icon;
@@ -10747,12 +10874,15 @@ Return STRICT JSON ONLY:
         if (lower.includes('read') || lower.includes('קריאה') || lower.includes('alef') || lower.includes('hebrew')) {
           resultSections = BLUEPRINT_PRESETS.reading_fluency;
           selectCourseColor('emerald');
+          if (titleInput && !titleInput.value) titleInput.value = 'Hebrew Reading & Fluency';
         } else if (lower.includes('chumash') || lower.includes('torah') || lower.includes('parsha') || lower.includes('חומש')) {
           resultSections = BLUEPRINT_PRESETS.torah_audio;
           selectCourseColor('amber');
+          if (titleInput && !titleInput.value) titleInput.value = 'Chumash with Trope';
         } else {
           resultSections = BLUEPRINT_PRESETS.concepts_ethics;
           selectCourseColor('blue');
+          if (titleInput && !titleInput.value) titleInput.value = 'Core Jewish Concepts';
         }
       }
 
@@ -10761,8 +10891,9 @@ Return STRICT JSON ONLY:
         type: s.type,
         name: s.name
       }));
+      if (typeof window !== 'undefined') window.currentBlueprintSections = currentBlueprintSections;
       renderBlueprintSectionsList();
-      showToast(isHe ? 'המבנה הותאם בהצלחה!' : 'Blueprint sections configured!');
+      showToast(isHe ? 'המבנה הותאם בהצלחה!' : 'Course structure designed with AI!');
     }
 
     function openCreateCourseModal() {
@@ -10916,6 +11047,148 @@ Return STRICT JSON ONLY:
       closeCreateCourseModal();
       renderLessonsCategoryView();
       showToast(APP_STATE.lang === 'he' ? 'הקורס נוצר בהצלחה! כעת הוסף שיעור ראשון.' : 'Course created successfully! Now add your first class.');
+    }
+
+    // ==============================================
+    // CHROME EXTENSION & WEB CLIPPER BRIDGE
+    // ==============================================
+    function openExtensionBridgeModal() {
+      const modal = document.getElementById('modal-extension-bridge');
+      if (modal) modal.classList.remove('hidden');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function closeExtensionBridgeModal() {
+      const modal = document.getElementById('modal-extension-bridge');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function copyWebClipperBookmarklet() {
+      const code = "javascript:(function(){const t=document.title;const s=window.getSelection().toString()||t;window.open('https://tutorpilot.pages.dev/?action=add_lesson&title='+encodeURIComponent(t)+'&text='+encodeURIComponent(s)+'&source_url='+encodeURIComponent(location.href),'_blank');})();";
+      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(() => {
+          showToast(APP_STATE.lang === 'he' ? 'קוד התוסף הועתק בהצלחה!' : 'Web Clipper code copied to clipboard!');
+        }).catch(() => {
+          prompt('Copy bookmarklet code:', code);
+        });
+      } else {
+        prompt('Copy bookmarklet code:', code);
+      }
+    }
+
+    function checkUrlExtensionParams() {
+      if (typeof window === 'undefined' || !window.location || !window.location.search) return;
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const action = params.get('action') || params.get('ext_action');
+        if (!action) return;
+
+        if (action === 'add_lesson' || action === 'create_lesson') {
+          const courseId = params.get('course_id') || params.get('course');
+          const title = params.get('title') || params.get('topic') || '';
+          const text = params.get('text') || params.get('content') || params.get('verses') || '';
+          const sourceUrl = params.get('source_url') || params.get('source') || '';
+
+          switchTab('study');
+
+          const courses = APP_STATE.customCourses || [];
+          let targetCourse = courses.find(c => c.id === courseId);
+          if (!targetCourse && courses.length > 0) {
+            targetCourse = courses[0];
+          }
+
+          if (targetCourse) {
+            openCourseClassesView(targetCourse.id);
+            openAddCustomLessonModal(targetCourse.id);
+
+            if (title) {
+              const titleInput = document.getElementById('input-custom-lesson-title-en');
+              if (titleInput) titleInput.value = title;
+            }
+
+            if (text) {
+              const firstTextSec = (targetCourse.blueprint?.sections || []).find(s => s.type === 'text');
+              if (firstTextSec) {
+                const secInput = document.getElementById(`input-section-${firstTextSec.id}`);
+                if (secInput) secInput.value = text + (sourceUrl ? `\n\nSource: ${sourceUrl}` : '');
+              }
+              const hookInput = document.getElementById('input-custom-lesson-hook');
+              if (hookInput && !hookInput.value) hookInput.value = text;
+            }
+
+            showToast(APP_STATE.lang === 'he' ? 'תוכן השיעור נטען מהתוסף!' : 'Lesson loaded from Web Clipper / Extension!');
+
+            if (window.history && window.history.replaceState) {
+              const cleanUrl = window.location.pathname + window.location.hash;
+              window.history.replaceState({}, document.title, cleanUrl);
+            }
+          } else {
+            openCreateCourseModal();
+            showToast(APP_STATE.lang === 'he' ? 'אנא צור קורס תחילה כדי לקלוט שיעורים מהתוסף' : 'Create a course first to accept lessons from extension!');
+          }
+        }
+      } catch (err) {
+        console.warn("checkUrlExtensionParams error:", err);
+      }
+    }
+
+    function initExtensionBridge() {
+      if (typeof window === 'undefined' || !window.addEventListener) return;
+      window.addEventListener('message', function(event) {
+        const data = event.data;
+        if (!data || typeof data !== 'object') return;
+
+        if (data.action === 'TUTORPILOT_GET_COURSES') {
+          const courses = (APP_STATE.customCourses || []).map(c => ({
+            id: c.id,
+            title_en: c.title_en,
+            title_he: c.title_he,
+            icon: c.icon,
+            color: c.color,
+            blueprint: c.blueprint
+          }));
+          if (event.source && typeof event.source.postMessage === 'function') {
+            event.source.postMessage({ type: 'TUTORPILOT_COURSES_RESPONSE', courses: courses }, '*');
+          }
+        }
+
+        if (data.action === 'TUTORPILOT_CREATE_LESSON') {
+          const courseId = data.courseId;
+          const courses = APP_STATE.customCourses || [];
+          const course = courses.find(c => c.id === courseId) || courses[0];
+          if (!course) return;
+
+          if (!course.lessons) course.lessons = [];
+          const newLesson = {
+            id: 'les_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            lesson_num: course.lessons.length + 1,
+            title_en: data.title_en || data.title || 'Extension Lesson',
+            title_he: data.title_he || data.title || 'שיעור מהתוסף',
+            hook_en: data.text || data.hook || '',
+            hook_he: data.text || data.hook || '',
+            anchors_en: Array.isArray(data.anchors) ? data.anchors : [],
+            anchors_he: Array.isArray(data.anchors) ? data.anchors : [],
+            life_app_en: data.life_app || '',
+            life_app_he: data.life_app || '',
+            sections: data.sections || {},
+            recordings: []
+          };
+
+          if (course.blueprint?.sections) {
+            course.blueprint.sections.forEach(sec => {
+              if (!newLesson.sections[sec.id] && sec.type === 'text' && data.text) {
+                newLesson.sections[sec.id] = data.text;
+              }
+            });
+          }
+
+          course.lessons.push(newLesson);
+          course.updated_at = new Date().toISOString();
+          saveCustomCoursesToStorage(true);
+          renderLessonsCategoryView();
+          showToast(APP_STATE.lang === 'he' ? 'שיעור נוצר בהצלחה מהתוסף!' : 'Lesson created from Extension!');
+        }
+      });
     }
 
     // ==============================================
@@ -17839,9 +18112,9 @@ Base44, please confirm receipt of this protocol and let us know that you are rea
   <nav class="fixed bottom-0 left-0 right-0 z-40 glass-nav border-t border-slate-800/90 mobile-safe-bottom px-3 pt-1.5">
     <div class="grid grid-cols-4 items-center w-full max-w-lg mx-auto gap-1">
 
-      <button onclick="switchTab('study')" id="mob-tab-study" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-brand-400 font-bold bg-brand-500/10 w-full">
+      <button onclick="switchTab('study')" id="mob-tab-study" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-brand-400 font-bold bg-brand-500/10 w-full" title="Classes & Courses">
         <i data-lucide="book-open" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-        <span class="text-[11px] tracking-tight truncate w-full text-center" id="mob-lbl-study">Study</span>
+        <span class="text-[11px] tracking-tight truncate w-full text-center" id="mob-lbl-study">Classes</span>
       </button>
 
       <button onclick="switchTab('students')" id="mob-tab-students" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 w-full">
