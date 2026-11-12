@@ -416,7 +416,7 @@
                   </span>
                   <span id="user-dropdown-school-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-500/10 text-brand-300 border border-brand-500/30 truncate max-w-[130px]" title="School Workspace">
                     <i data-lucide="building-2" class="w-3 h-3 shrink-0"></i>
-                    <span id="user-dropdown-school-name" class="truncate">Bar Mitzvah Academy</span>
+                    <span id="user-dropdown-school-name" class="truncate">My Tutoring Studio</span>
                   </span>
                 </div>
               </div>
@@ -1115,8 +1115,20 @@
             <i data-lucide="chevron-right" class="w-4 h-4 rtl:rotate-180"></i>
           </button>
 
-          <!-- Hebrew Month & Year Badge -->
-          <span id="calendar-hebrew-month-year" class="text-xs font-semibold text-brand-400 font-mono px-2 py-1 rounded-lg bg-brand-500/10 border border-brand-500/20">מרחשון תשפ״ז</span>
+          <!-- Hebrew Month & Year Badge (Visible when Hebrew overlay is enabled) -->
+          <span id="calendar-hebrew-month-year" class="text-xs font-semibold text-brand-400 font-mono px-2 py-1 rounded-lg bg-brand-500/10 border border-brand-500/20 hidden">מרחשון תשפ״ז</span>
+
+          <!-- Hebrew Calendar Overlay Toggle -->
+          <button
+            type="button"
+            onclick="toggleHebrewCalendarOverlay()"
+            id="btn-toggle-hebrew-calendar"
+            class="px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700/60 text-xs font-medium transition active:scale-95 flex items-center gap-1.5"
+            title="Toggle Hebrew Lunar Calendar Overlay"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="dot-hebrew-calendar-toggle"></span>
+            <span id="lbl-hebrew-calendar-toggle">Hebrew: Off</span>
+          </button>
         </div>
 
         <div class="flex items-center gap-2">
@@ -1701,8 +1713,8 @@
       <form onsubmit="handleSaveCustomCourse(event)" class="space-y-3.5 flex-1 overflow-y-auto pr-1">
         <!-- Hidden compatibility fields to ensure test compatibility -->
         <input type="hidden" id="input-create-course-format-type" value="standard">
-        <input type="hidden" id="input-create-course-category" value="Judaic Studies">
-        <input type="hidden" id="input-create-course-level" value="Bar Mitzvah (Age 12-13)">
+        <input type="hidden" id="input-create-course-category" value="General Curriculum">
+        <input type="hidden" id="input-create-course-level" value="Standard / All Levels">
         <input type="hidden" id="input-create-course-color" value="amber">
 
         <!-- 1. Course Identity -->
@@ -1711,7 +1723,7 @@
           <input
             type="text"
             id="input-create-course-title-en"
-            placeholder="e.g. Chumash with Trope, or Jewish Ethics"
+            placeholder="e.g. Algebra 1, World History, or Spanish Fluency"
             class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
             required
           >
@@ -1781,7 +1793,7 @@
             <input
               type="text"
               id="input-create-course-desc"
-              placeholder="e.g. Master parsha storylines, Hebrew reading fluency, or core values"
+              placeholder="e.g. Master algebraic equations, grammar fluency, or scientific method"
               class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
           </div>
@@ -1803,7 +1815,7 @@
             <input
               type="text"
               id="input-ai-blueprint-prompt"
-              placeholder="e.g. Chumash with Rashi, vocabulary ladder, trope audio, and teen life message..."
+              placeholder="e.g. Conversational French, AP Physics mechanics, or middle school literature..."
               class="flex-1 bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
             <button
@@ -2137,7 +2149,7 @@
               <input
                 type="text"
                 id="input-ai-class-prompt"
-                placeholder="e.g. Parshat Bereishit, Shabbat Candles, Fractions, etc."
+                placeholder="e.g. Solving Quadratic Equations, Photosynthesis, or French Subjunctive"
                 class="w-full bg-slate-950/80 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
             </div>
@@ -2146,7 +2158,7 @@
               <input
                 type="text"
                 id="input-ai-class-details"
-                placeholder="e.g. Include Rashi on 1:1, focus on teen accountability, 7 memory anchors"
+                placeholder="e.g. Include real world analogies, step by step breakdown, and practice exercises"
                 class="w-full bg-slate-950/80 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
             </div>
@@ -2156,7 +2168,7 @@
             <div id="ai-class-quick-actions" class="flex items-center gap-1.5 flex-wrap">
               <span class="text-[10px] text-slate-400 font-mono">Quick:</span>
               <button type="button" onclick="applyAiQuickPrompt('Generate a complete lesson tailored to this course format')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">⚡ Full Class</button>
-              <button type="button" onclick="applyAiQuickPrompt('Simplify language for age 12-13 bar mitzvah student')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">🎯 Simplify</button>
+              <button type="button" onclick="applyAiQuickPrompt('Simplify language and make concepts accessible')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">🎯 Simplify</button>
             </div>
             <button
               type="button"
@@ -2200,7 +2212,7 @@
             <input
               type="text"
               id="input-custom-lesson-title-en"
-              placeholder="e.g. Parshat Bereishit"
+              placeholder="e.g. Introduction to Derivatives"
               class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
               required
             >
@@ -2210,7 +2222,7 @@
             <input
               type="text"
               id="input-custom-lesson-title-he"
-              placeholder="e.g. פרשת בראשית"
+              placeholder="e.g. מבוא לנגזרות"
               class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
             >
           </div>
@@ -2777,7 +2789,7 @@
 
       <h3 id="modal-student-title" class="text-lg font-bold text-white flex items-center gap-2 mb-4">
         <i data-lucide="user-plus" class="w-5 h-5 text-brand-400"></i>
-        <span id="txt-modal-student-title">Add Bar Mitzvah Student</span>
+        <span id="txt-modal-student-title">Add New Student</span>
       </h3>
 
       <form id="add-student-form" onsubmit="handleCreateStudent(event)" autocomplete="off" class="space-y-4">
@@ -2798,21 +2810,21 @@
         </div>
 
         <div>
-          <label id="lbl-student-parsha" class="block text-xs font-medium text-slate-300 mb-1">Bar Mitzvah Parsha</label>
+          <label id="lbl-student-parsha" class="block text-xs font-medium text-slate-300 mb-1">Primary Course / Subject</label>
           <select id="new-student-parsha-select" onchange="handleParshaSelectChange(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
             <!-- Populated dynamically via JS -->
           </select>
-          <input type="text" id="new-student-parsha-custom" placeholder="e.g. Parshat Vayikra / Custom Event" class="hidden mt-1.5 w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+          <input type="text" id="new-student-parsha-custom" placeholder="e.g. Algebra 1, World History, Conversational Spanish, Physics..." class="hidden mt-1.5 w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
         </div>
 
         <div>
-          <label id="lbl-student-date" class="block text-xs font-medium text-slate-300 mb-1">Bar Mitzvah Date / Year</label>
-          <input type="text" id="new-student-date" name="student_date_fresh_1793734664717" autocomplete="off" autocorrect="off" placeholder="e.g. Nov 2026 / 15 Cheshvan" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
+          <label id="lbl-student-date" class="block text-xs font-medium text-slate-300 mb-1">Grade Level / Target Date</label>
+          <input type="text" id="new-student-date" name="student_date_fresh_1793734664717" autocomplete="off" autocorrect="off" placeholder="e.g. Grade 10 / June 2026, SAT Nov 2026" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
         </div>
 
         <div>
           <label id="lbl-student-notes" class="block text-xs font-medium text-slate-300 mb-1">Tutor Initial Notes</label>
-          <textarea id="new-student-notes" name="student_notes_fresh_1793734664717" autocomplete="off" autocorrect="off" rows="2" placeholder="e.g. Needs focus on Tefillin basics, very interested in science and basketball" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+          <textarea id="new-student-notes" name="student_notes_fresh_1793734664717" autocomplete="off" autocorrect="off" rows="2" placeholder="e.g. Needs focus on fundamentals, preparing for upcoming exam, plays soccer" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
         </div>
 
         <div class="flex justify-end gap-2 pt-2">
@@ -2984,15 +2996,15 @@
           </label>
         </div>
 
-        <!-- Lesson Focus / What to teach him -->
+        <!-- Lesson Focus / What to teach -->
         <div>
           <label id="lbl-schedule-topic" class="block text-xs font-medium text-slate-300 mb-1">
-            What to teach him during this session? (Optional)
+            What to teach during this session? (Optional)
           </label>
           <textarea
             id="schedule-topic-notes"
             rows="2"
-            placeholder="e.g. Parshat Beshalach Aliyah 1, Haftarah trope, Tefillin demonstration, speech practice..."
+            placeholder="e.g. Chapter 4 review, practice problem set, vocabulary quiz, project milestones..."
             class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
           ></textarea>
           <span class="text-[10px] text-slate-400 block mt-0.5" id="lbl-schedule-topic-hint">
@@ -3349,7 +3361,7 @@
             <span id="school-role-pill" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Owner</span>
           </div>
           <div class="flex items-center justify-between gap-3">
-            <h4 id="school-display-name" class="text-base font-bold text-white">Bar Mitzvah Academy</h4>
+            <h4 id="school-display-name" class="text-base font-bold text-white">My Tutoring Studio</h4>
             <button id="btn-edit-school-name" onclick="promptEditSchoolName()" class="text-xs text-slate-400 hover:text-amber-300 flex items-center gap-1 transition">
               <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
               <span id="btn-edit-school-name-text">Edit</span>
@@ -3615,6 +3627,7 @@
     const APP_STATE = {
       lang: localStorage.getItem('tutor_lang') || 'en', // 'en' or 'he'
       activeTab: 'study', // 'study', 'students', 'calendar'
+      enableHebrewCalendar: localStorage.getItem('tutor_enable_hebrew_calendar') === 'true',
       activeStudyCategory: 'lessons', // 'lessons', 'reading', 'speech', 'custom'
       studySection: 'concepts', // 'concepts', 'chumash', or 'custom'
       customCourses: [],
@@ -3908,13 +3921,13 @@
         chumashProgress: "Chumash Progress",
 
         // Add Student Modal
-        addStudentModalTitle: "Add Bar Mitzvah Student",
+        addStudentModalTitle: "Add New Student",
         studentNameLabel: "Student Name",
         studentNamePlaceholder: "e.g. David Cohen",
-        studentDateLabel: "Bar Mitzvah Date / Parsha",
-        studentDatePlaceholder: "e.g. Parshat Vayera / Nov 2026",
+        studentDateLabel: "Grade Level / Target Date",
+        studentDatePlaceholder: "e.g. Grade 10 / June 2026",
         studentNotesLabel: "Tutor Initial Notes",
-        studentNotesPlaceholder: "e.g. Needs focus on Tefillin basics, very interested in science and basketball",
+        studentNotesPlaceholder: "e.g. Needs focus on fundamentals, preparing for upcoming exam, plays soccer",
         cancel: "Cancel",
         saveStudent: "Save Student",
 
@@ -3927,7 +3940,7 @@
         filterConcepts: "Concepts",
         filterChumash: "Chumash",
         pctCompleted: "Completed",
-        defaultCandidate: "Bar Mitzvah Candidate",
+        defaultCandidate: "Student",
         deleteStudentTitle: "Delete Student",
         noNotesText: "No notes recorded",
 
@@ -4032,11 +4045,11 @@
         removePhoto: "Remove Photo",
         uploadPhoto: "Upload Photo",
         photoUploadHint: "Tap to upload or change student photo",
-        selectParshaPrompt: "-- Select Parsha (Optional) --",
-        customParshaOption: "Custom / Other Parsha",
-        parshaDropdownLabel: "Bar Mitzvah Parsha",
-        barMitzvahDateLabel: "Bar Mitzvah Date / Year",
-        customParshaPlaceholder: "Enter custom parsha or event",
+        selectParshaPrompt: "-- Select Primary Course / Subject (Optional) --",
+        customParshaOption: "Custom Subject / Topic...",
+        parshaDropdownLabel: "Primary Course / Subject",
+        barMitzvahDateLabel: "Grade Level / Target Date",
+        customParshaPlaceholder: "Enter custom course or subject",
         closeDrawer: "Close",
         studentDetailsTitle: "Student Progress & Checklist",
         toastStudentMoved: "Student list reordered",
@@ -4238,13 +4251,13 @@
         chumashProgress: "התקדמות חומש",
 
         // Add Student Modal
-        addStudentModalTitle: "הוספת תלמיד בר מצווה",
+        addStudentModalTitle: "הוספת תלמיד חדש",
         studentNameLabel: "שם התלמיד",
         studentNamePlaceholder: "לדוגמה: דוד כהן",
-        studentDateLabel: "תאריך בר מצווה / פרשה",
-        studentDatePlaceholder: "לדוגמה: פרשת וירא / חשון תשפ״ז",
+        studentDateLabel: "שכבת גיל / תאריך יעד",
+        studentDatePlaceholder: "לדוגמה: כיתה י׳ / יוני 2026",
         studentNotesLabel: "הערות ראשוניות של המלמד",
-        studentNotesPlaceholder: "לדוגמה: זקוק לחיזוק בהלכות תפילין, מתעניין במדע ובכדורסל",
+        studentNotesPlaceholder: "לדוגמה: זקוק לחיזוק ביסודות, מתכונן למבחן הקרוב, חובב ספורט",
         cancel: "ביטול",
         saveStudent: "שמור תלמיד",
 
@@ -4257,7 +4270,7 @@
         filterConcepts: "מושגי יסוד",
         filterChumash: "חומש",
         pctCompleted: "הושלם",
-        defaultCandidate: "חתן בר מצווה",
+        defaultCandidate: "תלמיד",
         deleteStudentTitle: "מחק תלמיד",
         noNotesText: "אין הערות שמורות",
 
@@ -4362,11 +4375,11 @@
         removePhoto: "הסר תמונה",
         uploadPhoto: "העלה תמונה",
         photoUploadHint: "הקש להעלאה או החלפת תמונת התלמיד",
-        selectParshaPrompt: "-- בחר פרשה (אופציונלי) --",
-        customParshaOption: "פרשה מותאמת אישית / אחר",
-        parshaDropdownLabel: "פרשת בר המצווה",
-        barMitzvahDateLabel: "תאריך או שנת בר המצווה",
-        customParshaPlaceholder: "הזן פרשה או אירוע מותאם",
+        selectParshaPrompt: "-- בחר קורס / מקצוע ראשי (אופציונלי) --",
+        customParshaOption: "מקצוע / נושא מותאם אישית...",
+        parshaDropdownLabel: "קורס / מקצוע ראשי",
+        barMitzvahDateLabel: "שכבת גיל / תאריך יעד",
+        customParshaPlaceholder: "הזן מקצוע או נושא לימוד",
         closeDrawer: "סגור",
         studentDetailsTitle: "מעקב התקדמות ורשימת שיעורים",
         toastStudentMoved: "סדר התלמידים עודכן",
@@ -4508,7 +4521,7 @@
       window.I18N = I18N;
     }
 
-    const SQL_SCHEMA = `-- Create shared students table for Bar Mitzvah tutors
+    const SQL_SCHEMA = `-- Create shared students table for TutorPilot educators
 create table if not exists public.students_sync (
   id text primary key,
   name text not null,
@@ -4545,9 +4558,9 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     function getStudentParshaAndDate(student) {
-      if (!student) return { parsha: '', date: '' };
-      let date = student.barMitzvahDate || student.date || '';
-      let parsha = (student.skills && student.skills.parshaReading && student.skills.parshaReading.parshaName) || student.parsha || '';
+      if (!student) return { parsha: '', date: '', subject: '', gradeOrDate: '' };
+      let date = student.gradeOrDate || student.targetDate || student.barMitzvahDate || student.date || '';
+      let parsha = student.subject || (student.skills && student.skills.parshaReading && student.skills.parshaReading.parshaName) || student.parsha || '';
 
       const raw = student.parshaOrDate || '';
       if (!parsha && raw) {
@@ -4568,8 +4581,9 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
 
       parsha = cleanCurriculumName(parsha || raw);
-      return { parsha, date };
+      return { parsha, date, subject: parsha, gradeOrDate: date };
     }
+    const getStudentSubjectAndDate = getStudentParshaAndDate;
 
     function getDefaultStudentSkills() {
       return {
@@ -5440,7 +5454,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                   dayOfWeek: l.date ? (new Date(l.date + 'T12:00:00')).getDay() : (l.dayOfWeek || 0),
                   time: l.timeSlot || l.time || '4:30 PM',
                   repeatWeekly: !!l.repeatWeekly,
-                  topic: l.subject || l.topic || (APP_STATE.lang === 'he' ? 'שיעור בר מצווה' : 'Bar Mitzvah Tutoring')
+                  topic: l.subject || l.topic || (APP_STATE.lang === 'he' ? 'שיעור פרטי' : 'Tutoring Session')
                 }));
               }
 
@@ -5601,7 +5615,7 @@ alter publication supabase_realtime add table public.students_sync;`;
             dayOfWeek: l.date ? (new Date(l.date + 'T12:00:00')).getDay() : (l.dayOfWeek || 0),
             time: l.timeSlot || l.time || '4:30 PM',
             repeatWeekly: !!l.repeatWeekly,
-            topic: l.subject || l.topic || (isHe ? 'שיעור בר מצווה' : 'Bar Mitzvah Tutoring')
+            topic: l.subject || l.topic || (isHe ? 'שיעור פרטי' : 'Tutoring Session')
           }));
         }
 
@@ -5974,7 +5988,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       const isHe = APP_STATE.lang === 'he';
 
       const nameEl = document.getElementById('school-display-name');
-      if (nameEl) nameEl.textContent = school.name || 'Bar Mitzvah Academy';
+      if (nameEl) nameEl.textContent = school.name || 'My Tutoring Studio';
 
       const rolePill = document.getElementById('school-role-pill');
       if (rolePill) {
@@ -6131,8 +6145,8 @@ alter publication supabase_realtime add table public.students_sync;`;
       const shareUrl = `${window.location.origin}${window.location.pathname}?join=${code}`;
       const isHe = APP_STATE.lang === 'he';
       const text = isHe
-        ? `שלום! הצטרף לכיתת הלימוד של ${school.name || 'טיוטור-פיילוט'}. קוד ההצטרפות שלך: ${code}\nקישור מהיר להרשמה ישירה: ${shareUrl}`
-        : `Shalom! Join our shared school workspace on TutorPilot (${school.name || 'Bar Mitzvah Academy'}). Your School Join Code is: ${code}\nDirect Sign Up Link: ${shareUrl}`;
+        ? `שלום! הצטרף לסביבת העבודה של ${school.name || 'TutorPilot'}. קוד ההצטרפות שלך: ${code}\nקישור מהיר להרשמה ישירה: ${shareUrl}`
+        : `Hello! Join our shared workspace on TutorPilot (${school.name || 'My Tutoring Studio'}). Your School Join Code is: ${code}\nDirect Sign Up Link: ${shareUrl}`;
 
       const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
       window.open(waUrl, '_blank');
@@ -6141,7 +6155,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     function promptEditSchoolName() {
       const school = getActiveSchool();
       const isHe = APP_STATE.lang === 'he';
-      const newName = prompt(isHe ? 'שם חדש לבית הספר / כיתה:' : 'Enter new School / Organization name:', school.name || 'Bar Mitzvah Academy');
+      const newName = prompt(isHe ? 'שם חדש לבית הספר / סטודיו:' : 'Enter new School / Studio name:', school.name || 'My Tutoring Studio');
       if (!newName || !newName.trim()) return;
 
       school.name = newName.trim();
@@ -7129,7 +7143,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (dropdownEmail) dropdownEmail.textContent = session.email;
 
       const school = getActiveSchool();
-      const schoolName = (school && school.name) || session.school_name || 'Bar Mitzvah Academy';
+      const schoolName = (school && school.name) || session.school_name || 'My Tutoring Studio';
       const dropdownSchoolName = document.getElementById('user-dropdown-school-name');
       if (dropdownSchoolName) dropdownSchoolName.textContent = schoolName;
 
@@ -7469,7 +7483,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (lblStudentDate) lblStudentDate.textContent = t.barMitzvahDateLabel;
 
       const newStudentDate = document.getElementById('new-student-date');
-      if (newStudentDate) newStudentDate.placeholder = isHe ? "לדוגמה: כ״ח חשון תשפ״ז / נובמבר 2026" : "e.g. Nov 2026 / 15 Cheshvan";
+      if (newStudentDate) newStudentDate.placeholder = t.studentDatePlaceholder || (isHe ? "לדוגמה: כיתה י׳ / יוני 2026" : "e.g. Grade 10 / June 2026");
 
       const lblStudentNotes = document.getElementById('lbl-student-notes');
       if (lblStudentNotes) lblStudentNotes.textContent = t.studentNotesLabel;
@@ -10670,7 +10684,7 @@ IV. Conclusion
         { id: 'sec_verses', type: 'text', name: 'Parsha Verses / Text' },
         { id: 'sec_recordings', type: 'audio', name: 'Chumash Audio Recordings' },
         { id: 'sec_anchors', type: 'list', name: 'Core Story Anchors' },
-        { id: 'sec_takeaway', type: 'reflection', name: 'Bar Mitzvah Life Message' }
+        { id: 'sec_takeaway', type: 'reflection', name: 'Key Takeaway & Life Message' }
       ],
       concepts_ethics: [
         { id: 'sec_hook', type: 'text', name: 'Opening Hook & Dilemma' },
@@ -10989,8 +11003,8 @@ Return STRICT JSON ONLY:
       let icon = document.getElementById('input-create-course-icon').value.trim() || '✦';
 
       const formatType = document.getElementById('input-create-course-format-type')?.value || 'custom_blueprint';
-      const category = document.getElementById('input-create-course-category')?.value || 'Judaic Studies';
-      const level = document.getElementById('input-create-course-level')?.value || 'Bar Mitzvah (Age 12-13)';
+      const category = document.getElementById('input-create-course-category')?.value || 'General Curriculum';
+      const level = document.getElementById('input-create-course-level')?.value || 'Standard / All Levels';
 
       if (!titleEn) return;
 
@@ -13352,7 +13366,7 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
         }
       }
 
-      const systemInstruction = `You are an elite master curriculum designer and educational author for Bar Mitzvah and Judaic studies.
+      const systemInstruction = `You are an elite master curriculum designer and educational author for tutors and educators across all academic disciplines and subjects.
 Generate a single, deeply rich and structured educational lesson based on the user's prompt.
 You MUST return ONLY a valid, parseable JSON object matching the exact schema below, with NO markdown backticks, NO code block markers, and NO extra text.
 
@@ -13392,10 +13406,10 @@ JSON Schema:
       const userPrompt = `Create a complete rich lesson for the course "${course.title_en}":
 Topic / Idea: ${lessonTopic}
 Course Category: ${course.category || 'General'}
-Target Level: ${course.target_level || 'Bar Mitzvah (Age 12-13)'}
+Target Level: ${course.target_level || 'Standard / All Levels'}
 Language: ${langChoice}
 ${connectedLessonInfo ? 'Connection Requirement: ' + connectedLessonInfo : ''}
-Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with bold keyword reminders, high-density points, relatable teen analogies, and an engaging discussion riddle.'}`;
+Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual anchors with bold keyword reminders, structured points, real-world analogies, and an engaging discussion challenge.'}`;
 
       try {
         const candidateModels = [
@@ -13839,24 +13853,38 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
 
       let html = `<option value="">-- ${t.selectParshaPrompt} --</option>`;
 
-      const berList = window.BEREISHIT_PARSHIOT_DATA || [];
-      if (berList.length > 0) {
-        html += `<optgroup label="${isHe ? 'ספר בראשית (12 פרשיות)' : 'Sefer Bereishit (12 Parshiot)'}">`;
-        berList.forEach(p => {
-          const label = cleanCurriculumName(isHe ? p.name_he : p.name_en);
-          html += `<option value="${label}">${label}</option>`;
+      // 1. Show educator's active created courses first
+      const courses = APP_STATE.customCourses || [];
+      if (courses.length > 0) {
+        html += `<optgroup label="${isHe ? 'קורסים שיצרת' : 'Your Created Courses'}">`;
+        courses.forEach(c => {
+          const cTitle = cleanCurriculumName(isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he));
+          html += `<option value="${escapeHtml(cTitle)}">${escapeHtml(c.icon || '📚')} ${escapeHtml(cTitle)}</option>`;
         });
         html += `</optgroup>`;
       }
 
-      const shemList = window.SHEMOT_PARSHIOT_DATA || [];
-      if (shemList.length > 0) {
-        html += `<optgroup label="${isHe ? 'ספר שמות (11 פרשיות)' : 'Sefer Shemot (11 Parshiot)'}">`;
-        shemList.forEach(p => {
-          const label = cleanCurriculumName(isHe ? p.name_he : p.name_en);
-          html += `<option value="${label}">${label}</option>`;
-        });
-        html += `</optgroup>`;
+      // 2. Master account Torah portions fallback
+      if (typeof isMasterAccount === 'function' && isMasterAccount()) {
+        const berList = window.BEREISHIT_PARSHIOT_DATA || [];
+        if (berList.length > 0) {
+          html += `<optgroup label="${isHe ? 'ספר בראשית (12 פרשיות)' : 'Sefer Bereishit (12 Parshiot)'}">`;
+          berList.forEach(p => {
+            const label = cleanCurriculumName(isHe ? p.name_he : p.name_en);
+            html += `<option value="${label}">${label}</option>`;
+          });
+          html += `</optgroup>`;
+        }
+
+        const shemList = window.SHEMOT_PARSHIOT_DATA || [];
+        if (shemList.length > 0) {
+          html += `<optgroup label="${isHe ? 'ספר שמות (11 פרשיות)' : 'Sefer Shemot (11 Parshiot)'}">`;
+          shemList.forEach(p => {
+            const label = cleanCurriculumName(isHe ? p.name_he : p.name_en);
+            html += `<option value="${label}">${label}</option>`;
+          });
+          html += `</optgroup>`;
+        }
       }
 
       html += `<option value="custom">${t.customParshaOption}</option>`;
@@ -14862,6 +14890,8 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
       const newStudent = {
         id: "stu_" + Date.now(),
         name: name,
+        subject: selectedParsha,
+        gradeOrDate: dateVal,
         parsha: selectedParsha,
         barMitzvahDate: dateVal,
         parshaOrDate: parshaOrDate,
@@ -15141,15 +15171,25 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
         secularBanner.textContent = `${isHe ? secularMonthNamesHe[month] : secularMonthNamesEn[month]} ${year}`;
       }
 
-      const midMonthDate = new Date(year, month, 15);
-      const midHebrew = getHebrewDateInfo(midMonthDate);
+      const showHebrew = !!APP_STATE.enableHebrewCalendar;
+
       if (hebrewBanner) {
-        hebrewBanner.textContent = `${midHebrew.monthName} ${midHebrew.yearHebrewNumeral}`;
+        if (showHebrew) {
+          const midMonthDate = new Date(year, month, 15);
+          const midHebrew = getHebrewDateInfo(midMonthDate);
+          hebrewBanner.textContent = `${midHebrew.monthName} ${midHebrew.yearHebrewNumeral}`;
+          hebrewBanner.classList.remove('hidden');
+        } else {
+          hebrewBanner.textContent = '';
+          hebrewBanner.classList.add('hidden');
+        }
       }
+
+      updateHebrewCalendarToggleLabel();
 
       if (weekdaysHeader) {
         weekdaysHeader.innerHTML = t.daysOfWeek.map((dayName, idx) => {
-          const isShabbat = idx === 6;
+          const isShabbat = showHebrew && idx === 6;
           return `<div class="p-1.5 sm:p-2 rounded-lg ${isShabbat ? 'text-amber-400 bg-amber-500/10' : 'bg-slate-900/40'} border border-slate-800/60 font-mono text-[11px]">${dayName}</div>`;
         }).join('');
       }
@@ -15207,9 +15247,43 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
       lucide.createIcons();
     }
 
+    function updateHebrewCalendarToggleLabel() {
+      const btn = document.getElementById('btn-toggle-hebrew-calendar');
+      const lbl = document.getElementById('lbl-hebrew-calendar-toggle');
+      const dot = document.getElementById('dot-hebrew-calendar-toggle');
+      if (!lbl) return;
+      const isHe = APP_STATE.lang === 'he';
+      const on = !!APP_STATE.enableHebrewCalendar;
+      lbl.textContent = isHe ? (on ? 'תאריכים עבריים: פעיל' : 'תאריכים עבריים: כבוי') : (on ? 'Hebrew: On' : 'Hebrew: Off');
+      if (dot) {
+        dot.className = on ? 'w-1.5 h-1.5 rounded-full bg-amber-400' : 'w-1.5 h-1.5 rounded-full bg-slate-500';
+      }
+      if (btn) {
+        if (on) {
+          btn.classList.add('border-amber-500/40', 'text-amber-300', 'bg-amber-950/20');
+          btn.classList.remove('text-slate-400');
+        } else {
+          btn.classList.remove('border-amber-500/40', 'text-amber-300', 'bg-amber-950/20');
+          btn.classList.add('text-slate-400');
+        }
+      }
+    }
+
+    function toggleHebrewCalendarOverlay() {
+      APP_STATE.enableHebrewCalendar = !APP_STATE.enableHebrewCalendar;
+      localStorage.setItem('tutor_enable_hebrew_calendar', APP_STATE.enableHebrewCalendar ? 'true' : 'false');
+      updateHebrewCalendarToggleLabel();
+      renderCalendar();
+      showToast(APP_STATE.lang === 'he'
+        ? (APP_STATE.enableHebrewCalendar ? 'תאריכים עבריים הופעלו ביומן' : 'תאריכים עבריים הוסרו מהיומן')
+        : (APP_STATE.enableHebrewCalendar ? 'Hebrew calendar overlay enabled' : 'Hebrew calendar overlay disabled')
+      );
+    }
+
     function renderDayCell(dayNum, hebrewDayNumeral, isCurrentMonth, isToday, dateStr, dayOfWeek, sessions) {
       const t = I18N[APP_STATE.lang];
-      const isShabbat = dayOfWeek === 6;
+      const showHebrew = !!APP_STATE.enableHebrewCalendar;
+      const isShabbat = showHebrew && dayOfWeek === 6;
 
       const maxDirect = 2;
       const directSessions = sessions.slice(0, maxDirect);
@@ -15256,9 +15330,11 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
             <span class="font-bold ${isToday ? 'text-amber-400 font-extrabold' : isCurrentMonth ? 'text-white' : 'text-slate-400'} font-mono">
               ${dayNum}
             </span>
-            <span class="text-[11px] font-semibold text-brand-400/90 font-mono">
-              ${hebrewDayNumeral}
-            </span>
+            ${showHebrew && hebrewDayNumeral ? `
+              <span class="text-[11px] font-semibold text-brand-400/90 font-mono">
+                ${hebrewDayNumeral}
+              </span>
+            ` : ''}
           </div>
 
           <!-- Scheduled Session Chips Container -->
@@ -15305,9 +15381,14 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
 
       const subtitle = document.getElementById('modal-schedule-date-subtitle');
       if (subtitle) {
+        const showHebrew = !!APP_STATE.enableHebrewCalendar;
         subtitle.textContent = isHe
-          ? `${dayOfWeekName}, ${hebrewInfo.dayHebrewNumeral} ${hebrewInfo.monthName} ${hebrewInfo.yearHebrewNumeral} • ${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`
-          : `${dayOfWeekName}, ${hebrewInfo.dayHebrewNumeral} ${hebrewInfo.monthName} ${hebrewInfo.yearHebrewNumeral} • ${dateStr}`;
+          ? (showHebrew
+              ? `${dayOfWeekName}, ${hebrewInfo.dayHebrewNumeral} ${hebrewInfo.monthName} ${hebrewInfo.yearHebrewNumeral} • ${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`
+              : `${dayOfWeekName}, ${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`)
+          : (showHebrew
+              ? `${dayOfWeekName}, ${hebrewInfo.dayHebrewNumeral} ${hebrewInfo.monthName} ${hebrewInfo.yearHebrewNumeral} • ${dateStr}`
+              : `${dayOfWeekName}, ${dateStr}`);
       }
 
       const lblStudent = document.getElementById('lbl-schedule-student');
@@ -15326,21 +15407,21 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
       if (lblRepeat) lblRepeat.textContent = t.repeatWeeklyLabel;
 
       const lblTopic = document.getElementById('lbl-schedule-topic');
-      if (lblTopic) lblTopic.textContent = isHe ? "מה ללמד בשיעור זה? (אופציונלי)" : "What to teach him during this session? (Optional)";
+      if (lblTopic) lblTopic.textContent = isHe ? "מה ללמד בשיעור זה? (אופציונלי)" : "What to teach during this session? (Optional)";
 
       const topicInput = document.getElementById('schedule-topic-notes');
       if (topicInput) {
         topicInput.value = '';
         topicInput.placeholder = isHe
-          ? "לדוגמה: עלייה א׳ בפרשה, ברכות ההפטרה, חזרת תפילין, תרגול דרשה..."
-          : "e.g. Parsha Aliyah 1, Haftarah trope, Tefillin demonstration, speech practice...";
+          ? "לדוגמה: נושא השיעור, תרגול פרק 4, שאלות הכנה למבחן, עבודת סיכום..."
+          : "e.g. Chapter 4 review, practice problem set, vocabulary quiz, project milestones...";
       }
 
       const topicHint = document.getElementById('lbl-schedule-topic-hint');
       if (topicHint) {
         topicHint.textContent = isHe
-          ? "תוכל ללחוץ על התלמיד בלוח השנה בכל עת כדי לראות מה ללמד אותו."
-          : "You can click on the student on the calendar anytime to view what to teach.";
+          ? "תוכל ללחוץ על התלמיד בלוח השנה בכל עת כדי לראות את נושא השיעור."
+          : "You can click on the student on the calendar anytime to view session topics.";
       }
 
       const btnCancel = document.getElementById('btn-cancel-schedule');
@@ -16479,13 +16560,15 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
         functionDeclarations: [
           {
             name: "add_student",
-            description: "Add a new Bar Mitzvah student to the roster",
+            description: "Add a new student to the roster",
             parameters: {
               type: "OBJECT",
               properties: {
                 name: { type: "STRING", description: "Student full name" },
-                parsha: { type: "STRING", description: "Torah Parsha for Bar Mitzvah" },
-                barMitzvahDate: { type: "STRING", description: "Hebrew or secular date of Bar Mitzvah" },
+                subject: { type: "STRING", description: "Primary course, subject, or focus area (e.g. Algebra 1, SAT Prep, Hebrew)" },
+                gradeOrDate: { type: "STRING", description: "Grade level or target goal date (e.g. Grade 10, June 2026)" },
+                parsha: { type: "STRING", description: "Subject or focus area (backward compatibility alias)" },
+                barMitzvahDate: { type: "STRING", description: "Target date or grade level (backward compatibility alias)" },
                 notes: { type: "STRING", description: "Initial tutor notes" }
               },
               required: ["name"]
@@ -16493,14 +16576,15 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
           },
           {
             name: "update_student",
-            description: "Update an existing student's name, notes, or parsha",
+            description: "Update an existing student's name, notes, subject, or goals",
             parameters: {
               type: "OBJECT",
               properties: {
                 studentNameOrId: { type: "STRING", description: "Existing student name or student ID" },
                 newName: { type: "STRING", description: "New name if changing student name" },
                 notes: { type: "STRING", description: "Updated tutor notes" },
-                parsha: { type: "STRING", description: "Updated Torah parsha" }
+                subject: { type: "STRING", description: "Updated primary course or subject" },
+                parsha: { type: "STRING", description: "Updated subject or parsha alias" }
               },
               required: ["studentNameOrId"]
             }
@@ -16618,7 +16702,7 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide 7 clear anchors with b
               properties: {
                 title_en: { type: "STRING", description: "Course title in English" },
                 title_he: { type: "STRING", description: "Course title in Hebrew" },
-                category: { type: "STRING", description: "Subject category (e.g. Bar Mitzvah & Torah, Halacha, Talmud, Hebrew, Math, Science)" },
+                category: { type: "STRING", description: "Subject category (e.g. Mathematics, Sciences, Languages, Humanities, History, Arts, Judaic Studies)" },
                 target_level: { type: "STRING", description: "Target student age/grade level" },
                 description_en: { type: "STRING", description: "1-2 sentence course summary in English" },
                 description_he: { type: "STRING", description: "1-2 sentence course summary in Hebrew" },
@@ -16779,7 +16863,7 @@ Portal Capabilities & Your Authorized Tools:
 6. mark_parsha_progress: Mark a Chumash Parsha as completed or incomplete.
 7. add_study_material: Add custom teaching notes, stories, explanation points, or discussion questions to a concept or parsha curriculum card.
 8. get_portal_data: Retrieve the live student roster, calendar schedule, and courses.
-9. create_lesson: Create a full pedagogical lesson matching the website visual studio (hook, 7 knowledge anchors with bold keywords, midrash depth nugget, teen life application, discussion spark) and add it to an existing or new course.
+9. create_lesson: Create a full pedagogical lesson matching the visual studio (engaging hook, structured knowledge anchors with bold keywords, deep insight nugget, real-world application, discussion spark) and add it to an existing or new course.
 10. create_course: Create a new class/course subject container in the Study Hub.
 11. create_full_class: Create an entire new course with a complete multi-lesson curriculum in one go.
 
@@ -16787,15 +16871,15 @@ Current Database State:
 ${JSON.stringify(portalContext)}
 
 Curriculum & Lesson Studio Guidelines:
-- You have deep pedagogical mastery across Jewish studies, Bar Mitzvah preparation, Chumash, Halacha, Talmud, Hebrew, and general subjects.
+- You have deep pedagogical mastery across all disciplines: Mathematics, Sciences, Humanities, Languages, History, Arts, Jewish Studies, and Test Prep.
 - When the tutor discusses an idea for a lesson or class, converse thoughtfully with them, brainstorm creative angles, and propose explicit connections to their existing courses and lessons (referencing them by title and number).
 - When the tutor asks you to create or finalize a lesson, call the "create_lesson" tool with full rich details matching the exact visual vision:
   * title_en & title_he (bilingual)
-  * hook_en & hook_he: an engaging teen-relatable dilemma, real-world puzzle, or modern analogy
+  * hook_en & hook_he: an engaging student-relatable dilemma, real-world puzzle, or modern analogy
   * anchors_en: 5 to 7 high-impact core knowledge anchors, formatted strictly as '**Keyword**: clear explanation'
-  * midrash_en & midrash_he: a classical rabbinic insight, Talmudic depth gem, or Midrash
-  * life_app_en & life_app_he: a concrete modern teen takeaway
-  * discussion_en & discussion_he: a provocative question, debate spark, or riddle
+  * midrash_en & midrash_he: a deep conceptual insight, case study, historical background, or scholarly perspective
+  * life_app_en & life_app_he: a concrete real-world takeaway and practical application
+  * discussion_en & discussion_he: a provocative question, debate spark, or critical thinking prompt
 - When the tutor asks you to create a full class or whole curriculum, call "create_full_class" with the course title, description, and all structured lessons.
 
 Debriefing & Intelligent Planning Guidelines:
@@ -16978,9 +17062,9 @@ Guidelines:
         const studentName = (args.name || '').trim();
         if (!studentName) return { success: false, error: 'Student name required' };
 
-        const parshaVal = (args.parsha || '').trim();
-        const dateVal = (args.barMitzvahDate || '').trim();
-        let parshaOrDate = parshaVal;
+        const subjectVal = (args.subject || args.parsha || '').trim();
+        const dateVal = (args.targetDate || args.gradeOrDate || args.gradeLevel || args.barMitzvahDate || '').trim();
+        let parshaOrDate = subjectVal;
         if (dateVal) {
           parshaOrDate = parshaOrDate ? (parshaOrDate + ' (' + dateVal + ')') : dateVal;
         }
@@ -16988,7 +17072,9 @@ Guidelines:
         const newStudent = {
           id: 'stu_' + Date.now(),
           name: studentName,
-          parsha: parshaVal,
+          subject: subjectVal,
+          gradeOrDate: dateVal,
+          parsha: subjectVal,
           barMitzvahDate: dateVal,
           parshaOrDate: parshaOrDate,
           parsha_or_date: parshaOrDate,
@@ -16997,7 +17083,7 @@ Guidelines:
           notes: (args.notes || '').trim(),
           skills: typeof getDefaultStudentSkills === 'function' ? getDefaultStudentSkills() : {
             hebrewReading: { booklet: 'Red Booklet', currentPage: '1', letter: '', vowel: '', letterOrVowel: '', nextTarget: '' },
-            parshaReading: { parshaName: parshaVal, aliyah: 'Aliyah 1', linesLearned: '', currentLine: '', notes: '', recordings: [] },
+            parshaReading: { parshaName: subjectVal, aliyah: 'Aliyah 1', linesLearned: '', currentLine: '', notes: '', recordings: [] },
             dvarTorah: { stage: '1. Topic & Theme', lengthMinutes: '3-4 min', outlineReady: false, notes: '' },
             homework: { currentAssignment: '', targetDate: '', completed: false }
           },
@@ -17007,7 +17093,7 @@ Guidelines:
           completed_topics: {
             _meta: {
               school_id: typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770',
-              parsha: parshaVal,
+              parsha: subjectVal,
               barMitzvahDate: dateVal,
               lessons: []
             }
@@ -17015,7 +17101,7 @@ Guidelines:
           completed_parshiot: {}
         };
         if (newStudent.skills && newStudent.skills.parshaReading) {
-          newStudent.skills.parshaReading.parshaName = parshaVal;
+          newStudent.skills.parshaReading.parshaName = subjectVal;
         }
 
         APP_STATE.students.push(newStudent);
@@ -17038,17 +17124,22 @@ Guidelines:
 
         if (args.newName) student.name = args.newName.trim();
         if (args.notes !== undefined) student.notes = args.notes.trim();
-        if (args.parsha) {
-          const parshaTrimmed = args.parsha.trim();
-          student.parsha = parshaTrimmed;
-          student.parshaOrDate = parshaTrimmed;
-          student.parsha_or_date = parshaTrimmed;
+        if (args.subject || args.parsha) {
+          const subjectTrimmed = (args.subject || args.parsha).trim();
+          student.subject = subjectTrimmed;
+          student.parsha = subjectTrimmed;
+          student.parshaOrDate = subjectTrimmed;
+          student.parsha_or_date = subjectTrimmed;
           if (student.completed_topics && student.completed_topics._meta) {
-            student.completed_topics._meta.parsha = parshaTrimmed;
+            student.completed_topics._meta.parsha = subjectTrimmed;
           }
           if (student.skills && student.skills.parshaReading) {
-            student.skills.parshaReading.parshaName = parshaTrimmed;
+            student.skills.parshaReading.parshaName = subjectTrimmed;
           }
+        }
+        if (args.targetDate || args.gradeOrDate || args.barMitzvahDate) {
+          student.gradeOrDate = (args.targetDate || args.gradeOrDate || args.barMitzvahDate).trim();
+          student.barMitzvahDate = student.gradeOrDate;
         }
 
         saveStudentsToStorage(true);
@@ -17103,7 +17194,7 @@ Guidelines:
         const dateObj = new Date(lessonDate + 'T12:00:00');
         const dayOfWeek = isNaN(dateObj.getDay()) ? 0 : dateObj.getDay();
         const formattedTime = formatFriendlyTimeSlot(args.timeSlot);
-        const lessonTopic = args.subject || (isHe ? 'שיעור בר מצווה' : 'Bar Mitzvah Tutoring');
+        const lessonTopic = args.subject || (isHe ? 'שיעור פרטי' : 'Tutoring Session');
 
         if (!Array.isArray(student.schedule)) student.schedule = [];
 

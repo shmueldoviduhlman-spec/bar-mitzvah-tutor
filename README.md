@@ -1,60 +1,66 @@
-# TutorPilot: Bar Mitzvah Tutor Companion & Tracker
+# TutorPilot: Universal Educator Operating System
 
-A standalone mobile-optimized web application for Bar Mitzvah tutors. Provides high-density memory triggers for quick 60-second pre-lesson review, modern relatability hooks for 12-13 year olds, and collaborative student tracking shared with the Rabbi.
+TutorPilot is a modern, high performance web operating system designed for private tutors, educators, learning centers, and coaches across all academic disciplines. It unifies course and curriculum authoring, student CRM tracking, multi tutor school collaboration, calendar scheduling, and AI lesson generation into a single responsive application.
 
----
-
-## What is Inside
-
-1. **13 Core Jewish Concepts**:
-   - Shabbat, Kashrut, Tefillin, Jewish Wedding, Avot & Imahot, Eretz Yisrael, Lashon HaKodesh, Kiddush Hashem, Ahavat Yisrael & Chesed, Holiday Cycle, Jewish Identity & The Soul, Bar Mitzvah & Maturity, Tefillah & Prayer.
-   - Each concept contains: The Teen Hook, Core Knowledge Anchors, 12-13 Bar Mitzvah Life Angle, Fascinating Midrash / Story, and Discussion Spark Question.
-
-2. **23 Complete Chumash Parshiot (Bereishit & Shemot)**:
-   - All 12 Parshiot in Bereishit and 11 in Shemot.
-   - Each parsha contains: The Big Plot storyline, Key Topics & Memory Jewels, Fascinating Rashi & Midrash Pearls, and Real-World Life Application for Bar Mitzvah boys.
-
-3. **Full Bilingual Toggle (English & Hebrew)**:
-   - Instant 1-tap switch between English and Hebrew with automatic RTL (right-to-left) alignment and typography.
-
-4. **Multi-Student Progress Tracker**:
-   - Add unlimited Bar Mitzvah students with target dates and personal notes.
-   - Check off topics and parshiot taught by you or the Rabbi.
-   - Real-time progress percentage bars.
-
-5. **Real-Time Supabase Cloud Sync (Zero Cost)**:
-   - Tap the cloud status pill in the top header (`Local Only` / `Cloud Live`).
-   - Enter your free Supabase project URL and Anon Key once.
-   - Any lesson checked off or note typed by you or the Rabbi updates live across all devices in real time with no monthly fees.
-   - **Offline-First**: If you have no cell reception during a lesson, the app works offline and syncs automatically once back online.
-
-6. **Instant Rabbi Sharing (Fail-Safe Offline Mode)**:
-   - Tap **Share with Rabbi** to show a scannable QR code or copy an instant WhatsApp/text link.
-   - When the Rabbi scans or opens the link on his phone, the exact student list and checked lessons load immediately on his screen without accounts or database fees.
+Production Deployment: [https://tutorpilot.pages.dev](https://tutorpilot.pages.dev)
 
 ---
 
-## How to Open on Your Computer
+## Core Capabilities
 
-Double-click `index.html` to open it in Chrome, Safari, or Brave.
+1. Modular Course and Curriculum Builder:
+   • Create custom courses for any academic discipline (Mathematics, Sciences, Languages, Humanities, History, Arts, Test Prep, or Specialized Traditions).
+   • Visual lesson studio with pedagogical frameworks: engagement hooks, structured knowledge anchors with bold keywords, deep conceptual case studies, real world applications, and interactive discussion prompts.
+   • Ready to use curriculum templates and custom blueprint generators.
 
-Or run a quick local preview in terminal:
+2. Student CRM and Progress Tracking:
+   • Manage active rosters with customized primary subjects, grade levels, and private notes.
+   • Track lesson completion, skills development, reading fluency, and capstone presentations.
+   • Real time progress percentages and individual student portals.
+
+3. Intelligent Calendar and Scheduling:
+   • Clean Gregorian secular calendar with day and week views, quick time slots, and recurring weekly lessons.
+   • Dedicated toggle for an optional Hebrew lunar calendar overlay with Shabbat highlighting when relevant.
+   • Conflict detection and direct calendar to student lesson navigation.
+
+4. Built In AI Pedagogical Studio:
+   • Powered by Google Gemini with full tool calling capabilities.
+   • Generate full multi section lessons, customized problem sets, and syllabus roadmaps in seconds.
+   • Conversational assistant with live database awareness of students, courses, and schedules.
+
+5. Multi Tutor School Collaboration:
+   • School workspace joining with six digit codes and direct WhatsApp invite links.
+   • Shared student database across educators with role based permissions.
+   • Real time cloud synchronization via Supabase with offline first fallbacks.
+
+6. Full Bilingual Support:
+   • Instant one tap switch between English and Hebrew.
+   • Automated right to left (RTL) alignment and font optimization.
+
+---
+
+## Quick Start Guide
+
+### Open in Browser
+Double click `index.html` to open directly in Google Chrome, Apple Safari, or Microsoft Edge.
+
+### Local Development Preview
+Run a local static server from the project directory:
 ```bash
 python3 -m http.server 8080
 ```
-Then visit `http://localhost:8080` in your browser.
+Then navigate to `http://localhost:8080` in your web browser.
+
+### Mobile Installation (PWA)
+• iOS Safari: Tap Share -> Add to Home Screen.
+• Android Chrome: Tap Menu (three dots) -> Install App or Add to Home Screen.
 
 ---
 
-## How to Install on Your Phone (iPhone & Android)
+## Testing and Verification
 
-### On iPhone (Safari):
-1. Open the website or HTML file in Safari.
-2. Tap the **Share** button (box with an arrow pointing up at the bottom).
-3. Scroll down and tap **Add to Home Screen**.
-4. The app icon will now appear on your home screen and open full-screen offline like a native app.
-
-### On Android (Chrome):
-1. Open the page in Chrome.
-2. Tap the **3 dots** menu in the top right.
-3. Tap **Add to Home screen** (or **Install app**).
+Run the comprehensive automated testing suite:
+```bash
+node test_modular_curriculum_suite.js
+```
+The suite verifies curriculum blueprints, student CRM state, calendar toggles, bilingual dictionaries, and AI tool declarations across over 530 deterministic verification gates.

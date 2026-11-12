@@ -40,7 +40,9 @@ function getOrCreateElem(id) {
       hasChildNodes() { return !!this.innerHTML; },
       setAttribute(k, v) { this[k] = v; },
       getAttribute(k) { return this[k]; },
-      addEventListener() {}
+      removeAttribute(k) { delete this[k]; },
+      addEventListener() {},
+      reset() {}
     };
   }
   return domElements[id];
@@ -1563,6 +1565,95 @@ assert(extCourse.lessons.length === initialLessonCount + 1, 'Extension message s
 const extLesson = extCourse.lessons[extCourse.lessons.length - 1];
 assert(extLesson.title_en === 'Extension: Talmudic Gemara Text', 'Extension lesson title saved');
 assert(extLesson.hook_en.includes('Two hold a garment') || Object.values(extLesson.sections || {}).some(v => String(v).includes('Two hold a garment')), 'Extension lesson saved clipped text');
+
+// Gate 20: Universal Domain Neutrality & Secular Calendar Purification
+console.log('\n--- Gate 20: Universal Domain Neutrality & Secular Calendar Purification ---');
+
+// 1. I18N Student CRM Neutrality
+assert(sandbox.I18N.en.addStudentModalTitle === 'Add New Student', 'I18N en student title is Add New Student');
+assert(sandbox.I18N.en.parshaDropdownLabel === 'Primary Course / Subject', 'I18N en parsha label is Primary Course / Subject');
+assert(sandbox.I18N.en.barMitzvahDateLabel === 'Grade Level / Target Date', 'I18N en date label is Grade Level / Target Date');
+assert(sandbox.I18N.he.addStudentModalTitle === 'הוספת תלמיד חדש', 'I18N he student title is הוספת תלמיד חדש');
+assert(sandbox.I18N.he.parshaDropdownLabel === 'קורס / מקצוע ראשי', 'I18N he parsha label is קורס / מקצוע ראשי');
+assert(sandbox.I18N.he.barMitzvahDateLabel === 'שכבת גיל / תאריך יעד', 'I18N he date label is שכבת גיל / תאריך יעד');
+
+// 2. HTML Student Modal & Hidden Fields Sanitization
+assert(indexHtml.includes('id="txt-modal-student-title"') && indexHtml.includes('Add New Student'), 'HTML modal contains Add New Student');
+assert(indexHtml.includes('id="lbl-student-parsha"') && indexHtml.includes('Primary Course / Subject'), 'HTML modal contains Primary Course / Subject label');
+assert(indexHtml.includes('id="lbl-student-date"') && indexHtml.includes('Grade Level / Target Date'), 'HTML modal contains Grade Level / Target Date label');
+assert(indexHtml.includes('id="input-create-course-category" value="General Curriculum"'), 'Course creation default category is General Curriculum');
+assert(indexHtml.includes('id="input-create-course-level" value="Standard / All Levels"'), 'Course creation default level is Standard / All Levels');
+
+// 3. Student Entity Subject & Grade Aliasing
+getOrCreateElem('new-student-name').value = 'Sophia Miller';
+getOrCreateElem('new-student-parsha-select').value = 'AP Physics 1';
+getOrCreateElem('new-student-date').value = 'Grade 11';
+getOrCreateElem('new-student-notes').value = 'Needs calculus review';
+
+sandbox.handleCreateStudent({ preventDefault() {} });
+const addedStudent = sandbox.APP_STATE.students.find(s => s.name === 'Sophia Miller');
+assert(!!addedStudent, 'Created student found in APP_STATE');
+assert(addedStudent.subject === 'AP Physics 1', 'Student stores subject field');
+assert(addedStudent.gradeOrDate === 'Grade 11', 'Student stores gradeOrDate field');
+assert(addedStudent.parsha === 'AP Physics 1', 'Student maintains parsha alias for compatibility');
+assert(addedStudent.barMitzvahDate === 'Grade 11', 'Student maintains barMitzvahDate alias for compatibility');
+
+const info = sandbox.getStudentSubjectAndDate ? sandbox.getStudentSubjectAndDate(addedStudent) : sandbox.getStudentParshaAndDate(addedStudent);
+assert(info.subject === 'AP Physics 1', 'getStudentSubjectAndDate returns correct subject');
+assert(info.gradeOrDate === 'Grade 11', 'getStudentSubjectAndDate returns correct gradeOrDate');
+
+// 4. Secular Calendar Default & Hebrew Overlay Toggle
+assert(sandbox.APP_STATE.enableHebrewCalendar === false, 'Secular Gregorian calendar is active by default');
+assert(typeof sandbox.toggleHebrewCalendarOverlay === 'function', 'toggleHebrewCalendarOverlay is a function');
+assert(indexHtml.includes('id="btn-toggle-hebrew-calendar"'), 'HTML contains btn-toggle-hebrew-calendar');
+assert(indexHtml.includes('id="lbl-hebrew-calendar-toggle"'), 'HTML contains lbl-hebrew-calendar-toggle');
+assert(indexHtml.includes('id="calendar-hebrew-month-year" class="text-xs font-semibold text-brand-400 font-mono px-2 py-1 rounded-lg bg-brand-500/10 border border-brand-500/20 hidden"'), 'Hebrew month badge is hidden by default');
+
+sandbox.toggleHebrewCalendarOverlay();
+assert(sandbox.APP_STATE.enableHebrewCalendar === true, 'Toggling turns Hebrew calendar overlay on');
+sandbox.toggleHebrewCalendarOverlay();
+assert(sandbox.APP_STATE.enableHebrewCalendar === false, 'Toggling again turns Hebrew calendar overlay off');
+
+// 5. Schedule Modal & Studio Copy Neutrality
+assert(indexHtml.includes('What to teach during this session? (Optional)'), 'Schedule modal topic label is universal');
+assert(indexHtml.includes('e.g. Chapter 4 review, practice problem set'), 'Schedule modal topic placeholder is universal');
+assert(indexHtml.includes('id="user-dropdown-school-name" class="truncate">My Tutoring Studio<'), 'User dropdown school placeholder is My Tutoring Studio');
+assert(indexHtml.includes('id="school-display-name" class="text-base font-bold text-white">My Tutoring Studio<'), 'School settings display placeholder is My Tutoring Studio');
+
+// 6. Gemini Tool Calling Domain Neutrality
+const phase1ToolsDecl = sandbox.buildGeminiToolsDeclaration ? sandbox.buildGeminiToolsDeclaration() : [];
+const toolList = (phase1ToolsDecl[0] && phase1ToolsDecl[0].functionDeclarations) ? phase1ToolsDecl[0].functionDeclarations : [];
+const addStudentTool = toolList.find(t => t.name === 'add_student');
+assert(!!addStudentTool, 'buildGeminiToolsDeclaration includes add_student');
+assert(!!addStudentTool.parameters.properties.subject, 'add_student tool defines subject property');
+assert(!!addStudentTool.parameters.properties.gradeOrDate, 'add_student tool defines gradeOrDate property');
+
+// Execute AI Tool with universal subject and grade
+sandbox.executeAiToolCall({
+  name: 'add_student',
+  args: {
+    name: 'Marcus Vance',
+    subject: 'AP World History',
+    gradeOrDate: 'Grade 10',
+    notes: 'Preparing for DBQ essay'
+  }
+});
+const aiStudent = sandbox.APP_STATE.students.find(s => s.name === 'Marcus Vance');
+assert(!!aiStudent, 'AI tool successfully created student');
+assert(aiStudent.subject === 'AP World History', 'AI student created with universal subject');
+assert(aiStudent.gradeOrDate === 'Grade 10', 'AI student created with universal gradeOrDate');
+assert(aiStudent.parsha === 'AP World History', 'AI student preserves parsha alias');
+
+sandbox.executeAiToolCall({
+  name: 'update_student',
+  args: {
+    studentNameOrId: 'Marcus Vance',
+    subject: 'AP European History',
+    gradeOrDate: 'Grade 11'
+  }
+});
+assert(aiStudent.subject === 'AP European History', 'AI tool successfully updated student subject');
+assert(aiStudent.gradeOrDate === 'Grade 11', 'AI tool successfully updated student gradeOrDate');
 
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
