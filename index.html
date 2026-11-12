@@ -122,6 +122,41 @@
         padding-bottom: max(4.5rem, calc(3.8rem + env(safe-area-inset-bottom))) !important;
       }
     }
+
+    /* Print Stylesheet for Universal Lesson Plans & Worksheets */
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #modal-print-lesson-plan,
+      #modal-print-lesson-plan *,
+      #printable-lesson-plan-preview,
+      #printable-lesson-plan-preview * {
+        visibility: visible !important;
+      }
+      #modal-print-lesson-plan {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+      }
+      #printable-lesson-plan-preview {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 1.5cm !important;
+        width: 100% !important;
+        color: black !important;
+        background: white !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col pb-16 antialiased selection:bg-brand-600 selection:text-white overflow-x-hidden w-full">
@@ -465,6 +500,78 @@
 
   <!-- Main View Container -->
   <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-1">
+
+    <!-- ============================================== -->
+    <!-- TEACHER COMMAND CENTER (HOME OVERVIEW COCKPIT) -->
+    <!-- ============================================== -->
+    <section id="educator-command-center" class="mb-6 rounded-3xl bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-slate-950 border border-slate-800 shadow-xl overflow-hidden backdrop-blur">
+      <!-- Cockpit Header Bar -->
+      <div class="p-4 sm:p-5 border-b border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 via-brand-500 to-indigo-600 flex items-center justify-center text-slate-950 font-bold shadow-md shrink-0">
+            <i data-lucide="compass" class="w-5 h-5 text-slate-950"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 id="command-center-greeting" class="text-base sm:text-lg font-bold text-white tracking-tight">Teacher Command Center</h2>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-amber-500/10 text-amber-300 border border-amber-500/30 font-semibold" id="command-center-date-pill">Today</span>
+            </div>
+            <p id="command-center-subheading" class="text-xs text-slate-400">Your daily teaching cockpit, agenda, and quick actions</p>
+          </div>
+        </div>
+
+        <!-- Quick Action Shortcuts -->
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <button type="button" onclick="openAddStudentModal()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition active:scale-95 shadow-sm flex items-center gap-1.5">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5 text-brand-400"></i>
+            <span id="lbl-cmd-add-student">+ Student</span>
+          </button>
+          <button type="button" onclick="openCreateCourseModal()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition active:scale-95 shadow-sm flex items-center gap-1.5">
+            <i data-lucide="book-plus" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span id="lbl-cmd-add-course">+ Course</span>
+          </button>
+          <button type="button" onclick="openScheduleModalForToday()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition active:scale-95 shadow-sm flex items-center gap-1.5">
+            <i data-lucide="calendar-plus" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span id="lbl-cmd-book-session">+ Schedule</span>
+          </button>
+          <button type="button" onclick="openPedagogicalAiModal()" class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-500/20 to-purple-500/20 hover:from-indigo-500/30 hover:to-purple-500/30 text-indigo-300 border border-indigo-500/40 text-xs font-bold transition active:scale-95 shadow-sm flex items-center gap-1.5">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i>
+            <span id="lbl-cmd-ai-tools">AI Tools</span>
+          </button>
+          <button type="button" onclick="openPrintLessonPlanModal()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition active:scale-95 shadow-sm flex items-center gap-1.5" title="Printable Lesson Plan / PDF Export">
+            <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span id="lbl-cmd-print-lesson">Print</span>
+          </button>
+          <button type="button" onclick="toggleCommandCenterCollapse()" id="btn-toggle-command-center" class="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition" title="Minimize / Expand Cockpit">
+            <i data-lucide="chevron-up" class="w-4 h-4" id="icon-toggle-command-center"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Collapsible Body Content -->
+      <div id="command-center-body" class="p-4 sm:p-5 space-y-4">
+        <!-- KPI Metric Cards Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3" id="command-center-kpi-grid">
+          <!-- Dynamically populated in renderCommandCenterKPIs -->
+        </div>
+
+        <!-- Today's Teaching Agenda Strip -->
+        <div class="space-y-2 pt-1 border-t border-slate-800/60">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+              <span id="lbl-cmd-today-schedule-title">Today's Teaching Schedule</span>
+            </h3>
+            <span id="cmd-today-sessions-count" class="text-xs font-mono text-slate-400">0 sessions</span>
+          </div>
+
+          <!-- Horizontal Session Cards Deck -->
+          <div id="command-center-today-sessions-deck" class="flex gap-3 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
+            <!-- Dynamically populated in renderCommandCenterTodaySessions -->
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- ============================================== -->
     <!-- VIEW 1: STUDY CURRICULUM (Modular 4-Category)  -->
@@ -3130,6 +3237,228 @@
             <i data-lucide="mail" class="w-4 h-4"></i>
             <span id="lbl-recap-email">Email</span>
           </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: PEDAGOGICAL AI COPILOT & POWER TOOLS    -->
+  <!-- ============================================== -->
+  <div id="modal-pedagogical-ai-tools" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 hidden backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto space-y-4">
+      <button onclick="closePedagogicalAiModal()" class="absolute top-4 right-4 rtl:right-auto rtl:left-4 text-slate-400 hover:text-white transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Header -->
+      <div class="flex items-center gap-3 border-b border-slate-800 pb-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-amber-500 flex items-center justify-center text-white shadow-md shrink-0">
+          <i data-lucide="sparkles" class="w-5 h-5 text-amber-200"></i>
+        </div>
+        <div>
+          <h3 id="modal-pedagogical-title" class="text-base sm:text-lg font-bold text-white tracking-tight">Pedagogical AI Power Tools</h3>
+          <p id="modal-pedagogical-subtitle" class="text-xs text-slate-400">Specialized teaching assistants: quizzes, reading levels, analogies, and parent reports</p>
+        </div>
+      </div>
+
+      <!-- Segmented Tool Mode Selector (4 Tools) -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 bg-slate-950/80 rounded-2xl border border-slate-800">
+        <button
+          type="button"
+          id="btn-pedagogical-tool-quiz"
+          onclick="switchPedagogicalToolMode('quiz')"
+          class="py-2 px-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-amber-500 text-slate-950 shadow"
+        >
+          <i data-lucide="file-question" class="w-3.5 h-3.5"></i>
+          <span id="lbl-tool-tab-quiz">Quiz Generator</span>
+        </button>
+        <button
+          type="button"
+          id="btn-pedagogical-tool-level"
+          onclick="switchPedagogicalToolMode('level')"
+          class="py-2 px-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200"
+        >
+          <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+          <span id="lbl-tool-tab-level">Level Adapter</span>
+        </button>
+        <button
+          type="button"
+          id="btn-pedagogical-tool-analogy"
+          onclick="switchPedagogicalToolMode('analogy')"
+          class="py-2 px-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200"
+        >
+          <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
+          <span id="lbl-tool-tab-analogy">Analogies</span>
+        </button>
+        <button
+          type="button"
+          id="btn-pedagogical-tool-parent"
+          onclick="switchPedagogicalToolMode('parent')"
+          class="py-2 px-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200"
+        >
+          <i data-lucide="mail-check" class="w-3.5 h-3.5"></i>
+          <span id="lbl-tool-tab-parent">Parent Report</span>
+        </button>
+      </div>
+
+      <!-- Parameter Inputs Form -->
+      <div class="space-y-3 bg-slate-950/40 p-3.5 sm:p-4 rounded-2xl border border-slate-800/80">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label id="lbl-pedagogical-topic" class="block text-xs font-semibold text-slate-300 mb-1">Topic or Learning Concept</label>
+            <input
+              type="text"
+              id="pedagogical-topic-input"
+              placeholder="e.g. Photosynthesis, Pythagorean Theorem, French Past Tense..."
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            >
+          </div>
+          <div>
+            <label id="lbl-pedagogical-level" class="block text-xs font-semibold text-slate-300 mb-1">Target Academic Level</label>
+            <select
+              id="pedagogical-level-select"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+            >
+              <option value="Elementary (Ages 8-11)">Elementary (Ages 8-11)</option>
+              <option value="Middle School (Ages 12-14)" selected>Middle School (Ages 12-14)</option>
+              <option value="High School (Ages 15-18)">High School (Ages 15-18)</option>
+              <option value="College / University">College / University</option>
+              <option value="Adult Learner / Beginner">Adult Learner / Beginner</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label id="lbl-pedagogical-student" class="block text-xs font-semibold text-slate-300 mb-1">Anchor to Student (Optional)</label>
+          <select
+            id="pedagogical-student-select"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+          >
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <div>
+          <label id="lbl-pedagogical-source-text" class="block text-xs font-semibold text-slate-300 mb-1">Source Text, Notes or Custom Prompt Details (Optional)</label>
+          <textarea
+            id="pedagogical-source-textarea"
+            rows="3"
+            placeholder="Paste text excerpt to differentiate, specific questions to target, or custom notes..."
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500 leading-relaxed"
+          ></textarea>
+        </div>
+
+        <!-- Action Trigger Button -->
+        <button
+          type="button"
+          id="btn-run-pedagogical-ai"
+          onclick="executePedagogicalAiTool()"
+          class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold transition flex items-center justify-center gap-2 active:scale-95 shadow-md"
+        >
+          <i data-lucide="zap" class="w-4 h-4 text-slate-950"></i>
+          <span id="lbl-btn-run-pedagogical">⚡ Generate with AI</span>
+        </button>
+      </div>
+
+      <!-- Pedagogical Output Card -->
+      <div id="pedagogical-output-card" class="hidden space-y-3 pt-1">
+        <div class="flex items-center justify-between">
+          <h4 id="pedagogical-output-heading" class="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+            <span>Generated Pedagogical Output</span>
+          </h4>
+          <div class="flex items-center gap-1.5">
+            <button
+              type="button"
+              onclick="copyPedagogicalOutput()"
+              class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition flex items-center gap-1 border border-slate-700 shadow-sm"
+              title="Copy to clipboard"
+            >
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span id="lbl-copy-pedagogical">Copy</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="pedagogical-output-content" class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-xs sm:text-sm text-slate-200 leading-relaxed overflow-y-auto max-h-60 font-sans whitespace-pre-wrap select-text">
+          <!-- Populated via executePedagogicalAiTool -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: PRINTABLE LESSON PLAN & PDF EXPORT      -->
+  <!-- ============================================== -->
+  <div id="modal-print-lesson-plan" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-2 sm:p-4 hidden backdrop-blur-sm overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl relative max-h-[94vh] flex flex-col space-y-4">
+      
+      <!-- Top Bar: Selectors & Print Action -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3 no-print">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center justify-center shrink-0">
+            <i data-lucide="printer" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 id="modal-print-title" class="text-base font-bold text-white">Printable Lesson Plan & PDF Export</h3>
+            <p id="modal-print-subtitle" class="text-xs text-slate-400">Offline teacher notes, student worksheets, and syllabus handouts</p>
+          </div>
+        </div>
+
+        <!-- Controls: Course & Lesson Pickers -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <select
+            id="print-plan-course-select"
+            onchange="handlePrintCourseSelectChange()"
+            class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 max-w-[180px]"
+          >
+            <!-- Injected via JS -->
+          </select>
+          <select
+            id="print-plan-lesson-select"
+            onchange="handlePrintLessonSelectChange()"
+            class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 max-w-[200px]"
+          >
+            <!-- Injected via JS -->
+          </select>
+
+          <!-- Print Trigger -->
+          <button
+            type="button"
+            onclick="printLessonPlan()"
+            class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shadow"
+          >
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span id="lbl-print-trigger-btn">Print / PDF</span>
+          </button>
+
+          <!-- Copy Text Worksheet -->
+          <button
+            type="button"
+            onclick="copyPrintableLessonPlanText()"
+            class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition flex items-center gap-1 border border-slate-700 shadow-sm"
+            title="Copy plain text worksheet"
+          >
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span id="lbl-copy-worksheet-btn">Copy</span>
+          </button>
+
+          <!-- Close Modal -->
+          <button
+            type="button"
+            onclick="closePrintLessonPlanModal()"
+            class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable Sheet Preview Container -->
+      <div class="flex-1 overflow-y-auto p-1 bg-slate-950/40 rounded-2xl">
+        <div id="printable-lesson-plan-preview" class="bg-white text-slate-900 p-6 sm:p-10 rounded-2xl shadow-xl max-w-3xl mx-auto space-y-6 select-text">
+          <!-- Populated dynamically via renderPrintableLessonPlan -->
         </div>
       </div>
     </div>
@@ -8399,6 +8728,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (tabId === 'ai') {
         renderAiView();
       }
+      renderCommandCenter();
       // Scroll to top of view smoothly on tab switch
       window.scrollTo({ top: 0, behavior: 'smooth' });
       lucide.createIcons();
@@ -19655,7 +19985,641 @@ Base44, please confirm receipt of this protocol and let us know that you are rea
       }
     }
 
+    // ==============================================
+    // PHASE 4: TEACHER COMMAND CENTER COCKPIT
+    // ==============================================
+    function toggleCommandCenterCollapse() {
+      APP_STATE.commandCenterCollapsed = !APP_STATE.commandCenterCollapsed;
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('tutor_cmd_collapsed', APP_STATE.commandCenterCollapsed ? 'true' : 'false');
+        }
+      } catch (e) {}
+
+      const body = document.getElementById('command-center-body');
+      const icon = document.getElementById('icon-toggle-command-center');
+      if (body) {
+        if (APP_STATE.commandCenterCollapsed) {
+          body.classList.add('hidden');
+        } else {
+          body.classList.remove('hidden');
+        }
+      }
+      if (icon) {
+        icon.setAttribute('data-lucide', APP_STATE.commandCenterCollapsed ? 'chevron-down' : 'chevron-up');
+        if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+      }
+    }
+
+    function renderCommandCenter() {
+      const container = document.getElementById('educator-command-center');
+      if (!container) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      const greetingEl = document.getElementById('command-center-greeting');
+      const datePill = document.getElementById('command-center-date-pill');
+      const subheading = document.getElementById('command-center-subheading');
+
+      const today = new Date();
+      const hour = today.getHours();
+      let timeGreeting = 'Good morning';
+      if (hour >= 12 && hour < 17) timeGreeting = 'Good afternoon';
+      else if (hour >= 17) timeGreeting = 'Good evening';
+
+      let timeGreetingHe = 'בוקר טוב';
+      if (hour >= 12 && hour < 17) timeGreetingHe = 'צהריים טובים';
+      else if (hour >= 17) timeGreetingHe = 'ערב טוב';
+
+      const userName = (APP_STATE.currentUser && APP_STATE.currentUser.name)
+        ? APP_STATE.currentUser.name.split(' ')[0]
+        : (isHe ? 'מורה' : 'Educator');
+
+      if (greetingEl) {
+        greetingEl.textContent = isHe
+          ? `${timeGreetingHe}, ${userName} · מרכז השליטה`
+          : `${timeGreeting}, ${userName} · Teacher Command Center`;
+      }
+
+      if (datePill) {
+        const dateOptions = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+        datePill.textContent = today.toLocaleDateString(isHe ? 'he-IL' : 'en-US', dateOptions);
+      }
+
+      if (subheading) {
+        subheading.textContent = isHe
+          ? 'תקציר השיעורים להיום, מדדי הצלחה ופעולות מהירות'
+          : 'Your daily teaching cockpit, agenda, and quick actions';
+      }
+
+      // Check collapsed state
+      if (APP_STATE.commandCenterCollapsed === undefined) {
+        APP_STATE.commandCenterCollapsed = (typeof localStorage !== 'undefined' && localStorage.getItem('tutor_cmd_collapsed') === 'true');
+      }
+      const body = document.getElementById('command-center-body');
+      const icon = document.getElementById('icon-toggle-command-center');
+      if (body) {
+        if (APP_STATE.commandCenterCollapsed) body.classList.add('hidden');
+        else body.classList.remove('hidden');
+      }
+      if (icon) {
+        icon.setAttribute('data-lucide', APP_STATE.commandCenterCollapsed ? 'chevron-down' : 'chevron-up');
+      }
+
+      renderCommandCenterKPIs();
+      renderCommandCenterTodaySessions();
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function renderCommandCenterKPIs() {
+      const grid = document.getElementById('command-center-kpi-grid');
+      if (!grid) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      const students = APP_STATE.students || [];
+      const activeStudents = students.filter(s => s && s.status !== 'completed' && s.status !== 'paused');
+      const courses = (APP_STATE.customCourses || []).filter(c => c && !c.id.startsWith('course_bar_mitzvah'));
+
+      const today = new Date();
+      const todaySessions = getScheduledSessionsForDate(today);
+
+      // Completed sessions this month across all students
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+      let completedThisMonth = 0;
+      students.forEach(st => {
+        (st.schedule || []).forEach(sess => {
+          if (sess.status === 'completed' && sess.dateStr) {
+            const [y, m] = sess.dateStr.split('-').map(Number);
+            if (y === currentYear && m === currentMonth + 1) {
+              completedThisMonth++;
+            }
+          }
+        });
+      });
+
+      grid.innerHTML = `
+        <div class="p-3 sm:p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 shadow-sm flex items-center justify-between">
+          <div>
+            <div class="text-[11px] font-semibold text-slate-400">${isHe ? 'תלמידים פעילים' : 'Active Students'}</div>
+            <div class="text-xl sm:text-2xl font-bold text-white mt-0.5 font-mono" id="cmd-kpi-students-count">${activeStudents.length}</div>
+          </div>
+          <div class="w-8 h-8 rounded-xl bg-brand-500/10 text-brand-400 border border-brand-500/30 flex items-center justify-center">
+            <i data-lucide="users" class="w-4 h-4"></i>
+          </div>
+        </div>
+
+        <div class="p-3 sm:p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 shadow-sm flex items-center justify-between">
+          <div>
+            <div class="text-[11px] font-semibold text-slate-400">${isHe ? 'סך קורסים' : 'Total Courses'}</div>
+            <div class="text-xl sm:text-2xl font-bold text-amber-300 mt-0.5 font-mono" id="cmd-kpi-courses-count">${courses.length}</div>
+          </div>
+          <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center justify-center">
+            <i data-lucide="book-open" class="w-4 h-4"></i>
+          </div>
+        </div>
+
+        <div class="p-3 sm:p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 shadow-sm flex items-center justify-between">
+          <div>
+            <div class="text-[11px] font-semibold text-slate-400">${isHe ? 'שיעורים היום' : "Today's Classes"}</div>
+            <div class="text-xl sm:text-2xl font-bold text-cyan-300 mt-0.5 font-mono" id="cmd-kpi-today-sessions">${todaySessions.length}</div>
+          </div>
+          <div class="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 flex items-center justify-center">
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+          </div>
+        </div>
+
+        <div class="p-3 sm:p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 shadow-sm flex items-center justify-between">
+          <div>
+            <div class="text-[11px] font-semibold text-slate-400">${isHe ? 'הושלמו החודש' : 'Completed Month'}</div>
+            <div class="text-xl sm:text-2xl font-bold text-emerald-300 mt-0.5 font-mono" id="cmd-kpi-completed-month">${completedThisMonth}</div>
+          </div>
+          <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCommandCenterTodaySessions() {
+      const deck = document.getElementById('command-center-today-sessions-deck');
+      const countLabel = document.getElementById('cmd-today-sessions-count');
+      if (!deck) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      const today = new Date();
+      const todayYMD = formatDateToYMD(today);
+      const sessions = getScheduledSessionsForDate(today);
+
+      if (countLabel) {
+        countLabel.textContent = `${sessions.length} ${isHe ? (sessions.length === 1 ? 'שיעור' : 'שיעורים') : (sessions.length === 1 ? 'session' : 'sessions')}`;
+      }
+
+      if (sessions.length === 0) {
+        deck.innerHTML = `
+          <div class="w-full p-4 rounded-2xl bg-slate-950/50 border border-dashed border-slate-800 flex items-center justify-between gap-4 flex-wrap">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center text-sm font-mono">✦</span>
+              <div>
+                <p class="text-xs font-semibold text-slate-300">${isHe ? 'אין שיעורים שנקבעו להיום' : 'No lessons scheduled for today'}</p>
+                <p class="text-[11px] text-slate-500">${isHe ? 'הזמן מתאים להכנת מערכי שיעור או קביעת פגישות חדשות' : 'Great time to prepare lesson outlines or book upcoming sessions'}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="openScheduleModalForToday()" class="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold transition flex items-center gap-1 active:scale-95 shadow-sm">
+                <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
+                <span>${isHe ? 'קבע שיעור להיום' : 'Schedule for Today'}</span>
+              </button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      deck.innerHTML = sessions.map(s => {
+        const student = (APP_STATE.students || []).find(st => st.id === s.studentId);
+        const avatar = s.studentAvatar
+          ? `<img src="${s.studentAvatar}" class="w-7 h-7 rounded-full object-cover shrink-0">`
+          : `<span class="w-7 h-7 rounded-full bg-brand-500/30 text-brand-300 font-bold text-xs flex items-center justify-center shrink-0">${s.studentName.charAt(0)}</span>`;
+
+        const sessStatus = s.status || 'scheduled';
+        let statusBadge = '<span class="text-[9px] px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30 font-semibold">Scheduled</span>';
+        if (sessStatus === 'completed') {
+          statusBadge = '<span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-semibold">✓ Completed</span>';
+        } else if (sessStatus === 'cancelled') {
+          statusBadge = '<span class="text-[9px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-semibold line-through">✗ Cancelled</span>';
+        } else if (sessStatus === 'no_show') {
+          statusBadge = '<span class="text-[9px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 font-semibold">⚠ No-Show</span>';
+        }
+
+        return `
+          <div class="min-w-[280px] max-w-[320px] p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-slate-700 transition shadow-md flex flex-col justify-between space-y-3 shrink-0">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 min-w-0">
+                  ${avatar}
+                  <div class="min-w-0">
+                    <h4 class="text-xs font-bold text-white truncate cursor-pointer hover:text-amber-300 transition" onclick="openStudentDrawer('${s.studentId}')">${escapeHtml(s.studentName)}</h4>
+                    <span class="text-[10px] text-slate-400 font-mono">${escapeHtml(s.time)}</span>
+                  </div>
+                </div>
+                ${statusBadge}
+              </div>
+
+              ${s.topic ? `<p class="text-[11px] text-slate-300 bg-slate-900/90 p-2 rounded-xl border border-slate-800/80 line-clamp-2">${escapeHtml(s.topic)}</p>` : ''}
+            </div>
+
+            <!-- Card Actions -->
+            <div class="flex items-center justify-between gap-1.5 pt-1 border-t border-slate-800/60">
+              <button
+                type="button"
+                onclick="openTutorTeleprompterForSession('${s.studentId}', '${s.id}')"
+                class="flex-1 py-1 px-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] font-bold transition flex items-center justify-center gap-1 active:scale-95 shadow"
+                title="Launch teaching cockpit and teleprompter"
+              >
+                <i data-lucide="play" class="w-3 h-3 fill-current"></i>
+                <span>${isHe ? 'הפעל שיעור' : 'Teach'}</span>
+              </button>
+
+              <button
+                type="button"
+                onclick="openScheduleLessonModal('${todayYMD}', '${s.id}')"
+                class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition"
+                title="Edit session details"
+              >
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              </button>
+
+              <button
+                type="button"
+                onclick="openParentRecapModal('${s.studentId}', '${s.id}')"
+                class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-emerald-300 transition"
+                title="Send Parent Recap"
+              >
+                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openTutorTeleprompterForSession(studentId, sessionId) {
+      const student = (APP_STATE.students || []).find(s => s.id === studentId);
+      const session = (student && student.schedule) ? student.schedule.find(sc => sc.id === sessionId) : null;
+
+      if (session && session.courseId && session.lessonId) {
+        openTutorTeleprompter(session.courseId, session.lessonId);
+        return;
+      }
+
+      // If no attached modular lesson, construct a session cockpit dynamically
+      const activeCourse = (APP_STATE.customCourses || [])[0];
+      const courseId = (activeCourse && activeCourse.id) || 'course_default';
+      const syntheticLesson = {
+        id: sessionId || 'sess_active',
+        title: (session && session.topic) || (student ? `${student.name}'s Tutoring Session` : 'Teaching Session'),
+        sources_text: (student && student.notes) ? `Student background notes: ${student.notes}` : '',
+        pitfalls_text: 'Verify foundational prerequisite understanding before advancing to exercises.',
+        cheat_sheet_text: 'Maintain interactive pacing, ask checking questions, and log session attendance before concluding.',
+        steps_text: '1. Warm-up & homework check\\n2. Concept breakdown\\n3. Guided practice\\n4. Independent problem\\n5. Wrap-up & next week goals',
+        homework_text: (student && student.skills && student.skills.homework && student.skills.homework.task) ? student.skills.homework.task : ''
+      };
+
+      if (!activeCourse) {
+        APP_STATE.customCourses = [{ id: courseId, title_en: 'Universal Tutoring', lessons: [syntheticLesson] }];
+      } else if (!activeCourse.lessons.some(l => l.id === syntheticLesson.id)) {
+        activeCourse.lessons.push(syntheticLesson);
+      }
+
+      openTutorTeleprompter(courseId, syntheticLesson.id);
+    }
+
+    // ==============================================
+    // PHASE 4: PEDAGOGICAL AI POWER TOOLS
+    // ==============================================
+    let currentPedagogicalTool = 'quiz';
+
+    function openPedagogicalAiModal(defaultTool, defaultTopic, defaultStudentId) {
+      if (defaultTool) currentPedagogicalTool = defaultTool;
+      const modal = document.getElementById('modal-pedagogical-ai-tools');
+      if (!modal) return;
+
+      const studentSelect = document.getElementById('pedagogical-student-select');
+      if (studentSelect) {
+        const students = APP_STATE.students || [];
+        studentSelect.innerHTML = `<option value="">-- ${APP_STATE.lang === 'he' ? 'כללי (ללא שיוך לתלמיד)' : 'General (No specific student)'} --</option>` +
+          students.map(s => `<option value="${s.id}">${escapeHtml(s.name)} (${escapeHtml(s.gradeLevel || 'Standard')})</option>`).join('');
+        if (defaultStudentId) studentSelect.value = defaultStudentId;
+      }
+
+      if (defaultTopic) {
+        const topicInput = document.getElementById('pedagogical-topic-input');
+        if (topicInput) topicInput.value = defaultTopic;
+      }
+
+      switchPedagogicalToolMode(currentPedagogicalTool);
+      modal.classList.remove('hidden');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function closePedagogicalAiModal() {
+      const modal = document.getElementById('modal-pedagogical-ai-tools');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function switchPedagogicalToolMode(tool) {
+      currentPedagogicalTool = tool;
+      const tools = ['quiz', 'level', 'analogy', 'parent'];
+
+      tools.forEach(t => {
+        const btn = document.getElementById(`btn-pedagogical-tool-${t}`);
+        if (btn) {
+          if (t === tool) {
+            btn.className = 'py-2 px-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-amber-500 text-slate-950 shadow';
+          } else {
+            btn.className = 'py-2 px-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200';
+          }
+        }
+      });
+
+      const isHe = APP_STATE.lang === 'he';
+      const topicInput = document.getElementById('pedagogical-topic-input');
+      const sourceLabel = document.getElementById('lbl-pedagogical-source-text');
+      const sourceTextarea = document.getElementById('pedagogical-source-textarea');
+
+      if (tool === 'quiz') {
+        if (topicInput) topicInput.placeholder = isHe ? 'לדוגמה: משוואות ריבועיות, פוטוסינתזה, דקדוק צרפתי...' : 'e.g. Quadratic Equations, Photosynthesis, French Irregular Verbs...';
+        if (sourceLabel) sourceLabel.textContent = isHe ? 'דגשים מיוחדים לשאלות (אופציונלי)' : 'Specific Focus Areas or Formulas (Optional)';
+        if (sourceTextarea) sourceTextarea.placeholder = isHe ? 'הזן דגשים, סוגי שאלות או מושגים שחובה לכלול...' : 'Specify problem types, edge cases, or difficulty constraints...';
+      } else if (tool === 'level') {
+        if (topicInput) topicInput.placeholder = isHe ? 'נושא הטקסט או ההסבר' : 'Topic or Subject of Text';
+        if (sourceLabel) sourceLabel.textContent = isHe ? 'הטקסט המקורי להסבה (חובה)' : 'Original Text or Explanation to Differentiate';
+        if (sourceTextarea) sourceTextarea.placeholder = isHe ? 'הדבק כאן את הטקסט או ההסבר המורכב שברצונך להתאים לרמה...' : 'Paste the complex text, source excerpt, or explanation to adapt...';
+      } else if (tool === 'analogy') {
+        if (topicInput) topicInput.placeholder = isHe ? 'לדוגמה: זיכרון RAM במחשב, חוקי ניוטון...' : 'e.g. Computer RAM, Supply and Demand, Newton\'s Third Law...';
+        if (sourceLabel) sourceLabel.textContent = isHe ? 'תחומי עניין של התלמיד (אופציונלי)' : 'Student Interests for Analogies (Optional)';
+        if (sourceTextarea) sourceTextarea.placeholder = isHe ? 'לדוגמה: אוהב כדורגל, משחקי וידאו, מוזיקה...' : 'e.g. Passionate about soccer, gaming, cooking, music...';
+      } else if (tool === 'parent') {
+        if (topicInput) topicInput.placeholder = isHe ? 'נושא השיעורים האחרונים' : 'Recent Session Topics & Milestones';
+        if (sourceLabel) sourceLabel.textContent = isHe ? 'הישגים ושיעורי בית (אופציונלי)' : 'Observed Strengths & Homework Assigned';
+        if (sourceTextarea) sourceTextarea.placeholder = isHe ? 'ציין נקודות חוזק, קשיים שנפתרו ושיעורי בית...' : 'Note student focus, breakthroughs, and practice for next week...';
+      }
+    }
+
+    async function executePedagogicalAiTool() {
+      const topicInput = document.getElementById('pedagogical-topic-input');
+      const topic = (topicInput ? topicInput.value : '').trim();
+      const level = document.getElementById('pedagogical-level-select')?.value || 'Middle School (Ages 12-14)';
+      const studentId = document.getElementById('pedagogical-student-select')?.value;
+      const student = (APP_STATE.students || []).find(s => s.id === studentId);
+      const studentName = student ? student.name : 'Student';
+      const sourceText = document.getElementById('pedagogical-source-textarea')?.value.trim() || '';
+
+      const isHe = APP_STATE.lang === 'he';
+
+      if (!topic && !sourceText) {
+        showToast(isHe ? 'אנא הזן נושא או טקסט להפעלה' : 'Please enter a topic or source text');
+        if (topicInput) topicInput.focus();
+        return;
+      }
+
+      const runBtn = document.getElementById('btn-run-pedagogical-ai');
+      const outputCard = document.getElementById('pedagogical-output-card');
+      const outputContent = document.getElementById('pedagogical-output-content');
+      const outputHeading = document.getElementById('pedagogical-output-heading');
+
+      if (runBtn) {
+        runBtn.disabled = true;
+        runBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-slate-950"></i><span>${isHe ? 'מעבד עם Gemini...' : 'Generating with Gemini...'}</span>`;
+        if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+      }
+
+      let prompt = '';
+      if (currentPedagogicalTool === 'quiz') {
+        prompt = `You are an elite educational assessment specialist. Generate 5 differentiated practice questions for the topic "${topic || sourceText}" targeted at level "${level}".
+Requirements:
+1. Provide a mix of conceptual and application questions.
+2. For each question, provide a detailed, step-by-step Answer Key and explanation that a tutor can discuss with a student.
+${sourceText ? `Specific constraints: ${sourceText}` : ''}
+${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output in clear English.'}`;
+      } else if (currentPedagogicalTool === 'level') {
+        prompt = `You are a master educational linguist. Differentiate and rewrite the following educational text/concept so that it is crystal-clear for a ${level} student (${studentName}).
+Original content:
+${sourceText || topic}
+Requirements:
+1. Break down complex clauses into intuitive steps.
+2. Maintain high conceptual rigor without condescending tone.
+3. Include 2 quick comprehension check questions at the end.
+${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output in clear English.'}`;
+      } else if (currentPedagogicalTool === 'analogy') {
+        prompt = `You are a renowned master educator specializing in unforgettable teaching hooks.
+Topic: "${topic || sourceText}" (Level: ${level})
+Requirements:
+1. Provide 2 relatable everyday analogies that make this concept click instantly.
+2. Identify 3 common pitfalls or student misconceptions, and provide exact advice on how the tutor should preemptively address them.
+${sourceText ? `Student background/interests: ${sourceText}` : ''}
+${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output in clear English.'}`;
+      } else if (currentPedagogicalTool === 'parent') {
+        prompt = `You are a top-tier private educator. Draft a polished, warm, and professional progress update message (suitable for WhatsApp or Email) to the parents of ${studentName}.
+Topic covered: "${topic || 'Recent lessons'}" (Level: ${level})
+${sourceText ? `Notes on session and homework: ${sourceText}` : ''}
+Include:
+1. Warm greeting and attendance recap.
+2. Specific praise for the student's progress and active participation.
+3. Exact homework/practice recommended before the next session.
+4. Professional sign-off.
+${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output in clear English.'}`;
+      }
+
+      try {
+        let result = '';
+        if (typeof callGeminiApi === 'function') {
+          result = await callGeminiApi(prompt);
+        }
+        if (!result) {
+          result = generateFallbackPedagogicalContent(currentPedagogicalTool, topic, level, studentName);
+        }
+
+        if (outputHeading) {
+          outputHeading.textContent = isHe
+            ? `תוצר הדרכה: ${currentPedagogicalTool.toUpperCase()} · ${topic || studentName}`
+            : `Pedagogical Output: ${currentPedagogicalTool.toUpperCase()} · ${topic || studentName}`;
+        }
+        if (outputContent) {
+          outputContent.textContent = result;
+        }
+        if (outputCard) {
+          outputCard.classList.remove('hidden');
+          outputCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      } catch (err) {
+        console.warn('Pedagogical AI error, using fallback:', err);
+        const fallback = generateFallbackPedagogicalContent(currentPedagogicalTool, topic, level, studentName);
+        if (outputContent) outputContent.textContent = fallback;
+        if (outputCard) outputCard.classList.remove('hidden');
+      } finally {
+        if (runBtn) {
+          runBtn.disabled = false;
+          runBtn.innerHTML = `<i data-lucide="zap" class="w-4 h-4 text-slate-950"></i><span>${isHe ? '⚡ הפק עם AI' : '⚡ Generate with AI'}</span>`;
+          if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+        }
+      }
+    }
+
+    function generateFallbackPedagogicalContent(tool, topic, level, studentName) {
+      if (tool === 'quiz') {
+        return `Diagnostic Practice Quiz: ${topic || 'General Practice'} (${level})\n\nQ1. Define the fundamental principle of ${topic || 'the topic'} in your own words.\nAnswer: Core mechanism and explanation.\n\nQ2. Solve/Analyze a foundational application problem.\nAnswer: Step-by-step breakdown.\n\nQ3. Identify which variable or condition alters the outcome.\nAnswer: Analysis and proof.\n\nQ4. Spot the deliberate error in the provided worked example.\nAnswer: Clarification of common student pitfall.\n\nQ5. Advanced challenge connecting ${topic || 'this concept'} to a practical problem.\nAnswer: Synthesized conclusion.`;
+      } else if (tool === 'level') {
+        return `Differentiated Explanation (${level}): ${topic}\n\nOverview:\nHere is the concept adapted specifically for ${level} comprehension without sacrificing depth.\n\nCore Principles:\n• Step 1: Foundational starting point.\n• Step 2: How the mechanism works in action.\n• Step 3: Key takeaway.\n\nCheck for Understanding:\n1. Why does this step matter?\n2. What happens if the primary condition changes?`;
+      } else if (tool === 'analogy') {
+        return `Everyday Analogies & Watch-Out Pitfalls: ${topic} (${level})\n\nAnalogy 1: Imagine a busy airport baggage carousel...\nAnalogy 2: Like a thermostat regulating room temperature...\n\nTop 3 Student Pitfalls:\n1. Confusing cause and effect -> Preempt by asking what initiates the reaction.\n2. Rushing calculations without units -> Keep a dedicated check-step.\n3. Misinterpreting edge conditions -> Frame with an everyday extreme example.`;
+      } else {
+        return `Parent Progress Update for ${studentName} (${level})\n\nDear Parent,\n\nI wanted to share a brief update on ${studentName}'s recent tutoring session on ${topic || 'our focus topics'}. ${studentName} showed fantastic focus today, particularly when tackling new problem structures.\n\nKey Highlights:\n• Strong engagement with the core concepts\n• Successfully solved practice problems independently\n\nHomework & Next Steps:\n• Review assigned practice problems\n• Prepare for our upcoming review session\n\nWarm regards,\nTutorPilot Educator`;
+      }
+    }
+
+    function copyPedagogicalOutput() {
+      const content = document.getElementById('pedagogical-output-content');
+      if (!content) return;
+      copyToClipboard(content.textContent, APP_STATE.lang === 'he' ? 'התוכן הועתק ללוח!' : 'Pedagogical content copied to clipboard!');
+    }
+
+    // ==============================================
+    // PHASE 4: PRINTABLE LESSON PLAN & PDF EXPORT
+    // ==============================================
+    function openPrintLessonPlanModal(targetCourseId, targetLessonId) {
+      const modal = document.getElementById('modal-print-lesson-plan');
+      if (!modal) return;
+
+      const courses = (APP_STATE.customCourses || []).filter(c => c && !c.id.startsWith('course_bar_mitzvah'));
+      const courseSelect = document.getElementById('print-plan-course-select');
+      const lessonSelect = document.getElementById('print-plan-lesson-select');
+
+      if (courseSelect) {
+        if (courses.length === 0) {
+          courseSelect.innerHTML = `<option value="">-- No Courses Created --</option>`;
+        } else {
+          courseSelect.innerHTML = courses.map(c => {
+            const title = c.title_en || c.title_he || 'Untitled Course';
+            return `<option value="${c.id}">${escapeHtml(title)}</option>`;
+          }).join('');
+        }
+        if (targetCourseId) courseSelect.value = targetCourseId;
+      }
+
+      handlePrintCourseSelectChange(targetLessonId);
+
+      modal.classList.remove('hidden');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function closePrintLessonPlanModal() {
+      const modal = document.getElementById('modal-print-lesson-plan');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function handlePrintCourseSelectChange(preferredLessonId) {
+      const courseSelect = document.getElementById('print-plan-course-select');
+      const lessonSelect = document.getElementById('print-plan-lesson-select');
+      const courseId = courseSelect ? courseSelect.value : null;
+
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lessons = (course && Array.isArray(course.lessons)) ? course.lessons : [];
+
+      if (lessonSelect) {
+        if (lessons.length === 0) {
+          lessonSelect.innerHTML = `<option value="">-- No Lessons in Course --</option>`;
+        } else {
+          lessonSelect.innerHTML = lessons.map(l => `<option value="${l.id}">${escapeHtml(l.title || 'Untitled Lesson')}</option>`).join('');
+        }
+        if (preferredLessonId && lessons.some(l => l.id === preferredLessonId)) {
+          lessonSelect.value = preferredLessonId;
+        }
+      }
+
+      const activeLessonId = lessonSelect ? lessonSelect.value : null;
+      renderPrintableLessonPlan(courseId, activeLessonId);
+    }
+
+    function handlePrintLessonSelectChange() {
+      const courseId = document.getElementById('print-plan-course-select')?.value;
+      const lessonId = document.getElementById('print-plan-lesson-select')?.value;
+      renderPrintableLessonPlan(courseId, lessonId);
+    }
+
+    function renderPrintableLessonPlan(courseId, lessonId) {
+      const preview = document.getElementById('printable-lesson-plan-preview');
+      if (!preview) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = (course && Array.isArray(course.lessons)) ? course.lessons.find(l => l.id === lessonId) : null;
+
+      if (!course || !lesson) {
+        preview.innerHTML = `
+          <div class="text-center py-12 space-y-2">
+            <h4 class="text-base font-bold text-slate-800">${isHe ? 'בחר קורס ושיעור להצגה' : 'Select a course and lesson to preview printable plan'}</h4>
+            <p class="text-xs text-slate-500">${isHe ? 'מערך השיעור יוצג בפורמט נקי המותאם להדפסה או שמירה כ-PDF' : 'Your structured lesson plan will render in high-contrast print format'}</p>
+          </div>
+        `;
+        return;
+      }
+
+      const courseTitle = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
+      const todayDate = new Date().toLocaleDateString(isHe ? 'he-IL' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+      preview.innerHTML = `
+        <div class="space-y-6">
+          <!-- Print Sheet Header -->
+          <div class="border-b-2 border-slate-900 pb-4 flex items-start justify-between">
+            <div class="space-y-1">
+              <span class="text-[11px] font-mono uppercase tracking-widest text-slate-500 font-bold">${escapeHtml(courseTitle)} · ${escapeHtml(course.category || 'Curriculum')}</span>
+              <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">${escapeHtml(lesson.title || 'Lesson Plan')}</h1>
+              <div class="text-xs text-slate-600 font-medium">Target Level: ${escapeHtml(course.target_level || 'All Levels')}</div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="text-xs font-mono font-bold text-slate-900 uppercase">TutorPilot Educator Plan</div>
+              <div class="text-[11px] text-slate-500 mt-0.5">${todayDate}</div>
+            </div>
+          </div>
+
+          <!-- Structured Blocks -->
+          ${lesson.sources_text ? `
+            <div class="space-y-2">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1">Primary Sources & Excerpts</h3>
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 leading-relaxed font-serif whitespace-pre-wrap">${escapeHtml(lesson.sources_text)}</div>
+            </div>
+          ` : ''}
+
+          ${lesson.steps_text ? `
+            <div class="space-y-2">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1">Key Teaching Steps & Anchors</h3>
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">${escapeHtml(lesson.steps_text)}</div>
+            </div>
+          ` : ''}
+
+          ${lesson.pitfalls_text ? `
+            <div class="space-y-2">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-amber-900 border-b border-amber-200 pb-1">Common Pitfalls & Misconceptions to Watch</h3>
+              <div class="p-3.5 rounded-xl bg-amber-50/60 border border-amber-200 text-xs sm:text-sm text-amber-950 leading-relaxed whitespace-pre-wrap">${escapeHtml(lesson.pitfalls_text)}</div>
+            </div>
+          ` : ''}
+
+          ${lesson.cheat_sheet_text ? `
+            <div class="space-y-2">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1">Tutor Secret Cheat Sheet & Quick Answers</h3>
+              <div class="p-3.5 rounded-xl bg-slate-100 border border-slate-300 text-xs sm:text-sm text-slate-900 font-mono leading-relaxed whitespace-pre-wrap">${escapeHtml(lesson.cheat_sheet_text)}</div>
+            </div>
+          ` : ''}
+
+          ${lesson.homework_text ? `
+            <div class="space-y-2">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1">Student Practice & Homework Assignment</h3>
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">${escapeHtml(lesson.homework_text)}</div>
+            </div>
+          ` : ''}
+
+          <!-- Footer Signature -->
+          <div class="pt-6 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+            <span>Prepared on TutorPilot · Operating System for Educators</span>
+            <span>Page 1 of 1</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function printLessonPlan() {
+      window.print();
+    }
+
+    function copyPrintableLessonPlanText() {
+      const preview = document.getElementById('printable-lesson-plan-preview');
+      if (!preview) return;
+      copyToClipboard(preview.innerText || preview.textContent, APP_STATE.lang === 'he' ? 'מערך השיעור הועתק!' : 'Lesson plan text copied to clipboard!');
+    }
+
     function renderAllViews() {
+      renderCommandCenter();
       populateCourseSelector();
       renderLessonsCategoryView();
       renderReadingCategoryView();

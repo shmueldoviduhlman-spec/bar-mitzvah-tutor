@@ -2152,6 +2152,136 @@ assert(icsOutput.includes('STATUS:CONFIRMED'), 'ICS declares confirmed status');
 assert(icsOutput.includes('END:VEVENT'), 'ICS contains END:VEVENT');
 assert(icsOutput.includes('END:VCALENDAR'), 'ICS concludes with END:VCALENDAR');
 
+// ==============================================
+// Gate 25: Teacher Command Center, Pedagogical AI & Printable Lesson Plans (Phase 4)
+// ==============================================
+console.log('\n--- Gate 25: Teacher Command Center, Pedagogical AI & Printable Plans ---');
+
+// 1. HTML Verification of Phase 4 Cockpit & Modals
+assert(indexHtml.includes('id="educator-command-center"'), 'HTML contains educator-command-center');
+assert(indexHtml.includes('id="command-center-greeting"'), 'HTML contains command-center-greeting');
+assert(indexHtml.includes('id="command-center-date-pill"'), 'HTML contains command-center-date-pill');
+assert(indexHtml.includes('id="command-center-kpi-grid"'), 'HTML contains command-center-kpi-grid');
+assert(indexHtml.includes('id="command-center-today-sessions-deck"'), 'HTML contains command-center-today-sessions-deck');
+assert(indexHtml.includes('id="modal-pedagogical-ai-tools"'), 'HTML contains modal-pedagogical-ai-tools');
+assert(indexHtml.includes('id="btn-pedagogical-tool-quiz"'), 'HTML contains btn-pedagogical-tool-quiz');
+assert(indexHtml.includes('id="btn-pedagogical-tool-level"'), 'HTML contains btn-pedagogical-tool-level');
+assert(indexHtml.includes('id="btn-pedagogical-tool-analogy"'), 'HTML contains btn-pedagogical-tool-analogy');
+assert(indexHtml.includes('id="btn-pedagogical-tool-parent"'), 'HTML contains btn-pedagogical-tool-parent');
+assert(indexHtml.includes('id="modal-print-lesson-plan"'), 'HTML contains modal-print-lesson-plan');
+assert(indexHtml.includes('id="printable-lesson-plan-preview"'), 'HTML contains printable-lesson-plan-preview');
+
+// 2. Function Existence
+assert(typeof sandbox.renderCommandCenter === 'function', 'renderCommandCenter is a function');
+assert(typeof sandbox.renderCommandCenterKPIs === 'function', 'renderCommandCenterKPIs is a function');
+assert(typeof sandbox.renderCommandCenterTodaySessions === 'function', 'renderCommandCenterTodaySessions is a function');
+assert(typeof sandbox.toggleCommandCenterCollapse === 'function', 'toggleCommandCenterCollapse is a function');
+assert(typeof sandbox.openPedagogicalAiModal === 'function', 'openPedagogicalAiModal is a function');
+assert(typeof sandbox.closePedagogicalAiModal === 'function', 'closePedagogicalAiModal is a function');
+assert(typeof sandbox.switchPedagogicalToolMode === 'function', 'switchPedagogicalToolMode is a function');
+assert(typeof sandbox.executePedagogicalAiTool === 'function', 'executePedagogicalAiTool is a function');
+assert(typeof sandbox.copyPedagogicalOutput === 'function', 'copyPedagogicalOutput is a function');
+assert(typeof sandbox.openPrintLessonPlanModal === 'function', 'openPrintLessonPlanModal is a function');
+assert(typeof sandbox.closePrintLessonPlanModal === 'function', 'closePrintLessonPlanModal is a function');
+assert(typeof sandbox.handlePrintCourseSelectChange === 'function', 'handlePrintCourseSelectChange is a function');
+assert(typeof sandbox.handlePrintLessonSelectChange === 'function', 'handlePrintLessonSelectChange is a function');
+assert(typeof sandbox.renderPrintableLessonPlan === 'function', 'renderPrintableLessonPlan is a function');
+assert(typeof sandbox.printLessonPlan === 'function', 'printLessonPlan is a function');
+assert(typeof sandbox.copyPrintableLessonPlanText === 'function', 'copyPrintableLessonPlanText is a function');
+
+// 3. Command Center KPI Calculation
+const g25Today = new Date();
+const g25TodayYMD = sandbox.formatDateToYMD(g25Today);
+sandbox.APP_STATE.students = [
+  { id: 'st_1', name: 'John Doe', status: 'active', schedule: [{ id: 's1', dateStr: g25TodayYMD, time: '4:00 PM', topic: 'Algebra' }] },
+  { id: 'st_2', name: 'Jane Smith', status: 'paused', schedule: [] },
+  { id: 'st_3', name: 'Bob Hope', status: 'completed', schedule: [] },
+  { id: 'st_4', name: 'Alice Cooper', status: 'active', schedule: [{ id: 's2', dateStr: g25TodayYMD, time: '5:00 PM', topic: 'Geometry', status: 'completed' }] }
+];
+sandbox.APP_STATE.customCourses = [
+  { id: 'course_math_1', title_en: 'Algebra I', lessons: [] },
+  { id: 'course_math_2', title_en: 'Geometry', lessons: [] }
+];
+sandbox.renderCommandCenterKPIs();
+const g25GridHtml = getOrCreateElem('command-center-kpi-grid').innerHTML;
+assert(g25GridHtml.includes('id="cmd-kpi-students-count">2</div>'), 'KPI displays 2 active students (ignoring paused and completed)');
+assert(g25GridHtml.includes('id="cmd-kpi-courses-count">2</div>'), 'KPI displays 2 custom courses');
+assert(g25GridHtml.includes('id="cmd-kpi-today-sessions">2</div>'), 'KPI displays 2 sessions for today');
+assert(g25GridHtml.includes('id="cmd-kpi-completed-month">1</div>'), 'KPI displays 1 completed session for current month');
+
+// 4. Command Center Today Sessions Deck
+sandbox.renderCommandCenterTodaySessions();
+const g25DeckHtml = getOrCreateElem('command-center-today-sessions-deck').innerHTML;
+assert(g25DeckHtml.includes('John Doe'), 'Today deck renders student John Doe');
+assert(g25DeckHtml.includes('Alice Cooper'), 'Today deck renders student Alice Cooper');
+assert(g25DeckHtml.includes('Algebra'), 'Today deck renders session topic Algebra');
+assert(g25DeckHtml.includes('openTutorTeleprompterForSession'), 'Today deck provides 1-tap Teach trigger');
+
+// 5. Command Center Collapsible Behavior
+sandbox.APP_STATE.commandCenterCollapsed = false;
+sandbox.toggleCommandCenterCollapse();
+assert(sandbox.APP_STATE.commandCenterCollapsed === true, 'toggleCommandCenterCollapse sets collapsed to true');
+const g25CmdBody = getOrCreateElem('command-center-body');
+assert(g25CmdBody.classList.contains('hidden'), 'command-center-body is hidden when collapsed');
+sandbox.toggleCommandCenterCollapse();
+assert(sandbox.APP_STATE.commandCenterCollapsed === false, 'toggleCommandCenterCollapse sets collapsed to false');
+assert(!g25CmdBody.classList.contains('hidden'), 'command-center-body is visible when expanded');
+
+// 6. Pedagogical AI Tools
+sandbox.openPedagogicalAiModal('quiz', 'Quadratic Equations');
+const g25PedModal = getOrCreateElem('modal-pedagogical-ai-tools');
+assert(!g25PedModal.classList.contains('hidden'), 'openPedagogicalAiModal unhides modal');
+const g25TopicInput = getOrCreateElem('pedagogical-topic-input');
+assert(g25TopicInput.value === 'Quadratic Equations', 'openPedagogicalAiModal sets topic input');
+
+sandbox.switchPedagogicalToolMode('level');
+sandbox.switchPedagogicalToolMode('analogy');
+sandbox.switchPedagogicalToolMode('parent');
+
+const fallbackQuiz = sandbox.generateFallbackPedagogicalContent('quiz', 'Newton Laws', 'High School', 'Emma');
+assert(fallbackQuiz.includes('Diagnostic Practice Quiz'), 'Fallback quiz generates diagnostic questions');
+
+const fallbackLevel = sandbox.generateFallbackPedagogicalContent('level', 'Cell Division', 'Elementary', 'Emma');
+assert(fallbackLevel.includes('Differentiated Explanation'), 'Fallback level differentiates explanation');
+
+const fallbackAnalogy = sandbox.generateFallbackPedagogicalContent('analogy', 'Ohm Law', 'Middle School', 'Emma');
+assert(fallbackAnalogy.includes('Everyday Analogies'), 'Fallback analogy provides teaching hooks');
+
+const fallbackParent = sandbox.generateFallbackPedagogicalContent('parent', 'Fractions', 'Elementary', 'Emma');
+assert(fallbackParent.includes('Parent Progress Update for Emma'), 'Fallback parent crafts parent report');
+
+// 7. Printable Lesson Plan & PDF Export
+const g25SampleCourse = {
+  id: 'course_chem_101',
+  title_en: 'AP Chemistry',
+  category: 'Sciences',
+  target_level: 'High School',
+  lessons: [
+    {
+      id: 'less_chem_1',
+      title: 'Chemical Equilibrium & Le Chatelier Principle',
+      sources_text: 'N2(g) + 3H2(g) <=> 2NH3(g) (Haber Process)',
+      steps_text: '1. Introduce dynamic equilibrium\n2. Shift under pressure changes\n3. Worked equilibrium constant calculation',
+      pitfalls_text: 'Catalysts speed up reaction rates but do NOT alter equilibrium position.',
+      cheat_sheet_text: 'Keq = [Products]^coefficients / [Reactants]^coefficients',
+      homework_text: 'Problems 1-10 on page 142.'
+    }
+  ]
+};
+sandbox.APP_STATE.customCourses.push(g25SampleCourse);
+sandbox.openPrintLessonPlanModal('course_chem_101', 'less_chem_1');
+const g25PrintModal = getOrCreateElem('modal-print-lesson-plan');
+assert(!g25PrintModal.classList.contains('hidden'), 'openPrintLessonPlanModal unhides modal-print-lesson-plan');
+
+sandbox.renderPrintableLessonPlan('course_chem_101', 'less_chem_1');
+const g25PrintPreview = getOrCreateElem('printable-lesson-plan-preview').innerHTML;
+assert(g25PrintPreview.includes('AP Chemistry'), 'Printable sheet includes Course Title');
+assert(g25PrintPreview.includes('Chemical Equilibrium'), 'Printable sheet includes Lesson Title');
+assert(g25PrintPreview.includes('Haber Process'), 'Printable sheet includes primary source');
+assert(g25PrintPreview.includes('Introduce dynamic equilibrium'), 'Printable sheet includes key steps');
+assert(g25PrintPreview.includes('Catalysts speed up reaction rates'), 'Printable sheet includes pitfalls');
+assert(g25PrintPreview.includes('TutorPilot Educator Plan'), 'Printable sheet includes header branding');
+
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
 console.log(`========================================\n`);
