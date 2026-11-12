@@ -2389,6 +2389,153 @@ assert(typeof sandbox.handleDeleteCustomCourseById === 'function', 'handleDelete
 assert(typeof sandbox.handleDeleteCustomLesson === 'function', 'handleDeleteCustomLesson is a function');
 assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDeleteActiveCustomCourse is a function');
 
-console.log(`\n========================================`);
-console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
-console.log(`========================================\n`);
+// Gate 27: Next-Generation Two-Pane Course & Class Studio
+(async () => {
+  console.log('\n--- Gate 27: Next-Generation Two-Pane Course & Class Studio ---');
+
+  // 1. HTML DOM Elements & Modals
+  assert(indexHtml.includes('id="modal-studio-batch-outline"'), 'HTML contains modal-studio-batch-outline');
+  assert(indexHtml.includes('id="modal-studio-ai-copilot"'), 'HTML contains modal-studio-ai-copilot');
+  assert(indexHtml.includes('id="active-course-display-stats"'), 'HTML contains active-course-display-stats');
+  assert(indexHtml.includes('openStudioBatchOutlineModal()'), 'Inside course header contains Batch Outline trigger');
+  assert(indexHtml.includes('openStudioAiCoPilotModal()'), 'Inside course header contains AI Co-Pilot trigger');
+
+  // 2. Core Studio Functions Existence
+  assert(typeof sandbox.renderCourseClassesView === 'function', 'renderCourseClassesView is a function');
+  assert(typeof sandbox.renderCourseStudio === 'function', 'renderCourseStudio is a function');
+  assert(typeof sandbox.selectStudioClass === 'function', 'selectStudioClass is a function');
+  assert(typeof sandbox.setStudioMobileView === 'function', 'setStudioMobileView is a function');
+  assert(typeof sandbox.handleStudioQuickAddClass === 'function', 'handleStudioQuickAddClass is a function');
+  assert(typeof sandbox.openStudioBatchOutlineModal === 'function', 'openStudioBatchOutlineModal is a function');
+  assert(typeof sandbox.closeStudioBatchOutlineModal === 'function', 'closeStudioBatchOutlineModal is a function');
+  assert(typeof sandbox.handleStudioBatchOutlineSubmit === 'function', 'handleStudioBatchOutlineSubmit is a function');
+  assert(typeof sandbox.handleStudioMoveClass === 'function', 'handleStudioMoveClass is a function');
+  assert(typeof sandbox.handleStudioDuplicateClass === 'function', 'handleStudioDuplicateClass is a function');
+  assert(typeof sandbox.handleStudioDeleteClass === 'function', 'handleStudioDeleteClass is a function');
+  assert(typeof sandbox.handleStudioClassTitleChange === 'function', 'handleStudioClassTitleChange is a function');
+  assert(typeof sandbox.handleStudioUpdateClassField === 'function', 'handleStudioUpdateClassField is a function');
+  assert(typeof sandbox.openStudioAiCoPilotModal === 'function', 'openStudioAiCoPilotModal is a function');
+  assert(typeof sandbox.closeStudioAiCoPilotModal === 'function', 'closeStudioAiCoPilotModal is a function');
+  assert(typeof sandbox.switchStudioAiCoPilotMode === 'function', 'switchStudioAiCoPilotMode is a function');
+  assert(typeof sandbox.executeStudioAiSyllabusSuggest === 'function', 'executeStudioAiSyllabusSuggest is a function');
+  assert(typeof sandbox.applyAllSuggestedClassesToCourse === 'function', 'applyAllSuggestedClassesToCourse is a function');
+  assert(typeof sandbox.executeStudioAiGenerateFullClass === 'function', 'executeStudioAiGenerateFullClass is a function');
+  assert(typeof sandbox.handleStudioMiniBlockAi === 'function', 'handleStudioMiniBlockAi is a function');
+
+  // 3. Studio Clean Canvas & Empty State
+  const testStudioCourse = {
+    id: 'course_studio_test_1',
+    title_en: 'AP Physics Mechanics',
+    category: 'Physics',
+    target_level: 'High School',
+    lessons: [],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+  sandbox.APP_STATE.customCourses = [testStudioCourse];
+  sandbox.renderCourseClassesView('course_studio_test_1');
+  assert(sandbox.APP_STATE.insideCourseId === 'course_studio_test_1', 'renderCourseClassesView sets insideCourseId');
+
+  const studioEmptyHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(studioEmptyHtml.includes('course-studio-empty-state'), 'Empty course renders Studio Onboarding Canvas');
+  assert(studioEmptyHtml.includes('input-studio-quick-class'), 'Empty course canvas provides rapid-fire quick-add input');
+  assert(studioEmptyHtml.includes('openStudioBatchOutlineModal'), 'Empty course canvas provides Batch Outline trigger');
+  assert(studioEmptyHtml.includes('openStudioAiCoPilotModal'), 'Empty course canvas provides AI Co-Pilot trigger');
+
+  // 4. Rapid-Fire 1-Line Class Creator
+  getOrCreateElem('input-studio-quick-class').value = '1. Kinematics & Velocity';
+  sandbox.handleStudioQuickAddClass(null, 'course_studio_test_1');
+  assert(testStudioCourse.lessons.length === 1, 'Quick-Add successfully created first class');
+  assert(testStudioCourse.lessons[0].title_en === '1. Kinematics & Velocity', 'First class has correct title');
+  assert(testStudioCourse.lessons[0].lesson_num === 1, 'First class lesson_num is 1');
+  assert(sandbox.APP_STATE.studioSelectedLessonId === testStudioCourse.lessons[0].id, 'Newly added class is selected in Studio');
+
+  // Quick-Add second class
+  getOrCreateElem('input-studio-quick-class').value = 'Acceleration in 1D';
+  sandbox.handleStudioQuickAddClass(null, 'course_studio_test_1');
+  assert(testStudioCourse.lessons.length === 2, 'Quick-Add successfully created second class');
+  assert(testStudioCourse.lessons[1].lesson_num === 2, 'Second class lesson_num is 2');
+
+  // 5. Two-Pane Studio Rendering Verification
+  const studioActiveHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(studioActiveHtml.includes('studio-syllabus-pane'), 'Studio renders Left Pane (Syllabus Outline Tree)');
+  assert(studioActiveHtml.includes('studio-active-class-pane'), 'Studio renders Right Pane (Active Class Editor)');
+  assert(studioActiveHtml.includes('studio-class-title-input'), 'Active class renders in-place editable title input');
+  assert(studioActiveHtml.includes('studio-save-indicator'), 'Active class renders live auto-save indicator');
+  assert(studioActiveHtml.includes('Opening Hook / Real-World Analogy'), 'Active class renders Opening Hook modular block');
+  assert(studioActiveHtml.includes('Core Knowledge Anchors'), 'Active class renders Core Anchors modular block');
+  assert(studioActiveHtml.includes('Primary Sources, Quotes & Formulas'), 'Active class renders Primary Sources modular block');
+  assert(studioActiveHtml.includes('Step-by-Step Procedure & Flow'), 'Active class renders Step-by-Step modular block');
+  assert(studioActiveHtml.includes('Common Pitfalls & Misconceptions'), 'Active class renders Common Pitfalls modular block');
+  assert(studioActiveHtml.includes('Teacher Secret Cheat Sheet'), 'Active class renders Secret Cheat Sheet modular block');
+  assert(studioActiveHtml.includes('Student Homework Challenge'), 'Active class renders Homework Challenge modular block');
+  assert(studioActiveHtml.includes('Audio & Voice Recordings'), 'Active class renders Audio Studio modular block');
+
+  // 6. In-Place Field Updates & Auto-Save
+  const selectedLesson = testStudioCourse.lessons[1];
+  sandbox.handleStudioClassTitleChange('course_studio_test_1', selectedLesson.id, 'Kinematics: 1D Acceleration');
+  assert(selectedLesson.title_en === 'Kinematics: 1D Acceleration', 'In-place title change updated lesson title');
+
+  sandbox.handleStudioUpdateClassField('course_studio_test_1', selectedLesson.id, 'hook_en', 'Imagine pressing the gas pedal: what actually changes?');
+  assert(selectedLesson.hook_en.includes('gas pedal'), 'handleStudioUpdateClassField updated hook_en');
+
+  sandbox.handleStudioUpdateClassField('course_studio_test_1', selectedLesson.id, 'anchors_en', 'Instantaneous Velocity\nAverage Acceleration\nConstant vs Variable');
+  assert(Array.isArray(selectedLesson.anchors_en) && selectedLesson.anchors_en.length === 3, 'handleStudioUpdateClassField parsed multiline anchors');
+
+  sandbox.handleStudioUpdateClassField('course_studio_test_1', selectedLesson.id, 'sources_text', 'v = v0 + at');
+  assert(selectedLesson.sources_text === 'v = v0 + at', 'handleStudioUpdateClassField updated sources_text');
+
+  sandbox.handleStudioUpdateClassField('course_studio_test_1', selectedLesson.id, 'duration', '60m');
+  assert(selectedLesson.duration === '60m', 'handleStudioUpdateClassField updated duration');
+
+  // 7. Class Reordering
+  sandbox.handleStudioMoveClass('course_studio_test_1', selectedLesson.id, -1);
+  assert(testStudioCourse.lessons[0].id === selectedLesson.id, 'handleStudioMoveClass moved second lesson up to index 0');
+  assert(testStudioCourse.lessons[0].lesson_num === 1, 'Reordered lesson re-indexed lesson_num to 1');
+  assert(testStudioCourse.lessons[1].lesson_num === 2, 'Pushed lesson re-indexed lesson_num to 2');
+
+  // 8. Class Duplication
+  const countBeforeDup = testStudioCourse.lessons.length;
+  sandbox.handleStudioDuplicateClass('course_studio_test_1', selectedLesson.id);
+  assert(testStudioCourse.lessons.length === countBeforeDup + 1, 'handleStudioDuplicateClass incremented lessons count');
+  assert(testStudioCourse.lessons[1].title_en.includes('Copy of Kinematics: 1D Acceleration'), 'Duplicated lesson has Copy of prefix');
+  assert(testStudioCourse.lessons[1].sources_text === 'v = v0 + at', 'Duplicated lesson cloned sources_text');
+  assert(testStudioCourse.lessons[1].lesson_num === 2, 'Duplicated lesson has proper lesson_num');
+
+  // 9. Batch Outline Importer
+  getOrCreateElem('input-studio-batch-outline').value = '1. Projectile Motion\n2. Circular Motion and Centripetal Force\n- Gravitational Fields and Orbits';
+  getOrCreateElem('chk-studio-batch-clean').checked = true;
+
+  const countBeforeBatch = testStudioCourse.lessons.length;
+  sandbox.handleStudioBatchOutlineSubmit('course_studio_test_1');
+  assert(testStudioCourse.lessons.length === countBeforeBatch + 3, 'Batch outline imported 3 new classes');
+  assert(testStudioCourse.lessons[countBeforeBatch].title_en === 'Projectile Motion', 'Batch outline stripped leading digit 1.');
+  assert(testStudioCourse.lessons[countBeforeBatch + 1].title_en === 'Circular Motion and Centripetal Force', 'Batch outline stripped leading digit 2.');
+  assert(testStudioCourse.lessons[countBeforeBatch + 2].title_en === 'Gravitational Fields and Orbits', 'Batch outline stripped bullet hyphen');
+
+  // 10. Studio AI Co-Pilot
+  sandbox.openStudioAiCoPilotModal('course_studio_test_1', testStudioCourse.lessons[0].id);
+  assert(!getOrCreateElem('modal-studio-ai-copilot').classList.contains('hidden'), 'openStudioAiCoPilotModal unhides copilot modal');
+
+  sandbox.switchStudioAiCoPilotMode('syllabus');
+  assert(!getOrCreateElem('panel-studio-copilot-syllabus').classList.contains('hidden'), 'switchStudioAiCoPilotMode reveals syllabus panel');
+
+  sandbox.switchStudioAiCoPilotMode('class');
+  assert(!getOrCreateElem('panel-studio-copilot-class').classList.contains('hidden'), 'switchStudioAiCoPilotMode reveals class panel');
+
+  await sandbox.executeStudioAiGenerateFullClass();
+  assert(sandbox.getStudioCopilotContext().generatedContent !== null, 'executeStudioAiGenerateFullClass produced content');
+  sandbox.applyGeneratedContentToActiveClass();
+  assert(testStudioCourse.lessons[0].hook_en.length > 0, 'applyGeneratedContentToActiveClass populated active class hook');
+  assert(testStudioCourse.lessons[0].steps_text.length > 0, 'applyGeneratedContentToActiveClass populated active class steps');
+
+  // 11. Mobile View Mode Toggling
+  sandbox.setStudioMobileView('editor');
+  assert(sandbox.APP_STATE.studioMobileView === 'editor', 'setStudioMobileView sets studioMobileView to editor');
+  sandbox.setStudioMobileView('syllabus');
+  assert(sandbox.APP_STATE.studioMobileView === 'syllabus', 'setStudioMobileView sets studioMobileView to syllabus');
+
+  console.log(`\n========================================`);
+  console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
+  console.log(`========================================\n`);
+})();
