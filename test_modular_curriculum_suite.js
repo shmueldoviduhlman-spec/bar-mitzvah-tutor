@@ -1385,6 +1385,115 @@ const emptyGridHtml = getOrCreateElem('courses-cards-grid').innerHTML;
 assert(emptyGridHtml.includes('Clean Canvas') || emptyGridHtml.includes('דף חלק'), 'Courses grid renders clean canvas placeholder when 0 courses');
 assert(indexHtml.includes('id="btn-purge-all-courses"'), 'HTML contains btn-purge-all-courses element');
 
+// ==============================================
+// GATE 18: UNIVERSAL COURSE & CLASS BLUEPRINT ENGINE
+// ==============================================
+console.log('\n--- Gate 18: Universal Course & Class Blueprint Engine ---');
+
+// 1. Function existence
+assert(typeof sandbox.applyBlueprintPreset === 'function', 'applyBlueprintPreset is a function');
+assert(typeof sandbox.addBlueprintSection === 'function', 'addBlueprintSection is a function');
+assert(typeof sandbox.removeBlueprintSection === 'function', 'removeBlueprintSection is a function');
+assert(typeof sandbox.updateBlueprintSectionName === 'function', 'updateBlueprintSectionName is a function');
+assert(typeof sandbox.selectCourseColor === 'function', 'selectCourseColor is a function');
+assert(typeof sandbox.handleAiSuggestBlueprint === 'function', 'handleAiSuggestBlueprint is a function');
+assert(typeof sandbox.renderBlueprintSectionsList === 'function', 'renderBlueprintSectionsList is a function');
+assert(typeof sandbox.renderDynamicClassFormFields === 'function', 'renderDynamicClassFormFields is a function');
+assert(typeof sandbox.promptAddSectionToClass === 'function', 'promptAddSectionToClass is a function');
+
+// 2. Blueprint Presets Behavior
+sandbox.applyBlueprintPreset('blank');
+assert(sandbox.getCurrentBlueprintSections().length === 2, 'blank preset provides 2 minimal starter sections');
+
+sandbox.applyBlueprintPreset('torah_audio');
+assert(sandbox.getCurrentBlueprintSections().length === 4, 'torah_audio preset generates 4 sections');
+assert(sandbox.getCurrentBlueprintSections().some(s => s.name.includes('Parsha Verses') && s.type === 'text'), 'torah_audio includes Parsha Verses text section');
+assert(sandbox.getCurrentBlueprintSections().some(s => s.type === 'audio'), 'torah_audio includes Trope Audio Recordings section');
+
+sandbox.applyBlueprintPreset('reading_fluency');
+assert(sandbox.getCurrentBlueprintSections().length === 4, 'reading_fluency preset generates 4 sections');
+assert(sandbox.getCurrentBlueprintSections().some(s => s.name.includes('Reading') && s.type === 'text'), 'reading_fluency includes Reading Rule section');
+
+// 3. Section Editing & Addition
+sandbox.addBlueprintSection('list', 'Custom Practice Drills');
+assert(sandbox.getCurrentBlueprintSections().length === 5, 'addBlueprintSection added 5th section');
+const addedSec = sandbox.getCurrentBlueprintSections()[sandbox.getCurrentBlueprintSections().length - 1];
+assert(addedSec.name === 'Custom Practice Drills', 'added section has correct name');
+
+sandbox.updateBlueprintSectionName(addedSec.id, 'Updated Speed Drills');
+assert(sandbox.getCurrentBlueprintSections().find(s => s.id === addedSec.id).name === 'Updated Speed Drills', 'updateBlueprintSectionName modified section name');
+
+sandbox.removeBlueprintSection(addedSec.id);
+assert(sandbox.getCurrentBlueprintSections().length === 4, 'removeBlueprintSection removed section');
+
+// 4. Color Selection
+sandbox.selectCourseColor('emerald');
+const colorInput = getOrCreateElem('input-create-course-color');
+assert(colorInput.value === 'emerald', 'selectCourseColor sets color input value to emerald');
+
+// 5. Course Creation with Blueprint & Color
+getOrCreateElem('input-create-course-title-en').value = 'Chumash with Trope';
+getOrCreateElem('input-create-course-title-he').value = 'חומש עם טעמים';
+getOrCreateElem('input-create-course-icon').value = '📜';
+getOrCreateElem('input-create-course-desc').value = 'Master Torah chanting and storyline';
+colorInput.value = 'amber';
+sandbox.applyBlueprintPreset('torah_audio');
+
+const mockEvent = { preventDefault() {} };
+sandbox.handleSaveCustomCourse(mockEvent);
+
+const blueprintCourse = (sandbox.APP_STATE.customCourses || []).find(c => c.title_en === 'Chumash with Trope');
+assert(blueprintCourse, 'handleSaveCustomCourse successfully created course in customCourses');
+assert(blueprintCourse.color === 'amber', 'Created course saved color amber');
+assert(blueprintCourse.icon === '📜', 'Created course saved icon');
+assert(blueprintCourse.blueprint && blueprintCourse.blueprint.sections.length === 4, 'Created course saved 4 blueprint sections');
+
+// 6. Dynamic Class Field Rendering
+sandbox.APP_STATE.insideCourseId = blueprintCourse.id;
+sandbox.APP_STATE.activeCourseId = blueprintCourse.id;
+sandbox.renderDynamicClassFormFields(blueprintCourse);
+
+const dynamicFormContainer = getOrCreateElem('dynamic-course-lesson-sections');
+assert(dynamicFormContainer.innerHTML.includes('Parsha Verses'), 'Dynamic class form renders Parsha Verses section label');
+assert(dynamicFormContainer.innerHTML.includes('Audio Recordings'), 'Dynamic class form renders Audio Recordings section label');
+assert(dynamicFormContainer.innerHTML.includes('Record Voice Memo'), 'Dynamic class form renders Audio Studio voice memo button');
+
+// 7. AI Questionnaire and Class Assist
+getOrCreateElem('input-ai-class-prompt').value = 'Parshat Bereishit - Creation';
+getOrCreateElem('input-ai-class-details').value = 'Include Rashi on 1:1 and trope recording notes';
+sandbox.handleAiClassAssist();
+
+// Verify that dynamic section fields got populated
+const versesInput = getOrCreateElem(`input-section-${blueprintCourse.blueprint.sections[0].id}`);
+assert(versesInput.value.length > 0, 'AI Assist populated dynamic Parsha Verses input');
+
+// 8. Class Saving with Blueprint Sections
+getOrCreateElem('input-custom-lesson-title-en').value = 'Bereishit: Day One';
+getOrCreateElem('input-custom-lesson-title-he').value = 'בראשית: יום ראשון';
+sandbox.handleSaveCustomLesson(mockEvent);
+
+assert(blueprintCourse.lessons.length === 1, 'Created course has 1 lesson');
+const blueprintLesson = blueprintCourse.lessons[0];
+assert(blueprintLesson.title_en === 'Bereishit: Day One', 'Saved lesson has correct title');
+assert(blueprintLesson.sections && typeof blueprintLesson.sections === 'object', 'Saved lesson has sections object');
+assert(blueprintLesson.sections[blueprintCourse.blueprint.sections[0].id], 'Saved lesson preserved dynamic section content');
+assert(blueprintLesson.hook_en, 'Saved lesson preserved resolved hook fallback for compatibility');
+
+// 9. Class Header Discreet Edit Pencil & Custom Section Display
+sandbox.APP_STATE.expandedCustomLessonIds[blueprintLesson.id] = true;
+sandbox.renderTutorHubActiveLessons(blueprintCourse.id);
+const lessonsContainerHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+
+assert(lessonsContainerHtml.includes('title="Edit Class"') || lessonsContainerHtml.includes('edit-2'), 'Class card header includes discreet Edit Class button');
+assert(lessonsContainerHtml.includes('Teach') || lessonsContainerHtml.includes('presentation'), 'Class card header includes Teach button');
+assert(lessonsContainerHtml.includes('Parsha Verses'), 'Expanded card displays custom blueprint section Parsha Verses');
+assert(lessonsContainerHtml.includes('Audio & Voice Recordings'), 'Expanded card displays Audio Studio section');
+
+// 10. Edit Class Modal Rehydration
+sandbox.openEditCustomLessonModal(blueprintCourse.id, blueprintLesson.id);
+const rehydratedInput = getOrCreateElem(`input-section-${blueprintCourse.blueprint.sections[0].id}`);
+assert(rehydratedInput.value.length > 0, 'Edit modal rehydrated dynamic section field value');
+
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
 console.log(`========================================\n`);

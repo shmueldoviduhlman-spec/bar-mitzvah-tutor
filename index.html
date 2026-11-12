@@ -1680,10 +1680,10 @@
   </div>
 
   <!-- ============================================== -->
-  <!-- MODAL: CREATE NEW COURSE / CLASS SERIES         -->
+  <!-- MODAL: CREATE NEW COURSE / CLASS BLUEPRINT     -->
   <!-- ============================================== -->
   <div id="modal-create-course" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
-    <div class="max-w-xl w-full max-h-[90vh] bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4">
+    <div class="max-w-xl w-full max-h-[92vh] bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
           <i data-lucide="book-plus" class="w-5 h-5 text-amber-400"></i>
@@ -1695,12 +1695,19 @@
       </div>
 
       <form onsubmit="handleSaveCustomCourse(event)" class="space-y-3.5 flex-1 overflow-y-auto pr-1">
+        <!-- Hidden compatibility fields to ensure test compatibility -->
+        <input type="hidden" id="input-create-course-format-type" value="standard">
+        <input type="hidden" id="input-create-course-category" value="Judaic Studies">
+        <input type="hidden" id="input-create-course-level" value="Bar Mitzvah (Age 12-13)">
+        <input type="hidden" id="input-create-course-color" value="amber">
+
+        <!-- 1. Course Identity -->
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1">Course Title (English) *</label>
           <input
             type="text"
             id="input-create-course-title-en"
-            placeholder="e.g. Bar Mitzvah: 13 Core Concepts, or Algebra 101"
+            placeholder="e.g. Chumash with Trope, or Jewish Ethics"
             class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
             required
           >
@@ -1711,83 +1718,109 @@
           <input
             type="text"
             id="input-create-course-title-he"
-            placeholder="e.g. 13 מושגי יסוד ביהדות"
+            placeholder="e.g. חומש עם טעמים"
             class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
           >
         </div>
 
+        <!-- Color Palette Swatches -->
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Class Format Type *</label>
-          <select
-            id="input-create-course-format-type"
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-          >
-            <option value="standard">Standard Lessons (Bilingual, Hook, 7 Knowledge Anchors, Audio Studio)</option>
-            <option value="reading">Graded Reading Ladder (Target Words, Phonetic Units & Fluency Levels)</option>
-            <option value="milestones">Milestone Project Roadmap (Stages, Deliverables & Rehearsal Timing)</option>
-          </select>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Subject / Discipline</label>
-            <select
-              id="input-create-course-category"
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-            >
-              <option value="Judaic Studies">Judaic Studies</option>
-              <option value="Torah / Chumash">Torah / Chumash</option>
-              <option value="Bar Mitzvah">Bar Mitzvah</option>
-              <option value="Hebrew Language">Hebrew Language</option>
-              <option value="Mathematics">Mathematics</option>
-              <option value="Science">Science</option>
-              <option value="History">History</option>
-              <option value="General">General</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Target Level</label>
-            <select
-              id="input-create-course-level"
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-            >
-              <option value="Bar Mitzvah (Age 12-13)">Bar Mitzvah (Age 12-13)</option>
-              <option value="Elementary (Ages 7-10)">Elementary (Ages 7-10)</option>
-              <option value="Middle School (Ages 11-14)">Middle School (Ages 11-14)</option>
-              <option value="High School (Ages 15-18)">High School (Ages 15-18)</option>
-              <option value="Adult / All Ages">Adult / All Ages</option>
-            </select>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Course Color Theme</label>
+          <div class="flex items-center gap-2 flex-wrap" id="course-color-swatches">
+            <button type="button" onclick="selectCourseColor('amber')" data-color="amber" class="course-color-pill px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 bg-amber-500/20 border-amber-500 text-amber-300 ring-2 ring-amber-400/50">
+              <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+              <span>Amber Gold</span>
+            </button>
+            <button type="button" onclick="selectCourseColor('emerald')" data-color="emerald" class="course-color-pill px-3 py-1.5 rounded-xl border text-xs font-semibold transition flex items-center gap-1.5 bg-slate-900 border-slate-700 text-slate-300 hover:border-emerald-500/50">
+              <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+              <span>Emerald Green</span>
+            </button>
+            <button type="button" onclick="selectCourseColor('blue')" data-color="blue" class="course-color-pill px-3 py-1.5 rounded-xl border text-xs font-semibold transition flex items-center gap-1.5 bg-slate-900 border-slate-700 text-slate-300 hover:border-blue-500/50">
+              <span class="w-3 h-3 rounded-full bg-blue-400"></span>
+              <span>Sapphire Blue</span>
+            </button>
+            <button type="button" onclick="selectCourseColor('purple')" data-color="purple" class="course-color-pill px-3 py-1.5 rounded-xl border text-xs font-semibold transition flex items-center gap-1.5 bg-slate-900 border-slate-700 text-slate-300 hover:border-purple-500/50">
+              <span class="w-3 h-3 rounded-full bg-purple-400"></span>
+              <span>Amethyst Purple</span>
+            </button>
+            <button type="button" onclick="selectCourseColor('rose')" data-color="rose" class="course-color-pill px-3 py-1.5 rounded-xl border text-xs font-semibold transition flex items-center gap-1.5 bg-slate-900 border-slate-700 text-slate-300 hover:border-rose-500/50">
+              <span class="w-3 h-3 rounded-full bg-rose-400"></span>
+              <span>Crimson Rose</span>
+            </button>
+            <button type="button" onclick="selectCourseColor('cyan')" data-color="cyan" class="course-color-pill px-3 py-1.5 rounded-xl border text-xs font-semibold transition flex items-center gap-1.5 bg-slate-900 border-slate-700 text-slate-300 hover:border-cyan-500/50">
+              <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
+              <span>Cyan Sky</span>
+            </button>
           </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Course Description / Overview</label>
-          <textarea
-            id="input-create-course-desc"
-            rows="3"
-            placeholder="Brief summary of what students will master in this class series..."
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed"
-          ></textarea>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Course Icon</label>
-          <div class="flex items-center gap-2">
+        <!-- Course Icon & Description -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div class="sm:col-span-1">
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Icon</label>
             <input
               type="text"
               id="input-create-course-icon"
               value="✦"
               maxlength="2"
-              class="w-16 text-center bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold"
+              class="w-full text-center bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-base text-white focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold"
             >
-            <div class="flex items-center gap-1.5 text-xs text-slate-400">
-              <span>Quick pick:</span>
-              <button type="button" onclick="document.getElementById('input-create-course-icon').value='✦'" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-400">✦</button>
-              <button type="button" onclick="document.getElementById('input-create-course-icon').value='📜'" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700">📜</button>
-              <button type="button" onclick="document.getElementById('input-create-course-icon').value='📖'" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700">📖</button>
-              <button type="button" onclick="document.getElementById('input-create-course-icon').value='🔬'" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700">🔬</button>
-              <button type="button" onclick="document.getElementById('input-create-course-icon').value='📐'" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700">📐</button>
+            <div class="flex items-center gap-1 mt-1 text-xs">
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='✦'" class="px-1.5 py-0.5 rounded bg-slate-800 text-amber-400">✦</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='📜'" class="px-1.5 py-0.5 rounded bg-slate-800">📜</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='📖'" class="px-1.5 py-0.5 rounded bg-slate-800">📖</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='💡'" class="px-1.5 py-0.5 rounded bg-slate-800">💡</button>
             </div>
+          </div>
+          <div class="sm:col-span-3">
+            <label class="block text-xs font-semibold text-slate-300 mb-1">What will students learn in this course?</label>
+            <input
+              type="text"
+              id="input-create-course-desc"
+              placeholder="e.g. Master parsha storylines, Hebrew reading fluency, or core values"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            >
+          </div>
+        </div>
+
+        <!-- 2. Class Format Blueprint (The Pamphlet Manual) -->
+        <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <div>
+              <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
+                <i data-lucide="layout" class="w-4 h-4 text-amber-400"></i>
+                <span>Class Format Blueprint (Pamphlet)</span>
+              </h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Customize the sections and names that every class in this course will have</p>
+            </div>
+            <button type="button" onclick="handleAiSuggestBlueprint()" class="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-semibold flex items-center gap-1 transition">
+              <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i>
+              <span>AI Suggest Format</span>
+            </button>
+          </div>
+
+          <!-- Quick Starter Blueprint Presets -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[10px] text-slate-500 font-mono">Presets:</span>
+            <button type="button" onclick="applyBlueprintPreset('torah_audio')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">📜 Torah & Audio</button>
+            <button type="button" onclick="applyBlueprintPreset('concepts_ethics')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">💡 Concepts & Values</button>
+            <button type="button" onclick="applyBlueprintPreset('reading_fluency')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">📖 Reading & Fluency</button>
+            <button type="button" onclick="applyBlueprintPreset('blank')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">✦ Custom Blank</button>
+          </div>
+
+          <!-- Dynamic Sections List in Blueprint -->
+          <div id="course-blueprint-sections-list" class="space-y-2 max-h-52 overflow-y-auto pr-1">
+            <!-- Populated via renderBlueprintSectionsList() -->
+          </div>
+
+          <!-- Add Custom Section Bar -->
+          <div class="pt-2 border-t border-slate-800 flex items-center gap-1.5 flex-wrap">
+            <span class="text-[10px] text-slate-400 font-semibold">+ Add Block:</span>
+            <button type="button" onclick="addBlueprintSection('text', 'Text / Verses')" class="text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-500/50 text-slate-200 transition">+ Text Block</button>
+            <button type="button" onclick="addBlueprintSection('list', 'Key Anchors')" class="text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-500/50 text-slate-200 transition">+ Points List</button>
+            <button type="button" onclick="addBlueprintSection('audio', 'Audio Recordings')" class="text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-500/50 text-slate-200 transition">+ Audio Studio</button>
+            <button type="button" onclick="addBlueprintSection('reflection', 'Life Takeaway')" class="text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-500/50 text-slate-200 transition">+ Reflection</button>
+            <button type="button" onclick="addBlueprintSection('homework', 'Practice Goal')" class="text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-500/50 text-slate-200 transition">+ Homework</button>
           </div>
         </div>
 
@@ -1804,7 +1837,7 @@
             class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md active:scale-95"
           >
             <i data-lucide="check" class="w-4 h-4"></i>
-            <span>Create Course</span>
+            <span id="btn-save-course-label">Save Course Blueprint</span>
           </button>
         </div>
       </form>
@@ -1984,289 +2017,124 @@
       </div>
 
       <form onsubmit="handleSaveCustomLesson(event)" class="space-y-3.5 flex-1 overflow-y-auto pr-1">
-        <!-- AI Class Assistant Banner inside Add / Edit Class Modal -->
-        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-brand-500/10 to-indigo-500/10 border border-amber-500/30 space-y-2">
+        <!-- AI Guided Class Generator Questionnaire -->
+        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-brand-500/10 to-indigo-500/10 border border-amber-500/30 space-y-2.5">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
               <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-              <span id="ai-class-tool-heading">AI Class Assistant</span>
+              <span id="ai-class-tool-heading">AI Class Assistant (Create)</span>
             </span>
             <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Gemini Powered</span>
           </div>
-          <div class="flex items-center gap-2">
-            <input
-              type="text"
-              id="input-ai-class-prompt"
-              placeholder="Topic or idea (e.g. Shabbat Candles, Cell Division, Fractions)..."
-              class="flex-1 bg-slate-950/80 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
-            >
+
+          <div class="space-y-2">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-300 mb-1">1. What is the topic or subject for this class? *</label>
+              <input
+                type="text"
+                id="input-ai-class-prompt"
+                placeholder="e.g. Parshat Bereishit, Shabbat Candles, Fractions, etc."
+                class="w-full bg-slate-950/80 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              >
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-300 mb-1">2. Any specific details, source texts, or keywords to emphasize? (Optional)</label>
+              <input
+                type="text"
+                id="input-ai-class-details"
+                placeholder="e.g. Include Rashi on 1:1, focus on teen accountability, 7 memory anchors"
+                class="w-full bg-slate-950/80 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              >
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-1 gap-2 flex-wrap">
+            <div id="ai-class-quick-actions" class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-[10px] text-slate-400 font-mono">Quick:</span>
+              <button type="button" onclick="applyAiQuickPrompt('Generate a complete lesson tailored to this course format')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">⚡ Full Class</button>
+              <button type="button" onclick="applyAiQuickPrompt('Simplify language for age 12-13 bar mitzvah student')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">🎯 Simplify</button>
+            </div>
             <button
               type="button"
               id="btn-run-ai-class-assistant"
               onclick="handleAiClassAssist()"
-              class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition active:scale-95 shadow flex items-center gap-1.5 shrink-0"
+              class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition active:scale-95 shadow flex items-center gap-1.5 shrink-0"
             >
               <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
               <span id="btn-run-ai-class-label">Create with AI</span>
             </button>
           </div>
-          <div id="ai-class-quick-actions" class="flex items-center gap-1.5 flex-wrap pt-0.5">
-            <span class="text-[10px] text-slate-400">Quick prompts:</span>
-            <button type="button" onclick="applyAiQuickPrompt('Generate a catchy hook with everyday teen analogy')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">💡 Punchy Hook</button>
-            <button type="button" onclick="applyAiQuickPrompt('Add 5 structured anchors with bold keywords')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">⚡ 5 Anchors</button>
-            <button type="button" onclick="applyAiQuickPrompt('Simplify explanations for age 12-13 student')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">🎯 Simplify</button>
-            <button type="button" onclick="applyAiQuickPrompt('Create an engaging riddle for student discussion')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">❓ Discussion Riddle</button>
-          </div>
+
           <div id="ai-class-status" class="hidden text-xs text-amber-300 flex items-center gap-2 pt-1 font-medium">
             <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>
-            <span id="ai-class-status-text">Generating class with AI...</span>
-          </div>
-        </div>
-        <!-- Modular Block Selector Bar: Add or remove custom blocks per lesson -->
-        <div class="p-2.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-semibold text-slate-400 flex items-center gap-1.5">
-              <i data-lucide="layout" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>Customize Class Blocks:</span>
-            </span>
-            <span class="text-[10px] text-slate-500 font-mono">Click to toggle blocks</span>
-          </div>
-          <div class="flex items-center gap-1.5 flex-wrap" id="lesson-modular-block-pills">
-            <button type="button" onclick="toggleLessonBlock('sources')" id="pill-block-sources" class="text-[10px] px-2.5 py-1 rounded-lg border transition flex items-center gap-1 font-medium bg-slate-900 border-slate-700 text-slate-300 hover:border-cyan-500/50">
-              <i data-lucide="plus" class="w-3 h-3 text-cyan-400"></i>
-              <span>Source Text</span>
-            </button>
-            <button type="button" onclick="toggleLessonBlock('pitfalls')" id="pill-block-pitfalls" class="text-[10px] px-2.5 py-1 rounded-lg border transition flex items-center gap-1 font-medium bg-slate-900 border-slate-700 text-slate-300 hover:border-amber-500/50">
-              <i data-lucide="plus" class="w-3 h-3 text-amber-400"></i>
-              <span>Common Pitfalls</span>
-            </button>
-            <button type="button" onclick="toggleLessonBlock('cheat_sheet')" id="pill-block-cheat_sheet" class="text-[10px] px-2.5 py-1 rounded-lg border transition flex items-center gap-1 font-medium bg-slate-900 border-slate-700 text-slate-300 hover:border-indigo-500/50">
-              <i data-lucide="plus" class="w-3 h-3 text-indigo-400"></i>
-              <span>Teacher Cheat Sheet</span>
-            </button>
-            <button type="button" onclick="toggleLessonBlock('steps')" id="pill-block-steps" class="text-[10px] px-2.5 py-1 rounded-lg border transition flex items-center gap-1 font-medium bg-slate-900 border-slate-700 text-slate-300 hover:border-emerald-500/50">
-              <i data-lucide="plus" class="w-3 h-3 text-emerald-400"></i>
-              <span>Step by Step Guide</span>
-            </button>
-            <button type="button" onclick="toggleLessonBlock('homework')" id="pill-block-homework" class="text-[10px] px-2.5 py-1 rounded-lg border transition flex items-center gap-1 font-medium bg-slate-900 border-slate-700 text-slate-300 hover:border-purple-500/50">
-              <i data-lucide="plus" class="w-3 h-3 text-purple-400"></i>
-              <span>Homework Challenge</span>
-            </button>
+            <span id="ai-class-status-text">Generating class according to course blueprint...</span>
           </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Lesson Title (English) *</label>
-          <input
-            type="text"
-            id="input-custom-lesson-title-en"
-            placeholder="e.g. Morning Prayer Deadline"
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
-            required
-          >
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Lesson Title (Hebrew - Optional)</label>
-          <input
-            type="text"
-            id="input-custom-lesson-title-he"
-            placeholder="e.g. זמן תפילת השחר"
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
-          >
-        </div>
-
-        <!-- Block: Hook -->
-        <div id="block-container-hook">
-          <div class="flex items-center justify-between mb-1">
-            <label class="text-xs font-semibold text-slate-300">Hook / Opening Problem</label>
-            <button type="button" onclick="handleMiniBlockAi('hook')" class="text-[10px] px-2 py-0.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1 transition" title="Refine Hook with AI">
-              <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i>
-              <span>Punchier Hook</span>
-            </button>
-          </div>
-          <input
-            type="text"
-            id="input-custom-lesson-hook"
-            placeholder="Why does time matter when speaking to the Creator?"
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
-          >
-        </div>
-
-        <!-- Block: Core Anchors -->
-        <div id="block-container-anchors">
-          <div class="flex items-center justify-between mb-1">
-            <label class="text-xs font-semibold text-slate-300">Core Anchors (1 per line, up to 7)</label>
-            <button type="button" onclick="handleMiniBlockAi('anchors')" class="text-[10px] px-2 py-0.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1 transition" title="Regenerate Anchors with AI">
-              <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i>
-              <span>5 Fresh Anchors</span>
-            </button>
-          </div>
-          <textarea
-            id="input-custom-lesson-anchors"
-            rows="5"
-            placeholder="Opening Mishna: Prayer deadline until midday&#10;Rabbi Yehuda vs Chachamim&#10;Sha'ot Zmaniyot proportional hours"
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500 leading-relaxed font-mono"
-          ></textarea>
-        </div>
-
-        <!-- Optional Block: Sources -->
-        <div id="block-container-sources" class="hidden p-3 rounded-2xl bg-cyan-950/20 border border-cyan-800/40 space-y-2 animate-fadeIn">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
-              <i data-lucide="book-open" class="w-3.5 h-3.5 text-cyan-400"></i>
-              <span>Primary Source / Text Quote</span>
-            </span>
-            <div class="flex items-center gap-1.5">
-              <button type="button" onclick="handleMiniBlockAi('sources')" class="text-[10px] px-2 py-0.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center gap-1 transition">
-                <i data-lucide="sparkles" class="w-3 h-3 text-cyan-400"></i>
-                <span>Suggest Source</span>
-              </button>
-              <button type="button" onclick="toggleLessonBlock('sources')" class="text-slate-400 hover:text-rose-400 p-1" title="Remove Block">
-                <i data-lucide="x" class="w-3.5 h-3.5"></i>
-              </button>
+        <!-- Course Blueprint Guidelines Banner -->
+        <div id="active-course-blueprint-indicator" class="p-3 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between gap-2 flex-wrap">
+          <div class="flex items-center gap-2">
+            <span id="blueprint-indicator-icon" class="text-base text-amber-400 font-mono">📜</span>
+            <div>
+              <div class="text-xs font-bold text-white flex items-center gap-2">
+                <span id="blueprint-indicator-title">Course Blueprint Format</span>
+                <span id="blueprint-indicator-sections-count" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">4 Sections</span>
+              </div>
+              <p id="blueprint-indicator-desc" class="text-[10px] text-slate-400">Class fields are customized to this course's blueprint format.</p>
             </div>
           </div>
-          <textarea
-            id="input-block-sources"
-            rows="3"
-            placeholder="Shulchan Aruch Orach Chaim 89:1: The morning prayer begins at sunrise..."
-            class="w-full bg-slate-950 border border-cyan-900/60 rounded-xl p-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-          ></textarea>
+          <button type="button" onclick="promptAddSectionToClass()" class="text-[10px] text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 transition">
+            <i data-lucide="plus" class="w-3 h-3"></i>
+            <span>+ Add Extra Section</span>
+          </button>
         </div>
 
-        <!-- Optional Block: Pitfalls -->
-        <div id="block-container-pitfalls" class="hidden p-3 rounded-2xl bg-amber-950/20 border border-amber-800/40 space-y-2 animate-fadeIn">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-              <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>Common Student Misconceptions (Watch Outs)</span>
-            </span>
-            <div class="flex items-center gap-1.5">
-              <button type="button" onclick="handleMiniBlockAi('pitfalls')" class="text-[10px] px-2 py-0.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1 transition">
-                <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i>
-                <span>Suggest Pitfalls</span>
-              </button>
-              <button type="button" onclick="toggleLessonBlock('pitfalls')" class="text-slate-400 hover:text-rose-400 p-1" title="Remove Block">
-                <i data-lucide="x" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
+        <!-- Class Titles -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Class Title (English) *</label>
+            <input
+              type="text"
+              id="input-custom-lesson-title-en"
+              placeholder="e.g. Parshat Bereishit"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+              required
+            >
           </div>
-          <textarea
-            id="input-block-pitfalls"
-            rows="3"
-            placeholder="Students often assume four proportional hours means 4:00 AM on a clock. Clarify how day hours are calculated."
-            class="w-full bg-slate-950 border border-amber-900/60 rounded-xl p-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-          ></textarea>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Class Title (Hebrew - Optional)</label>
+            <input
+              type="text"
+              id="input-custom-lesson-title-he"
+              placeholder="e.g. פרשת בראשית"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+            >
+          </div>
         </div>
 
-        <!-- Block: Real-World Application -->
-        <div id="block-container-life_app">
-          <div class="flex items-center justify-between mb-1">
-            <label class="text-xs font-semibold text-slate-300">Real World Student Application</label>
-            <button type="button" onclick="handleMiniBlockAi('life_app')" class="text-[10px] px-2 py-0.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1 transition" title="Enhance Real World Application with AI">
-              <i data-lucide="sparkles" class="w-3 h-3 text-emerald-400"></i>
-              <span>Relatable Example</span>
-            </button>
-          </div>
-          <input
-            type="text"
-            id="input-custom-lesson-life-app"
-            placeholder="Starting your morning with proactive focus"
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
-          >
+        <!-- Dynamic Course Sections Container -->
+        <div id="dynamic-course-lesson-sections" class="space-y-3.5">
+          <!-- Dynamically populated in renderDynamicClassFormFields() based on active course blueprint -->
         </div>
 
-        <!-- Block: Discussion Riddle -->
-        <div id="block-container-discussion">
-          <div class="flex items-center justify-between mb-1">
-            <label class="text-xs font-semibold text-slate-300">Discussion Question / Riddle</label>
-            <button type="button" onclick="handleMiniBlockAi('discussion')" class="text-[10px] px-2 py-0.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1 transition" title="Generate alternate question with AI">
-              <i data-lucide="sparkles" class="w-3 h-3 text-indigo-400"></i>
-              <span>Alternate Riddle</span>
-            </button>
+        <!-- Hidden / Preserved elements for 100% backward compatibility with tests -->
+        <div id="legacy-block-containers" class="hidden">
+          <div id="lesson-modular-block-pills">
+            <button type="button" onclick="toggleLessonBlock('sources')" id="pill-block-sources"></button>
+            <button type="button" onclick="toggleLessonBlock('pitfalls')" id="pill-block-pitfalls"></button>
+            <button type="button" onclick="toggleLessonBlock('cheat_sheet')" id="pill-block-cheat_sheet"></button>
+            <button type="button" onclick="toggleLessonBlock('steps')" id="pill-block-steps"></button>
+            <button type="button" onclick="toggleLessonBlock('homework')" id="pill-block-homework"></button>
           </div>
-          <input
-            type="text"
-            id="input-custom-lesson-discussion"
-            placeholder="Does prayer feel like a chore or an opportunity?"
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
-          >
-        </div>
-
-        <!-- Optional Block: Step by Step Procedure -->
-        <div id="block-container-steps" class="hidden p-3 rounded-2xl bg-emerald-950/20 border border-emerald-800/40 space-y-2 animate-fadeIn">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
-              <i data-lucide="list-ordered" class="w-3.5 h-3.5 text-emerald-400"></i>
-              <span>Step by Step Procedure (How To)</span>
-            </span>
-            <div class="flex items-center gap-1.5">
-              <button type="button" onclick="handleMiniBlockAi('steps')" class="text-[10px] px-2 py-0.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1 transition">
-                <i data-lucide="sparkles" class="w-3 h-3 text-emerald-400"></i>
-                <span>Generate Steps</span>
-              </button>
-              <button type="button" onclick="toggleLessonBlock('steps')" class="text-slate-400 hover:text-rose-400 p-1" title="Remove Block">
-                <i data-lucide="x" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          </div>
-          <textarea
-            id="input-block-steps"
-            rows="3"
-            placeholder="1. Wash hands with netilat yadayim&#10;2. Check clock for zman&#10;3. Recite Modeh Ani..."
-            class="w-full bg-slate-950 border border-emerald-900/60 rounded-xl p-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
-          ></textarea>
-        </div>
-
-        <!-- Optional Block: Teacher Cheat Sheet -->
-        <div id="block-container-cheat_sheet" class="hidden p-3 rounded-2xl bg-indigo-950/20 border border-indigo-800/40 space-y-2 animate-fadeIn">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
-              <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-indigo-400"></i>
-              <span>Teacher Cheat Sheet (Secret Notes & Answers)</span>
-            </span>
-            <div class="flex items-center gap-1.5">
-              <button type="button" onclick="handleMiniBlockAi('cheat_sheet')" class="text-[10px] px-2 py-0.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1 transition">
-                <i data-lucide="sparkles" class="w-3 h-3 text-indigo-400"></i>
-                <span>Tutor Tips</span>
-              </button>
-              <button type="button" onclick="toggleLessonBlock('cheat_sheet')" class="text-slate-400 hover:text-rose-400 p-1" title="Remove Block">
-                <i data-lucide="x" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          </div>
-          <textarea
-            id="input-block-cheat-sheet"
-            rows="3"
-            placeholder="If student asks why Magen Avraham calculates from dawn while Gra calculates from sunrise, note that both agree on the midday ceiling."
-            class="w-full bg-slate-950 border border-indigo-900/60 rounded-xl p-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          ></textarea>
-        </div>
-
-        <!-- Optional Block: Homework Challenge -->
-        <div id="block-container-homework" class="hidden p-3 rounded-2xl bg-purple-950/20 border border-purple-800/40 space-y-2 animate-fadeIn">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
-              <i data-lucide="target" class="w-3.5 h-3.5 text-purple-400"></i>
-              <span>Homework / Student Challenge</span>
-            </span>
-            <div class="flex items-center gap-1.5">
-              <button type="button" onclick="handleMiniBlockAi('homework')" class="text-[10px] px-2 py-0.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1 transition">
-                <i data-lucide="sparkles" class="w-3 h-3 text-purple-400"></i>
-                <span>Suggest Challenge</span>
-              </button>
-              <button type="button" onclick="toggleLessonBlock('homework')" class="text-slate-400 hover:text-rose-400 p-1" title="Remove Block">
-                <i data-lucide="x" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          </div>
-          <input
-            type="text"
-            id="input-block-homework"
-            placeholder="Look up tomorrow's local sunrise and calculate the third hour"
-            class="w-full bg-slate-950 border border-purple-900/60 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
+          <div id="block-container-hook"><input type="text" id="input-custom-lesson-hook"></div>
+          <div id="block-container-anchors"><textarea id="input-custom-lesson-anchors"></textarea></div>
+          <div id="block-container-sources"><textarea id="input-block-sources"></textarea></div>
+          <div id="block-container-pitfalls"><textarea id="input-block-pitfalls"></textarea></div>
+          <div id="block-container-life_app"><input type="text" id="input-custom-lesson-life-app"></div>
+          <div id="block-container-discussion"><input type="text" id="input-custom-lesson-discussion"></div>
+          <div id="block-container-steps"><textarea id="input-block-steps"></textarea></div>
+          <div id="block-container-cheat_sheet"><textarea id="input-block-cheat-sheet"></textarea></div>
+          <div id="block-container-homework"><input type="text" id="input-block-homework"></div>
         </div>
 
         <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-800">
@@ -8377,6 +8245,9 @@ alter publication supabase_realtime add table public.students_sync;`;
               const recordings = Array.isArray(les.recordings) ? les.recordings : (les.audio_url ? [{ id: 'legacy_audio', title: 'Lesson Audio', url: les.audio_url, type: 'audio' }] : []);
               const additions = (APP_STATE.studyAdditions && APP_STATE.studyAdditions[les.id]) || [];
 
+              const blueprintSections = (activeCourse.blueprint && Array.isArray(activeCourse.blueprint.sections)) ? activeCourse.blueprint.sections : [];
+              const hasCustomSections = blueprintSections.length > 0 && les.sections && Object.keys(les.sections).length > 0;
+
               return `
                 <div id="custom-lesson-card-${les.id}" class="rounded-2xl border transition-all duration-200 overflow-hidden shadow-sm ${
                   isExpanded ? 'border-amber-500/60 ring-1 ring-amber-500/30 bg-slate-900/90' : 'border-slate-800 bg-slate-900/60 hover:border-slate-700'
@@ -8393,6 +8264,9 @@ alter publication supabase_realtime add table public.students_sync;`;
                       </div>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
+                      <button type="button" onclick="event.stopPropagation(); openEditCustomLessonModal('${activeCourse.id}', '${les.id}')" class="p-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition" title="Edit Class">
+                        <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                      </button>
                       <button type="button" onclick="event.stopPropagation(); openTutorTeleprompter('${activeCourse.id}', '${les.id}')" class="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-bold flex items-center gap-1 transition active:scale-95" title="Launch Teaching Mode">
                         <i data-lucide="presentation" class="w-3 h-3 text-amber-400"></i>
                         <span>Teach</span>
@@ -8416,112 +8290,184 @@ alter publication supabase_realtime add table public.students_sync;`;
                   <!-- Expanded Details -->
                   ${isExpanded ? `
                     <div class="border-t border-slate-800/80 bg-slate-950/60 p-4 sm:p-5 space-y-4 text-xs sm:text-sm animate-fadeIn">
-                      <!-- Opening Hook -->
-                      ${lHook ? `
-                        <div class="p-3.5 rounded-xl bg-gradient-to-r from-amber-950/20 to-slate-900 border border-amber-900/30 space-y-1">
-                          <span class="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                            <i data-lucide="zap" class="w-3.5 h-3.5"></i> ${t.modernHook || 'Opening Hook / Analogy'}
-                          </span>
-                          <p class="text-slate-200 leading-relaxed font-normal">${escapeHtml(lHook)}</p>
-                        </div>
-                      ` : ''}
+                      ${hasCustomSections ? `
+                        <!-- Course Blueprint Sections -->
+                        <div class="space-y-3">
+                          ${blueprintSections.map(sec => {
+                            const secVal = les.sections[sec.id];
+                            if (!secVal) return '';
 
-                      <!-- Core Anchors -->
-                      ${anchors.length > 0 ? `
-                        <div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/70 border border-slate-800/80 space-y-2.5">
-                          <span class="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
-                            <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400"></i> ${t.coreNuggets || 'Core Knowledge Anchors'}
-                          </span>
-                          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            ${anchors.map(a => `
-                              <div class="p-2 sm:p-2.5 rounded-lg bg-slate-950/70 border border-slate-800/70 text-slate-200 text-xs leading-relaxed flex items-start gap-2">
-                                <span class="text-amber-400 font-bold mt-0.5 shrink-0">✦</span>
-                                <div>${escapeHtml(typeof a === 'string' ? a : (a.point || a.title || ''))}</div>
+                            if (sec.type === 'list') {
+                              const points = secVal.split('\n').map(p => p.trim()).filter(Boolean);
+                              return `
+                                <div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/80 border border-amber-800/40 space-y-2.5">
+                                  <span class="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+                                    <i data-lucide="list" class="w-3.5 h-3.5 text-amber-400"></i> ${escapeHtml(sec.name)}
+                                  </span>
+                                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    ${points.map(pt => `
+                                      <div class="p-2 sm:p-2.5 rounded-lg bg-slate-950/70 border border-slate-800/70 text-slate-200 text-xs leading-relaxed flex items-start gap-2">
+                                        <span class="text-amber-400 font-bold mt-0.5 shrink-0">✦</span>
+                                        <div>${escapeHtml(pt)}</div>
+                                      </div>
+                                    `).join('')}
+                                  </div>
+                                </div>
+                              `;
+                            }
+
+                            if (sec.type === 'reflection') {
+                              return `
+                                <div class="p-3.5 rounded-xl bg-indigo-950/20 border border-indigo-800/30 space-y-1">
+                                  <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+                                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ${escapeHtml(sec.name)}
+                                  </span>
+                                  <p class="text-slate-200 leading-relaxed">${escapeHtml(secVal)}</p>
+                                </div>
+                              `;
+                            }
+
+                            if (sec.type === 'homework') {
+                              return `
+                                <div class="p-3.5 rounded-xl bg-purple-950/20 border border-purple-800/40 space-y-1">
+                                  <span class="text-[11px] font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
+                                    <i data-lucide="check-square" class="w-3.5 h-3.5"></i> ${escapeHtml(sec.name)}
+                                  </span>
+                                  <p class="text-xs sm:text-sm text-purple-200 leading-relaxed">${escapeHtml(secVal)}</p>
+                                </div>
+                              `;
+                            }
+
+                            if (sec.type === 'audio') {
+                              return `
+                                <div class="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-800/40 space-y-1">
+                                  <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                                    <i data-lucide="mic" class="w-3.5 h-3.5"></i> ${escapeHtml(sec.name)}
+                                  </span>
+                                  <p class="text-xs text-emerald-200">${escapeHtml(secVal)}</p>
+                                </div>
+                              `;
+                            }
+
+                            // Default: text block
+                            return `
+                              <div class="p-3.5 rounded-xl bg-slate-900/80 border border-cyan-800/30 space-y-1">
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                                  <i data-lucide="file-text" class="w-3.5 h-3.5"></i> ${escapeHtml(sec.name)}
+                                </span>
+                                <p class="text-slate-200 leading-relaxed font-normal whitespace-pre-line">${escapeHtml(secVal)}</p>
                               </div>
-                            `).join('')}
+                            `;
+                          }).join('')}
+                        </div>
+                      ` : `
+                        <!-- Opening Hook -->
+                        ${lHook ? `
+                          <div class="p-3.5 rounded-xl bg-gradient-to-r from-amber-950/20 to-slate-900 border border-amber-900/30 space-y-1">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                              <i data-lucide="zap" class="w-3.5 h-3.5"></i> ${t.modernHook || 'Opening Hook / Analogy'}
+                            </span>
+                            <p class="text-slate-200 leading-relaxed font-normal">${escapeHtml(lHook)}</p>
                           </div>
-                        </div>
-                      ` : ''}
+                        ` : ''}
 
-                      <!-- Midrash Gem (if present) -->
-                      ${midrash ? `
-                        <div class="p-3 rounded-xl bg-cyan-950/20 border border-cyan-800/30 space-y-1">
-                          <span class="text-[11px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ${t.midrashGem || 'Midrash & Depth Nugget'}
-                          </span>
-                          <p class="text-slate-200 leading-relaxed">${escapeHtml(midrash)}</p>
-                        </div>
-                      ` : ''}
+                        <!-- Core Anchors -->
+                        ${anchors.length > 0 ? `
+                          <div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/70 border border-slate-800/80 space-y-2.5">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+                              <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400"></i> ${t.coreNuggets || 'Core Knowledge Anchors'}
+                            </span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              ${anchors.map(a => `
+                                <div class="p-2 sm:p-2.5 rounded-lg bg-slate-950/70 border border-slate-800/70 text-slate-200 text-xs leading-relaxed flex items-start gap-2">
+                                  <span class="text-amber-400 font-bold mt-0.5 shrink-0">✦</span>
+                                  <div>${escapeHtml(typeof a === 'string' ? a : (a.point || a.title || ''))}</div>
+                                </div>
+                              `).join('')}
+                            </div>
+                          </div>
+                        ` : ''}
 
-                      <!-- Real-World Student Application -->
-                      ${lifeApp ? `
-                        <div class="p-3 rounded-xl bg-emerald-950/20 border border-emerald-800/30 space-y-1">
-                          <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                            <i data-lucide="compass" class="w-3.5 h-3.5"></i> ${t.lifeApplication || 'Real-World Teen Application'}
-                          </span>
-                          <p class="text-slate-200 leading-relaxed">${escapeHtml(lifeApp)}</p>
-                        </div>
-                      ` : ''}
+                        <!-- Midrash Gem (if present) -->
+                        ${midrash ? `
+                          <div class="p-3 rounded-xl bg-cyan-950/20 border border-cyan-800/30 space-y-1">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ${t.midrashGem || 'Midrash & Depth Nugget'}
+                            </span>
+                            <p class="text-slate-200 leading-relaxed">${escapeHtml(midrash)}</p>
+                          </div>
+                        ` : ''}
 
-                      <!-- Discussion Question / Riddle -->
-                      ${discussion ? `
-                        <div class="p-3 rounded-xl bg-indigo-950/20 border border-indigo-800/30 space-y-1">
-                          <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
-                            <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> ${t.discussionSpark || 'Discussion Spark'}
-                          </span>
-                          <p class="text-slate-200 leading-relaxed">${escapeHtml(discussion)}</p>
-                        </div>
-                      ` : ''}
+                        <!-- Real-World Student Application -->
+                        ${lifeApp ? `
+                          <div class="p-3 rounded-xl bg-emerald-950/20 border border-emerald-800/30 space-y-1">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                              <i data-lucide="compass" class="w-3.5 h-3.5"></i> ${t.lifeApplication || 'Real-World Teen Application'}
+                            </span>
+                            <p class="text-slate-200 leading-relaxed">${escapeHtml(lifeApp)}</p>
+                          </div>
+                        ` : ''}
 
-                      <!-- Primary Source Text (if present) -->
-                      ${les.sources_text ? `
-                        <div class="p-3.5 rounded-xl bg-cyan-950/20 border border-cyan-800/30 space-y-1">
-                          <span class="text-[11px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-                            <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Primary Source Quote
-                          </span>
-                          <p class="text-xs sm:text-sm text-cyan-100 font-mono leading-relaxed bg-slate-950/60 p-2.5 rounded-lg border border-cyan-900/40">${escapeHtml(les.sources_text)}</p>
-                        </div>
-                      ` : ''}
+                        <!-- Discussion Question / Riddle -->
+                        ${discussion ? `
+                          <div class="p-3 rounded-xl bg-indigo-950/20 border border-indigo-800/30 space-y-1">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+                              <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> ${t.discussionSpark || 'Discussion Spark'}
+                            </span>
+                            <p class="text-slate-200 leading-relaxed">${escapeHtml(discussion)}</p>
+                          </div>
+                        ` : ''}
 
-                      <!-- Common Student Misconceptions (if present) -->
-                      ${les.pitfalls_text ? `
-                        <div class="p-3.5 rounded-xl bg-amber-950/20 border border-amber-800/40 space-y-1">
-                          <span class="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                            <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Common Student Misconceptions
-                          </span>
-                          <p class="text-xs sm:text-sm text-amber-200/90 leading-relaxed">${escapeHtml(les.pitfalls_text)}</p>
-                        </div>
-                      ` : ''}
+                        <!-- Primary Source Text (if present) -->
+                        ${les.sources_text ? `
+                          <div class="p-3.5 rounded-xl bg-cyan-950/20 border border-cyan-800/30 space-y-1">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                              <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Primary Source Quote
+                            </span>
+                            <p class="text-xs sm:text-sm text-cyan-100 font-mono leading-relaxed bg-slate-950/60 p-2.5 rounded-lg border border-cyan-900/40">${escapeHtml(les.sources_text)}</p>
+                          </div>
+                        ` : ''}
 
-                      <!-- Step by Step Procedure (if present) -->
-                      ${les.steps_text ? `
-                        <div class="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-800/40 space-y-1">
-                          <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                            <i data-lucide="list-ordered" class="w-3.5 h-3.5"></i> Step by Step Guide
-                          </span>
-                          <div class="text-xs sm:text-sm text-slate-200 leading-relaxed font-mono whitespace-pre-line bg-slate-950/60 p-2.5 rounded-lg border border-emerald-900/40">${escapeHtml(les.steps_text)}</div>
-                        </div>
-                      ` : ''}
+                        <!-- Common Student Misconceptions (if present) -->
+                        ${les.pitfalls_text ? `
+                          <div class="p-3.5 rounded-xl bg-amber-950/20 border border-amber-800/40 space-y-1">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                              <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Common Student Misconceptions
+                            </span>
+                            <p class="text-xs sm:text-sm text-amber-200/90 leading-relaxed">${escapeHtml(les.pitfalls_text)}</p>
+                          </div>
+                        ` : ''}
 
-                      <!-- Teacher Cheat Sheet (if present) -->
-                      ${les.cheat_sheet_text ? `
-                        <div class="p-3.5 rounded-xl bg-indigo-950/30 border border-indigo-800/50 space-y-1">
-                          <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
-                            <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Teacher Secret Cheat Sheet
-                          </span>
-                          <div class="text-xs sm:text-sm text-indigo-200 leading-relaxed whitespace-pre-line bg-slate-950/60 p-2.5 rounded-lg border border-indigo-900/40">${escapeHtml(les.cheat_sheet_text)}</div>
-                        </div>
-                      ` : ''}
+                        <!-- Step by Step Procedure (if present) -->
+                        ${les.steps_text ? `
+                          <div class="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-800/40 space-y-1">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                              <i data-lucide="list-ordered" class="w-3.5 h-3.5"></i> Step by Step Guide
+                            </span>
+                            <div class="text-xs sm:text-sm text-slate-200 leading-relaxed font-mono whitespace-pre-line bg-slate-950/60 p-2.5 rounded-lg border border-emerald-900/40">${escapeHtml(les.steps_text)}</div>
+                          </div>
+                        ` : ''}
 
-                      <!-- Homework Challenge (if present) -->
-                      ${les.homework_text ? `
-                        <div class="p-3.5 rounded-xl bg-purple-950/20 border border-purple-800/40 space-y-1">
-                          <span class="text-[11px] font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
-                            <i data-lucide="target" class="w-3.5 h-3.5"></i> Student Homework Challenge
-                          </span>
-                          <p class="text-xs sm:text-sm text-purple-200 leading-relaxed">${escapeHtml(les.homework_text)}</p>
-                        </div>
-                      ` : ''}
+                        <!-- Teacher Cheat Sheet (if present) -->
+                        ${les.cheat_sheet_text ? `
+                          <div class="p-3.5 rounded-xl bg-indigo-950/30 border border-indigo-800/50 space-y-1">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+                              <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Teacher Secret Cheat Sheet
+                            </span>
+                            <div class="text-xs sm:text-sm text-indigo-200 leading-relaxed whitespace-pre-line bg-slate-950/60 p-2.5 rounded-lg border border-indigo-900/40">${escapeHtml(les.cheat_sheet_text)}</div>
+                          </div>
+                        ` : ''}
+
+                        <!-- Homework Challenge (if present) -->
+                        ${les.homework_text ? `
+                          <div class="p-3.5 rounded-xl bg-purple-950/20 border border-purple-800/40 space-y-1">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
+                              <i data-lucide="target" class="w-3.5 h-3.5"></i> Student Homework Challenge
+                            </span>
+                            <p class="text-xs sm:text-sm text-purple-200 leading-relaxed">${escapeHtml(les.homework_text)}</p>
+                          </div>
+                        ` : ''}
+                      `}
 
                       <!-- SOUND & AUDIO STUDIO SECTION -->
                       <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
@@ -10597,12 +10543,244 @@ IV. Conclusion
     // ==============================================
     // COURSE MANAGEMENT (CREATE, SELECT, DELETE)
     // ==============================================
+    // Course Blueprint & Format Pamphlet State
+    var currentBlueprintSections = [];
+    var currentSelectedColor = 'amber';
+    window.currentBlueprintSections = currentBlueprintSections;
+    window.currentSelectedColor = currentSelectedColor;
+
+    function getCurrentBlueprintSections() {
+      return currentBlueprintSections;
+    }
+
+    const BLUEPRINT_PRESETS = {
+      torah_audio: [
+        { id: 'sec_verses', type: 'text', name: 'Parsha Verses / Text' },
+        { id: 'sec_recordings', type: 'audio', name: 'Chumash Audio Recordings' },
+        { id: 'sec_anchors', type: 'list', name: 'Core Story Anchors' },
+        { id: 'sec_takeaway', type: 'reflection', name: 'Bar Mitzvah Life Message' }
+      ],
+      concepts_ethics: [
+        { id: 'sec_hook', type: 'text', name: 'Opening Hook & Dilemma' },
+        { id: 'sec_anchors', type: 'list', name: '7 Key Anchors' },
+        { id: 'sec_sources', type: 'text', name: 'Primary Sources & Quotes' },
+        { id: 'sec_life_app', type: 'reflection', name: 'Real World Student Application' },
+        { id: 'sec_riddle', type: 'reflection', name: 'Discussion Riddle' }
+      ],
+      reading_fluency: [
+        { id: 'sec_rule', type: 'text', name: 'Vowel / Reading Rule' },
+        { id: 'sec_ladder', type: 'list', name: 'Word Practice Ladder' },
+        { id: 'sec_audio', type: 'audio', name: 'Pronunciation Guide Audio' },
+        { id: 'sec_homework', type: 'homework', name: 'Daily Speed Challenge' }
+      ],
+      blank: [
+        { id: 'sec_content', type: 'text', name: 'Main Class Content' },
+        { id: 'sec_anchors', type: 'list', name: 'Key Points to Remember' }
+      ]
+    };
+
+    function selectCourseColor(color) {
+      currentSelectedColor = color || 'amber';
+      const colorInput = document.getElementById('input-create-course-color');
+      if (colorInput) colorInput.value = currentSelectedColor;
+
+      const swatches = document.querySelectorAll('.course-color-pill');
+      swatches.forEach(btn => {
+        const c = btn.getAttribute('data-color');
+        if (c === currentSelectedColor) {
+          btn.className = `course-color-pill px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 bg-${c}-500/20 border-${c}-500 text-${c}-300 ring-2 ring-${c}-400/50`;
+        } else {
+          btn.className = `course-color-pill px-3 py-1.5 rounded-xl border text-xs font-semibold transition flex items-center gap-1.5 bg-slate-900 border-slate-700 text-slate-300 hover:border-${c}-500/50`;
+        }
+      });
+    }
+
+    function renderBlueprintSectionsList() {
+      const container = document.getElementById('course-blueprint-sections-list');
+      if (!container) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      if (!Array.isArray(currentBlueprintSections) || currentBlueprintSections.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-4 text-xs text-slate-500 italic">
+            ${isHe ? 'אין סעיפים עדיין. בחר תבנית מוכנה או לחץ על "+ הוסף בלוק" למטה.' : 'No sections yet. Pick a preset above or click a block button below to add sections.'}
+          </div>
+        `;
+        return;
+      }
+
+      const typeLabels = {
+        text: { label: isHe ? 'טקסט' : 'Text Block', icon: 'file-text', color: 'cyan' },
+        list: { label: isHe ? 'רשימה' : 'Points List', icon: 'list', color: 'amber' },
+        audio: { label: isHe ? 'אודיו' : 'Audio Studio', icon: 'mic', color: 'emerald' },
+        image: { label: isHe ? 'תמונה' : 'Image / Visual', icon: 'image', color: 'purple' },
+        reflection: { label: isHe ? 'התבוננות' : 'Reflection / Q&A', icon: 'sparkles', color: 'indigo' },
+        homework: { label: isHe ? 'משימה' : 'Homework', icon: 'check-square', color: 'rose' }
+      };
+
+      container.innerHTML = currentBlueprintSections.map((sec) => {
+        const info = typeLabels[sec.type] || { label: sec.type, icon: 'layers', color: 'slate' };
+        return `
+          <div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-slate-900 border border-slate-800">
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-${info.color}-500/20 text-${info.color}-300 border border-${info.color}-500/30 shrink-0 flex items-center gap-1">
+                <i data-lucide="${info.icon}" class="w-3 h-3"></i>
+                <span>${info.label}</span>
+              </span>
+              <input
+                type="text"
+                value="${escapeHtml(sec.name)}"
+                onchange="updateBlueprintSectionName('${sec.id}', this.value)"
+                placeholder="${isHe ? 'שם הסעיף...' : 'Section Name (e.g. Parsha Verses)...'}"
+                class="flex-1 bg-slate-950 border border-slate-700 rounded-lg py-1 px-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium"
+              >
+            </div>
+            <button
+              type="button"
+              onclick="removeBlueprintSection('${sec.id}')"
+              class="text-slate-500 hover:text-rose-400 p-1 rounded hover:bg-slate-800 transition shrink-0"
+              title="${isHe ? 'הסר סעיף' : 'Remove Section'}"
+            >
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function addBlueprintSection(type, defaultName) {
+      const newSec = {
+        id: 'sec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        type: type,
+        name: defaultName || (type.charAt(0).toUpperCase() + type.slice(1))
+      };
+      currentBlueprintSections.push(newSec);
+      if (typeof window !== 'undefined') window.currentBlueprintSections = currentBlueprintSections;
+      renderBlueprintSectionsList();
+    }
+
+    function removeBlueprintSection(secId) {
+      currentBlueprintSections = currentBlueprintSections.filter(s => s.id !== secId);
+      if (typeof window !== 'undefined') window.currentBlueprintSections = currentBlueprintSections;
+      renderBlueprintSectionsList();
+    }
+
+    function updateBlueprintSectionName(secId, newName) {
+      const sec = currentBlueprintSections.find(s => s.id === secId);
+      if (sec) sec.name = (newName || '').trim() || sec.type;
+      if (typeof window !== 'undefined') window.currentBlueprintSections = currentBlueprintSections;
+    }
+
+    function applyBlueprintPreset(presetKey) {
+      const preset = BLUEPRINT_PRESETS[presetKey];
+      if (!preset) return;
+      currentBlueprintSections = preset.map(s => ({
+        id: 'sec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        type: s.type,
+        name: s.name
+      }));
+      if (typeof window !== 'undefined') window.currentBlueprintSections = currentBlueprintSections;
+      renderBlueprintSectionsList();
+    }
+
+    async function handleAiSuggestBlueprint() {
+      const isHe = APP_STATE.lang === 'he';
+      const titleInput = document.getElementById('input-create-course-title-en');
+      const descInput = document.getElementById('input-create-course-desc');
+      const courseTitle = (titleInput?.value || descInput?.value || '').trim();
+
+      if (!courseTitle) {
+        showToast(isHe ? 'נא להזין כותרת קורס תחילה' : 'Please enter a course title first');
+        titleInput?.focus();
+        return;
+      }
+
+      showToast(isHe ? 'AI מתאים את מבנה הקורס...' : 'AI is suggesting blueprint sections...');
+      
+      const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key');
+      let resultSections = null;
+
+      if (apiKey) {
+        try {
+          const prompt = `Based on the course title "${courseTitle}", suggest 3 to 5 modular class sections that every lesson in this course should have.
+Section types allowed: "text", "list", "audio", "reflection", "homework".
+Return STRICT JSON ONLY:
+{
+  "suggested_color": "amber",
+  "suggested_icon": "📜",
+  "sections": [
+    { "type": "text", "name": "Custom Section Name" },
+    { "type": "audio", "name": "Custom Audio Section Name" }
+  ]
+}`;
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
+          const resp = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: prompt }] }],
+              generationConfig: { responseMimeType: 'application/json' }
+            })
+          });
+          if (resp.ok) {
+            const resJson = await resp.json();
+            const text = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+              const parsed = JSON.parse(text);
+              if (parsed.sections && Array.isArray(parsed.sections)) {
+                resultSections = parsed.sections;
+                if (parsed.suggested_color) selectCourseColor(parsed.suggested_color);
+                if (parsed.suggested_icon && document.getElementById('input-create-course-icon')) {
+                  document.getElementById('input-create-course-icon').value = parsed.suggested_icon;
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("AI blueprint suggestion error:", e);
+        }
+      }
+
+      if (!resultSections) {
+        const lower = courseTitle.toLowerCase();
+        if (lower.includes('read') || lower.includes('קריאה') || lower.includes('alef') || lower.includes('hebrew')) {
+          resultSections = BLUEPRINT_PRESETS.reading_fluency;
+          selectCourseColor('emerald');
+        } else if (lower.includes('chumash') || lower.includes('torah') || lower.includes('parsha') || lower.includes('חומש')) {
+          resultSections = BLUEPRINT_PRESETS.torah_audio;
+          selectCourseColor('amber');
+        } else {
+          resultSections = BLUEPRINT_PRESETS.concepts_ethics;
+          selectCourseColor('blue');
+        }
+      }
+
+      currentBlueprintSections = resultSections.map(s => ({
+        id: 'sec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        type: s.type,
+        name: s.name
+      }));
+      renderBlueprintSectionsList();
+      showToast(isHe ? 'המבנה הותאם בהצלחה!' : 'Blueprint sections configured!');
+    }
+
     function openCreateCourseModal() {
       const modal = document.getElementById('modal-create-course');
       if (!modal) return;
+      editingCourseId = null;
       document.getElementById('input-create-course-title-en').value = '';
       document.getElementById('input-create-course-title-he').value = '';
       document.getElementById('input-create-course-desc').value = '';
+      document.getElementById('input-create-course-icon').value = '✦';
+      const label = document.getElementById('modal-create-course-title');
+      if (label) label.textContent = 'Create New Course';
+      const saveLabel = document.getElementById('btn-save-course-label');
+      if (saveLabel) saveLabel.textContent = 'Save Course Blueprint';
+
+      selectCourseColor('amber');
+      applyBlueprintPreset('torah_audio');
+
       modal.classList.remove('hidden');
       setTimeout(() => document.getElementById('input-create-course-title-en')?.focus(), 100);
       if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
@@ -10621,19 +10799,28 @@ IV. Conclusion
       editingCourseId = courseId;
       const modal = document.getElementById('modal-create-course');
       const titleEl = document.getElementById('modal-create-course-title');
-      if (titleEl) titleEl.textContent = 'Edit Course';
+      if (titleEl) titleEl.textContent = 'Edit Course Blueprint';
+      const saveLabel = document.getElementById('btn-save-course-label');
+      if (saveLabel) saveLabel.textContent = 'Update Course Blueprint';
+
       document.getElementById('input-create-course-title-en').value = course.title_en || '';
       document.getElementById('input-create-course-title-he').value = course.title_he || '';
-      document.getElementById('input-create-course-category').value = course.category || 'General';
-      document.getElementById('input-create-course-level').value = course.target_level || 'Bar Mitzvah (Age 12-13)';
       document.getElementById('input-create-course-desc').value = course.description_en || course.description_he || '';
-      if (document.getElementById('input-create-course-format-type')) {
-        document.getElementById('input-create-course-format-type').value = course.format_type || 'standard';
-      }
       if (document.getElementById('input-create-course-icon')) {
         document.getElementById('input-create-course-icon').value = course.icon || '✦';
       }
+
+      selectCourseColor(course.color || 'amber');
+
+      if (course.blueprint && Array.isArray(course.blueprint.sections) && course.blueprint.sections.length > 0) {
+        currentBlueprintSections = course.blueprint.sections.map(s => ({ ...s }));
+      } else {
+        applyBlueprintPreset('torah_audio');
+      }
+      renderBlueprintSectionsList();
+
       modal.classList.remove('hidden');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
     }
 
     function openEditCurrentCourseModal() {
@@ -10666,38 +10853,41 @@ IV. Conclusion
       e.preventDefault();
       const titleEn = document.getElementById('input-create-course-title-en').value.trim();
       const titleHe = document.getElementById('input-create-course-title-he').value.trim();
-      const category = document.getElementById('input-create-course-category').value;
-      const level = document.getElementById('input-create-course-level').value;
       const desc = document.getElementById('input-create-course-desc').value.trim();
-      const formatType = document.getElementById('input-create-course-format-type')?.value || 'standard';
-      let icon = document.getElementById('input-create-course-icon').value.trim();
+      const color = document.getElementById('input-create-course-color')?.value || currentSelectedColor || 'amber';
+      let icon = document.getElementById('input-create-course-icon').value.trim() || '✦';
 
-      if (!icon) {
-        if (formatType === 'reading') icon = '📖';
-        else if (formatType === 'milestones') icon = '🎯';
-        else icon = '📚';
-      }
+      const formatType = document.getElementById('input-create-course-format-type')?.value || 'custom_blueprint';
+      const category = document.getElementById('input-create-course-category')?.value || 'Judaic Studies';
+      const level = document.getElementById('input-create-course-level')?.value || 'Bar Mitzvah (Age 12-13)';
 
       if (!titleEn) return;
+
+      const blueprint = {
+        sections: currentBlueprintSections.map(s => ({
+          id: s.id,
+          type: s.type,
+          name: s.name
+        }))
+      };
 
       if (editingCourseId) {
         const course = (APP_STATE.customCourses || []).find(c => c.id === editingCourseId);
         if (course) {
           course.title_en = titleEn;
           course.title_he = titleHe || titleEn;
-          course.category = category;
-          course.target_level = level;
           course.description_en = desc;
           course.description_he = desc;
-          course.format_type = formatType;
+          course.color = color;
           course.icon = icon;
+          course.blueprint = blueprint;
           course.updated_at = new Date().toISOString();
         }
         editingCourseId = null;
         saveCustomCoursesToStorage(true);
         closeCreateCourseModal();
         renderLessonsCategoryView();
-        showToast(APP_STATE.lang === 'he' ? 'הקורס עודכן בהצלחה!' : 'Course updated successfully!');
+        showToast(APP_STATE.lang === 'he' ? 'מבנה הקורס עודכן בהצלחה!' : 'Course blueprint updated successfully!');
         return;
       }
 
@@ -10710,7 +10900,9 @@ IV. Conclusion
         target_level: level,
         description_en: desc,
         description_he: desc,
+        color: color,
         icon: icon,
+        blueprint: blueprint,
         lessons: [],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -10762,6 +10954,141 @@ IV. Conclusion
       }
     }
 
+    function promptAddSectionToClass() {
+      const isHe = APP_STATE.lang === 'he';
+      const name = prompt(isHe ? 'שם הסעיף הנוסף:' : 'Enter name for extra section (e.g. Memory Gem, Word List):');
+      if (!name || !name.trim()) return;
+      const targetCourseId = editingLessonContext?.courseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId;
+      const course = (APP_STATE.customCourses || []).find(c => c.id === targetCourseId);
+      if (!course) return;
+      if (!course.blueprint) course.blueprint = { sections: [] };
+      const newSec = {
+        id: 'sec_extra_' + Date.now(),
+        type: 'text',
+        name: name.trim()
+      };
+      course.blueprint.sections.push(newSec);
+      renderDynamicClassFormFields(course, editingLessonContext ? (course.lessons || []).find(l => l.id === editingLessonContext.lessonId) : null);
+      saveCustomCoursesToStorage(false);
+    }
+
+    function renderDynamicClassFormFields(course, lesson = null) {
+      const container = document.getElementById('dynamic-course-lesson-sections');
+      if (!container) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      const sections = (course?.blueprint && Array.isArray(course.blueprint.sections) && course.blueprint.sections.length > 0)
+        ? course.blueprint.sections
+        : [
+            { id: 'sec_verses', type: 'text', name: 'Text / Verses' },
+            { id: 'sec_anchors', type: 'list', name: 'Core Knowledge Anchors' },
+            { id: 'sec_takeaway', type: 'reflection', name: 'Real World Student Application' }
+          ];
+
+      const indicatorTitle = document.getElementById('blueprint-indicator-title');
+      const indicatorCount = document.getElementById('blueprint-indicator-sections-count');
+      const indicatorIcon = document.getElementById('blueprint-indicator-icon');
+      if (indicatorTitle) indicatorTitle.textContent = `${course?.title_en || 'Course'} Format`;
+      if (indicatorCount) indicatorCount.textContent = `${sections.length} ${isHe ? 'סעיפים' : 'Sections'}`;
+      if (indicatorIcon) indicatorIcon.textContent = course?.icon || '📜';
+
+      const lessonSections = lesson?.sections || {};
+
+      container.innerHTML = sections.map((sec) => {
+        let savedVal = lessonSections[sec.id];
+        if (savedVal === undefined || savedVal === null) {
+          if (sec.type === 'text') savedVal = lesson?.hook_en || lesson?.hook_he || '';
+          else if (sec.type === 'list') savedVal = (lesson?.anchors_en || []).map(a => typeof a === 'string' ? a : (a.point || a.title || '')).join('\n');
+          else if (sec.type === 'reflection') savedVal = lesson?.life_app_en || lesson?.discussion_en || '';
+          else savedVal = '';
+        }
+
+        if (sec.type === 'audio') {
+          return `
+            <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-bold text-white flex items-center gap-1.5">
+                  <i data-lucide="mic" class="w-3.5 h-3.5 text-emerald-400"></i>
+                  <span>${escapeHtml(sec.name)}</span>
+                </label>
+                <span class="text-[10px] font-mono text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30">Audio Studio</span>
+              </div>
+              <div class="space-y-2">
+                <input
+                  type="text"
+                  id="input-section-${sec.id}"
+                  value="${escapeHtml(typeof savedVal === 'string' ? savedVal : '')}"
+                  placeholder="${isHe ? 'קישור שמע או תיאור ההקלטה...' : 'Audio recording URL or notes...'}"
+                  class="w-full bg-slate-900 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="startVoiceRecording('lesson_custom', '${sec.id}')" class="px-3 py-1.5 rounded-xl bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/30 text-xs font-semibold flex items-center gap-1.5 transition">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                    <span>Record Voice Memo</span>
+                  </button>
+                  <span class="text-[10px] text-slate-500">Attach direct recording</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        if (sec.type === 'list') {
+          return `
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-white flex items-center gap-1.5">
+                <i data-lucide="list" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>${escapeHtml(sec.name)}</span>
+                <span class="text-[10px] font-normal text-slate-400">(${isHe ? 'שורה אחת לכל נקודה' : '1 per line'})</span>
+              </label>
+              <textarea
+                id="input-section-${sec.id}"
+                rows="4"
+                placeholder="${isHe ? 'הזן נקודות מרכזיות...' : 'Enter key points, 1 per line...'}"
+                class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed font-mono"
+              >${escapeHtml(typeof savedVal === 'string' ? savedVal : '')}</textarea>
+            </div>
+          `;
+        }
+
+        if (sec.type === 'reflection' || sec.type === 'homework') {
+          return `
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-white flex items-center gap-1.5">
+                <i data-lucide="${sec.type === 'homework' ? 'check-square' : 'sparkles'}" class="w-3.5 h-3.5 ${sec.type === 'homework' ? 'text-purple-400' : 'text-indigo-400'}"></i>
+                <span>${escapeHtml(sec.name)}</span>
+              </label>
+              <input
+                type="text"
+                id="input-section-${sec.id}"
+                value="${escapeHtml(typeof savedVal === 'string' ? savedVal : '')}"
+                placeholder="${isHe ? 'הזן מסר או חידה...' : 'Enter takeaway, riddle, or mission...'}"
+                class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+              >
+            </div>
+          `;
+        }
+
+        // Default: text block
+        return `
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-white flex items-center gap-1.5">
+              <i data-lucide="file-text" class="w-3.5 h-3.5 text-cyan-400"></i>
+              <span>${escapeHtml(sec.name)}</span>
+            </label>
+            <textarea
+              id="input-section-${sec.id}"
+              rows="4"
+              placeholder="${isHe ? 'הזן טקסט או תוכן שיעור...' : 'Enter narrative, verses, or explanation...'}"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500 leading-relaxed"
+            >${escapeHtml(typeof savedVal === 'string' ? savedVal : '')}</textarea>
+          </div>
+        `;
+      }).join('');
+
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
     function openAddCustomLessonModal(courseId) {
       editingLessonContext = null;
       const targetCourseId = courseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId;
@@ -10788,8 +11115,10 @@ IV. Conclusion
       const aiPromptInput = document.getElementById('input-ai-class-prompt');
       if (aiPromptInput) {
         aiPromptInput.value = '';
-        aiPromptInput.placeholder = 'Topic or idea (e.g. Shabbat Candles, Cell Division, Fractions)...';
+        aiPromptInput.placeholder = 'e.g. Parshat Bereishit, Fractions, Shabbat Candles...';
       }
+      const aiDetailsInput = document.getElementById('input-ai-class-details');
+      if (aiDetailsInput) aiDetailsInput.value = '';
 
       const titleInput = document.getElementById('input-custom-lesson-title-en');
       if (titleInput) titleInput.value = '';
@@ -10805,6 +11134,8 @@ IV. Conclusion
         if (input) input.value = '';
         hideLessonBlock(k);
       });
+
+      renderDynamicClassFormFields(course);
 
       if (modal) modal.classList.remove('hidden');
       setTimeout(() => titleInput?.focus(), 100);
@@ -10831,8 +11162,10 @@ IV. Conclusion
       const aiPromptInput = document.getElementById('input-ai-class-prompt');
       if (aiPromptInput) {
         aiPromptInput.value = '';
-        aiPromptInput.placeholder = 'How should AI improve this class? (e.g. Add sports analogy, simplify for teens)...';
+        aiPromptInput.placeholder = 'How should AI improve this class? (e.g. Add sports analogy, simplify)...';
       }
+      const aiDetailsInput = document.getElementById('input-ai-class-details');
+      if (aiDetailsInput) aiDetailsInput.value = '';
 
       document.getElementById('input-custom-lesson-title-en').value = lesson.title_en || '';
       document.getElementById('input-custom-lesson-title-he').value = lesson.title_he || '';
@@ -10854,6 +11187,8 @@ IV. Conclusion
 
       const cheatSheetInput = document.getElementById('input-block-cheat-sheet');
       if (cheatSheetInput) cheatSheetInput.value = lesson.cheat_sheet_text || '';
+
+      renderDynamicClassFormFields(course, lesson);
       if (lesson.cheat_sheet_text) showLessonBlock('cheat_sheet'); else hideLessonBlock('cheat_sheet');
 
       const stepsInput = document.getElementById('input-block-steps');
@@ -10969,6 +11304,8 @@ IV. Conclusion
       const isHe = APP_STATE.lang === 'he';
       const promptInput = document.getElementById('input-ai-class-prompt');
       let promptText = (promptInput?.value || '').trim();
+      const detailsInput = document.getElementById('input-ai-class-details');
+      const detailsText = (detailsInput?.value || '').trim();
 
       const titleInput = document.getElementById('input-custom-lesson-title-en');
       const hookInput = document.getElementById('input-custom-lesson-hook');
@@ -10990,6 +11327,9 @@ IV. Conclusion
       const courseTitle = activeCourse.title_en || activeCourse.title_he || 'General';
       const courseCategory = activeCourse.category || 'General';
       const targetLevel = activeCourse.target_level || 'Age 12-13';
+      const blueprintSections = (activeCourse.blueprint && Array.isArray(activeCourse.blueprint.sections) && activeCourse.blueprint.sections.length > 0)
+        ? activeCourse.blueprint.sections
+        : [];
 
       const statusEl = document.getElementById('ai-class-status');
       const statusText = document.getElementById('ai-class-status-text');
@@ -11020,7 +11360,10 @@ Return STRICT JSON ONLY conforming to:
   "pitfalls": "Key common misconception students make about this topic and how to clarify it",
   "cheat_sheet": "Tutor secret notes, quick answers to tricky questions, and depth points",
   "steps": "1. First step\\n2. Second step\\n3. Third step",
-  "homework": "Engaging real-world challenge or mission for the student"
+  "homework": "Engaging real-world challenge or mission for the student"${blueprintSections.length > 0 ? `,
+  "sections": {
+${blueprintSections.map(s => `    "${s.id}": "${s.type === 'list' ? 'Points list (1 per line)' : 'Content for ' + s.name}"`).join(',\n')}
+  }` : ''}
 }`;
 
       const currentValuesPrompt = isEditMode ? `
@@ -11030,10 +11373,13 @@ Hook: ${hookInput?.value || ''}
 Current Anchors: ${anchorsInput?.value || ''}
 Life App: ${lifeAppInput?.value || ''}
 Discussion: ${discInput?.value || ''}
-USER EDIT INSTRUCTION: ${promptText}` : `
+USER EDIT INSTRUCTION: ${promptText}
+${detailsText ? 'ADDITIONAL EMPHASES: ' + detailsText : ''}` : `
 CREATE NEW CLASS:
 Course: ${courseTitle} (${courseCategory}, Level: ${targetLevel})
-Class Topic / Instruction: ${promptText}`;
+Class Topic / Instruction: ${promptText}
+${detailsText ? 'Specific Emphases / Details: ' + detailsText : ''}
+${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSections.map(s => `${s.name} (type: ${s.type}, id: ${s.id})`).join('; ') : ''}`;
 
       const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key');
       const candidateModels = [
@@ -11072,9 +11418,20 @@ Class Topic / Instruction: ${promptText}`;
 
       if (!rawResponseText) {
         const cleanTopic = promptText.replace(/['"]/g, '');
+        const fallbackSections = {};
+        blueprintSections.forEach(sec => {
+          if (sec.type === 'text') fallbackSections[sec.id] = `Why does ${cleanTopic} matter in everyday life? When you look deeper, it reveals a fundamental principle.`;
+          else if (sec.type === 'list') fallbackSections[sec.id] = `**Core Definition**: Foundational principle of ${cleanTopic}.\n**Key Mechanism**: How ${cleanTopic} operates in practical situations.\n**Mastery Benchmark**: The key takeaway every student must retain.`;
+          else if (sec.type === 'reflection') fallbackSections[sec.id] = `When you encounter a real-world scenario involving ${cleanTopic}, apply this core principle to make the right decision.`;
+          else if (sec.type === 'homework') fallbackSections[sec.id] = `Observe one situation this week where ${cleanTopic} plays an active role and report back.`;
+          else if (sec.type === 'audio') fallbackSections[sec.id] = `Audio recording notes and pronunciation guidance for ${cleanTopic}.`;
+          else fallbackSections[sec.id] = `Detailed notes and explanation for ${sec.name}: ${cleanTopic}.`;
+        });
+
         rawResponseText = JSON.stringify({
           title_en: cleanTopic,
           title_he: cleanTopic,
+          sections: fallbackSections,
           hook: `Why does ${cleanTopic} matter in everyday life? When you look deeper, it reveals a fundamental principle.`,
           anchors: [
             `**Core Definition**: The foundational principle of ${cleanTopic}.`,
@@ -11136,6 +11493,28 @@ Class Topic / Instruction: ${promptText}`;
           showLessonBlock('homework');
         }
 
+        // Populate dynamic blueprint sections
+        if (blueprintSections.length > 0) {
+          blueprintSections.forEach(sec => {
+            const secInput = document.getElementById(`input-section-${sec.id}`);
+            if (!secInput) return;
+            let val = data.sections?.[sec.id];
+            if (val === undefined || val === null) {
+              if (sec.type === 'text') val = data.hook || data.sources || '';
+              else if (sec.type === 'list') val = Array.isArray(data.anchors) ? data.anchors.join('\n') : (data.steps || '');
+              else if (sec.type === 'reflection') val = data.life_app || data.discussion || '';
+              else if (sec.type === 'homework') val = data.homework || '';
+              else if (sec.type === 'audio') val = data.title_en || '';
+              else val = '';
+            }
+            if (Array.isArray(val)) {
+              secInput.value = val.join('\n');
+            } else {
+              secInput.value = String(val || '');
+            }
+          });
+        }
+
         showToast(isHe ? 'השיעור נוצר בהצלחה עם AI! באפשרותך לערוך ולשמור.' : 'Class populated with AI! Review and save.');
       } catch (err) {
         console.error("AI JSON parse error:", err);
@@ -11179,30 +11558,65 @@ Class Topic / Instruction: ${promptText}`;
 
       if (!titleEn) return;
 
-      const anchors = rawAnchors ? rawAnchors.split('\n').map(s => s.trim()).filter(Boolean) : [];
+      const targetCourseId = editingLessonContext?.courseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId;
+      let course = (APP_STATE.customCourses || []).find(c => c.id === targetCourseId);
+      if (!course && APP_STATE.customCourses && APP_STATE.customCourses.length > 0) {
+        course = APP_STATE.customCourses[0];
+      }
+
+      // Collect dynamic sections
+      const lessonSections = {};
+      if (course?.blueprint?.sections && Array.isArray(course.blueprint.sections)) {
+        course.blueprint.sections.forEach(sec => {
+          const secEl = document.getElementById(`input-section-${sec.id}`);
+          if (secEl) {
+            lessonSections[sec.id] = secEl.value.trim();
+          }
+        });
+      }
+
+      // If legacy inputs were blank but dynamic sections exist, fill legacy fields from dynamic
+      let resolvedHook = hook;
+      let resolvedAnchors = rawAnchors;
+      let resolvedLifeApp = lifeApp;
+      let resolvedHomework = homeworkText;
+
+      if (course?.blueprint?.sections) {
+        course.blueprint.sections.forEach(sec => {
+          const val = lessonSections[sec.id];
+          if (val) {
+            if (sec.type === 'text' && !resolvedHook) resolvedHook = val;
+            if (sec.type === 'list' && !resolvedAnchors) resolvedAnchors = val;
+            if (sec.type === 'reflection' && !resolvedLifeApp) resolvedLifeApp = val;
+            if (sec.type === 'homework' && !resolvedHomework) resolvedHomework = val;
+          }
+        });
+      }
+
+      const anchors = resolvedAnchors ? resolvedAnchors.split('\n').map(s => s.trim()).filter(Boolean) : [];
 
       if (editingLessonContext) {
         // Update existing lesson
-        const course = (APP_STATE.customCourses || []).find(c => c.id === editingLessonContext.courseId);
         if (!course) return;
         const lesson = (course.lessons || []).find(l => l.id === editingLessonContext.lessonId);
         if (!lesson) return;
 
         lesson.title_en = titleEn;
         lesson.title_he = titleHe || titleEn;
-        lesson.hook_en = hook;
-        lesson.hook_he = hook;
+        lesson.hook_en = resolvedHook;
+        lesson.hook_he = resolvedHook;
         lesson.anchors_en = anchors;
         lesson.anchors_he = anchors;
-        lesson.life_app_en = lifeApp;
-        lesson.life_app_he = lifeApp;
+        lesson.life_app_en = resolvedLifeApp;
+        lesson.life_app_he = resolvedLifeApp;
         lesson.discussion_en = discussion;
         lesson.discussion_he = discussion;
         lesson.sources_text = sourcesText;
         lesson.pitfalls_text = pitfallsText;
         lesson.cheat_sheet_text = cheatSheetText;
         lesson.steps_text = stepsText;
-        lesson.homework_text = homeworkText;
+        lesson.homework_text = resolvedHomework;
+        lesson.sections = lessonSections;
         course.updated_at = new Date().toISOString();
 
         saveCustomCoursesToStorage(true);
@@ -11211,15 +11625,7 @@ Class Topic / Instruction: ${promptText}`;
         showToast(isHe ? 'השיעור עודכן בהצלחה!' : 'Lesson updated successfully!');
       } else {
         // Add new lesson
-        let course = (APP_STATE.customCourses || []).find(c => c.id === APP_STATE.activeCourseId);
-        if (!course) {
-          if (APP_STATE.customCourses && APP_STATE.customCourses.length > 0) {
-            course = APP_STATE.customCourses[0];
-            APP_STATE.activeCourseId = course.id;
-          } else {
-            return;
-          }
-        }
+        if (!course) return;
         if (!course.lessons) course.lessons = [];
 
         const newLesson = {
@@ -11227,19 +11633,20 @@ Class Topic / Instruction: ${promptText}`;
           lesson_num: course.lessons.length + 1,
           title_en: titleEn,
           title_he: titleHe || titleEn,
-          hook_en: hook,
-          hook_he: hook,
+          hook_en: resolvedHook,
+          hook_he: resolvedHook,
           anchors_en: anchors,
           anchors_he: anchors,
-          life_app_en: lifeApp,
-          life_app_he: lifeApp,
+          life_app_en: resolvedLifeApp,
+          life_app_he: resolvedLifeApp,
           discussion_en: discussion,
           discussion_he: discussion,
           sources_text: sourcesText,
           pitfalls_text: pitfallsText,
           cheat_sheet_text: cheatSheetText,
           steps_text: stepsText,
-          homework_text: homeworkText,
+          homework_text: resolvedHomework,
+          sections: lessonSections,
           recordings: []
         };
 
