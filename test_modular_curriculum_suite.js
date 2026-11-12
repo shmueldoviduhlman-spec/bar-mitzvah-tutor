@@ -42,6 +42,8 @@ function getOrCreateElem(id) {
       getAttribute(k) { return this[k]; },
       removeAttribute(k) { delete this[k]; },
       addEventListener() {},
+      focus() {},
+      blur() {},
       reset() {}
     };
   }
@@ -1968,6 +1970,82 @@ assert(!blankStateElem.classList.contains('hidden'), 'Clean slate welcome canvas
 // 6. Template Loader Disconnection Verification
 sandbox.handleLoadStarterBarMitzvahTemplate();
 assert(!sandbox.APP_STATE.customCourses.some(c => c.id.startsWith('course_bar_mitzvah')), 'handleLoadStarterBarMitzvahTemplate does NOT load Bar Mitzvah courses into site');
+
+// ==============================================
+// Gate 23: Unified "Build Your Course" & Progressive Top Bar Actions
+// ==============================================
+console.log('\n--- Gate 23: Unified Build Your Course & Progressive Top Bar Actions ---');
+
+// 1. HTML Verification of Unified Studio Elements
+assert(indexHtml.includes('id="lbl-tutor-hub-title"'), 'HTML contains lbl-tutor-hub-title');
+assert(indexHtml.includes('Build Your Courses'), 'HTML includes "Build Your Courses" header in empty state');
+assert(indexHtml.includes('id="btn-course-builder-tab-ai"'), 'HTML contains btn-course-builder-tab-ai');
+assert(indexHtml.includes('id="btn-course-builder-tab-manual"'), 'HTML contains btn-course-builder-tab-manual');
+assert(indexHtml.includes('id="panel-course-builder-ai"'), 'HTML contains panel-course-builder-ai');
+assert(indexHtml.includes('id="panel-course-builder-manual"'), 'HTML contains panel-course-builder-manual');
+assert(indexHtml.includes('id="input-ai-blueprint-prompt"'), 'HTML contains input-ai-blueprint-prompt');
+assert(indexHtml.includes('id="btn-ai-blueprint-suggest"'), 'HTML contains btn-ai-blueprint-suggest');
+assert(indexHtml.includes('id="btn-ai-generate-full-course"'), 'HTML contains btn-ai-generate-full-course');
+assert(indexHtml.includes('id="ai-builder-level-unified"'), 'HTML contains ai-builder-level-unified');
+assert(indexHtml.includes('id="ai-builder-lessons-count-unified"'), 'HTML contains ai-builder-lessons-count-unified');
+assert(indexHtml.includes('id="ai-builder-language-unified"'), 'HTML contains ai-builder-language-unified');
+assert(indexHtml.includes('id="ai-suggested-preview-card"'), 'HTML contains ai-suggested-preview-card');
+assert(indexHtml.includes('id="btn-top-add-course"'), 'HTML contains btn-top-add-course');
+
+// 2. Separate Floating AI Studio Button Eliminated from Blank State
+const blankStateDom = getOrCreateElem('tutor-hub-blank-state');
+assert(!blankStateDom.innerHTML.includes('id="btn-ai-curriculum-studio"'), 'Blank state eliminates separate floating AI studio button');
+
+// 3. Top Actions Bar Progressive Visibility
+// When courses = 0: top actions bar is hidden
+sandbox.APP_STATE.customCourses = [];
+sandbox.renderCoursesCardsGrid();
+const topActionsBar = getOrCreateElem('courses-directory-top-actions');
+assert(topActionsBar.classList.contains('hidden'), 'courses-directory-top-actions is hidden when 0 courses exist');
+
+// When courses exist: top actions bar is unhidden
+sandbox.APP_STATE.customCourses = [
+  { id: 'course_physics_101', title_en: 'Physics 101', lessons: [] }
+];
+sandbox.renderCoursesCardsGrid();
+assert(!topActionsBar.classList.contains('hidden'), 'courses-directory-top-actions is unhidden when courses exist');
+
+// 4. Mode Switcher Functions
+assert(typeof sandbox.switchCourseBuilderMode === 'function', 'switchCourseBuilderMode is a function');
+assert(typeof sandbox.setAiCoursePrompt === 'function', 'setAiCoursePrompt is a function');
+assert(typeof sandbox.handleGenerateFullCourseFromAi === 'function', 'handleGenerateFullCourseFromAi is a function');
+
+// Test Switch to Manual Mode
+sandbox.switchCourseBuilderMode('manual');
+const aiPanel = getOrCreateElem('panel-course-builder-ai');
+const manualPanel = getOrCreateElem('panel-course-builder-manual');
+assert(aiPanel.classList.contains('hidden'), 'AI panel is hidden in manual mode');
+assert(!manualPanel.classList.contains('hidden'), 'Manual panel is visible in manual mode');
+
+// Test Switch to AI Mode
+sandbox.switchCourseBuilderMode('ai');
+assert(!aiPanel.classList.contains('hidden'), 'AI panel is visible in AI mode');
+assert(manualPanel.classList.contains('hidden'), 'Manual panel is hidden in AI mode');
+
+// 5. openCreateCourseModal Defaults to AI Discussion Mode
+sandbox.openCreateCourseModal();
+const modalCreate = getOrCreateElem('modal-create-course');
+assert(!modalCreate.classList.contains('hidden'), 'openCreateCourseModal unhides modal-create-course');
+assert(!aiPanel.classList.contains('hidden'), 'openCreateCourseModal defaults to AI discussion mode');
+
+// 6. setAiCoursePrompt Sets Prompt Value
+sandbox.setAiCoursePrompt('AP Chemistry Lab');
+const promptInput = getOrCreateElem('input-ai-blueprint-prompt');
+assert(promptInput.value === 'AP Chemistry Lab', 'setAiCoursePrompt sets input-ai-blueprint-prompt value');
+
+// 7. Transition Directly to Course & Lessons upon Course Creation
+sandbox.APP_STATE.insideCourseId = null;
+sandbox.openCourseClassesView('course_physics_101');
+assert(sandbox.APP_STATE.insideCourseId === 'course_physics_101', 'openCourseClassesView sets insideCourseId');
+const g23LevelClassesElem = getOrCreateElem('study-level-classes');
+const g23LevelCoursesElem = getOrCreateElem('study-level-courses');
+assert(!g23LevelClassesElem.classList.contains('hidden'), 'study-level-classes is visible for lesson creation');
+assert(g23LevelCoursesElem.classList.contains('hidden'), 'study-level-courses is hidden when inside course');
 
 console.log(`\n========================================`);
 console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
