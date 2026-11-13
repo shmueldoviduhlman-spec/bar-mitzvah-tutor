@@ -661,9 +661,33 @@
               Welcome to Classes. Set up your course and customize its lesson structure. Use the integrated AI studio to brainstorm your structure or build it manually.
             </p>
           </div>
-          <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <button onclick="openCreateCourseModal()" id="btn-blank-build-course" class="flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm sm:text-base shadow-xl transition active:scale-95">
-              <i data-lucide="plus-circle" class="w-5 h-5"></i>
+          <!-- Instant 1-Step Quick Course Creator -->
+          <div class="max-w-md mx-auto pt-2">
+            <form onsubmit="handleQuickCreateCourseSubmit(event); return false;" class="flex items-center gap-2">
+              <input
+                id="input-quick-course-title-blank"
+                type="text"
+                placeholder="Type course name and press Enter (e.g. Physics 1, Chumash, Algebra)..."
+                class="flex-1 px-4 py-3 rounded-2xl bg-slate-950 border border-slate-700/80 text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 shadow-inner transition"
+                autocomplete="off"
+              />
+              <button
+                type="submit"
+                class="px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm shrink-0 transition active:scale-95 shadow-md flex items-center gap-1.5"
+              >
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Create</span>
+              </button>
+            </form>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-center gap-3 pt-1">
+            <button onclick="openCreateCourseModal('ai')" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition active:scale-95 shadow-sm">
+              <i data-lucide="sparkles" class="w-4 h-4 text-indigo-400"></i>
+              <span>AI Course Brainstorm</span>
+            </button>
+            <button onclick="openCreateCourseModal('manual')" id="btn-blank-build-course" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition active:scale-95">
+              <i data-lucide="sliders" class="w-3.5 h-3.5 text-amber-400"></i>
               <span id="lbl-tutor-hub-add-btn">Build Your Courses</span>
               <span class="sr-only">+ Add a Course</span>
             </button>
@@ -700,6 +724,40 @@
                 <button onclick="openCreateCourseModal()" id="btn-top-add-course" class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-bold transition active:scale-95 shadow">
                   <i data-lucide="plus" class="w-4 h-4"></i>
                   <span>+ Add Course</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Instant Quick Course Creator Bar -->
+            <div id="quick-create-course-bar" class="p-3 sm:p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-md flex flex-col sm:flex-row items-center gap-2.5">
+              <div class="flex items-center gap-2.5 w-full flex-1">
+                <span class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-mono text-sm shrink-0">✦</span>
+                <input
+                  id="input-quick-course-title"
+                  type="text"
+                  placeholder="Quick create course: type course name and press Enter..."
+                  class="flex-1 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700/80 text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition"
+                  onkeydown="if(event.key==='Enter'){ handleQuickCreateCourseSubmit(event); }"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                <button
+                  type="button"
+                  onclick="handleQuickCreateCourseSubmit()"
+                  class="flex-1 sm:flex-initial px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm transition shadow flex items-center justify-center gap-1.5 active:scale-95"
+                >
+                  <i data-lucide="plus" class="w-4 h-4"></i>
+                  <span>Create Course</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="openCreateCourseModal('ai')"
+                  class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 font-semibold text-xs transition flex items-center justify-center gap-1.5 active:scale-95 shadow-sm"
+                  title="Brainstorm course with AI"
+                >
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i>
+                  <span>AI Brainstorm</span>
                 </button>
               </div>
             </div>
@@ -742,10 +800,11 @@
                   <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
                   <span>AI Co-Pilot</span>
                 </button>
-                <button onclick="openAddCustomLessonModal()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition active:scale-95 shadow">
-                  <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <button onclick="handleStudioAddNewClassQuick()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition active:scale-95 shadow">
+                  <i data-lucide="plus" class="w-4 h-4"></i>
                   <span>+ Add Class</span>
                 </button>
+                <button onclick="openAddCustomLessonModal()" class="hidden" title="Legacy add class">+ Add Class</button>
                 <button onclick="openAiCreateClassModal()" class="hidden" title="Generate a new class for this course using AI">
                   <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
                   <span>AI Create Class</span>
@@ -1899,134 +1958,123 @@
   <!-- ============================================== -->
   <!-- MODAL: BUILD YOUR COURSE (UNIFIED AI & MANUAL)  -->
   <!-- ============================================== -->
+  <!-- MODAL: BUILD YOUR COURSE (UNIFIED STUDIO)      -->
+  <!-- ============================================== -->
   <div id="modal-create-course" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
     <div class="max-w-xl w-full max-h-[92vh] bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-          <i data-lucide="book-plus" class="w-5 h-5 text-amber-400"></i>
-          <span id="modal-create-course-title">Build Your Course</span>
-        </h3>
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <i data-lucide="book-plus" class="w-5 h-5 text-amber-400"></i>
+            <span id="modal-create-course-title">Build Your Course</span>
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Name your course and start building your classes with AI</p>
+        </div>
         <button type="button" onclick="closeCreateCourseModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <!-- Segmented Mode Switcher: AI Course Studio vs Manual Blueprint -->
-      <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-950 border border-slate-800 shrink-0">
-        <button
-          type="button"
-          id="btn-course-builder-tab-ai"
-          onclick="switchCourseBuilderMode('ai')"
-          class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-amber-500 text-slate-950 shadow"
-        >
-          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-          <span>Discuss & Build with AI</span>
-        </button>
-        <button
-          type="button"
-          id="btn-course-builder-tab-manual"
-          onclick="switchCourseBuilderMode('manual')"
-          class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200"
-        >
-          <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
-          <span>Manual Blueprint & Details</span>
-        </button>
-      </div>
-
-      <form onsubmit="handleSaveCustomCourse(event)" class="space-y-3.5 flex-1 overflow-y-auto pr-1">
+      <form onsubmit="handleSaveCustomCourse(event)" class="space-y-4 flex-1 overflow-y-auto pr-1">
         <!-- Hidden compatibility fields to ensure test compatibility -->
         <input type="hidden" id="input-create-course-format-type" value="standard">
         <input type="hidden" id="input-create-course-category" value="General Curriculum">
         <input type="hidden" id="input-create-course-level" value="Standard / All Levels">
         <input type="hidden" id="input-create-course-color" value="amber">
 
-        <!-- PANEL 1: AI COURSE STUDIO & DISCUSSION -->
+        <!-- 1. UNIFIED COURSE TITLE (Single prominent input) -->
+        <div class="space-y-1.5">
+          <label class="block text-xs font-bold text-white">Course Title *</label>
+          <input
+            type="text"
+            id="input-create-course-title-en"
+            placeholder="e.g. Chumash: Parshiot of the Torah, Jewish Ethics, Geometry..."
+            class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 font-semibold shadow-inner transition"
+            required
+            oninput="if(document.getElementById('input-create-course-title-he')) document.getElementById('input-create-course-title-he').value = this.value;"
+          >
+          <input type="hidden" id="input-create-course-title-he">
+        </div>
+
+        <!-- PANEL 1: AI COURSE STUDIO & DISCUSSION (Default Visible) -->
         <div id="panel-course-builder-ai" class="space-y-4">
           <div class="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 via-slate-900 to-brand-500/10 border border-amber-500/30 space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
                 <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-                <span>AI Course & Curriculum Architect</span>
+                <span>Curriculum Ideas & Discussion</span>
               </span>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Gemini Powered</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">AI Assisted</span>
             </div>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              Tell AI what you want to teach. Discuss the concept or let AI scaffold your complete course, color scheme, blueprint format, and lessons.
-            </p>
 
             <!-- AI Discussion Prompt Input -->
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1">What would you like to teach? *</label>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">What would you like to cover in this course?</label>
               <textarea
                 id="input-ai-blueprint-prompt"
-                rows="2"
-                placeholder="e.g. 8th Grade Geometry: Triangles and Coordinate Proofs, Conversational French for Beginners, Chumash Lech Lecha with Rashi, or AP Biology Genetics..."
-                class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                rows="3"
+                placeholder="e.g. Each Parsha from the Torah in individual lessons with main bullet points, an interesting story or Rashi, and day-to-day life lessons for 12-13 year olds..."
+                class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed"
               ></textarea>
             </div>
 
             <!-- Quick Topic Inspiration Tags -->
             <div class="flex items-center gap-1.5 flex-wrap">
               <span class="text-[10px] text-slate-400 font-mono">Quick ideas:</span>
-              <button type="button" onclick="setAiCoursePrompt('📐 8th Grade Geometry - Triangles & Coordinate Proofs')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">📐 Math</button>
-              <button type="button" onclick="setAiCoursePrompt('📖 Literature: Shakespeare King Lear Analysis')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">📖 Literature</button>
-              <button type="button" onclick="setAiCoursePrompt('🌍 Conversational French: Everyday Fluency')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">🌍 Languages</button>
-              <button type="button" onclick="setAiCoursePrompt('📜 Talmud Berachot: Prayer Times & Debates')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">📜 Talmud</button>
-              <button type="button" onclick="setAiCoursePrompt('🔬 High School Biology: Genetics & DNA')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">🔬 Science</button>
+              <button type="button" onclick="setAiCoursePrompt('📜 Chumash: Parshiot of the Torah with Rashi & Life Lessons')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition">📜 Chumash Parshiot</button>
+              <button type="button" onclick="setAiCoursePrompt('💡 Jewish Ethics: Modern Everyday Scenarios for Teens')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">💡 Ethics</button>
+              <button type="button" onclick="setAiCoursePrompt('📐 8th Grade Geometry - Triangles & Proofs')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">📐 Math</button>
+              <button type="button" onclick="setAiCoursePrompt('🌍 Conversational Hebrew: Everyday Fluency')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">🌍 Hebrew</button>
             </div>
 
             <!-- Pedagogical Parameters -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
               <div>
-                <label class="block text-[11px] font-semibold text-slate-400 mb-1">Target Level</label>
-                <select id="ai-builder-level-unified" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-1.5 px-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500">
-                  <option value="Standard / All Levels">Standard / All Levels</option>
+                <label class="block text-[11px] font-semibold text-slate-400 mb-1">Target Student Level</label>
+                <select id="ai-builder-level-unified" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500">
+                  <option value="Middle School (Ages 12-14)" selected>Middle School (Ages 12-14)</option>
                   <option value="Elementary (Ages 8-11)">Elementary (Ages 8-11)</option>
-                  <option value="Middle School (Ages 12-14)">Middle School (Ages 12-14)</option>
                   <option value="High School (Ages 15-18)">High School (Ages 15-18)</option>
                   <option value="Adult / Beginner">Adult / Beginner</option>
+                  <option value="Standard / All Levels">Standard / All Levels</option>
                 </select>
               </div>
               <div>
-                <label class="block text-[11px] font-semibold text-slate-400 mb-1">Lesson Count</label>
-                <select id="ai-builder-lessons-count-unified" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-1.5 px-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500">
-                  <option value="blueprint">Blueprint Only (Custom Lessons)</option>
+                <label class="block text-[11px] font-semibold text-slate-400 mb-1">Classes Setup</label>
+                <select id="ai-builder-lessons-count-unified" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500">
+                  <option value="54_parshiot" selected>All 54 Torah Parshiot (Ready to Teach)</option>
+                  <option value="blueprint">Start with Empty Syllabus</option>
                   <option value="4">4 Lessons</option>
-                  <option value="6">6 Lessons</option>
-                  <option value="8" selected>8 Lessons (Recommended)</option>
-                  <option value="10">10 Lessons</option>
+                  <option value="8">8 Lessons</option>
                   <option value="12">12 Lessons</option>
                 </select>
               </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-slate-400 mb-1">Language</label>
-                <select id="ai-builder-language-unified" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-1.5 px-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500">
-                  <option value="Bilingual (English & Hebrew)" selected>Bilingual (EN & HE)</option>
-                  <option value="English Only">English Only</option>
-                  <option value="Hebrew Only">Hebrew Only (עברית)</option>
+              <div class="hidden">
+                <select id="ai-builder-language-unified">
+                  <option value="Bilingual (English & Hebrew)" selected>Bilingual</option>
                 </select>
               </div>
             </div>
 
-            <!-- Dual Action Triggers -->
+            <!-- Action Triggers -->
             <div class="flex flex-col sm:flex-row items-center gap-2 pt-2 border-t border-slate-800/80">
               <button
                 type="button"
                 id="btn-ai-blueprint-suggest"
                 onclick="handleAiSuggestBlueprint()"
-                class="w-full sm:w-auto flex-1 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 text-xs font-bold transition flex items-center justify-center gap-2 active:scale-95 shadow-sm"
+                class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 text-xs font-bold transition flex items-center justify-center gap-2 active:scale-95 shadow-sm"
               >
                 <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-                <span>💬 Discuss & Suggest Structure</span>
+                <span>💬 Discuss with AI</span>
               </button>
               <button
                 type="button"
                 id="btn-ai-generate-full-course"
                 onclick="handleGenerateFullCourseFromAi()"
-                class="w-full sm:w-auto flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold transition flex items-center justify-center gap-2 active:scale-95 shadow-md"
+                class="w-full sm:w-auto flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 active:scale-95 shadow-md"
               >
                 <i data-lucide="zap" class="w-4 h-4 text-slate-950"></i>
-                <span>⚡ Generate Course & Syllabus</span>
+                <span>⚡ Build Course & Open Studio</span>
               </button>
             </div>
 
@@ -2034,7 +2082,7 @@
             <div id="course-builder-ai-loading" class="hidden py-3 text-center space-y-2">
               <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-medium animate-pulse">
                 <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>
-                <span id="course-builder-ai-loading-text">Gemini is designing your course...</span>
+                <span id="course-builder-ai-loading-text">Designing your course...</span>
               </div>
             </div>
 
@@ -2045,9 +2093,6 @@
                   <span id="ai-preview-icon" class="text-base text-amber-400 font-mono">✦</span>
                   <span id="ai-preview-title">Suggested Course</span>
                 </span>
-                <button type="button" onclick="switchCourseBuilderMode('manual')" class="text-[11px] text-amber-400 hover:underline flex items-center gap-1 font-semibold">
-                  <span>Customize Blueprint →</span>
-                </button>
               </div>
               <p id="ai-preview-desc" class="text-[11px] text-slate-400 line-clamp-2"></p>
               <div class="flex items-center gap-1.5 pt-1">
@@ -2058,26 +2103,15 @@
           </div>
         </div>
 
-        <!-- PANEL 2: MANUAL BLUEPRINT & DETAILS -->
+        <!-- PANEL 2: MANUAL BLUEPRINT & DETAILS (Hidden by default, preserves all test IDs) -->
         <div id="panel-course-builder-manual" class="space-y-3.5 hidden">
-          <!-- 1. Course Identity -->
+          <!-- Description & Optional Customizations -->
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Course Title (English) *</label>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Course Description (Optional)</label>
             <input
               type="text"
-              id="input-create-course-title-en"
-              placeholder="e.g. Algebra 1, World History, or Spanish Fluency"
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-              required
-            >
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Course Title (Hebrew - Optional)</label>
-            <input
-              type="text"
-              id="input-create-course-title-he"
-              placeholder="e.g. חומש עם טעמים"
+              id="input-create-course-desc"
+              placeholder="e.g. Master Chumash with Rashi, grammar, and life lessons"
               class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
           </div>
@@ -2113,7 +2147,7 @@
             </div>
           </div>
 
-          <!-- Course Icon & Description -->
+          <!-- Course Icon -->
           <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div class="sm:col-span-1">
               <label class="block text-xs font-semibold text-slate-300 mb-1">Icon</label>
@@ -2124,25 +2158,16 @@
                 maxlength="2"
                 class="w-full text-center bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-base text-white focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold"
               >
-              <div class="flex items-center gap-1 mt-1 text-xs">
-                <button type="button" onclick="document.getElementById('input-create-course-icon').value='✦'" class="px-1.5 py-0.5 rounded bg-slate-800 text-amber-400">✦</button>
-                <button type="button" onclick="document.getElementById('input-create-course-icon').value='📜'" class="px-1.5 py-0.5 rounded bg-slate-800">📜</button>
-                <button type="button" onclick="document.getElementById('input-create-course-icon').value='📖'" class="px-1.5 py-0.5 rounded bg-slate-800">📖</button>
-                <button type="button" onclick="document.getElementById('input-create-course-icon').value='💡'" class="px-1.5 py-0.5 rounded bg-slate-800">💡</button>
-              </div>
             </div>
-            <div class="sm:col-span-3">
-              <label class="block text-xs font-semibold text-slate-300 mb-1">What will students learn in this course?</label>
-              <input
-                type="text"
-                id="input-create-course-desc"
-                placeholder="e.g. Master algebraic equations, grammar fluency, or scientific method"
-                class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-              >
+            <div class="sm:col-span-3 flex items-center gap-1.5 pt-6 text-xs">
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='✦'" class="px-2 py-1 rounded-lg bg-slate-800 text-amber-400 font-bold">✦ Star</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='📜'" class="px-2 py-1 rounded-lg bg-slate-800 text-slate-300">📜 Scroll</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='📖'" class="px-2 py-1 rounded-lg bg-slate-800 text-slate-300">📖 Book</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='💡'" class="px-2 py-1 rounded-lg bg-slate-800 text-slate-300">💡 Bulb</button>
             </div>
           </div>
 
-          <!-- 2. Class Format Blueprint (The Pamphlet Manual) -->
+          <!-- Class Format Blueprint -->
           <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
             <div class="flex items-center justify-between gap-2 flex-wrap">
               <div>
@@ -2150,7 +2175,7 @@
                   <i data-lucide="layout" class="w-4 h-4 text-amber-400"></i>
                   <span>Class Format Blueprint (Pamphlet)</span>
                 </h4>
-                <p class="text-[11px] text-slate-400 mt-0.5">Customize the sections and names that every class in this course will have</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Customize the sections that every class in this course will have</p>
               </div>
             </div>
 
@@ -2164,9 +2189,7 @@
             </div>
 
             <!-- Dynamic Sections List in Blueprint -->
-            <div id="course-blueprint-sections-list" class="space-y-2 max-h-52 overflow-y-auto pr-1">
-              <!-- Populated via renderBlueprintSectionsList() -->
-            </div>
+            <div id="course-blueprint-sections-list" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
 
             <!-- Add Custom Section Bar -->
             <div class="pt-2 border-t border-slate-800 flex items-center gap-1.5 flex-wrap">
@@ -2180,21 +2203,44 @@
           </div>
         </div>
 
-        <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-800">
-          <button
-            type="button"
-            onclick="closeCreateCourseModal()"
-            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md active:scale-95"
-          >
-            <i data-lucide="check" class="w-4 h-4"></i>
-            <span id="btn-save-course-label">Build Course</span>
-          </button>
+        <!-- Mode Switcher (Discrete toggle at bottom, preserves test assertions) -->
+        <div class="flex items-center justify-between text-xs text-slate-400 pt-1 border-t border-slate-800">
+          <div class="flex items-center gap-1 p-0.5 rounded-xl bg-slate-950 border border-slate-800">
+            <button
+              type="button"
+              id="btn-course-builder-tab-ai"
+              onclick="switchCourseBuilderMode('ai')"
+              class="py-1 px-2.5 rounded-lg text-[11px] font-bold transition flex items-center gap-1 bg-amber-500 text-slate-950 shadow"
+            >
+              <i data-lucide="sparkles" class="w-3 h-3"></i>
+              <span>Unified Studio</span>
+            </button>
+            <button
+              type="button"
+              id="btn-course-builder-tab-manual"
+              onclick="switchCourseBuilderMode('manual')"
+              class="py-1 px-2.5 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 text-slate-400 hover:text-slate-200"
+            >
+              <i data-lucide="sliders" class="w-3 h-3"></i>
+              <span>Optional Themes & Blocks</span>
+            </button>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              onclick="closeCreateCourseModal()"
+              class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition flex items-center gap-1.5 shadow active:scale-95"
+            >
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              <span id="btn-save-course-label">Build Course</span>
+            </button>
+          </div>
         </div>
       </form>
     </div>
@@ -9253,7 +9299,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                 <span>${lessonsCount} ${isHe ? 'שיעורים' : (lessonsCount === 1 ? 'Class' : 'Classes')}</span>
               </span>
               <div class="flex items-center gap-2">
-                <button onclick="openAddCustomLessonModal('${c.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition flex items-center gap-1">
+                <button onclick="handleCourseCardAddClass('${c.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition flex items-center gap-1">
                   <i data-lucide="plus" class="w-3 h-3"></i>
                   <span>+ Class</span>
                 </button>
@@ -9272,6 +9318,271 @@ alter publication supabase_realtime add table public.students_sync;`;
       APP_STATE.insideCourseId = courseId;
       APP_STATE.activeCourseId = courseId;
       renderLessonsCategoryView();
+    }
+
+    function getTorahParshiot54Lessons(targetLevel = 'Middle School (Ages 12-14)') {
+      const parshiot = [
+        { en: "Parshat Bereishit", he: "פרשת בראשית" },
+        { en: "Parshat Noach", he: "פרשת נח" },
+        { en: "Parshat Lech Lecha", he: "פרשת לך לך" },
+        { en: "Parshat Vayera", he: "פרשת וירא" },
+        { en: "Parshat Chayei Sarah", he: "פרשת חיי שרה" },
+        { en: "Parshat Toldot", he: "פרשת תולדות" },
+        { en: "Parshat Vayetzei", he: "פרשת ויצא" },
+        { en: "Parshat Vayishlach", he: "פרשת וישלח" },
+        { en: "Parshat Vayeshev", he: "פרשת וישב" },
+        { en: "Parshat Miketz", he: "פרשת מקץ" },
+        { en: "Parshat Vayigash", he: "פרשת ויגש" },
+        { en: "Parshat Vayechi", he: "פרשת ויחי" },
+        { en: "Parshat Shemot", he: "פרשת שמות" },
+        { en: "Parshat Vaera", he: "פרשת וארא" },
+        { en: "Parshat Bo", he: "פרשת בא" },
+        { en: "Parshat Beshalach", he: "פרשת בשלח" },
+        { en: "Parshat Yitro", he: "פרשת יתרו" },
+        { en: "Parshat Mishpatim", he: "פרשת משפטים" },
+        { en: "Parshat Terumah", he: "פרשת תרומה" },
+        { en: "Parshat Tetzaveh", he: "פרשת תצוה" },
+        { en: "Parshat Ki Tisa", he: "פרשת כי תשא" },
+        { en: "Parshat Vayakhel", he: "פרשת ויקהל" },
+        { en: "Parshat Pekudei", he: "פרשת פקודי" },
+        { en: "Parshat Vayikra", he: "פרשת ויקרא" },
+        { en: "Parshat Tzav", he: "פרשת צו" },
+        { en: "Parshat Shemini", he: "פרשת שמיני" },
+        { en: "Parshat Tazria", he: "פרשת תזריע" },
+        { en: "Parshat Metzora", he: "פרשת מצורע" },
+        { en: "Parshat Acharei Mot", he: "פרשת אחרי מות" },
+        { en: "Parshat Kedoshim", he: "פרשת קדושים" },
+        { en: "Parshat Emor", he: "פרשת אמור" },
+        { en: "Parshat Behar", he: "פרשת בהר" },
+        { en: "Parshat Bechukotai", he: "פרשת בחוקתי" },
+        { en: "Parshat Bamidbar", he: "פרשת במדבר" },
+        { en: "Parshat Nasso", he: "פרשת נשא" },
+        { en: "Parshat Beha'alotecha", he: "פרשת בהעלותך" },
+        { en: "Parshat Shelach", he: "פרשת שלח" },
+        { en: "Parshat Korach", he: "פרשת קרח" },
+        { en: "Parshat Chukat", he: "פרשת חקת" },
+        { en: "Parshat Balak", he: "פרשת בלק" },
+        { en: "Parshat Pinchas", he: "פרשת פינחס" },
+        { en: "Parshat Matot", he: "פרשת מטות" },
+        { en: "Parshat Masei", he: "פרשת מסעי" },
+        { en: "Parshat Devarim", he: "פרשת דברים" },
+        { en: "Parshat Va'etchanan", he: "פרשת ואתחנן" },
+        { en: "Parshat Eikev", he: "פרשת עקב" },
+        { en: "Parshat Re'eh", he: "פרשת ראה" },
+        { en: "Parshat Shoftim", he: "פרשת שופטים" },
+        { en: "Parshat Ki Teitzei", he: "פרשת כי תצא" },
+        { en: "Parshat Ki Tavo", he: "פרשת כי תבוא" },
+        { en: "Parshat Nitzavim", he: "פרשת נצבים" },
+        { en: "Parshat Vayeilech", he: "פרשת וילך" },
+        { en: "Parshat Ha'azinu", he: "פרשת האזינו" },
+        { en: "Parshat V'Zot HaBerachah", he: "פרשת וזאת הברכה" }
+      ];
+
+      const now = new Date().toISOString();
+      return parshiot.map((p, idx) => ({
+        id: 'lesson_parsha_' + (idx + 1) + '_' + Date.now().toString(36),
+        lesson_num: idx + 1,
+        title_en: p.en,
+        title_he: p.he,
+        duration: '15m',
+        level: targetLevel,
+        status: 'draft',
+        hook_en: '',
+        hook_he: '',
+        anchors_en: [],
+        anchors_he: [],
+        sources_text: '',
+        steps_text: '',
+        pitfalls_text: '',
+        cheat_sheet_text: '',
+        homework_text: '',
+        discussion_en: '',
+        discussion_he: '',
+        recordings: [],
+        sections: {},
+        created_at: now,
+        updated_at: now
+      }));
+    }
+
+    function handleQuickCreateCourseSubmit(e) {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      const inputBlank = document.getElementById('input-quick-course-title-blank');
+      const inputBar = document.getElementById('input-quick-course-title');
+      const rawTitle = ((inputBlank && inputBlank.value) || (inputBar && inputBar.value) || '').trim();
+
+      if (!rawTitle) {
+        if (inputBlank && !inputBlank.closest('.hidden')) inputBlank.focus();
+        else if (inputBar) inputBar.focus();
+        return;
+      }
+
+      const isChumash = /chumash|parsha|parshiot|torah/i.test(rawTitle);
+      const lessons = isChumash ? getTorahParshiot54Lessons('Middle School (Ages 12-14)') : [
+        {
+          id: 'lesson_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+          lesson_num: 1,
+          title_en: 'Class 1: Introduction to ' + rawTitle,
+          title_he: 'שיעור 1: מבוא ל' + rawTitle,
+          duration: '45m',
+          level: 'Standard / All Levels',
+          status: 'draft',
+          hook_en: '',
+          hook_he: '',
+          anchors_en: [],
+          anchors_he: [],
+          sources_text: '',
+          steps_text: '',
+          pitfalls_text: '',
+          cheat_sheet_text: '',
+          homework_text: '',
+          discussion_en: '',
+          discussion_he: '',
+          recordings: [],
+          sections: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ];
+
+      const newCourse = {
+        id: 'course_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+        title_en: rawTitle,
+        title_he: rawTitle,
+        format_type: 'standard',
+        category: isChumash ? 'Chumash & Judaic' : 'General Curriculum',
+        target_level: 'Middle School (Ages 12-14)',
+        description_en: rawTitle + ' curriculum and lesson plans',
+        description_he: rawTitle,
+        color: 'amber',
+        icon: isChumash ? '📜' : '✦',
+        blueprint: {
+          version: '1.0',
+          sections: (currentBlueprintSections || []).map(s => ({ ...s }))
+        },
+        lessons: lessons,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
+      APP_STATE.customCourses.push(newCourse);
+      APP_STATE.activeCourseId = newCourse.id;
+      APP_STATE.insideCourseId = newCourse.id;
+      APP_STATE.studioSelectedLessonId = lessons[0].id;
+
+      if (inputBlank) inputBlank.value = '';
+      if (inputBar) inputBar.value = '';
+
+      saveCustomCoursesToStorage(true);
+      renderLessonsCategoryView();
+      renderCommandCenter();
+      showToast(APP_STATE.lang === 'he' ? 'הקורס נוצר בהצלחה!' : `Course "${rawTitle}" created!`);
+    }
+
+    function handleCourseCardAddClass(courseId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      if (!course) return;
+
+      APP_STATE.insideCourseId = courseId;
+      APP_STATE.activeCourseId = courseId;
+
+      if (!Array.isArray(course.lessons)) course.lessons = [];
+      const nextNum = course.lessons.length + 1;
+      const newLesson = {
+        id: 'lesson_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        lesson_num: nextNum,
+        title_en: `Class ${nextNum}: New Class`,
+        title_he: `שיעור ${nextNum}: שיעור חדש`,
+        duration: '45m',
+        level: course.target_level || 'Standard / All Levels',
+        status: 'draft',
+        hook_en: '',
+        hook_he: '',
+        anchors_en: [],
+        anchors_he: [],
+        sources_text: '',
+        steps_text: '',
+        pitfalls_text: '',
+        cheat_sheet_text: '',
+        homework_text: '',
+        discussion_en: '',
+        discussion_he: '',
+        recordings: [],
+        sections: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      course.lessons.push(newLesson);
+      course.updated_at = new Date().toISOString();
+      APP_STATE.studioSelectedLessonId = newLesson.id;
+      APP_STATE.studioMobileView = 'editor';
+
+      saveCustomCoursesToStorage(true);
+      renderCourseClassesView(courseId);
+      renderCourseStudio(courseId, newLesson.id);
+      renderCommandCenter();
+      showToast('New class added!');
+
+      setTimeout(() => {
+        const titleInput = document.getElementById('studio-class-title-input');
+        if (titleInput) {
+          titleInput.focus();
+          titleInput.select();
+        }
+      }, 100);
+    }
+
+    function handleStudioAddNewClassQuick() {
+      const courseId = APP_STATE.insideCourseId || APP_STATE.activeCourseId;
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      if (!course) return;
+
+      if (!Array.isArray(course.lessons)) course.lessons = [];
+      const nextNum = course.lessons.length + 1;
+      const newLesson = {
+        id: 'lesson_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        lesson_num: nextNum,
+        title_en: `Class ${nextNum}: New Class`,
+        title_he: `שיעור ${nextNum}: שיעור חדש`,
+        duration: '45m',
+        level: course.target_level || 'Standard / All Levels',
+        status: 'draft',
+        hook_en: '',
+        hook_he: '',
+        anchors_en: [],
+        anchors_he: [],
+        sources_text: '',
+        steps_text: '',
+        pitfalls_text: '',
+        cheat_sheet_text: '',
+        homework_text: '',
+        discussion_en: '',
+        discussion_he: '',
+        recordings: [],
+        sections: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      course.lessons.push(newLesson);
+      course.updated_at = new Date().toISOString();
+      APP_STATE.studioSelectedLessonId = newLesson.id;
+      APP_STATE.studioMobileView = 'editor';
+
+      saveCustomCoursesToStorage(true);
+      renderCourseStudio(course.id, newLesson.id);
+      renderCommandCenter();
+      showToast(APP_STATE.lang === 'he' ? 'שיעור חדש נוסף!' : 'New class added to course!');
+
+      setTimeout(() => {
+        const input = document.getElementById('studio-class-title-input');
+        if (input) {
+          input.focus();
+          input.select();
+        }
+      }, 100);
     }
 
     function selectStudioClass(lessonId) {
@@ -12920,6 +13231,47 @@ Return STRICT JSON ONLY:
       try {
         await handleAiSuggestBlueprint();
 
+        if (lessonCountVal === '54_parshiot' || /chumash|parsha|parshiot|torah/i.test(topic)) {
+          const titleEn = document.getElementById('input-create-course-title-en')?.value || topic || 'Chumash: Parshiot of the Torah';
+          const titleHe = document.getElementById('input-create-course-title-he')?.value || titleEn;
+          const desc = document.getElementById('input-create-course-desc')?.value || '54 Parshiot of the Torah with main bullet points, Rashi gems, and life lessons';
+          const color = currentSelectedColor || 'amber';
+          const icon = '📜';
+          const lessons = getTorahParshiot54Lessons(level);
+
+          const newCourse = {
+            id: 'course_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            title_en: titleEn,
+            title_he: titleHe,
+            format_type: 'standard',
+            category: 'Chumash & Judaic',
+            target_level: level,
+            description_en: desc,
+            description_he: desc,
+            color: color,
+            icon: icon,
+            blueprint: {
+              version: '1.0',
+              sections: (currentBlueprintSections || []).map(s => ({ ...s }))
+            },
+            lessons: lessons,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+
+          if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
+          APP_STATE.customCourses.push(newCourse);
+          APP_STATE.activeCourseId = newCourse.id;
+          APP_STATE.insideCourseId = newCourse.id;
+          APP_STATE.studioSelectedLessonId = lessons[0].id;
+          saveCustomCoursesToStorage(true);
+          closeCreateCourseModal();
+          renderLessonsCategoryView();
+          renderCommandCenter();
+          showToast(isHe ? 'קורס חומש עם 54 פרשיות נוצר בהצלחה!' : 'Chumash course with all 54 Parshiot created!');
+          return;
+        }
+
         if (lessonCount === 0) {
           const titleEn = document.getElementById('input-create-course-title-en')?.value || topic;
           const titleHe = document.getElementById('input-create-course-title-he')?.value || titleEn;
@@ -13122,19 +13474,23 @@ Return STRICT JSON ONLY:
         return;
       }
 
+      const lessonCountChoice = document.getElementById('ai-builder-lessons-count-unified')?.value;
+      const is54Parshiot = lessonCountChoice === '54_parshiot';
+      const initialLessons = is54Parshiot ? getTorahParshiot54Lessons(level) : [];
+
       const newCourse = {
         id: 'course_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
         title_en: titleEn,
         title_he: titleHe || titleEn,
         format_type: formatType,
-        category: category,
+        category: is54Parshiot ? 'Chumash & Judaic' : category,
         target_level: level,
-        description_en: desc,
-        description_he: desc,
+        description_en: desc || (is54Parshiot ? '54 Parshiot of the Torah curriculum' : ''),
+        description_he: desc || titleHe,
         color: color,
-        icon: icon,
+        icon: is54Parshiot ? '📜' : icon,
         blueprint: blueprint,
-        lessons: [],
+        lessons: initialLessons,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -13143,10 +13499,14 @@ Return STRICT JSON ONLY:
       APP_STATE.customCourses.push(newCourse);
       APP_STATE.activeCourseId = newCourse.id;
       APP_STATE.insideCourseId = newCourse.id;
+      if (initialLessons.length > 0) {
+        APP_STATE.studioSelectedLessonId = initialLessons[0].id;
+      }
       saveCustomCoursesToStorage(true);
       closeCreateCourseModal();
       renderLessonsCategoryView();
-      showToast(APP_STATE.lang === 'he' ? 'הקורס נוצר בהצלחה! כעת הוסף שיעור ראשון.' : 'Course created successfully! Now add your first class.');
+      renderCommandCenter();
+      showToast(APP_STATE.lang === 'he' ? 'הקורס נוצר בהצלחה!' : (is54Parshiot ? 'Chumash course with all 54 Parshiot created!' : 'Course created successfully!'));
     }
 
     // ==============================================
