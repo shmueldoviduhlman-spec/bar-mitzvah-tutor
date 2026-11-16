@@ -4567,7 +4567,7 @@
           return APP_STATE.currentUser.school_id;
         }
         userEmail = (APP_STATE.currentUser.email || '').toLowerCase().trim();
-        if (userEmail === 'shmueldoviduhlman@gmail.com' || APP_STATE.currentUser.role === 'super_admin') {
+        if (userEmail === 'shmueldoviduhlman@gmail.com') {
           return 'school_main_770';
         }
       }
@@ -4578,7 +4578,7 @@
           if (s) {
             if (s.school_id) return s.school_id;
             const e = (s.email || '').toLowerCase().trim();
-            if (e === 'shmueldoviduhlman@gmail.com' || s.role === 'super_admin') {
+            if (e === 'shmueldoviduhlman@gmail.com') {
               return 'school_main_770';
             }
             if (!userEmail) userEmail = e;
@@ -4587,6 +4587,7 @@
       } catch (_) {}
 
       if (userEmail) {
+        if (userEmail === 'shmueldoviduhlman@gmail.com') return 'school_main_770';
         const registry = getSchoolsRegistry();
         const memberSchool = registry.find(s => Array.isArray(s.members) && s.members.some(m => (m.email || '').toLowerCase().trim() === userEmail));
         if (memberSchool) {
@@ -4608,8 +4609,25 @@
         };
       }
       const registry = getSchoolsRegistry();
+      if (schoolId === 'school_main_770') {
+        const found = registry.find(s => s.id === 'school_main_770');
+        return found || DEFAULT_SCHOOL;
+      }
       const found = registry.find(s => s.id === schoolId);
-      return found || DEFAULT_SCHOOL;
+      if (found) return found;
+
+      const userEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      const userName = (APP_STATE.currentUser && (APP_STATE.currentUser.name_en || APP_STATE.currentUser.name)) || 'Tutor';
+      const orgName = (APP_STATE.currentUser && (APP_STATE.currentUser.school_name || APP_STATE.currentUser.organization)) || (userName + "'s Classroom");
+
+      return {
+        id: schoolId,
+        name: orgName,
+        join_code: '',
+        owner_email: userEmail,
+        created_at: new Date().toISOString(),
+        members: userEmail ? [{ email: userEmail, name: userName, role: 'owner' }] : []
+      };
     }
 
     function findSchoolByJoinCode(code) {
@@ -4646,20 +4664,21 @@
         return false;
       }
 
+      if (userEmail === 'shmueluhlman@gmail.com') {
+        return false;
+      }
+
       if (userEmail === 'shmueldoviduhlman@gmail.com' || userRole === 'super_admin') {
         return true;
       }
 
-      if (userSchoolId) {
-        return userSchoolId === 'school_main_770';
-      }
-
-      if (userEmail) {
+      if (userSchoolId === 'school_main_770') {
         const registry = getSchoolsRegistry();
         const mainSchool = registry.find(s => s.id === 'school_main_770');
         if (mainSchool && Array.isArray(mainSchool.members) && mainSchool.members.some(m => (m.email || '').toLowerCase().trim() === userEmail)) {
           return true;
         }
+        return userEmail === 'coteacher@school.org';
       }
 
       return false;
@@ -6311,10 +6330,33 @@ alter publication supabase_realtime add table public.students_sync;`;
             updateAiStatusPill();
           }
 
+          // Synchronize Schools & Workspaces Registry from cloud
+          const registryRecord = data.find(row => row.id === '__schools_registry__');
+          if (registryRecord && registryRecord.completed_topics && Array.isArray(registryRecord.completed_topics.schools)) {
+            const cloudSchools = registryRecord.completed_topics.schools;
+            const localRegistry = getSchoolsRegistry();
+            const schoolMap = new Map();
+            localRegistry.forEach(s => schoolMap.set(s.id, s));
+            cloudSchools.forEach(cs => {
+              if (cs && cs.id) {
+                if (cs.id === 'school_main_770') {
+                  cs.owner_email = 'shmueldoviduhlman@gmail.com';
+                  cs.join_code = '770770';
+                  if (Array.isArray(cs.members)) {
+                    cs.members = cs.members.filter(m => m && (m.email?.toLowerCase().trim() === 'shmueldoviduhlman@gmail.com' || m.joined_with_code === '770770'));
+                  }
+                }
+                schoolMap.set(cs.id, { ...(schoolMap.get(cs.id) || {}), ...cs });
+              }
+            });
+            const mergedSchools = Array.from(schoolMap.values());
+            localStorage.setItem('tutor_schools_registry', JSON.stringify(mergedSchools));
+          }
+
           // Check for study materials system record with Multi-Tenant School Isolation
           const activeSchoolId = getActiveSchoolId();
           const isMaster = isMasterAccount();
-          const targetSuffix = (activeSchoolId === 'school_main_770') ? '' : ('_' + activeSchoolId.replace(/[^a-z0-9]/g, '_'));
+          const targetSuffix = (activeSchoolId === 'school_main_770') ? '' : ('_' + (activeSchoolId || 'default').replace(/[^a-z0-9]/g, '_'));
 
           const targetMaterialsId = (activeSchoolId === 'school_main_770') ? '__study_materials__' : ('__study_materials' + targetSuffix + '__');
           const targetCoursesId = (activeSchoolId === 'school_main_770') ? '__custom_courses__' : ('__custom_courses' + targetSuffix + '__');
@@ -6361,7 +6403,7 @@ alter publication supabase_realtime add table public.students_sync;`;
               const reg = getSchoolsRegistry();
               const mainSchool = reg.find(s => s.id === 'school_main_770');
               const mainMembers = (mainSchool && Array.isArray(mainSchool.members)) ? mainSchool.members.map(m => (m.email || '').toLowerCase()) : ['shmueldoviduhlman@gmail.com'];
-              return !rowSchoolId || rowSchoolId === 'school_main_770' || owner === 'shmueldoviduhlman@gmail.com' || mainMembers.includes(owner);
+              return (rowSchoolId === 'school_main_770') || (owner === 'shmueldoviduhlman@gmail.com') || mainMembers.includes(owner);
             } else {
               return (rowSchoolId && rowSchoolId === activeSchoolId) || (owner && owner === myEmail) || (uid && uid === myUserId);
             }
@@ -6415,16 +6457,8 @@ alter publication supabase_realtime add table public.students_sync;`;
 
             mergeStudentsWithCloud(cloudStudents);
           } else {
-            const cleanKey = 'tutor_canvas_reset_v1_' + (myEmail || '').replace(/[^a-z0-9]/g, '_');
-            if (localStorage.getItem(cleanKey)) {
-              APP_STATE.students = [];
-              const sKey = getStudentStorageKey();
-              if (sKey) localStorage.setItem(sKey, '[]');
-            } else if (APP_STATE.students.length > 0) {
-              for (const s of APP_STATE.students) {
-                await pushStudentToCloud(s);
-              }
-            }
+            // No students found in cloud for this account
+            mergeStudentsWithCloud([]);
           }
         }
         updateCloudStatusPill('connected');
@@ -6435,7 +6469,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     function mergeStudentsWithCloud(cloudStudents) {
-      if (!cloudStudents || cloudStudents.length === 0) return;
+      if (!Array.isArray(cloudStudents)) return;
 
       const cloudMap = new Map();
       cloudStudents.forEach(cs => cloudMap.set(cs.id, cs));
@@ -6556,13 +6590,14 @@ alter publication supabase_realtime add table public.students_sync;`;
         const owner = (meta.owner_email || '').toLowerCase();
         const myEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase();
         const myUserId = (APP_STATE.currentUser && APP_STATE.currentUser.id || '');
+        const uid = meta.user_id || '';
 
         let belongsToWorkspace = false;
         if (activeSchoolId === 'school_main_770') {
           const reg = getSchoolsRegistry();
           const mainSchool = reg.find(s => s.id === 'school_main_770');
           const mainMembers = (mainSchool && Array.isArray(mainSchool.members)) ? mainSchool.members.map(m => (m.email || '').toLowerCase()) : ['shmueldoviduhlman@gmail.com'];
-          belongsToWorkspace = !rowSchoolId || rowSchoolId === 'school_main_770' || owner === 'shmueldoviduhlman@gmail.com' || mainMembers.includes(owner);
+          belongsToWorkspace = (rowSchoolId === 'school_main_770') || (owner === 'shmueldoviduhlman@gmail.com') || mainMembers.includes(owner);
         } else {
           belongsToWorkspace = (rowSchoolId && rowSchoolId === activeSchoolId) || (owner && owner === myEmail) || (uid && uid === myUserId);
         }
@@ -6867,7 +6902,9 @@ alter publication supabase_realtime add table public.students_sync;`;
       const duration = rememberMe ? ONE_MONTH_MS : (24 * 60 * 60 * 1000);
 
       let schoolId = userRecord.school_id;
-      if (!schoolId) {
+      if (email === 'shmueluhlman@gmail.com') {
+        schoolId = 'school_shmueluhlman_gmail_com';
+      } else if (!schoolId) {
         const registry = getSchoolsRegistry();
         const memberSchool = registry.find(s => Array.isArray(s.members) && s.members.some(m => (m.email || '').toLowerCase().trim() === email));
         if (memberSchool) {
@@ -6875,12 +6912,12 @@ alter publication supabase_realtime add table public.students_sync;`;
         } else if (isOwner) {
           schoolId = 'school_main_770';
         } else {
-          schoolId = email ? email.replace(/[^a-z0-9]/g, '_') : ('school_user_' + (userRecord.id || 'default'));
+          schoolId = email ? email.replace(/[^a-z0-9]/g, '_') : ('usr_' + (userRecord.id || Date.now()));
         }
       }
 
       const activeSchool = getActiveSchool();
-      const schoolName = userRecord.school_name || (schoolId === 'school_main_770' ? (activeSchool.name || 'Bar Mitzvah Academy') : (userRecord.organization || 'My Classroom'));
+      const schoolName = userRecord.school_name || (schoolId === 'school_main_770' ? 'Bar Mitzvah Academy' : (userRecord.organization || (userRecord.name_en ? userRecord.name_en + "'s Classroom" : 'My Classroom')));
 
       const defaultNameEn = isOwner
         ? 'Shmuel Dovid Uhlman'
@@ -6892,7 +6929,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       const session = {
         id: userRecord.id || ('usr_' + Date.now()),
         email: email,
-        role: isOwner ? 'super_admin' : (userRecord.role || 'tutor'),
+        role: isOwner ? 'super_admin' : (schoolId === 'school_main_770' ? 'tutor' : 'classroom_owner'),
         name_en: userRecord.name_en || userRecord.name || defaultNameEn,
         name_he: userRecord.name_he || userRecord.name || defaultNameHe,
         organization: userRecord.organization || (isOwner ? 'Lead TutorPilot Admin' : schoolName),
@@ -6905,19 +6942,32 @@ alter publication supabase_realtime add table public.students_sync;`;
         expiresAt: Date.now() + duration
       };
 
-      // Ensure user is registered in school members list
+      // Ensure user is registered in school members list (ONLY in their own school or verified joined school)
       const registry = getSchoolsRegistry();
       const targetSchool = registry.find(s => s.id === schoolId);
       if (targetSchool && Array.isArray(targetSchool.members)) {
-        if (!targetSchool.members.some(m => m.email && m.email.toLowerCase() === email)) {
-          targetSchool.members.push({
-            email: email,
-            name: session.name_en,
-            role: session.role,
-            joined_at: new Date().toISOString()
-          });
-          saveSchoolsRegistry(registry);
+        if (!targetSchool.members.some(m => m.email && m.email.toLowerCase().trim() === email)) {
+          if (schoolId !== 'school_main_770' || isOwner || (email !== 'shmueluhlman@gmail.com' && userRecord.school_id === 'school_main_770')) {
+            targetSchool.members.push({
+              email: email,
+              name: session.name_en,
+              role: session.role,
+              joined_at: new Date().toISOString()
+            });
+            saveSchoolsRegistry(registry);
+          }
         }
+      } else if (!targetSchool && schoolId !== 'school_main_770') {
+        const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
+        registry.push({
+          id: schoolId,
+          name: schoolName,
+          join_code: randomCode,
+          owner_email: email,
+          created_at: new Date().toISOString(),
+          members: [{ email: email, name: session.name_en, role: 'owner', joined_at: new Date().toISOString() }]
+        });
+        saveSchoolsRegistry(registry);
       }
 
       localStorage.setItem('tutor_auth_session', JSON.stringify(session));
@@ -7347,7 +7397,9 @@ alter publication supabase_realtime add table public.students_sync;`;
           name_en: userRecord.name_en || existing.name_en || email.split('@')[0],
           name_he: userRecord.name_he || existing.name_he || email.split('@')[0],
           organization: userRecord.organization || existing.organization || '',
-          role: isOwner ? 'super_admin' : (userRecord.role || existing.role || 'tutor'),
+          role: isOwner ? 'super_admin' : (userRecord.role || existing.role || 'classroom_owner'),
+          school_id: userRecord.school_id || existing.school_id || (isOwner ? 'school_main_770' : ('school_' + email.replace(/[^a-z0-9]/g, '_'))),
+          school_name: userRecord.school_name || existing.school_name || userRecord.organization || '',
           subscription_status: isOwner ? 'lifetime' : (userRecord.subscription_status || existing.subscription_status || 'trialing'),
           trial_days: typeof userRecord.trial_days === 'number' ? userRecord.trial_days : (typeof existing.trial_days === 'number' ? existing.trial_days : 14),
           password_hash: userRecord.password_hash || existing.password_hash || '',
@@ -7832,8 +7884,8 @@ alter publication supabase_realtime add table public.students_sync;`;
               name_en: existing.name_en || meta.full_name || email.split('@')[0],
               name_he: existing.name_he || meta.full_name || email.split('@')[0],
               organization: existing.organization || meta.organization || 'My Classroom',
-              role: existing.role || 'tutor',
-              school_id: existing.school_id || ('school_user_' + u.id),
+              role: existing.role || 'classroom_owner',
+              school_id: existing.school_id || ('school_' + email.replace(/[^a-z0-9]/g, '_')),
               school_name: existing.school_name || existing.organization || 'My Classroom',
               subscription_status: existing.subscription_status || 'trialing',
               trial_days: existing.trial_days || 14,
@@ -7859,7 +7911,7 @@ alter publication supabase_realtime add table public.students_sync;`;
             name_en: email.split('@')[0],
             name_he: email.split('@')[0],
             organization: memberSchool.name,
-            role: 'tutor',
+            role: memberSchool.id === 'school_main_770' ? 'tutor' : 'classroom_owner',
             school_id: memberSchool.id,
             school_name: memberSchool.name,
             subscription_status: 'active',
@@ -8007,27 +8059,46 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
 
       const userId = supaUserId || ('usr_' + Date.now());
-      let assignedSchoolId = 'school_main_770';
-      let assignedSchoolName = 'Bar Mitzvah Academy';
+      let assignedSchoolId = null;
+      let assignedSchoolName = '';
 
       if (targetSchool) {
         assignedSchoolId = targetSchool.id;
         assignedSchoolName = targetSchool.name;
+        // Mark that user joined with explicit code
+        if (Array.isArray(targetSchool.members)) {
+          if (!targetSchool.members.some(m => (m.email || '').toLowerCase() === email)) {
+            targetSchool.members.push({
+              email: email,
+              name: name,
+              role: 'tutor',
+              joined_with_code: schoolCode,
+              joined_at: new Date().toISOString()
+            });
+            const registry = getSchoolsRegistry();
+            const idx = registry.findIndex(s => s.id === targetSchool.id);
+            if (idx >= 0) registry[idx] = targetSchool;
+            saveSchoolsRegistry(registry);
+          }
+        }
       } else if (isShmuel) {
         assignedSchoolId = 'school_main_770';
         assignedSchoolName = 'Bar Mitzvah Academy';
       } else {
-        // Check if pre-invited into a school by a school owner
+        // Deterministic independent school ID based on clean user email
+        assignedSchoolId = 'school_' + email.replace(/[^a-z0-9]/g, '_');
+        assignedSchoolName = org || (name + "'s Classroom");
+
         const registry = getSchoolsRegistry();
-        const preSchool = registry.find(s => Array.isArray(s.members) && s.members.some(m => (m.email || '').toLowerCase() === email));
+        // Check if pre-invited into an external school by another teacher
+        const preSchool = registry.find(s => s.id !== 'school_main_770' && Array.isArray(s.members) && s.members.some(m => (m.email || '').toLowerCase() === email));
         if (preSchool) {
           assignedSchoolId = preSchool.id;
           assignedSchoolName = preSchool.name;
         } else {
-          assignedSchoolId = 'school_' + userId;
-          assignedSchoolName = org || (name + "'s Classroom");
           // Register new school in registry
-          if (!registry.some(s => s.id === assignedSchoolId)) {
+          const existingSchool = registry.find(s => s.id === assignedSchoolId);
+          if (!existingSchool) {
             const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
             registry.push({
               id: assignedSchoolId,
@@ -8049,7 +8120,7 @@ alter publication supabase_realtime add table public.students_sync;`;
         name_en: name,
         name_he: name,
         organization: org || assignedSchoolName,
-        role: isShmuel ? 'super_admin' : 'tutor',
+        role: isShmuel ? 'super_admin' : (assignedSchoolId === 'school_main_770' ? 'tutor' : 'classroom_owner'),
         school_id: assignedSchoolId,
         school_name: assignedSchoolName,
         subscription_status: isShmuel ? 'lifetime' : 'trialing',
@@ -9395,7 +9466,7 @@ alter publication supabase_realtime add table public.students_sync;`;
         description_he: rawTitle,
         color: 'amber',
         icon: '✦',
-        created_by: email || 'shmueldoviduhlman@gmail.com',
+        created_by: email,
         owner_id: userId,
         school_id: schoolId,
         blueprint: {
@@ -11287,30 +11358,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     function loadCustomCoursesFromStorage() {
       try {
         const key = getCustomCoursesStorageKey();
-        let stored = localStorage.getItem(key);
-
-        // Auto-heal bridge for Super Admin:
-        // If super admin has 0 courses locally, check if courses were authored under shmueluhlman@gmail.com
-        const myEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
-        if (myEmail === 'shmueldoviduhlman@gmail.com' && (!stored || stored === '[]')) {
-          const alternateKey = 'tutor_custom_courses_shmueluhlman_gmail_com';
-          const altStored = localStorage.getItem(alternateKey);
-          if (altStored && altStored !== '[]') {
-            try {
-              const altCourses = JSON.parse(altStored);
-              if (Array.isArray(altCourses) && altCourses.length > 0) {
-                altCourses.forEach(c => {
-                  c.created_by = 'shmueldoviduhlman@gmail.com';
-                  c.owner_id = 'super_admin_shmuel';
-                  c.school_id = 'school_main_770';
-                });
-                stored = JSON.stringify(altCourses);
-                localStorage.setItem(key, stored);
-                localStorage.setItem('tutor_custom_courses', stored);
-              }
-            } catch (_) {}
-          }
-        }
+        const stored = localStorage.getItem(key);
 
         if (stored) {
           const parsed = JSON.parse(stored);
@@ -11330,56 +11378,26 @@ alter publication supabase_realtime add table public.students_sync;`;
       APP_STATE.customCourses = APP_STATE.customCourses.filter(c =>
         c && c.id !== 'course_bar_mitzvah_concepts' && c.id !== 'course_bar_mitzvah_chumash'
       );
-      // Multi-Tenant Profile Isolation: Each user only sees courses they created
+      // Multi-Tenant Profile Isolation: Each user only sees courses they created or in their own school
       const myEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
       const activeSchoolId = typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : null;
-      const isMaster = typeof isMasterAccount === 'function' ? isMasterAccount() : false;
+      const isSuper = (myEmail === 'shmueldoviduhlman@gmail.com');
 
       APP_STATE.customCourses = APP_STATE.customCourses.filter(c => {
         if (!c) return false;
         if (c.created_by) {
           return c.created_by.toLowerCase().trim() === myEmail;
         }
-        // Support scoped external courses in multi-tenant workspaces
-        if (c.school_id && activeSchoolId && c.school_id === activeSchoolId && activeSchoolId !== 'school_main_770') {
+        if (c.school_id && activeSchoolId && c.school_id === activeSchoolId) {
           return true;
         }
-        // Unstamped courses only belong to master super_admin
-        return isMaster && myEmail === 'shmueldoviduhlman@gmail.com';
+        return isSuper;
       });
       populateCourseSelector();
     }
 
     function handleImportCoursesFromAlternateAccount() {
-      const isHe = APP_STATE.lang === 'he';
-      const altKey = 'tutor_custom_courses_shmueluhlman_gmail_com';
-      const raw = localStorage.getItem(altKey);
-      if (!raw || raw === '[]') {
-        showToast(isHe ? 'לא נמצאו קורסים בחשבון המשני' : 'No courses found in secondary account');
-        return;
-      }
-      try {
-        const courses = JSON.parse(raw);
-        if (!Array.isArray(courses) || courses.length === 0) {
-          showToast(isHe ? 'לא נמצאו קורסים בחשבון המשני' : 'No courses found in secondary account');
-          return;
-        }
-        if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
-        courses.forEach(c => {
-          c.created_by = 'shmueldoviduhlman@gmail.com';
-          c.owner_id = 'super_admin_shmuel';
-          c.school_id = 'school_main_770';
-          if (!APP_STATE.customCourses.some(existing => existing.id === c.id)) {
-            APP_STATE.customCourses.push(c);
-          }
-        });
-        saveCustomCoursesToStorage(true);
-        renderLessonsCategoryView();
-        renderCommandCenter();
-        showToast(isHe ? `יובאו ${courses.length} קורסים בהצלחה!` : `Successfully imported ${courses.length} courses!`);
-      } catch (e) {
-        showToast('Error importing courses: ' + e.message);
-      }
+      // Safe no-op: strict account independence enforced
     }
 
     function saveCustomCoursesToStorage(syncCloud) {
@@ -11536,6 +11554,12 @@ alter publication supabase_realtime add table public.students_sync;`;
         saveCustomCoursesToStorage(false);
         renderLessonsCategoryView();
         if (APP_STATE.insideCourseId) {
+          const activeCourse = APP_STATE.customCourses.find(c => c.id === APP_STATE.insideCourseId);
+          if (activeCourse) {
+            if (!activeCourse.lessons.some(l => l.id === APP_STATE.studioSelectedLessonId)) {
+              APP_STATE.studioSelectedLessonId = activeCourse.lessons.length > 0 ? activeCourse.lessons[0].id : null;
+            }
+          }
           renderCourseStudio(APP_STATE.insideCourseId, APP_STATE.studioSelectedLessonId);
         }
         renderCommandCenter();
@@ -13288,7 +13312,7 @@ Return STRICT JSON ONLY:
             description_he: desc,
             color: color,
             icon: icon,
-            created_by: email || 'shmueldoviduhlman@gmail.com',
+            created_by: email,
             owner_id: userId,
             school_id: schoolId,
             blueprint: {
@@ -13536,7 +13560,7 @@ Return STRICT JSON ONLY:
         description_he: desc || titleHe,
         color: color,
         icon: icon,
-        created_by: email || 'shmueldoviduhlman@gmail.com',
+        created_by: email,
         owner_id: userId,
         school_id: schoolId,
         blueprint: blueprint,
@@ -17517,6 +17541,22 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
         console.error("Storage error:", e);
         APP_STATE.students = [];
       }
+
+      // Multi-Tenant Isolation Filter: Ensure external users only see their own students
+      const myEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      const activeSchoolId = typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : null;
+      const isSuper = (myEmail === 'shmueldoviduhlman@gmail.com');
+
+      APP_STATE.students = (APP_STATE.students || []).filter(s => {
+        if (!s) return false;
+        if (isSuper) {
+          return !s.school_id || s.school_id === 'school_main_770' || (s.owner_email && s.owner_email.toLowerCase() === myEmail);
+        } else {
+          const sSchool = s.school_id || '';
+          const sOwner = (s.owner_email || '').toLowerCase();
+          return (sSchool && sSchool === activeSchoolId) || (sOwner && sOwner === myEmail);
+        }
+      });
     }
 
     function saveStudentsToStorage(pushToCloud) {

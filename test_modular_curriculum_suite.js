@@ -2655,7 +2655,8 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   // Test secondary account shmueluhlman@gmail.com (david)
   const davidSession = {
     email: 'shmueluhlman@gmail.com',
-    role: 'tutor',
+    role: 'classroom_owner',
+    school_id: 'school_shmueluhlman_gmail_com',
     name_en: 'david',
     school_name: "david's Classroom"
   };
@@ -2666,7 +2667,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(davidBadgeHtml.includes('Classroom Owner') || davidBadgeHtml.includes('Tutor'), 'shmueluhlman@gmail.com displays Classroom Owner or Tutor badge');
   assert(sandbox.isSuperAdminUser() === false, 'shmueluhlman@gmail.com is NOT super admin user');
 
-  // 7. Super Admin Auto-Heal Bridge for Courses Created Under Secondary Account
+  // 7. Strict Account Isolation: Super Admin does NOT inherit secondary account courses
   sandbox.APP_STATE.currentUser = superAdminSession;
   sandbox.APP_STATE.customCourses = [];
   sandbox.localStorage.setItem('tutor_custom_courses', '[]');
@@ -2679,8 +2680,82 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     }
   ]));
   sandbox.loadCustomCoursesFromStorage();
-  const healedTitles = sandbox.APP_STATE.customCourses.map(c => c.title_en);
-  assert(healedTitles.includes('Shabbat: Meaning, Stories, and Inspiration'), 'Super Admin auto-heals courses created under secondary account');
+  const loadedTitles = sandbox.APP_STATE.customCourses.map(c => c.title_en);
+  assert(!loadedTitles.includes('Shabbat: Meaning, Stories, and Inspiration'), 'Strict account isolation: Super Admin does NOT inherit secondary account courses');
+
+  // ==============================================
+  // GATE 29: END-TO-END MULTI-TENANT ISOLATION & TWO-WAY DELETION PARITY
+  // ==============================================
+  console.log('\n--- Gate 29: End-to-End Multi-Tenant Isolation & Two-Way Deletion Parity ---');
+
+  // 1. Secondary user workspace isolation
+  sandbox.APP_STATE.currentUser = davidSession;
+  assert(sandbox.isMasterAccount() === false, 'Secondary user is NOT master account');
+  assert(sandbox.getActiveSchoolId() === 'school_shmueluhlman_gmail_com', 'Secondary user active school is strictly independent');
+
+  // 2. Secondary user creates a course
+  const secondaryCourse = {
+    id: 'course_independent_101',
+    title_en: 'Independent Creative Writing',
+    title_he: 'כתיבה יוצרת עצמאית',
+    created_by: 'shmueluhlman@gmail.com',
+    owner_id: 'david_id',
+    school_id: 'school_shmueluhlman_gmail_com',
+    lessons: [
+      { id: 'les_indep_1', lesson_num: 1, title_en: 'Finding Your Voice', title_he: 'מציאת הקול שלך' },
+      { id: 'les_indep_2', lesson_num: 2, title_en: 'Plot Architecture', title_he: 'מבנה עלילה' }
+    ]
+  };
+  sandbox.APP_STATE.customCourses = [secondaryCourse];
+  sandbox.saveCustomCoursesToStorage(false);
+
+  // 3. Switch back to Super Admin - verify secondary course is 100% invisible
+  sandbox.APP_STATE.currentUser = superAdminSession;
+  sandbox.loadCustomCoursesFromStorage();
+  const superAdminVisibleCourseIds = sandbox.APP_STATE.customCourses.map(c => c.id);
+  assert(!superAdminVisibleCourseIds.includes('course_independent_101'), 'Super Admin CANNOT see courses created by secondary account');
+
+  // 4. Switch back to Secondary User - verify course is visible to owner
+  sandbox.APP_STATE.currentUser = davidSession;
+  sandbox.loadCustomCoursesFromStorage();
+  const davidVisibleCourseIds = sandbox.APP_STATE.customCourses.map(c => c.id);
+  assert(davidVisibleCourseIds.includes('course_independent_101'), 'Course is visible to its creator');
+
+  // 5. Two-way lesson deletion: Secondary user deletes a lesson
+  assert(typeof sandbox.handleDeleteCustomLesson === 'function', 'handleDeleteCustomLesson is a function');
+  sandbox.handleDeleteCustomLesson('course_independent_101', 'les_indep_1', true);
+  const remainingLessons = sandbox.APP_STATE.customCourses.find(c => c.id === 'course_independent_101').lessons;
+  assert(remainingLessons.length === 1, 'Lesson was deleted from course');
+  assert(remainingLessons[0].id === 'les_indep_2', 'Correct lesson remains in course');
+
+  // 6. Two-way cross-device cloud deletion parity (simulated cloud sync from phone)
+  const phoneUpdatedCourses = [
+    {
+      id: 'course_independent_101',
+      title_en: 'Independent Creative Writing',
+      title_he: 'כתיבה יוצרת עצמאית',
+      created_by: 'shmueluhlman@gmail.com',
+      owner_id: 'david_id',
+      school_id: 'school_shmueluhlman_gmail_com',
+      updated_at: new Date(Date.now() + 10000).toISOString(),
+      lessons: [] // Phone deleted the last remaining lesson
+    }
+  ];
+  sandbox.mergeCustomCoursesWithCloud(phoneUpdatedCourses);
+  const syncedLessons = sandbox.APP_STATE.customCourses.find(c => c.id === 'course_independent_101').lessons;
+  assert(syncedLessons.length === 0, 'Class deleted on phone is cleanly deleted on computer');
+
+  // 7. Student roster isolation: External user cannot see Super Admin students
+  sandbox.APP_STATE.currentUser = davidSession;
+  const testRoster = [
+    { id: 'stu_super_1', name: 'Super Student', owner_email: 'shmueldoviduhlman@gmail.com', school_id: 'school_main_770' },
+    { id: 'stu_david_1', name: 'David Student', owner_email: 'shmueluhlman@gmail.com', school_id: 'school_shmueluhlman_gmail_com' }
+  ];
+  sandbox.localStorage.setItem(sandbox.getStudentStorageKey(), JSON.stringify(testRoster));
+  sandbox.loadStudentsFromStorage();
+  const visibleStudentIds = sandbox.APP_STATE.students.map(s => s.id);
+  assert(!visibleStudentIds.includes('stu_super_1'), 'External user cannot see Super Admin students');
+  assert(visibleStudentIds.includes('stu_david_1'), 'External user can see their own students');
 
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
