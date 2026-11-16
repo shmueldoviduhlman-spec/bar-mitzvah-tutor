@@ -2042,10 +2042,11 @@
               <div>
                 <label class="block text-[11px] font-semibold text-slate-400 mb-1">Classes Setup</label>
                 <select id="ai-builder-lessons-count-unified" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500">
-                  <option value="54_parshiot" selected>All 54 Torah Parshiot (Ready to Teach)</option>
-                  <option value="blueprint">Start with Empty Syllabus</option>
+                  <option value="blueprint" selected>Start with Empty Syllabus</option>
                   <option value="4">4 Lessons</option>
+                  <option value="6">6 Lessons</option>
                   <option value="8">8 Lessons</option>
+                  <option value="10">10 Lessons</option>
                   <option value="12">12 Lessons</option>
                 </select>
               </div>
@@ -6329,7 +6330,8 @@ alter publication supabase_realtime add table public.students_sync;`;
           // Check for custom courses system record with Multi-Tenant School Isolation
           const coursesRecord = data.find(row => row.id === targetCoursesId);
           if (coursesRecord && coursesRecord.completed_topics && Array.isArray(coursesRecord.completed_topics.courses)) {
-            mergeCustomCoursesWithCloud(coursesRecord.completed_topics.courses, coursesRecord.updated_at);
+            const delIds = coursesRecord.completed_topics.deleted_course_ids || [];
+            mergeCustomCoursesWithCloud(coursesRecord.completed_topics.courses, coursesRecord.updated_at, delIds);
           }
 
           // Check for custom reading system record with Multi-Tenant School Isolation
@@ -6500,11 +6502,12 @@ alter publication supabase_realtime add table public.students_sync;`;
       // Intercept custom courses cloud synchronization with strict workspace match
       if (newRecord && newRecord.id === targetCoursesId) {
         if (newRecord.completed_topics && Array.isArray(newRecord.completed_topics.courses)) {
-          mergeCustomCoursesWithCloud(newRecord.completed_topics.courses, newRecord.updated_at);
+          const delIds = newRecord.completed_topics.deleted_course_ids || [];
+          mergeCustomCoursesWithCloud(newRecord.completed_topics.courses, newRecord.updated_at, delIds);
           populateCourseSelector();
           renderLessonsCategoryView();
           if (APP_STATE.insideCourseId) {
-            renderCourseClassesView(APP_STATE.insideCourseId);
+            renderCourseStudio(APP_STATE.insideCourseId, APP_STATE.studioSelectedLessonId);
           }
           renderCommandCenter();
         }
@@ -9320,72 +9323,29 @@ alter publication supabase_realtime add table public.students_sync;`;
       renderLessonsCategoryView();
     }
 
-    function getTorahParshiot54Lessons(targetLevel = 'Middle School (Ages 12-14)') {
-      const parshiot = [
-        { en: "Parshat Bereishit", he: "פרשת בראשית" },
-        { en: "Parshat Noach", he: "פרשת נח" },
-        { en: "Parshat Lech Lecha", he: "פרשת לך לך" },
-        { en: "Parshat Vayera", he: "פרשת וירא" },
-        { en: "Parshat Chayei Sarah", he: "פרשת חיי שרה" },
-        { en: "Parshat Toldot", he: "פרשת תולדות" },
-        { en: "Parshat Vayetzei", he: "פרשת ויצא" },
-        { en: "Parshat Vayishlach", he: "פרשת וישלח" },
-        { en: "Parshat Vayeshev", he: "פרשת וישב" },
-        { en: "Parshat Miketz", he: "פרשת מקץ" },
-        { en: "Parshat Vayigash", he: "פרשת ויגש" },
-        { en: "Parshat Vayechi", he: "פרשת ויחי" },
-        { en: "Parshat Shemot", he: "פרשת שמות" },
-        { en: "Parshat Vaera", he: "פרשת וארא" },
-        { en: "Parshat Bo", he: "פרשת בא" },
-        { en: "Parshat Beshalach", he: "פרשת בשלח" },
-        { en: "Parshat Yitro", he: "פרשת יתרו" },
-        { en: "Parshat Mishpatim", he: "פרשת משפטים" },
-        { en: "Parshat Terumah", he: "פרשת תרומה" },
-        { en: "Parshat Tetzaveh", he: "פרשת תצוה" },
-        { en: "Parshat Ki Tisa", he: "פרשת כי תשא" },
-        { en: "Parshat Vayakhel", he: "פרשת ויקהל" },
-        { en: "Parshat Pekudei", he: "פרשת פקודי" },
-        { en: "Parshat Vayikra", he: "פרשת ויקרא" },
-        { en: "Parshat Tzav", he: "פרשת צו" },
-        { en: "Parshat Shemini", he: "פרשת שמיני" },
-        { en: "Parshat Tazria", he: "פרשת תזריע" },
-        { en: "Parshat Metzora", he: "פרשת מצורע" },
-        { en: "Parshat Acharei Mot", he: "פרשת אחרי מות" },
-        { en: "Parshat Kedoshim", he: "פרשת קדושים" },
-        { en: "Parshat Emor", he: "פרשת אמור" },
-        { en: "Parshat Behar", he: "פרשת בהר" },
-        { en: "Parshat Bechukotai", he: "פרשת בחוקתי" },
-        { en: "Parshat Bamidbar", he: "פרשת במדבר" },
-        { en: "Parshat Nasso", he: "פרשת נשא" },
-        { en: "Parshat Beha'alotecha", he: "פרשת בהעלותך" },
-        { en: "Parshat Shelach", he: "פרשת שלח" },
-        { en: "Parshat Korach", he: "פרשת קרח" },
-        { en: "Parshat Chukat", he: "פרשת חקת" },
-        { en: "Parshat Balak", he: "פרשת בלק" },
-        { en: "Parshat Pinchas", he: "פרשת פינחס" },
-        { en: "Parshat Matot", he: "פרשת מטות" },
-        { en: "Parshat Masei", he: "פרשת מסעי" },
-        { en: "Parshat Devarim", he: "פרשת דברים" },
-        { en: "Parshat Va'etchanan", he: "פרשת ואתחנן" },
-        { en: "Parshat Eikev", he: "פרשת עקב" },
-        { en: "Parshat Re'eh", he: "פרשת ראה" },
-        { en: "Parshat Shoftim", he: "פרשת שופטים" },
-        { en: "Parshat Ki Teitzei", he: "פרשת כי תצא" },
-        { en: "Parshat Ki Tavo", he: "פרשת כי תבוא" },
-        { en: "Parshat Nitzavim", he: "פרשת נצבים" },
-        { en: "Parshat Vayeilech", he: "פרשת וילך" },
-        { en: "Parshat Ha'azinu", he: "פרשת האזינו" },
-        { en: "Parshat V'Zot HaBerachah", he: "פרשת וזאת הברכה" }
-      ];
+    function handleQuickCreateCourseSubmit(e) {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      const inputBlank = document.getElementById('input-quick-course-title-blank');
+      const inputBar = document.getElementById('input-quick-course-title');
+      const rawTitle = ((inputBlank && inputBlank.value) || (inputBar && inputBar.value) || '').trim();
 
-      const now = new Date().toISOString();
-      return parshiot.map((p, idx) => ({
-        id: 'lesson_parsha_' + (idx + 1) + '_' + Date.now().toString(36),
-        lesson_num: idx + 1,
-        title_en: p.en,
-        title_he: p.he,
-        duration: '15m',
-        level: targetLevel,
+      if (!rawTitle) {
+        if (inputBlank && !inputBlank.closest('.hidden')) inputBlank.focus();
+        else if (inputBar) inputBar.focus();
+        return;
+      }
+
+      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      const userId = APP_STATE.currentUser?.id || '';
+      const schoolId = (typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770') || 'school_main_770';
+
+      const initialLesson = {
+        id: 'lesson_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        lesson_num: 1,
+        title_en: 'Class 1: Introduction to ' + rawTitle,
+        title_he: 'שיעור 1: מבוא ל' + rawTitle,
+        duration: '45m',
+        level: 'Standard / All Levels',
         status: 'draft',
         hook_en: '',
         hook_he: '',
@@ -9400,67 +9360,29 @@ alter publication supabase_realtime add table public.students_sync;`;
         discussion_he: '',
         recordings: [],
         sections: {},
-        created_at: now,
-        updated_at: now
-      }));
-    }
-
-    function handleQuickCreateCourseSubmit(e) {
-      if (e && typeof e.preventDefault === 'function') e.preventDefault();
-      const inputBlank = document.getElementById('input-quick-course-title-blank');
-      const inputBar = document.getElementById('input-quick-course-title');
-      const rawTitle = ((inputBlank && inputBlank.value) || (inputBar && inputBar.value) || '').trim();
-
-      if (!rawTitle) {
-        if (inputBlank && !inputBlank.closest('.hidden')) inputBlank.focus();
-        else if (inputBar) inputBar.focus();
-        return;
-      }
-
-      const isChumash = /chumash|parsha|parshiot|torah/i.test(rawTitle);
-      const lessons = isChumash ? getTorahParshiot54Lessons('Middle School (Ages 12-14)') : [
-        {
-          id: 'lesson_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
-          lesson_num: 1,
-          title_en: 'Class 1: Introduction to ' + rawTitle,
-          title_he: 'שיעור 1: מבוא ל' + rawTitle,
-          duration: '45m',
-          level: 'Standard / All Levels',
-          status: 'draft',
-          hook_en: '',
-          hook_he: '',
-          anchors_en: [],
-          anchors_he: [],
-          sources_text: '',
-          steps_text: '',
-          pitfalls_text: '',
-          cheat_sheet_text: '',
-          homework_text: '',
-          discussion_en: '',
-          discussion_he: '',
-          recordings: [],
-          sections: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ];
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
 
       const newCourse = {
         id: 'course_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
         title_en: rawTitle,
         title_he: rawTitle,
         format_type: 'standard',
-        category: isChumash ? 'Chumash & Judaic' : 'General Curriculum',
+        category: 'General Curriculum',
         target_level: 'Middle School (Ages 12-14)',
         description_en: rawTitle + ' curriculum and lesson plans',
         description_he: rawTitle,
         color: 'amber',
-        icon: isChumash ? '📜' : '✦',
+        icon: '✦',
+        created_by: email || 'shmueldoviduhlman@gmail.com',
+        owner_id: userId,
+        school_id: schoolId,
         blueprint: {
           version: '1.0',
           sections: (currentBlueprintSections || []).map(s => ({ ...s }))
         },
-        lessons: lessons,
+        lessons: [initialLesson],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -9469,13 +9391,13 @@ alter publication supabase_realtime add table public.students_sync;`;
       APP_STATE.customCourses.push(newCourse);
       APP_STATE.activeCourseId = newCourse.id;
       APP_STATE.insideCourseId = newCourse.id;
-      APP_STATE.studioSelectedLessonId = lessons[0].id;
+      APP_STATE.studioSelectedLessonId = initialLesson.id;
 
       if (inputBlank) inputBlank.value = '';
       if (inputBar) inputBar.value = '';
 
       saveCustomCoursesToStorage(true);
-      renderLessonsCategoryView();
+      renderCourseClassesView(newCourse.id);
       renderCommandCenter();
       showToast(APP_STATE.lang === 'he' ? 'הקורס נוצר בהצלחה!' : `Course "${rawTitle}" created!`);
     }
@@ -10306,7 +10228,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!confirm(isHe ? 'האם למחוק שיעור זה מהקורס?' : 'Delete this class from the course?')) {
         return;
       }
-      handleDeleteCustomLesson(courseId, lessonId);
+      handleDeleteCustomLesson(courseId, lessonId, true);
     }
 
     // ==============================================
@@ -11364,16 +11286,23 @@ alter publication supabase_realtime add table public.students_sync;`;
       APP_STATE.customCourses = APP_STATE.customCourses.filter(c =>
         c && c.id !== 'course_bar_mitzvah_concepts' && c.id !== 'course_bar_mitzvah_chumash'
       );
-      // Multi-Tenant Isolation Check: Non-master accounts must never inherit master or other school courses
-      if (typeof isMasterAccount === 'function' && !isMasterAccount()) {
-        const myEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
-        APP_STATE.customCourses = APP_STATE.customCourses.filter(c => {
-          if (!c) return false;
-          if (c.school_id && c.school_id === 'school_main_770') return false;
-          if (c.created_by && c.created_by === 'shmueldoviduhlman@gmail.com' && myEmail !== 'shmueldoviduhlman@gmail.com') return false;
+      // Multi-Tenant Profile Isolation: Each user only sees courses they created
+      const myEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      const activeSchoolId = typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : null;
+      const isMaster = typeof isMasterAccount === 'function' ? isMasterAccount() : false;
+
+      APP_STATE.customCourses = APP_STATE.customCourses.filter(c => {
+        if (!c) return false;
+        if (c.created_by) {
+          return c.created_by.toLowerCase().trim() === myEmail;
+        }
+        // Support scoped external courses in multi-tenant workspaces
+        if (c.school_id && activeSchoolId && c.school_id === activeSchoolId && activeSchoolId !== 'school_main_770') {
           return true;
-        });
-      }
+        }
+        // Unstamped courses only belong to master super_admin
+        return isMaster && myEmail === 'shmueldoviduhlman@gmail.com';
+      });
       populateCourseSelector();
     }
 
@@ -11396,17 +11325,23 @@ alter publication supabase_realtime add table public.students_sync;`;
       try {
         const activeSchoolId = typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770';
         const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+        const userId = APP_STATE.currentUser?.id || '';
         const recordId = (activeSchoolId === 'school_main_770')
           ? '__custom_courses__'
           : ('__custom_courses_' + activeSchoolId.replace(/[^a-z0-9]/g, '_') + '__');
+
+        const deletedKey = 'tutor_deleted_course_ids_' + email;
+        const deletedIds = JSON.parse(localStorage.getItem(deletedKey) || '[]');
+
         const payload = {
           id: recordId,
           name: (activeSchoolId === 'school_main_770') ? 'SYSTEM_CUSTOM_COURSES' : ('CUSTOM_COURSES_' + activeSchoolId),
           parsha_or_date: 'system',
-          notes: 'Custom Curricula for ' + activeSchoolId,
+          notes: 'Custom Curricula for ' + (email || activeSchoolId),
           completed_topics: {
             courses: APP_STATE.customCourses || [],
-            _meta: { school_id: activeSchoolId, owner_email: email, user_id: APP_STATE.currentUser?.id || '' }
+            deleted_course_ids: deletedIds,
+            _meta: { school_id: activeSchoolId, owner_email: email, user_id: userId }
           },
           completed_parshiot: {},
           updated_at: new Date().toISOString()
@@ -11419,21 +11354,37 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
-    function mergeCustomCoursesWithCloud(cloudCourses, cloudUpdatedAt) {
+    function mergeCustomCoursesWithCloud(cloudCourses, cloudUpdatedAt, cloudDeletedIds = []) {
       if (!Array.isArray(cloudCourses)) return;
       if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
 
       const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      const activeSchoolId = typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : null;
       const resetTsStr = localStorage.getItem('tutor_curriculum_reset_ts_' + email) || localStorage.getItem('tutor_curriculum_reset_ts');
       const resetTs = resetTsStr ? parseInt(resetTsStr, 10) : 0;
       const isMaster = typeof isMasterAccount === 'function' ? isMasterAccount() : false;
 
-      // Filter out legacy Bar Mitzvah courses AND courses created before clean reset timestamp
+      // Local deleted courses tombstone
+      const localDeletedKey = 'tutor_deleted_course_ids_' + email;
+      const localDeletedIds = new Set(JSON.parse(localStorage.getItem(localDeletedKey) || '[]'));
+      if (Array.isArray(cloudDeletedIds)) {
+        cloudDeletedIds.forEach(id => localDeletedIds.add(id));
+      }
+
+      // Filter out legacy Bar Mitzvah courses AND courses not belonging to this profile
       const validCloudCourses = cloudCourses.filter(cloudCourse => {
         if (!cloudCourse || !cloudCourse.id) return false;
+        if (localDeletedIds.has(cloudCourse.id)) return false;
         if (cloudCourse.id === 'course_bar_mitzvah_concepts' || cloudCourse.id === 'course_bar_mitzvah_chumash') return false;
-        if (!isMaster && cloudCourse.school_id && cloudCourse.school_id === 'school_main_770') return false;
-        if (!isMaster && cloudCourse.created_by && cloudCourse.created_by === 'shmueldoviduhlman@gmail.com' && email !== 'shmueldoviduhlman@gmail.com') return false;
+
+        // Profile isolation
+        if (cloudCourse.created_by) {
+          if (cloudCourse.created_by.toLowerCase().trim() !== email) return false;
+        } else if (cloudCourse.school_id && activeSchoolId && cloudCourse.school_id === activeSchoolId && activeSchoolId !== 'school_main_770') {
+          // Permitted for scoped school
+        } else {
+          if (!isMaster || email !== 'shmueldoviduhlman@gmail.com') return false;
+        }
 
         if (resetTs > 0) {
           let courseTs = 0;
@@ -11460,14 +11411,20 @@ alter publication supabase_realtime add table public.students_sync;`;
       const cloudIds = new Set(validCloudCourses.map(c => c.id));
 
       // 1. Deletion reconciliation:
-      // If a course is present locally but absent from cloud courses, and was created/updated before the cloud snapshot:
+      // If a course is present locally but absent from cloud courses, or is in tombstone:
       const retainedCourses = [];
       APP_STATE.customCourses.forEach(localCourse => {
+        if (!localCourse || !localCourse.id) return;
+        if (localDeletedIds.has(localCourse.id)) {
+          hasNewData = true;
+          return;
+        }
         if (cloudIds.has(localCourse.id)) {
           retainedCourses.push(localCourse);
         } else {
           const localTs = localCourse.updated_at ? new Date(localCourse.updated_at).getTime() : (localCourse.created_at ? new Date(localCourse.created_at).getTime() : 0);
-          if (localTs <= cloudRecordTs) {
+          // 5-second tolerance for cross-device clock skew
+          if ((localTs - 5000) <= cloudRecordTs) {
             // Course was deleted on another device or in cloud!
             hasNewData = true;
           } else {
@@ -11482,15 +11439,17 @@ alter publication supabase_realtime add table public.students_sync;`;
       validCloudCourses.forEach(cloudCourse => {
         const localIdx = APP_STATE.customCourses.findIndex(c => c.id === cloudCourse.id);
         if (localIdx === -1) {
-          APP_STATE.customCourses.push(cloudCourse);
-          hasNewData = true;
+          if (!localDeletedIds.has(cloudCourse.id)) {
+            APP_STATE.customCourses.push(cloudCourse);
+            hasNewData = true;
+          }
         } else {
           const localCourse = APP_STATE.customCourses[localIdx];
           const localTs = localCourse.updated_at ? new Date(localCourse.updated_at).getTime() : 0;
           const cloudTs = cloudCourse.updated_at ? new Date(cloudCourse.updated_at).getTime() : 0;
 
-          // If cloud has newer timestamp or equal timestamp with differing lessons
-          if (cloudTs >= localTs) {
+          // If cloud has newer timestamp or equal timestamp (with 5-second skew tolerance)
+          if ((cloudTs + 5000) >= localTs) {
             APP_STATE.customCourses[localIdx] = cloudCourse;
             hasNewData = true;
           }
@@ -11501,7 +11460,7 @@ alter publication supabase_realtime add table public.students_sync;`;
         saveCustomCoursesToStorage(false);
         renderLessonsCategoryView();
         if (APP_STATE.insideCourseId) {
-          renderCourseClassesView(APP_STATE.insideCourseId);
+          renderCourseStudio(APP_STATE.insideCourseId, APP_STATE.studioSelectedLessonId);
         }
         renderCommandCenter();
       }
@@ -13231,46 +13190,9 @@ Return STRICT JSON ONLY:
       try {
         await handleAiSuggestBlueprint();
 
-        if (lessonCountVal === '54_parshiot' || /chumash|parsha|parshiot|torah/i.test(topic)) {
-          const titleEn = document.getElementById('input-create-course-title-en')?.value || topic || 'Chumash: Parshiot of the Torah';
-          const titleHe = document.getElementById('input-create-course-title-he')?.value || titleEn;
-          const desc = document.getElementById('input-create-course-desc')?.value || '54 Parshiot of the Torah with main bullet points, Rashi gems, and life lessons';
-          const color = currentSelectedColor || 'amber';
-          const icon = '📜';
-          const lessons = getTorahParshiot54Lessons(level);
-
-          const newCourse = {
-            id: 'course_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-            title_en: titleEn,
-            title_he: titleHe,
-            format_type: 'standard',
-            category: 'Chumash & Judaic',
-            target_level: level,
-            description_en: desc,
-            description_he: desc,
-            color: color,
-            icon: icon,
-            blueprint: {
-              version: '1.0',
-              sections: (currentBlueprintSections || []).map(s => ({ ...s }))
-            },
-            lessons: lessons,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-
-          if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
-          APP_STATE.customCourses.push(newCourse);
-          APP_STATE.activeCourseId = newCourse.id;
-          APP_STATE.insideCourseId = newCourse.id;
-          APP_STATE.studioSelectedLessonId = lessons[0].id;
-          saveCustomCoursesToStorage(true);
-          closeCreateCourseModal();
-          renderLessonsCategoryView();
-          renderCommandCenter();
-          showToast(isHe ? 'קורס חומש עם 54 פרשיות נוצר בהצלחה!' : 'Chumash course with all 54 Parshiot created!');
-          return;
-        }
+        const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+        const userId = APP_STATE.currentUser?.id || '';
+        const schoolId = (typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770') || 'school_main_770';
 
         if (lessonCount === 0) {
           const titleEn = document.getElementById('input-create-course-title-en')?.value || topic;
@@ -13290,6 +13212,9 @@ Return STRICT JSON ONLY:
             description_he: desc,
             color: color,
             icon: icon,
+            created_by: email || 'shmueldoviduhlman@gmail.com',
+            owner_id: userId,
+            school_id: schoolId,
             blueprint: {
               version: '1.0',
               sections: (currentBlueprintSections || []).map(s => ({ ...s }))
@@ -13305,7 +13230,8 @@ Return STRICT JSON ONLY:
           APP_STATE.insideCourseId = newCourse.id;
           saveCustomCoursesToStorage(true);
           closeCreateCourseModal();
-          renderLessonsCategoryView();
+          renderCourseClassesView(newCourse.id);
+          renderCommandCenter();
           showToast(isHe ? 'הקורס נוצר בהצלחה! התחל לבנות את השיעורים שלך.' : 'Course created! Start building your lessons below.');
         } else {
           const aiTopic = document.getElementById('ai-builder-topic');
@@ -13419,6 +13345,18 @@ Return STRICT JSON ONLY:
         return;
       }
 
+      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      if (email) {
+        const delKey = 'tutor_deleted_course_ids_' + email;
+        try {
+          const ids = JSON.parse(localStorage.getItem(delKey) || '[]');
+          if (!ids.includes(courseId)) {
+            ids.push(courseId);
+            localStorage.setItem(delKey, JSON.stringify(ids));
+          }
+        } catch (_) {}
+      }
+
       APP_STATE.customCourses = (APP_STATE.customCourses || []).filter(c => c.id !== courseId);
       if (APP_STATE.insideCourseId === courseId) {
         APP_STATE.insideCourseId = null;
@@ -13445,6 +13383,10 @@ Return STRICT JSON ONLY:
       const level = document.getElementById('input-create-course-level')?.value || 'Standard / All Levels';
 
       if (!titleEn) return;
+
+      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      const userId = APP_STATE.currentUser?.id || '';
+      const schoolId = (typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770') || 'school_main_770';
 
       const blueprint = {
         sections: currentBlueprintSections.map(s => ({
@@ -13475,20 +13417,52 @@ Return STRICT JSON ONLY:
       }
 
       const lessonCountChoice = document.getElementById('ai-builder-lessons-count-unified')?.value;
-      const is54Parshiot = lessonCountChoice === '54_parshiot';
-      const initialLessons = is54Parshiot ? getTorahParshiot54Lessons(level) : [];
+      const initialLessons = [];
+      const numLessons = parseInt(lessonCountChoice, 10);
+      if (!isNaN(numLessons) && numLessons > 0) {
+        const now = new Date().toISOString();
+        for (let i = 1; i <= numLessons; i++) {
+          initialLessons.push({
+            id: 'lesson_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2, 5),
+            lesson_num: i,
+            title_en: `Class ${i}: ${titleEn} Part ${i}`,
+            title_he: `שיעור ${i}: ${titleHe || titleEn} חלק ${i}`,
+            duration: '45m',
+            level: level,
+            status: 'draft',
+            hook_en: '',
+            hook_he: '',
+            anchors_en: [],
+            anchors_he: [],
+            sources_text: '',
+            steps_text: '',
+            pitfalls_text: '',
+            cheat_sheet_text: '',
+            homework_text: '',
+            discussion_en: '',
+            discussion_he: '',
+            recordings: [],
+            sections: {},
+            created_at: now,
+            updated_at: now
+          });
+        }
+      }
 
       const newCourse = {
         id: 'course_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
         title_en: titleEn,
         title_he: titleHe || titleEn,
         format_type: formatType,
-        category: is54Parshiot ? 'Chumash & Judaic' : category,
+        category: category,
         target_level: level,
-        description_en: desc || (is54Parshiot ? '54 Parshiot of the Torah curriculum' : ''),
+        description_en: desc,
         description_he: desc || titleHe,
         color: color,
-        icon: is54Parshiot ? '📜' : icon,
+        icon: icon,
+        created_by: email || 'shmueldoviduhlman@gmail.com',
+        owner_id: userId,
+        school_id: schoolId,
         blueprint: blueprint,
         lessons: initialLessons,
         created_at: new Date().toISOString(),
@@ -13501,12 +13475,14 @@ Return STRICT JSON ONLY:
       APP_STATE.insideCourseId = newCourse.id;
       if (initialLessons.length > 0) {
         APP_STATE.studioSelectedLessonId = initialLessons[0].id;
+      } else {
+        APP_STATE.studioSelectedLessonId = null;
       }
       saveCustomCoursesToStorage(true);
       closeCreateCourseModal();
-      renderLessonsCategoryView();
+      renderCourseClassesView(newCourse.id);
       renderCommandCenter();
-      showToast(APP_STATE.lang === 'he' ? 'הקורס נוצר בהצלחה!' : (is54Parshiot ? 'Chumash course with all 54 Parshiot created!' : 'Course created successfully!'));
+      showToast(APP_STATE.lang === 'he' ? 'הקורס נוצר בהצלחה!' : 'Course created successfully!');
     }
 
     // ==============================================
@@ -14660,20 +14636,38 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
       if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
     }
 
-    function handleDeleteCustomLesson(courseId, lessonId) {
+    function handleDeleteCustomLesson(courseId, lessonId, skipConfirm = false) {
       const isHe = APP_STATE.lang === 'he';
-      if (!confirm(isHe ? 'האם למחוק שיעור זה מהקורס?' : 'Are you sure you want to delete this lesson?')) return;
+      if (!skipConfirm) {
+        if (!confirm(isHe ? 'האם למחוק שיעור זה מהקורס?' : 'Are you sure you want to delete this lesson?')) return;
+      }
 
       const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
       if (!course || !course.lessons) return;
 
+      const deletedIdx = course.lessons.findIndex(l => l.id === lessonId);
       course.lessons = course.lessons.filter(l => l.id !== lessonId);
       course.lessons.forEach((l, idx) => { l.lesson_num = idx + 1; });
       course.updated_at = new Date().toISOString();
+
+      if (!Array.isArray(course.deleted_lesson_ids)) course.deleted_lesson_ids = [];
+      if (!course.deleted_lesson_ids.includes(lessonId)) {
+        course.deleted_lesson_ids.push(lessonId);
+      }
+
+      if (APP_STATE.studioSelectedLessonId === lessonId) {
+        if (course.lessons.length > 0) {
+          const nextIdx = Math.min(Math.max(0, deletedIdx), course.lessons.length - 1);
+          APP_STATE.studioSelectedLessonId = course.lessons[nextIdx].id;
+        } else {
+          APP_STATE.studioSelectedLessonId = null;
+        }
+      }
+
       saveCustomCoursesToStorage(true);
       renderLessonsCategoryView();
       if (APP_STATE.insideCourseId === courseId) {
-        renderCourseClassesView(courseId);
+        renderCourseStudio(course.id, APP_STATE.studioSelectedLessonId);
       }
       renderCommandCenter();
       showToast(isHe ? 'השיעור נמחק' : 'Lesson deleted');

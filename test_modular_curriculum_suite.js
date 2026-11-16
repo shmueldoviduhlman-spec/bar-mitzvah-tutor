@@ -2535,6 +2535,110 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   sandbox.setStudioMobileView('syllabus');
   assert(sandbox.APP_STATE.studioMobileView === 'syllabus', 'setStudioMobileView sets studioMobileView to syllabus');
 
+  // ==============================================
+  // Gate 28: Universal Domain-Neutral Course Creator, Strict Profile Isolation & Deletion Parity
+  // ==============================================
+  console.log('\n--- Gate 28: Universal Course Creator & Profile Isolation ---');
+
+  // 1. Zero Hardcoded Parshiot in Classes Setup Dropdown
+  assert(!indexHtml.includes('54_parshiot'), 'Dropdown does NOT contain 54_parshiot preset');
+  assert(!indexHtml.includes('All 54 Torah Parshiot'), 'Dropdown does NOT contain Torah parshiot preset text');
+  assert(!indexHtml.includes('getTorahParshiot54Lessons'), 'getTorahParshiot54Lessons function permanently excised');
+  assert(indexHtml.includes('Start with Empty Syllabus'), 'Dropdown contains Start with Empty Syllabus');
+  assert(indexHtml.includes('<option value="4">4 Lessons</option>'), 'Dropdown contains 4 Lessons option');
+
+  // 2. Profile Stamping on Course Creation
+  sandbox.APP_STATE.currentUser = {
+    id: 'usr_super_1',
+    email: 'shmueldoviduhlman@gmail.com',
+    role: 'super_admin',
+    school_id: 'school_main_770'
+  };
+  getOrCreateElem('input-quick-course-title-blank').value = 'Calculus AB';
+  sandbox.handleQuickCreateCourseSubmit();
+  const createdCalcCourse = sandbox.APP_STATE.customCourses.find(c => c.title_en === 'Calculus AB');
+  assert(createdCalcCourse !== undefined, 'Quick-create created universal Calculus course');
+  assert(createdCalcCourse.created_by === 'shmueldoviduhlman@gmail.com', 'Course stamped with creator email');
+  assert(createdCalcCourse.owner_id === 'usr_super_1', 'Course stamped with creator user id');
+  assert(createdCalcCourse.category === 'General Curriculum', 'Course category defaults to General Curriculum');
+  assert(createdCalcCourse.lessons.length === 1, 'Quick-create produces single introductory lesson');
+  assert(createdCalcCourse.lessons[0].title_en.includes('Calculus AB'), 'Lesson title references Calculus AB');
+
+  // 3. Strict Profile Isolation
+  // Switch active user to an external user account
+  sandbox.APP_STATE.currentUser = {
+    id: 'usr_ext_dr_smith',
+    email: 'dr_smith@highschool.org',
+    role: 'tutor',
+    school_id: 'school_ext_smith'
+  };
+  // Save current storage with Calc course
+  sandbox.saveCustomCoursesToStorage(false);
+  // Switch storage key to Dr. Smith's key and load
+  sandbox.APP_STATE.customCourses = [createdCalcCourse];
+  sandbox.loadCustomCoursesFromStorage();
+  const smithCourses = sandbox.APP_STATE.customCourses.map(c => c.title_en);
+  assert(!smithCourses.includes('Calculus AB'), 'External user cannot see super admin courses');
+
+  // Dr. Smith creates their own course
+  getOrCreateElem('input-quick-course-title-blank').value = 'AP European History';
+  sandbox.handleQuickCreateCourseSubmit();
+  const smithHistoryCourse = sandbox.APP_STATE.customCourses.find(c => c.title_en === 'AP European History');
+  assert(smithHistoryCourse !== undefined, 'Dr. Smith created AP European History');
+  assert(smithHistoryCourse.created_by === 'dr_smith@highschool.org', 'Dr. Smith course stamped with their email');
+
+  // Switch back to super admin: super admin should NOT see Dr. Smith's course
+  sandbox.APP_STATE.currentUser = {
+    id: 'usr_super_1',
+    email: 'shmueldoviduhlman@gmail.com',
+    role: 'super_admin',
+    school_id: 'school_main_770'
+  };
+  sandbox.APP_STATE.customCourses = [smithHistoryCourse];
+  sandbox.loadCustomCoursesFromStorage();
+  const superAdminCourses = sandbox.APP_STATE.customCourses.map(c => c.title_en);
+  assert(!superAdminCourses.includes('AP European History'), 'Super admin cannot see external user courses');
+
+  // 4. Studio Class Deletion & Studio Re-render
+  sandbox.APP_STATE.customCourses = [createdCalcCourse];
+  const testCourse = createdCalcCourse;
+  // Add a second class
+  testCourse.lessons.push({
+    id: 'lesson_calc_2',
+    lesson_num: 2,
+    title_en: 'Derivatives and Limits',
+    duration: '45m',
+    status: 'draft'
+  });
+  sandbox.APP_STATE.insideCourseId = testCourse.id;
+  sandbox.APP_STATE.studioSelectedLessonId = 'lesson_calc_2';
+
+  // Delete the second class via handleStudioDeleteClass
+  sandbox.handleStudioDeleteClass(testCourse.id, 'lesson_calc_2');
+  assert(testCourse.lessons.length === 1, 'Class was deleted from course');
+  assert(!testCourse.lessons.some(l => l.id === 'lesson_calc_2'), 'Deleted lesson ID is removed from course lessons');
+  assert(testCourse.deleted_lesson_ids.includes('lesson_calc_2'), 'Deleted lesson ID tracked in deleted_lesson_ids');
+  assert(sandbox.APP_STATE.studioSelectedLessonId === testCourse.lessons[0].id, 'studioSelectedLessonId advanced to remaining lesson');
+
+  // 5. Authoritative Two-Way Course Deletion Sync with Clock Skew Tolerance
+  // Delete the course
+  sandbox.handleDeleteCustomCourseById(testCourse.id);
+  assert(!sandbox.APP_STATE.customCourses.some(c => c.id === testCourse.id), 'Course deleted locally');
+  assert(sandbox.APP_STATE.insideCourseId === null, 'insideCourseId reset after course deletion');
+
+  // Verify that an incoming stale cloud snapshot with old course is rejected because of tombstone
+  const staleCloudUpdate = [
+    {
+      id: testCourse.id,
+      title_en: 'Calculus AB',
+      created_by: 'shmueldoviduhlman@gmail.com',
+      updated_at: new Date(Date.now() - 10000).toISOString(),
+      lessons: []
+    }
+  ];
+  sandbox.mergeCustomCoursesWithCloud(staleCloudUpdate, new Date(Date.now() - 10000).toISOString());
+  assert(!sandbox.APP_STATE.customCourses.some(c => c.id === testCourse.id), 'Deleted course is NOT resurrected by stale cloud snapshot');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
