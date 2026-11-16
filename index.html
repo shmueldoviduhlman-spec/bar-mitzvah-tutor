@@ -6977,12 +6977,21 @@ alter publication supabase_realtime add table public.students_sync;`;
       );
       const isHe = APP_STATE.lang === 'he';
 
+      const isSuper = isSuperAdminUser();
+      const isClassOwner = !isSuper && school.owner_email && APP_STATE.currentUser && school.owner_email.toLowerCase() === (APP_STATE.currentUser.email || '').toLowerCase();
+
       const nameEl = document.getElementById('school-display-name');
       if (nameEl) nameEl.textContent = school.name || 'My Tutoring Studio';
 
       const rolePill = document.getElementById('school-role-pill');
       if (rolePill) {
-        rolePill.textContent = isOwner ? (isHe ? 'מנהל ראשי' : 'Owner / Admin') : (isHe ? 'מלמד שותף' : 'Teacher / Tutor');
+        if (isSuper) {
+          rolePill.textContent = isHe ? 'מנהל ראשי' : 'Super Admin';
+        } else if (isClassOwner) {
+          rolePill.textContent = isHe ? 'מנהל כיתה' : 'Classroom Owner';
+        } else {
+          rolePill.textContent = isHe ? 'מלמד שותף' : 'Teacher / Tutor';
+        }
       }
 
       const codeEl = document.getElementById('school-join-code-value');
@@ -7303,7 +7312,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       const u = APP_STATE.currentUser;
       if (!u) return false;
       const email = (u.email || '').toLowerCase().trim();
-      return u.role === 'super_admin' || email === 'shmueldoviduhlman@gmail.com';
+      return email === 'shmueldoviduhlman@gmail.com';
     }
 
     function openAdminUserDirectoryModal() {
@@ -8118,7 +8127,8 @@ alter publication supabase_realtime add table public.students_sync;`;
       const isHe = APP_STATE.lang === 'he';
       const rawName = isHe ? (session.name_he || session.name_en || session.name) : (session.name_en || session.name_he || session.name);
       const name = rawName || (session.email ? session.email.split('@')[0] : 'Tutor');
-      const isSuperAdmin = session.role === 'super_admin' || session.email === 'shmueldoviduhlman@gmail.com';
+      const userEmail = (session.email || '').toLowerCase().trim();
+      const isSuperAdmin = userEmail === 'shmueldoviduhlman@gmail.com';
 
       // Header Elements
       const avatarBadge = document.getElementById('user-avatar-badge');
@@ -8137,11 +8147,19 @@ alter publication supabase_realtime add table public.students_sync;`;
       const dropdownSchoolName = document.getElementById('user-dropdown-school-name');
       if (dropdownSchoolName) dropdownSchoolName.textContent = schoolName;
 
-      const isOwner = isSuperAdmin || (school.owner_email && school.owner_email.toLowerCase() === (session.email || '').toLowerCase());
+      const isClassOwner = !isSuperAdmin && school.owner_email && school.owner_email.toLowerCase().trim() === userEmail;
+
       if (dropdownRole) {
-        dropdownRole.innerHTML = isOwner
-          ? '<i data-lucide="crown" class="w-3 h-3 text-amber-400"></i> ' + (isHe ? 'מנהל ראשי' : 'Super Admin')
-          : '<i data-lucide="award" class="w-3 h-3 text-brand-400"></i> ' + (isHe ? 'מלמד שותף' : 'Tutor / Educator');
+        if (isSuperAdmin) {
+          dropdownRole.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-sm";
+          dropdownRole.innerHTML = '<i data-lucide="crown" class="w-3 h-3 text-amber-400"></i> ' + (isHe ? 'מנהל ראשי' : 'Super Admin');
+        } else if (isClassOwner) {
+          dropdownRole.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/30";
+          dropdownRole.innerHTML = '<i data-lucide="building" class="w-3 h-3 text-sky-400"></i> ' + (isHe ? 'מנהל כיתה' : 'Classroom Owner');
+        } else {
+          dropdownRole.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-800 text-slate-300 border border-slate-700";
+          dropdownRole.innerHTML = '<i data-lucide="award" class="w-3 h-3 text-brand-400"></i> ' + (isHe ? 'מלמד שותף' : 'Tutor / Educator');
+        }
       }
 
       const settingsSchoolDesc = document.getElementById('settings-school-desc');
@@ -8169,7 +8187,9 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (settingsDays) {
         settingsDays.textContent = isSuperAdmin
           ? (isHe ? 'מנהל ראשי • גישה מלאה קבועה' : 'Super Admin • Permanent Lifetime Access')
-          : (isHe ? 'מחובר • 14 יום ניסיון פעיל' : 'Active Session • 14-Day Free Trial');
+          : (isClassOwner
+            ? (isHe ? 'מנהל כיתה • 14 יום ניסיון פעיל' : 'Classroom Owner • 14-Day Free Trial')
+            : (isHe ? 'מלמד שותף • מחובר' : 'Co-Teacher / Tutor • Active Member'));
       }
       lucide.createIcons();
     }
@@ -11267,7 +11287,31 @@ alter publication supabase_realtime add table public.students_sync;`;
     function loadCustomCoursesFromStorage() {
       try {
         const key = getCustomCoursesStorageKey();
-        const stored = localStorage.getItem(key);
+        let stored = localStorage.getItem(key);
+
+        // Auto-heal bridge for Super Admin:
+        // If super admin has 0 courses locally, check if courses were authored under shmueluhlman@gmail.com
+        const myEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+        if (myEmail === 'shmueldoviduhlman@gmail.com' && (!stored || stored === '[]')) {
+          const alternateKey = 'tutor_custom_courses_shmueluhlman_gmail_com';
+          const altStored = localStorage.getItem(alternateKey);
+          if (altStored && altStored !== '[]') {
+            try {
+              const altCourses = JSON.parse(altStored);
+              if (Array.isArray(altCourses) && altCourses.length > 0) {
+                altCourses.forEach(c => {
+                  c.created_by = 'shmueldoviduhlman@gmail.com';
+                  c.owner_id = 'super_admin_shmuel';
+                  c.school_id = 'school_main_770';
+                });
+                stored = JSON.stringify(altCourses);
+                localStorage.setItem(key, stored);
+                localStorage.setItem('tutor_custom_courses', stored);
+              }
+            } catch (_) {}
+          }
+        }
+
         if (stored) {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed)) {
@@ -11304,6 +11348,38 @@ alter publication supabase_realtime add table public.students_sync;`;
         return isMaster && myEmail === 'shmueldoviduhlman@gmail.com';
       });
       populateCourseSelector();
+    }
+
+    function handleImportCoursesFromAlternateAccount() {
+      const isHe = APP_STATE.lang === 'he';
+      const altKey = 'tutor_custom_courses_shmueluhlman_gmail_com';
+      const raw = localStorage.getItem(altKey);
+      if (!raw || raw === '[]') {
+        showToast(isHe ? 'לא נמצאו קורסים בחשבון המשני' : 'No courses found in secondary account');
+        return;
+      }
+      try {
+        const courses = JSON.parse(raw);
+        if (!Array.isArray(courses) || courses.length === 0) {
+          showToast(isHe ? 'לא נמצאו קורסים בחשבון המשני' : 'No courses found in secondary account');
+          return;
+        }
+        if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
+        courses.forEach(c => {
+          c.created_by = 'shmueldoviduhlman@gmail.com';
+          c.owner_id = 'super_admin_shmuel';
+          c.school_id = 'school_main_770';
+          if (!APP_STATE.customCourses.some(existing => existing.id === c.id)) {
+            APP_STATE.customCourses.push(c);
+          }
+        });
+        saveCustomCoursesToStorage(true);
+        renderLessonsCategoryView();
+        renderCommandCenter();
+        showToast(isHe ? `יובאו ${courses.length} קורסים בהצלחה!` : `Successfully imported ${courses.length} courses!`);
+      } catch (e) {
+        showToast('Error importing courses: ' + e.message);
+      }
     }
 
     function saveCustomCoursesToStorage(syncCloud) {
@@ -15275,40 +15351,7 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
     }
 
     function checkCleanCanvasReset() {
-      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
       purgeLegacyCurriculumData();
-
-      // Complete purge marker for custom courses and classes to ensure clean canvas
-      const markerKey = 'tutor_purge_all_courses_v1_' + (email ? email.replace(/[^a-z0-9]/g, '_') : 'global');
-      if (!localStorage.getItem(markerKey)) {
-        localStorage.setItem(markerKey, 'true');
-        const resetTs = Date.now();
-        localStorage.setItem('tutor_curriculum_reset_ts', resetTs.toString());
-        if (email) {
-          localStorage.setItem('tutor_curriculum_reset_ts_' + email, resetTs.toString());
-        }
-
-        // Wipe all custom courses and classes to ensure a 100% clean canvas
-        APP_STATE.customCourses = [];
-        APP_STATE.activeCourseId = null;
-        APP_STATE.insideCourseId = null;
-
-        const keysToClean = [
-          'tutor_custom_courses',
-          'tutor_custom_courses_school_main_770',
-          'tutor_custom_courses_shmueluhlman_gmail_com',
-          'tutor_custom_courses_shmueldoviduhlman_gmail_com',
-          getCustomCoursesStorageKey()
-        ];
-        keysToClean.forEach(k => {
-          if (k) {
-            try { localStorage.setItem(k, '[]'); } catch (_) {}
-          }
-        });
-
-        saveCustomCoursesToStorage(true);
-        purgeLegacyCurriculumData();
-      }
     }
 
     function handlePurgeAllCourses() {

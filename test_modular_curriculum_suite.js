@@ -2639,6 +2639,49 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   sandbox.mergeCustomCoursesWithCloud(staleCloudUpdate, new Date(Date.now() - 10000).toISOString());
   assert(!sandbox.APP_STATE.customCourses.some(c => c.id === testCourse.id), 'Deleted course is NOT resurrected by stale cloud snapshot');
 
+  // 6. Super Admin Exclusivity & Classroom Owner Badge Distinctness
+  // Test Super Admin display
+  const superAdminSession = {
+    email: 'shmueldoviduhlman@gmail.com',
+    role: 'super_admin',
+    name_en: 'Shmuel Dovid Uhlman'
+  };
+  sandbox.APP_STATE.currentUser = superAdminSession;
+  sandbox.updateUserSessionDisplay(superAdminSession);
+  const superBadgeHtml = getOrCreateElem('user-dropdown-role-badge').innerHTML;
+  assert(superBadgeHtml.includes('Super Admin'), 'shmueldoviduhlman@gmail.com displays Super Admin badge');
+  assert(sandbox.isSuperAdminUser() === true, 'shmueldoviduhlman@gmail.com is identified as super admin user');
+
+  // Test secondary account shmueluhlman@gmail.com (david)
+  const davidSession = {
+    email: 'shmueluhlman@gmail.com',
+    role: 'tutor',
+    name_en: 'david',
+    school_name: "david's Classroom"
+  };
+  sandbox.APP_STATE.currentUser = davidSession;
+  sandbox.updateUserSessionDisplay(davidSession);
+  const davidBadgeHtml = getOrCreateElem('user-dropdown-role-badge').innerHTML;
+  assert(!davidBadgeHtml.includes('Super Admin'), 'shmueluhlman@gmail.com does NOT display Super Admin badge');
+  assert(davidBadgeHtml.includes('Classroom Owner') || davidBadgeHtml.includes('Tutor'), 'shmueluhlman@gmail.com displays Classroom Owner or Tutor badge');
+  assert(sandbox.isSuperAdminUser() === false, 'shmueluhlman@gmail.com is NOT super admin user');
+
+  // 7. Super Admin Auto-Heal Bridge for Courses Created Under Secondary Account
+  sandbox.APP_STATE.currentUser = superAdminSession;
+  sandbox.APP_STATE.customCourses = [];
+  sandbox.localStorage.setItem('tutor_custom_courses', '[]');
+  sandbox.localStorage.setItem('tutor_custom_courses_shmueluhlman_gmail_com', JSON.stringify([
+    {
+      id: 'course_shabbat_1',
+      title_en: 'Shabbat: Meaning, Stories, and Inspiration',
+      created_by: 'shmueluhlman@gmail.com',
+      lessons: []
+    }
+  ]));
+  sandbox.loadCustomCoursesFromStorage();
+  const healedTitles = sandbox.APP_STATE.customCourses.map(c => c.title_en);
+  assert(healedTitles.includes('Shabbat: Meaning, Stories, and Inspiration'), 'Super Admin auto-heals courses created under secondary account');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
