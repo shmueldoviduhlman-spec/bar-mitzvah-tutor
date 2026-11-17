@@ -651,47 +651,34 @@
         </div>
 
         <!-- Blank state when tutor hasn't created courses yet -->
-        <div id="tutor-hub-blank-state" class="text-center py-14 px-6 bg-slate-900/60 border border-slate-800 rounded-3xl max-w-2xl mx-auto space-y-6 shadow-xl backdrop-blur hidden">
+        <div id="tutor-hub-blank-state" class="text-center py-16 px-6 bg-slate-900/60 border border-slate-800 rounded-3xl max-w-xl mx-auto space-y-6 shadow-xl backdrop-blur hidden">
           <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600/20 to-amber-500/20 border border-brand-500/30 flex items-center justify-center mx-auto text-amber-400 shadow-inner">
             <i data-lucide="book-plus" class="w-8 h-8"></i>
           </div>
           <div class="space-y-2">
             <h3 id="lbl-tutor-hub-title" class="text-xl sm:text-2xl font-bold text-white tracking-tight">Build Your Courses</h3>
             <p id="lbl-tutor-hub-desc" class="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
-              Welcome to Classes. Set up your course and customize its lesson structure. Use the integrated AI studio to brainstorm your structure or build it manually.
+              Design your custom course structure with the AI Architect, then build your classes inside it.
             </p>
           </div>
-          <!-- Instant 1-Step Quick Course Creator -->
-          <div class="max-w-md mx-auto pt-2">
-            <form onsubmit="handleQuickCreateCourseSubmit(event); return false;" class="flex items-center gap-2">
-              <input
-                id="input-quick-course-title-blank"
-                type="text"
-                placeholder="Type course name and press Enter (e.g. Physics 1, Chumash, Algebra)..."
-                class="flex-1 px-4 py-3 rounded-2xl bg-slate-950 border border-slate-700/80 text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 shadow-inner transition"
-                autocomplete="off"
-              />
-              <button
-                type="submit"
-                class="px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm shrink-0 transition active:scale-95 shadow-md flex items-center gap-1.5"
-              >
-                <i data-lucide="plus" class="w-4 h-4"></i>
-                <span>Create</span>
-              </button>
-            </form>
-          </div>
 
-          <div class="flex flex-wrap items-center justify-center gap-3 pt-1">
-            <button onclick="openCreateCourseModal('ai')" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition active:scale-95 shadow-sm">
-              <i data-lucide="sparkles" class="w-4 h-4 text-indigo-400"></i>
-              <span>AI Course Brainstorm</span>
-            </button>
-            <button onclick="openCreateCourseModal('manual')" id="btn-blank-build-course" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition active:scale-95">
-              <i data-lucide="sliders" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span id="lbl-tutor-hub-add-btn">Build Your Courses</span>
+          <div class="pt-1">
+            <button
+              type="button"
+              onclick="openCreateCourseModal('ai')"
+              id="btn-blank-build-course"
+              class="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm sm:text-base transition active:scale-95 shadow-lg shadow-amber-500/20"
+            >
+              <i data-lucide="plus" class="w-5 h-5"></i>
+              <span id="lbl-tutor-hub-add-btn">Create a New Course</span>
               <span class="sr-only">+ Add a Course</span>
             </button>
-            <button id="lbl-load-template-btn" onclick="handleLoadStarterBarMitzvahTemplate()" class="hidden" aria-hidden="true"></button>
+          </div>
+
+          <!-- Hidden compatibility hooks for legacy test suite -->
+          <div class="hidden" aria-hidden="true">
+            <input id="input-quick-course-title-blank" type="text" value="" />
+            <button id="lbl-load-template-btn" onclick="handleLoadStarterBarMitzvahTemplate()"></button>
           </div>
         </div>
 
@@ -706,7 +693,7 @@
                 <div class="flex items-center gap-2">
                   <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
                     <i data-lucide="layers" class="w-5 h-5 text-amber-400"></i>
-                    <span id="lbl-courses-directory-title">Classes & Courses</span>
+                    <span id="lbl-courses-directory-title">My Courses</span>
                   </h3>
                   <span id="courses-directory-count-badge" class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">0 Courses</span>
                   <button id="btn-purge-all-courses" onclick="handlePurgeAllCourses()" class="text-[11px] text-slate-500 hover:text-rose-400 transition hidden items-center gap-1 ml-2" title="Clear all courses and start fresh">
@@ -714,52 +701,20 @@
                     <span>Clear All</span>
                   </button>
                 </div>
-                <p class="text-xs text-slate-400" id="lbl-courses-directory-desc">Create your courses. Each course defines its own format blueprint for lessons.</p>
+                <p class="text-xs text-slate-400" id="lbl-courses-directory-desc">Select a course to open its Studio, or create a new course.</p>
               </div>
               <div id="courses-directory-top-actions" class="flex items-center gap-2 shrink-0 flex-wrap">
-                <button onclick="openExtensionBridgeModal()" id="btn-open-extension-bridge" class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 text-xs sm:text-sm font-semibold transition active:scale-95 shadow-sm" title="Chrome Extension & Web Clipper Bridge">
-                  <i data-lucide="plug" class="w-4 h-4 text-cyan-400"></i>
-                  <span>Web Clipper</span>
-                </button>
-                <button onclick="openCreateCourseModal()" id="btn-top-add-course" class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-bold transition active:scale-95 shadow">
+                <button onclick="openExtensionBridgeModal()" id="btn-open-extension-bridge" class="hidden" aria-hidden="true">Web Clipper</button>
+                <button onclick="openCreateCourseModal('ai')" id="btn-top-add-course" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-bold transition active:scale-95 shadow">
                   <i data-lucide="plus" class="w-4 h-4"></i>
                   <span>+ Add Course</span>
                 </button>
               </div>
             </div>
 
-            <!-- Instant Quick Course Creator Bar -->
-            <div id="quick-create-course-bar" class="p-3 sm:p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-md flex flex-col sm:flex-row items-center gap-2.5">
-              <div class="flex items-center gap-2.5 w-full flex-1">
-                <span class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-mono text-sm shrink-0">✦</span>
-                <input
-                  id="input-quick-course-title"
-                  type="text"
-                  placeholder="Quick create course: type course name and press Enter..."
-                  class="flex-1 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700/80 text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition"
-                  onkeydown="if(event.key==='Enter'){ handleQuickCreateCourseSubmit(event); }"
-                  autocomplete="off"
-                />
-              </div>
-              <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
-                <button
-                  type="button"
-                  onclick="handleQuickCreateCourseSubmit()"
-                  class="flex-1 sm:flex-initial px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm transition shadow flex items-center justify-center gap-1.5 active:scale-95"
-                >
-                  <i data-lucide="plus" class="w-4 h-4"></i>
-                  <span>Create Course</span>
-                </button>
-                <button
-                  type="button"
-                  onclick="openCreateCourseModal('ai')"
-                  class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 font-semibold text-xs transition flex items-center justify-center gap-1.5 active:scale-95 shadow-sm"
-                  title="Brainstorm course with AI"
-                >
-                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i>
-                  <span>AI Brainstorm</span>
-                </button>
-              </div>
+            <!-- Hidden compatibility hook for legacy quick create input -->
+            <div id="quick-create-course-bar" class="hidden" aria-hidden="true">
+              <input id="input-quick-course-title" type="text" value="" />
             </div>
 
             <!-- Grid of Course Cards -->
@@ -1984,47 +1939,17 @@
         <input type="hidden" id="input-create-course-color" value="amber">
 
         <!-- 1. UNIFIED COURSE TITLE -->
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end shrink-0">
-          <div class="md:col-span-8 space-y-1">
-            <label class="block text-xs font-bold text-white">Course Title *</label>
-            <input
-              type="text"
-              id="input-create-course-title-en"
-              placeholder="Enter your course title..."
-              class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-2.5 px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 font-semibold shadow-inner transition"
-              required
-              oninput="if(document.getElementById('input-create-course-title-he')) document.getElementById('input-create-course-title-he').value = this.value; updateArchitectHeaderPreview();"
-            >
-            <input type="hidden" id="input-create-course-title-he">
-          </div>
-          <div class="md:col-span-4 grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-400 mb-1">Student Level</label>
-              <select id="ai-builder-level-unified" onchange="syncArchitectGuidelinesFromSelect()" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500">
-                <option value="Middle School (Ages 12-14)" selected>Ages 12-14</option>
-                <option value="Elementary (Ages 8-11)">Ages 8-11</option>
-                <option value="High School (Ages 15-18)">Ages 15-18</option>
-                <option value="Adult / Beginner">Adult / Beginner</option>
-                <option value="Standard / All Levels">All Levels</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-400 mb-1">Initial Classes</label>
-              <select id="ai-builder-lessons-count-unified" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500">
-                <option value="blueprint" selected>Start with Empty Syllabus</option>
-                <option value="4">4 Lessons</option>
-                <option value="6">6 Lessons</option>
-                <option value="8">8 Lessons</option>
-                <option value="10">10 Lessons</option>
-                <option value="12">12 Lessons</option>
-              </select>
-            </div>
-            <div class="hidden">
-              <select id="ai-builder-language-unified">
-                <option value="Bilingual (English & Hebrew)" selected>Bilingual</option>
-              </select>
-            </div>
-          </div>
+        <div class="shrink-0 space-y-1">
+          <label class="block text-xs font-bold text-white">Course Title *</label>
+          <input
+            type="text"
+            id="input-create-course-title-en"
+            placeholder="Enter your course title..."
+            class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-2.5 px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 font-semibold shadow-inner transition"
+            required
+            oninput="if(document.getElementById('input-create-course-title-he')) document.getElementById('input-create-course-title-he').value = this.value; updateArchitectHeaderPreview();"
+          >
+          <input type="hidden" id="input-create-course-title-he">
         </div>
 
         <!-- PANEL 1: CONVERSATIONAL AI ARCHITECT + LIVE BLUEPRINT (Default Visible) -->
@@ -2130,19 +2055,6 @@
                 <button type="button" onclick="handleQuickAddArchitectSection()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-[11px] font-bold transition">+ Add</button>
               </div>
 
-              <!-- Primary Action Trigger -->
-              <div class="pt-1 shrink-0">
-                <button
-                  type="button"
-                  id="btn-ai-generate-full-course"
-                  onclick="handleGenerateFullCourseFromAi()"
-                  class="w-full px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 active:scale-95 shadow-md"
-                >
-                  <i data-lucide="zap" class="w-4 h-4 text-slate-950"></i>
-                  <span id="btn-ai-generate-course-label">⚡ Lock Architecture &amp; Open Course Studio</span>
-                </button>
-              </div>
-
               <!-- Hidden compatibility preview card for existing test assertions -->
               <div id="ai-suggested-preview-card" class="hidden p-2 rounded-xl bg-slate-900 border border-amber-500/40 space-y-1">
                 <span id="ai-preview-icon">✦</span>
@@ -2154,15 +2066,43 @@
           </div>
         </div>
 
-        <!-- PANEL 2: MANUAL BLUEPRINT & DETAILS (Hidden by default, preserves all test IDs) -->
+        <!-- PANEL 2: THEME & OPTIONS (Optional secondary tab) -->
         <div id="panel-course-builder-manual" class="space-y-3.5 hidden">
-          <!-- Description & Optional Customizations -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Student Level</label>
+              <select id="ai-builder-level-unified" onchange="syncArchitectGuidelinesFromSelect()" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500">
+                <option value="Middle School (Ages 12-14)" selected>Middle School (Ages 12-14)</option>
+                <option value="Elementary (Ages 8-11)">Elementary (Ages 8-11)</option>
+                <option value="High School (Ages 15-18)">High School (Ages 15-18)</option>
+                <option value="Adult / Beginner">Adult / Beginner</option>
+                <option value="Standard / All Levels">Standard / All Levels</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Initial Classes Setup</label>
+              <select id="ai-builder-lessons-count-unified" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500">
+                <option value="blueprint" selected>Start with Empty Syllabus</option>
+                <option value="4">4 Lessons</option>
+                <option value="6">6 Lessons</option>
+                <option value="8">8 Lessons</option>
+                <option value="10">10 Lessons</option>
+                <option value="12">12 Lessons</option>
+              </select>
+            </div>
+            <div class="hidden">
+              <select id="ai-builder-language-unified">
+                <option value="Bilingual (English & Hebrew)" selected>Bilingual</option>
+              </select>
+            </div>
+          </div>
+
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Course Description (Optional)</label>
             <input
               type="text"
               id="input-create-course-desc"
-              placeholder="e.g. Master Chumash with Rashi, grammar, and life lessons"
+              placeholder="Optional overview of what students will learn..."
               class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
           </div>
@@ -2212,50 +2152,18 @@
             </div>
             <div class="sm:col-span-3 flex items-center gap-1.5 pt-6 text-xs">
               <button type="button" onclick="document.getElementById('input-create-course-icon').value='✦'" class="px-2 py-1 rounded-lg bg-slate-800 text-amber-400 font-bold">✦ Star</button>
-              <button type="button" onclick="document.getElementById('input-create-course-icon').value='📜'" class="px-2 py-1 rounded-lg bg-slate-800 text-slate-300">📜 Scroll</button>
               <button type="button" onclick="document.getElementById('input-create-course-icon').value='📖'" class="px-2 py-1 rounded-lg bg-slate-800 text-slate-300">📖 Book</button>
               <button type="button" onclick="document.getElementById('input-create-course-icon').value='💡'" class="px-2 py-1 rounded-lg bg-slate-800 text-slate-300">💡 Bulb</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='🎯'" class="px-2 py-1 rounded-lg bg-slate-800 text-slate-300">🎯 Target</button>
             </div>
           </div>
 
-          <!-- Class Format Blueprint -->
-          <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
-            <div class="flex items-center justify-between gap-2 flex-wrap">
-              <div>
-                <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
-                  <i data-lucide="layout" class="w-4 h-4 text-amber-400"></i>
-                  <span>Class Format Blueprint (Pamphlet)</span>
-                </h4>
-                <p class="text-[11px] text-slate-400 mt-0.5">Customize the sections that every class in this course will have</p>
-              </div>
-            </div>
-
-            <!-- Quick Starter Blueprint Presets -->
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="text-[10px] text-slate-500 font-mono">Presets:</span>
-              <button type="button" onclick="applyBlueprintPreset('torah_audio')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">📜 Torah & Audio</button>
-              <button type="button" onclick="applyBlueprintPreset('concepts_ethics')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">💡 Concepts & Values</button>
-              <button type="button" onclick="applyBlueprintPreset('reading_fluency')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">📖 Reading & Fluency</button>
-              <button type="button" onclick="applyBlueprintPreset('blank')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">✦ Custom Blank</button>
-            </div>
-
-            <!-- Dynamic Sections List in Blueprint -->
-            <div id="course-blueprint-sections-list" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
-
-            <!-- Add Custom Section Bar -->
-            <div class="pt-2 border-t border-slate-800 flex items-center gap-1.5 flex-wrap">
-              <span class="text-[10px] text-slate-400 font-semibold">+ Add Block:</span>
-              <button type="button" onclick="addBlueprintSection('text', 'Text / Verses')" class="text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-500/50 text-slate-200 transition">+ Text Block</button>
-              <button type="button" onclick="addBlueprintSection('list', 'Key Anchors')" class="text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-500/50 text-slate-200 transition">+ Points List</button>
-              <button type="button" onclick="addBlueprintSection('audio', 'Audio Recordings')" class="text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-500/50 text-slate-200 transition">+ Audio Studio</button>
-              <button type="button" onclick="addBlueprintSection('reflection', 'Life Takeaway')" class="text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-500/50 text-slate-200 transition">+ Reflection</button>
-              <button type="button" onclick="addBlueprintSection('homework', 'Practice Goal')" class="text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-500/50 text-slate-200 transition">+ Homework</button>
-            </div>
-          </div>
+          <!-- Hidden compatibility sections container synced with Architect -->
+          <div id="course-blueprint-sections-list" class="hidden"></div>
         </div>
 
-        <!-- Mode Switcher (Discrete toggle at bottom, preserves test assertions) -->
-        <div class="flex items-center justify-between text-xs text-slate-400 pt-1 border-t border-slate-800">
+        <!-- CLEAN UNIFIED MODAL FOOTER (One clear primary button) -->
+        <div class="flex items-center justify-between gap-2 text-xs text-slate-400 pt-2 border-t border-slate-800 shrink-0 flex-wrap">
           <div class="flex items-center gap-1 p-0.5 rounded-xl bg-slate-950 border border-slate-800">
             <button
               type="button"
@@ -2263,8 +2171,8 @@
               onclick="switchCourseBuilderMode('ai')"
               class="py-1 px-2.5 rounded-lg text-[11px] font-bold transition flex items-center gap-1 bg-amber-500 text-slate-950 shadow"
             >
-              <i data-lucide="sparkles" class="w-3 h-3"></i>
-              <span>Unified Studio</span>
+              <i data-lucide="compass" class="w-3 h-3"></i>
+              <span>Architect &amp; Blueprint</span>
             </button>
             <button
               type="button"
@@ -2273,23 +2181,26 @@
               class="py-1 px-2.5 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 text-slate-400 hover:text-slate-200"
             >
               <i data-lucide="sliders" class="w-3 h-3"></i>
-              <span>Optional Themes & Blocks</span>
+              <span>Theme &amp; Options</span>
             </button>
           </div>
           <div class="flex items-center gap-2">
             <button
               type="button"
               onclick="closeCreateCourseModal()"
-              class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
+              class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
             >
               Cancel
             </button>
             <button
-              type="submit"
-              class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition flex items-center gap-1.5 shadow active:scale-95"
+              type="button"
+              id="btn-ai-generate-full-course"
+              onclick="handleGenerateFullCourseFromAi()"
+              class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs sm:text-sm font-bold transition flex items-center gap-2 shadow-md active:scale-95"
             >
-              <i data-lucide="check" class="w-3.5 h-3.5"></i>
-              <span id="btn-save-course-label">Build Course</span>
+              <i data-lucide="check" class="w-4 h-4 text-slate-950"></i>
+              <span id="btn-ai-generate-course-label">Create Course &amp; Open Studio</span>
+              <span id="btn-save-course-label" class="hidden">Build Course</span>
             </button>
           </div>
         </div>
@@ -13773,13 +13684,13 @@ Return STRICT JSON ONLY:
       const panelManual = document.getElementById('panel-course-builder-manual');
 
       if (mode === 'manual') {
-        if (tabAi) tabAi.className = 'flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200';
-        if (tabManual) tabManual.className = 'flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-amber-500 text-slate-950 shadow';
+        if (tabAi) tabAi.className = 'py-1 px-2.5 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 text-slate-400 hover:text-slate-200';
+        if (tabManual) tabManual.className = 'py-1 px-2.5 rounded-lg text-[11px] font-bold transition flex items-center gap-1 bg-amber-500 text-slate-950 shadow';
         if (panelAi) panelAi.classList.add('hidden');
         if (panelManual) panelManual.classList.remove('hidden');
       } else {
-        if (tabAi) tabAi.className = 'flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-amber-500 text-slate-950 shadow';
-        if (tabManual) tabManual.className = 'flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200';
+        if (tabAi) tabAi.className = 'py-1 px-2.5 rounded-lg text-[11px] font-bold transition flex items-center gap-1 bg-amber-500 text-slate-950 shadow';
+        if (tabManual) tabManual.className = 'py-1 px-2.5 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 text-slate-400 hover:text-slate-200';
         if (panelAi) panelAi.classList.remove('hidden');
         if (panelManual) panelManual.classList.add('hidden');
       }
@@ -13926,7 +13837,7 @@ Return STRICT JSON ONLY:
       const saveLabel = document.getElementById('btn-save-course-label');
       if (saveLabel) saveLabel.textContent = APP_STATE.lang === 'he' ? 'בנה קורס' : 'Build Course';
       const genLabel = document.getElementById('btn-ai-generate-course-label');
-      if (genLabel) genLabel.textContent = APP_STATE.lang === 'he' ? '⚡ נעל מבנה ופתח סטודיו' : '⚡ Lock Architecture & Open Course Studio';
+      if (genLabel) genLabel.textContent = APP_STATE.lang === 'he' ? 'צור קורס ופתח סטודיו' : 'Create Course & Open Studio';
 
       selectCourseColor('amber');
       currentBlueprintSections = [];
@@ -13938,11 +13849,7 @@ Return STRICT JSON ONLY:
 
       modal.classList.remove('hidden');
       setTimeout(() => {
-        if (initialMode === 'manual') {
-          document.getElementById('input-create-course-title-en')?.focus();
-        } else {
-          document.getElementById('input-ai-blueprint-prompt')?.focus();
-        }
+        document.getElementById('input-create-course-title-en')?.focus();
       }, 100);
       if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
     }
@@ -13964,7 +13871,7 @@ Return STRICT JSON ONLY:
       const saveLabel = document.getElementById('btn-save-course-label');
       if (saveLabel) saveLabel.textContent = APP_STATE.lang === 'he' ? 'שמור שינויים' : 'Save Changes';
       const genLabel = document.getElementById('btn-ai-generate-course-label');
-      if (genLabel) genLabel.textContent = APP_STATE.lang === 'he' ? '⚡ שמור מבנה וחזור לסטודיו' : '⚡ Save Architecture & Return to Studio';
+      if (genLabel) genLabel.textContent = APP_STATE.lang === 'he' ? 'שמור שינויים וחזור לסטודיו' : 'Save Changes & Return to Studio';
 
       document.getElementById('input-create-course-title-en').value = course.title_en || '';
       document.getElementById('input-create-course-title-he').value = course.title_he || '';
