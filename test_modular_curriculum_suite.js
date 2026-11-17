@@ -2757,6 +2757,68 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(!visibleStudentIds.includes('stu_super_1'), 'External user cannot see Super Admin students');
   assert(visibleStudentIds.includes('stu_david_1'), 'External user can see their own students');
 
+  // ==============================================
+  // GATE 30: CONVERSATIONAL AI COURSE ARCHITECT & DYNAMIC BLUEPRINT STUDIO
+  // ==============================================
+  console.log('\n--- Gate 30: Conversational AI Course Architect & Dynamic Blueprint Studio ---');
+
+  // 1. Universal Block Catalog & Architect Functions
+  assert(typeof sandbox.COURSE_BLOCK_CATALOG === 'object', 'COURSE_BLOCK_CATALOG is defined');
+  assert(Object.keys(sandbox.COURSE_BLOCK_CATALOG).length >= 10, 'COURSE_BLOCK_CATALOG provides 10+ versatile block types');
+  assert(typeof sandbox.applyArchitectBlueprintUpdate === 'function', 'applyArchitectBlueprintUpdate is a function');
+  assert(typeof sandbox.handleQuickAddArchitectSection === 'function', 'handleQuickAddArchitectSection is a function');
+  assert(typeof sandbox.moveBlueprintSection === 'function', 'moveBlueprintSection is a function');
+  assert(typeof sandbox.handleStudioMiniBlockCustomAi === 'function', 'handleStudioMiniBlockCustomAi is a function');
+
+  // 2. Conversational AI Architect designs a custom course structure first
+  sandbox.APP_STATE.currentUser = superAdminSession;
+  sandbox.openCreateCourseModal('ai');
+  getOrCreateElem('input-create-course-title-en').value = 'Guitar & Songwriting Lab';
+  getOrCreateElem('input-ai-blueprint-prompt').value = 'Build a music course with scales, chord drills, repertoire, and audio recordings';
+  await sandbox.handleAiSuggestBlueprint();
+
+  const chatHtml = getOrCreateElem('architect-chat-messages').innerHTML;
+  assert(chatHtml.includes('AI Course Architect'), 'Architect chat renders conversational AI reply');
+  assert(chatHtml.includes('Music') || chatHtml.includes('Warmup'), 'Architect chat reflects music course discussion');
+  assert(sandbox.currentBlueprintSections.length >= 4, 'Live blueprint updated with custom music sections');
+
+  // 3. Manual side edit: add and reorder a section + set guidelines
+  getOrCreateElem('architect-add-block-type').value = 'discussion';
+  getOrCreateElem('architect-add-block-name').value = 'Ear Training Q&A';
+  sandbox.handleQuickAddArchitectSection();
+  assert(sandbox.currentBlueprintSections.some(s => s.name === 'Ear Training Q&A'), 'Manual side edit added custom section');
+  getOrCreateElem('input-architect-student-profile').value = 'Teen beginner guitarists';
+  sandbox.updateArchitectMetadataField('student_profile', 'Teen beginner guitarists');
+  getOrCreateElem('input-architect-guidelines').value = '5-min prep, hands-on practice';
+  sandbox.updateArchitectMetadataField('guidelines', '5-min prep, hands-on practice');
+
+  // 4. Save course & verify Dynamic Studio renders ONLY custom blueprint sections (NOT hardcoded generic blocks)
+  getOrCreateElem('ai-builder-lessons-count-unified').value = 'blueprint';
+  await sandbox.handleGenerateFullCourseFromAi();
+  const musicCourse = sandbox.APP_STATE.customCourses.find(c => c.title_en === 'Guitar & Songwriting Lab');
+  assert(!!musicCourse, 'Music course created from AI Architect');
+  assert(musicCourse.blueprint.student_profile === 'Teen beginner guitarists', 'Course saved target student profile');
+  assert(musicCourse.blueprint.guidelines === '5-min prep, hands-on practice', 'Course saved teaching guidelines');
+
+  getOrCreateElem('input-studio-quick-class').value = 'Class 1: Open Chords & Strumming';
+  sandbox.handleStudioQuickAddClass(null, musicCourse.id);
+  const studioMusicHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(studioMusicHtml.includes('Warmup &amp; Scales') || studioMusicHtml.includes('Warmup & Scales'), 'Dynamic Studio renders custom Music section Warmup & Scales');
+  assert(studioMusicHtml.includes('Ear Training Q&amp;A') || studioMusicHtml.includes('Ear Training Q&A'), 'Dynamic Studio renders manually added custom section');
+  assert(!studioMusicHtml.includes('Teacher Secret Cheat Sheet'), 'Dynamic Studio does NOT force hardcoded Teacher Secret Cheat Sheet onto custom Music course');
+
+  // 5. Architecture-Aware AI Class Generation populates custom section IDs
+  sandbox.openStudioAiCoPilotModal(musicCourse.id, musicCourse.lessons[0].id);
+  await sandbox.executeStudioAiGenerateFullClass();
+  sandbox.applyGeneratedContentToActiveClass();
+  const firstMusicSecId = musicCourse.blueprint.sections[0].id;
+  assert(Boolean(musicCourse.lessons[0].sections[firstMusicSecId]), 'Architecture-aware AI populated custom section ID directly');
+
+  // 6. Reopen Architect for existing course to continue refining without losing classes
+  sandbox.openEditCustomCourseModal(musicCourse.id);
+  assert(getOrCreateElem('input-architect-student-profile').value === 'Teen beginner guitarists', 'Reopening Architect preserves existing student profile');
+  assert(musicCourse.lessons.length === 1, 'Existing classes preserved when reopening Course Architect');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);

@@ -809,8 +809,9 @@
                   <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
                   <span>AI Create Class</span>
                 </button>
-                <button onclick="openEditCurrentCourseModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition" title="Edit Course Details">
-                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                <button onclick="openEditCurrentCourseModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition active:scale-95" title="Discuss & Edit Course Blueprint / Architecture">
+                  <i data-lucide="layout" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span class="hidden sm:inline">Course Blueprint</span>
                 </button>
                 <button onclick="handleDeleteActiveCustomCourse()" class="p-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 hover:text-rose-400 text-slate-400 text-xs transition" title="Delete Course">
                   <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
@@ -1960,145 +1961,203 @@
   <!-- ============================================== -->
   <!-- MODAL: BUILD YOUR COURSE (UNIFIED STUDIO)      -->
   <!-- ============================================== -->
-  <div id="modal-create-course" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
-    <div class="max-w-xl w-full max-h-[92vh] bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+  <div id="modal-create-course" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-4 hidden backdrop-blur-sm">
+    <div class="max-w-5xl w-full max-h-[94vh] bg-slate-900 border border-slate-700 rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 shrink-0">
         <div>
           <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            <i data-lucide="book-plus" class="w-5 h-5 text-amber-400"></i>
-            <span id="modal-create-course-title">Build Your Course</span>
+            <i data-lucide="compass" class="w-5 h-5 text-amber-400"></i>
+            <span id="modal-create-course-title">AI Course Architect</span>
           </h3>
-          <p class="text-xs text-slate-400 mt-0.5">Name your course and start building your classes with AI</p>
+          <p class="text-xs text-slate-400 mt-0.5">Discuss your vision with the AI to design your custom class structure &amp; guidelines first</p>
         </div>
-        <button type="button" onclick="closeCreateCourseModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+        <button type="button" onclick="closeCreateCourseModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <form onsubmit="handleSaveCustomCourse(event)" class="space-y-4 flex-1 overflow-y-auto pr-1">
+      <form onsubmit="handleSaveCustomCourse(event)" class="space-y-3 flex-1 overflow-y-auto pr-1 flex flex-col">
         <!-- Hidden compatibility fields to ensure test compatibility -->
-        <input type="hidden" id="input-create-course-format-type" value="standard">
+        <input type="hidden" id="input-create-course-format-type" value="custom_blueprint">
         <input type="hidden" id="input-create-course-category" value="General Curriculum">
         <input type="hidden" id="input-create-course-level" value="Standard / All Levels">
         <input type="hidden" id="input-create-course-color" value="amber">
 
-        <!-- 1. UNIFIED COURSE TITLE (Single prominent input) -->
-        <div class="space-y-1.5">
-          <label class="block text-xs font-bold text-white">Course Title *</label>
-          <input
-            type="text"
-            id="input-create-course-title-en"
-            placeholder="e.g. Chumash: Parshiot of the Torah, Jewish Ethics, Geometry..."
-            class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 font-semibold shadow-inner transition"
-            required
-            oninput="if(document.getElementById('input-create-course-title-he')) document.getElementById('input-create-course-title-he').value = this.value;"
-          >
-          <input type="hidden" id="input-create-course-title-he">
+        <!-- 1. UNIFIED COURSE TITLE -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end shrink-0">
+          <div class="md:col-span-8 space-y-1">
+            <label class="block text-xs font-bold text-white">Course Title *</label>
+            <input
+              type="text"
+              id="input-create-course-title-en"
+              placeholder="e.g. General Jewish Core Concepts, Guitar Foundations, Algebra 1..."
+              class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-2.5 px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 font-semibold shadow-inner transition"
+              required
+              oninput="if(document.getElementById('input-create-course-title-he')) document.getElementById('input-create-course-title-he').value = this.value; updateArchitectHeaderPreview();"
+            >
+            <input type="hidden" id="input-create-course-title-he">
+          </div>
+          <div class="md:col-span-4 grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-400 mb-1">Student Level</label>
+              <select id="ai-builder-level-unified" onchange="syncArchitectGuidelinesFromSelect()" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500">
+                <option value="Middle School (Ages 12-14)" selected>Ages 12-14</option>
+                <option value="Elementary (Ages 8-11)">Ages 8-11</option>
+                <option value="High School (Ages 15-18)">Ages 15-18</option>
+                <option value="Adult / Beginner">Adult / Beginner</option>
+                <option value="Standard / All Levels">All Levels</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-400 mb-1">Initial Classes</label>
+              <select id="ai-builder-lessons-count-unified" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500">
+                <option value="blueprint" selected>Start with Empty Syllabus</option>
+                <option value="4">4 Lessons</option>
+                <option value="6">6 Lessons</option>
+                <option value="8">8 Lessons</option>
+                <option value="10">10 Lessons</option>
+                <option value="12">12 Lessons</option>
+              </select>
+            </div>
+            <div class="hidden">
+              <select id="ai-builder-language-unified">
+                <option value="Bilingual (English & Hebrew)" selected>Bilingual</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <!-- PANEL 1: AI COURSE STUDIO & DISCUSSION (Default Visible) -->
-        <div id="panel-course-builder-ai" class="space-y-4">
-          <div class="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 via-slate-900 to-brand-500/10 border border-amber-500/30 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-                <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-                <span>Curriculum Ideas & Discussion</span>
-              </span>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">AI Assisted</span>
-            </div>
-
-            <!-- AI Discussion Prompt Input -->
-            <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1">What would you like to cover in this course?</label>
-              <textarea
-                id="input-ai-blueprint-prompt"
-                rows="3"
-                placeholder="e.g. Each Parsha from the Torah in individual lessons with main bullet points, an interesting story or Rashi, and day-to-day life lessons for 12-13 year olds..."
-                class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed"
-              ></textarea>
-            </div>
-
-            <!-- Quick Topic Inspiration Tags -->
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="text-[10px] text-slate-400 font-mono">Quick ideas:</span>
-              <button type="button" onclick="setAiCoursePrompt('📜 Chumash: Parshiot of the Torah with Rashi & Life Lessons')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition">📜 Chumash Parshiot</button>
-              <button type="button" onclick="setAiCoursePrompt('💡 Jewish Ethics: Modern Everyday Scenarios for Teens')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">💡 Ethics</button>
-              <button type="button" onclick="setAiCoursePrompt('📐 8th Grade Geometry - Triangles & Proofs')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">📐 Math</button>
-              <button type="button" onclick="setAiCoursePrompt('🌍 Conversational Hebrew: Everyday Fluency')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">🌍 Hebrew</button>
-            </div>
-
-            <!-- Pedagogical Parameters -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-              <div>
-                <label class="block text-[11px] font-semibold text-slate-400 mb-1">Target Student Level</label>
-                <select id="ai-builder-level-unified" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500">
-                  <option value="Middle School (Ages 12-14)" selected>Middle School (Ages 12-14)</option>
-                  <option value="Elementary (Ages 8-11)">Elementary (Ages 8-11)</option>
-                  <option value="High School (Ages 15-18)">High School (Ages 15-18)</option>
-                  <option value="Adult / Beginner">Adult / Beginner</option>
-                  <option value="Standard / All Levels">Standard / All Levels</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-slate-400 mb-1">Classes Setup</label>
-                <select id="ai-builder-lessons-count-unified" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500">
-                  <option value="blueprint" selected>Start with Empty Syllabus</option>
-                  <option value="4">4 Lessons</option>
-                  <option value="6">6 Lessons</option>
-                  <option value="8">8 Lessons</option>
-                  <option value="10">10 Lessons</option>
-                  <option value="12">12 Lessons</option>
-                </select>
-              </div>
-              <div class="hidden">
-                <select id="ai-builder-language-unified">
-                  <option value="Bilingual (English & Hebrew)" selected>Bilingual</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Action Triggers -->
-            <div class="flex flex-col sm:flex-row items-center gap-2 pt-2 border-t border-slate-800/80">
-              <button
-                type="button"
-                id="btn-ai-blueprint-suggest"
-                onclick="handleAiSuggestBlueprint()"
-                class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 text-xs font-bold transition flex items-center justify-center gap-2 active:scale-95 shadow-sm"
-              >
-                <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-                <span>💬 Discuss with AI</span>
-              </button>
-              <button
-                type="button"
-                id="btn-ai-generate-full-course"
-                onclick="handleGenerateFullCourseFromAi()"
-                class="w-full sm:w-auto flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 active:scale-95 shadow-md"
-              >
-                <i data-lucide="zap" class="w-4 h-4 text-slate-950"></i>
-                <span>⚡ Build Course & Open Studio</span>
-              </button>
-            </div>
-
-            <!-- AI Loading State -->
-            <div id="course-builder-ai-loading" class="hidden py-3 text-center space-y-2">
-              <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-medium animate-pulse">
-                <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>
-                <span id="course-builder-ai-loading-text">Designing your course...</span>
-              </div>
-            </div>
-
-            <!-- Interactive AI Structure Preview Card -->
-            <div id="ai-suggested-preview-card" class="hidden p-3.5 rounded-2xl bg-slate-950 border border-amber-500/40 space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-white flex items-center gap-1.5">
-                  <span id="ai-preview-icon" class="text-base text-amber-400 font-mono">✦</span>
-                  <span id="ai-preview-title">Suggested Course</span>
+        <!-- PANEL 1: CONVERSATIONAL AI ARCHITECT + LIVE BLUEPRINT (Default Visible) -->
+        <div id="panel-course-builder-ai" class="flex-1 min-h-0">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full">
+            <!-- LEFT PANE: MULTI-TURN AI ARCHITECT DISCUSSION -->
+            <div class="lg:col-span-6 flex flex-col rounded-2xl bg-slate-950/70 border border-amber-500/30 p-3.5 space-y-3 min-h-[340px] max-h-[54vh]">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2 shrink-0">
+                <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                  <i data-lucide="message-square-sparkles" class="w-4 h-4 text-amber-400"></i>
+                  <span>1. Discuss Structure with AI Architect</span>
                 </span>
+                <button type="button" onclick="resetArchitectConversation()" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">New Chat</button>
               </div>
-              <p id="ai-preview-desc" class="text-[11px] text-slate-400 line-clamp-2"></p>
-              <div class="flex items-center gap-1.5 pt-1">
-                <span class="text-[10px] text-slate-500 font-mono">Format Blocks:</span>
-                <div id="ai-preview-sections" class="flex flex-wrap gap-1"></div>
+
+              <!-- Chat Messages Feed -->
+              <div id="architect-chat-messages" class="flex-1 overflow-y-auto space-y-2.5 pr-1 text-xs leading-relaxed"></div>
+
+              <!-- Quick Topic Inspiration Tags -->
+              <div class="flex items-center gap-1.5 flex-wrap shrink-0">
+                <span class="text-[10px] text-slate-500 font-mono">Ideas:</span>
+                <button type="button" onclick="setAiCoursePrompt('I want a General Jewish Core Concepts course for 12-13 year old secular boys: 5-min review, 15-min talk, bullet points, story or Rashi gem, life takeaway.')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition">💡 Jewish Concepts</button>
+                <button type="button" onclick="setAiCoursePrompt('Design a Guitar & Music Theory course with warmup scales, chord drills, repertoire song, and audio recordings.')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">🎸 Music</button>
+                <button type="button" onclick="setAiCoursePrompt('Design an 8th Grade Algebra course with core formula, worked example, common traps, and 5 practice drills.')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">📐 Math</button>
+                <button type="button" onclick="setAiCoursePrompt('Design a Chumash course with story flow, key ideas, Rashi insight, and real-life lesson.')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">📜 Chumash</button>
+              </div>
+
+              <!-- AI Loading State -->
+              <div id="course-builder-ai-loading" class="hidden py-1.5 text-center shrink-0">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-medium animate-pulse">
+                  <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>
+                  <span id="course-builder-ai-loading-text">Architecting your course structure...</span>
+                </div>
+              </div>
+
+              <!-- Message Input & Send -->
+              <div class="flex items-end gap-2 pt-1 border-t border-slate-800/80 shrink-0">
+                <textarea
+                  id="input-ai-blueprint-prompt"
+                  rows="2"
+                  placeholder="Tell the AI what you want in each class, who your students are, or ask it to add/change sections..."
+                  onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); handleAiSuggestBlueprint(); }"
+                  class="flex-1 bg-slate-900 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed resize-none"
+                ></textarea>
+                <button
+                  type="button"
+                  id="btn-ai-blueprint-suggest"
+                  onclick="handleAiSuggestBlueprint()"
+                  class="px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shadow shrink-0"
+                  title="Send message to AI Architect"
+                >
+                  <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                  <span>Send</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- RIGHT PANE: LIVE EDITABLE COURSE ARCHITECTURE & GUIDELINES -->
+            <div id="architect-live-blueprint" class="lg:col-span-6 flex flex-col rounded-2xl bg-slate-950/70 border border-slate-800 p-3.5 space-y-2.5 min-h-[340px] max-h-[54vh]">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2 shrink-0">
+                <span class="text-xs font-bold text-white flex items-center gap-1.5">
+                  <i data-lucide="layout-template" class="w-4 h-4 text-emerald-400"></i>
+                  <span>2. Live Course Blueprint (Every Class Follows This)</span>
+                </span>
+                <span id="architect-sections-count-badge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">0 sections</span>
+              </div>
+
+              <!-- Target Student & Guidelines -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 shrink-0">
+                <div>
+                  <label class="block text-[10px] font-mono uppercase text-slate-400 mb-0.5">Target Students</label>
+                  <input
+                    type="text"
+                    id="input-architect-student-profile"
+                    placeholder="e.g. 12-13 yr old secular boys"
+                    oninput="updateArchitectMetadataField('student_profile', this.value)"
+                    class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-1.5 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                  >
+                </div>
+                <div>
+                  <label class="block text-[10px] font-mono uppercase text-slate-400 mb-0.5">Teaching &amp; Style Guidelines</label>
+                  <input
+                    type="text"
+                    id="input-architect-guidelines"
+                    placeholder="e.g. 5m prep, 15m talk, plain English"
+                    oninput="updateArchitectMetadataField('guidelines', this.value)"
+                    class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-1.5 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                  >
+                </div>
+              </div>
+
+              <!-- Live Custom Sections List -->
+              <div id="architect-sections-list" class="flex-1 overflow-y-auto space-y-2 pr-1"></div>
+
+              <!-- Quick Manual Add Section Bar -->
+              <div class="pt-2 border-t border-slate-800/80 flex items-center gap-1.5 flex-wrap shrink-0">
+                <span class="text-[10px] text-slate-400 font-semibold">+ Add Section:</span>
+                <select id="architect-add-block-type" class="bg-slate-900 border border-slate-700 rounded-lg py-1 px-2 text-[11px] text-slate-200 focus:outline-none focus:border-amber-400">
+                  <option value="text">📝 Text / Explanation</option>
+                  <option value="list">📌 Bullet Points List</option>
+                  <option value="steps">🔢 Step-by-Step Flow</option>
+                  <option value="quote">📖 Primary Source / Formula</option>
+                  <option value="example">💡 Story / Worked Example</option>
+                  <option value="exercise">⚡ Practice Drill / Exercise</option>
+                  <option value="pitfalls">⚠️ Common Pitfalls</option>
+                  <option value="discussion">💬 Discussion Question</option>
+                  <option value="reflection">🌱 Life Takeaway / Reflection</option>
+                  <option value="homework">🏠 Homework Challenge</option>
+                  <option value="audio">🎙️ Audio Studio / Recording</option>
+                </select>
+                <input type="text" id="architect-add-block-name" placeholder="Section name..." class="flex-1 min-w-[110px] bg-slate-900 border border-slate-700 rounded-lg py-1 px-2 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-amber-400" onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleQuickAddArchitectSection(); }">
+                <button type="button" onclick="handleQuickAddArchitectSection()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-[11px] font-bold transition">+ Add</button>
+              </div>
+
+              <!-- Primary Action Trigger -->
+              <div class="pt-1 shrink-0">
+                <button
+                  type="button"
+                  id="btn-ai-generate-full-course"
+                  onclick="handleGenerateFullCourseFromAi()"
+                  class="w-full px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 active:scale-95 shadow-md"
+                >
+                  <i data-lucide="zap" class="w-4 h-4 text-slate-950"></i>
+                  <span id="btn-ai-generate-course-label">⚡ Lock Architecture &amp; Open Course Studio</span>
+                </button>
+              </div>
+
+              <!-- Hidden compatibility preview card for existing test assertions -->
+              <div id="ai-suggested-preview-card" class="hidden p-2 rounded-xl bg-slate-900 border border-amber-500/40 space-y-1">
+                <span id="ai-preview-icon">✦</span>
+                <span id="ai-preview-title">Suggested Course</span>
+                <p id="ai-preview-desc"></p>
+                <div id="ai-preview-sections"></div>
               </div>
             </div>
           </div>
@@ -9960,6 +10019,112 @@ alter publication supabase_realtime add table public.students_sync;`;
 
               <!-- Modular Blocks Container -->
               <div id="studio-modular-blocks-container" class="space-y-4">
+                ${hasCustomSections ? `
+                  ${(activeCourse.blueprint && (activeCourse.blueprint.student_profile || activeCourse.blueprint.guidelines)) ? `
+                    <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between gap-2 flex-wrap text-[11px]">
+                      <div class="flex items-center gap-2 text-slate-300 flex-wrap">
+                        <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-mono font-bold">Course Blueprint</span>
+                        ${activeCourse.blueprint.student_profile ? `<span><strong class="text-slate-400">Students:</strong> ${escapeHtml(activeCourse.blueprint.student_profile)}</span>` : ''}
+                        ${activeCourse.blueprint.guidelines ? `<span>• <strong class="text-slate-400">Guidelines:</strong> ${escapeHtml(activeCourse.blueprint.guidelines)}</span>` : ''}
+                      </div>
+                      <button type="button" onclick="openEditCurrentCourseModal()" class="text-amber-400 hover:text-amber-300 font-semibold shrink-0 flex items-center gap-1">
+                        <i data-lucide="sliders" class="w-3 h-3"></i> Edit Architecture
+                      </button>
+                    </div>
+                  ` : ''}
+                  <div class="space-y-4">
+                    ${blueprintSections.map(sec => {
+                      const meta = (typeof COURSE_BLOCK_CATALOG !== 'undefined' && COURSE_BLOCK_CATALOG[sec.type]) ? COURSE_BLOCK_CATALOG[sec.type] : { label: 'Section', icon: 'layers', color: 'amber', placeholder: 'Enter content...' };
+                      const secVal = (selectedLesson.sections && selectedLesson.sections[sec.id]) || '';
+                      if (sec.type === 'audio') {
+                        return `
+                          <div class="p-4 rounded-2xl bg-slate-900/80 border border-emerald-900/40 space-y-3">
+                            <div class="flex items-center justify-between">
+                              <span class="text-xs font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
+                                <i data-lucide="mic" class="w-4 h-4 text-emerald-400"></i>
+                                <span>${escapeHtml(sec.name)}</span>
+                              </span>
+                              <span class="text-[10px] font-mono text-slate-400">Audio & Voice Recordings • ${selectedRecordings.length} file(s)</span>
+                            </div>
+                            ${selectedRecordings.length > 0 ? `
+                              <div class="space-y-2">
+                                ${selectedRecordings.map(rec => `
+                                  <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                      <i data-lucide="volume-2" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                                      <span class="text-xs text-white font-medium truncate">${escapeHtml(rec.title || 'Lesson Audio')}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                      <audio controls src="${escapeHtml(rec.url)}" class="h-8 max-w-[220px]"></audio>
+                                      <button type="button" onclick="deleteLessonAudio('${activeCourse.id}', '${selectedLesson.id}', '${rec.id}')" class="text-slate-500 hover:text-red-400 p-1 rounded" title="Delete Recording">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                      </button>
+                                    </div>
+                                  </div>
+                                `).join('')}
+                              </div>
+                            ` : `
+                              <p class="text-xs text-slate-500 italic">No audio attached to this class yet. Record a voice memo or upload an audio file.</p>
+                            `}
+                            <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/60">
+                              <button type="button" onclick="startVoiceRecording('lesson', '${selectedLesson.id}', '${activeCourse.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition active:scale-95">
+                                <i data-lucide="mic" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                <span>Record Voice Memo</span>
+                              </button>
+                              <button type="button" onclick="triggerLessonAudioUpload('${activeCourse.id}', '${selectedLesson.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition active:scale-95">
+                                <i data-lucide="upload" class="w-3.5 h-3.5 text-slate-400"></i>
+                                <span>Upload Audio File</span>
+                              </button>
+                              <button type="button" onclick="promptLessonAudioLink('${activeCourse.id}', '${selectedLesson.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition active:scale-95">
+                                <i data-lucide="link" class="w-3.5 h-3.5 text-slate-400"></i>
+                                <span>Audio Link</span>
+                              </button>
+                            </div>
+                            <textarea
+                              rows="2"
+                              placeholder="${escapeHtml(sec.ai_rule || meta.placeholder)}"
+                              oninput="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'sections.${sec.id}', this.value)"
+                              onblur="saveCustomCoursesToStorage(true)"
+                              class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400"
+                            >${escapeHtml(secVal)}</textarea>
+                          </div>
+                        `;
+                      }
+                      const listItems = (sec.type === 'list' && secVal) ? secVal.split('\n').map(l => l.trim()).filter(Boolean) : [];
+                      return `
+                        <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-${meta.color}-900/40 space-y-2">
+                          <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-${meta.color}-300 flex items-center gap-1.5">
+                              <i data-lucide="${meta.icon}" class="w-4 h-4 text-${meta.color}-400"></i>
+                              <span>${escapeHtml(sec.name)}</span>
+                            </span>
+                            <button type="button" onclick="handleStudioMiniBlockCustomAi('${activeCourse.id}', '${selectedLesson.id}', '${sec.id}')" class="text-[11px] text-${meta.color}-400 hover:text-${meta.color}-300 flex items-center gap-1 font-semibold shrink-0">
+                              <i data-lucide="sparkles" class="w-3 h-3"></i> AI Draft
+                            </button>
+                          </div>
+                          ${sec.ai_rule ? `<p class="text-[11px] text-slate-400 italic">Guideline: ${escapeHtml(sec.ai_rule)}</p>` : ''}
+                          <textarea
+                            rows="${sec.type === 'list' || sec.type === 'steps' ? 4 : 3}"
+                            placeholder="${escapeHtml(meta.placeholder)}"
+                            oninput="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'sections.${sec.id}', this.value)"
+                            onblur="saveCustomCoursesToStorage(true)"
+                            class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-${meta.color}-400 leading-relaxed ${(sec.type === 'list' || sec.type === 'steps') ? 'font-mono' : ''}"
+                          >${escapeHtml(secVal)}</textarea>
+                          ${listItems.length > 0 ? `
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
+                              ${listItems.map(item => `
+                                <div class="p-2 rounded-lg bg-slate-950/70 border border-slate-800/80 text-slate-200 text-xs flex items-start gap-2">
+                                  <span class="text-${meta.color}-400 font-bold shrink-0">✦</span>
+                                  <div class="leading-snug">${escapeHtml(item)}</div>
+                                </div>
+                              `).join('')}
+                            </div>
+                          ` : ''}
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                ` : `
                 <!-- 1. Opening Hook Block -->
                 <div class="p-4 rounded-2xl bg-slate-900/80 border border-amber-900/30 space-y-2">
                   <div class="flex items-center justify-between">
@@ -10150,31 +10315,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                     </button>
                   </div>
                 </div>
-
-                <!-- 9. Custom Blueprint Sections (if course has dynamic blueprint) -->
-                ${hasCustomSections ? `
-                  <div class="space-y-3">
-                    ${blueprintSections.map(sec => {
-                      const secVal = (selectedLesson.sections && selectedLesson.sections[sec.id]) || '';
-                      return `
-                        <div class="p-4 rounded-2xl bg-slate-900/80 border border-amber-800/40 space-y-2">
-                          <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
-                              <i data-lucide="list" class="w-3.5 h-3.5 text-amber-400"></i> ${escapeHtml(sec.name)}
-                            </span>
-                          </div>
-                          <textarea
-                            rows="3"
-                            placeholder="Enter ${escapeHtml(sec.name)}..."
-                            oninput="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'sections.${sec.id}', this.value)"
-                            onblur="saveCustomCoursesToStorage(true)"
-                            class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-400 leading-relaxed font-mono"
-                          >${escapeHtml(secVal)}</textarea>
-                        </div>
-                      `;
-                    }).join('')}
-                  </div>
-                ` : ''}
+                `}
 
                 <!-- Editor Footer: Discrete Modal Fallback -->
                 <div class="pt-2 flex items-center justify-between border-t border-slate-800/80">
@@ -10698,13 +10839,84 @@ alter publication supabase_realtime add table public.students_sync;`;
       const previewBody = document.getElementById('studio-copilot-class-preview-body');
 
       if (previewBox) previewBox.classList.remove('hidden');
-      if (previewBody) previewBody.innerHTML = '<p class="text-amber-400 animate-pulse py-2">Synthesizing full modular curriculum blocks...</p>';
+      if (previewBody) previewBody.innerHTML = '<p class="text-amber-400 animate-pulse py-2">Synthesizing class strictly inside your Course Architecture...</p>';
 
       let result = null;
       const classTitle = lesson.title_en || lesson.title_he || 'Topic';
+      const bp = course.blueprint || {};
+      const bpSections = Array.isArray(bp.sections) ? bp.sections : [];
+      const hasCustomBp = bpSections.length > 0;
+      const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key');
+
+      if (hasCustomBp) {
+        let customSectionsMap = null;
+        try {
+          if (apiKey) {
+            const specList = bpSections.map(s => `- ID "${s.id}" | Label: "${s.name}" | Type: ${s.type} | Rule: ${s.ai_rule || s.hint || 'Clear and engaging'}`).join('\n');
+            const prompt = `You are generating a complete class strictly inside this Course Architecture.
+Course: "${course.title_en || course.title_he}"
+Class Title: "${classTitle}"
+Target Students: ${bp.student_profile || course.target_level || 'General'}
+Course Guidelines: ${bp.guidelines || course.description_en || 'Clear, structured, and easy to teach'}
+Extra Teacher Instructions: ${userInstructions || 'Follow the course architecture strictly'}
+
+Required Custom Sections:
+${specList}
+
+Return STRICT JSON ONLY keyed by exact section ID (for "list" or "steps" types, join items with "\\n"):
+{
+  "sections": {
+    ${bpSections.map(s => `"${s.id}": "..."`).join(',\n    ')}
+  }
+}`;
+            const res = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey);
+            const cleaned = res.replace(/```json/gi, '').replace(/```/g, '').trim();
+            const parsed = JSON.parse(cleaned);
+            if (parsed && parsed.sections) customSectionsMap = parsed.sections;
+          }
+        } catch (err) {
+          console.warn('Gemini API fallback for architecture-aware class generation:', err);
+        }
+
+        if (!customSectionsMap) {
+          customSectionsMap = {};
+          bpSections.forEach(sec => {
+            if (sec.type === 'list') {
+              customSectionsMap[sec.id] = `**Core Point 1**: Foundational principle of ${classTitle}.\n**Core Point 2**: How ${classTitle} works in real life.\n**Core Point 3**: Key takeaway for ${bp.student_profile || 'students'}.`;
+            } else if (sec.type === 'steps') {
+              customSectionsMap[sec.id] = `1. Introduce ${classTitle} with a quick check-in.\n2. Walk through the core mechanism step by step.\n3. Practice or apply the key idea together.`;
+            } else if (sec.type === 'example') {
+              customSectionsMap[sec.id] = `Story / Example for ${classTitle}: Imagine a concrete everyday scenario where ${classTitle} makes an immediate difference.`;
+            } else if (sec.type === 'discussion') {
+              customSectionsMap[sec.id] = `If you had to explain ${classTitle} to a friend in one sentence, what would you say and why?`;
+            } else if (sec.type === 'reflection') {
+              customSectionsMap[sec.id] = `This week, look for one real-world moment to practice ${classTitle} in your daily routine.`;
+            } else if (sec.type === 'homework') {
+              customSectionsMap[sec.id] = `Review your notes on ${classTitle} and bring 1 question or real-life example to our next session.`;
+            } else if (sec.type === 'audio') {
+              customSectionsMap[sec.id] = `Audio notes & cues for ${classTitle}.`;
+            } else {
+              customSectionsMap[sec.id] = `${sec.name} for ${classTitle}: Clear, focused overview tailored to ${bp.student_profile || 'your students'}.`;
+            }
+          });
+        }
+
+        result = { customSections: customSectionsMap };
+        studioCopilotContext.generatedContent = result;
+
+        if (previewBody) {
+          previewBody.innerHTML = `
+            <div class="space-y-1.5 text-slate-300">
+              ${bpSections.map(sec => `
+                <div><span class="text-amber-400 font-bold">${escapeHtml(sec.name)}:</span> ${escapeHtml(String(customSectionsMap[sec.id] || '').replace(/\n/g, ' ').slice(0, 140))}</div>
+              `).join('')}
+            </div>
+          `;
+        }
+        return;
+      }
 
       try {
-        const apiKey = localStorage.getItem('gemini_api_key');
         if (apiKey) {
           const res = await callGeminiApi([
             {
@@ -10823,6 +11035,52 @@ alter publication supabase_realtime add table public.students_sync;`;
       showToast(`AI generated ${blockType} block!`);
     }
 
+    async function handleStudioMiniBlockCustomAi(courseId, lessonId, sectionId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      if (!course) return;
+      const lesson = (course.lessons || []).find(l => l.id === lessonId);
+      if (!lesson) return;
+      const bp = course.blueprint || {};
+      const sec = (bp.sections || []).find(s => s.id === sectionId);
+      if (!sec) return;
+
+      const title = lesson.title_en || lesson.title_he || 'Core Topic';
+      showStudioSavingIndicator();
+
+      let generated = '';
+      try {
+        const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key');
+        if (apiKey) {
+          const prompt = `Draft ONLY the section "${sec.name}" (type: ${sec.type}) for the class "${title}" in course "${course.title_en || course.title_he}".
+Target Students: ${bp.student_profile || course.target_level || 'General'}
+Course Guidelines: ${bp.guidelines || 'Clear and easy to teach'}
+Section Rule: ${sec.ai_rule || sec.hint || 'Be concise and practical'}
+Return plain text only (for lists/steps use newline separated lines).`;
+          generated = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey);
+          generated = generated.replace(/```/g, '').trim();
+        }
+      } catch (e) {
+        console.warn('Custom block AI fallback:', e);
+      }
+
+      if (!generated) {
+        if (sec.type === 'list') {
+          generated = `**Point 1**: Key principle of ${title}.\n**Point 2**: How ${title} applies in practice.\n**Point 3**: Takeaway for ${bp.student_profile || 'students'}.`;
+        } else if (sec.type === 'steps') {
+          generated = `1. Introduce ${title}.\n2. Walk through the main steps.\n3. Check understanding with a quick example.`;
+        } else {
+          generated = `${sec.name} for ${title}: Tailored for ${bp.student_profile || 'your students'} (${sec.ai_rule || 'clear & engaging'}).`;
+        }
+      }
+
+      if (!lesson.sections || typeof lesson.sections !== 'object') lesson.sections = {};
+      lesson.sections[sec.id] = generated;
+      course.updated_at = new Date().toISOString();
+      saveCustomCoursesToStorage(true);
+      renderCourseStudio(course.id, lesson.id);
+      showToast(`AI drafted "${sec.name}"!`);
+    }
+
     function applyGeneratedContentToActiveClass() {
       const course = (APP_STATE.customCourses || []).find(c => c.id === studioCopilotContext.courseId);
       if (!course || !studioCopilotContext.generatedContent) return;
@@ -10830,15 +11088,20 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!lesson) return;
 
       const gen = studioCopilotContext.generatedContent;
-      if (gen.hook) lesson.hook_en = gen.hook;
-      if (Array.isArray(gen.anchors)) {
-        lesson.anchors_en = gen.anchors.map(a => typeof a === 'string' ? { id: 'anc_' + Math.random().toString(36).substr(2, 6), point: a } : a);
+      if (gen.customSections && typeof gen.customSections === 'object') {
+        if (!lesson.sections || typeof lesson.sections !== 'object') lesson.sections = {};
+        Object.assign(lesson.sections, gen.customSections);
+      } else {
+        if (gen.hook) lesson.hook_en = gen.hook;
+        if (Array.isArray(gen.anchors)) {
+          lesson.anchors_en = gen.anchors.map(a => typeof a === 'string' ? { id: 'anc_' + Math.random().toString(36).substr(2, 6), point: a } : a);
+        }
+        if (gen.sources) lesson.sources_text = gen.sources;
+        if (gen.steps) lesson.steps_text = gen.steps;
+        if (gen.pitfalls) lesson.pitfalls_text = gen.pitfalls;
+        if (gen.cheat_sheet) lesson.cheat_sheet_text = gen.cheat_sheet;
+        if (gen.homework) lesson.homework_text = gen.homework;
       }
-      if (gen.sources) lesson.sources_text = gen.sources;
-      if (gen.steps) lesson.steps_text = gen.steps;
-      if (gen.pitfalls) lesson.pitfalls_text = gen.pitfalls;
-      if (gen.cheat_sheet) lesson.cheat_sheet_text = gen.cheat_sheet;
-      if (gen.homework) lesson.homework_text = gen.homework;
 
       course.updated_at = new Date().toISOString();
       saveCustomCoursesToStorage(true);
@@ -12983,6 +13246,165 @@ IV. Conclusion
       return currentBlueprintSections;
     }
 
+    var COURSE_BLOCK_CATALOG = {
+      text: { label: 'Text / Explanation', icon: 'file-text', color: 'cyan', placeholder: 'Write clear explanation or teaching notes...' },
+      list: { label: 'Bullet Points List', icon: 'list', color: 'amber', placeholder: 'One key point per line...' },
+      steps: { label: 'Step-by-Step Flow', icon: 'list-ordered', color: 'emerald', placeholder: '1. First step...\n2. Second step...' },
+      quote: { label: 'Primary Source / Formula', icon: 'book-open', color: 'sky', placeholder: 'Enter key quote, verse, citation, or formula...' },
+      example: { label: 'Story / Worked Example', icon: 'sparkles', color: 'amber', placeholder: 'Enter a compelling story, Midrash, or worked example...' },
+      exercise: { label: 'Practice Drill / Exercise', icon: 'dumbbell', color: 'emerald', placeholder: 'Enter practice problems, drills, or guided exercises...' },
+      pitfalls: { label: 'Common Pitfalls', icon: 'alert-triangle', color: 'rose', placeholder: 'Common student mistakes and how to resolve them...' },
+      discussion: { label: 'Discussion Question', icon: 'message-circle', color: 'indigo', placeholder: 'Engaging question to spark conversation...' },
+      reflection: { label: 'Life Takeaway / Reflection', icon: 'heart-handshake', color: 'purple', placeholder: 'Practical day-to-day takeaway for the student...' },
+      homework: { label: 'Homework Challenge', icon: 'check-square', color: 'orange', placeholder: 'Optional take-home challenge or assignment...' },
+      audio: { label: 'Audio Studio / Recording', icon: 'mic', color: 'emerald', placeholder: 'Record or link audio clips for this class...' },
+      image: { label: 'Visual / Diagram Notes', icon: 'image', color: 'purple', placeholder: 'Visual cue, chart description, or image URL...' }
+    };
+    if (typeof window !== 'undefined') window.COURSE_BLOCK_CATALOG = COURSE_BLOCK_CATALOG;
+
+    let architectChatHistory = [];
+    let architectStudentProfile = '';
+    let architectGuidelines = '';
+
+    function updateArchitectMetadataField(field, value) {
+      if (field === 'student_profile') architectStudentProfile = value;
+      if (field === 'guidelines') architectGuidelines = value;
+    }
+
+    function updateArchitectHeaderPreview() {
+      const title = document.getElementById('input-create-course-title-en')?.value || '';
+      const previewTitle = document.getElementById('ai-preview-title');
+      if (previewTitle && title) previewTitle.textContent = title;
+    }
+
+    function syncArchitectGuidelinesFromSelect() {
+      const level = document.getElementById('ai-builder-level-unified')?.value || '';
+      const profInput = document.getElementById('input-architect-student-profile');
+      if (profInput && !profInput.value.trim() && level) {
+        profInput.value = level;
+        architectStudentProfile = level;
+      }
+    }
+
+    function resetArchitectConversation() {
+      const title = document.getElementById('input-create-course-title-en')?.value?.trim() || '';
+      architectChatHistory = [
+        {
+          role: 'assistant',
+          text: title
+            ? `Let us design the architecture for "${title}". Who are your students, how long is each class, and what sections do you want inside every class?`
+            : 'Tell me what course you want to build! I will ask a few quick questions and shape your live class blueprint on the right so every class matches your exact teaching style.'
+        }
+      ];
+      renderArchitectChatMessages();
+    }
+
+    function renderArchitectChatMessages() {
+      const container = document.getElementById('architect-chat-messages');
+      if (!container) return;
+      if (!Array.isArray(architectChatHistory) || architectChatHistory.length === 0) {
+        resetArchitectConversation();
+        return;
+      }
+      container.innerHTML = architectChatHistory.map(msg => {
+        const isUser = msg.role === 'user';
+        return `
+          <div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
+            <div class="max-w-[90%] rounded-2xl px-3 py-2 ${isUser
+              ? 'bg-amber-500/20 border border-amber-500/40 text-amber-100 rounded-br-sm'
+              : 'bg-slate-900 border border-slate-700/80 text-slate-200 rounded-bl-sm'}">
+              <div class="text-[10px] font-mono uppercase tracking-wider mb-0.5 ${isUser ? 'text-amber-300' : 'text-emerald-400'}">
+                ${isUser ? 'You' : 'AI Course Architect'}
+              </div>
+              <div class="whitespace-pre-wrap leading-relaxed">${escapeHtml(msg.text)}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function renderArchitectSectionsList() {
+      const container = document.getElementById('architect-sections-list');
+      const badge = document.getElementById('architect-sections-count-badge');
+      if (badge) {
+        badge.textContent = `${currentBlueprintSections.length} ${currentBlueprintSections.length === 1 ? 'section' : 'sections'}`;
+      }
+      if (!container) return;
+      if (!Array.isArray(currentBlueprintSections) || currentBlueprintSections.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6 px-3 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
+            Discuss your course with the AI on the left, or use <strong>+ Add Section</strong> below to design your class structure.
+          </div>
+        `;
+        return;
+      }
+      container.innerHTML = currentBlueprintSections.map((sec, idx) => {
+        const meta = COURSE_BLOCK_CATALOG[sec.type] || COURSE_BLOCK_CATALOG.text;
+        return `
+          <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition space-y-1.5">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1.5 flex-1 min-w-0">
+                <span class="text-[10px] font-mono text-slate-500 w-4 shrink-0">${idx + 1}.</span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-${meta.color}-500/15 text-${meta.color}-300 border border-${meta.color}-500/30 shrink-0 flex items-center gap-1">
+                  <i data-lucide="${meta.icon}" class="w-3 h-3"></i>
+                  <span>${meta.label.split(' ')[0]}</span>
+                </span>
+                <input
+                  type="text"
+                  value="${escapeHtml(sec.name || '')}"
+                  onchange="updateBlueprintSectionName('${sec.id}', this.value)"
+                  placeholder="Section name..."
+                  class="flex-1 min-w-0 bg-slate-950 border border-slate-700/80 rounded-lg py-1 px-2 text-xs text-white font-semibold focus:outline-none focus:border-amber-400"
+                >
+              </div>
+              <div class="flex items-center gap-0.5 shrink-0">
+                <button type="button" onclick="moveBlueprintSection('${sec.id}', -1)" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition" title="Move Up"><i data-lucide="chevron-up" class="w-3.5 h-3.5"></i></button>
+                <button type="button" onclick="moveBlueprintSection('${sec.id}', 1)" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition" title="Move Down"><i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></button>
+                <button type="button" onclick="removeBlueprintSection('${sec.id}')" class="p-1 rounded hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 transition" title="Remove"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+              </div>
+            </div>
+            <input
+              type="text"
+              value="${escapeHtml(sec.ai_rule || sec.hint || '')}"
+              onchange="updateBlueprintSectionRule('${sec.id}', this.value)"
+              placeholder="Guideline / AI rule for this section (e.g. 2 sentences, teen-friendly)..."
+              class="w-full bg-slate-950/70 border border-slate-800 rounded-lg py-1 px-2 text-[11px] text-slate-300 placeholder-slate-500 focus:outline-none focus:border-amber-400/70"
+            >
+          </div>
+        `;
+      }).join('');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function handleQuickAddArchitectSection() {
+      const typeEl = document.getElementById('architect-add-block-type');
+      const nameEl = document.getElementById('architect-add-block-name');
+      const type = typeEl?.value || 'text';
+      const meta = COURSE_BLOCK_CATALOG[type] || COURSE_BLOCK_CATALOG.text;
+      const name = (nameEl?.value || '').trim() || meta.label;
+      addBlueprintSection(type, name);
+      if (nameEl) nameEl.value = '';
+    }
+
+    function moveBlueprintSection(secId, direction) {
+      const idx = currentBlueprintSections.findIndex(s => s.id === secId);
+      if (idx < 0) return;
+      const target = idx + direction;
+      if (target < 0 || target >= currentBlueprintSections.length) return;
+      const temp = currentBlueprintSections[idx];
+      currentBlueprintSections[idx] = currentBlueprintSections[target];
+      currentBlueprintSections[target] = temp;
+      if (typeof window !== 'undefined') window.currentBlueprintSections = currentBlueprintSections;
+      renderBlueprintSectionsList();
+    }
+
+    function updateBlueprintSectionRule(secId, newRule) {
+      const sec = currentBlueprintSections.find(s => s.id === secId);
+      if (sec) sec.ai_rule = (newRule || '').trim();
+      if (typeof window !== 'undefined') window.currentBlueprintSections = currentBlueprintSections;
+    }
+
     const BLUEPRINT_PRESETS = {
       torah_audio: [
         { id: 'sec_verses', type: 'text', name: 'Parsha Verses / Text' },
@@ -13026,6 +13448,9 @@ IV. Conclusion
     }
 
     function renderBlueprintSectionsList() {
+      if (typeof renderArchitectSectionsList === 'function') {
+        renderArchitectSectionsList();
+      }
       const container = document.getElementById('course-blueprint-sections-list');
       if (!container) return;
 
@@ -13114,105 +13539,220 @@ IV. Conclusion
       renderBlueprintSectionsList();
     }
 
+    function applyArchitectBlueprintUpdate(updateObj) {
+      if (!updateObj || typeof updateObj !== 'object') return;
+      const titleInput = document.getElementById('input-create-course-title-en');
+      const titleHeInput = document.getElementById('input-create-course-title-he');
+      const descInput = document.getElementById('input-create-course-desc');
+      const profInput = document.getElementById('input-architect-student-profile');
+      const guideInput = document.getElementById('input-architect-guidelines');
+
+      if (updateObj.course_title_en && titleInput && (!titleInput.value || !titleInput.value.trim() || updateObj.forceTitle)) {
+        titleInput.value = updateObj.course_title_en;
+        if (titleHeInput) titleHeInput.value = updateObj.course_title_he || updateObj.course_title_en;
+      }
+      if (updateObj.suggested_desc && descInput) descInput.value = updateObj.suggested_desc;
+      if (updateObj.student_profile) {
+        architectStudentProfile = updateObj.student_profile;
+        if (profInput) profInput.value = updateObj.student_profile;
+      }
+      if (updateObj.guidelines) {
+        architectGuidelines = updateObj.guidelines;
+        if (guideInput) guideInput.value = updateObj.guidelines;
+      }
+      if (updateObj.suggested_color) selectCourseColor(updateObj.suggested_color);
+      if (updateObj.suggested_icon && document.getElementById('input-create-course-icon')) {
+        document.getElementById('input-create-course-icon').value = updateObj.suggested_icon;
+      }
+      if (Array.isArray(updateObj.sections) && updateObj.sections.length > 0) {
+        currentBlueprintSections = updateObj.sections.map((s, idx) => ({
+          id: s.id || ('sec_' + Date.now() + '_' + idx + '_' + Math.random().toString(36).substr(2, 4)),
+          type: COURSE_BLOCK_CATALOG[s.type] ? s.type : 'text',
+          name: s.name || 'Section ' + (idx + 1),
+          ai_rule: s.ai_rule || s.hint || ''
+        }));
+        if (typeof window !== 'undefined') window.currentBlueprintSections = currentBlueprintSections;
+      }
+      renderBlueprintSectionsList();
+    }
+
     async function handleAiSuggestBlueprint() {
       const isHe = APP_STATE.lang === 'he';
       const promptInput = document.getElementById('input-ai-blueprint-prompt');
       const titleInput = document.getElementById('input-create-course-title-en');
       const descInput = document.getElementById('input-create-course-desc');
-      const courseTitle = (promptInput?.value || titleInput?.value || descInput?.value || '').trim();
+      const userMsg = (promptInput?.value || '').trim();
+      const courseTitle = (userMsg || titleInput?.value || descInput?.value || '').trim();
 
       if (!courseTitle) {
-        showToast(isHe ? 'נא להזין רעיון או כותרת לקורס' : 'Please enter a course idea or title first');
+        showToast(isHe ? 'נא להזין רעיון או כותרת לקורס' : 'Please enter a course idea or message first');
         if (promptInput) promptInput.focus();
         else if (titleInput) titleInput.focus();
         return;
       }
 
-      showToast(isHe ? 'AI מתאים את מבנה הקורס...' : 'AI is designing course structure...');
-      
-      const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key');
-      let resultSections = null;
+      if (!Array.isArray(architectChatHistory)) architectChatHistory = [];
+      if (userMsg) {
+        architectChatHistory.push({ role: 'user', text: userMsg });
+        if (promptInput) promptInput.value = '';
+        renderArchitectChatMessages();
+      }
+
+      const loadingEl = document.getElementById('course-builder-ai-loading');
+      if (loadingEl) loadingEl.classList.remove('hidden');
+
+      const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key');
+      let parsed = null;
 
       if (apiKey) {
         try {
-          const prompt = `Based on the course concept/title "${courseTitle}", suggest course identity and 3 to 5 modular class sections that every lesson in this course should have.
-Section types allowed: "text", "list", "audio", "reflection", "homework".
+          const catalogSummary = Object.entries(COURSE_BLOCK_CATALOG).map(([k, v]) => `"${k}" (${v.label})`).join(', ');
+          const currentStateJson = JSON.stringify({
+            course_title: titleInput?.value || '',
+            student_profile: architectStudentProfile || document.getElementById('input-architect-student-profile')?.value || '',
+            guidelines: architectGuidelines || document.getElementById('input-architect-guidelines')?.value || '',
+            sections: currentBlueprintSections
+          });
+          const convoText = architectChatHistory.map(m => `${m.role === 'user' ? 'Educator' : 'Architect'}: ${m.text}`).join('\n');
+
+          const systemPrompt = `You are TutorPilot's Expert Course Architect. Your job is to collaborate in a multi-turn discussion with the educator to design a bespoke, tailored Course Architecture & Guidelines before any classes are created.
+Every subject has a unique structure (e.g., Music needs Warmup/Technique/Repertoire/Audio; Math needs Core Formula/Worked Example/Practice Drills/Pitfalls; Jewish Concepts needs Hook/Bullet Points/Story or Rashi/Life Takeaway/Discussion).
+Available block types: ${catalogSummary}.
+Current live blueprint state: ${currentStateJson}
+
+Conversation so far:
+${convoText}
+
+Rules:
+1. Reply conversationally in "assistant_reply": acknowledge what the educator asked, explain any structural updates you made to the blueprint, and ask 1 to 3 sharp clarifying questions (about student profile, prep time, lecture length, tone, or specific blocks) if helpful to refine the course further.
+2. Update the blueprint fields ("course_title_en", "student_profile", "guidelines", "sections") to immediately reflect the educator's wishes. Give each section an "ai_rule" explaining how classes should be written for it.
 Return STRICT JSON ONLY:
 {
-  "course_title_en": "Suggested English Course Title",
-  "course_title_he": "כותרת קורס בעברית",
-  "suggested_desc": "What students will master in this course",
+  "assistant_reply": "Conversational response + clarifying questions...",
+  "course_title_en": "Refined Course Title",
+  "student_profile": "Target student description",
+  "guidelines": "Concise teaching & style rules (prep time, lecture length, tone)",
+  "suggested_desc": "Short course summary",
   "suggested_color": "amber",
-  "suggested_icon": "📜",
+  "suggested_icon": "✦",
   "sections": [
-    { "type": "text", "name": "Custom Section Name" },
-    { "type": "audio", "name": "Custom Audio Section Name" }
+    { "type": "text", "name": "Custom Section Name", "ai_rule": "Rule for generating this section" }
   ]
 }`;
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
-          const resp = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ role: 'user', parts: [{ text: prompt }] }],
-              generationConfig: { responseMimeType: 'application/json' }
-            })
-          });
-          if (resp.ok) {
-            const resJson = await resp.json();
-            const text = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (text) {
-              const parsed = JSON.parse(text);
-              if (parsed.sections && Array.isArray(parsed.sections)) {
-                resultSections = parsed.sections;
-                if (titleInput && (!titleInput.value || !titleInput.value.trim()) && parsed.course_title_en) {
-                  titleInput.value = parsed.course_title_en;
-                }
-                const titleHeInput = document.getElementById('input-create-course-title-he');
-                if (titleHeInput && (!titleHeInput.value || !titleHeInput.value.trim()) && parsed.course_title_he) {
-                  titleHeInput.value = parsed.course_title_he;
-                }
-                if (descInput && (!descInput.value || !descInput.value.trim()) && parsed.suggested_desc) {
-                  descInput.value = parsed.suggested_desc;
-                }
-                if (parsed.suggested_color) selectCourseColor(parsed.suggested_color);
-                if (parsed.suggested_icon && document.getElementById('input-create-course-icon')) {
-                  document.getElementById('input-create-course-icon').value = parsed.suggested_icon;
-                }
-              }
+
+          if (typeof callGeminiApi === 'function') {
+            const raw = await callGeminiApi([{ role: 'user', parts: [{ text: systemPrompt }] }], apiKey);
+            const cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
+            parsed = JSON.parse(cleaned);
+          } else {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            const resp = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: systemPrompt }] }],
+                generationConfig: { responseMimeType: 'application/json' }
+              })
+            });
+            if (resp.ok) {
+              const resJson = await resp.json();
+              const text = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (text) parsed = JSON.parse(text.replace(/```json/gi, '').replace(/```/g, '').trim());
             }
           }
         } catch (e) {
-          console.warn("AI blueprint suggestion error:", e);
+          console.warn("AI Architect discussion fallback:", e);
         }
       }
 
-      if (!resultSections) {
+      if (!parsed || !Array.isArray(parsed.sections)) {
         const lower = courseTitle.toLowerCase();
-        if (lower.includes('read') || lower.includes('קריאה') || lower.includes('alef') || lower.includes('hebrew')) {
-          resultSections = BLUEPRINT_PRESETS.reading_fluency;
-          selectCourseColor('emerald');
-          if (titleInput && !titleInput.value) titleInput.value = 'Hebrew Reading & Fluency';
+        if (lower.includes('music') || lower.includes('guitar') || lower.includes('piano') || lower.includes('נגינה') || lower.includes('מוזיקה')) {
+          parsed = {
+            assistant_reply: "Great! I structured a Music & Performance blueprint with Warmup Scales, Technique Drill, Repertoire Piece, and Audio Studio recordings. How long are your sessions, and what skill level are your students?",
+            course_title_en: titleInput?.value || 'Music & Instrument Mastery',
+            student_profile: 'Beginner to intermediate music students',
+            guidelines: 'Hands-on practice flow, clear rhythm cues, short daily drills',
+            suggested_color: 'purple',
+            suggested_icon: '🎵',
+            sections: [
+              { type: 'steps', name: 'Warmup & Scales', ai_rule: '3-5 minute technical warmup sequence' },
+              { type: 'exercise', name: 'Technique & Chord Drill', ai_rule: 'Focused finger/rhythm exercise' },
+              { type: 'example', name: 'Repertoire Piece', ai_rule: 'Song breakdown with phrasing notes' },
+              { type: 'audio', name: 'Practice Audio Recordings', ai_rule: 'Attach tempo tracks or student recordings' },
+              { type: 'homework', name: 'Weekly Practice Log', ai_rule: '10-minute daily home practice goal' }
+            ]
+          };
+        } else if (lower.includes('math') || lower.includes('algebra') || lower.includes('geometry') || lower.includes('calculus') || lower.includes('מתמטיקה')) {
+          parsed = {
+            assistant_reply: "I built a Math blueprint with Core Formula, Worked Example, Common Traps, and Practice Drills. What grade level are your students, and how many practice problems do you want per class?",
+            course_title_en: titleInput?.value || 'Mathematics Mastery',
+            student_profile: 'Middle / High School Math students',
+            guidelines: 'Step-by-step clarity, visual intuition before formal rules',
+            suggested_color: 'blue',
+            suggested_icon: '📐',
+            sections: [
+              { type: 'quote', name: 'Core Theorem / Formula', ai_rule: 'Exact formula and when to use it' },
+              { type: 'example', name: 'Worked Walkthrough Example', ai_rule: '1 complete step-by-step solved problem' },
+              { type: 'pitfalls', name: 'Common Mistakes & Traps', ai_rule: 'Top 2 errors students make on tests' },
+              { type: 'exercise', name: 'Guided Practice Drills', ai_rule: '4 progressive problems from easy to challenge' },
+              { type: 'homework', name: 'Homework Set', ai_rule: '3 independent practice problems' }
+            ]
+          };
+        } else if (lower.includes('read') || lower.includes('קריאה') || lower.includes('alef') || lower.includes('hebrew')) {
+          parsed = {
+            assistant_reply: "I designed a Reading & Fluency structure with Vowel/Rule Focus, Word Practice Ladder, Pronunciation Audio, and Speed Challenge. What age are the learners?",
+            course_title_en: titleInput?.value || 'Hebrew Reading & Fluency',
+            student_profile: 'Developing Hebrew readers',
+            guidelines: 'Phonetic clarity, progressive syllable drills',
+            suggested_color: 'emerald',
+            suggested_icon: '📖',
+            sections: BLUEPRINT_PRESETS.reading_fluency.map(s => ({ ...s, ai_rule: 'Clear phonetic reading focus' }))
+          };
         } else if (lower.includes('chumash') || lower.includes('torah') || lower.includes('parsha') || lower.includes('חומש')) {
-          resultSections = BLUEPRINT_PRESETS.torah_audio;
-          selectCourseColor('amber');
-          if (titleInput && !titleInput.value) titleInput.value = 'Chumash with Trope';
+          parsed = {
+            assistant_reply: "I put together a Chumash blueprint featuring Story Flow, Core Ideas, Rashi / Midrash Insight, and Real-Life Lesson. How many minutes do you want to spend reviewing before teaching?",
+            course_title_en: titleInput?.value || 'Chumash & Parsha Insights',
+            student_profile: '12-13 year old students',
+            guidelines: '5-minute review, 15-minute lecture, plain everyday English',
+            suggested_color: 'amber',
+            suggested_icon: '📜',
+            sections: [
+              { type: 'text', name: 'Parsha Story Flow', ai_rule: 'Clear summary of key plot events' },
+              { type: 'list', name: 'Main Ideas & Bullet Points', ai_rule: '5-7 crisp talking points for a 15-min lecture' },
+              { type: 'example', name: 'Interesting Rashi or Midrash Gem', ai_rule: '1 memorable commentary explained simply' },
+              { type: 'reflection', name: 'Day-to-Day Life Lesson', ai_rule: 'Practical takeaway for a teen today' }
+            ]
+          };
         } else {
-          resultSections = BLUEPRINT_PRESETS.concepts_ethics;
-          selectCourseColor('blue');
-          if (titleInput && !titleInput.value) titleInput.value = 'Core Jewish Concepts';
+          parsed = {
+            assistant_reply: "I drafted a 5-part Core Concepts architecture (Opening Hook, Main Bullet Points, Story / Source Gem, Day-to-Day Life Takeaway, and Discussion Question). Tell me about your students' background and how long each class runs so we can fine-tune it!",
+            course_title_en: titleInput?.value || 'General Jewish Core Concepts',
+            student_profile: '12-13 year old secular background students',
+            guidelines: '5-minute quick prep scan, 10-20 minute live lecture, plain everyday English',
+            suggested_color: 'amber',
+            suggested_icon: '💡',
+            sections: [
+              { type: 'text', name: 'Opening Hook', ai_rule: 'Relatable 2-sentence real-world scenario or question' },
+              { type: 'list', name: 'Main Bullet Points', ai_rule: '5-7 clear bite-sized teaching points' },
+              { type: 'example', name: 'Story or Source Gem', ai_rule: '1 engaging story, Midrash, or Torah insight' },
+              { type: 'reflection', name: 'Day-to-Day Life Takeaway', ai_rule: 'Practical action or mindset for everyday life' },
+              { type: 'discussion', name: 'Discussion Question', ai_rule: '1 thought-provoking question for the student' }
+            ]
+          };
         }
       }
 
-      currentBlueprintSections = resultSections.map(s => ({
-        id: 'sec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-        type: s.type,
-        name: s.name
-      }));
-      if (typeof window !== 'undefined') window.currentBlueprintSections = currentBlueprintSections;
-      renderBlueprintSectionsList();
+      applyArchitectBlueprintUpdate(parsed);
 
-      // Update interactive AI structure preview card in AI panel
+      if (parsed.assistant_reply) {
+        architectChatHistory.push({ role: 'assistant', text: parsed.assistant_reply });
+        renderArchitectChatMessages();
+      }
+
+      if (loadingEl) loadingEl.classList.add('hidden');
+
+      // Update hidden compatibility preview card
       const previewCard = document.getElementById('ai-suggested-preview-card');
       const previewTitle = document.getElementById('ai-preview-title');
       const previewDesc = document.getElementById('ai-preview-desc');
@@ -13231,7 +13771,7 @@ Return STRICT JSON ONLY:
         previewCard.classList.remove('hidden');
       }
 
-      showToast(isHe ? 'המבנה הותאם בהצלחה!' : 'Course structure designed with AI!');
+      showToast(isHe ? 'מבנה הקורס עודכן!' : 'Course blueprint updated!');
     }
 
     function switchCourseBuilderMode(mode) {
@@ -13264,16 +13804,22 @@ Return STRICT JSON ONLY:
 
     async function handleGenerateFullCourseFromAi() {
       const isHe = APP_STATE.lang === 'he';
-      const promptInput = document.getElementById('input-ai-blueprint-prompt');
-      const topic = (promptInput?.value || document.getElementById('input-create-course-title-en')?.value || '').trim();
+      if (editingCourseId) {
+        handleSaveCustomCourse({ preventDefault() {} });
+        return;
+      }
 
-      if (!topic) {
+      const promptInput = document.getElementById('input-ai-blueprint-prompt');
+      const titleVal = (document.getElementById('input-create-course-title-en')?.value || '').trim();
+      const topic = (promptInput?.value || titleVal || '').trim();
+
+      if (!topic && (!Array.isArray(currentBlueprintSections) || currentBlueprintSections.length === 0)) {
         showToast(isHe ? 'אנא הזן נושא או רעיון לקורס' : 'Please enter a course topic or idea');
         if (promptInput) promptInput.focus();
         return;
       }
 
-      const lessonCountVal = document.getElementById('ai-builder-lessons-count-unified')?.value || '8';
+      const lessonCountVal = document.getElementById('ai-builder-lessons-count-unified')?.value || 'blueprint';
       const lessonCount = lessonCountVal === 'blueprint' ? 0 : (parseInt(lessonCountVal, 10) || 8);
       const level = document.getElementById('ai-builder-level-unified')?.value || 'Standard / All Levels';
       const langChoice = document.getElementById('ai-builder-language-unified')?.value || 'Bilingual (English & Hebrew)';
@@ -13285,19 +13831,21 @@ Return STRICT JSON ONLY:
       if (generateBtn) generateBtn.disabled = true;
       if (suggestBtn) suggestBtn.disabled = true;
 
-      showToast(isHe ? 'AI מעצב את הקורס...' : 'AI is designing your course...');
-
       try {
-        await handleAiSuggestBlueprint();
+        if ((promptInput && promptInput.value.trim()) || !Array.isArray(currentBlueprintSections) || currentBlueprintSections.length === 0) {
+          await handleAiSuggestBlueprint();
+        }
 
         const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
         const userId = APP_STATE.currentUser?.id || '';
         const schoolId = (typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770') || 'school_main_770';
+        const studentProf = (document.getElementById('input-architect-student-profile')?.value || architectStudentProfile || level).trim();
+        const guidelinesVal = (document.getElementById('input-architect-guidelines')?.value || architectGuidelines || '').trim();
 
         if (lessonCount === 0) {
-          const titleEn = document.getElementById('input-create-course-title-en')?.value || topic;
-          const titleHe = document.getElementById('input-create-course-title-he')?.value || titleEn;
-          const desc = document.getElementById('input-create-course-desc')?.value || '';
+          const titleEn = document.getElementById('input-create-course-title-en')?.value?.trim() || topic || 'New Course';
+          const titleHe = document.getElementById('input-create-course-title-he')?.value?.trim() || titleEn;
+          const desc = document.getElementById('input-create-course-desc')?.value || guidelinesVal || '';
           const color = currentSelectedColor || 'amber';
           const icon = document.getElementById('input-create-course-icon')?.value || '✦';
 
@@ -13305,7 +13853,7 @@ Return STRICT JSON ONLY:
             id: 'course_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
             title_en: titleEn,
             title_he: titleHe,
-            format_type: 'standard',
+            format_type: 'custom_blueprint',
             category: 'General Curriculum',
             target_level: level,
             description_en: desc,
@@ -13316,7 +13864,10 @@ Return STRICT JSON ONLY:
             owner_id: userId,
             school_id: schoolId,
             blueprint: {
-              version: '1.0',
+              version: '2.0',
+              student_profile: studentProf,
+              guidelines: guidelinesVal,
+              architect_history: (architectChatHistory || []).slice(-12),
               sections: (currentBlueprintSections || []).map(s => ({ ...s }))
             },
             lessons: [],
@@ -13332,10 +13883,10 @@ Return STRICT JSON ONLY:
           closeCreateCourseModal();
           renderCourseClassesView(newCourse.id);
           renderCommandCenter();
-          showToast(isHe ? 'הקורס נוצר בהצלחה! התחל לבנות את השיעורים שלך.' : 'Course created! Start building your lessons below.');
+          showToast(isHe ? 'מבנה הקורס נשמר! התחל לבנות שיעורים.' : 'Course architecture locked! Start building classes.');
         } else {
           const aiTopic = document.getElementById('ai-builder-topic');
-          if (aiTopic) aiTopic.value = topic;
+          if (aiTopic) aiTopic.value = topic || titleVal;
           const aiLevel = document.getElementById('ai-builder-level');
           if (aiLevel) aiLevel.value = level;
           const aiCount = document.getElementById('ai-builder-lessons-count');
@@ -13371,13 +13922,23 @@ Return STRICT JSON ONLY:
       const previewCard = document.getElementById('ai-suggested-preview-card');
       if (previewCard) previewCard.classList.add('hidden');
 
+      architectStudentProfile = '';
+      architectGuidelines = '';
+      const profInput = document.getElementById('input-architect-student-profile');
+      if (profInput) profInput.value = '';
+      const guideInput = document.getElementById('input-architect-guidelines');
+      if (guideInput) guideInput.value = '';
+
       const label = document.getElementById('modal-create-course-title');
-      if (label) label.textContent = APP_STATE.lang === 'he' ? 'בנה את הקורס שלך' : 'Build Your Course';
+      if (label) label.textContent = APP_STATE.lang === 'he' ? 'אדריכל הקורסים (AI)' : 'AI Course Architect';
       const saveLabel = document.getElementById('btn-save-course-label');
       if (saveLabel) saveLabel.textContent = APP_STATE.lang === 'he' ? 'בנה קורס' : 'Build Course';
+      const genLabel = document.getElementById('btn-ai-generate-course-label');
+      if (genLabel) genLabel.textContent = APP_STATE.lang === 'he' ? '⚡ נעל מבנה ופתח סטודיו' : '⚡ Lock Architecture & Open Course Studio';
 
       selectCourseColor('amber');
-      applyBlueprintPreset('torah_audio');
+      applyBlueprintPreset('concepts_ethics');
+      resetArchitectConversation();
 
       switchCourseBuilderMode(initialMode || 'ai');
 
@@ -13405,9 +13966,11 @@ Return STRICT JSON ONLY:
       editingCourseId = courseId;
       const modal = document.getElementById('modal-create-course');
       const titleEl = document.getElementById('modal-create-course-title');
-      if (titleEl) titleEl.textContent = APP_STATE.lang === 'he' ? 'ערוך את מבנה הקורס' : 'Edit Course Blueprint';
+      if (titleEl) titleEl.textContent = APP_STATE.lang === 'he' ? 'ערוך ושוחח על מבנה הקורס' : 'Edit & Discuss Course Architecture';
       const saveLabel = document.getElementById('btn-save-course-label');
       if (saveLabel) saveLabel.textContent = APP_STATE.lang === 'he' ? 'שמור שינויים' : 'Save Changes';
+      const genLabel = document.getElementById('btn-ai-generate-course-label');
+      if (genLabel) genLabel.textContent = APP_STATE.lang === 'he' ? '⚡ שמור מבנה וחזור לסטודיו' : '⚡ Save Architecture & Return to Studio';
 
       document.getElementById('input-create-course-title-en').value = course.title_en || '';
       document.getElementById('input-create-course-title-he').value = course.title_he || '';
@@ -13418,14 +13981,34 @@ Return STRICT JSON ONLY:
 
       selectCourseColor(course.color || 'amber');
 
-      if (course.blueprint && Array.isArray(course.blueprint.sections) && course.blueprint.sections.length > 0) {
-        currentBlueprintSections = course.blueprint.sections.map(s => ({ ...s }));
+      const bp = course.blueprint || {};
+      architectStudentProfile = bp.student_profile || course.target_level || '';
+      architectGuidelines = bp.guidelines || course.description_en || '';
+      const profInput = document.getElementById('input-architect-student-profile');
+      if (profInput) profInput.value = architectStudentProfile;
+      const guideInput = document.getElementById('input-architect-guidelines');
+      if (guideInput) guideInput.value = architectGuidelines;
+
+      if (Array.isArray(bp.sections) && bp.sections.length > 0) {
+        currentBlueprintSections = bp.sections.map(s => ({ ...s }));
       } else {
-        applyBlueprintPreset('torah_audio');
+        applyBlueprintPreset('concepts_ethics');
       }
+
+      if (Array.isArray(bp.architect_history) && bp.architect_history.length > 0) {
+        architectChatHistory = bp.architect_history.map(m => ({ ...m }));
+      } else {
+        architectChatHistory = [
+          {
+            role: 'assistant',
+            text: `We are editing the architecture for "${course.title_en || course.title_he}". You currently have ${currentBlueprintSections.length} sections. Tell me what you would like to add, remove, or adjust!`
+          }
+        ];
+      }
+      renderArchitectChatMessages();
       renderBlueprintSectionsList();
 
-      switchCourseBuilderMode('manual');
+      switchCourseBuilderMode('ai');
 
       modal.classList.remove('hidden');
       if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
@@ -13488,11 +14071,19 @@ Return STRICT JSON ONLY:
       const userId = APP_STATE.currentUser?.id || '';
       const schoolId = (typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770') || 'school_main_770';
 
+      const studentProf = (document.getElementById('input-architect-student-profile')?.value || architectStudentProfile || level).trim();
+      const guidelinesVal = (document.getElementById('input-architect-guidelines')?.value || architectGuidelines || desc || '').trim();
+
       const blueprint = {
+        version: '2.0',
+        student_profile: studentProf,
+        guidelines: guidelinesVal,
+        architect_history: (architectChatHistory || []).slice(-12),
         sections: currentBlueprintSections.map(s => ({
           id: s.id,
           type: s.type,
-          name: s.name
+          name: s.name,
+          ai_rule: s.ai_rule || s.hint || ''
         }))
       };
 
@@ -13501,8 +14092,8 @@ Return STRICT JSON ONLY:
         if (course) {
           course.title_en = titleEn;
           course.title_he = titleHe || titleEn;
-          course.description_en = desc;
-          course.description_he = desc;
+          course.description_en = desc || guidelinesVal;
+          course.description_he = desc || guidelinesVal;
           course.color = color;
           course.icon = icon;
           course.blueprint = blueprint;
@@ -14610,6 +15201,59 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
       const homework = lesson.homework_text || '';
 
       teleprompterCheckedAnchors = {};
+
+      const bpSections = (course && course.blueprint && Array.isArray(course.blueprint.sections)) ? course.blueprint.sections : [];
+      const hasCustomSections = bpSections.length > 0 && lesson.sections && Object.values(lesson.sections).some(v => v && String(v).trim().length > 0);
+
+      if (hasCustomSections) {
+        let checkIdx = 0;
+        const customHtml = `
+          <div class="space-y-5 max-w-3xl mx-auto">
+            ${bpSections.map(sec => {
+              const val = (lesson.sections && lesson.sections[sec.id]) ? String(lesson.sections[sec.id]).trim() : '';
+              if (!val && sec.type !== 'audio') return '';
+              const meta = (typeof COURSE_BLOCK_CATALOG !== 'undefined' && COURSE_BLOCK_CATALOG[sec.type]) ? COURSE_BLOCK_CATALOG[sec.type] : { icon: 'layers', color: 'amber' };
+              if (sec.type === 'list' || sec.type === 'steps') {
+                const items = val.split('\n').map(l => l.trim()).filter(Boolean);
+                return `
+                  <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-${meta.color}-500/30 shadow-lg space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-bold uppercase tracking-wider text-${meta.color}-300 flex items-center gap-1.5">
+                        <i data-lucide="${meta.icon}" class="w-4 h-4 text-${meta.color}-400"></i>
+                        <span>${escapeHtml(sec.name)}</span>
+                      </span>
+                      <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">${items.length} items</span>
+                    </div>
+                    <div class="space-y-2">
+                      ${items.map(item => {
+                        const myIdx = checkIdx++;
+                        return `
+                          <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800/80 hover:border-slate-700 transition flex items-start gap-3 cursor-pointer select-none" onclick="toggleTeleprompterAnchorCheck(${myIdx})">
+                            <div id="teleprompter-anchor-box-${myIdx}" class="w-5 h-5 rounded-lg border border-slate-700 bg-slate-950 flex items-center justify-center shrink-0 mt-0.5 transition"></div>
+                            <div id="teleprompter-anchor-text-${myIdx}" class="text-xs sm:text-sm text-slate-100 leading-relaxed flex-1">${escapeHtml(item)}</div>
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
+                  </div>
+                `;
+              }
+              return `
+                <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-${meta.color}-500/30 shadow-lg space-y-2">
+                  <span class="text-xs font-bold uppercase tracking-wider text-${meta.color}-300 flex items-center gap-1.5">
+                    <i data-lucide="${meta.icon}" class="w-4 h-4 text-${meta.color}-400"></i>
+                    <span>${escapeHtml(sec.name)}</span>
+                  </span>
+                  <div class="text-sm sm:text-base text-slate-100 leading-relaxed whitespace-pre-wrap">${escapeHtml(val)}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+        container.innerHTML = customHtml;
+        if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+        return;
+      }
 
       let html = `
         <div class="space-y-6 max-w-3xl mx-auto">
