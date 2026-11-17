@@ -1990,7 +1990,7 @@
             <input
               type="text"
               id="input-create-course-title-en"
-              placeholder="e.g. General Jewish Core Concepts, Guitar Foundations, Algebra 1..."
+              placeholder="Enter your course title..."
               class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-2.5 px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 font-semibold shadow-inner transition"
               required
               oninput="if(document.getElementById('input-create-course-title-he')) document.getElementById('input-create-course-title-he').value = this.value; updateArchitectHeaderPreview();"
@@ -2043,15 +2043,6 @@
               <!-- Chat Messages Feed -->
               <div id="architect-chat-messages" class="flex-1 overflow-y-auto space-y-2.5 pr-1 text-xs leading-relaxed"></div>
 
-              <!-- Quick Topic Inspiration Tags -->
-              <div class="flex items-center gap-1.5 flex-wrap shrink-0">
-                <span class="text-[10px] text-slate-500 font-mono">Ideas:</span>
-                <button type="button" onclick="setAiCoursePrompt('I want a General Jewish Core Concepts course for 12-13 year old secular boys: 5-min review, 15-min talk, bullet points, story or Rashi gem, life takeaway.')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition">💡 Jewish Concepts</button>
-                <button type="button" onclick="setAiCoursePrompt('Design a Guitar & Music Theory course with warmup scales, chord drills, repertoire song, and audio recordings.')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">🎸 Music</button>
-                <button type="button" onclick="setAiCoursePrompt('Design an 8th Grade Algebra course with core formula, worked example, common traps, and 5 practice drills.')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">📐 Math</button>
-                <button type="button" onclick="setAiCoursePrompt('Design a Chumash course with story flow, key ideas, Rashi insight, and real-life lesson.')" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">📜 Chumash</button>
-              </div>
-
               <!-- AI Loading State -->
               <div id="course-builder-ai-loading" class="hidden py-1.5 text-center shrink-0">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-medium animate-pulse">
@@ -2099,7 +2090,7 @@
                   <input
                     type="text"
                     id="input-architect-student-profile"
-                    placeholder="e.g. 12-13 yr old secular boys"
+                    placeholder="Who is this course for? (age, level, background)"
                     oninput="updateArchitectMetadataField('student_profile', this.value)"
                     class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-1.5 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
                   >
@@ -2109,7 +2100,7 @@
                   <input
                     type="text"
                     id="input-architect-guidelines"
-                    placeholder="e.g. 5m prep, 15m talk, plain English"
+                    placeholder="Class duration, prep time, tone, format rules..."
                     oninput="updateArchitectMetadataField('guidelines', this.value)"
                     class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-1.5 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
                   >
@@ -13725,19 +13716,20 @@ Return STRICT JSON ONLY:
             ]
           };
         } else {
+          const levelVal = document.getElementById('ai-builder-level-unified')?.value || 'Standard / All Levels';
+          const customTitle = titleInput?.value?.trim() || 'Custom Course';
           parsed = {
-            assistant_reply: "I drafted a 5-part Core Concepts architecture (Opening Hook, Main Bullet Points, Story / Source Gem, Day-to-Day Life Takeaway, and Discussion Question). Tell me about your students' background and how long each class runs so we can fine-tune it!",
-            course_title_en: titleInput?.value || 'General Jewish Core Concepts',
-            student_profile: '12-13 year old secular background students',
-            guidelines: '5-minute quick prep scan, 10-20 minute live lecture, plain everyday English',
+            assistant_reply: `Got it. Let us shape the architecture for "${customTitle}". What specific sections do you want inside every class, how long is each teaching session, and what tone or level fits your students best?`,
+            course_title_en: customTitle,
+            student_profile: architectStudentProfile || levelVal,
+            guidelines: architectGuidelines || 'Clear, structured, and adapted to the teacher workflow',
             suggested_color: 'amber',
-            suggested_icon: '💡',
+            suggested_icon: '✦',
             sections: [
-              { type: 'text', name: 'Opening Hook', ai_rule: 'Relatable 2-sentence real-world scenario or question' },
-              { type: 'list', name: 'Main Bullet Points', ai_rule: '5-7 clear bite-sized teaching points' },
-              { type: 'example', name: 'Story or Source Gem', ai_rule: '1 engaging story, Midrash, or Torah insight' },
-              { type: 'reflection', name: 'Day-to-Day Life Takeaway', ai_rule: 'Practical action or mindset for everyday life' },
-              { type: 'discussion', name: 'Discussion Question', ai_rule: '1 thought-provoking question for the student' }
+              { type: 'text', name: 'Introduction & Context', ai_rule: 'Concise opening framing for the topic' },
+              { type: 'list', name: 'Core Key Points', ai_rule: 'Clear bite-sized bullet points' },
+              { type: 'example', name: 'Story or Worked Example', ai_rule: 'One concrete illustration or demonstration' },
+              { type: 'discussion', name: 'Application & Discussion', ai_rule: 'Practical takeaway and student question' }
             ]
           };
         }
@@ -13937,7 +13929,9 @@ Return STRICT JSON ONLY:
       if (genLabel) genLabel.textContent = APP_STATE.lang === 'he' ? '⚡ נעל מבנה ופתח סטודיו' : '⚡ Lock Architecture & Open Course Studio';
 
       selectCourseColor('amber');
-      applyBlueprintPreset('concepts_ethics');
+      currentBlueprintSections = [];
+      if (typeof window !== 'undefined') window.currentBlueprintSections = currentBlueprintSections;
+      renderBlueprintSectionsList();
       resetArchitectConversation();
 
       switchCourseBuilderMode(initialMode || 'ai');
