@@ -1,0 +1,166 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "TutorPilot Universal External AI Agent API",
+    "description": "Strictly scoped API allowing any external AI platform (ChatGPT, Claude, Gemini, Make, Zapier, n8n, or custom agents) to perform the exact 3 declared capabilities of TutorPilot My Agent: (1) End-of-class student progress updates (Last Taught & Next to Teach), (2) Calendar & schedule management, and (3) TutorPilot website help. Destructive operations, student creation/deletion, course mutations, and private guardian PII access are blocked at the server layer.",
+    "version": "2.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://tutorpilot.pages.dev/api",
+      "description": "TutorPilot Production External Agent Gateway"
+    }
+  ],
+  "security": [
+    {
+      "TutorPilotBearerToken": []
+    }
+  ],
+  "paths": {
+    "/external-agent": {
+      "get": {
+        "operationId": "readTutorPilotOverviewOrGuide",
+        "summary": "Read today's classes and students overview, or retrieve the TutorPilot App Help Guide",
+        "description": "Pass action=overview to get today's scheduled students, what to teach next, and read-only course lesson titles (PII scrubbed). Pass action=guide to retrieve how TutorPilot features work.",
+        "parameters": [
+          {
+            "name": "action",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["overview", "guide"]
+            },
+            "description": "Select 'overview' for today's students and syllabus outlines, or 'guide' for TutorPilot website instructions."
+          },
+          {
+            "name": "topic",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional app help topic when action=guide (e.g. courses, students, schedule, settings)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Requested overview or app guide returned successfully"
+          },
+          "401": {
+            "description": "Missing, invalid, or revoked Bearer token"
+          },
+          "403": {
+            "description": "Capability disabled by tutor or undeclared action blocked"
+          }
+        }
+      },
+      "post": {
+        "operationId": "executeTutorPilotAgentAction",
+        "summary": "Execute one of the 3 declared TutorPilot capabilities",
+        "description": "Strictly allowlisted endpoint for (1) log_after_class_update / get_overview, (2) schedule_lesson / cancel_lesson, and (3) get_app_guide. Any undeclared action returns HTTP 403.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalAgentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Declared capability executed successfully"
+          },
+          "400": {
+            "description": "Missing or invalid required fields"
+          },
+          "401": {
+            "description": "Missing, invalid, or revoked Bearer token"
+          },
+          "403": {
+            "description": "Undeclared action or disabled capability blocked by server policy"
+          },
+          "404": {
+            "description": "Existing student not found in tutor workspace"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "TutorPilotBearerToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Generate a revocable personal token (tp_ext_...) inside TutorPilot -> Settings -> Connect External AI."
+      }
+    },
+    "schemas": {
+      "ExternalAgentRequest": {
+        "type": "object",
+        "required": ["action"],
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "get_overview",
+              "log_after_class_update",
+              "schedule_lesson",
+              "cancel_lesson",
+              "get_app_guide"
+            ],
+            "description": "Strictly one of the 5 allowlisted actions across the 3 declared capabilities."
+          },
+          "studentNameOrId": {
+            "type": "string",
+            "description": "Existing student's name or ID (required for log_after_class_update, schedule_lesson, cancel_lesson)."
+          },
+          "lastTaught": {
+            "type": "string",
+            "description": "For log_after_class_update: concise summary of what was just taught in today's class."
+          },
+          "nextToTeach": {
+            "type": "string",
+            "description": "For log_after_class_update: concise topic or next sequential lesson to teach in the next class."
+          },
+          "homeworkTask": {
+            "type": "string",
+            "description": "Optional homework assignment to record for the student."
+          },
+          "appendNote": {
+            "type": "string",
+            "description": "Optional short lesson recap note appended to the student's notes."
+          },
+          "markTodayCompleted": {
+            "type": "boolean",
+            "default": true,
+            "description": "When logging lastTaught, automatically mark today's matching scheduled class as completed."
+          },
+          "date": {
+            "type": "string",
+            "description": "For schedule_lesson or cancel_lesson: target date in YYYY-MM-DD format."
+          },
+          "timeSlot": {
+            "type": "string",
+            "description": "For schedule_lesson: class time e.g. '4:30 PM'."
+          },
+          "topic": {
+            "type": "string",
+            "description": "For schedule_lesson (optional lesson topic) or get_app_guide (optional feature topic)."
+          },
+          "repeatWeekly": {
+            "type": "boolean",
+            "default": false,
+            "description": "For schedule_lesson: whether this class repeats weekly."
+          },
+          "sessionId": {
+            "type": "string",
+            "description": "Optional specific session ID for cancel_lesson."
+          }
+        }
+      }
+    }
+  }
+}

@@ -1865,8 +1865,8 @@
           <button type="button" onclick="toggleAiKeySettings()" class="hidden" aria-hidden="true">
             <span id="lbl-ai-btn-custom-key">Custom Key</span>
           </button>
-          <button type="button" onclick="openBase44Modal()" class="hidden" aria-hidden="true">
-            <span id="lbl-ai-btn-base44">Base44 Setup</span>
+          <button type="button" onclick="openExternalAiModal()" class="hidden" aria-hidden="true">
+            <span id="lbl-ai-btn-external">Connect External AI</span>
           </button>
 
           <button onclick="clearAiChat()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold transition active:scale-95" title="Start a fresh conversation">
@@ -3164,123 +3164,167 @@
   <!-- ============================================== -->
   <!-- MODAL: BASE44 & EXTERNAL AI INTEGRATION         -->
   <!-- ============================================== -->
-  <div id="modal-base44-integration" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
+  <div id="modal-external-ai-connect" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden backdrop-blur-sm">
     <div class="max-w-2xl w-full max-h-[90vh] bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2.5">
-          <button type="button" onclick="navigateAppBack()" class="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition" title="Back">
+      <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <button type="button" onclick="navigateAppBack()" class="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition shrink-0" title="Back">
             <i data-lucide="arrow-left" class="w-4 h-4 rtl:rotate-180"></i>
           </button>
-          <div class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-            <i data-lucide="bot" class="w-5 h-5"></i>
+          <div class="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+            <i data-lucide="plug-zap" class="w-5 h-5"></i>
           </div>
-          <div>
-            <h3 class="text-base sm:text-lg font-bold text-white" id="txt-base44-modal-title">Base44 & External AI Integration</h3>
-            <p class="text-xs text-slate-400" id="txt-base44-modal-subtitle">Connect your external Base44 AI agent directly to TutorPilot in real time</p>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="text-base sm:text-lg font-bold text-white truncate" id="txt-external-ai-title">Connect External AI</h3>
+              <span id="ext-ai-connection-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Disconnected</span>
+            </div>
+            <p class="text-xs text-slate-400" id="txt-external-ai-subtitle">Link ChatGPT, Claude, Gemini, or any external AI agent with strictly scoped permissions</p>
           </div>
         </div>
-        <button type="button" onclick="closeBase44Modal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+        <button type="button" onclick="closeExternalAiModal()" class="text-slate-400 hover:text-white p-1 rounded-lg shrink-0">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="flex-1 overflow-y-auto space-y-4 pr-1 min-h-[220px]">
+      <div class="flex-1 overflow-y-auto space-y-4 pr-1 min-h-[240px]">
 
-        <!-- Card 1: API Endpoint & Key -->
-        <div class="p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
-          <h4 class="text-xs font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5" id="lbl-base44-creds-title">
-            <i data-lucide="database" class="w-3.5 h-3.5"></i>
-            1. Supabase REST API Credentials
-          </h4>
+        <!-- Legacy Base44 Disconnected Notice -->
+        <div class="px-3.5 py-2.5 rounded-2xl bg-amber-950/30 border border-amber-500/30 text-[11px] text-amber-200 leading-relaxed flex items-start gap-2">
+          <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
+          <span><strong>Legacy Base44 Disconnected:</strong> Direct Base44 credentials have been retired from TutorPilot. If you previously added a TutorPilot action inside your Base44 dashboard, remove or disable it there as well.</span>
+        </div>
+
+        <!-- Section 1: Personal Connection Token (Revocable) -->
+        <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <div>
+              <h4 class="text-xs font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+                <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
+                <span>1. Personal Connection Token</span>
+              </h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Generate a revocable Bearer token for your external AI. No raw database keys are ever exposed.</p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button type="button" id="btn-generate-ext-ai-token" onclick="generateExternalAiToken()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition active:scale-95 shadow-sm flex items-center gap-1.5 keep-white">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                <span>Generate Token</span>
+              </button>
+              <button type="button" id="btn-revoke-ext-ai-token" onclick="revokeExternalAiToken()" class="hidden px-3 py-1.5 rounded-xl bg-rose-950/60 hover:bg-rose-900/70 text-rose-300 border border-rose-500/40 font-bold text-xs transition active:scale-95 flex items-center gap-1">
+                <i data-lucide="unlink" class="w-3.5 h-3.5"></i>
+                <span>Disconnect &amp; Revoke</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="ext-ai-token-box" class="hidden space-y-1.5 pt-1">
+            <span class="text-[11px] font-semibold text-emerald-400 block">Active Bearer Token (Copy &amp; paste into your AI platform's Authorization header):</span>
+            <div class="flex items-center gap-2">
+              <input type="text" id="ext-ai-token-display" readonly class="w-full bg-slate-900 border border-emerald-500/40 rounded-xl px-3 py-2 text-xs font-mono text-emerald-200 select-all" />
+              <button type="button" onclick="copyExternalAiToken()" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shrink-0 keep-white">Copy</button>
+            </div>
+          </div>
+          <p id="ext-ai-token-status-note" class="text-[11px] text-slate-400">No external AI is currently connected. Click Generate Token when you are ready to link your AI platform.</p>
+        </div>
+
+        <!-- Section 2: Declared Capabilities (Exact 3 Capabilities of My Agent) -->
+        <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+          <div>
+            <h4 class="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+              <span>2. Declared Capabilities (Strict Server Allowlist)</span>
+            </h4>
+            <p class="text-[11px] text-slate-400 mt-0.5">Your external AI can ONLY perform the exact 3 capabilities enabled below, matching My Agent inside TutorPilot.</p>
+          </div>
+
           <div class="space-y-2 text-xs">
-            <div>
-              <span class="text-slate-400 text-[11px] block mb-0.5">REST API URL (Table: students_sync)</span>
-              <div class="flex items-center gap-2">
-                <input
-                  type="text"
-                  readonly
-                  value="https://bpkwnqbabokesuesvkex.supabase.co/rest/v1/students_sync"
-                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-slate-300"
-                >
-                <button
-                  type="button"
-                  onclick="copyToClipboardText('https://bpkwnqbabokesuesvkex.supabase.co/rest/v1/students_sync', 'API URL Copied!')"
-                  class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold shrink-0"
-                >
-                  Copy
-                </button>
+            <label class="flex items-start justify-between gap-3 p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 cursor-pointer">
+              <div class="min-w-0">
+                <div class="font-bold text-white">1. End of Class Student Updates</div>
+                <div class="text-[11px] text-slate-400">Read today's classes &amp; existing students, update Last Taught &amp; Next to Teach, assign homework, and mark today's class completed.</div>
               </div>
-            </div>
+              <input type="checkbox" id="chk-ext-cap-afterclass" checked onchange="toggleExternalAiCapability('afterClass', this.checked)" class="mt-1 w-4 h-4 accent-indigo-500 shrink-0" />
+            </label>
 
-            <div>
-              <span class="text-slate-400 text-[11px] block mb-0.5">Publishable Anon API Key</span>
-              <div class="flex items-center gap-2">
-                <input
-                  type="text"
-                  readonly
-                  value="sb_publishable_hVy0YYOOT9k_LD_ZMe24zg_iuqTC538"
-                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-slate-300"
-                >
-                <button
-                  type="button"
-                  onclick="copyToClipboardText('sb_publishable_hVy0YYOOT9k_LD_ZMe24zg_iuqTC538', 'API Key Copied!')"
-                  class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold shrink-0"
-                >
-                  Copy
-                </button>
+            <label class="flex items-start justify-between gap-3 p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 cursor-pointer">
+              <div class="min-w-0">
+                <div class="font-bold text-white">2. Calendar &amp; Schedule Management</div>
+                <div class="text-[11px] text-slate-400">Schedule or cancel lessons on any date for existing students.</div>
               </div>
-            </div>
+              <input type="checkbox" id="chk-ext-cap-schedule" checked onchange="toggleExternalAiCapability('schedule', this.checked)" class="mt-1 w-4 h-4 accent-indigo-500 shrink-0" />
+            </label>
+
+            <label class="flex items-start justify-between gap-3 p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 cursor-pointer">
+              <div class="min-w-0">
+                <div class="font-bold text-white">3. TutorPilot Website Help Guide</div>
+                <div class="text-[11px] text-slate-400">Explain how Courses, Students, Schedule, Today's Overview, Settings, and Back navigation work.</div>
+              </div>
+              <input type="checkbox" id="chk-ext-cap-guide" checked onchange="toggleExternalAiCapability('appGuide', this.checked)" class="mt-1 w-4 h-4 accent-indigo-500 shrink-0" />
+            </label>
+          </div>
+
+          <div class="px-3 py-2 rounded-xl bg-rose-950/30 border border-rose-500/25 text-[11px] text-rose-200 leading-relaxed">
+            <strong>Always Blocked by Server (HTTP 403):</strong> Deleting or creating students, editing or deleting courses and lessons, reading private guardian contact info, billing rates, or portal codes, and changing account settings.
           </div>
         </div>
 
-        <!-- Card 2: Ready to Paste Base44 Prompt -->
-        <div class="p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2.5">
-          <div class="flex items-center justify-between">
-            <h4 class="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5" id="lbl-base44-prompt-title">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-              2. Base44 AI Agent System Prompt
+        <!-- Section 3: Universal Connection Guide (Any AI Platform) -->
+        <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <h4 class="text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="book-open-check" class="w-3.5 h-3.5"></i>
+              <span>3. Universal Setup Guideline (Any AI Platform)</span>
             </h4>
-            <button
-              type="button"
-              onclick="copyBase44Prompt()"
-              class="px-3 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition active:scale-95 flex items-center gap-1 shadow-sm"
-            >
-              <i data-lucide="copy" class="w-3 h-3"></i>
-              <span id="lbl-base44-btn-copy-prompt">Copy Prompt</span>
+            <button type="button" onclick="downloadExternalAiSchema()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition active:scale-95 flex items-center gap-1.5 keep-white">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span id="lbl-external-ai-download">Download OpenAPI JSON</span>
             </button>
           </div>
-          <p class="text-xs text-slate-400" id="lbl-base44-prompt-desc">Paste this prompt into your Base44 AI agent configuration so it knows the exact database schema and operations:</p>
-          <textarea
-            id="base44-prompt-textarea"
-            readonly
-            rows="6"
-            class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-[11px] font-mono text-slate-300 leading-relaxed"
-          ></textarea>
-        </div>
 
-        <!-- Card 3: Download OpenAPI Schema -->
-        <div class="p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 flex items-center justify-between gap-3">
-          <div>
-            <h4 class="text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1.5" id="lbl-base44-schema-title">
-              <i data-lucide="file-json" class="w-3.5 h-3.5"></i>
-              3. Download OpenAPI 3.0 Schema
-            </h4>
-            <p class="text-xs text-slate-400 mt-0.5" id="lbl-base44-schema-desc">Import base44_openapi_schema.json directly into Base44 Actions for one-click tool setup.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+            <div>
+              <span class="text-[11px] text-slate-400 block mb-1">Gateway Endpoint URL</span>
+              <div class="flex items-center gap-1.5">
+                <input type="text" readonly value="https://tutorpilot.pages.dev/api/external-agent" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-slate-300" />
+                <button type="button" onclick="copyToClipboardText('https://tutorpilot.pages.dev/api/external-agent', 'Gateway URL Copied!')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold shrink-0">Copy</button>
+              </div>
+            </div>
+            <div>
+              <span class="text-[11px] text-slate-400 block mb-1">Universal OpenAPI Schema URL</span>
+              <div class="flex items-center gap-1.5">
+                <input type="text" readonly value="https://tutorpilot.pages.dev/tutorpilot-agent-openapi.json" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-slate-300" />
+                <button type="button" onclick="copyToClipboardText('https://tutorpilot.pages.dev/tutorpilot-agent-openapi.json', 'OpenAPI URL Copied!')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold shrink-0">Copy</button>
+              </div>
+            </div>
           </div>
-          <button
-            type="button"
-            onclick="downloadBase44Schema()"
-            class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition active:scale-95 shrink-0 flex items-center gap-1.5 shadow-sm"
-          >
-            <i data-lucide="download" class="w-3.5 h-3.5"></i>
-            <span id="lbl-base44-btn-download">Download Schema</span>
-          </button>
+
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-semibold text-slate-300">Universal Agent Instructions (Copy &amp; paste into ChatGPT, Claude, Gemini, or any custom AI)</span>
+              <button type="button" onclick="copyExternalAiPrompt()" class="px-3 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition active:scale-95 flex items-center gap-1">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                <span id="lbl-external-ai-copy-prompt">Copy Instructions</span>
+              </button>
+            </div>
+            <textarea id="external-ai-prompt-textarea" readonly rows="6" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-[11px] font-mono text-slate-300 leading-relaxed"></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-300 pt-1">
+            <div class="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800 space-y-0.5">
+              <div class="font-bold text-white">ChatGPT (Custom GPT Actions)</div>
+              <div class="text-slate-400">Configure -> Create New Action -> Import from OpenAPI URL -> Auth: API Key (Bearer) -> paste token &amp; instructions.</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800 space-y-0.5">
+              <div class="font-bold text-white">Claude / Gemini / Custom Agent</div>
+              <div class="text-slate-400">Attach OpenAPI tool or HTTP connector to <code class="font-mono">/api/external-agent</code> with header <code class="font-mono">Authorization: Bearer tp_ext_...</code> and paste instructions.</div>
+            </div>
+          </div>
         </div>
 
       </div>
 
       <div class="pt-2 border-t border-slate-800 flex justify-end">
-        <button type="button" onclick="closeBase44Modal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+        <button type="button" onclick="closeExternalAiModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
           Close
         </button>
       </div>
@@ -4634,13 +4678,13 @@
           <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
         </button>
 
-        <!-- Base44 & External AI Integration Tile -->
-        <button onclick="closeSettingsModal(); openBase44Modal();" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-cyan-700/50 transition active:scale-98 text-left">
+        <!-- Universal External AI Connection Tile -->
+        <button onclick="closeSettingsModal(); openExternalAiModal();" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-indigo-500/50 transition active:scale-98 text-left">
           <div class="flex items-center gap-3">
-            <i data-lucide="bot" class="w-4 h-4 text-cyan-400"></i>
+            <i data-lucide="plug-zap" class="w-4 h-4 text-indigo-400"></i>
             <div>
-              <div id="settings-base44-title" class="text-xs font-bold text-white">Base44 & External AI</div>
-              <p id="settings-base44-desc" class="text-[11px] text-slate-400 mt-0.5">Prompt, keys, and OpenAPI schema for external AI</p>
+              <div id="settings-external-ai-title" class="text-xs font-bold text-white">Connect External AI</div>
+              <p id="settings-external-ai-desc" class="text-[11px] text-slate-400 mt-0.5">Link ChatGPT, Claude, Gemini, or any external AI with scoped permissions</p>
             </div>
           </div>
           <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
@@ -5798,15 +5842,15 @@
         aiChipSchedule: "Schedule lesson",
         aiChipAddNote: "Add note to lesson",
         aiChipSummarize: "Summarize roster",
-        base44BtnSetup: "Base44 Setup",
-        base44ModalTitle: "Base44 & External AI Integration",
-        base44ModalSubtitle: "Connect your Base44 AI agent directly to TutorPilot in real time",
-        base44CopyPromptBtn: "Copy Prompt",
-        base44DownloadSchemaBtn: "Download Schema",
+        externalAiBtnSetup: "Connect External AI",
+        externalAiModalTitle: "Connect External AI",
+        externalAiModalSubtitle: "Link ChatGPT, Claude, Gemini, or any external AI agent with strictly scoped permissions",
+        externalAiCopyPromptBtn: "Copy Instructions",
+        externalAiDownloadSchemaBtn: "Download OpenAPI JSON",
         toastApiKeySaved: "Gemini API Key saved and verified!",
         toastApiKeyInvalid: "Please enter a valid Gemini API Key",
         toastChatCleared: "Chat cleared",
-        toastPromptCopied: "Base44 System Prompt copied to clipboard!",
+        toastPromptCopied: "Universal External AI instructions copied!",
 
         // Skills & Daily Learning
         skillsDailyTitle: "Daily Learning & Ceremony Skills",
@@ -6167,15 +6211,15 @@
         aiChipSchedule: "קבע שיעור",
         aiChipAddNote: "הוסף הערה לשיעור",
         aiChipSummarize: "סיכום תלמידים",
-        base44BtnSetup: "חיבור Base44",
-        base44ModalTitle: "אינטגרציית Base44 ובינה מלאכותית",
-        base44ModalSubtitle: "חיבור סוכן ה-AI של הרב קלוסטר ב-Base44 ישירות למערכת בזמן אמת",
-        base44CopyPromptBtn: "העתק הנחיות",
-        base44DownloadSchemaBtn: "הורד סכימה",
+        externalAiBtnSetup: "חיבור סוכן AI חיצוני",
+        externalAiModalTitle: "חיבור סוכן AI חיצוני",
+        externalAiModalSubtitle: "חבר את ChatGPT, Claude, Gemini או כל סוכן חיצוני עם הרשאות מוגבלות ובטוחות",
+        externalAiCopyPromptBtn: "העתק הנחיות",
+        externalAiDownloadSchemaBtn: "הורד סכימת OpenAPI",
         toastApiKeySaved: "מפתח Gemini נשמר בהצלחה!",
         toastApiKeyInvalid: "אנא הזן מפתח Gemini תקין",
         toastChatCleared: "השיחה נוקתה",
-        toastPromptCopied: "הנחיות Base44 הועתקו ללוח!",
+        toastPromptCopied: "הנחיות החיבור לסוכן חיצוני הועתקו!",
 
         // Skills & Daily Learning
         skillsDailyTitle: "מיומנויות קריאה ולימוד יומי",
@@ -10476,8 +10520,8 @@ alter publication supabase_realtime add table public.students_sync;`;
       const lblAiSub = document.getElementById('lbl-ai-view-subtitle');
       if (lblAiSub) lblAiSub.textContent = t.aiViewSubtitle;
 
-      const lblAiBase44 = document.getElementById('lbl-ai-btn-base44');
-      if (lblAiBase44) lblAiBase44.textContent = t.base44BtnSetup;
+      const lblAiExt = document.getElementById('lbl-ai-btn-external');
+      if (lblAiExt) lblAiExt.textContent = t.externalAiBtnSetup;
 
       const lblCustomKeyBtn = document.getElementById('lbl-ai-btn-custom-key');
       if (lblCustomKeyBtn) lblCustomKeyBtn.textContent = t.aiCustomKeyBtn || (isHe ? "מפתח אישי" : "Custom Key");
@@ -10512,18 +10556,21 @@ alter publication supabase_realtime add table public.students_sync;`;
       const chipSum = document.getElementById('lbl-ai-chip-summarize');
       if (chipSum) chipSum.textContent = t.aiChipSummarize;
 
-      // Base44 Modal Localizations
-      const txtB44Title = document.getElementById('txt-base44-modal-title');
-      if (txtB44Title) txtB44Title.textContent = t.base44ModalTitle;
+      // External AI Modal Localizations
+      const txtExtTitle = document.getElementById('txt-external-ai-title');
+      if (txtExtTitle) txtExtTitle.textContent = t.externalAiModalTitle;
 
-      const txtB44Sub = document.getElementById('txt-base44-modal-subtitle');
-      if (txtB44Sub) txtB44Sub.textContent = t.base44ModalSubtitle;
+      const txtExtSub = document.getElementById('txt-external-ai-subtitle');
+      if (txtExtSub) txtExtSub.textContent = t.externalAiModalSubtitle;
 
-      const btnCopyB44 = document.getElementById('lbl-base44-btn-copy-prompt');
-      if (btnCopyB44) btnCopyB44.textContent = t.base44CopyPromptBtn;
+      const btnCopyExt = document.getElementById('lbl-external-ai-copy-prompt');
+      if (btnCopyExt) btnCopyExt.textContent = t.externalAiCopyPromptBtn;
 
-      const btnDlB44 = document.getElementById('lbl-base44-btn-download');
-      if (btnDlB44) btnDlB44.textContent = t.base44DownloadSchemaBtn;
+      const btnDlExt = document.getElementById('lbl-external-ai-download');
+      if (btnDlExt) btnDlExt.textContent = t.externalAiDownloadSchemaBtn;
+
+      const settingsExtTitle = document.getElementById('settings-external-ai-title');
+      if (settingsExtTitle) settingsExtTitle.textContent = t.externalAiBtnSetup;
 
       updateStudyMaterialsBadge();
       updateAiStatusPill();
@@ -27592,7 +27639,7 @@ Your 3 primary jobs are:
 
 Current Website Layout & How To Guide (Accurate Reference):
 - Left Sidebar Navigation: Circular parchment scroll logo at top-left collapses or unrolls the sidebar like a scroll. Below it are 4 main sections: Courses, Students, Schedule, and My Agent. Right below Workspace is Today's Overview, listing the students scheduled today and what to teach each one.
-- Profile & Settings: Click the circular profile letter avatar (S) at top-right of the sidebar to open School Workspace, Master Directory, or Settings (Light Warm Daylight vs Dark Mode toggle, English/Hebrew language toggle, and Hebrew Date toggle for the Schedule).
+- Profile & Settings: Click the circular profile letter avatar (S) at top-right of the sidebar to open School Workspace, Master Directory, or Settings (Light Warm Daylight vs Dark Mode toggle, English/Hebrew language toggle, Hebrew Date toggle for the Schedule, and Connect External AI to generate a revocable scoped token for ChatGPT, Claude, Gemini, or any external agent).
 - Courses: Shows visual course cards. Click a course to view its clean numbered vertical lesson list, add a lesson (+ New Lesson), or click Edit Course with AI (which also contains the double-confirmed Delete Course button). Click any lesson to read it cleanly or click Edit with AI to refine sections.
 - Students: Lists enrolled students. Click a student to open their profile (Tab 1: Teaching Continuity Last Taught & Next to Teach + Courses checklist + Private Tutor Notes; Tab 2: Student Portal access code, Homework, Goals & Shared Notes).
 - Schedule: Full-width Month or Week calendar. When Hebrew Date is turned on in Settings, the Hebrew month/year fits neatly in the Schedule header and Hebrew dates appear on each day. Click any date to go into that date's clean view showing scheduled students and times, then click a student to view/edit what to teach him or jump to AI After Class.
@@ -28665,210 +28712,306 @@ Guidelines:
       };
     }
 
-    function openBase44Modal() {
-      populateBase44PromptTextarea();
-      const modal = document.getElementById('modal-base44-integration');
-      if (modal) modal.classList.remove('hidden');
-      lucide.createIcons();
+    const EXTERNAL_AI_STORAGE_KEY = 'tutor_external_ai_connection_v2';
+    const EXTERNAL_AI_TOKEN_ROW_ID = '__external_agent_tokens__';
+
+    function getLocalExternalAiState() {
+      try {
+        const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(EXTERNAL_AI_STORAGE_KEY) : null;
+        const parsed = raw ? JSON.parse(raw) : null;
+        if (parsed && typeof parsed === 'object') {
+          return {
+            connected: Boolean(parsed.connected && parsed.tokenHash),
+            tokenHash: String(parsed.tokenHash || ''),
+            tokenPreview: String(parsed.tokenPreview || ''),
+            lastGeneratedToken: String(parsed.lastGeneratedToken || ''),
+            capabilities: {
+              afterClass: parsed.capabilities?.afterClass !== false,
+              schedule: parsed.capabilities?.schedule !== false,
+              appGuide: parsed.capabilities?.appGuide !== false
+            }
+          };
+        }
+      } catch (e) {}
+      return {
+        connected: false,
+        tokenHash: '',
+        tokenPreview: '',
+        lastGeneratedToken: '',
+        capabilities: { afterClass: true, schedule: true, appGuide: true }
+      };
     }
 
-    function closeBase44Modal() {
-      const modal = document.getElementById('modal-base44-integration');
+    function saveLocalExternalAiState(stateObj) {
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(EXTERNAL_AI_STORAGE_KEY, JSON.stringify(stateObj));
+        }
+      } catch (e) {}
+    }
+
+    async function computeSha256HexBrowser(input) {
+      const str = String(input || '');
+      if (typeof crypto !== 'undefined' && crypto.subtle && typeof TextEncoder !== 'undefined') {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+      // Deterministic fallback hash only for restricted test environments without SubtleCrypto
+      let h = 2166136261;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return ('00000000' + (h >>> 0).toString(16)).slice(-8).repeat(8);
+    }
+
+    function generateCryptographicExternalToken() {
+      const bytes = new Uint8Array(18);
+      if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+        crypto.getRandomValues(bytes);
+      } else {
+        for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+      }
+      return 'tp_ext_' + Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function syncExternalAiTokenRegistryToCloud(tokenHash, tokenRecord) {
+      if (!tokenHash) return;
+      const client = APP_STATE.cloud && APP_STATE.cloud.client;
+      if (!client) return;
+      try {
+        const { data: existingRows } = await client
+          .from('students_sync')
+          .select('id,completed_topics')
+          .eq('id', EXTERNAL_AI_TOKEN_ROW_ID);
+        const existingRow = Array.isArray(existingRows) ? existingRows[0] : null;
+        const existingTokens = (existingRow && existingRow.completed_topics && existingRow.completed_topics.tokens)
+          ? { ...existingRow.completed_topics.tokens }
+          : {};
+        existingTokens[tokenHash] = tokenRecord;
+        await client.from('students_sync').upsert({
+          id: EXTERNAL_AI_TOKEN_ROW_ID,
+          name: 'External Agent Token Registry',
+          parsha_or_date: '',
+          notes: '',
+          completed_topics: { tokens: existingTokens },
+          completed_parshiot: {},
+          updated_at: new Date().toISOString()
+        });
+      } catch (err) {
+        console.warn('External AI token cloud sync warning:', err);
+      }
+    }
+
+    function renderExternalAiConnectionState() {
+      const st = getLocalExternalAiState();
+      const isHe = APP_STATE.lang === 'he';
+      const badge = document.getElementById('ext-ai-connection-badge');
+      const revokeBtn = document.getElementById('btn-revoke-ext-ai-token');
+      const genBtn = document.getElementById('btn-generate-ext-ai-token');
+      const tokenBox = document.getElementById('ext-ai-token-box');
+      const tokenDisplay = document.getElementById('ext-ai-token-display');
+      const noteEl = document.getElementById('ext-ai-token-status-note');
+
+      const chkAfter = document.getElementById('chk-ext-cap-afterclass');
+      const chkSched = document.getElementById('chk-ext-cap-schedule');
+      const chkGuide = document.getElementById('chk-ext-cap-guide');
+      if (chkAfter) chkAfter.checked = st.capabilities.afterClass !== false;
+      if (chkSched) chkSched.checked = st.capabilities.schedule !== false;
+      if (chkGuide) chkGuide.checked = st.capabilities.appGuide !== false;
+
+      if (badge) {
+        if (st.connected) {
+          badge.textContent = isHe ? 'מחובר' : 'Connected';
+          badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+        } else {
+          badge.textContent = isHe ? 'מנותק' : 'Disconnected';
+          badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700';
+        }
+      }
+      if (revokeBtn) {
+        if (st.connected) revokeBtn.classList.remove('hidden');
+        else revokeBtn.classList.add('hidden');
+      }
+      if (genBtn) {
+        genBtn.innerHTML = `<i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>${st.connected ? (isHe ? 'החלף טוקן' : 'Rotate Token') : (isHe ? 'צור טוקן חיבור' : 'Generate Token')}</span>`;
+      }
+      if (tokenBox && tokenDisplay) {
+        if (st.connected && st.lastGeneratedToken) {
+          tokenDisplay.value = st.lastGeneratedToken;
+          tokenBox.classList.remove('hidden');
+        } else {
+          tokenDisplay.value = '';
+          tokenBox.classList.add('hidden');
+        }
+      }
+      if (noteEl) {
+        noteEl.textContent = st.connected
+          ? (isHe ? `טוקן פעיל (${st.tokenPreview}) מקושר לסביבת העבודה שלך.` : `Active token (${st.tokenPreview}) is scoped strictly to your workspace and enabled capabilities.`)
+          : (isHe ? 'אין סוכן חיצוני מחובר כרגע. לחץ "צור טוקן חיבור" כדי לחבר פלטפורמת AI.' : 'No external AI is currently connected. Click Generate Token when you are ready to link your AI platform.');
+      }
+    }
+
+    async function generateExternalAiToken() {
+      const prev = getLocalExternalAiState();
+      const rawToken = generateCryptographicExternalToken();
+      const tokenHash = await computeSha256HexBrowser(rawToken);
+      const activeSchoolId = typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770';
+      const ownerEmail = (APP_STATE.currentUser && APP_STATE.currentUser.email) || '';
+      const userId = (APP_STATE.currentUser && APP_STATE.currentUser.id) || '';
+      const tutorName = (APP_STATE.currentUser && APP_STATE.currentUser.name) || 'Tutor';
+
+      if (prev.connected && prev.tokenHash && prev.tokenHash !== tokenHash) {
+        await syncExternalAiTokenRegistryToCloud(prev.tokenHash, {
+          enabled: false,
+          revokedAt: new Date().toISOString()
+        });
+      }
+
+      const nextState = {
+        connected: true,
+        tokenHash,
+        tokenPreview: rawToken.slice(0, 11) + '••••' + rawToken.slice(-4),
+        lastGeneratedToken: rawToken,
+        capabilities: prev.capabilities || { afterClass: true, schedule: true, appGuide: true }
+      };
+      saveLocalExternalAiState(nextState);
+      await syncExternalAiTokenRegistryToCloud(tokenHash, {
+        schoolId: activeSchoolId,
+        ownerEmail,
+        userId,
+        tutorName,
+        enabled: true,
+        revokedAt: null,
+        capabilities: nextState.capabilities,
+        createdAt: new Date().toISOString()
+      });
+
+      renderExternalAiConnectionState();
+      populateExternalAiGuideTextarea();
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+      showToast(APP_STATE.lang === 'he' ? 'טוקן חיבור נוצר בהצלחה!' : 'Connection token generated! Copy it into your external AI.');
+      return rawToken;
+    }
+
+    async function revokeExternalAiToken() {
+      const prev = getLocalExternalAiState();
+      if (prev.tokenHash) {
+        await syncExternalAiTokenRegistryToCloud(prev.tokenHash, {
+          enabled: false,
+          revokedAt: new Date().toISOString()
+        });
+      }
+      saveLocalExternalAiState({
+        connected: false,
+        tokenHash: '',
+        tokenPreview: '',
+        lastGeneratedToken: '',
+        capabilities: prev.capabilities || { afterClass: true, schedule: true, appGuide: true }
+      });
+      renderExternalAiConnectionState();
+      populateExternalAiGuideTextarea();
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+      showToast(APP_STATE.lang === 'he' ? 'הגישה לסוכן החיצוני נותקה ובוטלה.' : 'External AI disconnected and token revoked.');
+    }
+
+    async function toggleExternalAiCapability(capKey, isEnabled) {
+      const st = getLocalExternalAiState();
+      if (!st.capabilities) st.capabilities = { afterClass: true, schedule: true, appGuide: true };
+      st.capabilities[capKey] = Boolean(isEnabled);
+      saveLocalExternalAiState(st);
+      if (st.connected && st.tokenHash) {
+        const activeSchoolId = typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770';
+        await syncExternalAiTokenRegistryToCloud(st.tokenHash, {
+          schoolId: activeSchoolId,
+          ownerEmail: (APP_STATE.currentUser && APP_STATE.currentUser.email) || '',
+          userId: (APP_STATE.currentUser && APP_STATE.currentUser.id) || '',
+          tutorName: (APP_STATE.currentUser && APP_STATE.currentUser.name) || 'Tutor',
+          enabled: true,
+          revokedAt: null,
+          capabilities: st.capabilities,
+          updatedAt: new Date().toISOString()
+        });
+      }
+      populateExternalAiGuideTextarea();
+      showToast(APP_STATE.lang === 'he' ? 'הרשאות הסוכן החיצוני עודכנו' : 'External AI capability updated');
+    }
+
+    function openExternalAiModal() {
+      renderExternalAiConnectionState();
+      populateExternalAiGuideTextarea();
+      const modal = document.getElementById('modal-external-ai-connect');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    }
+
+    function closeExternalAiModal() {
+      const modal = document.getElementById('modal-external-ai-connect');
       if (modal) modal.classList.add('hidden');
     }
 
-    function populateBase44PromptTextarea() {
-      const el = document.getElementById('base44-prompt-textarea');
+    function openBase44Modal() { openExternalAiModal(); }
+    function closeBase44Modal() { closeExternalAiModal(); }
+
+    function populateExternalAiGuideTextarea() {
+      const el = document.getElementById('external-ai-prompt-textarea');
       if (!el) return;
-
+      const st = getLocalExternalAiState();
+      const tutorName = (APP_STATE.currentUser && APP_STATE.currentUser.name) || 'Tutor';
       const activeSchoolId = typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770';
-      const tutorName = APP_STATE.currentUser?.name || 'Tutor';
-      const customCourses = APP_STATE.customCourses || [];
-
-      let customCoursesSection = '';
-      if (customCourses.length > 0) {
-        customCoursesSection = '\n\nACTIVE CLASSES & COURSES IN THIS WORKSPACE:\n' + customCourses.map(c => {
-          const lNames = (c.lessons || []).map((l, i) => `    ${i + 1}. [${l.id}] ${l.title_en || l.title_he}`).join('\n');
-          return `• Class: ${c.title_en || c.title_he} (ID: ${c.id}, Format: ${c.format_type || 'standard'})\n${lNames || '    (No lessons added yet)'}`;
-        }).join('\n\n');
+      const enabledLines = [];
+      if (st.capabilities.afterClass) {
+        enabledLines.push('1. END OF CLASS STUDENT UPDATES: Call GET /api/external-agent?action=overview to inspect today\'s classes, existing students, and read-only course lesson titles. After class, call POST /api/external-agent with { "action": "log_after_class_update", "studentNameOrId": "...", "lastTaught": "...", "nextToTeach": "...", "homeworkTask": "...", "appendNote": "...", "markTodayCompleted": true }. Automatically deduce the next sequential lesson from courseOutlines when not explicitly stated.');
+      }
+      if (st.capabilities.schedule) {
+        enabledLines.push('2. CALENDAR & SCHEDULE: Call POST /api/external-agent with { "action": "schedule_lesson", "studentNameOrId": "...", "date": "YYYY-MM-DD", "timeSlot": "4:30 PM", "topic": "..." } to book a class, or { "action": "cancel_lesson", "studentNameOrId": "...", "date": "YYYY-MM-DD" } to cancel a class on an existing student.');
+      }
+      if (st.capabilities.appGuide) {
+        enabledLines.push('3. TUTORPILOT APP HELP: Call GET /api/external-agent?action=guide (or POST { "action": "get_app_guide" }) whenever the user asks how TutorPilot works so your answers match the exact live interface.');
       }
 
-      el.value = `@Base44 SYSTEM INTEGRATION PROTOCOL: TUTORPILOT MULTI-ACTION DATABASE ACTIVATION
+      el.value = `TUTORPILOT UNIVERSAL EXTERNAL AI AGENT INSTRUCTIONS
 
-Base44, you are the official Tutoring Copilot for ${tutorName} (School Workspace: ${activeSchoolId}) in this chat.
-You have direct read and write access to our live TutorPilot database via REST API.
+You are connected to ${tutorName}'s TutorPilot workspace (School: ${activeSchoolId}) via the official TutorPilot External Agent Gateway.
 
-1. DATABASE REST API CONFIGURATION:
-• OpenAPI Schema: https://shmueldoviduhlman-spec.github.io/bar-mitzvah-tutor/base44_openapi_schema.json
-• Database Server: https://bpkwnqbabokesuesvkex.supabase.co/rest/v1
-• Target Table Endpoint: https://bpkwnqbabokesuesvkex.supabase.co/rest/v1/students_sync
-• Required Header 'apikey': sb_publishable_hVy0YYOOT9k_LD_ZMe24zg_iuqTC538
-• Required Header 'Authorization': Bearer sb_publishable_hVy0YYOOT9k_LD_ZMe24zg_iuqTC538
-• Upsert Header 'Prefer': resolution=merge-duplicates
-• Content Type: application/json
-• Active School Filter: completed_topics->'_meta'->>'school_id'=eq.${activeSchoolId}
+CONNECTION DETAILS:
+• Gateway Endpoint: https://tutorpilot.pages.dev/api/external-agent
+• OpenAPI 3.0 Schema: https://tutorpilot.pages.dev/tutorpilot-agent-openapi.json
+• Authentication Header: Authorization: Bearer <YOUR_PERSONAL_TOKEN>
 
-2. THE 36 CANONICAL CURRICULUM LESSONS:
-When checking off progress, evaluating remaining topics, or adding materials, match against these exact 36 lessons:
-• 13 Jewish Life Concepts:
-  shabbat (Shabbat & Sacred Time)
-  kashrut (Kashrut & Soul Nutrition)
-  tefillin (Tefillin Mind & Heart)
-  jewish_wedding (Jewish Wedding & Chuppah)
-  avot (The Avot & Imahot)
-  eretz_yisrael (Eretz Yisrael Homeland)
-  lashon_hakodesh (Lashon HaKodesh)
-  kiddush_hashem (Kiddush Hashem Ambassador)
-  ahavat_yisrael (Ahavat Yisrael & Chesed)
-  jewish_holidays (The Holiday Cycle)
-  jewish_identity (Jewish Identity & Soul)
-  bar_mitzvah (Bar Mitzvah & Maturity)
-  tefillah (Tefillah & Daily Prayer)
-• 12 Parshiot of Bereishit:
-  bereishit, noach, lech_lecha, vayeira, chayei_sarah, toledot,
-  vayetzei, vayishlach, vayeshev, mikeitz, vayigash, vayechi
-• 11 Parshiot of Shemot:
-  shemot, vaera, bo, beshalach, yitro, mishpatim,
-  terumah, tetzaveh, ki_tisa, vayakhel, pekudei${customCoursesSection}
+DECLARED CAPABILITIES (STRICT SERVER ALLOWLIST):
+${enabledLines.length > 0 ? enabledLines.join('\n') : '(All capabilities are currently disabled in TutorPilot Settings.)'}
 
-3. DEDICATED ACTION KEYWORDS & WORKFLOWS:
-
-Whenever either of us messages you in this chat, look for these primary action keywords:
-
-KEYWORD 1: SCHEDULE (or BOOK, CALENDAR, קבע שיעור)
-• When to use: The tutor wants to book a lesson on the calendar.
-• Syntax: SCHEDULE [Student Name] on [Date e.g. YYYY-MM-DD, tomorrow, or day of week] at [Time e.g. 4:30 PM]. Focus: [What to teach].
-• Action:
-  1. Fetch student by name: GET /students_sync?name=ilike.*[StudentName]*
-  2. Inside student.completed_topics._meta.schedule, append the session object:
-     {
-       "id": "les_" + Date.now(),
-       "dateStr": "YYYY-MM-DD",
-       "dayOfWeek": 0-6,
-       "time": "4:30 PM",
-       "repeatWeekly": false,
-       "topic": "[What to teach him]"
-     }
-  3. Mirror into completed_topics._meta.lessons with { id, date, timeSlot, subject, notes }.
-  4. Post upsert to /students_sync.
-  5. Reply in WhatsApp confirming student name, date, time, and teaching focus.
-
-KEYWORD 2: DEBRIEF (or FINISHED CLASS, TODAY'S LESSON, סיכום שיעור)
-• When to use: The tutor finished a class and explains what was gone over, taught, tested, or assigned today.
-• Syntax: DEBRIEF [Student Name]: [Summary of Hebrew booklet color & page, letter/vowel, Parsha lines, Shema, homework, and concepts covered].
-• Note on Booklets: We use 4 leveled booklets: Red Booklet (חוברת אדומה), Orange Booklet (חוברת כתומה), Yellow Booklet (חוברת צהובה), and Green Booklet (חוברת ירוקה).
-• Action:
-  1. Fetch student record from /students_sync.
-  2. Parse and update student.completed_topics._meta.skills:
-     • skills.hebrewReading: {
-         booklet: "Red Booklet" | "Orange Booklet" | "Yellow Booklet" | "Green Booklet",
-         currentPage: "[Page Number]",
-         letter: "[Hebrew Letter e.g. Bet, Shin]",
-         vowel: "[Hebrew Vowel e.g. Kamatz, Patach, Tzere, Segol, Shva, Chirik, Cholam, Shuruk]",
-         letterOrVowel: "[Combined description]",
-         nextTarget: "[Next step]"
-       }
-     • skills.parshaReading: { parshaName, aliyah, linesLearned, currentLine, notes, recordings }
-     • skills.dvarTorah: { topic, stage, text, notes, attachments }
-     • skills.homework: { task: "[Assigned task]", assignedDate: "YYYY-MM-DD", completed: false }
-  3. Analyze the debrief text against the 36 Canonical Curriculum Lessons:
-     - If the student was tested or mastered a concept, set completed_topics[topicId] = true.
-     - If the student mastered a Chumash parsha, set completed_parshiot[parshaId] = true.
-  4. Post upsert to /students_sync.
-  5. Reply with debrief summary, skills holding, checked off topics, and remaining topics.
-
-KEYWORD 3: NEXT LESSON (or SCHEDULE NEXT, שיעור הבא)
-• When to use: The tutor wants to schedule the upcoming class with an automatic intelligent study plan.
-• Syntax: NEXT LESSON [Student Name] on [Date] at [Time].
-  (Note: Often chained with DEBRIEF: e.g. "DEBRIEF Ethan Miller... and NEXT LESSON on Thursday at 5:00 PM").
-• Action:
-  1. Fetch student record from /students_sync.
-  2. Analyze student's completed_topics._meta.skills and completed_topics:
-     • Check if active homework exists.
-     • Calculate next step for Hebrew reading (e.g. next page / vowel).
-     • Calculate next lines for Torah Parsha reading (e.g. advance to next verses).
-     • Determine next unlearned topic from curriculum classes.
-  3. Formulate the preparation plan as clean bullet points for the calendar card:
-     • Check Homework: [Active homework task]
-     • Hebrew Reading: Advance to page [N] ([letter / vowel])
-     • Torah Reading: Learn [Aliyah] lines [Y-Z]
-     • Shema: [Section to practice]
-     • Concept: [Next unlearned topic e.g. Kashrut]
-  4. Inside student.completed_topics._meta.schedule, add the session with topic set to these bullet points.
-  5. Post upsert to /students_sync.
-  6. Reply confirming the scheduled lesson and the bullet point preparation checklist.
-
-KEYWORD 4: ADD MATERIAL (or ENRICH, הוסף חומר)
-• When to use: The tutor or educator wants to add a teaching tip, story, explanation, or source link to any lesson.
-• Syntax: ADD MATERIAL [Lesson Name e.g. Shabbat, Tefillin, Noach]. Title: [Headline]. Content: [Explanation or notes].
-• Action:
-  1. Identify the target lesson ID from curriculum classes.
-  2. Fetch existing materials: GET /students_sync?id=eq.__study_materials__
-  3. Append to completed_topics[targetLessonId]:
-     {
-       "id": "mat_" + Date.now(),
-       "title": "[Headline]",
-       "content": "[Content]",
-       "createdAt": new Date().toISOString(),
-       "author": "TutorPilot / Educator",
-       "targetType": "concept" or "parsha",
-       "targetTitle": "[Target Lesson Name]"
-     }
-  4. Post upsert to /students_sync under id "__study_materials__".
-  5. Reply confirming that the new study material has been added to the curriculum.
-
-KEYWORD 5: BREAKDOWN (or PLAN BREAKDOWN, חלק שיעורים)
-• When to use: The tutor wants to automatically break down a full course into a sequence of scheduled classes across upcoming calendar dates (e.g. 15 classes).
-• Syntax: BREAKDOWN [Student Name] into [X] classes for [Class Name/ID] starting [Date YYYY-MM-DD] [Cadence: twice_weekly, tues_thurs, once_weekly, etc.] at [Time e.g. 4:30 PM].
-• Action:
-  1. Fetch student and course records from /students_sync.
-  2. Compute upcoming schedule dates based on starting date and cadence.
-  3. Map sequential lessons onto each date (Session 1 -> Lesson 1, Session 2 -> Lesson 2...).
-  4. Append sessions to student.completed_topics._meta.schedule and mirror to student.completed_topics._meta.lessons.
-  5. Post upsert to /students_sync.
-  6. Reply confirming the planned breakdown and total scheduled dates.
-
-4. CHAINING COMMANDS:
-Tutors can combine commands in one message:
-Example: "DEBRIEF Ethan Miller: We practiced Tefillin blessings and wrapping. He passed! Schedule NEXT LESSON for next Tuesday at 5:00 PM."
-Execute both: log the debrief, check off Tefillin, identify the next curriculum topic, and schedule Tuesday's lesson with that preparation note ready on the calendar.
-
-5. CONFIRMATION PROTOCOL:
-Always reply with a clean, bulleted summary:
-• Action Taken
-• Student Name
-• Date & Time (if applicable)
-• Lesson Focus / Teaching Notes
-• Curriculum Topics Checked Off / Added
-• Status: Synced live to TutorPilot portal (https://tutorpilot.pages.dev)
-
-Base44, please confirm receipt of this protocol and let us know that you are ready.`;
+STRICT BOUNDARIES (ENFORCED BY SERVER):
+• You can ONLY perform the declared actions above.
+• You CANNOT delete students, create new students, edit or delete courses/lessons, read private guardian contact or billing info, or change account settings.
+• After every update, reply with a concise summary showing Student Name, Last Taught, Next to Teach, and Schedule changes (if any).`;
     }
 
-    function copyBase44Prompt() {
-      const textarea = document.getElementById('base44-prompt-textarea');
+    function populateBase44PromptTextarea() { populateExternalAiGuideTextarea(); }
+
+    function copyExternalAiToken() {
+      const el = document.getElementById('ext-ai-token-display');
+      const token = el ? el.value.trim() : '';
+      if (!token) return;
+      copyToClipboardText(token, APP_STATE.lang === 'he' ? 'הטוקן הועתק!' : 'Connection token copied!');
+    }
+
+    function copyExternalAiPrompt() {
+      const textarea = document.getElementById('external-ai-prompt-textarea');
       const text = textarea ? textarea.value : '';
-      const t = I18N[APP_STATE.lang];
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => {
-          showToast(t.toastPromptCopied || 'Base44 System Prompt copied to clipboard!');
-        }).catch(() => {
-          prompt('Copy Base44 Prompt:', text);
-        });
-      } else {
-        prompt('Copy Base44 Prompt:', text);
-      }
+      const t = I18N[APP_STATE.lang] || I18N.en;
+      copyToClipboardText(text, t.toastPromptCopied || 'Universal External AI instructions copied!');
     }
 
-    function downloadBase44Schema() {
+    function downloadExternalAiSchema() {
       const link = document.createElement('a');
-      link.href = 'base44_openapi_schema.json';
-      link.download = 'base44_openapi_schema.json';
+      link.href = 'tutorpilot-agent-openapi.json';
+      link.download = 'tutorpilot-agent-openapi.json';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showToast('Downloading base44_openapi_schema.json');
+      showToast('Downloading tutorpilot-agent-openapi.json');
     }
 
     function copyToClipboardText(text, successMsg) {
@@ -29897,7 +30040,7 @@ ${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output 
       { key: 'join_school', id: 'modal-join-school', open: 'openJoinSchoolModal', close: 'closeJoinSchoolModal' },
       { key: 'admin', id: 'modal-admin-user-directory', open: 'openAdminUserDirectoryModal', close: 'closeAdminUserDirectoryModal' },
       { key: 'share', id: 'modal-share', open: 'openShareModal', close: 'closeShareModal' },
-      { key: 'base44', id: 'modal-base44-integration', open: 'openBase44Modal', close: 'closeBase44Modal' },
+      { key: 'external_ai', id: 'modal-external-ai-connect', open: 'openExternalAiModal', close: 'closeExternalAiModal' },
       { key: 'settings', id: 'modal-settings', open: 'openSettingsModal', close: 'closeSettingsModal' },
       { key: 'create_course', id: 'modal-create-course', open: 'openCreateCourseModal', close: 'closeCreateCourseModal' },
       { key: 'add_student', id: 'modal-add-student', open: 'openAddStudentModal', close: 'closeAddStudentModal' },

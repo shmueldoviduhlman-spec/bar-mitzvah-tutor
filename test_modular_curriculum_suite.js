@@ -996,29 +996,29 @@ assert(sandbox.APP_STATE.customMilestones.length === 5, 'handleGenerateMilestone
 assert(sandbox.APP_STATE.customMilestones[0].stage_num === 1, 'First milestone stage is stage 1');
 assert(sandbox.APP_STATE.customMilestones[0].deliverables.length > 0, 'Milestone stage has deliverables');
 
-// 13. External AI Base44 Integration & OpenAPI Schema
-const base44SchemaRaw = fs.readFileSync('base44_openapi_schema.json', 'utf8');
-const base44Schema = JSON.parse(base44SchemaRaw);
-assert(base44Schema.openapi === '3.0.3', 'Base44 OpenAPI schema version is 3.0.3');
-assert(base44Schema.paths['/students_sync'] !== undefined, 'Base44 OpenAPI schema defines /students_sync endpoint');
-assert(base44Schema.paths['/students_sync'].get !== undefined, 'Base44 schema declares GET /students_sync');
-assert(base44Schema.paths['/students_sync'].post !== undefined, 'Base44 schema declares POST /students_sync');
-assert(base44Schema.paths['/students_sync'].delete !== undefined, 'Base44 schema declares DELETE /students_sync');
+// 13. Universal External AI Integration & OpenAPI Schema (Base44 Retired)
+assert(!fs.existsSync(path.join(__dirname, 'base44_openapi_schema.json')), 'Legacy base44_openapi_schema.json has been retired and removed');
+const extOpenApiRaw = fs.readFileSync(path.join(__dirname, 'tutorpilot-agent-openapi.json'), 'utf8');
+const extOpenApi = JSON.parse(extOpenApiRaw);
+assert(extOpenApi.openapi === '3.0.3', 'Universal External AI OpenAPI schema version is 3.0.3');
+assert(extOpenApi.paths['/external-agent'] !== undefined, 'Universal OpenAPI schema defines /external-agent gateway');
+assert(extOpenApi.paths['/external-agent'].get !== undefined, 'Universal OpenAPI schema declares GET /external-agent');
+assert(extOpenApi.paths['/external-agent'].post !== undefined, 'Universal OpenAPI schema declares POST /external-agent');
+assert(extOpenApi.paths['/external-agent'].delete === undefined && extOpenApi.paths['/students_sync'] === undefined, 'Universal OpenAPI schema exposes zero raw /students_sync or DELETE endpoints');
 
-// Verify Base44 Prompt population
-assert(typeof sandbox.populateBase44PromptTextarea === 'function', 'populateBase44PromptTextarea is a function');
-sandbox.populateBase44PromptTextarea();
-const base44PromptVal = getOrCreateElem('base44-prompt-textarea').value;
-assert(base44PromptVal.includes('@Base44 SYSTEM INTEGRATION PROTOCOL'), 'Base44 prompt textarea populated with protocol');
-assert(base44PromptVal.includes('shabbat (Shabbat & Sacred Time)'), 'Base44 prompt includes 13 Jewish concepts');
-assert(base44PromptVal.includes('bereishit, noach, lech_lecha'), 'Base44 prompt includes Chumash parshiot');
-assert(base44PromptVal.includes('KEYWORD 1: SCHEDULE'), 'Base44 prompt defines SCHEDULE keyword');
-assert(base44PromptVal.includes('KEYWORD 2: DEBRIEF'), 'Base44 prompt defines DEBRIEF keyword');
-assert(base44PromptVal.includes('KEYWORD 3: NEXT LESSON'), 'Base44 prompt defines NEXT LESSON keyword');
-assert(base44PromptVal.includes('KEYWORD 4: ADD MATERIAL'), 'Base44 prompt defines ADD MATERIAL keyword');
+// Verify Universal External AI Instructions population
+assert(typeof sandbox.populateExternalAiGuideTextarea === 'function', 'populateExternalAiGuideTextarea is a function');
+sandbox.populateExternalAiGuideTextarea();
+const extAiGuideVal = getOrCreateElem('external-ai-prompt-textarea').value;
+assert(extAiGuideVal.includes('TUTORPILOT UNIVERSAL EXTERNAL AI AGENT INSTRUCTIONS'), 'External AI guide populates universal instructions');
+assert(extAiGuideVal.includes('https://tutorpilot.pages.dev/api/external-agent'), 'External AI guide points to scoped server gateway');
+assert(extAiGuideVal.includes('END OF CLASS STUDENT UPDATES'), 'External AI guide declares Capability 1: End of Class Updates');
+assert(extAiGuideVal.includes('CALENDAR & SCHEDULE'), 'External AI guide declares Capability 2: Calendar & Schedule');
+assert(extAiGuideVal.includes('TUTORPILOT APP HELP'), 'External AI guide declares Capability 3: TutorPilot App Help');
+assert(extAiGuideVal.includes('CANNOT delete students'), 'External AI guide states explicit server boundaries');
 
 // 14. HTML UI Check for AI Assistant & Modals
-assert(indexHtml.includes('id="modal-base44-integration"'), 'HTML contains modal-base44-integration');
+assert(indexHtml.includes('id="modal-external-ai-connect"'), 'HTML contains modal-external-ai-connect');
 assert(indexHtml.includes('id="modal-ai-curriculum-builder"'), 'HTML contains modal-ai-curriculum-builder');
 assert(indexHtml.includes('id="modal-ai-reading-builder"'), 'HTML contains modal-ai-reading-builder');
 assert(indexHtml.includes('id="modal-ai-milestone-builder"'), 'HTML contains modal-ai-milestone-builder');
@@ -1142,11 +1142,11 @@ assert(Array.isArray(aiBreakdownResult.actionCards), 'AI returned actionCards ar
 assert(aiBreakdownResult.actionCards.some(c => c.type === 'calendar'), 'Action card includes calendar jump');
 assert(aiBreakdownResult.actionCards.some(c => c.type === 'student'), 'Action card includes student drawer link');
 
-// 7. Base44 Dynamic Prompt with KEYWORD 5: BREAKDOWN
-sandbox.populateBase44PromptTextarea();
-const g14_base44Val = getOrCreateElem('base44-prompt-textarea').value;
-assert(g14_base44Val.includes('KEYWORD 5: BREAKDOWN'), 'Base44 prompt defines KEYWORD 5: BREAKDOWN');
-assert(g14_base44Val.includes('Active School Filter'), 'Base44 prompt defines dynamic Active School Filter');
+// 7. Universal External AI Guide includes scoped school workspace
+sandbox.populateExternalAiGuideTextarea();
+const g14_extAiVal = getOrCreateElem('external-ai-prompt-textarea').value;
+assert(g14_extAiVal.includes('School:'), 'Universal External AI guide scopes instructions to active school workspace');
+assert(g14_extAiVal.includes('tutorpilot-agent-openapi.json'), 'Universal External AI guide links official OpenAPI schema');
 
 // 8. Class Format Type in Save Custom Course
 assert(indexHtml.includes('id="input-create-course-format-type"'), 'HTML contains input-create-course-format-type');
@@ -4616,6 +4616,181 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   // Press Back #4: Course Lessons List -> All Courses Gallery
   sandbox.navigateAppBack();
   assert(sandbox.APP_STATE.insideCourseId === null && sandbox.APP_STATE.activeTab === 'study', 'Back #4 returns from Course back to All Courses Gallery');
+
+  console.log('\n--- Running Gate 49: Universal External AI Gateway & Strict 3-Capability Sandbox ---');
+  assert(typeof sandbox.generateExternalAiToken === 'function' && typeof sandbox.revokeExternalAiToken === 'function' && typeof sandbox.toggleExternalAiCapability === 'function', 'External AI token & capability controls are defined');
+  const genToken = await sandbox.generateExternalAiToken();
+  assert(genToken.startsWith('tp_ext_') && genToken.length >= 20, 'generateExternalAiToken creates cryptographic tp_ext_ token');
+  assert(sandbox.getLocalExternalAiState().connected === true, 'External AI state switches to connected after token generation');
+  await sandbox.revokeExternalAiToken();
+  assert(sandbox.getLocalExternalAiState().connected === false && sandbox.getLocalExternalAiState().tokenHash === '', 'revokeExternalAiToken disconnects and clears active token cleanly');
+
+  // Behavioral test of Cloudflare Pages Function: functions/api/external-agent.js
+  const extAgentSrc = fs.readFileSync(path.join(__dirname, 'functions/api/external-agent.js'), 'utf8');
+  const extAgentCjs = extAgentSrc.replace(/export async function /g, 'async function ') + '\nmodule.exports = { onRequestGet, onRequestPost, onRequestOptions, sha256Hex };';
+  const cryptoMod = require('crypto');
+  const validRawToken = 'tp_ext_0123456789abcdef0123456789abcdef0123';
+  const validTokenHash = cryptoMod.createHash('sha256').update(validRawToken).digest('hex');
+  const revokedRawToken = 'tp_ext_fedcba9876543210fedcba9876543210fedc';
+  const revokedTokenHash = cryptoMod.createHash('sha256').update(revokedRawToken).digest('hex');
+  const todayStr49 = sandbox.formatDateToYMD(new Date());
+
+  const mockDbRows = [
+    {
+      id: '__external_agent_tokens__',
+      completed_topics: {
+        tokens: {
+          [validTokenHash]: {
+            schoolId: 'school_alpha',
+            ownerEmail: 'tutor@alpha.edu',
+            tutorName: 'Rabbi Alpha',
+            enabled: true,
+            revokedAt: null,
+            capabilities: { afterClass: true, schedule: true, appGuide: true }
+          },
+          [revokedTokenHash]: {
+            schoolId: 'school_alpha',
+            enabled: false,
+            revokedAt: '2026-11-18T10:00:00Z',
+            capabilities: { afterClass: true, schedule: true, appGuide: true }
+          }
+        }
+      }
+    },
+    {
+      id: 'stu_alpha_1',
+      name: 'David Cohen',
+      notes: 'Good focus',
+      completed_topics: {
+        _meta: {
+          school_id: 'school_alpha',
+          owner_email: 'tutor@alpha.edu',
+          subject: 'Jewish Foundations',
+          status: 'active',
+          hourlyRate: '$100/hr',
+          studentAccessCode: 'SECRET77',
+          parentContact: { name: 'Miriam Cohen', phone: '555-999-0000', email: 'miriam@private.com' },
+          skills: { lastTaught: 'Intro', nextToTeach: 'Lesson 1: Shabbat' },
+          schedule: [{ id: 's_today_1', dateStr: todayStr49, dayOfWeek: new Date().getDay(), time: '4:30 PM', topic: 'Lesson 1: Shabbat', status: 'scheduled' }]
+        }
+      }
+    },
+    {
+      id: 'stu_other_school',
+      name: 'Other School Student',
+      notes: 'Confidential',
+      completed_topics: { _meta: { school_id: 'school_beta', owner_email: 'other@beta.edu', status: 'active', skills: {} } }
+    },
+    {
+      id: '__custom_courses__',
+      completed_topics: {
+        courses: [{ id: 'c_jf', title_en: 'Jewish Foundations', lessons: [{ id: 'l1', lesson_num: 1, title_en: 'Shabbat' }, { id: 'l2', lesson_num: 2, title_en: 'Kashrut' }] }]
+      }
+    }
+  ];
+
+  const extSandbox = {
+    module: { exports: {} },
+    exports: {},
+    URL,
+    TextEncoder,
+    crypto: cryptoMod.webcrypto,
+    Response: class {
+      constructor(body, init = {}) {
+        this.body = body;
+        this.status = init.status || 200;
+        this.headers = init.headers || {};
+      }
+      async json() { return JSON.parse(this.body); }
+    },
+    fetch: async (url, opts = {}) => {
+      const method = (opts.method || 'GET').toUpperCase();
+      if (method === 'GET' && url.includes('id=eq.__external_agent_tokens__')) {
+        return { ok: true, status: 200, text: async () => JSON.stringify([mockDbRows[0]]) };
+      }
+      if (method === 'GET' && url.includes('/rest/v1/students_sync')) {
+        return { ok: true, status: 200, text: async () => JSON.stringify(mockDbRows) };
+      }
+      if (method === 'PATCH' && url.includes('id=eq.stu_alpha_1')) {
+        const patch = JSON.parse(opts.body);
+        const target = mockDbRows.find(r => r.id === 'stu_alpha_1');
+        if (patch.notes !== undefined) target.notes = patch.notes;
+        if (patch.completed_topics !== undefined) target.completed_topics = patch.completed_topics;
+        return { ok: true, status: 204, text: async () => '' };
+      }
+      return { ok: false, status: 404, text: async () => 'Not found' };
+    }
+  };
+  vm.runInNewContext(extAgentCjs, extSandbox);
+  const extMod = extSandbox.module.exports;
+
+  const makeReq = (method, urlPath, token, bodyObj) => ({
+    url: `https://tutorpilot.pages.dev${urlPath}`,
+    headers: {
+      get: (h) => {
+        const k = String(h).toLowerCase();
+        if (k === 'authorization') return token ? `Bearer ${token}` : '';
+        if (k === 'origin') return 'https://chatgpt.com';
+        return '';
+      }
+    },
+    json: async () => bodyObj
+  });
+
+  // 1. Missing / Revoked token -> 401
+  const resNoAuth = await extMod.onRequestGet({ request: makeReq('GET', '/api/external-agent?action=overview', ''), env: {} });
+  assert(resNoAuth.status === 401, 'Gateway rejects unauthenticated request with HTTP 401');
+  const resRevoked = await extMod.onRequestGet({ request: makeReq('GET', '/api/external-agent?action=overview', revokedRawToken), env: {} });
+  assert(resRevoked.status === 401, 'Gateway rejects revoked Bearer token with HTTP 401');
+
+  // 2. Undeclared destructive actions -> 403 Forbidden
+  const resDel = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'delete_student', studentNameOrId: 'David Cohen' }), env: {} });
+  assert(resDel.status === 403, 'Gateway blocks undeclared delete_student with HTTP 403');
+  const resEditCourse = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'edit_course', courseId: 'c_jf' }), env: {} });
+  assert(resEditCourse.status === 403, 'Gateway blocks undeclared edit_course with HTTP 403');
+
+  // 3. GET overview: strict school scoping + zero guardian/billing PII
+  const resOverview = await extMod.onRequestGet({ request: makeReq('GET', '/api/external-agent?action=overview', validRawToken), env: {} });
+  assert(resOverview.status === 200, 'Valid Bearer token reads scoped overview with HTTP 200');
+  const ovData = await resOverview.json();
+  const ovStr = JSON.stringify(ovData);
+  assert(ovData.students.length === 1 && ovData.students[0].name === 'David Cohen' && !ovStr.includes('Other School Student'), 'Gateway enforces strict school tenant isolation');
+  assert(!ovStr.includes('555-999-0000') && !ovStr.includes('miriam@private.com') && !ovStr.includes('$100/hr') && !ovStr.includes('SECRET77'), 'Gateway strictly scrubs guardian PII, hourly rates, and portal codes');
+
+  // 4. Capability 1: End of Class Student Update
+  const resDebrief = await extMod.onRequestPost({
+    request: makeReq('POST', '/api/external-agent', validRawToken, {
+      action: 'log_after_class_update',
+      studentNameOrId: 'David Cohen',
+      lastTaught: 'Lesson 1: Shabbat',
+      nextToTeach: 'Lesson 2: Kashrut',
+      homeworkTask: 'Review 39 Melachot'
+    }),
+    env: {}
+  });
+  assert(resDebrief.status === 200, 'Capability 1 log_after_class_update succeeds with HTTP 200');
+  const dbDavid = mockDbRows.find(r => r.id === 'stu_alpha_1');
+  assert(dbDavid.completed_topics._meta.skills.lastTaught === 'Lesson 1: Shabbat' && dbDavid.completed_topics._meta.skills.nextToTeach === 'Lesson 2: Kashrut' && dbDavid.completed_topics._meta.schedule[0].status === 'completed', 'log_after_class_update updates lastTaught, nextToTeach, and marks today session completed');
+  assert(dbDavid.completed_topics._meta.parentContact.email === 'miriam@private.com' && dbDavid.completed_topics._meta.studentAccessCode === 'SECRET77', 'log_after_class_update preserves existing private profile fields untouched');
+
+  // 5. Capability 2: Schedule & Cancel + reject unknown student creation (404)
+  const resUnknown = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'schedule_lesson', studentNameOrId: 'Brand New Kid', date: '2026-11-25', timeSlot: '5:00 PM' }), env: {} });
+  assert(resUnknown.status === 404, 'Gateway refuses to silently create unknown students (HTTP 404)');
+  const resSched = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'schedule_lesson', studentNameOrId: 'David Cohen', date: '2026-11-25', timeSlot: '5:00 PM' }), env: {} });
+  assert(resSched.status === 200 && dbDavid.completed_topics._meta.schedule.some(s => s.dateStr === '2026-11-25'), 'Capability 2 schedule_lesson adds session on existing student');
+  const resCancel = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'cancel_lesson', studentNameOrId: 'David Cohen', date: '2026-11-25' }), env: {} });
+  assert(resCancel.status === 200 && !dbDavid.completed_topics._meta.schedule.some(s => s.dateStr === '2026-11-25'), 'Capability 2 cancel_lesson removes scheduled session cleanly');
+
+  // 6. Per-capability disable enforcement -> 403
+  mockDbRows[0].completed_topics.tokens[validTokenHash].capabilities.schedule = false;
+  const resCapBlocked = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'schedule_lesson', studentNameOrId: 'David Cohen', date: '2026-11-26', timeSlot: '5:00 PM' }), env: {} });
+  assert(resCapBlocked.status === 403, 'Disabling Schedule capability immediately blocks schedule_lesson with HTTP 403');
+  mockDbRows[0].completed_topics.tokens[validTokenHash].capabilities.schedule = true;
+
+  // 7. Capability 3: App Help Guide
+  const resGuide = await extMod.onRequestGet({ request: makeReq('GET', '/api/external-agent?action=guide&topic=settings', validRawToken), env: {} });
+  const guideData = await resGuide.json();
+  assert(resGuide.status === 200 && guideData.guide && guideData.guide.settings.includes('Connect External AI'), 'Capability 3 get_app_guide returns accurate TutorPilot website guide');
 
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
