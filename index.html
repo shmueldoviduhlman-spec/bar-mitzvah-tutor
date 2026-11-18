@@ -11095,6 +11095,33 @@ alter publication supabase_realtime add table public.students_sync;`;
     var studioPendingCloudRender = false;
     var lastLocalCourseEditTs = 0;
     var activeLocalCourseEditId = null;
+    var studioActiveAiCourseLocks = {};
+
+    function beginCourseAiLock(courseId) {
+      if (!courseId) return;
+      studioActiveAiCourseLocks[courseId] = (studioActiveAiCourseLocks[courseId] || 0) + 1;
+      lastLocalCourseEditTs = Date.now();
+      activeLocalCourseEditId = courseId;
+      const liveCourse = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      if (liveCourse) liveCourse.updated_at = new Date().toISOString();
+    }
+
+    function endCourseAiLock(courseId) {
+      if (!courseId) return;
+      const cur = studioActiveAiCourseLocks[courseId] || 0;
+      if (cur <= 1) delete studioActiveAiCourseLocks[courseId];
+      else studioActiveAiCourseLocks[courseId] = cur - 1;
+      lastLocalCourseEditTs = Date.now();
+    }
+
+    function resolveLiveCourseAndLesson(courseId, lessonId) {
+      const courses = APP_STATE.customCourses || [];
+      const liveCourse = courses.find(c => c.id === courseId) || null;
+      const liveLesson = (liveCourse && Array.isArray(liveCourse.lessons))
+        ? (liveCourse.lessons.find(l => l.id === lessonId) || null)
+        : null;
+      return { course: liveCourse, lesson: liveLesson };
+    }
 
     function isStudioUserActivelyEditing() {
       if (studioIsComposing) return true;
@@ -11260,12 +11287,13 @@ alter publication supabase_realtime add table public.students_sync;`;
       const currentVal = (lesson.sections && lesson.sections[sectionId]) || '';
       const sources = ensureStudioLessonSources(lesson);
       showStudioSavingIndicator();
+      beginCourseAiLock(courseId);
       if (inp) inp.disabled = true;
 
       let generated = '';
       try {
         const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
-        if (apiKey && typeof callGeminiApi === 'function') {
+        if ((apiKey || shouldUseAiProxy()) && typeof callGeminiApi === 'function') {
           const textSources = sources.map((s, idx) => `[Ref ${idx + 1}: ${s.label}] ${s.extractedText || s.note || s.url || ''}`).filter(Boolean).join('\n');
           const allowedRule = typeof buildCourseAllowedResourcesPromptRule === 'function' ? buildCourseAllowedResourcesPromptRule(bp) : '';
           const prompt = `Refine ONLY the section "${sec.name}" (type: ${sec.type}) for class "${title}" in course "${course.title_en || course.title_he}".
@@ -11286,7 +11314,7 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
           sources.forEach(s => {
             if (s.base64Data) userParts.push({ inlineData: { mimeType: s.mimeType || 'audio/webm', data: s.base64Data } });
           });
-          let rawRes = await callGeminiApi([{ role: 'user', parts: userParts }], apiKey, { temperature: 0.7 });
+          let rawRes = await callGeminiApi([{ role: 'user', parts: userParts }], apiKey, { temperature: 0.5, taskTier: getAiQualityTier() });
           rawRes = String(rawRes || '').replace(/```json/gi, '').replace(/```/g, '').trim();
           if (sec.type !== 'audio' && rawRes.startsWith('{')) {
             generated = normalizeSectionAiValue(JSON.parse(rawRes), sec.type);
@@ -11296,18 +11324,24 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
         }
       } catch (err) {
         console.warn('Section targeted tweak fallback:', err);
+      } finally {
+        endCourseAiLock(courseId);
       }
 
+      const resolvedLive = resolveLiveCourseAndLesson(courseId, lessonId);
+      const liveCourse = resolvedLive.course || course;
+      const liveLesson = resolvedLive.lesson || lesson;
+
       if (generated) {
-        captureStudioUndoSnapshot(lesson);
-        if (!lesson.sections) lesson.sections = {};
-        lesson.sections[sectionId] = generated;
-        studioAiUpdatedSectionIds[lesson.id] = [sectionId];
-        lesson.updated_at = new Date().toISOString();
-        course.updated_at = new Date().toISOString();
+        captureStudioUndoSnapshot(liveLesson);
+        if (!liveLesson.sections) liveLesson.sections = {};
+        liveLesson.sections[sectionId] = generated;
+        studioAiUpdatedSectionIds[liveLesson.id] = [sectionId];
+        liveLesson.updated_at = new Date().toISOString();
+        liveCourse.updated_at = new Date().toISOString();
         studioSectionTweakOpenMap[sectionId] = false;
         saveCustomCoursesToStorage(true);
-        renderCourseStudio(courseId, lessonId);
+        renderCourseStudio(liveCourse.id, liveLesson.id);
         showToast(`Refined "${sec.name}"!`);
       } else {
         if (inp) inp.disabled = false;
@@ -12490,14 +12524,18 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
         return;
       }
 
-      studioWorkspaceTabMap[lesson.id] = 'ai';
-      studioClassAiOpenMap[lesson.id] = true;
+      const targetLessonId = lesson.id;
+      studioWorkspaceTabMap[targetLessonId] = 'ai';
+      studioClassAiOpenMap[targetLessonId] = true;
       ensureStudioClassAiHistory(course, lesson);
       lesson.ai_chat_history.push({ role: 'user', text: userMsg });
+      course.updated_at = new Date().toISOString();
+      lesson.updated_at = course.updated_at;
       if (inputEl && overridePrompt === undefined) inputEl.value = '';
-      if (overridePrompt === undefined) delete studioAiDraftMap[lesson.id];
-      studioClassAiThinkingMap[lesson.id] = true;
-      renderCourseStudio(cId, lesson.id);
+      if (overridePrompt === undefined) delete studioAiDraftMap[targetLessonId];
+      studioClassAiThinkingMap[targetLessonId] = true;
+      beginCourseAiLock(cId);
+      renderCourseStudio(cId, targetLessonId);
 
       const bp = course.blueprint || {};
       const bpSections = Array.isArray(bp.sections) ? bp.sections : [];
@@ -12526,57 +12564,58 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       let aiCallError = null;
       const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
 
-      if (apiKey && typeof callGeminiApi === 'function') {
-        try {
-          const contents = [];
-          lesson.ai_chat_history.forEach(m => {
-            if (!m || !m.text) return;
-            const role = m.role === 'user' ? 'user' : 'model';
-            if (contents.length === 0 && role !== 'user') return;
-            const last = contents[contents.length - 1];
-            if (last && last.role === role) {
-              last.parts[0].text += '\n' + String(m.text);
-            } else {
-              contents.push({ role, parts: [{ text: String(m.text) }] });
+      try {
+        if ((apiKey || shouldUseAiProxy()) && typeof callGeminiApi === 'function') {
+          try {
+            const contents = [];
+            lesson.ai_chat_history.forEach(m => {
+              if (!m || !m.text) return;
+              const role = m.role === 'user' ? 'user' : 'model';
+              if (contents.length === 0 && role !== 'user') return;
+              const last = contents[contents.length - 1];
+              if (last && last.role === role) {
+                last.parts[0].text += '\n' + String(m.text);
+              } else {
+                contents.push({ role, parts: [{ text: String(m.text) }] });
+              }
+            });
+            if (contents.length === 0) {
+              contents.push({ role: 'user', parts: [{ text: userMsg }] });
             }
-          });
-          if (contents.length === 0) {
-            contents.push({ role: 'user', parts: [{ text: userMsg }] });
-          }
 
-          // Attach multimodal parts (voice notes, uploaded audio, photos, PDFs) & text extracts cleanly to latest user turn
-          const lastUserTurn = contents[contents.length - 1];
-          const textSourcesSummary = sources.map((s, sIdx) => {
-            if (s.kind === 'link') {
-              return `[Source ${sIdx + 1} - Link]: ${s.label} (${s.url})${s.note ? `\nTeacher Note: ${s.note}` : ''}${s.extractedText ? `\nExtracted Content:\n${s.extractedText.slice(0, 8000)}` : '\n(URL attached; direct web text unavailable)'}`;
+            // Attach multimodal parts (voice notes, uploaded audio, photos, PDFs) & text extracts cleanly to latest user turn
+            const lastUserTurn = contents[contents.length - 1];
+            const textSourcesSummary = sources.map((s, sIdx) => {
+              if (s.kind === 'link') {
+                return `[Source ${sIdx + 1} - Link]: ${s.label} (${s.url})${s.note ? `\nTeacher Note: ${s.note}` : ''}${s.extractedText ? `\nExtracted Content:\n${s.extractedText.slice(0, 8000)}` : '\n(URL attached; direct web text unavailable)'}`;
+              }
+              if (s.kind === 'text') {
+                return `[Source ${sIdx + 1} - Document/Notes]: ${s.label}\n${(s.extractedText || '').slice(0, 10000)}`;
+              }
+              return `[Source ${sIdx + 1} - Attached Media (${s.kind})]: ${s.label} (${s.mimeType || ''})`;
+            }).join('\n\n---\n\n');
+
+            if (textSourcesSummary && lastUserTurn && lastUserTurn.role === 'user') {
+              lastUserTurn.parts[0].text += `\n\nATTACHED REFERENCE SOURCES TO ANALYZE:\n${textSourcesSummary}`;
             }
-            if (s.kind === 'text') {
-              return `[Source ${sIdx + 1} - Document/Notes]: ${s.label}\n${(s.extractedText || '').slice(0, 10000)}`;
-            }
-            return `[Source ${sIdx + 1} - Attached Media (${s.kind})]: ${s.label} (${s.mimeType || ''})`;
-          }).join('\n\n---\n\n');
 
-          if (textSourcesSummary && lastUserTurn && lastUserTurn.role === 'user') {
-            lastUserTurn.parts[0].text += `\n\nATTACHED REFERENCE SOURCES TO ANALYZE:\n${textSourcesSummary}`;
-          }
+            sources.forEach(s => {
+              if (s.base64Data && lastUserTurn && lastUserTurn.role === 'user') {
+                lastUserTurn.parts.push({
+                  inlineData: {
+                    mimeType: s.mimeType || 'audio/webm',
+                    data: s.base64Data
+                  }
+                });
+              }
+            });
 
-          sources.forEach(s => {
-            if (s.base64Data && lastUserTurn && lastUserTurn.role === 'user') {
-              lastUserTurn.parts.push({
-                inlineData: {
-                  mimeType: s.mimeType || 'audio/webm',
-                  data: s.base64Data
-                }
-              });
-            }
-          });
+            const currentSectionSnapshot = hasCustomBp
+              ? bpSections.map(s => `- ID "${s.id}" | Name: "${s.name}" | Type: ${s.type} | Guideline: ${s.ai_rule || s.hint || 'Clear & engaging'} | Exact Shape: ${getSectionAiFormatRule(s.type)} | Current Draft Value: ${JSON.stringify((lesson.sections && lesson.sections[s.id]) || '')}`).join('\n')
+              : `Legacy modular blocks: hook_en=${JSON.stringify(lesson.hook_en || '')}, anchors=${JSON.stringify((lesson.anchors_en || []).length)} items, sources_text=${JSON.stringify(lesson.sources_text || '')}, steps_text=${JSON.stringify(lesson.steps_text || '')}, pitfalls_text=${JSON.stringify(lesson.pitfalls_text || '')}, homework_text=${JSON.stringify(lesson.homework_text || '')}`;
 
-          const currentSectionSnapshot = hasCustomBp
-            ? bpSections.map(s => `- ID "${s.id}" | Name: "${s.name}" | Type: ${s.type} | Guideline: ${s.ai_rule || s.hint || 'Clear & engaging'} | Exact Shape: ${getSectionAiFormatRule(s.type)} | Current Draft Value: ${JSON.stringify((lesson.sections && lesson.sections[s.id]) || '')}`).join('\n')
-            : `Legacy modular blocks: hook_en=${JSON.stringify(lesson.hook_en || '')}, anchors=${JSON.stringify((lesson.anchors_en || []).length)} items, sources_text=${JSON.stringify(lesson.sources_text || '')}, steps_text=${JSON.stringify(lesson.steps_text || '')}, pitfalls_text=${JSON.stringify(lesson.pitfalls_text || '')}, homework_text=${JSON.stringify(lesson.homework_text || '')}`;
-
-          const analyzeOnlyMode = !!metaOpts.analyzeOnly;
-          const systemInstruction = `You are TutorPilot's Master Lesson Co-Builder & Source Analyst. You collaborate fluently with the educator inside the Lesson Studio to analyze links, listen to voice/audio recordings, inspect images/PDFs/notes, discuss pedagogical angles, and directly build/update lesson sections inside the custom Course Blueprint.
+            const analyzeOnlyMode = !!metaOpts.analyzeOnly;
+            const systemInstruction = `You are TutorPilot's Master Lesson Co-Builder & Source Analyst. You collaborate fluently with the educator inside the Lesson Studio to analyze links, listen to voice/audio recordings, inspect images/PDFs/notes, discuss pedagogical angles, and directly build/update lesson sections inside the custom Course Blueprint.
 
 Course Context:
 Course Title: "${course.title_en || course.title_he}"
@@ -12595,7 +12634,7 @@ Collaboration & Action Rules:
 1. ANALYZE ALL ATTACHED SOURCES FIRST: If the teacher attached links, audio recordings, images, PDFs, or pasted notes, deeply synthesize what is inside them and ground your updates and reply directly in those materials.
 2. ${analyzeOnlyMode
   ? 'THE TEACHER ASKED TO ANALYZE SOURCES BEFORE WRITING SECTIONS: Return an empty "sections": {} object, give a clear insightful breakdown of what you found across their links/audio/notes, propose how each section could use those ideas, and invite them to confirm or tweak before drafting.'
-  : 'MANDATORY EXECUTION RULE: Whenever the teacher sends you a draft, pasted notes, outline, feedback, or ANY instruction to create, edit, organize, rewrite, fix, shorten, expand, or populate the lesson, you MUST directly populate the matching section IDs inside "sections" right now! Do NOT just give advice in "assistant_reply" with an empty "sections": {} — apply the draft/changes into the lesson sections on the right using the exact ID strings (e.g. "sec_..."). Only update ONLY specific sections when they explicitly ask to touch only one section (leaving untouched sections out so they remain preserved).'}
+  : 'MANDATORY EXECUTION RULE: Whenever the teacher sends you a draft, pasted notes, outline, feedback, or ANY instruction to create, edit, organize, rewrite, fix, shorten, expand, or populate the lesson, you MUST directly populate every matching section ID inside "sections" with rich, non-empty content right now! Do NOT leave sections as empty objects {} and do NOT just give advice in "assistant_reply" with an empty "sections": {} — apply the draft/changes into the lesson sections on the right using the exact ID strings (e.g. "sec_...").'}
 3. Maintain warm, intelligent, concise mentoring dialogue in "assistant_reply" summarizing the exact sections you updated.
 4. Respond in Hebrew if the teacher writes in Hebrew, or English if they write in English.
 
@@ -12604,7 +12643,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
   "assistant_reply": "Brief summary of the exact lesson sections updated...",
   "updated_title": null,
   "sections": {
-    "<exact_section_id>": <object matching that section's Exact Shape>
+    "<exact_section_id>": <non-empty object matching that section's Exact Shape>
   }
 }` : `Return STRICT JSON ONLY:
 {
@@ -12619,146 +12658,179 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
   "homework": "..."
 }`}`;
 
-          const raw = await callGeminiApi(contents, apiKey, {
-            systemInstruction,
-            responseMimeType: 'application/json',
-            temperature: 0.5,
-            taskTier: getAiQualityTier()
-          });
-          parsed = parseClassAiJson(raw);
-        } catch (err) {
-          aiCallError = err;
-          console.warn('Class AI partner Gemini fallback:', err);
+            const raw = await callGeminiApi(contents, apiKey, {
+              systemInstruction,
+              responseMimeType: 'application/json',
+              temperature: 0.5,
+              taskTier: getAiQualityTier()
+            });
+            parsed = parseClassAiJson(raw);
+          } catch (err) {
+            aiCallError = err;
+            console.warn('Class AI partner Gemini fallback:', err);
+          }
         }
-      }
 
-      if (!parsed || typeof parsed !== 'object') {
-        if (metaOpts.analyzeOnly) {
-          parsed = {
-            assistant_reply: `I reviewed your ${sources.length} attached source(s) (${sources.map(s => s.label).join(', ')}). Tell me which ideas you want emphasized or click Auto-Draft All when ready.${aiCallError ? ` (AI notice: ${aiCallError.message || 'connection issue'})` : ''}`,
-            sections: {}
-          };
-        } else if (hasCustomBp) {
-          const fallbackSecs = {};
-          bpSections.forEach(s => {
-            fallbackSecs[s.id] = buildStructuredSectionFallback(s, classTitle, bp.student_profile || '', userMsg);
-          });
-          parsed = {
-            assistant_reply: `I organized your input into all ${bpSections.length} sections of "${classTitle}". Review the Lesson Sections panel on the right or keep refining.${aiCallError ? ` (Live AI could not respond: ${aiCallError.message || 'network/model error'} — applied your draft locally so nothing is lost.)` : ''}`,
-            sections: fallbackSecs
-          };
-        } else {
-          const draftLines = userMsg.split(/\n+/).map(l => l.replace(/^[•\-\*\d\.)]+\s*/, '').trim()).filter(l => l.length > 2);
-          parsed = {
-            assistant_reply: `I updated the teaching blocks for "${classTitle}" using your draft.${aiCallError ? ` (Live AI error: ${aiCallError.message || 'network/model error'} — saved locally.)` : ''}`,
-            hook: userMsg.length >= 25 ? userMsg : `Real-world scenario connecting ${classTitle} to everyday student choices.`,
-            anchors: draftLines.length >= 2 ? draftLines.slice(0, 7) : [`**Core Concept**: Foundational premise of ${classTitle}.`, `**Why It Matters**: Practical impact for today.`],
-            pitfalls: `Clarify common misconceptions early before moving into examples.`,
-            homework: `Reflect on one situation this week where ${classTitle} applies.`
-          };
+        if (!parsed || typeof parsed !== 'object') {
+          if (metaOpts.analyzeOnly) {
+            parsed = {
+              assistant_reply: `I reviewed your ${sources.length} attached source(s) (${sources.map(s => s.label).join(', ')}). Tell me which ideas you want emphasized or click Auto-Draft All when ready.${aiCallError ? ` (AI notice: ${aiCallError.message || 'connection issue'})` : ''}`,
+              sections: {}
+            };
+          } else if (hasCustomBp) {
+            const fallbackSecs = {};
+            bpSections.forEach(s => {
+              fallbackSecs[s.id] = buildStructuredSectionFallback(s, classTitle, bp.student_profile || '', userMsg);
+            });
+            parsed = {
+              assistant_reply: `I organized your input into all ${bpSections.length} sections of "${classTitle}". Review the Lesson Sections panel on the right or keep refining.${aiCallError ? ` (Live AI could not respond: ${aiCallError.message || 'network/model error'} — applied your draft locally so nothing is lost.)` : ''}`,
+              sections: fallbackSecs
+            };
+          } else {
+            const draftLines = userMsg.split(/\n+/).map(l => l.replace(/^[•\-\*\d\.)]+\s*/, '').trim()).filter(l => l.length > 2);
+            parsed = {
+              assistant_reply: `I updated the teaching blocks for "${classTitle}" using your draft.${aiCallError ? ` (Live AI error: ${aiCallError.message || 'network/model error'} — saved locally.)` : ''}`,
+              hook: userMsg.length >= 25 ? userMsg : `Real-world scenario connecting ${classTitle} to everyday student choices.`,
+              anchors: draftLines.length >= 2 ? draftLines.slice(0, 7) : [`**Core Concept**: Foundational premise of ${classTitle}.`, `**Why It Matters**: Practical impact for today.`],
+              pitfalls: `Clarify common misconceptions early before moving into examples.`,
+              homework: `Reflect on one situation this week where ${classTitle} applies.`
+            };
+          }
         }
-      }
 
-      if (parsed.updated_title && typeof parsed.updated_title === 'string' && parsed.updated_title.trim()) {
-        captureStudioUndoSnapshot(lesson);
-        lesson.title_en = parsed.updated_title.trim();
-        lesson.title_he = parsed.updated_title.trim();
-      }
+        // Resolve LIVE course & lesson from APP_STATE so no background cloud sync can leave us writing to a stale detached object
+        const resolvedLivePre = resolveLiveCourseAndLesson(cId, targetLessonId);
+        let liveCourse = resolvedLivePre.course || course;
+        let liveLesson = resolvedLivePre.lesson || lesson;
 
-      let updatedCount = 0;
-      const updatedSecIds = [];
-      if (hasCustomBp) {
-        let resolvedUpdates = resolveSectionUpdatesFromAiPayload(parsed, bpSections);
-        let resolvedKeys = Object.keys(resolvedUpdates);
+        if (parsed.updated_title && typeof parsed.updated_title === 'string' && parsed.updated_title.trim()) {
+          captureStudioUndoSnapshot(liveLesson);
+          liveLesson.title_en = parsed.updated_title.trim();
+          liveLesson.title_he = parsed.updated_title.trim();
+        }
 
-        // Self-healing retry: if Gemini returned conversational text with empty sections: {} on an explicit draft/edit request, force a direct section-mapping pass
-        const looksLikeEditOrDraft = (userMsg.length >= 35) || /\b(draft|write|edit|update|fix|add|put|create|organize|rewrite|improve|turn\s+this|fill|generate)\b/i.test(userMsg) || /[\u0590-\u05FF]/.test(userMsg);
-        if (resolvedKeys.length === 0 && !metaOpts.analyzeOnly && bpSections.length > 0 && looksLikeEditOrDraft) {
-          if (apiKey && typeof callGeminiApi === 'function') {
-            try {
-              const forceSchemaLines = bpSections.map(s => `"${s.id}" (${s.name}, type ${s.type}): ${getSectionAiFormatRule(s.type)}`).join('\n');
-              const forcePrompt = `The educator sent this draft/request for class "${classTitle}":
+        let updatedCount = 0;
+        const updatedSecIds = [];
+        if (hasCustomBp) {
+          let resolvedUpdates = resolveSectionUpdatesFromAiPayload(parsed, bpSections);
+          // Discard any empty {} section objects so we trigger repair instead of writing blank fields
+          Object.keys(resolvedUpdates).forEach(k => {
+            const matchedSec = bpSections.find(s => s.id === k);
+            const normVal = matchedSec ? normalizeSectionAiValue(resolvedUpdates[k], matchedSec.type) : '';
+            if (!normVal) delete resolvedUpdates[k];
+            else resolvedUpdates[k] = normVal;
+          });
+          let resolvedKeys = Object.keys(resolvedUpdates);
+
+          // Self-healing retry: if Gemini returned conversational text with empty/missing sections on a draft/edit/auto-draft request
+          const looksLikeEditOrDraft = (userMsg.length >= 35) || /\b(draft|write|edit|update|fix|add|put|create|organize|rewrite|improve|turn\s+this|fill|generate)\b/i.test(userMsg) || /[\u0590-\u05FF]/.test(userMsg);
+          if (resolvedKeys.length === 0 && !metaOpts.analyzeOnly && bpSections.length > 0 && looksLikeEditOrDraft) {
+            if ((apiKey || shouldUseAiProxy()) && typeof callGeminiApi === 'function') {
+              try {
+                const forceSchemaLines = bpSections.map(s => `"${s.id}" (${s.name}, type ${s.type}): ${getSectionAiFormatRule(s.type)}`).join('\n');
+                const forcePrompt = `The educator sent this draft/request for class "${classTitle}":
 "${userMsg}"
 ${allowedRule ? `\n${allowedRule}\n` : ''}
-Map and apply their draft directly into the lesson sections below right now. Return STRICT JSON ONLY matching this exact structure (at least 1 section ID must be populated):
+Map and apply concrete non-empty teaching content into the lesson sections below right now. Return STRICT JSON ONLY matching this exact structure:
 {
   "sections": {
-${bpSections.map(s => `    "${s.id}": <object matching ${s.type} shape>`).join(',\n')}
+${bpSections.map(s => `    "${s.id}": <non-empty object matching ${s.type} shape>`).join(',\n')}
   }
 }
 
 Section Shapes:
 ${forceSchemaLines}`;
-              const forcedRaw = await callGeminiApi(forcePrompt, apiKey, {
-                responseMimeType: 'application/json',
-                temperature: 0.35,
-                taskTier: getAiQualityTier()
-              });
-              const forcedParsed = parseClassAiJson(forcedRaw);
-              resolvedUpdates = resolveSectionUpdatesFromAiPayload(forcedParsed, bpSections);
-              resolvedKeys = Object.keys(resolvedUpdates);
-            } catch (_) {}
-          }
-          if (resolvedKeys.length === 0 && userMsg.length >= 25) {
-            bpSections.forEach(s => {
-              resolvedUpdates[s.id] = buildStructuredSectionFallback(s, classTitle, bp.student_profile || '', userMsg);
-            });
-            resolvedKeys = Object.keys(resolvedUpdates);
-          }
-        }
-
-        if (resolvedKeys.length > 0) {
-          captureStudioUndoSnapshot(lesson);
-          if (!lesson.sections) lesson.sections = {};
-          bpSections.forEach(s => {
-            if (resolvedUpdates[s.id] !== undefined) {
-              lesson.sections[s.id] = normalizeSectionAiValue(resolvedUpdates[s.id], s.type);
-              updatedSecIds.push(s.id);
-              updatedCount++;
+                const forcedRaw = await callGeminiApi(forcePrompt, apiKey, {
+                  responseMimeType: 'application/json',
+                  temperature: 0.35,
+                  taskTier: getAiQualityTier()
+                });
+                const forcedParsed = parseClassAiJson(forcedRaw);
+                resolvedUpdates = resolveSectionUpdatesFromAiPayload(forcedParsed, bpSections);
+                Object.keys(resolvedUpdates).forEach(k => {
+                  const matchedSec = bpSections.find(s => s.id === k);
+                  const normVal = matchedSec ? normalizeSectionAiValue(resolvedUpdates[k], matchedSec.type) : '';
+                  if (!normVal) delete resolvedUpdates[k];
+                  else resolvedUpdates[k] = normVal;
+                });
+                resolvedKeys = Object.keys(resolvedUpdates);
+              } catch (_) {}
             }
-          });
-        }
-      } else if (!hasCustomBp) {
-        const secMap = (parsed.sections && typeof parsed.sections === 'object') ? parsed.sections : {};
-        const nextHook = parsed.hook || secMap.hook || secMap.intro || '';
-        const nextAnchors = Array.isArray(parsed.anchors) ? parsed.anchors : (Array.isArray(secMap.anchors) ? secMap.anchors : null);
-        const nextSources = parsed.sources || secMap.sources || '';
-        const nextSteps = parsed.steps || secMap.steps || '';
-        const nextPitfalls = parsed.pitfalls || secMap.pitfalls || '';
-        const nextCheat = parsed.cheat_sheet || secMap.cheat_sheet || '';
-        const nextHomework = parsed.homework || secMap.homework || '';
-        const willMutateLegacy = !!(nextHook || (nextAnchors && nextAnchors.length) || nextSources || nextSteps || nextPitfalls || nextCheat || nextHomework);
-        if (willMutateLegacy) captureStudioUndoSnapshot(lesson);
-        if (nextHook) { lesson.hook_en = typeof nextHook === 'string' ? nextHook : JSON.stringify(nextHook); updatedCount++; }
-        if (nextAnchors && nextAnchors.length) {
-          lesson.anchors_en = nextAnchors.map(pt => ({ id: 'anc_' + Math.random().toString(36).substr(2, 6), point: typeof pt === 'string' ? pt : JSON.stringify(pt) }));
-          lesson.anchors_he = lesson.anchors_en;
-          updatedCount++;
-        }
-        if (nextSources) { lesson.sources_text = typeof nextSources === 'string' ? nextSources : JSON.stringify(nextSources); updatedCount++; }
-        if (nextSteps) { lesson.steps_text = typeof nextSteps === 'string' ? nextSteps : JSON.stringify(nextSteps); updatedCount++; }
-        if (nextPitfalls) { lesson.pitfalls_text = typeof nextPitfalls === 'string' ? nextPitfalls : JSON.stringify(nextPitfalls); updatedCount++; }
-        if (nextCheat) { lesson.cheat_sheet_text = typeof nextCheat === 'string' ? nextCheat : JSON.stringify(nextCheat); updatedCount++; }
-        if (nextHomework) { lesson.homework_text = typeof nextHomework === 'string' ? nextHomework : JSON.stringify(nextHomework); updatedCount++; }
-      }
-      if (updatedSecIds.length > 0) {
-        studioAiUpdatedSectionIds[lesson.id] = updatedSecIds;
-      }
+            if (resolvedKeys.length === 0 && userMsg.length >= 25) {
+              bpSections.forEach(s => {
+                const fb = buildStructuredSectionFallback(s, classTitle, bp.student_profile || '', userMsg);
+                if (fb) resolvedUpdates[s.id] = fb;
+              });
+              resolvedKeys = Object.keys(resolvedUpdates);
+            }
+          }
 
-      if (parsed.assistant_reply) {
-        lesson.ai_chat_history.push({ role: 'assistant', text: parsed.assistant_reply, updatedCount });
-      } else if (updatedCount > 0) {
-        lesson.ai_chat_history.push({ role: 'assistant', text: `Updated ${updatedCount} lesson section${updatedCount === 1 ? '' : 's'} with your changes.`, updatedCount });
-      }
+          // Re-resolve live course & lesson again in case a second await occurred
+          const resolvedLivePost = resolveLiveCourseAndLesson(cId, targetLessonId);
+          liveCourse = resolvedLivePost.course || liveCourse;
+          liveLesson = resolvedLivePost.lesson || liveLesson;
 
-      course.updated_at = new Date().toISOString();
-      lesson.updated_at = new Date().toISOString();
-      studioClassAiThinkingMap[lesson.id] = false;
-      lastLocalCourseEditTs = Date.now();
-      saveCustomCoursesToStorage(true);
-      renderCourseStudio(cId, lesson.id);
-      renderCommandCenter();
-      showToast(updatedCount > 0 ? `Updated ${updatedCount} lesson section${updatedCount === 1 ? '' : 's'}!` : 'AI replied (no section changes requested)');
+          if (resolvedKeys.length > 0) {
+            captureStudioUndoSnapshot(liveLesson);
+            if (!liveLesson.sections || typeof liveLesson.sections !== 'object') liveLesson.sections = {};
+            bpSections.forEach(s => {
+              if (resolvedUpdates[s.id] !== undefined && String(resolvedUpdates[s.id]).trim() !== '') {
+                liveLesson.sections[s.id] = resolvedUpdates[s.id];
+                updatedSecIds.push(s.id);
+                updatedCount++;
+              }
+            });
+          }
+        } else if (!hasCustomBp) {
+          const secMap = (parsed.sections && typeof parsed.sections === 'object') ? parsed.sections : {};
+          const nextHook = parsed.hook || secMap.hook || secMap.intro || '';
+          const nextAnchors = Array.isArray(parsed.anchors) ? parsed.anchors : (Array.isArray(secMap.anchors) ? secMap.anchors : null);
+          const nextSources = parsed.sources || secMap.sources || '';
+          const nextSteps = parsed.steps || secMap.steps || '';
+          const nextPitfalls = parsed.pitfalls || secMap.pitfalls || '';
+          const nextCheat = parsed.cheat_sheet || secMap.cheat_sheet || '';
+          const nextHomework = parsed.homework || secMap.homework || '';
+          const willMutateLegacy = !!(nextHook || (nextAnchors && nextAnchors.length) || nextSources || nextSteps || nextPitfalls || nextCheat || nextHomework);
+          if (willMutateLegacy) captureStudioUndoSnapshot(liveLesson);
+          if (nextHook) { liveLesson.hook_en = typeof nextHook === 'string' ? nextHook : JSON.stringify(nextHook); updatedCount++; }
+          if (nextAnchors && nextAnchors.length) {
+            liveLesson.anchors_en = nextAnchors.map(pt => ({ id: 'anc_' + Math.random().toString(36).substr(2, 6), point: typeof pt === 'string' ? pt : JSON.stringify(pt) }));
+            liveLesson.anchors_he = liveLesson.anchors_en;
+            updatedCount++;
+          }
+          if (nextSources) { liveLesson.sources_text = typeof nextSources === 'string' ? nextSources : JSON.stringify(nextSources); updatedCount++; }
+          if (nextSteps) { liveLesson.steps_text = typeof nextSteps === 'string' ? nextSteps : JSON.stringify(nextSteps); updatedCount++; }
+          if (nextPitfalls) { liveLesson.pitfalls_text = typeof nextPitfalls === 'string' ? nextPitfalls : JSON.stringify(nextPitfalls); updatedCount++; }
+          if (nextCheat) { liveLesson.cheat_sheet_text = typeof nextCheat === 'string' ? nextCheat : JSON.stringify(nextCheat); updatedCount++; }
+          if (nextHomework) { liveLesson.homework_text = typeof nextHomework === 'string' ? nextHomework : JSON.stringify(nextHomework); updatedCount++; }
+        }
+
+        if (updatedSecIds.length > 0) {
+          studioAiUpdatedSectionIds[liveLesson.id] = updatedSecIds;
+        }
+
+        ensureStudioClassAiHistory(liveCourse, liveLesson);
+        const lastChatMsg = liveLesson.ai_chat_history[liveLesson.ai_chat_history.length - 1];
+        if (!lastChatMsg || lastChatMsg.role !== 'user' || lastChatMsg.text !== userMsg) {
+          liveLesson.ai_chat_history.push({ role: 'user', text: userMsg });
+        }
+        if (parsed.assistant_reply) {
+          liveLesson.ai_chat_history.push({ role: 'assistant', text: parsed.assistant_reply, updatedCount });
+        } else if (updatedCount > 0) {
+          liveLesson.ai_chat_history.push({ role: 'assistant', text: `Updated ${updatedCount} lesson section${updatedCount === 1 ? '' : 's'} with your changes.`, updatedCount });
+        }
+
+        liveLesson.updated_at = new Date().toISOString();
+        liveCourse.updated_at = liveLesson.updated_at;
+        showToast(updatedCount > 0 ? `Updated ${updatedCount} lesson section${updatedCount === 1 ? '' : 's'}!` : 'AI replied (no section changes requested)');
+      } finally {
+        studioClassAiThinkingMap[targetLessonId] = false;
+        endCourseAiLock(cId);
+        lastLocalCourseEditTs = Date.now();
+        saveCustomCoursesToStorage(true);
+        renderCourseStudio(cId, targetLessonId);
+        renderCommandCenter();
+      }
     }
 
     function toggleReaderElement(elId) {
@@ -14475,30 +14547,65 @@ ${forceSchemaLines}`;
       return rules[secType] || rules.text;
     }
 
+    function hasMeaningfulSectionObject(obj, secType) {
+      if (!obj || typeof obj !== 'object') return false;
+      const entries = Object.entries(obj).filter(([k]) => k !== '_structured' && k !== 'rtl' && k !== 'leftLabel' && k !== 'rightLabel');
+      return entries.some(([, v]) => {
+        if (Array.isArray(v)) {
+          return v.some(item => {
+            if (typeof item === 'string') return item.trim() !== '';
+            if (item && typeof item === 'object') return Object.values(item).some(iv => String(iv || '').trim() !== '');
+            return false;
+          });
+        }
+        return v !== undefined && v !== null && String(v).trim() !== '';
+      });
+    }
+
     function normalizeSectionAiValue(val, secType) {
       if (secType === 'audio') {
-        return typeof val === 'string' ? val : JSON.stringify(val || '');
+        return typeof val === 'string' ? val.trim() : JSON.stringify(val || '');
       }
       let normalized = val;
       if (typeof val === 'string') {
         const trimmed = val.trim();
-        if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+        if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
           try {
             const parsedObj = JSON.parse(trimmed);
             if (parsedObj && typeof parsedObj === 'object') normalized = parsedObj;
           } catch (_) {}
         }
       }
-      if (normalized && typeof normalized === 'object' && !Array.isArray(normalized)) {
-        return JSON.stringify({ _structured: true, ...normalized });
-      }
       if (Array.isArray(normalized)) {
         if (secType === 'steps') {
-          return JSON.stringify({ _structured: true, steps: normalized.map(st => typeof st === 'string' ? { text: st, mins: '' } : st) });
+          const steps = normalized.map(st => typeof st === 'string' ? { text: st, mins: '' } : st).filter(st => st && String(st.text || '').trim());
+          return steps.length ? JSON.stringify({ _structured: true, steps }) : '';
         }
-        return JSON.stringify({ _structured: true, items: normalized });
+        if (secType === 'bilingual_split') {
+          const rows = normalized.map(r => (typeof r === 'string' ? { orig: r, trans: '' } : { orig: r.orig || r.source || r.text || '', trans: r.trans || r.meaning || r.explanation || '' })).filter(r => (r.orig || r.trans).trim());
+          return rows.length ? JSON.stringify({ _structured: true, rtl: true, leftLabel: 'Original Text', rightLabel: 'Plain Explanation', rows }) : '';
+        }
+        const items = normalized.filter(it => (typeof it === 'string' ? it.trim() !== '' : (it && typeof it === 'object' && Object.values(it).some(v => String(v || '').trim() !== ''))));
+        return items.length ? JSON.stringify({ _structured: true, items }) : '';
       }
-      // If plain string returned for structured 'text' or 'reflection' block, wrap cleanly so fields display properly
+      if (normalized && typeof normalized === 'object') {
+        // Normalize slight Gemini key variations before rejecting empty objects
+        if (secType === 'text' && !normalized.body && (normalized.content || normalized.text || normalized.explanation)) {
+          normalized = { summary: normalized.summary || '', body: normalized.content || normalized.text || normalized.explanation };
+        } else if (secType === 'reflection' && !normalized.mindset && (normalized.takeaway || normalized.lesson || normalized.body || normalized.value)) {
+          normalized = { mindset: normalized.takeaway || normalized.lesson || normalized.body || normalized.value, action: normalized.action || normalized.challenge || '' };
+        } else if (secType === 'bilingual_split' && !Array.isArray(normalized.rows)) {
+          if (Array.isArray(normalized.items)) {
+            normalized = { rtl: normalized.rtl !== false, rows: normalized.items.map(r => ({ orig: r.orig || r.source || r.quote || '', trans: r.trans || r.meaning || r.explanation || '' })) };
+          } else if (normalized.orig || normalized.trans || normalized.quote || normalized.meaning) {
+            normalized = { rtl: normalized.rtl !== false, rows: [{ orig: normalized.orig || normalized.quote || '', trans: normalized.trans || normalized.meaning || '' }] };
+          }
+        }
+        if (!hasMeaningfulSectionObject(normalized, secType)) {
+          return '';
+        }
+        return JSON.stringify({ _structured: true, ...normalized });
+      }
       const strVal = String(normalized || '').trim();
       if (!strVal) return '';
       if (secType === 'text') {
@@ -14509,9 +14616,30 @@ ${forceSchemaLines}`;
           body: strVal
         });
       }
+      if (secType === 'reflection') {
+        return JSON.stringify({ _structured: true, mindset: strVal, action: '' });
+      }
+      if (secType === 'bilingual_split') {
+        return JSON.stringify({ _structured: true, rtl: true, leftLabel: 'Original Text', rightLabel: 'Plain Explanation', rows: [{ orig: strVal, trans: '' }] });
+      }
+      if (secType === 'example') {
+        return JSON.stringify({ _structured: true, setup: strVal, takeaway: '' });
+      }
+      if (secType === 'discussion') {
+        return JSON.stringify({ _structured: true, prompt: strVal, followup: '', notes: '' });
+      }
+      if (secType === 'homework') {
+        return JSON.stringify({ _structured: true, task: strVal, estMinutes: '15m' });
+      }
+      if (secType === 'quote') {
+        return JSON.stringify({ _structured: true, citation: '', quote: strVal, meaning: '', rtl: /[\u0590-\u05FF]/.test(strVal) });
+      }
+      if (secType === 'teacher_cue') {
+        return JSON.stringify({ _structured: true, cue: strVal });
+      }
       if (secType === 'list') {
         const items = strVal.split('\n').map(l => l.replace(/^[•\-\*✦\d\.)]+\s*/, '').trim()).filter(Boolean);
-        return JSON.stringify({ _structured: true, items: items.length ? items : [strVal] });
+        return items.length ? JSON.stringify({ _structured: true, items }) : '';
       }
       return strVal;
     }
@@ -14948,18 +15076,23 @@ Return STRICT JSON ONLY keyed by exact section ID matching each section's exact 
       if (!lesson) return;
 
       const title = lesson.title_en || lesson.title_he || 'Core Concept';
+      const targetCourseId = course.id;
+      const targetLessonId = lesson.id;
       showStudioSavingIndicator();
+      beginCourseAiLock(targetCourseId);
 
       let generated = '';
       try {
         const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
-        if (apiKey) {
+        if (apiKey || shouldUseAiProxy()) {
           const prompt = `Write a high-impact pedagogical block for "${blockType}" regarding the topic "${title}" (${course.target_level || 'General'}). Return plain text only.`;
-          generated = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey, { temperature: 0.7 });
-          generated = generated.replace(/```/g, '').trim();
+          generated = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey, { temperature: 0.6, taskTier: getAiQualityTier() });
+          generated = String(generated || '').replace(/```/g, '').trim();
         }
       } catch (e) {
         console.warn('Mini block AI fallback:', e);
+      } finally {
+        endCourseAiLock(targetCourseId);
       }
 
       if (!generated) {
@@ -14982,20 +15115,25 @@ Return STRICT JSON ONLY keyed by exact section ID matching each section's exact 
         }
       }
 
-      if (blockType === 'hook') lesson.hook_en = generated;
+      const resolvedLive = resolveLiveCourseAndLesson(targetCourseId, targetLessonId);
+      const liveCourse = resolvedLive.course || course;
+      const liveLesson = resolvedLive.lesson || lesson;
+
+      if (blockType === 'hook') liveLesson.hook_en = generated;
       else if (blockType === 'anchors') {
         const lines = generated.split('\n').map(l => l.trim()).filter(Boolean);
-        lesson.anchors_en = lines.map(line => ({ id: 'anc_' + Math.random().toString(36).substr(2, 6), point: line }));
-      } else if (blockType === 'sources') lesson.sources_text = generated;
-      else if (blockType === 'steps') lesson.steps_text = generated;
-      else if (blockType === 'pitfalls') lesson.pitfalls_text = generated;
-      else if (blockType === 'cheat_sheet') lesson.cheat_sheet_text = generated;
-      else if (blockType === 'homework') lesson.homework_text = generated;
-      else if (blockType === 'discussion') lesson.discussion_en = generated;
+        liveLesson.anchors_en = lines.map(line => ({ id: 'anc_' + Math.random().toString(36).substr(2, 6), point: line }));
+      } else if (blockType === 'sources') liveLesson.sources_text = generated;
+      else if (blockType === 'steps') liveLesson.steps_text = generated;
+      else if (blockType === 'pitfalls') liveLesson.pitfalls_text = generated;
+      else if (blockType === 'cheat_sheet') liveLesson.cheat_sheet_text = generated;
+      else if (blockType === 'homework') liveLesson.homework_text = generated;
+      else if (blockType === 'discussion') liveLesson.discussion_en = generated;
 
-      course.updated_at = new Date().toISOString();
+      liveLesson.updated_at = new Date().toISOString();
+      liveCourse.updated_at = liveLesson.updated_at;
       saveCustomCoursesToStorage(true);
-      renderCourseStudio(course.id, lesson.id);
+      renderCourseStudio(liveCourse.id, liveLesson.id);
       showToast(`AI generated ${blockType} block!`);
     }
 
@@ -15010,11 +15148,13 @@ Return STRICT JSON ONLY keyed by exact section ID matching each section's exact 
 
       const title = lesson.title_en || lesson.title_he || 'Core Topic';
       showStudioSavingIndicator();
+      beginCourseAiLock(courseId);
+      showToast(`Drafting "${sec.name}"...`);
 
       let generated = '';
       try {
         const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
-        if (apiKey) {
+        if (apiKey || shouldUseAiProxy()) {
           const allowedRule = typeof buildCourseAllowedResourcesPromptRule === 'function' ? buildCourseAllowedResourcesPromptRule(bp) : '';
           const prompt = `Draft ONLY the section "${sec.name}" (type: ${sec.type}) for the class "${title}" in course "${course.title_en || course.title_he}".
 Target Students: ${bp.student_profile || course.target_level || 'General'}
@@ -15022,27 +15162,36 @@ Course Guidelines: ${bp.guidelines || 'Clear and easy to teach'}
 ${allowedRule ? `\n${allowedRule}\n` : ''}
 Section Rule: ${sec.ai_rule || sec.hint || 'Be concise and practical'}
 Format requirement: ${getSectionAiFormatRule(sec.type)}.`;
-          let rawRes = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey, { temperature: 0.7 });
-          rawRes = rawRes.replace(/```json/gi, '').replace(/```/g, '').trim();
+          let rawRes = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey, { temperature: 0.5, responseMimeType: sec.type !== 'audio' ? 'application/json' : undefined, taskTier: getAiQualityTier() });
+          rawRes = String(rawRes || '').replace(/```json/gi, '').replace(/```/g, '').trim();
           if (sec.type !== 'audio' && rawRes.startsWith('{')) {
             generated = normalizeSectionAiValue(JSON.parse(rawRes), sec.type);
           } else {
-            generated = rawRes;
+            generated = normalizeSectionAiValue(rawRes, sec.type);
           }
         }
       } catch (e) {
         console.warn('Custom block AI fallback:', e);
+      } finally {
+        endCourseAiLock(courseId);
       }
 
       if (!generated) {
         generated = buildStructuredSectionFallback(sec, title, bp.student_profile);
       }
 
-      if (!lesson.sections || typeof lesson.sections !== 'object') lesson.sections = {};
-      lesson.sections[sec.id] = generated;
-      course.updated_at = new Date().toISOString();
+      const resolvedLive = resolveLiveCourseAndLesson(courseId, lessonId);
+      const liveCourse = resolvedLive.course || course;
+      const liveLesson = resolvedLive.lesson || lesson;
+
+      captureStudioUndoSnapshot(liveLesson);
+      if (!liveLesson.sections || typeof liveLesson.sections !== 'object') liveLesson.sections = {};
+      liveLesson.sections[sec.id] = generated;
+      studioAiUpdatedSectionIds[liveLesson.id] = [sec.id];
+      liveLesson.updated_at = new Date().toISOString();
+      liveCourse.updated_at = liveLesson.updated_at;
       saveCustomCoursesToStorage(true);
-      renderCourseStudio(course.id, lesson.id);
+      renderCourseStudio(liveCourse.id, liveLesson.id);
       showToast(`AI drafted "${sec.name}"!`);
     }
 
@@ -15771,10 +15920,11 @@ Format requirement: ${getSectionAiFormatRule(sec.type)}.`;
           const localTs = localCourse.updated_at ? new Date(localCourse.updated_at).getTime() : 0;
           const cloudTs = cloudCourse.updated_at ? new Date(cloudCourse.updated_at).getTime() : 0;
 
-          // Protect active local edits & self-echoed pushes from overwriting newer typed/dictated text
+          // Protect active local edits, active in-flight AI generations & self-echoed pushes from overwriting newer typed/dictated or generated state
+          const isAiLockedThisCourse = !!(studioActiveAiCourseLocks && studioActiveAiCourseLocks[localCourse.id] > 0);
           const isEditingThisCourse = (typeof isStudioUserActivelyEditing === 'function' && isStudioUserActivelyEditing() && localCourse.id === (APP_STATE.insideCourseId || APP_STATE.activeCourseId));
-          const isRecentSelfEdit = (typeof lastLocalCourseEditTs === 'number' && (Date.now() - lastLocalCourseEditTs) < 10000 && localCourse.id === activeLocalCourseEditId && cloudTs <= (localTs + 1000));
-          if (!isEditingThisCourse && !isRecentSelfEdit && (cloudTs + 5000) >= localTs && JSON.stringify(localCourse) !== JSON.stringify(cloudCourse)) {
+          const isRecentSelfEdit = (typeof lastLocalCourseEditTs === 'number' && (Date.now() - lastLocalCourseEditTs) < 12000 && localCourse.id === activeLocalCourseEditId && cloudTs <= (localTs + 1500));
+          if (!isAiLockedThisCourse && !isEditingThisCourse && !isRecentSelfEdit && (cloudTs + 5000) >= localTs && JSON.stringify(localCourse) !== JSON.stringify(cloudCourse)) {
             APP_STATE.customCourses[localIdx] = cloudCourse;
             hasNewData = true;
           }

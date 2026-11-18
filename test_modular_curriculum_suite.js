@@ -4152,6 +4152,93 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   const quotaExceededResp = await onRequestPost({ request: mkReq({ model: 'gemini-3.8-flash', payload: {} }, { 'CF-Connecting-IP': '9.9.9.9' }), env: { GEMINI_API_KEY: 'server-secret', AI_DAILY_LIMIT: '2' } });
   assert(quotaExceededResp.status === 429 && (await quotaExceededResp.json()).quotaExceeded === true, 'Edge proxy blocks excessive requests beyond AI_DAILY_LIMIT with HTTP 429');
 
+  // --- Gate 44: In-Flight Cloud Sync Race Immunity & Empty-Section Object Guard ---
+  console.log('\n--- Running Gate 44: In-Flight Cloud Sync Race Immunity & Empty-Section Guard ---');
+  assert(typeof sandbox.beginCourseAiLock === 'function' && typeof sandbox.resolveLiveCourseAndLesson === 'function', 'Course AI lock & live resolution helpers are defined');
+  assert(sandbox.normalizeSectionAiValue({}, 'text') === '', 'normalizeSectionAiValue rejects empty {} objects instead of creating blank _structured placeholders');
+  assert(sandbox.normalizeSectionAiValue({ summary: '', body: '' }, 'text') === '', 'normalizeSectionAiValue rejects all-empty structured objects');
+  assert(sandbox.normalizeSectionAiValue({ orig: 'בראשית', trans: 'In the beginning' }, 'bilingual_split').includes('"rows"'), 'normalizeSectionAiValue upgrades flat bilingual_split keys into valid rows array');
+
+  const g44Course = {
+    id: 'course_g44_race',
+    title_en: 'Chumash',
+    title_he: 'חומש',
+    created_by: 'shmueldoviduhlman@gmail.com',
+    updated_at: new Date().toISOString(),
+    blueprint: {
+      version: '2.0',
+      student_profile: 'Parashah students',
+      sections: [
+        { id: 'sec_g44_overview', type: 'text', name: 'PARASHA OVERVIEW', ai_rule: 'Core summary' },
+        { id: 'sec_g44_chazal', type: 'bilingual_split', name: 'VOICES OF CHAZAL', ai_rule: 'Rashi / Chazal text' },
+        { id: 'sec_g44_living', type: 'reflection', name: 'LIVING THE TORAH', ai_rule: 'Weekly action' }
+      ]
+    },
+    lessons: [
+      { id: 'les_g44_1', lesson_num: 1, title_en: 'Lesson 1: New Lesson', sections: {}, ai_chat_history: [] }
+    ]
+  };
+  sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com', role: 'super_admin' };
+  sandbox.APP_STATE.customCourses = [g44Course];
+  sandbox.APP_STATE.insideCourseId = g44Course.id;
+  sandbox.APP_STATE.activeCourseId = g44Course.id;
+  sandbox.APP_STATE.studioSelectedLessonId = 'les_g44_1';
+  sandbox.studioScreenMode = 'edit';
+
+  // Simulate cloud sync firing mid-flight WHILE Gemini is drafting (plus initial empty {} values from model)
+  let g44CallCount = 0;
+  sandbox.fetch = async () => {
+    g44CallCount++;
+    // Fire stale cloud echo mid-flight containing blank sections & no chat
+    const staleCloudSnapshot = [{
+      id: 'course_g44_race',
+      title_en: 'Chumash',
+      created_by: 'shmueldoviduhlman@gmail.com',
+      updated_at: new Date(Date.now() + 3000).toISOString(),
+      blueprint: g44Course.blueprint,
+      lessons: [{ id: 'les_g44_1', lesson_num: 1, title_en: 'Lesson 1: New Lesson', sections: {}, ai_chat_history: [] }]
+    }];
+    sandbox.mergeCustomCoursesWithCloud(staleCloudSnapshot, staleCloudSnapshot[0].updated_at, []);
+
+    if (g44CallCount === 1) {
+      // Simulate Gemini mistakenly returning empty section shells on attempt 1
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          candidates: [{ content: { parts: [{ text: JSON.stringify({ assistant_reply: 'Drafted!', sections: { sec_g44_overview: {}, sec_g44_chazal: {}, sec_g44_living: {} } }) }] } }]
+        })
+      };
+    }
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        candidates: [{
+          content: {
+            parts: [{
+              text: JSON.stringify({
+                sections: {
+                  sec_g44_overview: { summary: 'Creation reveals divine purpose', body: 'Everything begins with intentionality and responsibility.' },
+                  sec_g44_chazal: { rtl: true, rows: [{ orig: 'בראשית ברא אלקים', trans: 'In the beginning — For the sake of Torah and Israel (Rashi)' }] },
+                  sec_g44_living: { mindset: 'Every small beginning shapes the whole world.', action: 'Start one new mitzvah habit this week.' }
+                }
+              })
+            }]
+          }
+        }]
+      })
+    };
+  };
+
+  await sandbox.triggerStudioQuickAutoDraftClass(g44Course.id, 'les_g44_1', 'draft');
+  const liveAfterCourse = sandbox.APP_STATE.customCourses.find(c => c.id === 'course_g44_race');
+  const liveAfterLesson = liveAfterCourse.lessons[0];
+  assert(String(liveAfterLesson.sections.sec_g44_overview || '').includes('Creation reveals divine purpose'), 'Auto-Draft writes real PARASHA OVERVIEW content into live APP_STATE course even across mid-flight cloud sync');
+  assert(String(liveAfterLesson.sections.sec_g44_chazal || '').includes('בראשית ברא אלקים'), 'Auto-Draft populates VOICES OF CHAZAL bilingual rows cleanly');
+  assert(String(liveAfterLesson.sections.sec_g44_living || '').includes('Start one new mitzvah habit'), 'Auto-Draft populates LIVING THE TORAH reflection fields cleanly');
+  assert(liveAfterLesson.ai_chat_history.some(m => m.role === 'user') && liveAfterLesson.ai_chat_history.some(m => m.role === 'assistant' && m.updatedCount === 3), 'AI chat history retains both user request and assistant confirmation pill despite mid-flight cloud sync');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
