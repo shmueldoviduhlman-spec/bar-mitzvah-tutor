@@ -4434,8 +4434,8 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(sandbox.toggleThemeMode() === 'dark' && sandbox.localStorage.getItem('tutor_theme_mode') === 'dark', 'toggleThemeMode switches to Dark Mode and persists preference');
   assert(sandbox.toggleThemeMode() === 'light' && sandbox.localStorage.getItem('tutor_theme_mode') === 'light', 'toggleThemeMode switches back to Warm Daylight cleanly');
 
-  // Desktop Top Pill Navigation & Clean Header Today Trigger
-  assert(indexHtml.includes('id="desktop-top-pill-nav"') && indexHtml.includes('id="main-bottom-dock" class="md:hidden'), 'Desktop uses centered Top Pill Navigation while hiding mobile bottom dock on md+ screens');
+  // Desktop Left Sidebar App Shell & Live Quick-Jump Course Tree
+  assert(indexHtml.includes('id="app-sidebar-shell"') && indexHtml.includes('id="desktop-sidebar-nav"') && indexHtml.includes('id="sidebar-courses-quick-list"') && indexHtml.includes('id="main-bottom-dock" class="md:hidden'), 'Desktop uses fixed Left Sidebar App Shell with live Your Courses tree while hiding mobile bottom dock on md+ screens');
 
   // Tab 1: 1-Click Continue Last Lesson, Top Lesson Switcher, Click-to-Rename Title, Quick Section Jump List & 3-Tab Course Architect
   const g47Course = {
@@ -4484,10 +4484,14 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   sandbox.jumpToStudioLesson('course_g47_ui', 'les_g47_2');
   assert(sandbox.APP_STATE.studioSelectedLessonId === 'les_g47_2' && sandbox.APP_STATE.lastOpenedLessonId === 'les_g47_2', 'jumpToStudioLesson switches active lesson and records lastOpenedLessonId');
 
-  // Test 1-Click Continue Last Lesson Banner in My Courses
+  // Test Visual Course Cover Cards, Left Sidebar Quick Course Tree & Removal of Continue Last Lesson Banner
   sandbox.showAllCoursesView();
-  const continueBannerHtml = getOrCreateElem('continue-last-lesson-banner').innerHTML;
-  assert(continueBannerHtml.includes('Continue Last Lesson') && continueBannerHtml.includes('Lesson 2: Noach'), 'My Courses displays 1-click Continue Last Lesson shortcut banner');
+  const continueBannerEl = getOrCreateElem('continue-last-lesson-banner');
+  assert(continueBannerEl.classList.contains('hidden') && continueBannerEl.innerHTML === '', 'Continue Last Lesson banner is permanently removed and hidden per user preference');
+  const g47CardsHtml = getOrCreateElem('courses-cards-grid').innerHTML;
+  assert(g47CardsHtml.includes('modern-gradient-cover') && g47CardsHtml.includes('Open Course'), 'My Courses renders rich Visual Course Cards with gradient covers and Open Course CTA');
+  const g47SidebarTreeHtml = getOrCreateElem('sidebar-courses-quick-list').innerHTML;
+  assert(g47SidebarTreeHtml.includes('Chumash Mastery'), 'Left Sidebar Your Courses tree populates live quick-jump course links');
 
   // Test 3-Tab Course Architect Right Panel switcher
   assert(typeof sandbox.switchArchitectRightTab === 'function', 'switchArchitectRightTab is defined');

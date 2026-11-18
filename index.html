@@ -42,7 +42,7 @@
             }
           },
           fontFamily: {
-            sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+            sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
             hebrew: ['Heebo', 'Rubik', 'system-ui', 'sans-serif']
           }
         }
@@ -51,16 +51,18 @@
   </script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       -webkit-tap-highlight-color: transparent;
       user-select: text;
+      letter-spacing: -0.01em;
     }
 
     html[dir="rtl"] body {
       font-family: 'Heebo', sans-serif;
+      letter-spacing: 0;
     }
 
     /* Custom smooth scrollbars */
@@ -69,97 +71,103 @@
       height: 6px;
     }
     ::-webkit-scrollbar-track {
-      background: #0f172a;
+      background: #0B0F19;
     }
     ::-webkit-scrollbar-thumb {
       background: #334155;
-      border-radius: 4px;
+      border-radius: 9999px;
     }
     ::-webkit-scrollbar-thumb:hover {
       background: #475569;
     }
 
     html.theme-daylight ::-webkit-scrollbar-track {
-      background: #FAF8F5;
+      background: #F4F5F8;
     }
     html.theme-daylight ::-webkit-scrollbar-thumb {
-      background: #D6D3D1;
-      border-radius: 4px;
+      background: #CBD5E1;
+      border-radius: 9999px;
     }
     html.theme-daylight ::-webkit-scrollbar-thumb:hover {
-      background: #A8A29E;
+      background: #94A3B8;
     }
 
     .glass-nav {
       background: rgba(15, 23, 42, 0.88);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
 
     /* ==========================================================================
-       M105 WARM DAYLIGHT DESIGN SYSTEM (Craft Docs + Claude.ai + Editorial Theme)
+       MODERN SAAS & EDTECH DESIGN SYSTEM (Linear / Notion / Brilliant Aesthetic)
        ========================================================================== */
     html.theme-daylight,
     html.theme-daylight body {
-      background-color: #FAF8F5 !important;
-      color: #18181B !important;
+      background-color: #F4F6FB !important;
+      background-image:
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.06) 0px, transparent 45%),
+        radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.06) 0px, transparent 45%) !important;
+      background-attachment: fixed;
+      color: #0F172A !important;
+    }
+
+    html.theme-daylight #app-sidebar-shell {
+      background: rgba(255, 255, 255, 0.92) !important;
+      border-color: #E2E8F0 !important;
+      box-shadow: 4px 0 24px rgba(15, 23, 42, 0.03);
     }
 
     html.theme-daylight .glass-nav {
-      background: rgba(250, 248, 245, 0.94) !important;
-      border-color: #E7E5E4 !important;
-      box-shadow: 0 1px 4px rgba(28, 25, 23, 0.04);
+      background: rgba(255, 255, 255, 0.92) !important;
+      border-color: #E2E8F0 !important;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
     }
 
-    /* Warm Ivory & Crisp White Surfaces */
-    html.theme-daylight [class*="bg-slate-900"] {
+    /* Elevated Crisp White Surfaces with Soft SaaS Shadows */
+    html.theme-daylight [class*="bg-slate-900"]:not(.modern-gradient-cover) {
       background-color: #FFFFFF !important;
-      box-shadow: 0 2px 10px rgba(28, 25, 23, 0.035);
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 1px 3px 0 rgba(15, 23, 42, 0.02);
     }
-    html.theme-daylight [class*="bg-slate-950"] {
-      background-color: #F4F1EA !important;
+    html.theme-daylight [class*="bg-slate-950"]:not(.modern-gradient-cover) {
+      background-color: #F8FAFC !important;
     }
     html.theme-daylight #lock-screen,
     html.theme-daylight #educator-command-center-backdrop {
-      background-color: rgba(244, 241, 234, 0.92) !important;
+      background-color: rgba(241, 245, 249, 0.92) !important;
     }
     html.theme-daylight #educator-command-center {
       background: #FFFFFF !important;
-      border-color: #E7E5E4 !important;
+      border-color: #E2E8F0 !important;
     }
-    html.theme-daylight [class*="bg-slate-800"],
-    html.theme-daylight [class*="bg-slate-850"] {
-      background-color: #EFECE6 !important;
+    html.theme-daylight [class*="bg-slate-800"]:not(.modern-gradient-cover),
+    html.theme-daylight [class*="bg-slate-850"]:not(.modern-gradient-cover) {
+      background-color: #F1F5F9 !important;
     }
     html.theme-daylight button[class*="bg-slate-800"]:hover,
     html.theme-daylight a[class*="bg-slate-800"]:hover {
-      background-color: #E4DFD7 !important;
+      background-color: #E2E8F0 !important;
     }
 
-    /* Warm Stone Hairline Borders */
+    /* Clean Hairline Borders */
     html.theme-daylight [class*="border-slate-800"],
     html.theme-daylight [class*="border-slate-900"] {
-      border-color: #E7E5E4 !important;
+      border-color: #E2E8F0 !important;
     }
     html.theme-daylight [class*="border-slate-700"],
     html.theme-daylight [class*="border-slate-600"] {
-      border-color: #D6D3D1 !important;
+      border-color: #CBD5E1 !important;
     }
     html.theme-daylight [class*="divide-slate-800"] > :not([hidden]) ~ :not([hidden]) {
-      border-color: #E7E5E4 !important;
+      border-color: #E2E8F0 !important;
     }
 
     /* Tinted Surface Callouts in Daylight */
-    html.theme-daylight [class*="bg-amber-950"],
-    html.theme-daylight [class*="from-amber-950"] {
-      background-color: #FEF3C7 !important;
-      background-image: none !important;
+    html.theme-daylight [class*="bg-amber-950"] {
+      background-color: #FFFBEB !important;
     }
     html.theme-daylight [class*="bg-indigo-950"],
-    html.theme-daylight [class*="bg-brand-950"],
-    html.theme-daylight [class*="via-indigo-950"] {
+    html.theme-daylight [class*="bg-brand-950"] {
       background-color: #EEF2FF !important;
-      background-image: none !important;
     }
     html.theme-daylight [class*="bg-emerald-950"] {
       background-color: #ECFDF5 !important;
@@ -175,10 +183,12 @@
       background-color: #F5F3FF !important;
     }
 
-    /* High-Contrast Editorial Typography in Daylight */
-    html.theme-daylight .text-white {
-      color: #18181B !important;
+    /* High-Contrast Typography in Daylight */
+    html.theme-daylight .text-white:not(.keep-white) {
+      color: #0F172A !important;
     }
+    html.theme-daylight .keep-white,
+    html.theme-daylight .keep-white *,
     html.theme-daylight .bg-brand-600.text-white,
     html.theme-daylight .bg-brand-500.text-white,
     html.theme-daylight .bg-indigo-600.text-white,
@@ -189,23 +199,24 @@
     html.theme-daylight [class*="from-brand-600"].text-white,
     html.theme-daylight [class*="from-indigo-"].text-white,
     html.theme-daylight .bg-brand-600 .text-white,
+    html.theme-daylight .bg-indigo-600 .text-white,
     html.theme-daylight .bg-indigo-500 .text-white,
     html.theme-daylight .bg-emerald-600 .text-white {
       color: #FFFFFF !important;
     }
     html.theme-daylight .text-slate-100,
     html.theme-daylight .text-slate-200 {
-      color: #1C1917 !important;
+      color: #1E293B !important;
     }
     html.theme-daylight .text-slate-300 {
-      color: #44403C !important;
+      color: #334155 !important;
     }
     html.theme-daylight .text-slate-400 {
-      color: #57534E !important;
+      color: #475569 !important;
     }
     html.theme-daylight .text-slate-500,
     html.theme-daylight .text-slate-600 {
-      color: #78716C !important;
+      color: #64748B !important;
     }
 
     /* Semantic Accent Text Contrast on Daylight Cards */
@@ -213,7 +224,7 @@
     html.theme-daylight .text-amber-200,
     html.theme-daylight .text-amber-300,
     html.theme-daylight .text-amber-400 {
-      color: #B45309 !important;
+      color: #D97706 !important;
     }
     html.theme-daylight .text-brand-200,
     html.theme-daylight .text-brand-300,
@@ -221,12 +232,12 @@
     html.theme-daylight .text-indigo-200,
     html.theme-daylight .text-indigo-300,
     html.theme-daylight .text-indigo-400 {
-      color: #4338CA !important;
+      color: #4F46E5 !important;
     }
     html.theme-daylight .text-emerald-200,
     html.theme-daylight .text-emerald-300,
     html.theme-daylight .text-emerald-400 {
-      color: #047857 !important;
+      color: #059669 !important;
     }
     html.theme-daylight .text-cyan-100,
     html.theme-daylight .text-cyan-200,
@@ -235,31 +246,36 @@
     html.theme-daylight .text-sky-200,
     html.theme-daylight .text-sky-300,
     html.theme-daylight .text-sky-400 {
-      color: #0E7490 !important;
+      color: #0284C7 !important;
     }
     html.theme-daylight .text-rose-200,
     html.theme-daylight .text-rose-300,
     html.theme-daylight .text-rose-400,
     html.theme-daylight .text-red-300,
     html.theme-daylight .text-red-400 {
-      color: #BE123C !important;
+      color: #E11D48 !important;
     }
     html.theme-daylight .text-purple-100,
     html.theme-daylight .text-purple-200,
     html.theme-daylight .text-purple-300,
     html.theme-daylight .text-purple-400 {
-      color: #6D28D9 !important;
+      color: #7C3AED !important;
     }
 
-    /* Responsive 2-Column Visual Book Grid for My Courses on Desktop */
+    /* Responsive 2-Column & 3-Column Visual Course Gallery Grid on Desktop */
     @media (min-width: 768px) {
       #courses-cards-grid {
         display: grid !important;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 1rem !important;
+        gap: 1.25rem !important;
       }
       body {
         padding-bottom: 2rem !important;
+      }
+    }
+    @media (min-width: 1200px) {
+      #courses-cards-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
       }
     }
 
@@ -689,137 +705,161 @@
     </div>
   </div>
 
-  <!-- Top Sticky Header (Ultra-Clean & Mobile Fitted) -->
-  <header class="sticky top-0 z-40 glass-nav border-b border-slate-800/90 px-3 sm:px-4 py-2.5">
-    <div class="max-w-7xl mx-auto flex flex-col gap-2.5">
+  <!-- Modern Left Sidebar App Shell (Desktop Fixed Left Rail / Mobile Slim Top Bar) -->
+  <aside id="app-sidebar-shell" class="sticky top-0 md:fixed md:inset-y-0 md:left-0 rtl:md:left-auto rtl:md:right-0 z-40 w-full md:w-64 glass-nav border-b md:border-b-0 md:border-r border-slate-800/80 px-3.5 py-2.5 md:p-5 flex items-center md:items-stretch justify-between md:flex-col gap-3 select-none">
 
-      <!-- Upper Row: Brand + Status + Actions -->
-      <div class="flex items-center justify-between gap-2">
+    <!-- Top Brand + Primary CTA + Vertical Nav + Course Tree -->
+    <div class="flex items-center md:flex-col md:items-stretch gap-3 md:gap-5 min-w-0 flex-1 md:overflow-y-auto no-scrollbar">
 
-        <!-- Left: Brand Logo & Title -->
-        <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center text-white shadow-md badge-glow">
+      <!-- Brand Logo & Studio Badge -->
+      <div class="flex items-center justify-between gap-2.5 min-w-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-2xl bg-gradient-to-tr from-indigo-600 via-brand-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 keep-white">
             <i data-lucide="scroll" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
-          <span id="app-title" class="text-base sm:text-lg font-bold text-white tracking-tight">TutorPilot</span>
+          <div class="min-w-0">
+            <span id="app-title" class="text-base sm:text-lg font-extrabold text-white tracking-tight block leading-none">TutorPilot</span>
+            <span class="hidden md:block text-[10px] font-bold uppercase tracking-widest text-indigo-400 mt-1">Teaching Studio</span>
+          </div>
         </div>
+      </div>
 
-        <!-- Center: Desktop & Tablet Top Pill Navigation Bar -->
-        <nav id="desktop-top-pill-nav" class="hidden md:flex items-center gap-1 p-1 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-sm">
-          <button type="button" onclick="switchTab('study')" id="tab-study" class="tab-btn flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-semibold transition whitespace-nowrap bg-brand-600 text-white shadow-sm">
-            <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
-            <span id="tab-study-label">Classes</span>
-          </button>
-          <button type="button" onclick="switchTab('students')" id="tab-students" class="tab-btn flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap">
-            <i data-lucide="users" class="w-3.5 h-3.5"></i>
-            <span id="tab-students-label">Students</span>
-          </button>
-          <button type="button" onclick="switchTab('calendar')" id="tab-calendar" class="tab-btn flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap">
-            <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-            <span id="tab-calendar-label">Calendar</span>
-          </button>
-          <button type="button" onclick="switchTab('ai')" id="tab-ai" class="tab-btn flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap">
-            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
-            <span id="tab-ai-label">AI Studio</span>
-          </button>
-        </nav>
+      <!-- Desktop Primary Action: + Create Course -->
+      <button type="button" onclick="openCreateCourseModal('ai')" class="hidden md:flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs shadow-lg shadow-indigo-500/20 transition active:scale-95 keep-white">
+        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+        <span>Create New Course</span>
+      </button>
 
-        <!-- Right: Teacher Profile Controls OR Student Portal Header Controls -->
-        <div id="teacher-header-controls" class="flex items-center gap-1.5 shrink-0">
+      <!-- Desktop Vertical Sidebar Navigation Rail -->
+      <nav id="desktop-sidebar-nav" class="hidden md:flex flex-col gap-1.5">
+        <div class="px-2.5 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Workspace</div>
+        <button type="button" onclick="switchTab('study')" id="tab-study" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition bg-brand-600 text-white shadow-md shadow-brand-500/20">
+          <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i>
+          <span id="tab-study-label" class="truncate">Courses & Classes</span>
+        </button>
+        <button type="button" onclick="switchTab('students')" id="tab-students" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-400 hover:bg-slate-800/70 hover:text-white transition">
+          <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+          <span id="tab-students-label" class="truncate">Students</span>
+        </button>
+        <button type="button" onclick="switchTab('calendar')" id="tab-calendar" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-400 hover:bg-slate-800/70 hover:text-white transition">
+          <i data-lucide="calendar" class="w-4 h-4 shrink-0"></i>
+          <span id="tab-calendar-label" class="truncate">Schedule</span>
+        </button>
+        <button type="button" onclick="switchTab('ai')" id="tab-ai" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-400 hover:bg-slate-800/70 hover:text-white transition">
+          <i data-lucide="sparkles" class="w-4 h-4 text-amber-400 shrink-0"></i>
+          <span id="tab-ai-label" class="truncate">AI Studio</span>
+        </button>
+        <button type="button" onclick="toggleCommandCenterCollapse()" id="btn-header-command-center" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-semibold text-slate-400 hover:bg-slate-800/70 hover:text-white transition" title="Today Overview & Quick Actions">
+          <i data-lucide="sun" class="w-4 h-4 text-amber-400 shrink-0"></i>
+          <span id="lbl-header-today-btn" class="truncate">Today's Overview</span>
+        </button>
+      </nav>
 
-          <!-- Clean Today Overview Toggle in Header -->
-          <button onclick="toggleCommandCenterCollapse()" id="btn-header-command-center" class="flex items-center gap-1.5 px-2.5 py-1.5 min-h-[36px] sm:min-h-[38px] rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition active:scale-95 shadow-sm" title="Today Overview & Quick Actions">
-            <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-400"></i>
-            <span class="hidden sm:inline" id="lbl-header-today-btn">Today</span>
-          </button>
+      <!-- Desktop Live Quick-Jump Course Tree inside Left Sidebar -->
+      <div class="hidden md:flex flex-col gap-1.5 pt-3 border-t border-slate-800/70 flex-1 min-h-0">
+        <div class="flex items-center justify-between px-2.5">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Your Courses</span>
+          <button type="button" onclick="switchTab('study'); backToCoursesOverview();" class="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition">View All</button>
+        </div>
+        <div id="sidebar-courses-quick-list" class="space-y-1 overflow-y-auto pr-1 max-h-56 no-scrollbar"></div>
+      </div>
 
-          <!-- 1-Click Warm Daylight / Dark Mode Theme Toggle -->
-          <button type="button" onclick="toggleThemeMode()" id="btn-theme-toggle" class="w-9 h-9 sm:w-9.5 sm:h-9.5 flex items-center justify-center rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-amber-400 border border-slate-700/80 transition active:scale-95 shadow-sm" title="Switch Warm Daylight / Dark Mode">
-            <i data-lucide="moon" id="icon-theme-toggle" class="w-4 h-4"></i>
-          </button>
+    </div>
 
-          <!-- User Profile & Session Pill -->
-          <div class="relative">
-            <button onclick="toggleUserDropdown()" id="btn-user-profile-menu" class="flex items-center gap-1.5 px-2.5 py-1.5 min-h-[36px] sm:min-h-[38px] rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition active:scale-95 shadow-sm" title="User Profile">
-              <span id="user-avatar-badge" class="w-5 h-5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/40 flex items-center justify-center text-[10px] font-bold">S</span>
-              <span id="user-display-name-short" class="max-w-[70px] sm:max-w-[100px] truncate hidden sm:inline">Shmuel Dovid</span>
-              <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
-            </button>
+    <!-- Bottom Sidebar Footer (Desktop) / Right Controls (Mobile) -->
+    <div id="teacher-header-controls" class="flex md:flex-col items-center md:items-stretch gap-1.5 md:gap-2.5 shrink-0 md:pt-3 md:border-t md:border-slate-800/80">
 
-            <!-- User Dropdown Menu -->
-            <div id="user-dropdown-menu" class="hidden absolute right-0 rtl:right-auto rtl:left-0 mt-2 w-64 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-2 z-50 text-xs space-y-1">
-              <div class="p-2 border-b border-slate-800">
-                <span id="user-dropdown-full-name" class="font-bold text-white block truncate">Shmuel Dovid Uhlman</span>
-                <span id="user-dropdown-email" class="text-[11px] text-slate-400 block truncate font-mono">shmueldoviduhlman@gmail.com</span>
-                <div class="flex items-center gap-1.5 flex-wrap mt-1">
-                  <span id="user-dropdown-role-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/30">
-                    <i data-lucide="crown" class="w-3 h-3"></i> Super Admin
-                  </span>
-                  <span id="user-dropdown-school-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-500/10 text-brand-300 border border-brand-500/30 truncate max-w-[130px]" title="School Workspace">
-                    <i data-lucide="building-2" class="w-3 h-3 shrink-0"></i>
-                    <span id="user-dropdown-school-name" class="truncate">My Tutoring Studio</span>
-                  </span>
-                </div>
-              </div>
-              <!-- School & Team Workspace -->
-              <button id="btn-open-school-workspace" onclick="openSchoolWorkspaceModal(); toggleUserDropdown()" class="w-full flex items-center gap-2 p-2 rounded-xl text-amber-300 hover:text-amber-200 hover:bg-amber-950/30 transition border border-amber-500/20">
-                <i data-lucide="users" class="w-4 h-4 text-amber-400"></i>
-                <span id="user-dropdown-school-label">School & Team Workspace</span>
-              </button>
-              <!-- Join School with Code -->
-              <button id="btn-open-join-school" onclick="openJoinSchoolModal(); toggleUserDropdown()" class="w-full flex items-center gap-2 p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition">
-                <i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i>
-                <span id="user-dropdown-join-school-label">Join School with Code</span>
-              </button>
-              <!-- Super Admin User Directory Item (visible only to shmueldoviduhlman@gmail.com) -->
-              <button id="btn-user-dropdown-admin" onclick="openAdminUserDirectoryModal(); toggleUserDropdown()" class="hidden w-full flex items-center gap-2 p-2 rounded-xl text-amber-300 hover:text-amber-200 hover:bg-amber-950/30 transition border border-amber-500/20">
-                <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
-                <span id="user-dropdown-admin-label">Master User Directory</span>
-              </button>
-              <button onclick="openSettingsModal(); toggleUserDropdown()" class="w-full flex items-center gap-2 p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition">
-                <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
-                <span id="user-dropdown-settings-label">Settings</span>
-              </button>
-              <button onclick="handleLogout()" class="w-full flex items-center gap-2 p-2 rounded-xl text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 transition">
-                <i data-lucide="log-out" class="w-4 h-4"></i>
-                <span id="user-dropdown-logout-label">Log Out</span>
-              </button>
+      <!-- Utility Icon Row (Theme, Language, Settings) -->
+      <div class="flex items-center justify-between gap-1.5">
+        <!-- 1-Click Warm Daylight / Dark Mode Theme Toggle -->
+        <button type="button" onclick="toggleThemeMode()" id="btn-theme-toggle" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-amber-400 border border-slate-700/80 transition active:scale-95 shadow-sm" title="Switch Warm Daylight / Dark Mode">
+          <i data-lucide="moon" id="icon-theme-toggle" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Language Switcher -->
+        <button type="button" onclick="toggleLanguage()" class="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-2 min-h-[36px] rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition active:scale-95 shadow-sm">
+          <i data-lucide="languages" class="w-3.5 h-3.5 text-brand-400"></i>
+          <span id="lang-indicator">עברית</span>
+        </button>
+
+        <!-- Settings Button (Gear) -->
+        <button type="button" onclick="openSettingsModal()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition active:scale-95 shadow-sm" title="Settings">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- User Profile Card & Dropdown -->
+      <div class="relative">
+        <button type="button" onclick="toggleUserDropdown()" id="btn-user-profile-menu" class="w-full flex items-center justify-between gap-2 px-2.5 py-2 min-h-[38px] rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition active:scale-95 shadow-sm" title="User Profile">
+          <div class="flex items-center gap-2 min-w-0">
+            <span id="user-avatar-badge" class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 flex items-center justify-center text-[11px] font-bold shrink-0">S</span>
+            <span id="user-display-name-short" class="max-w-[90px] md:max-w-[140px] truncate hidden sm:inline font-bold">Shmuel Dovid</span>
+          </div>
+          <i data-lucide="chevron-up" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+        </button>
+
+        <!-- User Dropdown Menu -->
+        <div id="user-dropdown-menu" class="hidden absolute right-0 md:left-0 md:right-auto top-full md:top-auto md:bottom-full mt-2 md:mt-0 md:mb-2 w-64 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-2 z-50 text-xs space-y-1">
+          <div class="p-2 border-b border-slate-800">
+            <span id="user-dropdown-full-name" class="font-bold text-white block truncate">Shmuel Dovid Uhlman</span>
+            <span id="user-dropdown-email" class="text-[11px] text-slate-400 block truncate font-mono">shmueldoviduhlman@gmail.com</span>
+            <div class="flex items-center gap-1.5 flex-wrap mt-1">
+              <span id="user-dropdown-role-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                <i data-lucide="crown" class="w-3 h-3"></i> Super Admin
+              </span>
+              <span id="user-dropdown-school-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-500/10 text-brand-300 border border-brand-500/30 truncate max-w-[130px]" title="School Workspace">
+                <i data-lucide="building-2" class="w-3 h-3 shrink-0"></i>
+                <span id="user-dropdown-school-name" class="truncate">My Tutoring Studio</span>
+              </span>
             </div>
           </div>
-
-          <!-- Language Switcher -->
-          <button onclick="toggleLanguage()" class="flex items-center justify-center gap-1.5 px-2.5 py-1.5 min-h-[36px] sm:min-h-[38px] rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition active:scale-95 shadow-sm">
-            <i data-lucide="languages" class="w-3.5 h-3.5 text-brand-400"></i>
-            <span id="lang-indicator">עברית</span>
+          <!-- School & Team Workspace -->
+          <button id="btn-open-school-workspace" onclick="openSchoolWorkspaceModal(); toggleUserDropdown()" class="w-full flex items-center gap-2 p-2 rounded-xl text-amber-300 hover:text-amber-200 hover:bg-amber-950/30 transition border border-amber-500/20">
+            <i data-lucide="users" class="w-4 h-4 text-amber-400"></i>
+            <span id="user-dropdown-school-label">School & Team Workspace</span>
           </button>
-
-          <!-- Settings Button (Gear) -->
-          <button onclick="openSettingsModal()" class="w-9 h-9 sm:w-9.5 sm:h-9.5 flex items-center justify-center rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition active:scale-95 shadow-sm" title="Settings">
-            <i data-lucide="settings" class="w-4 h-4"></i>
+          <!-- Join School with Code -->
+          <button id="btn-open-join-school" onclick="openJoinSchoolModal(); toggleUserDropdown()" class="w-full flex items-center gap-2 p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition">
+            <i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i>
+            <span id="user-dropdown-join-school-label">Join School with Code</span>
           </button>
-
-        </div>
-
-        <div id="student-header-controls" class="hidden flex items-center gap-2 shrink-0">
-          <span class="px-2.5 py-1 rounded-xl bg-indigo-500/15 border border-indigo-400/35 text-indigo-200 text-xs font-bold">Student Portal</span>
-          <button type="button" onclick="toggleThemeMode()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition" title="Switch Theme">
-            <i data-lucide="moon" class="w-3.5 h-3.5"></i>
+          <!-- Super Admin User Directory Item (visible only to shmueldoviduhlman@gmail.com) -->
+          <button id="btn-user-dropdown-admin" onclick="openAdminUserDirectoryModal(); toggleUserDropdown()" class="hidden w-full flex items-center gap-2 p-2 rounded-xl text-amber-300 hover:text-amber-200 hover:bg-amber-950/30 transition border border-amber-500/20">
+            <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
+            <span id="user-dropdown-admin-label">Master User Directory</span>
           </button>
-          <button type="button" onclick="toggleLanguage()" class="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition">
-            <i data-lucide="languages" class="w-3.5 h-3.5 text-brand-400"></i>
+          <button onclick="openSettingsModal(); toggleUserDropdown()" class="w-full flex items-center gap-2 p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition">
+            <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
+            <span id="user-dropdown-settings-label">Settings</span>
           </button>
-          <button type="button" id="btn-student-portal-logout" onclick="logoutStudentPortal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold transition">
-            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-            <span>Log Out</span>
+          <button onclick="handleLogout()" class="w-full flex items-center gap-2 p-2 rounded-xl text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 transition">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+            <span id="user-dropdown-logout-label">Log Out</span>
           </button>
         </div>
       </div>
 
     </div>
-  </header>
 
-  <!-- Main View Container -->
-  <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-1">
+    <!-- Student Portal Header Controls (Shown only when logged in as Student) -->
+    <div id="student-header-controls" class="hidden flex items-center gap-2 shrink-0">
+      <span class="px-2.5 py-1 rounded-xl bg-indigo-500/15 border border-indigo-400/35 text-indigo-200 text-xs font-bold">Student Portal</span>
+      <button type="button" onclick="toggleThemeMode()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition" title="Switch Theme">
+        <i data-lucide="moon" class="w-3.5 h-3.5"></i>
+      </button>
+      <button type="button" onclick="toggleLanguage()" class="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition">
+        <i data-lucide="languages" class="w-3.5 h-3.5 text-brand-400"></i>
+      </button>
+      <button type="button" id="btn-student-portal-logout" onclick="logoutStudentPortal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold transition">
+        <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+        <span>Log Out</span>
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- Main Open Workspace Canvas (Offset on Desktop for Left Sidebar Shell) -->
+  <main id="app-main-canvas" class="md:pl-72 rtl:md:pl-6 rtl:md:pr-72 max-w-[1440px] mx-auto px-4 sm:px-8 py-6 sm:py-8 w-full flex-1">
 
     <!-- ============================================== -->
     <!-- TEACHER COMMAND CENTER (HOME OVERVIEW COCKPIT) -->
@@ -998,55 +1038,63 @@
         <!-- Active lessons list when the tutor has classes -->
         <div id="tutor-hub-active-lessons" class="space-y-6">
 
-          <!-- LEVEL 1: MY COURSES DIRECTORY -->
-          <div id="study-level-courses" class="space-y-4 max-w-4xl mx-auto">
-            <!-- Single Clean Header: My Courses + Add a New Course -->
-            <div id="courses-directory-header-bar" class="flex items-center justify-between gap-3 py-2.5 border-b border-slate-800/80">
-              <div class="flex items-center gap-2.5">
-                <h3 class="text-lg sm:text-xl font-bold text-white tracking-tight" id="lbl-courses-directory-title">My Courses</h3>
-                <span id="courses-directory-count-badge" class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-slate-800/90 text-slate-300 border border-slate-700/80">0 Courses</span>
+          <!-- LEVEL 1: MY COURSES DIRECTORY (MODERN VISUAL COURSE GALLERY) -->
+          <div id="study-level-courses" class="space-y-6 max-w-6xl mx-auto">
+            <!-- Modern Studio Header: My Courses + Create Course CTA -->
+            <div id="courses-directory-header-bar" class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
+              <div class="space-y-1">
+                <div class="flex items-center gap-3">
+                  <h3 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight" id="lbl-courses-directory-title">My Courses</h3>
+                  <span id="courses-directory-count-badge" class="text-xs font-bold px-3 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">0 Courses</span>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-400">Design structured courses, customize your AI lesson blueprint, and teach interactive classes.</p>
                 <button id="btn-purge-all-courses" onclick="handlePurgeAllCourses()" class="hidden" aria-hidden="true">Clear All</button>
                 <p class="hidden" id="lbl-courses-directory-desc" aria-hidden="true"></p>
               </div>
-              <div id="courses-directory-top-actions" class="flex items-center gap-2 shrink-0">
+              <div id="courses-directory-top-actions" class="flex items-center gap-2.5 shrink-0">
                 <button onclick="openExtensionBridgeModal()" id="btn-open-extension-bridge" class="hidden" aria-hidden="true">Web Clipper</button>
-                <button onclick="openCreateCourseModal('ai')" id="btn-top-add-course" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-bold transition active:scale-95 shadow">
-                  <i data-lucide="plus" class="w-4 h-4"></i>
+                <button onclick="openCreateCourseModal('ai')" id="btn-top-add-course" class="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs sm:text-sm font-bold transition active:scale-95 shadow-lg shadow-indigo-500/20 keep-white">
+                  <i data-lucide="plus-circle" class="w-4 h-4"></i>
                   <span>Add a New Course</span>
+                  <span class="sr-only">+ Add a New Course</span>
                 </button>
               </div>
             </div>
 
-            <!-- 1-Click Continue Last Lesson Shortcut Banner -->
-            <div id="continue-last-lesson-banner" class="hidden"></div>
+            <!-- Removed Continue Last Lesson Banner per user request (kept hidden empty hook for DOM safety) -->
+            <div id="continue-last-lesson-banner" class="hidden" aria-hidden="true"></div>
 
             <!-- Hidden compatibility hook for legacy quick create input -->
             <div id="quick-create-course-bar" class="hidden" aria-hidden="true">
               <input id="input-quick-course-title" type="text" value="" />
             </div>
 
-            <!-- Clean Clickable List of Courses -->
+            <!-- Visual Gallery Grid of Courses (2 to 3 columns on desktop via CSS grid override) -->
             <div id="courses-cards-grid" class="flex flex-col gap-3">
               <!-- Dynamically populated in renderCoursesCardsGrid -->
             </div>
           </div>
 
-          <!-- LEVEL 2: INSIDE COURSE (LESSONS LIST -> READER -> EDIT STUDIO) -->
-          <div id="study-level-classes" class="space-y-4 max-w-7xl mx-auto hidden">
-            <!-- Course Header Bar (Shown on Lesson Names List screen; hidden inside Reader & Edit modes to avoid stacked headers) -->
-            <div id="inside-course-header-card" class="max-w-3xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-slate-800/80 overflow-hidden">
-              <div class="flex items-center gap-3 min-w-0 flex-1">
-                <button onclick="showAllCoursesView()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition active:scale-95 border border-slate-700 shrink-0" title="Back to My Courses">
+          <!-- LEVEL 2: INSIDE COURSE (HERO BANNER + 2-COLUMN CHAPTER CARDS -> READER -> EDIT STUDIO) -->
+          <div id="study-level-classes" class="space-y-6 max-w-6xl mx-auto hidden">
+            <!-- Modern Course Hero Banner (Shown on Lesson List screen; hidden inside Reader & Edit modes) -->
+            <div id="inside-course-header-card" class="max-w-5xl mx-auto rounded-3xl bg-slate-900/90 border border-slate-800/90 p-5 sm:p-6 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 overflow-hidden">
+              <div class="flex items-start sm:items-center gap-4 min-w-0 flex-1">
+                <button onclick="showAllCoursesView()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-bold transition active:scale-95 border border-slate-700 shrink-0 shadow-sm" title="Back to My Courses">
                   <i data-lucide="arrow-left" class="w-3.5 h-3.5 rtl:rotate-180"></i>
-                  <span>My Courses</span>
+                  <span>All Courses</span>
                 </button>
-                <div class="flex items-center gap-2 min-w-0 flex-1">
-                  <span id="active-course-display-icon" class="text-base text-amber-400 font-mono shrink-0">✦</span>
-                  <h3 id="active-course-display-title" class="text-base sm:text-lg font-bold text-white truncate">Course Title</h3>
-                  <span id="active-course-display-stats" class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">0 Lessons</span>
-                  <span id="active-course-display-category" class="hidden"></span>
-                  <span id="active-course-display-level" class="hidden"></span>
-                  <p id="active-course-display-desc" class="hidden"></p>
+                <div class="flex items-center gap-3.5 min-w-0 flex-1">
+                  <span id="active-course-display-icon" class="w-12 h-12 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-2xl text-amber-400 shrink-0 shadow-inner">✦</span>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                      <h3 id="active-course-display-title" class="text-lg sm:text-2xl font-extrabold text-white tracking-tight">Course Title</h3>
+                      <span id="active-course-display-stats" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 shrink-0">0 Lessons</span>
+                    </div>
+                    <p id="active-course-display-desc" class="text-xs text-slate-400 mt-1 line-clamp-1">Structured interactive curriculum</p>
+                    <span id="active-course-display-category" class="hidden"></span>
+                    <span id="active-course-display-level" class="hidden"></span>
+                  </div>
                 </div>
               </div>
 
@@ -1056,15 +1104,15 @@
                 <button onclick="openStudioAiCoPilotModal()" class="hidden" aria-hidden="true">AI Co-Pilot</button>
                 <button onclick="openAddCustomLessonModal()" class="hidden" aria-hidden="true">Legacy Add Class</button>
                 <button onclick="openAiCreateClassModal()" class="hidden" aria-hidden="true">AI Create Class</button>
-                <button onclick="handleStudioAddNewClassQuick()" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition active:scale-95 shadow">
+                <button onclick="handleStudioAddNewClassQuick()" class="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold transition active:scale-95 shadow-md shadow-indigo-500/20 keep-white">
                   <i data-lucide="plus" class="w-4 h-4"></i>
                   <span>New Lesson</span>
                 </button>
-                <button onclick="openEditCurrentCourseModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition active:scale-95" title="Edit Course Architecture & Blueprint">
-                  <i data-lucide="sliders" class="w-3.5 h-3.5 text-amber-400"></i>
-                  <span>Blueprint</span>
+                <button onclick="openEditCurrentCourseModal()" class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition active:scale-95" title="Edit Course Architecture & Blueprint">
+                  <i data-lucide="sliders" class="w-3.5 h-3.5 text-indigo-400"></i>
+                  <span>Course Rules & Blueprint</span>
                 </button>
-                <button onclick="handleDeleteActiveCustomCourse()" class="p-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 hover:text-rose-400 text-slate-400 text-xs transition border border-slate-700/60" title="Delete Course">
+                <button onclick="handleDeleteActiveCustomCourse()" class="p-2.5 rounded-2xl bg-slate-800 hover:bg-rose-950/60 hover:text-rose-400 text-slate-400 text-xs transition border border-slate-700/60" title="Delete Course">
                   <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
@@ -1805,51 +1853,51 @@
         </div>
       </div>
 
-      <!-- Chat History Container -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-lg flex flex-col space-y-4 min-h-[420px] max-h-[65vh] flex-1">
+      <!-- Chat History Container (Modern Claude-Style Floating Studio) -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col space-y-4 min-h-[420px] max-h-[65vh] flex-1">
         
         <!-- Messages Scroll Container -->
-        <div id="ai-chat-messages" class="flex-1 overflow-y-auto space-y-3.5 pr-1 min-h-[300px]">
+        <div id="ai-chat-messages" class="flex-1 overflow-y-auto space-y-4 pr-1 min-h-[280px]">
           <!-- Rendered dynamically -->
         </div>
 
         <!-- Quick Prompt Chips -->
-        <div class="pt-2 border-t border-slate-800/80 flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-          <button onclick="applyAiQuickPrompt('create_lesson')" class="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-[11px] text-amber-300 font-semibold whitespace-nowrap transition active:scale-95 flex items-center gap-1 shadow-sm">
+        <div class="pt-3 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <button onclick="applyAiQuickPrompt('create_lesson')" class="px-3 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-[11px] text-amber-300 font-bold whitespace-nowrap transition active:scale-95 flex items-center gap-1.5 shadow-sm">
             <span>⚡</span>
             <span>Create a Lesson</span>
           </button>
-          <button onclick="applyAiQuickPrompt('create_course')" class="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-[11px] text-indigo-300 font-semibold whitespace-nowrap transition active:scale-95 flex items-center gap-1 shadow-sm">
+          <button onclick="applyAiQuickPrompt('create_course')" class="px-3 py-1.5 rounded-full bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-[11px] text-indigo-300 font-bold whitespace-nowrap transition active:scale-95 flex items-center gap-1.5 shadow-sm">
             <span>📚</span>
             <span>Create Full Class</span>
           </button>
-          <button onclick="applyAiQuickPrompt('connect_lesson')" class="px-2.5 py-1 rounded-lg bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-cyan-300 font-medium whitespace-nowrap transition active:scale-95 flex items-center gap-1">
+          <button onclick="applyAiQuickPrompt('connect_lesson')" class="px-3 py-1.5 rounded-full bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-cyan-300 font-semibold whitespace-nowrap transition active:scale-95 flex items-center gap-1.5">
             <span>🔗</span>
             <span>Connect Idea to Lessons</span>
           </button>
-          <button onclick="applyAiQuickPrompt('add_student')" class="px-2.5 py-1 rounded-lg bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-medium whitespace-nowrap transition active:scale-95 flex items-center gap-1">
+          <button onclick="applyAiQuickPrompt('add_student')" class="px-3 py-1.5 rounded-full bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-semibold whitespace-nowrap transition active:scale-95 flex items-center gap-1.5">
             <span>👤</span>
             <span id="lbl-ai-chip-add-student">Add student</span>
           </button>
-          <button onclick="applyAiQuickPrompt('schedule_lesson')" class="px-2.5 py-1 rounded-lg bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-medium whitespace-nowrap transition active:scale-95 flex items-center gap-1">
+          <button onclick="applyAiQuickPrompt('schedule_lesson')" class="px-3 py-1.5 rounded-full bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-semibold whitespace-nowrap transition active:scale-95 flex items-center gap-1.5">
             <span>📅</span>
             <span id="lbl-ai-chip-schedule">Schedule lesson</span>
           </button>
-          <button onclick="applyAiQuickPrompt('summarize_roster')" class="px-2.5 py-1 rounded-lg bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-medium whitespace-nowrap transition active:scale-95 flex items-center gap-1">
+          <button onclick="applyAiQuickPrompt('summarize_roster')" class="px-3 py-1.5 rounded-full bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-semibold whitespace-nowrap transition active:scale-95 flex items-center gap-1.5">
             <span>📊</span>
             <span id="lbl-ai-chip-summarize">Summarize roster</span>
           </button>
         </div>
 
-        <!-- Chat Input Form -->
-        <form onsubmit="handleSendAiMessage(event)" class="relative flex items-center gap-2 pt-1">
+        <!-- Floating Rounded-3xl Chat Composer -->
+        <form onsubmit="handleSendAiMessage(event)" class="relative flex items-center gap-2.5 pt-1">
           <div class="relative flex-1">
             <textarea
               id="ai-chat-input"
               dir="auto"
               rows="1"
               placeholder="Ask anything or give a command (Hebrew or English)..."
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 pl-3 pr-10 rtl:pr-3 rtl:pl-10 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none max-h-32"
+              class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 pl-4 pr-11 rtl:pr-4 rtl:pl-11 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none max-h-32 shadow-inner"
               onkeydown="if(event.key==='Enter' && !event.shiftKey && !event.isComposing && event.keyCode !== 229){ event.preventDefault(); handleSendAiMessage(event); }"
             ></textarea>
             
@@ -1858,7 +1906,7 @@
               type="button"
               id="ai-mic-btn"
               onclick="toggleVoiceInput()"
-              class="absolute right-2.5 rtl:right-auto rtl:left-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-400 p-1 rounded-lg transition"
+              class="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-400 p-1 rounded-xl transition"
               title="Voice Dictation"
             >
               <i data-lucide="mic" class="w-4 h-4"></i>
@@ -1868,7 +1916,7 @@
           <button
             type="submit"
             id="ai-send-btn"
-            class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs transition active:scale-95 shadow shrink-0 flex items-center justify-center gap-1.5 h-10"
+            class="px-5 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs transition active:scale-95 shadow-lg shadow-indigo-500/20 shrink-0 flex items-center justify-center gap-1.5 h-11 keep-white"
           >
             <span id="lbl-ai-btn-send">Send</span>
             <i data-lucide="send" class="w-3.5 h-3.5"></i>
@@ -7728,7 +7776,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (lockScreen) lockScreen.classList.add('hidden');
       const teacherHeader = document.getElementById('teacher-header-controls');
       if (teacherHeader) teacherHeader.classList.add('hidden');
-      const desktopNav = document.getElementById('desktop-top-pill-nav');
+      const desktopNav = document.getElementById('desktop-sidebar-nav');
       if (desktopNav) desktopNav.classList.add('hidden');
       const studentHeader = document.getElementById('student-header-controls');
       if (studentHeader) studentHeader.classList.remove('hidden');
@@ -7796,7 +7844,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (studentHeader) studentHeader.classList.add('hidden');
       const teacherHeader = document.getElementById('teacher-header-controls');
       if (teacherHeader) teacherHeader.classList.remove('hidden');
-      const desktopNav = document.getElementById('desktop-top-pill-nav');
+      const desktopNav = document.getElementById('desktop-sidebar-nav');
       if (desktopNav) desktopNav.classList.remove('hidden');
       const bottomDock = document.getElementById('main-bottom-dock');
       if (bottomDock) bottomDock.classList.remove('hidden');
@@ -10275,7 +10323,7 @@ alter publication supabase_realtime add table public.students_sync;`;
         const mobBtn = document.getElementById(`mob-tab-${t}`);
 
         if (t === tabId) {
-          if (btn) btn.className = "tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs font-semibold transition whitespace-nowrap bg-brand-600 text-white shadow-sm shrink-0";
+          if (btn) btn.className = "tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition bg-brand-600 text-white shadow-md shadow-brand-500/20";
           if (view) view.classList.remove('hidden');
           if (mobBtn) {
             mobBtn.className = t === 'ai'
@@ -10283,7 +10331,7 @@ alter publication supabase_realtime add table public.students_sync;`;
               : "flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-brand-400 font-bold bg-brand-500/10 w-full";
           }
         } else {
-          if (btn) btn.className = "tab-btn flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap shrink-0";
+          if (btn) btn.className = "tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-400 hover:bg-slate-800/70 hover:text-white transition";
           if (view) view.classList.add('hidden');
           if (mobBtn) mobBtn.className = "flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 w-full";
         }
@@ -10648,61 +10696,55 @@ alter publication supabase_realtime add table public.students_sync;`;
       renderLessonsCategoryView();
     }
 
-    function renderContinueLastLessonBanner(courses) {
+    function renderContinueLastLessonBanner() {
       const banner = document.getElementById('continue-last-lesson-banner');
-      if (!banner) return;
-      const validCourses = Array.isArray(courses) ? courses.filter(c => c && Array.isArray(c.lessons) && c.lessons.length > 0) : [];
-      if (validCourses.length === 0) {
+      if (banner) {
         banner.classList.add('hidden');
         banner.innerHTML = '';
+      }
+    }
+
+    function getCourseCoverGradient(colorName, idx) {
+      const map = {
+        amber: 'from-amber-500 via-orange-500 to-rose-500',
+        indigo: 'from-indigo-600 via-violet-600 to-purple-600',
+        emerald: 'from-emerald-500 via-teal-500 to-cyan-600',
+        sky: 'from-sky-500 via-blue-600 to-indigo-600',
+        rose: 'from-rose-500 via-pink-600 to-purple-600',
+        violet: 'from-violet-600 via-purple-600 to-fuchsia-600'
+      };
+      if (colorName && map[colorName]) return map[colorName];
+      const list = [
+        'from-indigo-600 via-violet-600 to-purple-600',
+        'from-amber-500 via-orange-500 to-rose-500',
+        'from-emerald-500 via-teal-500 to-cyan-600',
+        'from-sky-500 via-blue-600 to-indigo-600'
+      ];
+      return list[(idx || 0) % list.length];
+    }
+
+    function renderSidebarCoursesQuickList(courses) {
+      const listEl = document.getElementById('sidebar-courses-quick-list');
+      if (!listEl) return;
+      const isHe = APP_STATE.lang === 'he';
+      if (!Array.isArray(courses) || courses.length === 0) {
+        listEl.innerHTML = `<div class="px-2.5 py-2 text-[11px] text-slate-500">${isHe ? 'אין קורסים עדיין' : 'No courses yet'}</div>`;
         return;
       }
-
-      let targetCourse = null;
-      let targetLesson = null;
-      let savedCId = APP_STATE.lastOpenedCourseId;
-      let savedLId = APP_STATE.lastOpenedLessonId;
-      if (!savedCId || !savedLId) {
-        try {
-          const saved = JSON.parse((typeof localStorage !== 'undefined' && localStorage.getItem('tutor_last_opened_lesson')) || '{}');
-          savedCId = savedCId || saved.courseId;
-          savedLId = savedLId || saved.lessonId;
-        } catch (e) {}
-      }
-      if (savedCId) {
-        targetCourse = validCourses.find(c => c.id === savedCId) || null;
-        if (targetCourse && savedLId) {
-          targetLesson = (targetCourse.lessons || []).find(l => l.id === savedLId) || null;
-        }
-      }
-      if (!targetCourse) targetCourse = validCourses[0];
-      if (!targetLesson) targetLesson = targetCourse.lessons[targetCourse.lessons.length - 1] || targetCourse.lessons[0];
-
-      const isHe = APP_STATE.lang === 'he';
-      const cTitle = isHe ? (targetCourse.title_he || targetCourse.title_en) : (targetCourse.title_en || targetCourse.title_he);
-      const lTitle = isHe ? (targetLesson.title_he || targetLesson.title_en) : (targetLesson.title_en || targetLesson.title_he);
-      const lNum = targetLesson.lesson_num || (targetCourse.lessons.indexOf(targetLesson) + 1);
-
-      banner.classList.remove('hidden');
-      banner.innerHTML = `
-        <div onclick="resumeLastOpenedLesson('${targetCourse.id}', '${targetLesson.id}')" class="px-4 py-3 rounded-2xl bg-slate-900/90 border border-indigo-500/35 hover:border-indigo-400/60 transition cursor-pointer shadow-sm flex items-center justify-between gap-3 group">
-          <div class="flex items-center gap-3 min-w-0">
-            <span class="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 flex items-center justify-center shrink-0">
-              <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+      listEl.innerHTML = courses.map(c => {
+        const title = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
+        const icon = normalizeCourseIcon(c.icon);
+        const isCurrent = APP_STATE.insideCourseId === c.id && APP_STATE.activeTab === 'study';
+        return `
+          <button type="button" onclick="switchTab('study'); openCourseClassesView('${c.id}')" class="w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold transition ${isCurrent ? 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/70 hover:text-white'}">
+            <span class="flex items-center gap-2 min-w-0">
+              <span class="text-sm shrink-0">${escapeHtml(icon)}</span>
+              <span class="line-clamp-1 text-left rtl:text-right">${escapeHtml(title)}</span>
             </span>
-            <div class="min-w-0">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-300 block">${isHe ? 'המשך מאיפה שעצרת' : 'Continue Last Lesson'}</span>
-              <div dir="auto" class="text-xs sm:text-sm font-bold text-white group-hover:text-indigo-300 transition">
-                ${escapeHtml(cTitle)} • ${isHe ? 'שיעור' : 'Lesson'} ${lNum}: ${escapeHtml(lTitle || 'Untitled Lesson')}
-              </div>
-            </div>
-          </div>
-          <span class="px-3 py-1.5 rounded-xl bg-indigo-500/15 group-hover:bg-indigo-500 text-indigo-300 group-hover:text-white text-xs font-bold transition shrink-0 flex items-center gap-1">
-            <span>${isHe ? 'פתח שיעור' : 'Resume'}</span>
-            <i data-lucide="arrow-right" class="w-3.5 h-3.5 rtl:rotate-180"></i>
-          </span>
-        </div>
-      `;
+            <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-800/80 text-slate-400 shrink-0">${Array.isArray(c.lessons) ? c.lessons.length : 0}</span>
+          </button>
+        `;
+      }).join('');
     }
 
     function renderCoursesCardsGrid() {
@@ -10718,7 +10760,8 @@ alter publication supabase_realtime add table public.students_sync;`;
         countBadge.textContent = `${courses.length} ${isHe ? (courses.length === 1 ? 'קורס' : 'קורסים') : (courses.length === 1 ? 'Course' : 'Courses')}`;
       }
 
-      renderContinueLastLessonBanner(courses);
+      renderContinueLastLessonBanner();
+      renderSidebarCoursesQuickList(courses);
 
       if (purgeBtn) {
         purgeBtn.classList.add('hidden');
@@ -10736,20 +10779,20 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       if (courses.length === 0) {
         grid.innerHTML = `
-          <div class="text-center py-12 px-6 bg-slate-900/40 border border-dashed border-slate-800 rounded-3xl space-y-4 max-w-xl mx-auto w-full">
-            <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mx-auto text-2xl leading-none select-none">
+          <div class="col-span-full text-center py-14 px-6 bg-slate-900/60 border border-dashed border-slate-800 rounded-3xl space-y-5 max-w-xl mx-auto w-full shadow-sm">
+            <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-indigo-600 to-amber-500 flex items-center justify-center text-white mx-auto text-3xl leading-none select-none shadow-lg keep-white">
               ✦
             </div>
-            <div class="space-y-1.5">
-              <h4 class="text-base font-bold text-white">${isHe ? 'בנה את הקורסים שלך' : 'Build Your Courses'} <span class="sr-only">Clean Canvas דף חלק</span></h4>
-              <p class="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+            <div class="space-y-2">
+              <h4 class="text-lg font-extrabold text-white">${isHe ? 'בנה את הקורסים שלך' : 'Build Your Courses'} <span class="sr-only">Clean Canvas דף חלק</span></h4>
+              <p class="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
                 ${isHe
                   ? 'הגדר את הקורס שלך ואת מבנה השיעורים. השתמש בסטודיו ה-AI המובנה כדי לדון במבנה או בנה אותו באופן ידני.'
                   : 'Welcome to Classes. Set up your course and customize its lesson structure. Use the integrated AI studio to brainstorm your structure or build it manually.'}
               </p>
             </div>
             <div class="flex items-center justify-center gap-2 pt-2">
-              <button onclick="openCreateCourseModal()" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition shadow flex items-center gap-1.5">
+              <button onclick="openCreateCourseModal()" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs sm:text-sm font-bold transition shadow-lg flex items-center gap-2 keep-white">
                 <i data-lucide="plus-circle" class="w-4 h-4"></i>
                 <span>${isHe ? 'בנה את הקורס שלך' : 'Build Your Courses'}</span>
                 <span class="sr-only">+ Add a Course</span>
@@ -10763,33 +10806,67 @@ alter publication supabase_realtime add table public.students_sync;`;
         return;
       }
 
-      grid.innerHTML = courses.map(c => {
+      grid.innerHTML = courses.map((c, idx) => {
         const title = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
+        const desc = isHe
+          ? (c.desc_he || c.desc_en || c.target_audience || 'תוכנית לימודים מובנית עם שיעורים אינטראקטיביים')
+          : (c.desc_en || c.desc_he || c.target_audience || 'Structured interactive curriculum and AI lesson studio');
         const lessonsCount = Array.isArray(c.lessons) ? c.lessons.length : 0;
         const icon = normalizeCourseIcon(c.icon);
-        const accentCls = getCourseAccentClasses(c.color);
+        const gradCls = getCourseCoverGradient(c.color, idx);
+        const bpSections = (c.blueprint && Array.isArray(c.blueprint.sections) ? c.blueprint.sections : []).slice(0, 3);
 
         return `
-          <div onclick="openCourseClassesView('${c.id}')" class="px-4 sm:px-5 py-3.5 sm:py-4 rounded-2xl bg-slate-900/80 border border-slate-800/90 hover:border-amber-500/45 hover:bg-slate-900 transition cursor-pointer shadow-sm hover:shadow-md flex items-center justify-between gap-4 group">
-            <div class="flex items-center gap-4 min-w-0 flex-1">
-              <span class="w-11 h-11 rounded-xl border ${accentCls} flex items-center justify-center text-xl leading-none shrink-0 overflow-hidden select-none">
-                ${escapeHtml(icon)}
-              </span>
-              <div class="min-w-0 flex-1 space-y-0.5">
-                <h4 dir="auto" class="text-sm sm:text-base font-bold text-white group-hover:text-amber-300 transition leading-snug break-words">${escapeHtml(title)}</h4>
-                <div class="flex items-center gap-2 text-xs text-slate-400">
-                  <span class="font-medium">${lessonsCount} ${isHe ? (lessonsCount === 1 ? 'שיעור' : 'שיעורים') : (lessonsCount === 1 ? 'Lesson' : 'Lessons')}</span>
+          <div onclick="openCourseClassesView('${c.id}')" class="rounded-3xl bg-slate-900/90 border border-slate-800/90 hover:border-indigo-500/50 transition cursor-pointer shadow-sm hover:shadow-xl flex flex-col justify-between overflow-hidden group">
+            <div>
+              <!-- Vibrant Gradient Course Cover Banner -->
+              <div class="modern-gradient-cover keep-white h-24 bg-gradient-to-r ${gradCls} p-4 flex items-start justify-between relative overflow-hidden">
+                <span class="px-2.5 py-1 rounded-full bg-black/25 backdrop-blur-md text-white text-[10px] font-extrabold uppercase tracking-wider">
+                  ${escapeHtml(c.category || 'Curriculum')}
+                </span>
+                <div class="flex items-center gap-1 relative z-10">
+                  <button type="button" onclick="event.stopPropagation(); openEditCustomCourseModal('${c.id}')" class="p-1.5 rounded-xl bg-black/20 hover:bg-black/40 text-white transition" title="Edit Course">
+                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button type="button" onclick="event.stopPropagation(); handleDeleteCustomCourseById('${c.id}')" class="p-1.5 rounded-xl bg-black/20 hover:bg-rose-500/80 text-white transition" title="Delete Course">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
                 </div>
               </div>
+
+              <!-- Floating Course Icon & Body -->
+              <div class="px-5 pt-0 pb-4">
+                <div class="flex items-end justify-between -mt-7 mb-3 relative z-10">
+                  <span class="w-14 h-14 rounded-2xl bg-slate-900 border-2 border-slate-800 shadow-md flex items-center justify-center text-2xl leading-none select-none">
+                    ${escapeHtml(icon)}
+                  </span>
+                  <span class="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 text-xs font-bold">
+                    ${lessonsCount} ${isHe ? (lessonsCount === 1 ? 'שיעור' : 'שיעורים') : (lessonsCount === 1 ? 'Lesson' : 'Lessons')}
+                  </span>
+                </div>
+
+                <h4 dir="auto" class="text-base sm:text-lg font-extrabold text-white group-hover:text-indigo-400 transition leading-snug break-words">${escapeHtml(title)}</h4>
+                <p dir="auto" class="text-xs text-slate-400 mt-1.5 line-clamp-2 leading-relaxed">${escapeHtml(desc)}</p>
+
+                ${bpSections.length > 0 ? `
+                  <div class="flex items-center gap-1.5 flex-wrap mt-3.5">
+                    ${bpSections.map(sec => `
+                      <span class="px-2 py-0.5 rounded-lg bg-slate-800/90 border border-slate-700/70 text-[10px] font-semibold text-slate-300">
+                        ${escapeHtml(sec.title || 'Section')}
+                      </span>
+                    `).join('')}
+                  </div>
+                ` : ''}
+              </div>
             </div>
-            <div class="flex items-center gap-1 shrink-0">
-              <button type="button" onclick="event.stopPropagation(); openEditCustomCourseModal('${c.id}')" class="p-2 rounded-xl text-slate-500 hover:text-white hover:bg-slate-800 sm:opacity-45 sm:group-hover:opacity-100 transition" title="Edit Course">
-                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-              </button>
-              <button type="button" onclick="event.stopPropagation(); handleDeleteCustomCourseById('${c.id}')" class="p-2 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-slate-800 sm:opacity-45 sm:group-hover:opacity-100 transition" title="Delete Course">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition ml-1 rtl:rotate-180"></i>
+
+            <!-- Tactile Card Footer -->
+            <div class="px-5 py-3.5 bg-slate-950/40 border-t border-slate-800/80 flex items-center justify-between gap-2">
+              <span class="text-[11px] font-semibold text-slate-400">${isHe ? 'לחץ לפתיחת השיעורים' : 'Click to open chapters'}</span>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/15 group-hover:bg-indigo-600 text-indigo-300 group-hover:text-white text-xs font-bold transition">
+                <span>${isHe ? 'פתח קורס' : 'Open Course'}</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5 rtl:rotate-180"></i>
+              </span>
             </div>
           </div>
         `;
@@ -14110,40 +14187,78 @@ ${forceSchemaLines}`;
       const mode = studioScreenMode || 'list';
 
       // ================================================================
-      // SCREEN 2: CLEAN COURSE LESSON NAMES LIST (studioScreenMode === 'list')
+      // SCREEN 2: MODERN 2-COLUMN CHAPTER / LESSON CARDS GRID (studioScreenMode === 'list')
       // ================================================================
       if (mode === 'list') {
         if (outerCourseHeader) outerCourseHeader.classList.remove('hidden');
+        const bpSecs = (activeCourse.blueprint && Array.isArray(activeCourse.blueprint.sections)) ? activeCourse.blueprint.sections : [];
         container.innerHTML = `
-          <div id="studio-lesson-list-screen" class="max-w-3xl mx-auto space-y-4">
-            <!-- Clean Scannable List: Strictly Lesson Number + Lesson Name -->
-            <div id="studio-syllabus-list" class="space-y-2">
+          <div id="studio-lesson-list-screen" class="max-w-5xl mx-auto space-y-4">
+            <!-- 2-Column Visual Chapter Cards Grid -->
+            <div id="studio-syllabus-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
               ${lessons.map((les, idx) => {
                 const lTitle = isHe ? (les.title_he || les.title_en || 'Untitled Lesson') : (les.title_en || les.title_he || 'Untitled Lesson');
+                const lNum = les.lesson_num || (idx + 1);
+                const paddedNum = String(lNum).padStart(2, '0');
+                const secMap = (les && les.sections && typeof les.sections === 'object') ? les.sections : {};
+                const filledCount = Object.keys(secMap).filter(k => secMap[k] && String(secMap[k]).trim().length > 2).length;
+                const isReady = filledCount > 0;
                 return `
                   <div
                     id="studio-syllabus-item-${les.id}"
                     onclick="selectStudioClass('${les.id}')"
-                    class="p-3.5 sm:p-4 rounded-2xl border border-slate-800/90 bg-slate-900/75 hover:bg-slate-900 hover:border-amber-500/50 transition cursor-pointer select-none group flex items-center justify-between gap-3 shadow-sm"
+                    class="p-5 rounded-3xl border border-slate-800/90 bg-slate-900/90 hover:border-indigo-500/50 transition cursor-pointer select-none group flex flex-col justify-between gap-4 shadow-sm hover:shadow-xl"
                   >
-                    <div class="flex items-center gap-3.5 min-w-0 flex-1">
-                      <span class="w-7 h-7 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-400 flex items-center justify-center font-mono text-xs font-bold shrink-0">
-                        ${les.lesson_num || idx + 1}
-                      </span>
-                      <h5 id="studio-syllabus-title-${les.id}" dir="auto" class="text-sm sm:text-base font-bold text-white group-hover:text-amber-300 transition truncate">${escapeHtml(lTitle)}</h5>
+                    <div class="space-y-3">
+                      <!-- Top Row: Chapter Pill + Status Badge + Reorder/Delete Actions -->
+                      <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                          <span class="px-2.5 py-1 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 font-mono text-[11px] font-extrabold tracking-wider uppercase">
+                            ${isHe ? 'שיעור' : 'Lesson'} ${paddedNum}
+                          </span>
+                          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isReady ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'}">
+                            ${isReady ? `${filledCount} ${isHe ? 'חלקים מוכנים' : 'Sections Ready'}` : (isHe ? 'טיוטה' : 'Ready to Draft')}
+                          </span>
+                        </div>
+
+                        <div class="flex items-center gap-0.5 shrink-0">
+                          <button type="button" onclick="event.stopPropagation(); handleStudioMoveClass('${activeCourse.id}', '${les.id}', -1)" class="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Move Up">
+                            <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+                          </button>
+                          <button type="button" onclick="event.stopPropagation(); handleStudioMoveClass('${activeCourse.id}', '${les.id}', 1)" class="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Move Down">
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                          </button>
+                          <button type="button" onclick="event.stopPropagation(); handleStudioDeleteClass('${activeCourse.id}', '${les.id}')" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Delete Lesson">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- Chapter Title -->
+                      <h5 id="studio-syllabus-title-${les.id}" dir="auto" class="text-base sm:text-lg font-extrabold text-white group-hover:text-indigo-400 transition leading-snug break-words">${escapeHtml(lTitle)}</h5>
+
+                      <!-- Blueprint Section Chips -->
+                      ${bpSecs.length > 0 ? `
+                        <div class="flex items-center gap-1.5 flex-wrap pt-0.5">
+                          ${bpSecs.slice(0, 3).map(s => `
+                            <span class="px-2 py-0.5 rounded-lg bg-slate-800/80 border border-slate-700/70 text-[10px] font-semibold text-slate-400">
+                              ${escapeHtml(s.title || s.name || 'Section')}
+                            </span>
+                          `).join('')}
+                        </div>
+                      ` : ''}
                     </div>
 
-                    <div class="flex items-center gap-1 shrink-0">
-                      <button type="button" onclick="event.stopPropagation(); handleStudioMoveClass('${activeCourse.id}', '${les.id}', -1)" class="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Move Up">
-                        <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+                    <!-- Bottom Action Row: Read & Teach + Edit with AI -->
+                    <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                      <button type="button" onclick="event.stopPropagation(); enterStudioEditLessonMode('${activeCourse.id}', '${les.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs font-bold transition">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+                        <span>${isHe ? 'ערוך עם AI' : 'Edit with AI'}</span>
                       </button>
-                      <button type="button" onclick="event.stopPropagation(); handleStudioMoveClass('${activeCourse.id}', '${les.id}', 1)" class="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Move Down">
-                        <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
-                      </button>
-                      <button type="button" onclick="event.stopPropagation(); handleStudioDeleteClass('${activeCourse.id}', '${les.id}')" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Delete Lesson">
-                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                      </button>
-                      <i data-lucide="arrow-right" class="w-4 h-4 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition ml-1 rtl:rotate-180"></i>
+                      <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-500/15 group-hover:bg-indigo-600 text-indigo-300 group-hover:text-white text-xs font-bold transition">
+                        <span>${isHe ? 'פתח שיעור' : 'Read & Teach'}</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 rtl:rotate-180"></i>
+                      </span>
                     </div>
                   </div>
                 `;
@@ -23832,72 +23947,76 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
         return `
           <div
             onclick="selectActiveStudent('${student.id}')"
-            class="cursor-pointer rounded-2xl p-4 sm:p-5 border transition duration-150 flex flex-col justify-between hover:shadow-lg active:scale-[0.99] group ${
+            class="cursor-pointer rounded-3xl overflow-hidden border transition duration-150 flex flex-col justify-between shadow-sm hover:shadow-xl active:scale-[0.99] group ${
               isActive
-                ? 'bg-slate-850/90 border-brand-500/80 shadow-md ring-1 ring-brand-500/50'
-                : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
+                ? 'bg-slate-850/90 border-indigo-500/80 ring-2 ring-indigo-500/30'
+                : 'bg-slate-900/90 border-slate-800 hover:border-indigo-500/40'
             }"
           >
-            <div>
-              <!-- Header: Avatar, Name, Reorder Buttons & Percentage -->
-              <div class="flex items-start justify-between gap-2 mb-3">
-                <div class="flex items-center gap-3 min-w-0">
-                  <div onclick="triggerPhotoUpload('${student.id}', event)" title="${t.changePhoto}" class="relative group/avatar">
-                    ${avatarHtml}
-                    <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition">
-                      <i data-lucide="camera" class="w-3.5 h-3.5 text-white"></i>
+            <!-- Top Gradient Accent Strip -->
+            <div class="modern-gradient-cover keep-white h-2 bg-gradient-to-r from-indigo-500 via-violet-500 to-amber-500"></div>
+
+            <div class="p-5 flex-1 flex flex-col justify-between">
+              <div>
+                <!-- Header: Avatar, Name & Percentage -->
+                <div class="flex items-start justify-between gap-2 mb-3.5">
+                  <div class="flex items-center gap-3.5 min-w-0">
+                    <div onclick="triggerPhotoUpload('${student.id}', event)" title="${t.changePhoto}" class="relative group/avatar shrink-0">
+                      ${avatarHtml}
+                      <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition">
+                        <i data-lucide="camera" class="w-3.5 h-3.5 text-white"></i>
+                      </div>
+                    </div>
+                    <div class="min-w-0 space-y-1">
+                      <div class="flex items-center gap-2">
+                        <h4 class="text-base sm:text-lg font-extrabold text-white truncate group-hover:text-indigo-400 transition">${student.name}</h4>
+                        ${statusBadgeHtml}
+                      </div>
+                      <div class="flex items-center gap-2 flex-wrap text-xs text-slate-400">
+                        <span class="inline-flex items-center gap-1 text-indigo-300 font-semibold">
+                          <i data-lucide="book-open" class="w-3.5 h-3.5 text-indigo-400 shrink-0"></i>
+                          <span class="truncate">${activeCourses.length} ${isHe ? (activeCourses.length === 1 ? 'קורס' : 'קורסים') : (activeCourses.length === 1 ? 'Course' : 'Courses')}</span>
+                        </span>
+                        ${cardDate ? `
+                          <span class="text-slate-600 font-bold">•</span>
+                          <span class="inline-flex items-center gap-1 text-slate-300 font-mono text-[11px]">
+                            <i data-lucide="calendar" class="w-3 h-3 text-slate-400 shrink-0"></i>
+                            <span class="truncate">${cardDate}</span>
+                          </span>
+                        ` : ''}
+                      </div>
                     </div>
                   </div>
-                  <div class="min-w-0 space-y-0.5">
-                    <div class="flex items-center gap-2">
-                      <h4 class="text-sm sm:text-base font-bold text-white truncate group-hover:text-brand-300 transition">${student.name}</h4>
-                      ${statusBadgeHtml}
-                    </div>
-                    <div class="flex items-center gap-1.5 flex-wrap text-xs text-slate-400">
-                      <span class="inline-flex items-center gap-1 text-brand-300 font-medium">
-                        <i data-lucide="book-open" class="w-3 h-3 text-brand-400 shrink-0"></i>
-                        <span class="truncate">${activeCourses.length} ${isHe ? (activeCourses.length === 1 ? 'קורס' : 'קורסים') : (activeCourses.length === 1 ? 'Course' : 'Courses')}</span>
-                      </span>
-                      ${cardDate ? `
-                        <span class="text-slate-600 font-bold">•</span>
-                        <span class="inline-flex items-center gap-1 text-slate-300 font-mono text-[11px]">
-                          <i data-lucide="calendar" class="w-3 h-3 text-slate-400 shrink-0"></i>
-                          <span class="truncate">${cardDate}</span>
-                        </span>
-                      ` : ''}
-                    </div>
+
+                  <!-- Clean Progress Badge -->
+                  <div class="flex items-center gap-1.5 shrink-0" onclick="event.stopPropagation()">
+                    <span class="text-xs font-mono font-extrabold px-3 py-1 rounded-full ${
+                      overallPct > 50 ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                    }">
+                      ${overallPct}%
+                    </span>
                   </div>
                 </div>
 
-                <!-- Clean Progress Badge -->
-                <div class="flex items-center gap-1.5 shrink-0" onclick="event.stopPropagation()">
-                  <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-xl ${
-                    overallPct > 50 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                  }">
-                    ${overallPct}%
-                  </span>
-                </div>
+                <!-- Progress Bars -->
+                ${progressBarsHtml}
               </div>
 
-              <!-- Progress Bars -->
-              ${progressBarsHtml}
-            </div>
-
-            <!-- Footer: Notes preview and clean Open Profile action -->
-            <div class="mt-4 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-              <span class="truncate max-w-[170px] italic text-slate-400">
-                ${student.notes ? student.notes : t.noNotesText}
-              </span>
-              <div class="flex items-center gap-1.5">
-                <button type="button" onclick="event.stopPropagation(); copyStudentPortalInvite('${student.id}')" title="Copy Student Portal Link &amp; Code" class="px-2 py-1 rounded-lg bg-slate-950/80 hover:bg-indigo-500/20 text-indigo-300 border border-slate-800 text-[10px] font-mono font-bold transition">
-                  ${escapeHtml(student.studentAccessCode || 'Code')}
-                </button>
-                <span class="text-[11px] text-brand-400 font-bold group-hover:underline flex items-center gap-0.5">
-                  ${isHe ? 'פתח פרופיל' : 'Open Profile'} <i data-lucide="${isHe ? 'chevron-left' : 'chevron-right'}" class="w-3.5 h-3.5"></i>
+              <!-- Footer: Portal Access Code + Tactile Open Workspace Button -->
+              <div class="mt-4 pt-3.5 border-t border-slate-800/80 flex items-center justify-between gap-2 text-[11px] text-slate-400">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <button type="button" onclick="event.stopPropagation(); copyStudentPortalInvite('${student.id}')" title="Copy Student Portal Link &amp; Code" class="px-2.5 py-1 rounded-xl bg-slate-950/80 hover:bg-indigo-500/20 text-indigo-300 border border-slate-800 text-[10px] font-mono font-bold transition flex items-center gap-1 shrink-0">
+                    <i data-lucide="key" class="w-3 h-3"></i>
+                    <span>${escapeHtml(student.studentAccessCode || 'Code')}</span>
+                  </button>
+                  <button onclick="event.stopPropagation(); deleteStudent('${student.id}')" title="${t.deleteStudentTitle}" class="text-slate-500 hover:text-red-400 p-1.5 rounded-xl hover:bg-slate-800 transition shrink-0">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+                <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-500/15 group-hover:bg-indigo-600 text-indigo-300 group-hover:text-white text-xs font-bold transition shrink-0">
+                  <span>${isHe ? 'פתח פרופיל' : 'Open Profile'}</span>
+                  <i data-lucide="${isHe ? 'arrow-left' : 'arrow-right'}" class="w-3.5 h-3.5"></i>
                 </span>
-                <button onclick="event.stopPropagation(); deleteStudent('${student.id}')" title="${t.deleteStudentTitle}" class="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-slate-800 transition">
-                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                </button>
               </div>
             </div>
           </div>
