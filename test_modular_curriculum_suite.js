@@ -4492,7 +4492,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   const continueBannerEl = getOrCreateElem('continue-last-lesson-banner');
   assert(continueBannerEl.classList.contains('hidden') && continueBannerEl.innerHTML === '', 'Continue Last Lesson banner is permanently removed and hidden per user preference');
   const g47CardsHtml = getOrCreateElem('courses-cards-grid').innerHTML;
-  assert(g47CardsHtml.includes('modern-gradient-cover') && g47CardsHtml.includes('Open Course') && !g47CardsHtml.includes('handleDeleteCustomCourseById'), 'My Courses renders clean Visual Course Cards without exposed edit/delete icon clutter');
+  assert(g47CardsHtml.includes('modern-gradient-cover') && !g47CardsHtml.includes('Click to open chapters') && !g47CardsHtml.includes('Structured interactive curriculum') && !g47CardsHtml.includes('handleDeleteCustomCourseById'), 'My Courses renders ultra-clean Visual Course Cards without filler descriptions, footer buttons, or exposed edit/delete clutter');
   const g47SidebarTreeHtml = getOrCreateElem('sidebar-courses-quick-list').innerHTML;
   assert(g47SidebarTreeHtml.includes('Chumash Mastery'), 'Left Sidebar Your Courses tree populates live quick-jump course links');
 

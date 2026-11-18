@@ -1058,7 +1058,7 @@
                       <h3 id="active-course-display-title" class="text-lg sm:text-2xl font-extrabold text-white tracking-tight">Course Title</h3>
                       <span id="active-course-display-stats" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 shrink-0">0 Lessons</span>
                     </div>
-                    <p id="active-course-display-desc" class="text-xs text-slate-400 mt-1 line-clamp-1">Structured interactive curriculum</p>
+                    <p id="active-course-display-desc" class="hidden"></p>
                     <span id="active-course-display-category" class="hidden"></span>
                     <span id="active-course-display-level" class="hidden"></span>
                   </div>
@@ -10816,47 +10816,31 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       grid.innerHTML = courses.map((c, idx) => {
         const title = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
-        const desc = isHe
-          ? (c.desc_he || c.desc_en || c.target_audience || 'תוכנית לימודים מובנית עם שיעורים אינטראקטיביים')
-          : (c.desc_en || c.desc_he || c.target_audience || 'Structured interactive curriculum and AI lesson studio');
         const lessonsCount = Array.isArray(c.lessons) ? c.lessons.length : 0;
         const icon = normalizeCourseIcon(c.icon);
         const gradCls = getCourseCoverGradient(c.color, idx);
-        const bpSections = (c.blueprint && Array.isArray(c.blueprint.sections) ? c.blueprint.sections : []).slice(0, 3);
 
         return `
-          <div onclick="openCourseClassesView('${c.id}')" class="rounded-3xl bg-slate-900/90 border border-slate-800/90 hover:border-indigo-500/50 transition cursor-pointer shadow-sm hover:shadow-xl flex flex-col justify-between overflow-hidden group">
-            <div>
-              <!-- Vibrant Gradient Course Cover Banner -->
-              <div class="modern-gradient-cover keep-white h-20 bg-gradient-to-r ${gradCls} p-4 flex items-start justify-between relative overflow-hidden">
-                <span class="px-2.5 py-1 rounded-full bg-black/25 backdrop-blur-md text-white text-[10px] font-extrabold uppercase tracking-wider">
-                  ${escapeHtml(c.category || 'Curriculum')}
+          <div onclick="openCourseClassesView('${c.id}')" class="rounded-3xl bg-slate-900/90 border border-slate-800/90 hover:border-indigo-500/50 transition cursor-pointer shadow-sm hover:shadow-xl overflow-hidden group">
+            <!-- Vibrant Gradient Course Cover Banner -->
+            <div class="modern-gradient-cover keep-white h-16 bg-gradient-to-r ${gradCls} p-3.5 flex items-start justify-between relative overflow-hidden">
+              <span class="px-2.5 py-0.5 rounded-full bg-black/25 backdrop-blur-md text-white text-[10px] font-extrabold uppercase tracking-wider">
+                ${escapeHtml(c.category || 'Curriculum')}
+              </span>
+            </div>
+
+            <!-- Floating Course Icon & Clean Title -->
+            <div class="px-5 pt-0 pb-5">
+              <div class="flex items-end justify-between -mt-6 mb-3 relative z-10">
+                <span class="w-12 h-12 rounded-2xl bg-slate-900 border-2 border-slate-800 shadow-md flex items-center justify-center text-xl leading-none select-none">
+                  ${escapeHtml(icon)}
+                </span>
+                <span class="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 text-xs font-bold">
+                  ${lessonsCount} ${isHe ? (lessonsCount === 1 ? 'שיעור' : 'שיעורים') : (lessonsCount === 1 ? 'Lesson' : 'Lessons')}
                 </span>
               </div>
 
-              <!-- Floating Course Icon & Body -->
-              <div class="px-5 pt-0 pb-4">
-                <div class="flex items-end justify-between -mt-7 mb-3 relative z-10">
-                  <span class="w-14 h-14 rounded-2xl bg-slate-900 border-2 border-slate-800 shadow-md flex items-center justify-center text-2xl leading-none select-none">
-                    ${escapeHtml(icon)}
-                  </span>
-                  <span class="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 text-xs font-bold">
-                    ${lessonsCount} ${isHe ? (lessonsCount === 1 ? 'שיעור' : 'שיעורים') : (lessonsCount === 1 ? 'Lesson' : 'Lessons')}
-                  </span>
-                </div>
-
-                <h4 dir="auto" class="text-base sm:text-lg font-extrabold text-white group-hover:text-indigo-400 transition leading-snug break-words">${escapeHtml(title)}</h4>
-                <p dir="auto" class="text-xs text-slate-400 mt-1.5 line-clamp-2 leading-relaxed">${escapeHtml(desc)}</p>
-              </div>
-            </div>
-
-            <!-- Tactile Card Footer -->
-            <div class="px-5 py-3.5 bg-slate-950/40 border-t border-slate-800/80 flex items-center justify-between gap-2">
-              <span class="text-[11px] font-semibold text-slate-400">${isHe ? 'לחץ לפתיחת השיעורים' : 'Click to open chapters'}</span>
-              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/15 group-hover:bg-indigo-600 text-indigo-300 group-hover:text-white text-xs font-bold transition">
-                <span>${isHe ? 'פתח קורס' : 'Open Course'}</span>
-                <i data-lucide="arrow-right" class="w-3.5 h-3.5 rtl:rotate-180"></i>
-              </span>
+              <h4 dir="auto" class="text-base sm:text-lg font-extrabold text-white group-hover:text-indigo-400 transition leading-snug break-words">${escapeHtml(title)}</h4>
             </div>
           </div>
         `;
