@@ -3925,6 +3925,122 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   const generatedCourse = sandbox.APP_STATE.customCourses.find(c => c.title_en === 'My Custom Chumash');
   assert(!!generatedCourse && generatedCourse.icon === '📜', 'handleGenerateCurriculum locks exact course name verbatim and normalizes returned icon');
 
+  // --- Gate 42: Studio Focus/Dictation Immunity & Resilient Draft-to-Sections AI ---
+  console.log('\n--- Running Gate 42: Studio Focus/Dictation Immunity & Resilient AI Draft Application ---');
+  assert(typeof sandbox.resolveSectionUpdatesFromAiPayload === 'function', 'resolveSectionUpdatesFromAiPayload is a function');
+  sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com', role: 'super_admin', id: 'teacher_g42' };
+
+  const g42Course = {
+    id: 'course_g42_studio',
+    title_en: 'Chumash',
+    title_he: 'חומש',
+    created_by: 'shmueldoviduhlman@gmail.com',
+    updated_at: new Date().toISOString(),
+    blueprint: {
+      version: '2.0',
+      student_profile: '13 yr old teen',
+      guidelines: 'Interactive',
+      sections: [
+        { id: 'sec_g42_intro', type: 'text', name: 'Relatable Opening Dilemma', ai_rule: 'Modern dilemma' },
+        { id: 'sec_g42_points', type: 'list', name: 'Core Takeaways', ai_rule: 'Bullet list' }
+      ]
+    },
+    lessons: [
+      { id: 'les_g42_1', lesson_num: 1, title_en: 'Lesson 1', title_he: 'שיעור 1', sections: {} }
+    ]
+  };
+  sandbox.APP_STATE.customCourses = [g42Course];
+  sandbox.APP_STATE.insideCourseId = g42Course.id;
+  sandbox.APP_STATE.activeCourseId = g42Course.id;
+  sandbox.APP_STATE.studioSelectedLessonId = 'les_g42_1';
+  sandbox.studioScreenMode = 'edit';
+  sandbox.renderCourseStudio(g42Course.id, 'les_g42_1');
+
+  // 1. Focus / typing immunity during 15s mergeStudentsWithCloud & renderAllViews
+  const promptField = getOrCreateElem('input-studio-class-ai-prompt');
+  const studioContainerEl = getOrCreateElem('course-studio-wrapper');
+  const lessonsCont = getOrCreateElem('tutor-hub-lessons-container');
+  promptField.tagName = 'TEXTAREA';
+  studioContainerEl.contains = (node) => node === promptField;
+  sandbox.document.activeElement = promptField;
+  assert(sandbox.isStudioUserActivelyEditing() === true, 'isStudioUserActivelyEditing detects focused studio input/textarea');
+
+  const sentinelMarker = '<!-- ACTIVE_FOCUS_SENTINEL -->';
+  lessonsCont.innerHTML = lessonsCont.innerHTML + sentinelMarker;
+  sandbox.studioPendingCloudRender = false;
+
+  // Identical cloud students snapshot does NOT call renderAllViews or wipe studio DOM
+  const currentStuSnapshot = JSON.parse(JSON.stringify(sandbox.APP_STATE.students || []));
+  sandbox.mergeStudentsWithCloud(currentStuSnapshot);
+  assert(lessonsCont.innerHTML.includes(sentinelMarker), 'mergeStudentsWithCloud with unchanged students preserves studio focus and DOM');
+
+  // Even when renderAllViews fires during active editing, studio DOM is deferred instead of stealing focus
+  sandbox.renderAllViews();
+  assert(lessonsCont.innerHTML.includes(sentinelMarker) && sandbox.studioPendingCloudRender === true, 'renderAllViews defers rebuilding Studio DOM while user is actively typing/dictating');
+
+  // Active local edit timestamp shields local typed lesson from older realtime cloud echoes
+  sandbox.handleStudioUpdateClassField(g42Course.id, 'les_g42_1', 'sections.sec_g42_intro', 'LIVE TYPED DRAFT');
+  const olderCloudCourse = JSON.parse(JSON.stringify(g42Course));
+  olderCloudCourse.lessons[0].sections = { sec_g42_intro: 'STALE CLOUD VERSION' };
+  olderCloudCourse.updated_at = new Date(Date.now() + 2000).toISOString();
+  sandbox.mergeCustomCoursesWithCloud([olderCloudCourse], olderCloudCourse.updated_at, []);
+  assert(g42Course.lessons[0].sections.sec_g42_intro === 'LIVE TYPED DRAFT', 'mergeCustomCoursesWithCloud protects live typed edits from overwriting during active save window');
+
+  // autoGrowStudioTextarea never collapses height during speech/IME composing
+  const mockArea = { style: { height: '120px' }, clientHeight: 120, scrollHeight: 120, value: 'speaking' };
+  sandbox.autoGrowStudioTextarea(mockArea, { isComposing: true });
+  assert(mockArea.style.height === '120px', 'autoGrowStudioTextarea preserves height cleanly during speech/IME composition');
+
+  sandbox.document.activeElement = null;
+
+  // 2. Resilient Section Resolution: maps Section Names and JSON-stringified objects cleanly
+  const resolvedByName = sandbox.resolveSectionUpdatesFromAiPayload({
+    sections: {
+      'Relatable Opening Dilemma': JSON.stringify({ summary: 'Modern Test', body: 'You get offered free concert tickets...' }),
+      'Core Takeaways': ['**Honesty**: Build trust first']
+    }
+  }, g42Course.blueprint.sections);
+  assert(resolvedByName.sec_g42_intro !== undefined && resolvedByName.sec_g42_points !== undefined, 'resolveSectionUpdatesFromAiPayload maps human section names back to cryptic blueprint IDs');
+  const parsedIntro = JSON.parse(sandbox.normalizeSectionAiValue(resolvedByName.sec_g42_intro, 'text'));
+  assert(parsedIntro._structured === true && parsedIntro.summary === 'Modern Test' && parsedIntro.body.includes('concert tickets'), 'normalizeSectionAiValue parses JSON-stringified objects without double-escaping');
+
+  // 3. Self-healing AI execution: when initial AI reply leaves sections: {} on a draft submission, follow-up populates sections directly
+  let aiAttempt = 0;
+  sandbox.fetch = async () => {
+    aiAttempt++;
+    if (aiAttempt === 1) {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          candidates: [{ content: { parts: [{ text: JSON.stringify({ assistant_reply: 'Great draft idea!', sections: {} }) }] } }]
+        })
+      };
+    }
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        candidates: [{
+          content: {
+            parts: [{
+              text: JSON.stringify({
+                sections: {
+                  sec_g42_intro: { summary: 'Peer Pressure Test', body: 'When your friends dare you to skip studying...' },
+                  sec_g42_points: { items: ['**Inner Compass**: Decide before pressure hits'] }
+                }
+              })
+            }]
+          }
+        }]
+      })
+    };
+  };
+  await sandbox.sendStudioClassAiMessage(g42Course.id, 'les_g42_1', 'Here is my draft: start with a story about peer pressure and give one main takeaway.');
+  assert(aiAttempt >= 2, 'sendStudioClassAiMessage runs self-healing section pass when initial reply omitted sections for a draft');
+  assert(String(g42Course.lessons[0].sections.sec_g42_intro || '').includes('Peer Pressure Test'), 'Draft content is applied cleanly into blueprint intro section');
+  assert(lessonsCont.innerHTML.includes('Updated 2 sections'), 'AI Co-Builder chat bubble surfaces confirmation badge showing exact updated section count');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);

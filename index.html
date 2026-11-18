@@ -4602,7 +4602,9 @@
       fallbackModels.forEach(m => {
         if (!candidateQueue.includes(m)) candidateQueue.push(m);
       });
-      if (!candidateQueue.includes('gemini-3.1-flash-lite')) candidateQueue.push('gemini-3.1-flash-lite');
+      ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-3.1-flash-lite'].forEach(m => {
+        if (!candidateQueue.includes(m)) candidateQueue.push(m);
+      });
 
       let lastError = null;
       for (const model of candidateQueue) {
@@ -4623,12 +4625,15 @@
               if (typeof localStorage !== 'undefined') localStorage.setItem('tutor_gemini_model', model);
               return text;
             }
+            const finishReason = data?.candidates?.[0]?.finishReason || 'EMPTY_RESPONSE';
+            lastError = new Error(`Model ${model} returned empty output (${finishReason})`);
+            continue;
           }
 
           const errData = await resp.json().catch(() => ({}));
           const errMsg = errData?.error?.message || `API error ${resp.status}`;
           lastError = new Error(errMsg);
-          if (resp.status === 404 || resp.status === 503 || resp.status === 429 ||
+          if (resp.status === 400 || resp.status === 404 || resp.status === 500 || resp.status === 502 || resp.status === 503 || resp.status === 504 || resp.status === 429 ||
               errMsg.includes('not found') || errMsg.includes('not supported') ||
               errMsg.includes('no longer available') || errMsg.includes('high demand') ||
               errMsg.includes('quota') || errMsg.includes('capacity')) {
@@ -4640,7 +4645,8 @@
           const msg = err?.message || '';
           if (msg.includes('not found') || msg.includes('not supported') ||
               msg.includes('no longer available') || msg.includes('high demand') ||
-              msg.includes('quota') || msg.includes('capacity')) {
+              msg.includes('quota') || msg.includes('capacity') ||
+              msg.includes('EMPTY_RESPONSE') || msg.includes('API error')) {
             continue;
           }
           if (payload.generationConfig && payload.generationConfig.responseMimeType && msg.includes('JSON')) {
@@ -6690,6 +6696,9 @@ alter publication supabase_realtime add table public.students_sync;`;
     function mergeStudentsWithCloud(cloudStudents) {
       if (!Array.isArray(cloudStudents)) return;
 
+      const prevSnapshot = JSON.stringify(APP_STATE.students || []);
+      const prevActiveId = APP_STATE.activeStudentId;
+
       const cloudMap = new Map();
       cloudStudents.forEach(cs => cloudMap.set(cs.id, cs));
 
@@ -6699,6 +6708,11 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       if (!APP_STATE.activeStudentId || !cloudMap.has(APP_STATE.activeStudentId)) {
         APP_STATE.activeStudentId = APP_STATE.students.length > 0 ? APP_STATE.students[0].id : null;
+      }
+
+      const nextSnapshot = JSON.stringify(APP_STATE.students || []);
+      if (prevSnapshot === nextSnapshot && prevActiveId === APP_STATE.activeStudentId) {
+        return;
       }
 
       saveStudentsToStorage(false);
@@ -10000,8 +10014,12 @@ alter publication supabase_realtime add table public.students_sync;`;
         renderCoursesCardsGrid();
       }
 
-      // Populate tutor-hub-lessons-container with the target course's lessons
-      renderTutorHubActiveLessons(APP_STATE.insideCourseId || APP_STATE.activeCourseId);
+      // Populate tutor-hub-lessons-container with the target course's lessons unless user is actively typing/dictating in Studio
+      if (isInsideCourse && studioScreenMode === 'edit' && typeof isStudioUserActivelyEditing === 'function' && isStudioUserActivelyEditing() && document.getElementById('course-studio-wrapper')) {
+        studioPendingCloudRender = true;
+      } else {
+        renderTutorHubActiveLessons(APP_STATE.insideCourseId || APP_STATE.activeCourseId);
+      }
 
       if (window.lucide && typeof lucide.createIcons === 'function') {
         lucide.createIcons();
@@ -10945,13 +10963,17 @@ alter publication supabase_realtime add table public.students_sync;`;
     var studioAiDraftMap = {};
     var studioIsComposing = false;
     var studioPendingCloudRender = false;
+    var lastLocalCourseEditTs = 0;
+    var activeLocalCourseEditId = null;
 
     function isStudioUserActivelyEditing() {
       if (studioIsComposing) return true;
       const activeEl = typeof document !== 'undefined' ? document.activeElement : null;
       if (!activeEl) return false;
-      const wrapper = typeof document.getElementById === 'function' ? document.getElementById('course-studio-wrapper') : null;
-      if (!wrapper || typeof wrapper.contains !== 'function' || !wrapper.contains(activeEl)) return false;
+      const studioRoot = typeof document.getElementById === 'function'
+        ? (document.getElementById('course-studio-wrapper') || document.getElementById('tutor-hub-lessons-container') || document.getElementById('study-level-classes'))
+        : null;
+      if (!studioRoot || typeof studioRoot.contains !== 'function' || !studioRoot.contains(activeEl)) return false;
       const tag = (activeEl.tagName || '').toUpperCase();
       return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || !!activeEl.isContentEditable;
     }
@@ -11051,11 +11073,24 @@ alter publication supabase_realtime add table public.students_sync;`;
       return Math.min(maxRows, Math.max(minRows, visualLines));
     }
 
-    function autoGrowStudioTextarea(el) {
+    function autoGrowStudioTextarea(el, ev) {
       if (!el || !el.style) return;
+      const composing = studioIsComposing || !!(ev && ev.isComposing);
+      if (composing) {
+        if (el.scrollHeight > el.clientHeight) {
+          el.style.height = Math.max(40, el.scrollHeight + 2) + 'px';
+        }
+        return;
+      }
+      const prevHeight = el.clientHeight || 0;
+      const prevScrollY = (typeof window !== 'undefined' && typeof window.scrollY === 'number') ? window.scrollY : null;
       el.style.height = 'auto';
       if (el.scrollHeight && el.scrollHeight > 0) {
-        el.style.height = Math.max(40, el.scrollHeight + 2) + 'px';
+        const nextHeight = Math.max(40, el.scrollHeight + 2);
+        el.style.height = nextHeight + 'px';
+        if (prevScrollY !== null && Math.abs(nextHeight - prevHeight) <= 2 && Math.abs(window.scrollY - prevScrollY) > 4) {
+          window.scrollTo(window.scrollX, prevScrollY);
+        }
       }
     }
 
@@ -12340,6 +12375,7 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       const classTitle = lesson.title_en || lesson.title_he || 'Untitled Class';
       const syllabusOverview = (course.lessons || []).map((l, i) => `${i + 1}. ${l.title_en || l.title_he}${l.id === lesson.id ? '  <-- (CURRENT CLASS)' : ''}`).join('\n');
       const sources = ensureStudioLessonSources(lesson);
+      const allowedRule = typeof buildCourseAllowedResourcesPromptRule === 'function' ? buildCourseAllowedResourcesPromptRule(bp) : '';
 
       const parseClassAiJson = (rawText) => {
         if (!rawText) return null;
@@ -12357,6 +12393,7 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       };
 
       let parsed = null;
+      let aiCallError = null;
       const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
 
       if (apiKey && typeof callGeminiApi === 'function') {
@@ -12409,8 +12446,7 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
             : `Legacy modular blocks: hook_en=${JSON.stringify(lesson.hook_en || '')}, anchors=${JSON.stringify((lesson.anchors_en || []).length)} items, sources_text=${JSON.stringify(lesson.sources_text || '')}, steps_text=${JSON.stringify(lesson.steps_text || '')}, pitfalls_text=${JSON.stringify(lesson.pitfalls_text || '')}, homework_text=${JSON.stringify(lesson.homework_text || '')}`;
 
           const analyzeOnlyMode = !!metaOpts.analyzeOnly;
-          const allowedRule = typeof buildCourseAllowedResourcesPromptRule === 'function' ? buildCourseAllowedResourcesPromptRule(bp) : '';
-          const systemInstruction = `You are TutorPilot's Master Lesson Co-Builder & Source Analyst. You collaborate fluently with the educator inside the Lesson Studio to analyze links, listen to voice/audio recordings, inspect images/PDFs/notes, discuss pedagogical angles, and craft exceptional lessons inside the custom Course Blueprint.
+          const systemInstruction = `You are TutorPilot's Master Lesson Co-Builder & Source Analyst. You collaborate fluently with the educator inside the Lesson Studio to analyze links, listen to voice/audio recordings, inspect images/PDFs/notes, discuss pedagogical angles, and directly build/update lesson sections inside the custom Course Blueprint.
 
 Course Context:
 Course Title: "${course.title_en || course.title_he}"
@@ -12425,22 +12461,24 @@ Current Class: "${classTitle}" (Duration: ${lesson.duration || '45m'})
 Class Sections & Current Draft State:
 ${currentSectionSnapshot}
 
-Collaboration & Analysis Rules:
-1. ANALYZE ALL ATTACHED SOURCES FIRST: If the teacher attached links, audio recordings, images, PDFs, or pasted notes, deeply synthesize what is inside them (including transcribing/understanding spoken audio or reading textbook pages) and ground your reply and lesson content specifically in those materials.
-2. ${analyzeOnlyMode ? 'THE TEACHER ASKED TO ANALYZE SOURCES BEFORE WRITING SECTIONS: Return an empty "sections": {} object, give a clear insightful breakdown of what you found across their links/audio/notes, propose how each section could use those ideas, and invite them to confirm or tweak before drafting.' : 'If the teacher asks to draft the class or discuss an idea with a clear direction, populate the appropriate sections matching each section\'s exact Shape. If they ask to adjust ONLY specific sections (e.g. Hook or Pitfalls), ONLY include those section IDs inside "sections" so untouched sections remain safely preserved!'}
-3. Maintain warm, intelligent, concise mentoring dialogue in "assistant_reply" so the teacher can think out loud and refine smoothly over multiple turns.
+Collaboration & Action Rules:
+1. ANALYZE ALL ATTACHED SOURCES FIRST: If the teacher attached links, audio recordings, images, PDFs, or pasted notes, deeply synthesize what is inside them and ground your updates and reply directly in those materials.
+2. ${analyzeOnlyMode
+  ? 'THE TEACHER ASKED TO ANALYZE SOURCES BEFORE WRITING SECTIONS: Return an empty "sections": {} object, give a clear insightful breakdown of what you found across their links/audio/notes, propose how each section could use those ideas, and invite them to confirm or tweak before drafting.'
+  : 'MANDATORY EXECUTION RULE: Whenever the teacher sends you a draft, pasted notes, outline, feedback, or ANY instruction to create, edit, organize, rewrite, fix, shorten, expand, or populate the lesson, you MUST directly populate the matching section IDs inside "sections" right now! Do NOT just give advice in "assistant_reply" with an empty "sections": {} — apply the draft/changes into the lesson sections on the right using the exact ID strings (e.g. "sec_..."). Only update ONLY specific sections when they explicitly ask to touch only one section (leaving untouched sections out so they remain preserved).'}
+3. Maintain warm, intelligent, concise mentoring dialogue in "assistant_reply" summarizing the exact sections you updated.
 4. Respond in Hebrew if the teacher writes in Hebrew, or English if they write in English.
 
 ${hasCustomBp ? `Return STRICT JSON ONLY:
 {
-  "assistant_reply": "Thoughtful response referencing analyzed audio/links/notes, summarizing changes made, and offering 1 sharp next question or tip...",
+  "assistant_reply": "Brief summary of the exact lesson sections updated...",
   "updated_title": null,
   "sections": {
-    "<section_id>": <value matching exact Shape>
+    "<exact_section_id>": <object matching that section's Exact Shape>
   }
 }` : `Return STRICT JSON ONLY:
 {
-  "assistant_reply": "Thoughtful response...",
+  "assistant_reply": "Brief summary of the lesson sections updated...",
   "updated_title": null,
   "hook": "...",
   "anchors": ["**Key**: point"],
@@ -12454,10 +12492,11 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
           const raw = await callGeminiApi(contents, apiKey, {
             systemInstruction,
             responseMimeType: 'application/json',
-            temperature: 0.75
+            temperature: 0.7
           });
           parsed = parseClassAiJson(raw);
         } catch (err) {
+          aiCallError = err;
           console.warn('Class AI partner Gemini fallback:', err);
         }
       }
@@ -12465,23 +12504,24 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
       if (!parsed || typeof parsed !== 'object') {
         if (metaOpts.analyzeOnly) {
           parsed = {
-            assistant_reply: `I reviewed your ${sources.length} attached source(s) (${sources.map(s => s.label).join(', ')}). Tell me which ideas you want emphasized or click Auto-Draft Class when ready.`,
+            assistant_reply: `I reviewed your ${sources.length} attached source(s) (${sources.map(s => s.label).join(', ')}). Tell me which ideas you want emphasized or click Auto-Draft All when ready.${aiCallError ? ` (AI notice: ${aiCallError.message || 'connection issue'})` : ''}`,
             sections: {}
           };
         } else if (hasCustomBp) {
           const fallbackSecs = {};
           bpSections.forEach(s => {
-            fallbackSecs[s.id] = buildStructuredSectionFallback(s, classTitle, bp.student_profile || userMsg);
+            fallbackSecs[s.id] = buildStructuredSectionFallback(s, classTitle, bp.student_profile || '', userMsg);
           });
           parsed = {
-            assistant_reply: `I drafted structured content for all ${bpSections.length} sections of "${classTitle}". Switch to Lesson Sections to inspect them or continue chatting below to refine.`,
+            assistant_reply: `I organized your input into all ${bpSections.length} sections of "${classTitle}". Review the Lesson Sections panel on the right or keep refining.${aiCallError ? ` (Live AI could not respond: ${aiCallError.message || 'network/model error'} — applied your draft locally so nothing is lost.)` : ''}`,
             sections: fallbackSecs
           };
         } else {
+          const draftLines = userMsg.split(/\n+/).map(l => l.replace(/^[•\-\*\d\.)]+\s*/, '').trim()).filter(l => l.length > 2);
           parsed = {
-            assistant_reply: `I drafted modular teaching blocks for "${classTitle}". Review them in Lesson Sections or keep discussing ideas here.`,
-            hook: `Real-world scenario connecting ${classTitle} to everyday student choices.`,
-            anchors: [`**Core Concept**: Foundational premise of ${classTitle}.`, `**Why It Matters**: Practical impact for today.`],
+            assistant_reply: `I updated the teaching blocks for "${classTitle}" using your draft.${aiCallError ? ` (Live AI error: ${aiCallError.message || 'network/model error'} — saved locally.)` : ''}`,
+            hook: userMsg.length >= 25 ? userMsg : `Real-world scenario connecting ${classTitle} to everyday student choices.`,
+            anchors: draftLines.length >= 2 ? draftLines.slice(0, 7) : [`**Core Concept**: Foundational premise of ${classTitle}.`, `**Why It Matters**: Practical impact for today.`],
             pitfalls: `Clarify common misconceptions early before moving into examples.`,
             homework: `Reflect on one situation this week where ${classTitle} applies.`
           };
@@ -12496,32 +12536,78 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
 
       let updatedCount = 0;
       const updatedSecIds = [];
-      if (hasCustomBp && parsed.sections && typeof parsed.sections === 'object') {
-        const willMutate = bpSections.some(s => parsed.sections[s.id] !== undefined);
-        if (willMutate && !studioUndoSnapshotMap[lesson.id]) captureStudioUndoSnapshot(lesson);
-        else if (willMutate) captureStudioUndoSnapshot(lesson);
-        if (!lesson.sections) lesson.sections = {};
-        bpSections.forEach(s => {
-          if (parsed.sections[s.id] !== undefined) {
-            lesson.sections[s.id] = normalizeSectionAiValue(parsed.sections[s.id], s.type);
-            updatedSecIds.push(s.id);
-            updatedCount++;
+      if (hasCustomBp) {
+        let resolvedUpdates = resolveSectionUpdatesFromAiPayload(parsed, bpSections);
+        let resolvedKeys = Object.keys(resolvedUpdates);
+
+        // Self-healing retry: if Gemini returned conversational text with empty sections: {} on an explicit draft/edit request, force a direct section-mapping pass
+        const looksLikeEditOrDraft = (userMsg.length >= 35) || /\b(draft|write|edit|update|fix|add|put|create|organize|rewrite|improve|turn\s+this|fill|generate)\b/i.test(userMsg) || /[\u0590-\u05FF]/.test(userMsg);
+        if (resolvedKeys.length === 0 && !metaOpts.analyzeOnly && bpSections.length > 0 && looksLikeEditOrDraft) {
+          if (apiKey && typeof callGeminiApi === 'function') {
+            try {
+              const forceSchemaLines = bpSections.map(s => `"${s.id}" (${s.name}, type ${s.type}): ${getSectionAiFormatRule(s.type)}`).join('\n');
+              const forcePrompt = `The educator sent this draft/request for class "${classTitle}":
+"${userMsg}"
+${allowedRule ? `\n${allowedRule}\n` : ''}
+Map and apply their draft directly into the lesson sections below right now. Return STRICT JSON ONLY matching this exact structure (at least 1 section ID must be populated):
+{
+  "sections": {
+${bpSections.map(s => `    "${s.id}": <object matching ${s.type} shape>`).join(',\n')}
+  }
+}
+
+Section Shapes:
+${forceSchemaLines}`;
+              const forcedRaw = await callGeminiApi(forcePrompt, apiKey, {
+                responseMimeType: 'application/json',
+                temperature: 0.45
+              });
+              const forcedParsed = parseClassAiJson(forcedRaw);
+              resolvedUpdates = resolveSectionUpdatesFromAiPayload(forcedParsed, bpSections);
+              resolvedKeys = Object.keys(resolvedUpdates);
+            } catch (_) {}
           }
-        });
+          if (resolvedKeys.length === 0 && userMsg.length >= 25) {
+            bpSections.forEach(s => {
+              resolvedUpdates[s.id] = buildStructuredSectionFallback(s, classTitle, bp.student_profile || '', userMsg);
+            });
+            resolvedKeys = Object.keys(resolvedUpdates);
+          }
+        }
+
+        if (resolvedKeys.length > 0) {
+          captureStudioUndoSnapshot(lesson);
+          if (!lesson.sections) lesson.sections = {};
+          bpSections.forEach(s => {
+            if (resolvedUpdates[s.id] !== undefined) {
+              lesson.sections[s.id] = normalizeSectionAiValue(resolvedUpdates[s.id], s.type);
+              updatedSecIds.push(s.id);
+              updatedCount++;
+            }
+          });
+        }
       } else if (!hasCustomBp) {
-        const willMutateLegacy = !!(parsed.hook || (Array.isArray(parsed.anchors) && parsed.anchors.length) || parsed.sources || parsed.steps || parsed.pitfalls || parsed.cheat_sheet || parsed.homework);
+        const secMap = (parsed.sections && typeof parsed.sections === 'object') ? parsed.sections : {};
+        const nextHook = parsed.hook || secMap.hook || secMap.intro || '';
+        const nextAnchors = Array.isArray(parsed.anchors) ? parsed.anchors : (Array.isArray(secMap.anchors) ? secMap.anchors : null);
+        const nextSources = parsed.sources || secMap.sources || '';
+        const nextSteps = parsed.steps || secMap.steps || '';
+        const nextPitfalls = parsed.pitfalls || secMap.pitfalls || '';
+        const nextCheat = parsed.cheat_sheet || secMap.cheat_sheet || '';
+        const nextHomework = parsed.homework || secMap.homework || '';
+        const willMutateLegacy = !!(nextHook || (nextAnchors && nextAnchors.length) || nextSources || nextSteps || nextPitfalls || nextCheat || nextHomework);
         if (willMutateLegacy) captureStudioUndoSnapshot(lesson);
-        if (parsed.hook) { lesson.hook_en = parsed.hook; updatedCount++; }
-        if (Array.isArray(parsed.anchors) && parsed.anchors.length) {
-          lesson.anchors_en = parsed.anchors.map(pt => ({ id: 'anc_' + Math.random().toString(36).substr(2, 6), point: pt }));
+        if (nextHook) { lesson.hook_en = typeof nextHook === 'string' ? nextHook : JSON.stringify(nextHook); updatedCount++; }
+        if (nextAnchors && nextAnchors.length) {
+          lesson.anchors_en = nextAnchors.map(pt => ({ id: 'anc_' + Math.random().toString(36).substr(2, 6), point: typeof pt === 'string' ? pt : JSON.stringify(pt) }));
           lesson.anchors_he = lesson.anchors_en;
           updatedCount++;
         }
-        if (parsed.sources) { lesson.sources_text = parsed.sources; updatedCount++; }
-        if (parsed.steps) { lesson.steps_text = parsed.steps; updatedCount++; }
-        if (parsed.pitfalls) { lesson.pitfalls_text = parsed.pitfalls; updatedCount++; }
-        if (parsed.cheat_sheet) { lesson.cheat_sheet_text = parsed.cheat_sheet; updatedCount++; }
-        if (parsed.homework) { lesson.homework_text = parsed.homework; updatedCount++; }
+        if (nextSources) { lesson.sources_text = typeof nextSources === 'string' ? nextSources : JSON.stringify(nextSources); updatedCount++; }
+        if (nextSteps) { lesson.steps_text = typeof nextSteps === 'string' ? nextSteps : JSON.stringify(nextSteps); updatedCount++; }
+        if (nextPitfalls) { lesson.pitfalls_text = typeof nextPitfalls === 'string' ? nextPitfalls : JSON.stringify(nextPitfalls); updatedCount++; }
+        if (nextCheat) { lesson.cheat_sheet_text = typeof nextCheat === 'string' ? nextCheat : JSON.stringify(nextCheat); updatedCount++; }
+        if (nextHomework) { lesson.homework_text = typeof nextHomework === 'string' ? nextHomework : JSON.stringify(nextHomework); updatedCount++; }
       }
       if (updatedSecIds.length > 0) {
         studioAiUpdatedSectionIds[lesson.id] = updatedSecIds;
@@ -12529,15 +12615,18 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
 
       if (parsed.assistant_reply) {
         lesson.ai_chat_history.push({ role: 'assistant', text: parsed.assistant_reply, updatedCount });
+      } else if (updatedCount > 0) {
+        lesson.ai_chat_history.push({ role: 'assistant', text: `Updated ${updatedCount} lesson section${updatedCount === 1 ? '' : 's'} with your changes.`, updatedCount });
       }
 
       course.updated_at = new Date().toISOString();
       lesson.updated_at = new Date().toISOString();
       studioClassAiThinkingMap[lesson.id] = false;
+      lastLocalCourseEditTs = Date.now();
       saveCustomCoursesToStorage(true);
       renderCourseStudio(cId, lesson.id);
       renderCommandCenter();
-      showToast(updatedCount > 0 ? `Updated ${updatedCount} lesson section${updatedCount === 1 ? '' : 's'}!` : 'AI analysis complete!');
+      showToast(updatedCount > 0 ? `Updated ${updatedCount} lesson section${updatedCount === 1 ? '' : 's'}!` : 'AI replied (no section changes requested)');
     }
 
     function toggleReaderElement(elId) {
@@ -13422,6 +13511,11 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                       <div dir="auto" class="max-w-[92%] rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed ${isUser ? 'bg-amber-500/15 border border-amber-500/30 text-amber-100' : 'bg-slate-950/90 border border-slate-800 text-slate-200'}">
                         <span class="block text-[9px] font-mono uppercase tracking-wider mb-1 ${isUser ? 'text-amber-300' : 'text-indigo-400'}">${isUser ? 'You' : 'AI Co-Builder'}</span>
                         <div class="whitespace-pre-wrap break-words">${escapeHtml(m.text)}</div>
+                        ${(!isUser && m.updatedCount > 0) ? `
+                          <button type="button" onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'sections')" class="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/35 text-[10px] font-bold transition">
+                            <span>✓ Updated ${m.updatedCount} section${m.updatedCount === 1 ? '' : 's'}</span>
+                          </button>
+                        ` : ''}
                       </div>
                     </div>
                   `;
@@ -13721,8 +13815,23 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
       if (typeof container.querySelectorAll === 'function') {
         const autoAreas = container.querySelectorAll('textarea.studio-autogrow');
         if (autoAreas && typeof autoAreas.forEach === 'function') {
-          autoAreas.forEach(autoGrowStudioTextarea);
+          autoAreas.forEach(el => autoGrowStudioTextarea(el));
         }
+        const allFields = container.querySelectorAll('textarea, input[type="text"], input[type="url"]');
+        if (allFields && typeof allFields.forEach === 'function') {
+          allFields.forEach(field => {
+            if (!field || typeof field.addEventListener !== 'function') return;
+            field.addEventListener('compositionstart', () => { studioIsComposing = true; });
+            field.addEventListener('compositionend', () => {
+              studioIsComposing = false;
+              if (field.classList && field.classList.contains('studio-autogrow')) autoGrowStudioTextarea(field);
+            });
+          });
+        }
+      }
+      const chatFeed = document.getElementById('studio-class-ai-messages');
+      if (chatFeed && typeof chatFeed.scrollHeight === 'number') {
+        chatFeed.scrollTop = chatFeed.scrollHeight;
       }
       if (window.lucide && typeof lucide.createIcons === 'function') {
         lucide.createIcons();
@@ -13898,6 +14007,8 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
     }
 
     function showStudioSavingIndicator() {
+      lastLocalCourseEditTs = Date.now();
+      activeLocalCourseEditId = APP_STATE.insideCourseId || APP_STATE.activeCourseId || null;
       const ind = document.getElementById('studio-save-indicator');
       if (ind) {
         ind.textContent = 'Saving...';
@@ -14247,18 +14358,153 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
       if (secType === 'audio') {
         return typeof val === 'string' ? val : JSON.stringify(val || '');
       }
-      if (val && typeof val === 'object') {
-        return JSON.stringify({ _structured: true, ...val });
+      let normalized = val;
+      if (typeof val === 'string') {
+        const trimmed = val.trim();
+        if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+          try {
+            const parsedObj = JSON.parse(trimmed);
+            if (parsedObj && typeof parsedObj === 'object') normalized = parsedObj;
+          } catch (_) {}
+        }
       }
-      return String(val || '');
+      if (normalized && typeof normalized === 'object' && !Array.isArray(normalized)) {
+        return JSON.stringify({ _structured: true, ...normalized });
+      }
+      if (Array.isArray(normalized)) {
+        if (secType === 'steps') {
+          return JSON.stringify({ _structured: true, steps: normalized.map(st => typeof st === 'string' ? { text: st, mins: '' } : st) });
+        }
+        return JSON.stringify({ _structured: true, items: normalized });
+      }
+      // If plain string returned for structured 'text' or 'reflection' block, wrap cleanly so fields display properly
+      const strVal = String(normalized || '').trim();
+      if (!strVal) return '';
+      if (secType === 'text') {
+        const firstLine = strVal.split('\n')[0].replace(/^\*+|\*+$/g, '').trim();
+        return JSON.stringify({
+          _structured: true,
+          summary: firstLine.length > 140 ? (firstLine.slice(0, 137) + '...') : firstLine,
+          body: strVal
+        });
+      }
+      if (secType === 'list') {
+        const items = strVal.split('\n').map(l => l.replace(/^[•\-\*✦\d\.)]+\s*/, '').trim()).filter(Boolean);
+        return JSON.stringify({ _structured: true, items: items.length ? items : [strVal] });
+      }
+      return strVal;
     }
 
-    function buildStructuredSectionFallback(sec, classTitle, studentProfile) {
+    function resolveSectionUpdatesFromAiPayload(parsed, bpSections) {
+      const resolved = {};
+      if (!parsed || typeof parsed !== 'object' || !Array.isArray(bpSections) || bpSections.length === 0) {
+        return resolved;
+      }
+
+      const rawSections = parsed.sections;
+      // 1. Handle array payload: sections: [{ id / name, content / value / data }]
+      if (Array.isArray(rawSections)) {
+        rawSections.forEach(entry => {
+          if (!entry || typeof entry !== 'object') return;
+          const entryId = String(entry.id || entry.section_id || '').trim().toLowerCase();
+          const entryName = String(entry.name || entry.title || '').trim().toLowerCase();
+          const match = bpSections.find(s =>
+            (entryId && s.id.toLowerCase() === entryId) ||
+            (entryName && (s.name || '').trim().toLowerCase() === entryName)
+          );
+          if (match) {
+            const payload = entry.value !== undefined ? entry.value : (entry.content !== undefined ? entry.content : (entry.data !== undefined ? entry.data : entry));
+            resolved[match.id] = payload;
+          }
+        });
+      } else if (rawSections && typeof rawSections === 'object') {
+        const keys = Object.keys(rawSections);
+        const norm = (str) => String(str || '').toLowerCase().replace(/[^a-z0-9\u0590-\u05FF]+/g, ' ').trim();
+
+        bpSections.forEach((s, idx) => {
+          // Exact ID
+          if (rawSections[s.id] !== undefined) {
+            resolved[s.id] = rawSections[s.id];
+            return;
+          }
+          // Case-insensitive ID or Exact/Normalized Section Name or Type
+          const sIdLower = String(s.id || '').toLowerCase();
+          const sNameNorm = norm(s.name);
+          const matchedKey = keys.find(k => {
+            const kl = String(k).trim().toLowerCase();
+            if (kl === sIdLower) return true;
+            if (sNameNorm && norm(k) === sNameNorm) return true;
+            if (String(k).trim() === String(idx + 1)) return true;
+            return false;
+          });
+          if (matchedKey && rawSections[matchedKey] !== undefined) {
+            resolved[s.id] = rawSections[matchedKey];
+            return;
+          }
+          // Substring / partial section name fallback ONLY if unambiguous single hit
+          if (sNameNorm.length >= 4) {
+            const partialKey = keys.find(k => {
+              const kn = norm(k);
+              return kn.length >= 4 && (kn.includes(sNameNorm) || sNameNorm.includes(kn));
+            });
+            if (partialKey && rawSections[partialKey] !== undefined) {
+              resolved[s.id] = rawSections[partialKey];
+            }
+          }
+        });
+
+        // If keys still didn't match any section by ID/name and single top-level key like hook/anchors/homework exists inside rawSections:
+        if (Object.keys(resolved).length === 0 && keys.length > 0) {
+          bpSections.forEach(s => {
+            if (s.type === 'text' && (rawSections.hook || rawSections.intro || rawSections.introduction)) {
+              resolved[s.id] = rawSections.hook || rawSections.intro || rawSections.introduction;
+            } else if (s.type === 'list' && (rawSections.anchors || rawSections.points || rawSections.list)) {
+              resolved[s.id] = rawSections.anchors || rawSections.points || rawSections.list;
+            } else if (s.type === 'homework' && rawSections.homework) {
+              resolved[s.id] = rawSections.homework;
+            } else if (s.type === 'pitfalls' && rawSections.pitfalls) {
+              resolved[s.id] = rawSections.pitfalls;
+            } else if (s.type === 'steps' && rawSections.steps) {
+              resolved[s.id] = rawSections.steps;
+            }
+          });
+        }
+      }
+
+      // Legacy flat fallback if Gemini returned top-level hook/anchors/homework alongside custom blueprint
+      if (Object.keys(resolved).length === 0) {
+        bpSections.forEach(s => {
+          if ((s.type === 'text' || s.type === 'example') && parsed.hook && !resolved[s.id]) {
+            resolved[s.id] = parsed.hook;
+          } else if (s.type === 'list' && Array.isArray(parsed.anchors) && parsed.anchors.length > 0 && !resolved[s.id]) {
+            resolved[s.id] = { items: parsed.anchors };
+          } else if (s.type === 'homework' && parsed.homework && !resolved[s.id]) {
+            resolved[s.id] = { task: parsed.homework, estMinutes: '15m' };
+          }
+        });
+      }
+
+      return resolved;
+    }
+
+    function buildStructuredSectionFallback(sec, classTitle, studentProfile, userDraftText = '') {
       const sp = studentProfile || 'your students';
+      const draft = String(userDraftText || '').trim();
+      const draftLines = draft ? draft.split(/\n+/).map(l => l.replace(/^[•\-\*\d\.)]+\s*/, '').trim()).filter(l => l.length > 2) : [];
+
+      if (sec.type === 'text') {
+        if (draft.length >= 25) {
+          return JSON.stringify({
+            _structured: true,
+            summary: (draftLines[0] || draft).slice(0, 140),
+            body: draft
+          });
+        }
+      }
       if (sec.type === 'list') {
         return JSON.stringify({
           _structured: true,
-          items: [
+          items: draftLines.length >= 2 ? draftLines.slice(0, 8) : [
             `**Core Point 1**: Foundational principle of ${classTitle}.`,
             `**Core Point 2**: How ${classTitle} works in real life.`,
             `**Core Point 3**: Key takeaway tailored to ${sp}.`
@@ -15267,6 +15513,7 @@ Format requirement: ${getSectionAiFormatRule(sec.type)}.`;
       }
       populateCourseSelector();
       if (syncCloud) {
+        lastLocalCourseEditTs = Date.now();
         pushCustomCoursesToCloud();
       }
     }
@@ -15399,8 +15646,10 @@ Format requirement: ${getSectionAiFormatRule(sec.type)}.`;
           const localTs = localCourse.updated_at ? new Date(localCourse.updated_at).getTime() : 0;
           const cloudTs = cloudCourse.updated_at ? new Date(cloudCourse.updated_at).getTime() : 0;
 
-          // If cloud has newer timestamp (or within 5s skew) AND content actually differs
-          if ((cloudTs + 5000) >= localTs && JSON.stringify(localCourse) !== JSON.stringify(cloudCourse)) {
+          // Protect active local edits & self-echoed pushes from overwriting newer typed/dictated text
+          const isEditingThisCourse = (typeof isStudioUserActivelyEditing === 'function' && isStudioUserActivelyEditing() && localCourse.id === (APP_STATE.insideCourseId || APP_STATE.activeCourseId));
+          const isRecentSelfEdit = (typeof lastLocalCourseEditTs === 'number' && (Date.now() - lastLocalCourseEditTs) < 10000 && localCourse.id === activeLocalCourseEditId && cloudTs <= (localTs + 1000));
+          if (!isEditingThisCourse && !isRecentSelfEdit && (cloudTs + 5000) >= localTs && JSON.stringify(localCourse) !== JSON.stringify(cloudCourse)) {
             APP_STATE.customCourses[localIdx] = cloudCourse;
             hasNewData = true;
           }
@@ -28000,7 +28249,11 @@ ${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output 
     function renderAllViews() {
       renderCommandCenter();
       populateCourseSelector();
-      renderLessonsCategoryView();
+      if (typeof isStudioUserActivelyEditing === 'function' && isStudioUserActivelyEditing()) {
+        studioPendingCloudRender = true;
+      } else {
+        renderLessonsCategoryView();
+      }
       renderReadingCategoryView();
       renderSpeechCategoryView();
       renderStudents();
