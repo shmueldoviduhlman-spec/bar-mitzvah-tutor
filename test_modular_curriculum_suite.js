@@ -4554,6 +4554,69 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   const g47AiMsgHtml = getOrCreateElem('ai-chat-messages').innerHTML;
   assert(g47AiChipsHtml.includes('Log End of Class') && g47AiChipsHtml.includes('Add to Schedule') && g47AiChipsHtml.includes('How to Use TutorPilot') && g47AiMsgHtml.includes('After every class'), 'My Agent renders focused end-of-class, scheduling, and website help interface');
 
+  console.log('\n--- Running Gate 48: Universal Desktop & Mobile Back Navigation (History API / popstate) ---');
+  assert(typeof sandbox.initSpaHistoryNavigation === 'function' && typeof sandbox.navigateAppBack === 'function' && typeof sandbox.handleSpaPopState === 'function', 'SPA Back navigation helpers are defined');
+  const mockBrowserStack = [];
+  let mockBrowserIdx = -1;
+  sandbox.window.history = {
+    replaceState(st) {
+      if (mockBrowserIdx < 0) {
+        mockBrowserStack.push(st);
+        mockBrowserIdx = 0;
+      } else {
+        mockBrowserStack[mockBrowserIdx] = st;
+      }
+    },
+    pushState(st) {
+      mockBrowserStack.splice(mockBrowserIdx + 1);
+      mockBrowserStack.push(st);
+      mockBrowserIdx = mockBrowserStack.length - 1;
+    },
+    back() {
+      if (mockBrowserIdx > 0) {
+        mockBrowserIdx -= 1;
+        sandbox.window.dispatchEvent({ type: 'popstate', state: mockBrowserStack[mockBrowserIdx] });
+      }
+    }
+  };
+
+  // Ensure lock screen is hidden & seed initial Courses state
+  getOrCreateElem('lock-screen').classList.add('hidden');
+  sandbox.closeAllSpaModalsSilently();
+  sandbox.switchTab('study');
+  sandbox.showAllCoursesView();
+  sandbox.seedInitialSpaHistoryState();
+
+  // Navigate deep: Courses -> Course -> Lesson -> Settings -> Cloud Sync (sub-section of Settings)
+  sandbox.openCourseClassesView('course_g47_ui');
+  sandbox.flushSpaHistoryNow();
+  sandbox.selectStudioClass('les_g47_1');
+  sandbox.flushSpaHistoryNow();
+  sandbox.openSettingsModal();
+  sandbox.flushSpaHistoryNow();
+  // Simulate clicking Database Sync inside Settings (closeSettingsModal + openCloudModal in same tick)
+  sandbox.closeSettingsModal();
+  sandbox.openCloudModal();
+  sandbox.flushSpaHistoryNow();
+
+  assert(!getOrCreateElem('modal-cloud').classList.contains('hidden') && getOrCreateElem('modal-settings').classList.contains('hidden'), 'Navigating from Settings to Cloud Sync opens Cloud modal');
+
+  // Press Back #1 (Desktop/Mobile Back): Cloud Sync -> Settings
+  sandbox.navigateAppBack();
+  assert(getOrCreateElem('modal-cloud').classList.contains('hidden') && !getOrCreateElem('modal-settings').classList.contains('hidden'), 'Back #1 returns from Settings sub-section cleanly to Settings modal');
+
+  // Press Back #2: Settings -> Lesson Reader
+  sandbox.navigateAppBack();
+  assert(getOrCreateElem('modal-settings').classList.contains('hidden') && sandbox.APP_STATE.insideCourseId === 'course_g47_ui' && sandbox.APP_STATE.studioSelectedLessonId === 'les_g47_1', 'Back #2 closes Settings and returns directly to the Lesson Reader page');
+
+  // Press Back #3: Lesson Reader -> Course Lessons List
+  sandbox.navigateAppBack();
+  assert(sandbox.APP_STATE.insideCourseId === 'course_g47_ui' && sandbox.studioScreenMode === 'list', 'Back #3 exits Lesson Reader back to the Course Lessons List');
+
+  // Press Back #4: Course Lessons List -> All Courses Gallery
+  sandbox.navigateAppBack();
+  assert(sandbox.APP_STATE.insideCourseId === null && sandbox.APP_STATE.activeTab === 'study', 'Back #4 returns from Course back to All Courses Gallery');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);

@@ -3168,6 +3168,9 @@
     <div class="max-w-2xl w-full max-h-[90vh] bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <div class="flex items-center gap-2.5">
+          <button type="button" onclick="navigateAppBack()" class="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition" title="Back">
+            <i data-lucide="arrow-left" class="w-4 h-4 rtl:rotate-180"></i>
+          </button>
           <div class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
             <i data-lucide="bot" class="w-5 h-5"></i>
           </div>
@@ -4394,7 +4397,10 @@
       </button>
 
       <div class="flex items-center gap-3 mb-3">
-        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+        <button type="button" onclick="navigateAppBack()" class="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition shrink-0" title="Back">
+          <i data-lucide="arrow-left" class="w-4 h-4 rtl:rotate-180"></i>
+        </button>
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
           <i data-lucide="share-2" class="w-5 h-5"></i>
         </div>
         <div>
@@ -4444,7 +4450,10 @@
       </button>
 
       <div class="flex items-center gap-3 mb-3">
-        <div class="w-10 h-10 rounded-xl bg-brand-500/20 text-brand-400 border border-brand-500/30 flex items-center justify-center">
+        <button type="button" onclick="navigateAppBack()" class="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition shrink-0" title="Back">
+          <i data-lucide="arrow-left" class="w-4 h-4 rtl:rotate-180"></i>
+        </button>
+        <div class="w-10 h-10 rounded-xl bg-brand-500/20 text-brand-400 border border-brand-500/30 flex items-center justify-center shrink-0">
           <i data-lucide="cloud-lightning" class="w-5 h-5"></i>
         </div>
         <div>
@@ -4698,7 +4707,10 @@
       <!-- Header -->
       <div class="p-4 sm:p-6 border-b border-slate-800 flex items-start justify-between bg-slate-950/60">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center shadow-sm">
+          <button type="button" onclick="navigateAppBack()" class="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition shrink-0" title="Back">
+            <i data-lucide="arrow-left" class="w-4 h-4 rtl:rotate-180"></i>
+          </button>
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center shadow-sm shrink-0">
             <i data-lucide="building-2" class="w-5 h-5"></i>
           </div>
           <div>
@@ -4868,7 +4880,10 @@
       <!-- Header -->
       <div class="p-4 sm:p-6 border-b border-slate-800 flex items-start justify-between bg-slate-950/60">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center shadow-sm">
+          <button type="button" onclick="navigateAppBack()" class="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition shrink-0" title="Back">
+            <i data-lucide="arrow-left" class="w-4 h-4 rtl:rotate-180"></i>
+          </button>
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center shadow-sm shrink-0">
             <i data-lucide="shield-check" class="w-5 h-5"></i>
           </div>
           <div>
@@ -8328,6 +8343,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       loadCustomMilestonesFromStorage();
       checkCleanCanvasReset();
       renderAllViews();
+      if (typeof seedInitialSpaHistoryState === 'function') seedInitialSpaHistoryState();
       initSupabaseCloud();
 
       const lockScreen = document.getElementById('lock-screen');
@@ -9871,6 +9887,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       initExtensionBridge();
       checkUrlExtensionParams();
       renderAllViews();
+      if (typeof seedInitialSpaHistoryState === 'function') seedInitialSpaHistoryState();
       initSupabaseCloud();
       lucide.createIcons();
     });
@@ -29870,6 +29887,341 @@ ${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output 
         fetchCloudStudents();
       }
     }, 15000);
+
+    // =========================================================================
+    // UNIVERSAL DESKTOP & MOBILE BACK NAVIGATION ENGINE (History API / popstate)
+    // =========================================================================
+    const SPA_MODAL_REGISTRY = [
+      { key: 'cloud', id: 'modal-cloud', open: 'openCloudModal', close: 'closeCloudModal' },
+      { key: 'school', id: 'modal-school-workspace', open: 'openSchoolWorkspaceModal', close: 'closeSchoolWorkspaceModal' },
+      { key: 'join_school', id: 'modal-join-school', open: 'openJoinSchoolModal', close: 'closeJoinSchoolModal' },
+      { key: 'admin', id: 'modal-admin-user-directory', open: 'openAdminUserDirectoryModal', close: 'closeAdminUserDirectoryModal' },
+      { key: 'share', id: 'modal-share', open: 'openShareModal', close: 'closeShareModal' },
+      { key: 'base44', id: 'modal-base44-integration', open: 'openBase44Modal', close: 'closeBase44Modal' },
+      { key: 'settings', id: 'modal-settings', open: 'openSettingsModal', close: 'closeSettingsModal' },
+      { key: 'create_course', id: 'modal-create-course', open: 'openCreateCourseModal', close: 'closeCreateCourseModal' },
+      { key: 'add_student', id: 'modal-add-student', open: 'openAddStudentModal', close: 'closeAddStudentModal' },
+      { key: 'schedule_lesson', id: 'modal-schedule-lesson', open: 'openScheduleLessonModal', close: 'closeScheduleLessonModal' },
+      { key: 'month_picker', id: 'modal-month-picker', open: 'openMonthPickerModal', close: 'closeMonthPickerModal' },
+      { key: 'breakdown_planner', id: 'modal-curriculum-breakdown-planner', open: 'openBreakdownPlannerModal', close: 'closeBreakdownPlannerModal' },
+      { key: 'pedagogical_ai', id: 'modal-pedagogical-ai-tools', open: 'openPedagogicalAiModal', close: 'closePedagogicalAiModal' },
+      { key: 'print_plan', id: 'modal-print-lesson-plan', open: 'openPrintLessonPlanModal', close: 'closePrintLessonPlanModal' },
+      { key: 'parent_recap', id: 'modal-parent-recap', open: 'openParentRecapModal', close: 'closeParentRecapModal' },
+      { key: 'add_lesson', id: 'modal-add-custom-lesson', open: 'openAddCustomLessonModal', close: 'closeAddCustomLessonModal' },
+      { key: 'batch_outline', id: 'modal-studio-batch-outline', open: 'openStudioBatchOutlineModal', close: 'closeStudioBatchOutlineModal' },
+      { key: 'studio_copilot', id: 'modal-studio-ai-copilot', open: 'openStudioAiCoPilotModal', close: 'closeStudioAiCoPilotModal' },
+      { key: 'add_material', id: 'modal-add-study-material', open: 'openAddStudyMaterialModal', close: 'closeAddStudyMaterialModal' },
+      { key: 'review_materials', id: 'modal-review-study-materials', open: 'openReviewStudyMaterialsModal', close: 'closeReviewStudyMaterialsModal' },
+      { key: 'extension_bridge', id: 'modal-extension-bridge', open: 'openExtensionBridgeModal', close: 'closeExtensionBridgeModal' },
+      { key: 'ai_builder', id: 'modal-ai-curriculum-builder', open: 'openAiCurriculumBuilderModal', close: 'closeAiCurriculumBuilderModal' }
+    ];
+
+    var spaHistoryInitialized = false;
+    var isRestoringSpaHistory = false;
+    var spaHistoryFlushQueued = false;
+    var lastCommittedSpaNavKey = '';
+    APP_STATE._navHistoryStack = [];
+    APP_STATE._navHistoryIndex = -1;
+
+    function getActiveTopSpaModal() {
+      if (typeof document === 'undefined') return null;
+      for (let i = 0; i < SPA_MODAL_REGISTRY.length; i++) {
+        const entry = SPA_MODAL_REGISTRY[i];
+        const el = document.getElementById(entry.id);
+        if (el && el.classList && !el.classList.contains('hidden')) {
+          return entry.key;
+        }
+      }
+      return null;
+    }
+
+    function captureCurrentNavigationState() {
+      const modalKey = getActiveTopSpaModal();
+      const drawerId = APP_STATE.activeStudentDrawerId || null;
+      const drawerTab = drawerId && typeof studentProfileTabMap !== 'undefined'
+        ? (studentProfileTabMap[drawerId] || 'progress')
+        : null;
+      const modalMeta = (modalKey === 'create_course' && typeof editingCustomCourseId !== 'undefined' && editingCustomCourseId)
+        ? { courseId: editingCustomCourseId }
+        : null;
+      return {
+        _tpNav: true,
+        tab: APP_STATE.activeTab || 'study',
+        insideCourseId: APP_STATE.insideCourseId || null,
+        studioLessonId: APP_STATE.studioSelectedLessonId || null,
+        studioMode: (typeof studioScreenMode !== 'undefined' && studioScreenMode) ? studioScreenMode : 'list',
+        calViewMode: (APP_STATE.calendar && APP_STATE.calendar.viewMode) || 'month',
+        calDayOpen: !!(APP_STATE.calendar && APP_STATE.calendar.isDayViewOpen),
+        calDateStr: (APP_STATE.calendar && APP_STATE.calendar.selectedDateStr) || null,
+        calSessionId: (APP_STATE.calendar && APP_STATE.calendar.selectedSessionId) || null,
+        drawerStudentId: drawerId,
+        drawerTab: drawerTab,
+        modal: modalKey,
+        modalMeta: modalMeta
+      };
+    }
+
+    function getSpaNavStateKey(st) {
+      if (!st) return '';
+      return JSON.stringify([
+        st.tab, st.insideCourseId, st.studioLessonId, st.studioMode,
+        st.calViewMode, st.calDayOpen, st.calDateStr, st.calSessionId,
+        st.drawerStudentId, st.drawerTab, st.modal, st.modalMeta ? st.modalMeta.courseId : null
+      ]);
+    }
+
+    function getSafeHistoryUrl() {
+      try {
+        if (typeof window !== 'undefined' && window.location) {
+          return (window.location.pathname || '/') + (window.location.search || '');
+        }
+      } catch (e) {}
+      return '/';
+    }
+
+    function seedInitialSpaHistoryState() {
+      const snap = captureCurrentNavigationState();
+      const key = getSpaNavStateKey(snap);
+      lastCommittedSpaNavKey = key;
+      APP_STATE._navHistoryStack = [snap];
+      APP_STATE._navHistoryIndex = 0;
+      try {
+        if (typeof window !== 'undefined' && window.history && typeof window.history.replaceState === 'function') {
+          window.history.replaceState(snap, '', getSafeHistoryUrl());
+        }
+      } catch (e) {}
+    }
+
+    function commitSpaHistorySnapshot() {
+      spaHistoryFlushQueued = false;
+      if (isRestoringSpaHistory) return;
+      const lockEl = typeof document !== 'undefined' ? document.getElementById('lock-screen') : null;
+      if (lockEl && lockEl.classList && !lockEl.classList.contains('hidden')) return;
+
+      const snap = captureCurrentNavigationState();
+      const key = getSpaNavStateKey(snap);
+      if (key === lastCommittedSpaNavKey) return;
+
+      lastCommittedSpaNavKey = key;
+      if (!Array.isArray(APP_STATE._navHistoryStack)) APP_STATE._navHistoryStack = [];
+      const nextIdx = (typeof APP_STATE._navHistoryIndex === 'number' ? APP_STATE._navHistoryIndex : -1) + 1;
+      APP_STATE._navHistoryStack = APP_STATE._navHistoryStack.slice(0, nextIdx);
+      APP_STATE._navHistoryStack.push(snap);
+      APP_STATE._navHistoryIndex = APP_STATE._navHistoryStack.length - 1;
+
+      try {
+        if (typeof window !== 'undefined' && window.history && typeof window.history.pushState === 'function') {
+          window.history.pushState(snap, '', getSafeHistoryUrl());
+        }
+      } catch (e) {}
+    }
+
+    function scheduleSpaHistorySync() {
+      if (isRestoringSpaHistory || spaHistoryFlushQueued) return;
+      spaHistoryFlushQueued = true;
+      Promise.resolve().then(commitSpaHistorySnapshot);
+    }
+
+    function flushSpaHistoryNow() {
+      if (spaHistoryFlushQueued) {
+        commitSpaHistorySnapshot();
+      }
+    }
+
+    function closeAllSpaModalsSilently() {
+      if (typeof document === 'undefined') return;
+      SPA_MODAL_REGISTRY.forEach(entry => {
+        const el = document.getElementById(entry.id);
+        if (el && el.classList) el.classList.add('hidden');
+      });
+      const userDropdown = document.getElementById('user-dropdown-menu');
+      if (userDropdown && userDropdown.classList) userDropdown.classList.add('hidden');
+      const drawer = document.getElementById('drawer-student-detail');
+      if (drawer && drawer.classList) drawer.classList.add('hidden');
+      APP_STATE.activeStudentDrawerId = null;
+    }
+
+    function restoreNavigationState(state) {
+      if (!state || !state._tpNav) return;
+      const rootScope = (typeof globalThis !== 'undefined' ? globalThis : window);
+      isRestoringSpaHistory = true;
+      spaHistoryFlushQueued = false;
+      try {
+        closeAllSpaModalsSilently();
+
+        // 1. Restore primary tab
+        const targetTab = state.tab || 'study';
+        if (typeof switchTab === 'function') {
+          switchTab(targetTab);
+        }
+
+        // 2. Restore Tab-specific sub-views
+        if (targetTab === 'study') {
+          if (state.insideCourseId) {
+            APP_STATE.insideCourseId = state.insideCourseId;
+            APP_STATE.activeCourseId = state.insideCourseId;
+            APP_STATE.studioSelectedLessonId = state.studioLessonId || null;
+            if (typeof studioScreenMode !== 'undefined') {
+              studioScreenMode = state.studioMode || 'list';
+            }
+            if (typeof renderLessonsCategoryView === 'function') renderLessonsCategoryView();
+          } else {
+            if (typeof showAllCoursesView === 'function') showAllCoursesView();
+          }
+        } else if (targetTab === 'calendar') {
+          if (APP_STATE.calendar) {
+            APP_STATE.calendar.viewMode = state.calViewMode || 'month';
+            APP_STATE.calendar.isDayViewOpen = !!state.calDayOpen;
+            if (state.calDateStr) APP_STATE.calendar.selectedDateStr = state.calDateStr;
+            APP_STATE.calendar.selectedSessionId = state.calSessionId || null;
+          }
+          if (typeof renderCalendar === 'function') renderCalendar();
+        }
+
+        // 3. Restore Student Drawer if open in snapshot
+        if (state.drawerStudentId && typeof openStudentDrawer === 'function') {
+          if (typeof studentProfileTabMap !== 'undefined' && state.drawerTab) {
+            studentProfileTabMap[state.drawerStudentId] = state.drawerTab;
+          }
+          openStudentDrawer(state.drawerStudentId);
+        }
+
+        // 4. Restore Top Modal if open in snapshot
+        if (state.modal) {
+          if (state.modal === 'create_course' && state.modalMeta && state.modalMeta.courseId && typeof openEditCustomCourseModal === 'function') {
+            openEditCustomCourseModal(state.modalMeta.courseId);
+          } else if (state.modal === 'schedule_lesson' && state.calDateStr && typeof openScheduleLessonModal === 'function') {
+            openScheduleLessonModal(state.calDateStr, state.calSessionId || null);
+          } else {
+            const modalDef = SPA_MODAL_REGISTRY.find(m => m.key === state.modal);
+            if (modalDef && typeof rootScope[modalDef.open] === 'function') {
+              rootScope[modalDef.open]();
+            } else if (modalDef) {
+              const el = document.getElementById(modalDef.id);
+              if (el && el.classList) el.classList.remove('hidden');
+            }
+          }
+        }
+
+        lastCommittedSpaNavKey = getSpaNavStateKey(state);
+        if (Array.isArray(APP_STATE._navHistoryStack)) {
+          const matchIdx = APP_STATE._navHistoryStack.findIndex(item => getSpaNavStateKey(item) === lastCommittedSpaNavKey);
+          if (matchIdx >= 0) APP_STATE._navHistoryIndex = matchIdx;
+        }
+        if (typeof window !== 'undefined' && window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.lucide.createIcons();
+        }
+      } finally {
+        isRestoringSpaHistory = false;
+      }
+    }
+
+    function handleSpaPopState(event) {
+      const state = event && event.state;
+      if (state && state._tpNav) {
+        restoreNavigationState(state);
+        return;
+      }
+      // Fallback to in-memory stack if browser popped to initial/null state
+      if (Array.isArray(APP_STATE._navHistoryStack) && APP_STATE._navHistoryIndex > 0) {
+        APP_STATE._navHistoryIndex -= 1;
+        const prev = APP_STATE._navHistoryStack[APP_STATE._navHistoryIndex];
+        if (prev) restoreNavigationState(prev);
+      }
+    }
+
+    function navigateAppBack() {
+      if (typeof window !== 'undefined' && window.history && typeof window.history.back === 'function' && APP_STATE._navHistoryIndex > 0) {
+        window.history.back();
+        return true;
+      }
+      if (Array.isArray(APP_STATE._navHistoryStack) && APP_STATE._navHistoryIndex > 0) {
+        APP_STATE._navHistoryIndex -= 1;
+        const prev = APP_STATE._navHistoryStack[APP_STATE._navHistoryIndex];
+        if (prev) {
+          restoreNavigationState(prev);
+          return true;
+        }
+      }
+      // Graceful fallback when opened directly with empty stack
+      const activeModal = getActiveTopSpaModal();
+      if (activeModal) {
+        const def = SPA_MODAL_REGISTRY.find(m => m.key === activeModal);
+        const rootScope = (typeof globalThis !== 'undefined' ? globalThis : window);
+        if (def && typeof rootScope[def.close] === 'function') rootScope[def.close]();
+        return true;
+      }
+      if (APP_STATE.activeStudentDrawerId && typeof closeStudentDrawer === 'function') {
+        closeStudentDrawer();
+        return true;
+      }
+      if (APP_STATE.activeTab === 'calendar' && APP_STATE.calendar && APP_STATE.calendar.isDayViewOpen && typeof closeCalendarDateView === 'function') {
+        closeCalendarDateView();
+        return true;
+      }
+      if (APP_STATE.activeTab === 'study' && APP_STATE.insideCourseId) {
+        if (typeof studioScreenMode !== 'undefined' && studioScreenMode !== 'list' && typeof exitStudioToLessonList === 'function') {
+          exitStudioToLessonList(APP_STATE.insideCourseId);
+        } else if (typeof showAllCoursesView === 'function') {
+          showAllCoursesView();
+        }
+        return true;
+      }
+      return false;
+    }
+
+    function initSpaHistoryNavigation() {
+      if (spaHistoryInitialized) return;
+      spaHistoryInitialized = true;
+      const rootScope = (typeof globalThis !== 'undefined' ? globalThis : window);
+
+      const navFnNames = [
+        'switchTab',
+        'showAllCoursesView',
+        'openCourseClassesView',
+        'selectStudioClass',
+        'enterStudioEditLessonMode',
+        'exitStudioToLessonList',
+        'openCalendarDateView',
+        'closeCalendarDateView',
+        'switchCalendarViewMode',
+        'openStudentDrawer',
+        'closeStudentDrawer',
+        'switchStudentProfileTab',
+        'openEditCustomCourseModal',
+        'openEditCurrentCourseModal',
+        'openEditCustomLessonModal',
+        'openScheduleModalForToday',
+        'openAfterClassAiDebrief',
+        'navigateToCourse',
+        'navigateToLesson'
+      ];
+      SPA_MODAL_REGISTRY.forEach(m => {
+        if (m.open && !navFnNames.includes(m.open)) navFnNames.push(m.open);
+        if (m.close && !navFnNames.includes(m.close)) navFnNames.push(m.close);
+      });
+
+      navFnNames.forEach(fnName => {
+        const orig = rootScope[fnName];
+        if (typeof orig !== 'function' || orig._tpSpaWrapped) return;
+        const wrapped = function(...args) {
+          const res = orig.apply(this, args);
+          if (!isRestoringSpaHistory) {
+            scheduleSpaHistorySync();
+          }
+          return res;
+        };
+        wrapped._tpSpaWrapped = true;
+        rootScope[fnName] = wrapped;
+      });
+
+      if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+        window.addEventListener('popstate', handleSpaPopState);
+      }
+      seedInitialSpaHistoryState();
+    }
+
+    try { initSpaHistoryNavigation(); } catch (e) {}
   </script>
 
   <!-- ============================================== -->
