@@ -10822,12 +10822,8 @@ alter publication supabase_realtime add table public.students_sync;`;
 
         return `
           <div onclick="openCourseClassesView('${c.id}')" class="rounded-3xl bg-slate-900/90 border border-slate-800/90 hover:border-indigo-500/50 transition cursor-pointer shadow-sm hover:shadow-xl overflow-hidden group">
-            <!-- Vibrant Gradient Course Cover Banner -->
-            <div class="modern-gradient-cover keep-white h-16 bg-gradient-to-r ${gradCls} p-3.5 flex items-start justify-between relative overflow-hidden">
-              <span class="px-2.5 py-0.5 rounded-full bg-black/25 backdrop-blur-md text-white text-[10px] font-extrabold uppercase tracking-wider">
-                ${escapeHtml(c.category || 'Curriculum')}
-              </span>
-            </div>
+            <!-- Clean Gradient Course Cover Strip -->
+            <div class="modern-gradient-cover keep-white h-12 bg-gradient-to-r ${gradCls}"></div>
 
             <!-- Floating Course Icon & Clean Title -->
             <div class="px-5 pt-0 pb-5">
