@@ -3084,7 +3084,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
 
   const directReply = await sandbox.callGeminiApi('Ping test');
   assert(directReply === 'AI drafted custom block content via managed key', 'callGeminiApi skips 503 model and returns response using built-in managed key');
-  assert(sandbox.APP_STATE.geminiModel === 'gemini-3.8-flash', 'callGeminiApi routes standard requests through flagship gemini-3.8-flash model');
+  assert(sandbox.APP_STATE.geminiModel === 'gemini-3-flash-preview', 'callGeminiApi routes standard requests through flagship gemini-3-flash-preview model');
 
   // Test Multi-turn Architect conversation
   geminiRequests.length = 0;
@@ -4042,19 +4042,35 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(String(g42Course.lessons[0].sections.sec_g42_intro || '').includes('Peer Pressure Test'), 'Draft content is applied cleanly into blueprint intro section');
   assert(lessonsCont.innerHTML.includes('Updated 2 sections'), 'AI Co-Builder chat bubble surfaces confirmation badge showing exact updated section count');
 
-  // --- Gate 43: Smart AI Task Routing, Sticky-Lite Fix, PII Scrubbing & Cloudflare /api/ai Proxy ---
+  // --- Gate 43: Smart AI Task Routing, Sticky-Lite Fix, Timeout Failover & Cloudflare /api/ai Proxy ---
   console.log('\n--- Running Gate 43: Smart AI Task Routing, Sticky-Lite Fix, PII Scrubbing & Cloudflare Edge Proxy ---');
-  assert(sandbox.GEMINI_CANDIDATE_MODELS[0] === 'gemini-3.8-flash', 'GEMINI_CANDIDATE_MODELS leads with flagship gemini-3.8-flash ahead of -lite models');
+  assert(sandbox.GEMINI_CANDIDATE_MODELS[0] === 'gemini-3-flash-preview', 'GEMINI_CANDIDATE_MODELS leads with flagship gemini-3-flash-preview ahead of -lite models');
   assert(typeof sandbox.getGeminiCandidateModelsForTier === 'function', 'getGeminiCandidateModelsForTier is defined');
   assert(sandbox.getGeminiCandidateModelsForTier('pro')[0] === 'gemini-3.1-pro-preview', 'Pro taskTier prioritizes gemini-3.1-pro-preview');
-  assert(sandbox.getGeminiCandidateModelsForTier('standard')[0] === 'gemini-3.8-flash', 'Standard taskTier prioritizes gemini-3.8-flash');
+  assert(sandbox.getGeminiCandidateModelsForTier('standard')[0] === 'gemini-3-flash-preview', 'Standard taskTier prioritizes gemini-3-flash-preview');
   assert(sandbox.getGeminiCandidateModelsForTier('fast')[0] === 'gemini-3.5-flash-lite', 'Fast taskTier routes lightweight tasks to flash-lite');
 
-  // Poisoned sticky -lite localStorage value is automatically evicted on standard routing
-  sandbox.APP_STATE.geminiModel = 'gemini-3.1-flash-lite';
-  sandbox.localStorage.setItem('tutor_gemini_model', 'gemini-3.1-flash-lite');
+  // Poisoned sticky -lite or stalling model in localStorage is automatically evicted on standard routing
+  sandbox.APP_STATE.geminiModel = 'gemini-3.8-flash';
+  sandbox.localStorage.setItem('tutor_gemini_model', 'gemini-3.8-flash');
   const rescuedQueue = sandbox.getGeminiCandidateModelsForTier('standard');
-  assert(rescuedQueue[0] === 'gemini-3.8-flash' && sandbox.localStorage.getItem('tutor_gemini_model') === null, 'getGeminiCandidateModelsForTier evicts poisoned sticky -lite model from localStorage');
+  assert(rescuedQueue[0] === 'gemini-3-flash-preview' && sandbox.localStorage.getItem('tutor_gemini_model') === null, 'getGeminiCandidateModelsForTier evicts poisoned/stalling model from localStorage');
+
+  // Timeout/AbortError on slow primary model cleanly fails over to fast next candidate model instead of hanging forever
+  sandbox.fetch = async (url) => {
+    if (url.includes('gemini-3-flash-preview:')) {
+      const err = new Error('The operation was aborted due to timeout');
+      err.name = 'AbortError';
+      throw err;
+    }
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({ candidates: [{ content: { parts: [{ text: 'Timeout failover succeeded' }] } }] })
+    };
+  };
+  const timeoutFailoverRes = await sandbox.callGeminiApi('Quick ping', null, { taskTier: 'standard' });
+  assert(timeoutFailoverRes === 'Timeout failover succeeded', 'callGeminiApi cleanly fails over to next model when primary model stalls/aborts on timeout');
 
   // Fallback to -lite during a temporary outage does NOT permanently lock localStorage.tutor_gemini_model
   sandbox.fetch = async (url) => {

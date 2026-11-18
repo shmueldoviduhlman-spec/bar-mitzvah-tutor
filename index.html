@@ -4573,9 +4573,9 @@
       return !!custom && custom.trim() !== '' && custom.trim() !== SYSTEM_DEFAULT_GEMINI_KEY;
     }
 
-    const GEMINI_PRO_MODELS = ['gemini-3.1-pro-preview', 'gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-flash-latest'];
-    const GEMINI_STANDARD_MODELS = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-flash-latest', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
-    const GEMINI_FAST_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'];
+    const GEMINI_PRO_MODELS = ['gemini-3.1-pro-preview', 'gemini-pro-latest', 'gemini-3-flash-preview', 'gemini-3.5-flash-lite', 'gemini-3.7-flash'];
+    const GEMINI_STANDARD_MODELS = ['gemini-3-flash-preview', 'gemini-3.5-flash-lite', 'gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-flash-lite-latest', 'gemini-3.8-flash'];
+    const GEMINI_FAST_MODELS = ['gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3-flash-preview'];
     let aiProxyFallbackDisabledForSession = false;
 
     function getAiQualityTier() {
@@ -4619,13 +4619,14 @@
       const tier = taskTier || getAiQualityTier() || 'standard';
       if (tier === 'pro') return [...GEMINI_PRO_MODELS];
       if (tier === 'fast') return [...GEMINI_FAST_MODELS];
+      const staleModels = new Set(['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite']);
       const queue = [];
       const activeModel = typeof APP_STATE !== 'undefined' && APP_STATE ? APP_STATE.geminiModel : '';
-      if (activeModel && !String(activeModel).includes('-lite')) queue.push(activeModel);
+      if (activeModel && !String(activeModel).includes('-lite') && !staleModels.has(activeModel)) queue.push(activeModel);
       const storedModel = typeof localStorage !== 'undefined' ? (localStorage.getItem('tutor_gemini_model') || '') : '';
-      if (storedModel && !storedModel.includes('-lite') && !queue.includes(storedModel)) {
+      if (storedModel && !storedModel.includes('-lite') && !staleModels.has(storedModel) && !queue.includes(storedModel)) {
         queue.push(storedModel);
-      } else if (storedModel && storedModel.includes('-lite') && typeof localStorage !== 'undefined') {
+      } else if (storedModel && (storedModel.includes('-lite') || staleModels.has(storedModel)) && typeof localStorage !== 'undefined') {
         localStorage.removeItem('tutor_gemini_model');
       }
       const baseList = (typeof GEMINI_CANDIDATE_MODELS !== 'undefined' && Array.isArray(GEMINI_CANDIDATE_MODELS))
@@ -4677,8 +4678,11 @@
       const candidateQueue = getGeminiCandidateModelsForTier(taskTier);
 
       let lastError = null;
+      const perAttemptTimeoutMs = (options && typeof options.timeoutMs === 'number') ? options.timeoutMs : 12000;
       for (const model of candidateQueue) {
         let triedProxyThisModel = false;
+        const controller = (typeof AbortController === 'function') ? new AbortController() : null;
+        const timerId = controller ? setTimeout(() => { try { controller.abort(); } catch (_) {} }, perAttemptTimeoutMs) : null;
         try {
           let resp = null;
           if (useProxy && !aiProxyFallbackDisabledForSession) {
@@ -4692,11 +4696,13 @@
             } catch (_) {}
             const proxyHeaders = { 'Content-Type': 'application/json', 'X-TutorPilot-Role': 'tutor' };
             if (bearer) proxyHeaders['Authorization'] = `Bearer ${bearer}`;
-            resp = await fetch('/api/ai', {
+            const fetchOpts = {
               method: 'POST',
               headers: proxyHeaders,
               body: JSON.stringify({ model, payload, taskTier })
-            });
+            };
+            if (controller) fetchOpts.signal = controller.signal;
+            resp = await fetch('/api/ai', fetchOpts);
             if (resp.status === 404 || resp.status === 503) {
               const pData = await resp.clone().json().catch(() => ({}));
               if (resp.status === 404 || pData.fallbackDirect) {
@@ -4711,12 +4717,16 @@
               throw new Error('No Gemini API key configured');
             }
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
-            resp = await fetch(url, {
+            const directOpts = {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(payload)
-            });
+            };
+            if (controller) directOpts.signal = controller.signal;
+            resp = await fetch(url, directOpts);
           }
+
+          if (timerId) clearTimeout(timerId);
 
           if (resp.ok) {
             const data = await resp.json();
@@ -4747,12 +4757,14 @@
           }
           throw lastError;
         } catch (err) {
+          if (timerId) clearTimeout(timerId);
           lastError = err;
           if (triedProxyThisModel && !aiProxyFallbackDisabledForSession && err?.message && err.message.includes('Failed to fetch')) {
             aiProxyFallbackDisabledForSession = true;
           }
           const msg = err?.message || '';
-          if (msg.includes('not found') || msg.includes('not supported') ||
+          const isTimeoutOrAbort = err?.name === 'AbortError' || msg.includes('aborted') || msg.includes('timeout') || msg.includes('Failed to fetch');
+          if (isTimeoutOrAbort || msg.includes('not found') || msg.includes('not supported') ||
               msg.includes('no longer available') || msg.includes('high demand') ||
               msg.includes('quota') || msg.includes('capacity') ||
               msg.includes('EMPTY_RESPONSE') || msg.includes('API error')) {
@@ -4769,10 +4781,11 @@
     }
     if (typeof window !== 'undefined') window.callGeminiApi = callGeminiApi;
 
-    // Sanitize sticky weak -lite model from earlier browser sessions on startup
+    // Sanitize sticky weak -lite or stalling model from earlier browser sessions on startup
     const initialSavedModel = (typeof localStorage !== 'undefined' ? (localStorage.getItem('tutor_gemini_model') || '') : '');
-    const initialResolvedModel = (initialSavedModel && !initialSavedModel.includes('-lite')) ? initialSavedModel : 'gemini-3.8-flash';
-    if (initialSavedModel && initialSavedModel.includes('-lite') && typeof localStorage !== 'undefined') {
+    const staleStartupModels = new Set(['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite']);
+    const initialResolvedModel = (initialSavedModel && !initialSavedModel.includes('-lite') && !staleStartupModels.has(initialSavedModel)) ? initialSavedModel : 'gemini-3-flash-preview';
+    if (initialSavedModel && (initialSavedModel.includes('-lite') || staleStartupModels.has(initialSavedModel)) && typeof localStorage !== 'undefined') {
       localStorage.removeItem('tutor_gemini_model');
     }
 
@@ -26060,12 +26073,12 @@ Respond ONLY with strict JSON (no markdown fences):
     }
 
     var GEMINI_CANDIDATE_MODELS = [
-      'gemini-3.8-flash',
-      'gemini-3.7-flash',
-      'gemini-flash-latest',
-      'gemini-3.5-flash',
+      'gemini-3-flash-preview',
       'gemini-3.5-flash-lite',
-      'gemini-3.1-flash-lite'
+      'gemini-3.7-flash',
+      'gemini-3.5-flash',
+      'gemini-flash-lite-latest',
+      'gemini-3.8-flash'
     ];
     if (typeof window !== 'undefined') window.GEMINI_CANDIDATE_MODELS = GEMINI_CANDIDATE_MODELS;
 
