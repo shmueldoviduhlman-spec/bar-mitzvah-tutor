@@ -3477,6 +3477,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(indexHtml.includes('+ Add a New Course'), 'Screen 1 header features Add a New Course CTA');
   const cardsGridHtml = getOrCreateElem('courses-cards-grid').innerHTML;
   assert(cardsGridHtml.includes('openCourseClassesView(\'course_g37_makeover\')'), 'Course card is directly clickable to open its lessons');
+  assert(getOrCreateElem('btn-purge-all-courses').classList.contains('hidden'), 'Screen 1 My Courses permanently hides Clear All courses button to prevent accidental bulk deletion');
 
   // Screen 2: Inside Course opens strictly clean Lesson Number + Name list
   sandbox.openCourseClassesView('course_g37_makeover');
@@ -3484,7 +3485,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   const screen2Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
   assert(screen2Html.includes('studio-lesson-list-screen'), 'Screen 2 renders dedicated clean Lesson List view');
   assert(screen2Html.includes('Time vs Space: The Architecture of Shabbat'), 'Screen 2 displays lesson title cleanly');
-  assert(!screen2Html.includes('studio-class-ai-partner') && !screen2Html.includes('studio-lesson-reader'), 'Screen 2 omits raw editor forms and reader body to stay uncluttered');
+  assert(!screen2Html.includes('studio-class-ai-partner') && !screen2Html.includes('studio-lesson-reader') && !screen2Html.includes('studio-inline-syllabus-drawer'), 'Screen 2 omits raw editor forms, reader body, and stacked Topic focus syllabus clutter');
 
   // Screen 3: Clicking a lesson opens Full Clean Lesson Reader with zero raw input fields + Edit Lesson CTA
   sandbox.selectStudioClass('les_g37_1');

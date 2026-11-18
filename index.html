@@ -9386,13 +9386,8 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
 
       if (purgeBtn) {
-        if (courses.length > 0) {
-          purgeBtn.classList.remove('hidden');
-          purgeBtn.classList.add('inline-flex');
-        } else {
-          purgeBtn.classList.add('hidden');
-          purgeBtn.classList.remove('inline-flex');
-        }
+        purgeBtn.classList.add('hidden');
+        purgeBtn.classList.remove('inline-flex');
       }
 
       const topActions = document.getElementById('courses-directory-top-actions');
@@ -12433,60 +12428,21 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
               }).join('')}
             </div>
 
-            <!-- Quiet Add / Syllabus Tools Below List -->
-            <div id="studio-rapid-add-box" class="p-3.5 rounded-2xl bg-slate-900/50 border border-slate-800/80 space-y-2.5">
+            <!-- Single Clean Quick-Add Bar Below Lesson List -->
+            <div id="studio-rapid-add-box" class="p-3 rounded-2xl bg-slate-900/45 border border-slate-800/80">
               <form onsubmit="handleStudioQuickAddClass(event, '${activeCourse.id}'); return false;" class="flex items-center gap-2">
                 <input
                   id="input-studio-quick-class"
                   type="text"
                   dir="auto"
-                  placeholder="${isHe ? '+ הקלד שם שיעור ולחץ Enter...' : '+ Type lesson name and press Enter...'}"
+                  placeholder="${isHe ? '+ הקלד שם שיעור להוספה מהירה...' : '+ Type a lesson name to add quickly...'}"
                   class="flex-1 min-w-0 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:border-amber-400 transition"
                   autocomplete="off"
                 />
                 <button type="submit" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs shrink-0 transition border border-slate-700">
-                  ${isHe ? 'הוסף' : 'Quick Add'}
+                  ${isHe ? 'הוסף' : 'Add'}
                 </button>
               </form>
-              <div class="flex items-center justify-between text-xs pt-1">
-                <button type="button" onclick="toggleStudioSyllabusAiDrawer('${activeCourse.id}')" class="text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 font-semibold transition">
-                  <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                  <span>${isHe ? 'תכנון סילבוס AI' : 'Plan Syllabus with AI'}</span>
-                </button>
-                <button type="button" onclick="openStudioBatchOutlineModal('${activeCourse.id}')" class="text-slate-400 hover:text-amber-300 flex items-center gap-1.5 font-semibold transition">
-                  <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-                  <span>${isHe ? 'הדבק רשימה' : 'Paste Outline'}</span>
-                </button>
-              </div>
-
-              <div id="studio-inline-syllabus-drawer" class="${studioInlineSyllabusOpen ? '' : 'hidden'} pt-2 border-t border-indigo-500/20 space-y-2">
-                <div class="flex items-center gap-1.5">
-                  <input
-                    id="input-studio-inline-syllabus-prompt"
-                    type="text"
-                    dir="auto"
-                    placeholder="Topic focus (optional)..."
-                    onkeydown="if(event.key==='Enter'){ event.preventDefault(); executeStudioInlineSyllabusAi('${activeCourse.id}'); }"
-                    class="flex-1 min-w-0 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400"
-                  />
-                  <button type="button" onclick="executeStudioInlineSyllabusAi('${activeCourse.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold shrink-0">Suggest</button>
-                </div>
-                ${studioInlineSyllabusThinking ? `<p class="text-[11px] text-amber-400 animate-pulse font-mono">Planning sequence with Gemini...</p>` : ''}
-                ${(studioInlineSyllabusSuggestions && studioInlineSyllabusSuggestions.length > 0) ? `
-                  <div class="space-y-1.5 max-h-48 overflow-y-auto">
-                    <div class="flex items-center justify-between text-[10px] text-slate-400 px-0.5">
-                      <span>Click + Add on any lesson:</span>
-                      <button type="button" onclick="addAllInlineSuggestedClasses('${activeCourse.id}')" class="text-emerald-400 hover:underline font-bold">+ Add All</button>
-                    </div>
-                    ${studioInlineSyllabusSuggestions.map((s, sIdx) => `
-                      <div class="p-2 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-2 text-xs text-slate-200">
-                        <span dir="auto" class="truncate">${escapeHtml(s)}</span>
-                        <button type="button" onclick="addInlineSuggestedClass('${activeCourse.id}', ${sIdx})" class="px-2.5 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold shrink-0">+ Add</button>
-                      </div>
-                    `).join('')}
-                  </div>
-                ` : ''}
-              </div>
             </div>
           </div>
         `;
