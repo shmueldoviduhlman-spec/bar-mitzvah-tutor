@@ -4448,7 +4448,14 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   ];
   sandbox.renderSidebarDailyOverview();
   const g47DailyHtml = getOrCreateElem('sidebar-daily-overview-body').innerHTML;
-  assert(g47DailyHtml.includes('David Levi') && g47DailyHtml.includes('4:30 PM') && g47DailyHtml.includes('id="sidebar-daily-classes-count"') && g47DailyHtml.includes('>1</div>') && g47DailyHtml.includes('id="sidebar-daily-students-count"'), 'Live Daily Overview updates with today classes count, active student count, and scheduled student rows');
+  assert(g47DailyHtml.includes('David Levi') && g47DailyHtml.includes('4:30 PM') && g47DailyHtml.includes('Parashat Chayei Sarah') && !g47DailyHtml.includes('sidebar-daily-classes-count'), 'Today Overview focuses strictly on scheduled students, times, and what to teach each student');
+  sandbox.executeAiToolCall({ name: 'update_student', args: { studentNameOrId: 'David Levi', lastTaught: 'Lesson 1: Shabbat', nextToTeach: 'Lesson 2: Kashrut' } });
+  const updatedDailyStu = sandbox.APP_STATE.students.find(s => s.id === 'stu_daily_1');
+  assert(updatedDailyStu.skills.lastTaught === 'Lesson 1: Shabbat' && updatedDailyStu.skills.nextToTeach === 'Lesson 2: Kashrut', 'AI update_student persists lastTaught and nextToTeach after class');
+  updatedDailyStu.schedule[0].topic = 'Tutoring Session';
+  sandbox.renderSidebarDailyOverview();
+  const g47UpdatedDailyHtml = getOrCreateElem('sidebar-daily-overview-body').innerHTML;
+  assert(g47UpdatedDailyHtml.includes('Lesson 2: Kashrut'), 'Today Overview automatically surfaces updated nextToTeach for the upcoming class');
   sandbox.APP_STATE.students = g47PrevStudents;
 
   // Tab 1: 1-Click Continue Last Lesson, Top Lesson Switcher, Click-to-Rename Title, Quick Section Jump List & 3-Tab Course Architect

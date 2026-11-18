@@ -6465,6 +6465,9 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!student.skills.homework) student.skills.homework = { task: '', assignedDate: '', completed: false };
       if (!Array.isArray(student.skills.customGoals)) student.skills.customGoals = [];
       if (!Array.isArray(student.skills.nextLessonBullets)) student.skills.nextLessonBullets = [];
+      if (typeof student.skills.lastTaught !== 'string') student.skills.lastTaught = '';
+      if (typeof student.skills.lastTaughtAt !== 'string') student.skills.lastTaughtAt = '';
+      if (typeof student.skills.nextToTeach !== 'string') student.skills.nextToTeach = '';
 
       // Normalize and synchronize completedTopics / completed_topics
       if (!student.completedTopics && student.completed_topics) {
@@ -6484,6 +6487,37 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
       if (!student.completedParshiot) student.completedParshiot = {};
       if (!student.completed_parshiot) student.completed_parshiot = {};
+    }
+
+    function resolveStudentNextToTeach(student, sessionTopic) {
+      const cleanSess = String(sessionTopic || '').trim();
+      const genericDefaults = ['Tutoring Session', 'שיעור פרטי', 'Private Lesson'];
+      if (cleanSess && !genericDefaults.includes(cleanSess)) {
+        return cleanSess;
+      }
+      const nextSaved = String(student?.skills?.nextToTeach || '').trim();
+      if (nextSaved) return nextSaved;
+      const openGoal = Array.isArray(student?.skills?.customGoals) ? student.skills.customGoals.find(g => g && !g.completed && g.title) : null;
+      if (openGoal) return openGoal.title.trim();
+      const bullet = Array.isArray(student?.skills?.nextLessonBullets) && student.skills.nextLessonBullets[0] ? String(student.skills.nextLessonBullets[0]).trim() : '';
+      if (bullet) return bullet;
+      const subj = String(student?.subject || student?.parshaOrDate || '').trim();
+      if (subj) return subj;
+      return '';
+    }
+
+    function openAfterClassAiDebrief(studentId) {
+      const student = (APP_STATE.students || []).find(s => s.id === studentId);
+      const isHe = APP_STATE.lang === 'he';
+      if (typeof switchTab === 'function') switchTab('ai');
+      const input = document.getElementById('ai-chat-input');
+      if (input) {
+        const sName = student ? student.name : '';
+        input.value = isHe
+          ? `סיימתי שיעור עם ${sName}. היום לימדתי: `
+          : `After class with ${sName}: today we finished teaching `;
+        input.focus();
+      }
     }
 
     function toggleStudentModule(studentId, moduleKey) {
@@ -24738,8 +24772,12 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       const sess = student.schedule.find(item => item.id === sessionId);
       if (!sess) return;
       const input = document.getElementById(`day-detail-topic-input-${sessionId}`);
-      sess.topic = input ? input.value.trim() : '';
+      const nextVal = input ? input.value.trim() : '';
+      sess.topic = nextVal;
+      if (typeof ensureStudentSkills === 'function') ensureStudentSkills(student);
+      if (student.skills) student.skills.nextToTeach = nextVal;
       saveStudentsToStorage(true);
+      if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
       renderCalendar();
       showToast(APP_STATE.lang === 'he' ? 'תוכן השיעור עודכן בהצלחה' : 'Lesson plan updated');
     }
@@ -24808,12 +24846,14 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
                     ? `<span class="px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30 text-[10px] font-bold">⚠ ${t.sessionStatusNoShow || 'No-Show'}</span>`
                     : '';
 
-              const hasTopic = !!(s.topic && s.topic.trim());
-              const teachingText = hasTopic
-                ? s.topic.trim()
-                : (s.studentNotes || s.studentParsha || (isHe ? 'לא הוגדרו הערות לימוד ספציפיות לשיעור זה. לחץ ערוך כדי להוסיף מה ללמד.' : 'No specific lesson notes yet. Click Edit to write what to teach in this session.'));
-
               const studentObj = (APP_STATE.students || []).find(st => st.id === s.studentId);
+              const resolvedNext = resolveStudentNextToTeach(studentObj, s.topic);
+              const lastTaughtText = String(studentObj?.skills?.lastTaught || '').trim();
+              const lastTaughtAt = String(studentObj?.skills?.lastTaughtAt || '').trim();
+              const teachingText = resolvedNext
+                || s.studentNotes
+                || s.studentParsha
+                || (isHe ? 'לא הוגדר עדיין מה ללמד בשיעור זה. לחץ ערוך או עדכן דרך ה-AI.' : 'Nothing set yet for next class. Click Edit or ask AI to update after class.');
               const activeHw = (studentObj && studentObj.skills && studentObj.skills.homework && studentObj.skills.homework.task && !studentObj.skills.homework.completed)
                 ? studentObj.skills.homework.task
                 : null;
@@ -24857,6 +24897,12 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
                           </button>
                         </div>
                         <div id="day-detail-topic-display-${s.id}" dir="auto" class="text-sm text-slate-100 leading-relaxed whitespace-pre-wrap">${escapeHtml(teachingText)}</div>
+                        ${lastTaughtText ? `
+                          <div class="pt-2 border-t border-brand-500/20 text-xs text-slate-300 flex items-start gap-1.5">
+                            <span class="font-bold text-emerald-400 shrink-0">${isHe ? 'נלמד לאחרונה:' : 'Last taught:'}</span>
+                            <span dir="auto" class="flex-1">${escapeHtml(lastTaughtText)}${lastTaughtAt ? ` <span class="text-[10px] text-slate-500 font-mono">(${escapeHtml(lastTaughtAt)})</span>` : ''}</span>
+                          </div>
+                        ` : ''}
                         ${quickStatusPills.length > 0 ? `
                           <div class="flex items-center gap-1.5 flex-wrap pt-1">
                             ${quickStatusPills.map(p => `<span class="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-slate-300 text-[11px] font-mono">${p}</span>`).join('')}
@@ -24885,6 +24931,10 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
                           <button type="button" onclick="updateSessionAttendance('${s.studentId}', '${s.id}', 'cancelled')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${sessionStatus === 'cancelled' ? 'bg-rose-700 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'}">${t.markSessionCancelledBtn || 'Cancelled'}</button>
                         </div>
                         <div class="flex items-center gap-2">
+                          <button type="button" onclick="openAfterClassAiDebrief('${s.studentId}')" class="px-2.5 py-1 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-400/30 text-[11px] font-bold flex items-center gap-1 transition">
+                            <i data-lucide="sparkles" class="w-3 h-3"></i>
+                            <span>${isHe ? 'עדכן עם AI' : 'AI After Class'}</span>
+                          </button>
                           <button type="button" onclick="openStudentDrawer('${s.studentId}')" class="text-xs font-semibold text-indigo-400 hover:underline flex items-center gap-1">
                             <span>${isHe ? 'פרופיל תלמיד' : 'Student Profile'}</span>
                             <i data-lucide="arrow-right" class="w-3 h-3 rtl:rotate-180"></i>
@@ -27014,6 +27064,8 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
                 addGoal: { type: "STRING", description: "Optional new learning goal to add to student checklist" },
                 homeworkTask: { type: "STRING", description: "Optional active homework assignment text" },
                 appendNotes: { type: "STRING", description: "Optional new note line to append without overwriting existing notes" },
+                lastTaught: { type: "STRING", description: "Summary of the last topic or lesson just taught to this student today" },
+                nextToTeach: { type: "STRING", description: "Specific lesson or topic to teach this student in their next class" },
                 parsha: { type: "STRING", description: "Updated subject or parsha alias" }
               },
               required: ["studentNameOrId"]
@@ -27521,10 +27573,12 @@ Curriculum & Lesson Studio Guidelines:
 - When the tutor asks you to create a full class or whole curriculum, call "create_full_class" with the course title, description, and all structured lessons.
 
 Debriefing & Intelligent Planning Guidelines:
-- When the user provides a lesson debrief (e.g. 'DEBRIEF [Student]: we learned X, tested Y, he mastered Z'):
-  1. Call update_student to record the debrief in their notes.
-  2. Call mark_topic_progress or mark_parsha_progress to check off any mastered topics from the 36 lessons.
-  3. If asked to schedule their next lesson, analyze uncompleted topics and set the lesson subject to the recommended upcoming topics (e.g. 'Next to teach: [Topic]'), then call schedule_lesson.
+- Core Mission (End-of-Class Progress & Next Lesson Loop): Whenever the tutor shares what they just finished teaching a student (e.g. "With Ari we finished lesson 2" or "DEBRIEF [Student]: today we learned X"):
+  1. ALWAYS call update_student with BOTH:
+     * lastTaught: clear concise summary of what was just taught today.
+     * nextToTeach: clear concise title/topic of what to teach him in the NEXT class (automatically looking at the next sequential lesson in the student's Course syllabus or notes if the tutor didn't specify it explicitly).
+  2. Record a brief note via appendNotes if helpful, and call mark_topic_progress / mark_parsha_progress if a topic was completed.
+  3. If asked to schedule their next lesson, set the lesson subject to nextToTeach and call schedule_lesson.
 
 Guidelines:
 - When the user asks you to add a student, update a name, schedule a session, create a lesson, create a class, or add a study note, ALWAYS call the corresponding function tool.
@@ -27776,6 +27830,13 @@ Guidelines:
             completed: false,
             assignedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
           };
+        }
+        if (args.lastTaught !== undefined && student.skills) {
+          student.skills.lastTaught = String(args.lastTaught).trim();
+          student.skills.lastTaughtAt = new Date().toISOString().split('T')[0];
+        }
+        if (args.nextToTeach !== undefined && student.skills) {
+          student.skills.nextToTeach = String(args.nextToTeach).trim();
         }
 
         saveStudentsToStorage(true);
@@ -28478,6 +28539,9 @@ Guidelines:
           subject: s.subject || '',
           parsha: s.parsha || s.completed_topics?._meta?.parsha || s.parsha_or_date || s.parshaOrDate || '',
           barMitzvahDate: s.barMitzvahDate || s.completed_topics?._meta?.barMitzvahDate || '',
+          lastTaught: s.skills?.lastTaught || '',
+          lastTaughtAt: s.skills?.lastTaughtAt || '',
+          nextToTeach: s.skills?.nextToTeach || '',
           notes: cleanNotes,
           completedTopicsCount: topicsCompleted.length,
           completedParshiotCount: parshiotCompleted.length,
@@ -28998,38 +29062,38 @@ Base44, please confirm receipt of this protocol and let us know that you are rea
       }
 
       const students = Array.isArray(APP_STATE.students) ? APP_STATE.students : [];
-      const activeStudentsCount = students.filter(s => s && s.status !== 'completed' && s.status !== 'paused').length;
       const todaySessions = typeof getScheduledSessionsForDate === 'function' ? (getScheduledSessionsForDate(today) || []) : [];
 
-      const classesListHtml = todaySessions.length === 0
-        ? `<div class="px-2.5 py-2 rounded-xl bg-slate-800/45 border border-slate-800/70 text-[11px] text-slate-400 text-center">${isHe ? 'אין שיעורים מתוכננים להיום' : 'No classes today'}</div>`
-        : `<div class="space-y-1 max-h-40 overflow-y-auto no-scrollbar">${todaySessions.slice(0, 4).map(sess => {
-            const isDone = sess.status === 'completed';
-            const studentName = sess.studentName || (isHe ? 'תלמיד' : 'Student');
-            const timeLabel = sess.time || '';
-            return `
-              <button type="button" onclick="switchTab('calendar'); openCalendarDateView('${escapeHtml(todayYMD)}', '${escapeHtml(sess.id)}');" class="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-slate-800/55 hover:bg-slate-800 border border-slate-800/70 text-left rtl:text-right transition">
-                <div class="flex items-center gap-2 min-w-0">
-                  <span class="w-1.5 h-1.5 rounded-full shrink-0 ${isDone ? 'bg-emerald-400' : 'bg-indigo-400'}"></span>
-                  <span class="text-[11px] font-semibold text-white truncate">${escapeHtml(studentName)}</span>
-                </div>
-                <span class="text-[10px] font-mono text-slate-400 shrink-0">${escapeHtml(timeLabel)}</span>
-              </button>
-            `;
-          }).join('')}${todaySessions.length > 4 ? `<button type="button" onclick="switchTab('calendar');" class="w-full text-center text-[10px] font-semibold text-indigo-400 hover:text-indigo-300 py-1">+${todaySessions.length - 4} ${isHe ? 'נוספים' : 'more'}</button>` : ''}</div>`;
+      if (todaySessions.length === 0) {
+        container.innerHTML = `<div class="px-3 py-2.5 rounded-xl bg-slate-800/45 border border-slate-800/70 text-[11px] text-slate-400 text-center">${isHe ? 'אין תלמידים מתוכננים להיום' : 'No students scheduled today'}</div>`;
+        return;
+      }
 
       container.innerHTML = `
-        <div class="grid grid-cols-2 gap-1.5">
-          <div class="px-2.5 py-2 rounded-xl bg-slate-800/60 border border-slate-800/80">
-            <div id="sidebar-daily-classes-count" class="text-base font-extrabold text-indigo-400 leading-tight">${todaySessions.length}</div>
-            <div class="text-[10px] font-semibold text-slate-400 mt-0.5 truncate">${isHe ? 'שיעורים היום' : 'Classes Today'}</div>
-          </div>
-          <div class="px-2.5 py-2 rounded-xl bg-slate-800/60 border border-slate-800/80">
-            <div id="sidebar-daily-students-count" class="text-base font-extrabold text-white leading-tight">${activeStudentsCount}</div>
-            <div class="text-[10px] font-semibold text-slate-400 mt-0.5 truncate">${isHe ? 'תלמידים' : 'Active'}</div>
-          </div>
+        <div id="sidebar-daily-students-list" class="space-y-1.5 max-h-64 overflow-y-auto no-scrollbar">
+          ${todaySessions.slice(0, 6).map(sess => {
+            const isDone = sess.status === 'completed';
+            const studentObj = students.find(st => st.id === sess.studentId);
+            const studentName = sess.studentName || (isHe ? 'תלמיד' : 'Student');
+            const timeLabel = sess.time || '';
+            const nextToTeach = resolveStudentNextToTeach(studentObj, sess.topic);
+            return `
+              <button type="button" onclick="switchTab('calendar'); openCalendarDateView('${escapeHtml(todayYMD)}', '${escapeHtml(sess.id)}');" class="w-full p-2.5 rounded-xl bg-slate-800/55 hover:bg-slate-800 border border-slate-800/75 text-left rtl:text-right transition space-y-1">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-1.5 min-w-0">
+                    <span class="w-1.5 h-1.5 rounded-full shrink-0 ${isDone ? 'bg-emerald-400' : 'bg-amber-400'}"></span>
+                    <span class="text-xs font-bold text-white truncate">${escapeHtml(studentName)}</span>
+                  </div>
+                  <span class="text-[10px] font-mono text-indigo-400 font-semibold shrink-0">${escapeHtml(timeLabel)}</span>
+                </div>
+                <div dir="auto" class="text-[11px] leading-snug line-clamp-2 pl-3 rtl:pl-0 rtl:pr-3 ${nextToTeach ? 'text-slate-200 font-medium' : 'text-slate-500 italic'}">
+                  ${nextToTeach ? escapeHtml(nextToTeach) : (isHe ? 'לחץ להגדיר מה ללמד' : 'Click to set what to teach')}
+                </div>
+              </button>
+            `;
+          }).join('')}
+          ${todaySessions.length > 6 ? `<button type="button" onclick="switchTab('calendar'); openCalendarDateView('${escapeHtml(todayYMD)}');" class="w-full text-center text-[10px] font-semibold text-indigo-400 hover:text-indigo-300 py-1">+${todaySessions.length - 6} ${isHe ? 'תלמידים נוספים' : 'more students'}</button>` : ''}
         </div>
-        ${classesListHtml}
       `;
     }
 
