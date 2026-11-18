@@ -709,7 +709,7 @@
   <aside id="app-sidebar-shell" class="sticky top-0 md:fixed md:inset-y-0 md:left-0 rtl:md:left-auto rtl:md:right-0 z-40 w-full md:w-64 glass-nav border-b md:border-b-0 md:border-r border-slate-800/80 px-3.5 py-2.5 md:p-5 flex items-center md:items-stretch justify-between md:flex-col gap-3 select-none">
 
     <!-- Top Brand + Primary CTA + Vertical Nav + Course Tree -->
-    <div class="flex items-center md:flex-col md:items-stretch gap-3 md:gap-5 min-w-0 flex-1 md:overflow-y-auto no-scrollbar">
+    <div class="flex items-center md:flex-col md:items-stretch gap-3 md:gap-5 min-w-0 flex-1">
 
       <!-- Brand Logo & Top-Right Circular User Profile Avatar -->
       <div class="flex items-center justify-between gap-2.5 min-w-0">
@@ -730,8 +730,8 @@
             <span id="user-display-name-short" class="sr-only">Shmuel Dovid</span>
           </button>
 
-          <!-- User Dropdown Menu (Opens below circular avatar) -->
-          <div id="user-dropdown-menu" class="hidden absolute right-0 md:left-0 md:right-auto rtl:right-auto rtl:left-0 rtl:md:right-0 rtl:md:left-auto top-full mt-2 w-64 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-2 z-50 text-xs space-y-1">
+          <!-- User Dropdown Menu (Opens cleanly below circular avatar, aligned to right edge) -->
+          <div id="user-dropdown-menu" class="hidden absolute right-0 rtl:right-auto rtl:left-0 top-full mt-2 w-60 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-2 z-50 text-xs space-y-1">
             <div class="p-2 border-b border-slate-800">
               <span id="user-dropdown-full-name" class="font-bold text-white block truncate">Shmuel Dovid Uhlman</span>
               <span id="user-dropdown-email" class="text-[11px] text-slate-400 block truncate font-mono">shmueldoviduhlman@gmail.com</span>
