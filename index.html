@@ -1142,9 +1142,9 @@
               <i data-lucide="sparkles" class="w-3.5 h-3.5 text-slate-950"></i>
               <span>AI Course Generator</span>
             </button>
-            <button onclick="openAddCustomLessonModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white border border-slate-700 transition active:scale-95 shadow-sm">
+            <button onclick="openCourseClassesView(APP_STATE.activeCourseId); handleStudioAddNewClassQuick();" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white border border-slate-700 transition active:scale-95 shadow-sm">
               <i data-lucide="plus" class="w-3.5 h-3.5 text-brand-400"></i>
-              <span>+ Add Lesson</span>
+              <span>Add Class</span>
             </button>
             <button onclick="handleDeleteActiveCustomCourse()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-xs font-semibold text-red-300 border border-red-800/40 transition active:scale-95 shadow-sm" title="Delete this custom course">
               <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-400"></i>
@@ -2528,7 +2528,7 @@
           </div>
           <button type="button" onclick="promptAddSectionToClass()" class="text-[10px] text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 transition">
             <i data-lucide="plus" class="w-3 h-3"></i>
-            <span>+ Add Extra Section</span>
+            <span>Add Extra Section</span>
           </button>
         </div>
 
@@ -9250,13 +9250,21 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     function openAiCreateClassModal(courseId) {
-      openAddCustomLessonModal(courseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId);
-      const promptInput = document.getElementById('input-ai-class-prompt');
+      const targetId = courseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId;
+      if (!targetId) {
+        openCreateCourseModal();
+        return;
+      }
+      handleCourseCardAddClass(targetId);
+      if (APP_STATE.studioSelectedLessonId) {
+        setStudioWorkspaceTab(APP_STATE.studioSelectedLessonId, 'ai');
+      }
+      const promptInput = document.getElementById('input-studio-class-ai-prompt');
       if (promptInput) {
         setTimeout(() => {
           promptInput.focus();
-          promptInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 150);
+          if (typeof promptInput.scrollIntoView === 'function') promptInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 120);
       }
     }
 
@@ -9455,7 +9463,7 @@ alter publication supabase_realtime add table public.students_sync;`;
               <div class="flex items-center gap-2">
                 <button onclick="handleCourseCardAddClass('${c.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition flex items-center gap-1">
                   <i data-lucide="plus" class="w-3 h-3"></i>
-                  <span>+ Class</span>
+                  <span>Class</span>
                 </button>
                 <button onclick="openCourseClassesView('${c.id}')" class="px-3.5 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition flex items-center gap-1 shadow">
                   <span>Open Classes</span>
@@ -10173,6 +10181,115 @@ alter publication supabase_realtime add table public.students_sync;`;
       return `${pad} rounded-2xl ${skin} space-y-2.5`;
     }
 
+    var studioSectionRuleOpenMap = {};
+    var studioSectionTweakOpenMap = {};
+
+    function estimateTextareaRows(text, minRows = 2, maxRows = 12, charsPerLine = 68) {
+      const str = String(text || '');
+      if (!str.trim()) return minRows;
+      const lines = str.split('\n');
+      let visualLines = 0;
+      lines.forEach(line => {
+        visualLines += Math.max(1, Math.ceil(line.length / charsPerLine));
+      });
+      return Math.min(maxRows, Math.max(minRows, visualLines));
+    }
+
+    function autoGrowStudioTextarea(el) {
+      if (!el || !el.style) return;
+      el.style.height = 'auto';
+      if (el.scrollHeight && el.scrollHeight > 0) {
+        el.style.height = Math.max(40, el.scrollHeight + 2) + 'px';
+      }
+    }
+
+    function toggleSectionRuleHint(secId) {
+      studioSectionRuleOpenMap[secId] = !studioSectionRuleOpenMap[secId];
+      const el = document.getElementById('studio-sec-rule-' + secId);
+      if (el) el.classList.toggle('hidden', !studioSectionRuleOpenMap[secId]);
+    }
+
+    function toggleSectionTweakBar(secId) {
+      studioSectionTweakOpenMap[secId] = !studioSectionTweakOpenMap[secId];
+      const bar = document.getElementById('studio-sec-tweak-bar-' + secId);
+      if (bar) {
+        bar.classList.toggle('hidden', !studioSectionTweakOpenMap[secId]);
+        if (studioSectionTweakOpenMap[secId]) {
+          setTimeout(() => document.getElementById('input-sec-tweak-' + secId)?.focus(), 50);
+        }
+      }
+    }
+
+    async function handleStudioSectionTargetedTweak(courseId, lessonId, sectionId, customInstruction) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course && (course.lessons || []).find(l => l.id === lessonId);
+      const bp = (course && course.blueprint) || {};
+      const sec = (bp.sections || []).find(s => s.id === sectionId);
+      if (!course || !lesson || !sec) return;
+
+      const inp = document.getElementById('input-sec-tweak-' + sectionId);
+      const instruction = (customInstruction !== undefined ? customInstruction : (inp?.value || '')).trim();
+      if (!instruction) {
+        showToast('Describe how to refine this section first');
+        inp?.focus();
+        return;
+      }
+
+      const title = lesson.title_en || lesson.title_he || 'Core Topic';
+      const currentVal = (lesson.sections && lesson.sections[sectionId]) || '';
+      const sources = ensureStudioLessonSources(lesson);
+      showStudioSavingIndicator();
+      if (inp) inp.disabled = true;
+
+      let generated = '';
+      try {
+        const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
+        if (apiKey && typeof callGeminiApi === 'function') {
+          const textSources = sources.map((s, idx) => `[Ref ${idx + 1}: ${s.label}] ${s.extractedText || s.note || s.url || ''}`).filter(Boolean).join('\n');
+          const prompt = `Refine ONLY the section "${sec.name}" (type: ${sec.type}) for class "${title}" in course "${course.title_en || course.title_he}".
+Target Students: ${bp.student_profile || course.target_level || 'General'}
+Course Guidelines: ${bp.guidelines || 'Clear, relatable, and engaging'}
+Section Rule: ${sec.ai_rule || sec.hint || 'Be concise and clear'}
+Format Requirement: ${getSectionAiFormatRule(sec.type)}
+
+Current Content:
+${currentVal || '(empty)'}
+
+${textSources ? `Reference Materials to draw from:\n${textSources.slice(0, 6000)}\n` : ''}
+Educator's Specific Request: ${instruction}
+
+Return ONLY the updated value matching the Format Requirement cleanly.`;
+          const userParts = [{ text: prompt }];
+          sources.forEach(s => {
+            if (s.base64Data) userParts.push({ inlineData: { mimeType: s.mimeType || 'audio/webm', data: s.base64Data } });
+          });
+          let rawRes = await callGeminiApi([{ role: 'user', parts: userParts }], apiKey, { temperature: 0.7 });
+          rawRes = String(rawRes || '').replace(/```json/gi, '').replace(/```/g, '').trim();
+          if (sec.type !== 'audio' && rawRes.startsWith('{')) {
+            generated = normalizeSectionAiValue(JSON.parse(rawRes), sec.type);
+          } else {
+            generated = normalizeSectionAiValue(rawRes, sec.type);
+          }
+        }
+      } catch (err) {
+        console.warn('Section targeted tweak fallback:', err);
+      }
+
+      if (generated) {
+        if (!lesson.sections) lesson.sections = {};
+        lesson.sections[sectionId] = generated;
+        lesson.updated_at = new Date().toISOString();
+        course.updated_at = new Date().toISOString();
+        studioSectionTweakOpenMap[sectionId] = false;
+        saveCustomCoursesToStorage(true);
+        renderCourseStudio(courseId, lessonId);
+        showToast(`Refined "${sec.name}"!`);
+      } else {
+        if (inp) inp.disabled = false;
+        showToast('Could not refine section — please try again');
+      }
+    }
+
     function renderCustomBlueprintSectionCard(activeCourse, selectedLesson, sec, meta) {
       const cId = activeCourse.id;
       const lId = selectedLesson.id;
@@ -10180,20 +10297,37 @@ alter publication supabase_realtime add table public.students_sync;`;
       const cardCls = getCourseCardThemeClasses(activeCourse, effColor);
       const isTeacherOnly = !!(sec.teacher_only || sec.type === 'teacher_cue');
       const rawVal = (selectedLesson.sections && selectedLesson.sections[sec.id]) || '';
+      const isRuleOpen = !!studioSectionRuleOpenMap[sec.id];
+      const isTweakOpen = !!studioSectionTweakOpenMap[sec.id];
+
       const headerHtml = `
-        <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
           <div class="flex items-center gap-2 min-w-0">
             <span class="text-xs font-bold uppercase tracking-wider text-${effColor}-300 flex items-center gap-1.5">
-              <i data-lucide="${meta.icon}" class="w-4 h-4 text-${effColor}-400"></i>
+              <i data-lucide="${meta.icon}" class="w-4 h-4 text-${effColor}-400 shrink-0"></i>
               <span>${escapeHtml(sec.name)}</span>
             </span>
             ${isTeacherOnly ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Teacher Only</span>' : ''}
+            ${sec.ai_rule ? `
+              <button type="button" onclick="toggleSectionRuleHint('${sec.id}')" class="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 transition" title="View section guideline">
+                ⓘ Rule
+              </button>
+            ` : ''}
           </div>
-          <button type="button" onclick="handleStudioMiniBlockCustomAi('${cId}', '${lId}', '${sec.id}')" class="text-[11px] text-${effColor}-400 hover:text-${effColor}-300 flex items-center gap-1 font-semibold shrink-0">
-            <i data-lucide="sparkles" class="w-3 h-3"></i> AI Draft
-          </button>
+          <div class="flex items-center gap-2 shrink-0">
+            <button type="button" onclick="toggleSectionTweakBar('${sec.id}')" class="text-[11px] px-2 py-1 rounded-lg bg-slate-800/80 hover:bg-indigo-500/20 text-indigo-300 border border-slate-700 hover:border-indigo-400/50 flex items-center gap-1 font-semibold transition">
+              <i data-lucide="wand-2" class="w-3 h-3"></i> AI Tweak
+            </button>
+            <button type="button" onclick="handleStudioMiniBlockCustomAi('${cId}', '${lId}', '${sec.id}')" class="text-[11px] text-${effColor}-400 hover:text-${effColor}-300 flex items-center gap-1 font-semibold shrink-0" title="Auto-draft fresh content for this section">
+              <i data-lucide="sparkles" class="w-3 h-3"></i> AI Draft
+            </button>
+          </div>
         </div>
-        ${sec.ai_rule ? `<p class="text-[11px] text-slate-400 italic">Guideline: ${escapeHtml(sec.ai_rule)}</p>` : ''}
+        ${sec.ai_rule ? `<p id="studio-sec-rule-${sec.id}" class="${isRuleOpen ? '' : 'hidden'} text-[11px] text-slate-400 bg-slate-950/60 border border-slate-800 rounded-xl px-3 py-1.5 leading-relaxed">${escapeHtml(sec.ai_rule)}</p>` : ''}
+        <div id="studio-sec-tweak-bar-${sec.id}" class="${isTweakOpen ? '' : 'hidden'} flex items-center gap-2 p-2 rounded-xl bg-slate-950/90 border border-indigo-500/35">
+          <input id="input-sec-tweak-${sec.id}" type="text" dir="auto" placeholder="How should AI adjust just '${escapeHtml(sec.name)}'? (e.g. Use the Bill Gates story, simplify...)" onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleStudioSectionTargetedTweak('${cId}', '${lId}', '${sec.id}'); }" class="flex-1 min-w-0 bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none">
+          <button type="button" onclick="handleStudioSectionTargetedTweak('${cId}', '${lId}', '${sec.id}')" class="px-2.5 py-1 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white text-[11px] font-bold shrink-0">Apply</button>
+        </div>
       `;
 
       // 11. AUDIO STUDIO
@@ -10241,7 +10375,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                 <span>Audio Link</span>
               </button>
             </div>
-            <textarea rows="2" placeholder="${escapeHtml(sec.ai_rule || meta.placeholder)}" oninput="handleStudioUpdateClassField('${cId}', '${lId}', 'sections.${sec.id}', this.value)" onblur="saveCustomCoursesToStorage(true)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400">${escapeHtml(rawVal)}</textarea>
+            <textarea dir="auto" rows="${estimateTextareaRows(rawVal, 2, 8)}" placeholder="${escapeHtml(sec.ai_rule || meta.placeholder)}" oninput="autoGrowStudioTextarea(this); handleStudioUpdateClassField('${cId}', '${lId}', 'sections.${sec.id}', this.value)" onblur="saveCustomCoursesToStorage(true)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400 leading-relaxed">${escapeHtml(rawVal)}</textarea>
           </div>
         `;
       }
@@ -10252,15 +10386,15 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (sec.type === 'list') {
         const addId = 'inp-list-add-' + sec.id;
         return `
-          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-amber-900/40 space-y-3">
+          <div id="studio-custom-block-${sec.id}" class="${cardCls}">
             ${headerHtml}
             ${d.items.length > 0 ? `
               <div class="space-y-1.5">
                 ${d.items.map((item, idx) => `
-                  <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between gap-2">
-                    <div class="flex items-start gap-2 text-xs sm:text-sm text-slate-200 flex-1 min-w-0">
+                  <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-start justify-between gap-2.5">
+                    <div dir="auto" class="flex items-start gap-2.5 text-xs sm:text-sm text-slate-200 flex-1 min-w-0 leading-relaxed">
                       <span class="text-amber-400 font-bold shrink-0 mt-0.5">✦</span>
-                      <div class="leading-snug flex-1">${formatSectionInlineText(item)}</div>
+                      <div class="flex-1 break-words">${formatSectionInlineText(item)}</div>
                     </div>
                     <div class="flex items-center gap-0.5 shrink-0">
                       <button type="button" onclick="handleSectionListMoveItem('${cId}', '${lId}', '${sec.id}', ${idx}, -1)" class="p-1 rounded hover:bg-slate-800 text-slate-500 hover:text-white"><i data-lucide="chevron-up" class="w-3.5 h-3.5"></i></button>
@@ -10272,7 +10406,7 @@ alter publication supabase_realtime add table public.students_sync;`;
               </div>
             ` : '<p class="text-xs text-slate-500 italic">No bullet points yet. Add points below or click AI Draft.</p>'}
             <div class="flex items-center gap-2 pt-1">
-              <input id="${addId}" type="text" placeholder="**Concept**: Quick explanation (press Enter to add)..." class="flex-1 bg-slate-950 border border-slate-700/80 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400" onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleSectionListAddItem('${cId}', '${lId}', '${sec.id}', '${addId}'); }">
+              <input id="${addId}" type="text" dir="auto" placeholder="**Concept**: Quick explanation (press Enter to add)..." class="flex-1 bg-slate-950 border border-slate-700/80 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400" onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleSectionListAddItem('${cId}', '${lId}', '${sec.id}', '${addId}'); }">
               <button type="button" onclick="handleSectionListAddItem('${cId}', '${lId}', '${sec.id}', '${addId}')" class="px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-bold shrink-0">+ Add Point</button>
             </div>
           </div>
@@ -10284,22 +10418,22 @@ alter publication supabase_realtime add table public.students_sync;`;
         const textId = 'inp-step-txt-' + sec.id;
         const minsId = 'inp-step-mins-' + sec.id;
         return `
-          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-emerald-900/40 space-y-3">
+          <div id="studio-custom-block-${sec.id}" class="${cardCls}">
             ${headerHtml}
             ${d.steps.length > 0 ? `
               <div class="space-y-2">
                 ${d.steps.map((st, idx) => `
-                  <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center gap-2">
-                    <span class="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold shrink-0">Step ${idx + 1}</span>
-                    <input type="text" value="${escapeHtml(st.text || '')}" oninput="handleSectionStepUpdate('${cId}', '${lId}', '${sec.id}', ${idx}, 'text', this.value)" class="flex-1 bg-transparent text-xs sm:text-sm text-slate-200 focus:outline-none">
-                    <input type="text" value="${escapeHtml(st.mins || '')}" placeholder="min" oninput="handleSectionStepUpdate('${cId}', '${lId}', '${sec.id}', ${idx}, 'mins', this.value)" class="w-12 text-center bg-slate-900 border border-slate-800 rounded-lg py-0.5 px-1 text-[10px] font-mono text-emerald-300 focus:outline-none focus:border-emerald-400">
+                  <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-start gap-2.5">
+                    <span class="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold shrink-0 mt-1">Step ${idx + 1}</span>
+                    <textarea dir="auto" rows="${estimateTextareaRows(st.text, 1, 6)}" oninput="autoGrowStudioTextarea(this); handleSectionStepUpdate('${cId}', '${lId}', '${sec.id}', ${idx}, 'text', this.value)" class="studio-autogrow flex-1 bg-transparent text-xs sm:text-sm text-slate-200 focus:outline-none leading-relaxed resize-none py-0.5">${escapeHtml(st.text || '')}</textarea>
+                    <input type="text" value="${escapeHtml(st.mins || '')}" placeholder="min" oninput="handleSectionStepUpdate('${cId}', '${lId}', '${sec.id}', ${idx}, 'mins', this.value)" class="w-12 text-center bg-slate-900 border border-slate-800 rounded-lg py-1 px-1 text-[10px] font-mono text-emerald-300 focus:outline-none focus:border-emerald-400 shrink-0">
                     <button type="button" onclick="handleSectionStepDelete('${cId}', '${lId}', '${sec.id}', ${idx})" class="p-1 rounded hover:bg-rose-950/60 text-slate-500 hover:text-rose-400 shrink-0"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
                   </div>
                 `).join('')}
               </div>
             ` : '<p class="text-xs text-slate-500 italic">No steps yet. Add numbered steps with optional minutes below.</p>'}
             <div class="flex items-center gap-2 pt-1">
-              <input id="${textId}" type="text" placeholder="Add step description..." class="flex-1 bg-slate-950 border border-slate-700/80 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400" onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleSectionStepAdd('${cId}', '${lId}', '${sec.id}', '${textId}', '${minsId}'); }">
+              <input id="${textId}" type="text" dir="auto" placeholder="Add step description..." class="flex-1 bg-slate-950 border border-slate-700/80 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400" onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleSectionStepAdd('${cId}', '${lId}', '${sec.id}', '${textId}', '${minsId}'); }">
               <input id="${minsId}" type="text" placeholder="3m" class="w-14 bg-slate-950 border border-slate-700/80 rounded-xl py-2 px-2 text-xs text-center text-emerald-300 placeholder-slate-500 font-mono focus:outline-none focus:border-emerald-400">
               <button type="button" onclick="handleSectionStepAdd('${cId}', '${lId}', '${sec.id}', '${textId}', '${minsId}')" class="px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold shrink-0">+ Step</button>
             </div>
@@ -10310,14 +10444,14 @@ alter publication supabase_realtime add table public.students_sync;`;
       // 4. PRIMARY SOURCE / FORMULA
       if (sec.type === 'quote') {
         return `
-          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-sky-900/40 space-y-2.5">
+          <div id="studio-custom-block-${sec.id}" class="${cardCls}">
             ${headerHtml}
             <div class="flex items-center gap-2">
-              <input type="text" value="${escapeHtml(d.citation || '')}" placeholder="Source citation, verse, chapter, or theorem title..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'quote', 'citation', this.value)" class="flex-1 bg-slate-950/80 border border-slate-800 rounded-xl py-1.5 px-3 text-xs text-sky-300 font-semibold placeholder-slate-500 focus:outline-none focus:border-sky-400">
-              <button type="button" onclick="toggleSectionQuoteRtl('${cId}', '${lId}', '${sec.id}')" class="px-2.5 py-1.5 rounded-xl border text-[10px] font-bold transition ${d.rtl ? 'bg-sky-500/20 border-sky-400 text-sky-300' : 'bg-slate-950 border-slate-700 text-slate-400 hover:text-white'}" title="Toggle Right-to-Left Hebrew/Arabic alignment">אבג RTL</button>
+              <input type="text" dir="auto" value="${escapeHtml(d.citation || '')}" placeholder="Source citation, verse, chapter, or theorem title..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'quote', 'citation', this.value)" class="flex-1 bg-slate-950/80 border border-slate-800 rounded-xl py-2 px-3 text-xs text-sky-300 font-semibold placeholder-slate-500 focus:outline-none focus:border-sky-400">
+              <button type="button" onclick="toggleSectionQuoteRtl('${cId}', '${lId}', '${sec.id}')" class="px-2.5 py-2 rounded-xl border text-[10px] font-bold transition ${d.rtl ? 'bg-sky-500/20 border-sky-400 text-sky-300' : 'bg-slate-950 border-slate-700 text-slate-400 hover:text-white'}" title="Toggle Right-to-Left Hebrew/Arabic alignment">אבג RTL</button>
             </div>
-            <textarea rows="2" dir="${d.rtl ? 'rtl' : 'ltr'}" placeholder="Enter original quote, primary text, or mathematical formula..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'quote', 'quote', this.value)" class="w-full bg-slate-950/90 border border-sky-500/30 rounded-xl p-3 text-sm ${d.rtl ? 'text-right font-serif text-base' : 'font-mono text-sky-100'} placeholder-slate-500 focus:outline-none focus:border-sky-400 leading-relaxed">${escapeHtml(d.quote || '')}</textarea>
-            <textarea rows="2" placeholder="Plain-language meaning or commentary..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'quote', 'meaning', this.value)" class="w-full bg-slate-950/60 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-400">${escapeHtml(d.meaning || '')}</textarea>
+            <textarea rows="${estimateTextareaRows(d.quote, 2, 10)}" dir="${d.rtl ? 'rtl' : 'auto'}" placeholder="Enter original quote, primary text, or mathematical formula..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'quote', 'quote', this.value)" class="studio-autogrow w-full bg-slate-950/90 border border-sky-500/30 rounded-xl p-3 text-sm ${d.rtl ? 'text-right font-serif text-base' : 'font-mono text-sky-100'} placeholder-slate-500 focus:outline-none focus:border-sky-400 leading-relaxed">${escapeHtml(d.quote || '')}</textarea>
+            <textarea dir="auto" rows="${estimateTextareaRows(d.meaning, 2, 10)}" placeholder="Plain-language meaning or commentary..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'quote', 'meaning', this.value)" class="studio-autogrow w-full bg-slate-950/60 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-400 leading-relaxed">${escapeHtml(d.meaning || '')}</textarea>
           </div>
         `;
       }
@@ -10325,15 +10459,15 @@ alter publication supabase_realtime add table public.students_sync;`;
       // 5. STORY / WORKED EXAMPLE
       if (sec.type === 'example') {
         return `
-          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-amber-900/40 space-y-2.5">
+          <div id="studio-custom-block-${sec.id}" class="${cardCls}">
             ${headerHtml}
             <div>
               <label class="block text-[10px] font-mono uppercase text-slate-400 mb-1">Story / Problem Setup</label>
-              <textarea rows="2" placeholder="Tell the story, scenario, or initial problem setup..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'example', 'setup', this.value)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-400 leading-relaxed">${escapeHtml(d.setup || '')}</textarea>
+              <textarea dir="auto" rows="${estimateTextareaRows(d.setup, 3, 14)}" placeholder="Tell the story, scenario, or initial problem setup..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'example', 'setup', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400 leading-relaxed">${escapeHtml(d.setup || '')}</textarea>
             </div>
             <div>
               <label class="block text-[10px] font-mono uppercase text-amber-400 mb-1">Punchline / Key Lesson / Solution (Collapsible in Teach Mode)</label>
-              <textarea rows="2" placeholder="The moral, insight, or final step-by-step answer..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'example', 'takeaway', this.value)" class="w-full bg-slate-950/60 border border-amber-500/20 rounded-xl p-2.5 text-xs text-amber-100 placeholder-slate-500 focus:outline-none focus:border-amber-400">${escapeHtml(d.takeaway || '')}</textarea>
+              <textarea dir="auto" rows="${estimateTextareaRows(d.takeaway, 2, 10)}" placeholder="The moral, insight, or final step-by-step answer..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'example', 'takeaway', this.value)" class="studio-autogrow w-full bg-slate-950/60 border border-amber-500/25 rounded-xl p-3 text-xs sm:text-sm text-amber-100 placeholder-slate-500 focus:outline-none focus:border-amber-400 leading-relaxed">${escapeHtml(d.takeaway || '')}</textarea>
             </div>
           </div>
         `;
@@ -10342,17 +10476,17 @@ alter publication supabase_realtime add table public.students_sync;`;
       // 6. PRACTICE DRILL / EXERCISE
       if (sec.type === 'exercise') {
         return `
-          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-emerald-900/40 space-y-2.5">
+          <div id="studio-custom-block-${sec.id}" class="${cardCls}">
             ${headerHtml}
-            <div class="space-y-2">
+            <div class="space-y-2.5">
               ${d.items.map((item, idx) => `
                 <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
                   <div class="flex items-center justify-between gap-2">
                     <span class="text-[10px] font-mono text-emerald-400 font-bold">Drill #${idx + 1}</span>
                     ${d.items.length > 1 ? `<button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'exercise', ${idx})" class="text-slate-500 hover:text-rose-400 text-[11px]">Remove</button>` : ''}
                   </div>
-                  <input type="text" value="${escapeHtml(item.q || '')}" placeholder="Question or drill prompt..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'exercise', ${idx}, 'q', this.value)" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400">
-                  <input type="text" value="${escapeHtml(item.a || '')}" placeholder="Answer Key (hidden until revealed during class)..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'exercise', ${idx}, 'a', this.value)" class="w-full bg-slate-900/70 border border-emerald-500/20 rounded-lg py-1.5 px-2.5 text-xs text-emerald-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400">
+                  <textarea dir="auto" rows="${estimateTextareaRows(item.q, 1, 6)}" placeholder="Question or drill prompt..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'exercise', ${idx}, 'q', this.value)" class="studio-autogrow w-full bg-slate-900 border border-slate-700/80 rounded-xl py-2 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 leading-relaxed resize-none">${escapeHtml(item.q || '')}</textarea>
+                  <textarea dir="auto" rows="${estimateTextareaRows(item.a, 1, 6)}" placeholder="Answer Key (hidden until revealed during class)..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'exercise', ${idx}, 'a', this.value)" class="studio-autogrow w-full bg-slate-900/70 border border-emerald-500/20 rounded-xl py-2 px-3 text-xs sm:text-sm text-emerald-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400 leading-relaxed resize-none">${escapeHtml(item.a || '')}</textarea>
                 </div>
               `).join('')}
             </div>
@@ -10364,17 +10498,17 @@ alter publication supabase_realtime add table public.students_sync;`;
       // 7. COMMON PITFALLS
       if (sec.type === 'pitfalls') {
         return `
-          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-rose-900/40 space-y-2.5">
+          <div id="studio-custom-block-${sec.id}" class="${cardCls}">
             ${headerHtml}
-            <div class="space-y-2">
+            <div class="space-y-2.5">
               ${d.items.map((item, idx) => `
                 <div class="p-3 rounded-xl bg-slate-950/80 border border-rose-500/20 space-y-2">
                   <div class="flex items-center justify-between gap-2">
                     <span class="text-[10px] font-mono text-rose-400 font-bold">Trap &amp; Fix #${idx + 1}</span>
                     ${d.items.length > 1 ? `<button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'pitfalls', ${idx})" class="text-slate-500 hover:text-rose-400 text-[11px]">Remove</button>` : ''}
                   </div>
-                  <input type="text" value="${escapeHtml(item.trap || '')}" placeholder="Mistake students usually make..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'pitfalls', ${idx}, 'trap', this.value)" class="w-full bg-slate-900 border border-rose-500/30 rounded-lg py-1.5 px-2.5 text-xs text-rose-200 placeholder-slate-500 focus:outline-none focus:border-rose-400">
-                  <input type="text" value="${escapeHtml(item.fix || '')}" placeholder="How to correct / clarify it..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'pitfalls', ${idx}, 'fix', this.value)" class="w-full bg-slate-900/70 border border-emerald-500/20 rounded-lg py-1.5 px-2.5 text-xs text-emerald-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400">
+                  <textarea dir="auto" rows="${estimateTextareaRows(item.trap, 2, 6)}" placeholder="Mistake or misconception students usually have..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'pitfalls', ${idx}, 'trap', this.value)" class="studio-autogrow w-full bg-slate-900 border border-rose-500/30 rounded-xl py-2 px-3 text-xs sm:text-sm text-rose-200 placeholder-slate-500 focus:outline-none focus:border-rose-400 leading-relaxed resize-none">${escapeHtml(item.trap || '')}</textarea>
+                  <textarea dir="auto" rows="${estimateTextareaRows(item.fix, 2, 8)}" placeholder="How to correct or reframe it cleanly..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'pitfalls', ${idx}, 'fix', this.value)" class="studio-autogrow w-full bg-slate-900/70 border border-emerald-500/25 rounded-xl py-2 px-3 text-xs sm:text-sm text-emerald-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400 leading-relaxed resize-none">${escapeHtml(item.fix || '')}</textarea>
                 </div>
               `).join('')}
             </div>
@@ -10386,11 +10520,11 @@ alter publication supabase_realtime add table public.students_sync;`;
       // 8. DISCUSSION QUESTION
       if (sec.type === 'discussion') {
         return `
-          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-indigo-900/40 space-y-2.5">
+          <div id="studio-custom-block-${sec.id}" class="${cardCls}">
             ${headerHtml}
-            <textarea rows="2" placeholder="Main question to spark conversation..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'discussion', 'prompt', this.value)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400">${escapeHtml(d.prompt || '')}</textarea>
-            <input type="text" value="${escapeHtml(d.followup || '')}" placeholder="Follow-up cue (e.g. If they say X, ask Y)..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'discussion', 'followup', this.value)" class="w-full bg-slate-950/60 border border-indigo-500/20 rounded-xl py-1.5 px-3 text-xs text-indigo-200 placeholder-slate-500 focus:outline-none focus:border-indigo-400">
-            <input type="text" value="${escapeHtml(d.notes || '')}" placeholder="Quick note on student responses..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'discussion', 'notes', this.value)" class="w-full bg-slate-950/40 border border-slate-800 rounded-xl py-1.5 px-3 text-xs text-slate-300 placeholder-slate-500 focus:outline-none focus:border-slate-600">
+            <textarea dir="auto" rows="${estimateTextareaRows(d.prompt, 2, 8)}" placeholder="Main question to spark conversation..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'discussion', 'prompt', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400 leading-relaxed">${escapeHtml(d.prompt || '')}</textarea>
+            <textarea dir="auto" rows="${estimateTextareaRows(d.followup, 2, 6)}" placeholder="Follow-up cue (e.g. If they say X, ask Y)..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'discussion', 'followup', this.value)" class="studio-autogrow w-full bg-slate-950/60 border border-indigo-500/25 rounded-xl p-2.5 text-xs sm:text-sm text-indigo-200 placeholder-slate-500 focus:outline-none focus:border-indigo-400 leading-relaxed resize-none">${escapeHtml(d.followup || '')}</textarea>
+            <textarea dir="auto" rows="${estimateTextareaRows(d.notes, 1, 6)}" placeholder="Quick note on student responses..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'discussion', 'notes', this.value)" class="studio-autogrow w-full bg-slate-950/40 border border-slate-800 rounded-xl p-2.5 text-xs sm:text-sm text-slate-300 placeholder-slate-500 focus:outline-none focus:border-slate-600 leading-relaxed resize-none">${escapeHtml(d.notes || '')}</textarea>
           </div>
         `;
       }
@@ -10399,10 +10533,10 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (sec.type === 'reflection') {
         const pickerId = 'sel-goal-stu-' + sec.id;
         return `
-          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-purple-900/40 space-y-2.5">
+          <div id="studio-custom-block-${sec.id}" class="${cardCls}">
             ${headerHtml}
-            <textarea rows="2" placeholder="Core value or life mindset..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'reflection', 'mindset', this.value)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-400">${escapeHtml(d.mindset || '')}</textarea>
-            <input type="text" value="${escapeHtml(d.action || '')}" placeholder="Concrete action challenge for this week..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'reflection', 'action', this.value)" class="w-full bg-slate-950/60 border border-purple-500/20 rounded-xl py-1.5 px-3 text-xs text-purple-200 placeholder-slate-500 focus:outline-none focus:border-purple-400">
+            <textarea dir="auto" rows="${estimateTextareaRows(d.mindset, 2, 8)}" placeholder="Core value or life mindset..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'reflection', 'mindset', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-400 leading-relaxed">${escapeHtml(d.mindset || '')}</textarea>
+            <textarea dir="auto" rows="${estimateTextareaRows(d.action, 2, 6)}" placeholder="Concrete action challenge for this week..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'reflection', 'action', this.value)" class="studio-autogrow w-full bg-slate-950/60 border border-purple-500/25 rounded-xl p-2.5 text-xs sm:text-sm text-purple-200 placeholder-slate-500 focus:outline-none focus:border-purple-400 leading-relaxed resize-none">${escapeHtml(d.action || '')}</textarea>
             <div class="flex items-center justify-end gap-2 pt-1 flex-wrap">
               ${renderStudentQuickPickerHtml(pickerId)}
               <button type="button" onclick="assignSectionTaskToStudent('${cId}', '${lId}', '${sec.id}', 'reflection', '${pickerId}')" class="px-3 py-1 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 text-[11px] font-bold transition">+ Send to Student Goal</button>
@@ -10415,10 +10549,10 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (sec.type === 'homework') {
         const pickerId = 'sel-hw-stu-' + sec.id;
         return `
-          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-orange-900/40 space-y-2.5">
+          <div id="studio-custom-block-${sec.id}" class="${cardCls}">
             ${headerHtml}
             <div class="flex items-start gap-2">
-              <textarea rows="2" placeholder="Homework assignment instructions..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'homework', 'task', this.value)" class="flex-1 bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-orange-400">${escapeHtml(d.task || '')}</textarea>
+              <textarea dir="auto" rows="${estimateTextareaRows(d.task, 2, 8)}" placeholder="Homework assignment instructions..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'homework', 'task', this.value)" class="studio-autogrow flex-1 bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-orange-400 leading-relaxed">${escapeHtml(d.task || '')}</textarea>
               <select onchange="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'homework', 'estMinutes', this.value)" class="bg-slate-950 border border-slate-700 rounded-xl py-2 px-2 text-xs text-orange-300 font-mono focus:outline-none">
                 ${['5m', '10m', '15m', '20m', '30m'].map(m => `<option value="${m}" ${(d.estMinutes || '15m') === m ? 'selected' : ''}>${m}</option>`).join('')}
               </select>
@@ -10445,12 +10579,12 @@ alter publication supabase_realtime add table public.students_sync;`;
               </div>
               <button type="button" onclick="toggleSectionQuoteRtl('${cId}', '${lId}', '${sec.id}', 'bilingual_split')" class="px-2 py-1 rounded-lg border text-[10px] font-bold ${isRtl ? 'bg-teal-500/20 border-teal-400 text-teal-300' : 'bg-slate-950 border-slate-700 text-slate-400'}">אבג RTL</button>
             </div>
-            <div class="space-y-2">
+            <div class="space-y-2.5">
               ${rows.map((r, idx) => `
-                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center p-2 rounded-xl bg-slate-950/70 border border-slate-800">
-                  <textarea rows="2" dir="${isRtl ? 'rtl' : 'ltr'}" placeholder="Original verse/phrase..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'bilingual_split', ${idx}, 'orig', this.value)" class="sm:col-span-6 bg-slate-900 border border-slate-700/80 rounded-lg p-2 text-xs text-teal-100 ${isRtl ? 'text-right font-serif text-sm' : ''}">${escapeHtml(r.orig || '')}</textarea>
-                  <textarea rows="2" placeholder="Translation / commentary..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'bilingual_split', ${idx}, 'trans', this.value)" class="sm:col-span-5 bg-slate-900 border border-slate-700/80 rounded-lg p-2 text-xs text-slate-200">${escapeHtml(r.trans || '')}</textarea>
-                  <button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'bilingual_split', ${idx})" class="sm:col-span-1 text-slate-500 hover:text-rose-400 p-1 flex justify-center"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-start p-2.5 rounded-xl bg-slate-950/70 border border-slate-800">
+                  <textarea rows="${estimateTextareaRows(r.orig, 2, 10, 34)}" dir="${isRtl ? 'rtl' : 'auto'}" placeholder="Original verse/phrase..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'bilingual_split', ${idx}, 'orig', this.value)" class="studio-autogrow sm:col-span-5 bg-slate-900 border border-slate-700/80 rounded-xl p-2.5 text-xs sm:text-sm text-teal-100 leading-relaxed ${isRtl ? 'text-right font-serif text-base' : ''}">${escapeHtml(r.orig || '')}</textarea>
+                  <textarea rows="${estimateTextareaRows(r.trans, 2, 10, 42)}" dir="auto" placeholder="Translation / commentary..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'bilingual_split', ${idx}, 'trans', this.value)" class="studio-autogrow sm:col-span-6 bg-slate-900 border border-slate-700/80 rounded-xl p-2.5 text-xs sm:text-sm text-slate-200 leading-relaxed">${escapeHtml(r.trans || '')}</textarea>
+                  <button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'bilingual_split', ${idx})" class="sm:col-span-1 text-slate-500 hover:text-rose-400 p-1.5 flex justify-center"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
                 </div>
               `).join('')}
             </div>
@@ -10472,7 +10606,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                   <tr>
                     ${headers.map((h, cIdx) => `
                       <th class="p-1 text-left">
-                        <input type="text" value="${escapeHtml(h)}" oninput="handleSectionTableUpdateHeader('${cId}', '${lId}', '${sec.id}', ${cIdx}, this.value)" class="w-full bg-blue-500/10 border border-blue-500/30 rounded-lg py-1 px-2 text-blue-300 font-bold text-xs">
+                        <input type="text" dir="auto" value="${escapeHtml(h)}" oninput="handleSectionTableUpdateHeader('${cId}', '${lId}', '${sec.id}', ${cIdx}, this.value)" class="w-full bg-blue-500/10 border border-blue-500/30 rounded-lg py-1.5 px-2.5 text-blue-300 font-bold text-xs">
                       </th>
                     `).join('')}
                     <th class="w-8"></th>
@@ -10482,11 +10616,11 @@ alter publication supabase_realtime add table public.students_sync;`;
                   ${rows.map((r, rIdx) => `
                     <tr>
                       ${headers.map((_, cIdx) => `
-                        <td class="p-1">
-                          <input type="text" value="${escapeHtml((r && r[cIdx]) || '')}" oninput="handleSectionTableUpdateCell('${cId}', '${lId}', '${sec.id}', ${rIdx}, ${cIdx}, this.value)" placeholder="Value..." class="w-full bg-slate-950/80 border border-slate-800 rounded-lg py-1 px-2 text-slate-200 text-xs">
+                        <td class="p-1 align-top">
+                          <textarea dir="auto" rows="${estimateTextareaRows((r && r[cIdx]) || '', 1, 5, 28)}" oninput="autoGrowStudioTextarea(this); handleSectionTableUpdateCell('${cId}', '${lId}', '${sec.id}', ${rIdx}, ${cIdx}, this.value)" placeholder="Value..." class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-lg py-1.5 px-2.5 text-slate-200 text-xs leading-snug resize-none">${escapeHtml((r && r[cIdx]) || '')}</textarea>
                         </td>
                       `).join('')}
-                      <td class="p-1 text-center">
+                      <td class="p-1 text-center align-top">
                         <button type="button" onclick="handleSectionTableDeleteRow('${cId}', '${lId}', '${sec.id}', ${rIdx})" class="text-slate-500 hover:text-rose-400 p-1"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
                       </td>
                     </tr>
@@ -10518,12 +10652,12 @@ alter publication supabase_realtime add table public.students_sync;`;
                       <span class="text-[10px] font-mono text-indigo-300 font-bold">Question #${qIdx + 1}</span>
                       ${items.length > 1 ? `<button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'quiz', ${qIdx})" class="text-[11px] text-slate-500 hover:text-rose-400">Remove</button>` : ''}
                     </div>
-                    <input type="text" value="${escapeHtml(item.q || '')}" placeholder="Quiz question..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'quiz', ${qIdx}, 'q', this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2.5 text-xs text-white font-semibold">
+                    <textarea dir="auto" rows="${estimateTextareaRows(item.q, 1, 5)}" placeholder="Quiz question..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'quiz', ${qIdx}, 'q', this.value)" class="studio-autogrow w-full bg-slate-900 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white font-semibold leading-relaxed resize-none">${escapeHtml(item.q || '')}</textarea>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                       ${opts.map((opt, optIdx) => `
                         <div class="flex items-center gap-1.5">
                           <button type="button" onclick="handleSectionQuizCorrectSet('${cId}', '${lId}', '${sec.id}', ${qIdx}, ${optIdx})" class="px-2 py-1 rounded-lg border text-[10px] font-bold shrink-0 ${corr === optIdx ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300' : 'bg-slate-900 border-slate-700 text-slate-500'}" title="Mark as correct answer">${String.fromCharCode(65 + optIdx)}${corr === optIdx ? ' ✓' : ''}</button>
-                          <input type="text" value="${escapeHtml(opt || '')}" placeholder="Choice ${String.fromCharCode(65 + optIdx)}" oninput="handleSectionQuizOptionUpdate('${cId}', '${lId}', '${sec.id}', ${qIdx}, ${optIdx}, this.value)" class="flex-1 bg-slate-900 border border-slate-800 rounded-lg py-1 px-2 text-xs text-slate-200">
+                          <input type="text" dir="auto" value="${escapeHtml(opt || '')}" placeholder="Choice ${String.fromCharCode(65 + optIdx)}" oninput="handleSectionQuizOptionUpdate('${cId}', '${lId}', '${sec.id}', ${qIdx}, ${optIdx}, this.value)" class="flex-1 bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-2.5 text-xs text-slate-200">
                         </div>
                       `).join('')}
                     </div>
@@ -10544,10 +10678,10 @@ alter publication supabase_realtime add table public.students_sync;`;
             ${headerHtml}
             <div class="space-y-2">
               ${items.map((item, idx) => `
-                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center p-2.5 rounded-xl bg-slate-950/80 border border-purple-500/20">
-                  <input type="text" value="${escapeHtml(item.front || '')}" placeholder="Front (Term / Question)..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'flashcards', ${idx}, 'front', this.value)" class="sm:col-span-5 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2.5 text-xs text-purple-200 font-bold">
-                  <input type="text" value="${escapeHtml(item.back || '')}" placeholder="Back (Definition / Answer)..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'flashcards', ${idx}, 'back', this.value)" class="sm:col-span-6 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2.5 text-xs text-slate-200">
-                  <button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'flashcards', ${idx})" class="sm:col-span-1 text-slate-500 hover:text-rose-400 p-1 flex justify-center"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-start p-2.5 rounded-xl bg-slate-950/80 border border-purple-500/20">
+                  <textarea dir="auto" rows="${estimateTextareaRows(item.front, 1, 5, 28)}" placeholder="Front (Term / Question)..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'flashcards', ${idx}, 'front', this.value)" class="studio-autogrow sm:col-span-5 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2.5 text-xs text-purple-200 font-bold resize-none">${escapeHtml(item.front || '')}</textarea>
+                  <textarea dir="auto" rows="${estimateTextareaRows(item.back, 1, 5, 36)}" placeholder="Back (Definition / Answer)..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'flashcards', ${idx}, 'back', this.value)" class="studio-autogrow sm:col-span-6 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2.5 text-xs text-slate-200 resize-none">${escapeHtml(item.back || '')}</textarea>
+                  <button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'flashcards', ${idx})" class="sm:col-span-1 text-slate-500 hover:text-rose-400 p-1.5 flex justify-center"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
                 </div>
               `).join('')}
             </div>
@@ -10569,7 +10703,7 @@ alter publication supabase_realtime add table public.students_sync;`;
               </select>
               <span class="text-[11px] text-slate-400">Countdown activates inside Teach Class</span>
             </div>
-            <textarea rows="2" placeholder="Activity prompt or timed drill instructions..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'timed_activity', 'prompt', this.value)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-orange-400">${escapeHtml(d.prompt || '')}</textarea>
+            <textarea dir="auto" rows="${estimateTextareaRows(d.prompt, 2, 8)}" placeholder="Activity prompt or timed drill instructions..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'timed_activity', 'prompt', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-orange-400 leading-relaxed">${escapeHtml(d.prompt || '')}</textarea>
           </div>
         `;
       }
@@ -10582,10 +10716,10 @@ alter publication supabase_realtime add table public.students_sync;`;
             ${headerHtml}
             <div class="space-y-2">
               ${items.map((item, idx) => `
-                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center p-2 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <input type="text" value="${escapeHtml(item.speaker || '')}" placeholder="Speaker..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'dialogue', ${idx}, 'speaker', this.value)" class="sm:col-span-3 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2 text-xs text-cyan-300 font-bold">
-                  <input type="text" value="${escapeHtml(item.line || '')}" placeholder="Dialogue line..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'dialogue', ${idx}, 'line', this.value)" class="sm:col-span-8 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2.5 text-xs text-slate-200">
-                  <button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'dialogue', ${idx})" class="sm:col-span-1 text-slate-500 hover:text-rose-400 p-1 flex justify-center"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-start p-2 rounded-xl bg-slate-950/80 border border-slate-800">
+                  <input type="text" dir="auto" value="${escapeHtml(item.speaker || '')}" placeholder="Speaker..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'dialogue', ${idx}, 'speaker', this.value)" class="sm:col-span-3 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2 text-xs text-cyan-300 font-bold">
+                  <textarea dir="auto" rows="${estimateTextareaRows(item.line, 1, 6, 48)}" placeholder="Dialogue line..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'dialogue', ${idx}, 'line', this.value)" class="studio-autogrow sm:col-span-8 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2.5 text-xs text-slate-200 resize-none">${escapeHtml(item.line || '')}</textarea>
+                  <button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'dialogue', ${idx})" class="sm:col-span-1 text-slate-500 hover:text-rose-400 p-1.5 flex justify-center"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
                 </div>
               `).join('')}
             </div>
@@ -10604,7 +10738,7 @@ alter publication supabase_realtime add table public.students_sync;`;
               <button type="button" onclick="triggerSectionImageUpload('${cId}', '${lId}', '${sec.id}')" class="px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 text-xs font-semibold shrink-0">Upload Image</button>
             </div>
             ${d.url ? `<div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950 p-2 max-h-56 flex justify-center"><img src="${escapeHtml(d.url)}" alt="${escapeHtml(d.caption || sec.name)}" class="max-h-52 rounded-lg object-contain"></div>` : ''}
-            <input type="text" value="${escapeHtml(d.caption || '')}" placeholder="Caption or visual teaching cue..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'image', 'caption', this.value)" class="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-1.5 px-3 text-xs text-slate-300">
+            <input type="text" dir="auto" value="${escapeHtml(d.caption || '')}" placeholder="Caption or visual teaching cue..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'image', 'caption', this.value)" class="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-1.5 px-3 text-xs text-slate-300">
           </div>
         `;
       }
@@ -10618,7 +10752,7 @@ alter publication supabase_realtime add table public.students_sync;`;
             <div class="space-y-2">
               ${items.map((item, idx) => `
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center p-2 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <input type="text" value="${escapeHtml(item.title || '')}" placeholder="Link / Video title..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'video_links', ${idx}, 'title', this.value)" class="sm:col-span-4 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2 text-xs text-white font-semibold">
+                  <input type="text" dir="auto" value="${escapeHtml(item.title || '')}" placeholder="Link / Video title..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'video_links', ${idx}, 'title', this.value)" class="sm:col-span-4 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2 text-xs text-white font-semibold">
                   <input type="text" value="${escapeHtml(item.url || '')}" placeholder="https://youtube.com/... or resource URL" oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'video_links', ${idx}, 'url', this.value)" class="sm:col-span-7 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2 text-xs text-rose-200 font-mono">
                   <button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'video_links', ${idx})" class="sm:col-span-1 text-slate-500 hover:text-rose-400 p-1 flex justify-center"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
                 </div>
@@ -10634,20 +10768,17 @@ alter publication supabase_realtime add table public.students_sync;`;
         return `
           <div id="studio-custom-block-${sec.id}" class="${cardCls} border-dashed">
             ${headerHtml}
-            <textarea rows="2" placeholder="Private prep cues, anticipated student questions, or pacing reminders (excluded from student views)..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'teacher_cue', 'cue', this.value)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs sm:text-sm text-slate-300 placeholder-slate-500 focus:outline-none focus:border-slate-500">${escapeHtml(d.cue || '')}</textarea>
+            <textarea dir="auto" rows="${estimateTextareaRows(d.cue, 2, 8)}" placeholder="Private prep cues, anticipated student questions, or pacing reminders (excluded from student views)..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'teacher_cue', 'cue', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-300 placeholder-slate-500 focus:outline-none focus:border-slate-500 leading-relaxed">${escapeHtml(d.cue || '')}</textarea>
           </div>
         `;
       }
 
-      // 1. TEXT / EXPLANATION (Formatted Bold/Code Preview + Quick Summary)
+      // 1. TEXT / EXPLANATION (Auto-growing Full Readability + Formatted Highlight)
       return `
         <div id="studio-custom-block-${sec.id}" class="${cardCls}">
           ${headerHtml}
-          <input type="text" value="${escapeHtml(d.summary || '')}" placeholder="Quick 1-sentence core takeaway (optional)..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'text', 'summary', this.value)" class="w-full bg-slate-950/60 border border-cyan-500/20 rounded-xl py-1.5 px-3 text-xs text-cyan-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-semibold">
-          <textarea rows="3" placeholder="Main explanation (supports **bold** and \`code\` highlights)..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'text', 'body', this.value)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-${effColor}-400 leading-relaxed">${escapeHtml(d.body || '')}</textarea>
-          ${(d.body && (d.body.includes('**') || d.body.includes('`'))) ? `
-            <div class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-xs text-slate-300 leading-relaxed">${formatSectionInlineText(d.body)}</div>
-          ` : ''}
+          <textarea dir="auto" rows="${estimateTextareaRows(d.summary, 1, 4)}" placeholder="Quick 1-sentence core takeaway (optional)..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'text', 'summary', this.value)" class="studio-autogrow w-full bg-slate-950/60 border border-cyan-500/20 rounded-xl py-2 px-3 text-xs sm:text-sm text-cyan-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-semibold leading-relaxed resize-none">${escapeHtml(d.summary || '')}</textarea>
+          <textarea dir="auto" rows="${estimateTextareaRows(d.body, 3, 16)}" placeholder="Main explanation (supports **bold** and \`code\` highlights)..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'text', 'body', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-${effColor}-400 leading-relaxed">${escapeHtml(d.body || '')}</textarea>
         </div>
       `;
     }
@@ -10837,9 +10968,84 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
 
     var studioWorkspaceTabMap = {};
     var studioSourcePopoverMap = {};
+    var studioSourcePreviewMap = {};
+    var studioSyllabusCollapsed = false;
     var studioSourceRecordingActive = false;
     var studioSourceMediaRecorder = null;
     var studioSourceAudioChunks = [];
+
+    function toggleStudioSyllabusRail() {
+      studioSyllabusCollapsed = !studioSyllabusCollapsed;
+      renderCourseStudio(APP_STATE.insideCourseId || APP_STATE.activeCourseId, APP_STATE.studioSelectedLessonId);
+    }
+
+    function toggleStudioSourcePreview(srcId) {
+      studioSourcePreviewMap[srcId] = !studioSourcePreviewMap[srcId];
+      const box = document.getElementById('studio-source-preview-' + srcId);
+      if (box) box.classList.toggle('hidden', !studioSourcePreviewMap[srcId]);
+    }
+
+    function promoteStudioSourceToLessonAudio(courseId, lessonId, srcId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course && (course.lessons || []).find(l => l.id === lessonId);
+      if (!course || !lesson) return;
+      const src = ensureStudioLessonSources(lesson).find(s => s.id === srcId);
+      if (!src || !src.dataUrl) return;
+      if (!Array.isArray(lesson.recordings)) lesson.recordings = [];
+      const already = lesson.recordings.some(r => r.sourceRefId === srcId);
+      if (already) {
+        lesson.recordings = lesson.recordings.filter(r => r.sourceRefId !== srcId);
+        src.savedToTeachAudio = false;
+        showToast('Removed from Teach Class Audio');
+      } else {
+        lesson.recordings.push({
+          id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+          sourceRefId: srcId,
+          title: src.label || 'Prep Audio Recording',
+          url: src.dataUrl,
+          type: 'audio'
+        });
+        src.savedToTeachAudio = true;
+        showToast('Saved to Teach Class Audio!');
+      }
+      saveCustomCoursesToStorage(true);
+      renderCourseStudio(courseId, lessonId);
+    }
+
+    function handleStudioComposerPaste(event, courseId, lessonId) {
+      const items = event?.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        const it = items[i];
+        if (it && it.type && it.type.startsWith('image/')) {
+          const blob = it.getAsFile();
+          if (!blob) continue;
+          event.preventDefault();
+          const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+          const lesson = course && (course.lessons || []).find(l => l.id === lessonId);
+          if (!course || !lesson) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            const dataUrl = String(reader.result || '');
+            const base64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+            ensureStudioLessonSources(lesson).push({
+              id: 'src_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+              kind: 'image',
+              label: `Pasted Image (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`,
+              mimeType: blob.type || 'image/png',
+              dataUrl: dataUrl,
+              base64Data: base64,
+              status: 'ready',
+              created_at: new Date().toISOString()
+            });
+            saveCustomCoursesToStorage(true);
+            renderCourseStudio(courseId, lessonId);
+            showToast('Screenshot / image attached for AI analysis!');
+          };
+          reader.readAsDataURL(blob);
+        }
+      }
+    }
 
     function getStudioWorkspaceTab(course, lesson) {
       if (!lesson) return 'ai';
@@ -10916,21 +11122,30 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       saveCustomCoursesToStorage(true);
       renderCourseStudio(courseId, lessonId);
 
-      // Live browser metadata/text extraction for YouTube & readable web pages
+      // Live browser metadata/text extraction via verified CORS endpoints
       let extracted = '';
       try {
         const isYt = /(?:youtube\.com\/watch|youtu\.be\/|youtube\.com\/shorts)/i.test(rawUrl);
         if (isYt && typeof fetch === 'function') {
-          const ytCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-          const ytTimer = ytCtrl ? setTimeout(() => ytCtrl.abort(), 5000) : null;
-          const ytResp = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(rawUrl)}&format=json`, ytCtrl ? { signal: ytCtrl.signal } : {}).catch(() => null);
-          if (ytTimer) clearTimeout(ytTimer);
-          if (ytResp && ytResp.ok) {
-            const ytMeta = await ytResp.json().catch(() => null);
-            if (ytMeta && ytMeta.title) {
-              srcItem.label = ytMeta.title.slice(0, 48);
-              extracted += `YouTube Video Title: ${ytMeta.title}\nChannel: ${ytMeta.author_name || 'Unknown'}\n`;
+          let ytMeta = null;
+          const tryYtMeta = async (endpointUrl) => {
+            const ytCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+            const ytTimer = ytCtrl ? setTimeout(() => ytCtrl.abort(), 4500) : null;
+            const ytResp = await fetch(endpointUrl, ytCtrl ? { signal: ytCtrl.signal } : {}).catch(() => null);
+            if (ytTimer) clearTimeout(ytTimer);
+            if (ytResp && ytResp.ok) {
+              const json = await ytResp.json().catch(() => null);
+              if (json && json.title) return json;
             }
+            return null;
+          };
+          ytMeta = await tryYtMeta(`https://noembed.com/embed?url=${encodeURIComponent(rawUrl)}`);
+          if (!ytMeta) {
+            ytMeta = await tryYtMeta(`https://www.youtube.com/oembed?url=${encodeURIComponent(rawUrl)}&format=json`);
+          }
+          if (ytMeta && ytMeta.title) {
+            srcItem.label = ytMeta.title.slice(0, 48);
+            extracted += `YouTube Video Title: ${ytMeta.title}\nChannel: ${ytMeta.author_name || 'Unknown'}\n`;
           }
         }
         if (typeof fetch === 'function') {
@@ -11522,12 +11737,12 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
             </button>
           </div>
 
-          <!-- Two-Pane Balanced Studio Grid (4/8) -->
+          <!-- Two-Pane Balanced Studio Grid (Collapsible 4/8 -> 12 Full Width) -->
           <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
             <!-- ============================================== -->
-            <!-- LEFT PANE: CLEAN SYLLABUS SIDEBAR (Col 4)      -->
+            <!-- LEFT PANE: COLLAPSIBLE SYLLABUS SIDEBAR        -->
             <!-- ============================================== -->
-            <div id="studio-syllabus-pane" class="md:col-span-4 space-y-3 ${mobileView === 'editor' ? 'hidden md:block' : 'block'}">
+            <div id="studio-syllabus-pane" class="${studioSyllabusCollapsed ? 'hidden' : 'md:col-span-4'} space-y-3 ${mobileView === 'editor' && !studioSyllabusCollapsed ? 'hidden md:block' : ''}">
               <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-sm flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <i data-lucide="book-marked" class="w-4 h-4 text-amber-400"></i>
@@ -11667,16 +11882,20 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
             </div>
 
             <!-- ============================================== -->
-            <!-- RIGHT PANE: CALM 2-TAB LESSON WORKSPACE (Col 8)-->
+            <!-- RIGHT PANE: CALM FULL-READABILITY CLASS STUDIO -->
             <!-- ============================================== -->
-            <div id="studio-active-class-pane" class="md:col-span-8 space-y-3.5 ${mobileView === 'syllabus' ? 'hidden md:block' : 'block'}">
-              <!-- Clean Class Identity Bar -->
-              <div class="p-4 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-3">
+            <div id="studio-active-class-pane" class="${studioSyllabusCollapsed ? 'md:col-span-12' : 'md:col-span-8'} space-y-3.5 ${mobileView === 'syllabus' && !studioSyllabusCollapsed ? 'hidden md:block' : 'block'}">
+              <!-- Calm Unified Class Header -->
+              <div class="p-4 sm:p-5 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-3.5">
                 <div class="flex items-center justify-between gap-2 flex-wrap">
                   <div class="flex items-center gap-2 flex-wrap">
                     <button type="button" onclick="setStudioMobileView('syllabus')" class="md:hidden flex items-center gap-1 text-xs text-amber-400 font-bold hover:underline mr-1">
                       <i data-lucide="arrow-left" class="w-3.5 h-3.5 rtl:rotate-180"></i>
                       <span>${isHe ? 'סילבוס' : 'Syllabus'}</span>
+                    </button>
+                    <button type="button" id="btn-toggle-syllabus-rail" onclick="toggleStudioSyllabusRail()" class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-semibold transition" title="Show or hide Syllabus rail for full-width writing">
+                      <i data-lucide="${studioSyllabusCollapsed ? 'panel-left-open' : 'panel-left-close'}" class="w-3.5 h-3.5 text-amber-400"></i>
+                      <span>${studioSyllabusCollapsed ? `Show Syllabus (${lessons.length})` : 'Focus View'}</span>
                     </button>
                     <span class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold">
                       Class ${selectedIdx + 1} of ${lessons.length}
@@ -11684,6 +11903,12 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                     <span id="studio-save-indicator" class="text-[11px] font-mono text-emerald-400">✓ Auto-saved</span>
                   </div>
                   <div class="flex items-center gap-1.5 flex-wrap">
+                    ${(bp && (bp.student_profile || bp.guidelines)) ? `
+                      <button type="button" onclick="toggleStudioBlueprintSummary()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 text-[11px] font-semibold flex items-center gap-1 transition" title="View Course Blueprint & Guidelines">
+                        <i data-lucide="book-open-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                        <span>${studioBlueprintDetailsOpen ? 'Hide Rules' : 'View Rules'}</span>
+                      </button>
+                    ` : ''}
                     <button type="button" onclick="openTutorTeleprompter('${activeCourse.id}', '${selectedLesson.id}')" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow active:scale-95 transition" title="Launch Teaching Mode">
                       <i data-lucide="presentation" class="w-3.5 h-3.5"></i>
                       <span>Teach Class</span>
@@ -11697,40 +11922,35 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                   </div>
                 </div>
 
-                <!-- Editable Class Title + Sleek Inline Metadata -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 items-center">
-                  <div class="lg:col-span-6">
-                    <input
-                      id="studio-class-title-input"
-                      type="text"
-                      value="${escapeHtml(selectedTitle)}"
-                      oninput="handleStudioClassTitleChange('${activeCourse.id}', '${selectedLesson.id}', this.value)"
-                      onblur="saveCustomCoursesToStorage(true)"
-                      class="w-full text-sm sm:text-base font-bold text-white bg-slate-950/80 border border-slate-700/80 rounded-xl px-3.5 py-2 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 transition"
-                      placeholder="Enter class title..."
-                    />
-                  </div>
-                  <div class="lg:col-span-2">
-                    <select aria-label="Duration" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'duration', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                <!-- Full-Width Never-Clipped Class Title + Calm Wrap-Safe Metadata Chips -->
+                <div class="space-y-2.5">
+                  <input
+                    id="studio-class-title-input"
+                    type="text"
+                    dir="auto"
+                    value="${escapeHtml(selectedTitle)}"
+                    oninput="handleStudioClassTitleChange('${activeCourse.id}', '${selectedLesson.id}', this.value)"
+                    onblur="saveCustomCoursesToStorage(true)"
+                    class="w-full text-base sm:text-lg font-bold text-white bg-slate-950/75 border border-slate-700/80 rounded-2xl px-4 py-2.5 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 transition"
+                    placeholder="Enter class title..."
+                  />
+                  <div class="flex flex-wrap items-center gap-2">
+                    <select aria-label="Duration" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'duration', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-xl py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
                       <option value="15m" ${selectedLesson.duration === '15m' ? 'selected' : ''}>15 min</option>
                       <option value="30m" ${selectedLesson.duration === '30m' ? 'selected' : ''}>30 min</option>
                       <option value="45m" ${(!selectedLesson.duration || selectedLesson.duration === '45m') ? 'selected' : ''}>45 min</option>
                       <option value="60m" ${selectedLesson.duration === '60m' ? 'selected' : ''}>60 min</option>
                       <option value="90m" ${selectedLesson.duration === '90m' ? 'selected' : ''}>90 min</option>
                     </select>
-                  </div>
-                  <div class="lg:col-span-2">
-                    <select aria-label="Level" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'level', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                    <select aria-label="Level" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'level', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-xl py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
                       <option value="Standard / All Levels" ${(!selectedLesson.level || selectedLesson.level === 'Standard / All Levels') ? 'selected' : ''}>All Levels</option>
-                      <option value="Elementary (Ages 8-11)" ${selectedLesson.level?.includes('Elementary') ? 'selected' : ''}>Elementary</option>
-                      <option value="Middle School (Ages 12-14)" ${selectedLesson.level?.includes('Middle') ? 'selected' : ''}>Middle School</option>
-                      <option value="High School (Ages 15-18)" ${selectedLesson.level?.includes('High') ? 'selected' : ''}>High School</option>
-                      <option value="Adult / Professional" ${selectedLesson.level?.includes('Adult') ? 'selected' : ''}>Adult</option>
+                      <option value="Elementary (Ages 8-11)" ${selectedLesson.level?.includes('Elementary') ? 'selected' : ''}>Elementary (Ages 8-11)</option>
+                      <option value="Middle School (Ages 12-14)" ${selectedLesson.level?.includes('Middle') ? 'selected' : ''}>Middle School (Ages 12-14)</option>
+                      <option value="High School (Ages 15-18)" ${selectedLesson.level?.includes('High') ? 'selected' : ''}>High School (Ages 15-18)</option>
+                      <option value="Adult / Professional" ${selectedLesson.level?.includes('Adult') ? 'selected' : ''}>Adult / Professional</option>
                     </select>
-                  </div>
-                  <div class="lg:col-span-2">
-                    <select aria-label="Status" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'status', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-2 text-xs text-white focus:outline-none focus:border-amber-400">
-                      <option value="ready" ${selectedLesson.status === 'ready' ? 'selected' : ''}>Ready</option>
+                    <select aria-label="Status" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'status', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-xl py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
+                      <option value="ready" ${selectedLesson.status === 'ready' ? 'selected' : ''}>Ready to Teach</option>
                       <option value="draft" ${(!selectedLesson.status || selectedLesson.status === 'draft') ? 'selected' : ''}>Draft</option>
                     </select>
                   </div>
@@ -11742,17 +11962,18 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                     type="button"
                     id="btn-studio-tab-ai"
                     onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'ai')"
-                    class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeTab === 'ai' ? 'bg-indigo-500/20 text-indigo-200 border border-indigo-400/50 shadow-sm' : 'text-slate-400 hover:text-white'}"
+                    class="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeTab === 'ai' ? 'bg-indigo-500/20 text-indigo-200 border border-indigo-400/50 shadow-sm' : 'text-slate-400 hover:text-white'}"
                   >
                     <i data-lucide="sparkles" class="w-3.5 h-3.5 ${activeTab === 'ai' ? 'text-indigo-300' : 'text-slate-500'}"></i>
-                    <span>${isHe ? 'בנה ושוחח עם AI' : 'Build & Discuss with AI'}</span>
+                    <span>${isHe ? 'בנה ושוחח עם AI' : 'Build with AI & Sources'}</span>
                     ${attachedSources.length > 0 ? `<span class="px-1.5 py-0.5 rounded-full bg-indigo-500/30 text-[10px] font-mono text-indigo-200">${attachedSources.length} ref</span>` : ''}
                   </button>
                   <button
                     type="button"
                     id="btn-studio-tab-sections"
                     onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'sections')"
-                    class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeTab === 'sections' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'}"
+                    title="Edit Class"
+                    class="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeTab === 'sections' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'}"
                   >
                     <i data-lucide="layout-list" class="w-3.5 h-3.5"></i>
                     <span>${isHe ? 'תוכן השיעור' : 'Lesson Sections'} (${hasCustomSections ? `${filledSectionsCount}/${blueprintSections.length}` : filledSectionsCount})</span>
@@ -11760,29 +11981,22 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                 </div>
               </div>
 
-              <!-- Compact Collapsible Course Blueprint Strip -->
+              <!-- Collapsible Course Blueprint Drawer (Hidden unless expanded, saving clean canvas height) -->
               ${(bp && (bp.student_profile || bp.guidelines)) ? `
-                <div id="studio-blueprint-summary-bar" class="px-3.5 py-2 rounded-2xl bg-slate-900/60 border border-slate-800/90 text-[11px] space-y-2">
-                  <div class="flex items-center justify-between gap-2 flex-wrap">
-                    <div class="flex items-center gap-2 min-w-0 flex-1 text-slate-300">
-                      <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-mono font-bold shrink-0">Course Blueprint</span>
-                      <span class="truncate">${escapeHtml(bp.student_profile || bp.guidelines || '')}</span>
-                    </div>
-                    <div class="flex items-center gap-2.5 shrink-0">
-                      <button type="button" onclick="toggleStudioBlueprintSummary()" class="text-slate-400 hover:text-white font-semibold">
-                        ${studioBlueprintDetailsOpen ? 'Hide Rules ▲' : 'View Rules ▾'}
-                      </button>
-                      <button type="button" onclick="openEditCurrentCourseModal()" class="text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1">
-                        <i data-lucide="sliders" class="w-3 h-3"></i> Edit Blueprint
-                      </button>
-                    </div>
+                <div id="studio-blueprint-summary-bar" class="${studioBlueprintDetailsOpen ? '' : 'hidden'} px-4 py-3 rounded-2xl bg-slate-900/75 border border-emerald-500/30 text-xs space-y-1.5 leading-relaxed">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-mono font-bold text-[10px]">Course Blueprint</span>
+                    <button type="button" onclick="openEditCurrentCourseModal()" class="text-amber-400 hover:text-amber-300 text-xs font-semibold flex items-center gap-1">
+                      <i data-lucide="sliders" class="w-3 h-3"></i> Edit Architecture
+                    </button>
                   </div>
-                  <div id="studio-blueprint-expanded-details" class="${studioBlueprintDetailsOpen ? '' : 'hidden'} pt-2 border-t border-slate-800/80 text-slate-300 space-y-1 leading-relaxed">
+                  <div id="studio-blueprint-expanded-details" class="text-slate-300 space-y-1">
                     ${bp.student_profile ? `<div><strong class="text-slate-400">Target Students:</strong> ${escapeHtml(bp.student_profile)}</div>` : ''}
                     ${bp.guidelines ? `<div><strong class="text-slate-400">Teaching Guidelines:</strong> ${escapeHtml(bp.guidelines)}</div>` : ''}
+                    <button type="button" onclick="toggleStudioBlueprintSummary()" class="text-slate-400 hover:text-white text-[11px] font-semibold">Hide Rules ▲</button>
                   </div>
                 </div>
-              ` : ''}
+              ` : '<div id="studio-blueprint-summary-bar" class="hidden">View Rules</div>'}
 
               <!-- ======================================================= -->
               <!-- TAB 1: MULTIMODAL AI CLASS WORKBENCH                    -->
@@ -11823,12 +12037,13 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                       ${attachedSources.map(src => {
                         const iconName = src.kind === 'audio' ? 'mic' : (src.kind === 'link' ? 'link' : (src.kind === 'image' ? 'image' : 'file-text'));
                         const badgeText = src.status === 'fetching' ? 'Reading...' : (src.extractedText ? `${Math.max(1, Math.round(src.extractedText.length / 100) / 10)}k chars` : (src.base64Data ? 'Media ready' : 'Link attached'));
+                        const previewOpen = !!studioSourcePreviewMap[src.id];
                         return `
-                          <div class="p-2 rounded-xl bg-slate-900 border border-slate-700/80 flex flex-col gap-1.5 max-w-full sm:max-w-[260px]">
+                          <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 flex flex-col gap-1.5 max-w-full sm:max-w-[300px]">
                             <div class="flex items-center justify-between gap-2">
                               <div class="flex items-center gap-1.5 min-w-0">
                                 <i data-lucide="${iconName}" class="w-3.5 h-3.5 text-indigo-400 shrink-0"></i>
-                                <span class="text-xs font-semibold text-white truncate">${escapeHtml(src.label)}</span>
+                                <span dir="auto" class="text-xs font-semibold text-white truncate">${escapeHtml(src.label)}</span>
                               </div>
                               <button type="button" onclick="removeStudioSource('${activeCourse.id}', '${selectedLesson.id}', '${src.id}')" class="text-slate-500 hover:text-rose-400 shrink-0 p-0.5" title="Remove source">
                                 <i data-lucide="x" class="w-3 h-3"></i>
@@ -11836,7 +12051,11 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                             </div>
                             <div class="flex items-center justify-between gap-2 text-[10px] font-mono">
                               <span class="${src.status === 'fetching' ? 'text-amber-400 animate-pulse' : 'text-emerald-400'}">${badgeText}</span>
+                              ${src.extractedText ? `<button type="button" onclick="toggleStudioSourcePreview('${src.id}')" class="text-indigo-300 hover:underline">${previewOpen ? 'Hide Text ▲' : 'View Read Text ▾'}</button>` : ''}
+                              ${(src.kind === 'audio' && src.dataUrl) ? `<button type="button" onclick="promoteStudioSourceToLessonAudio('${activeCourse.id}', '${selectedLesson.id}', '${src.id}')" class="${src.savedToTeachAudio ? 'text-emerald-300 font-bold' : 'text-amber-300 hover:underline'}">${src.savedToTeachAudio ? '✓ In Teach Audio' : '+ Teach Audio'}</button>` : ''}
                             </div>
+                            ${(src.extractedText && previewOpen) ? `<div id="studio-source-preview-${src.id}" dir="auto" class="p-2 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-300 max-h-32 overflow-y-auto whitespace-pre-wrap leading-relaxed">${escapeHtml(src.extractedText.slice(0, 1500))}</div>` : `<div id="studio-source-preview-${src.id}" class="hidden"></div>`}
+                            ${(src.kind === 'image' && src.dataUrl) ? `<img src="${src.dataUrl}" alt="${escapeHtml(src.label)}" class="max-h-24 rounded-lg object-contain bg-slate-950 p-1 border border-slate-800" />` : ''}
                             ${(src.kind === 'audio' && src.dataUrl) ? `<audio controls src="${src.dataUrl}" class="h-7 w-full"></audio>` : ''}
                           </div>
                         `;
@@ -11845,16 +12064,16 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                   </div>
                 ` : ''}
 
-                <!-- Conversation Stream -->
-                <div id="studio-class-ai-messages" class="max-h-72 overflow-y-auto space-y-2.5 pr-1">
+                <!-- Fluent Conversational Stream -->
+                <div id="studio-class-ai-messages" class="min-h-[260px] max-h-[54vh] overflow-y-auto space-y-3 pr-1">
                   ${classAiHistory.map((m, mIdx) => {
                     const isUser = m.role === 'user';
                     const showSwitchBanner = (!isUser && m.updatedCount > 0 && mIdx === classAiHistory.length - 1);
                     return `
                       <div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
-                        <div class="max-w-[92%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${isUser ? 'bg-amber-500/15 border border-amber-500/30 text-amber-100' : 'bg-slate-950/90 border border-slate-800 text-slate-200'}">
+                        <div dir="auto" class="max-w-[92%] rounded-2xl px-4 py-3 text-xs sm:text-sm leading-relaxed ${isUser ? 'bg-amber-500/15 border border-amber-500/30 text-amber-100' : 'bg-slate-950/90 border border-slate-800 text-slate-200'}">
                           <span class="block text-[9px] font-mono uppercase tracking-wider mb-1 ${isUser ? 'text-amber-300' : 'text-indigo-400'}">${isUser ? 'You' : 'AI Co-Builder'}</span>
-                          <div class="whitespace-pre-wrap">${escapeHtml(m.text)}</div>
+                          <div class="whitespace-pre-wrap break-words">${escapeHtml(m.text)}</div>
                           ${showSwitchBanner ? `
                             <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2">
                               <span class="text-[11px] text-emerald-400 font-semibold">✓ Updated ${m.updatedCount} section${m.updatedCount === 1 ? '' : 's'}</span>
@@ -11875,30 +12094,32 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                   <div class="text-[11px] font-bold text-indigo-300">Attach Web Article or YouTube Link for AI to Analyze</div>
                   <input id="input-studio-source-url" type="url" placeholder="https://..." class="w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" onkeydown="if(event.key==='Enter'){ event.preventDefault(); addStudioLinkSource('${activeCourse.id}', '${selectedLesson.id}'); }" />
                   <div class="flex items-center gap-2">
-                    <input id="input-studio-source-note" type="text" placeholder="Optional note: focus on minute 4 or key proof..." class="flex-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" />
+                    <input id="input-studio-source-note" dir="auto" type="text" placeholder="Optional note: focus on minute 4 or key proof..." class="flex-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" />
                     <button type="button" onclick="addStudioLinkSource('${activeCourse.id}', '${selectedLesson.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold shrink-0">Attach Link</button>
                   </div>
                 </div>
 
                 <div id="studio-source-popover-paste" class="${studioSourcePopoverMap.active === 'paste' ? '' : 'hidden'} p-3 rounded-2xl bg-slate-950 border border-indigo-500/30 space-y-2">
-                  <div class="text-[11px] font-bold text-indigo-300">Paste Text, Transcript, Story or Source Excerpt</div>
-                  <input id="input-studio-source-paste-title" type="text" placeholder="Label (e.g. Rashi Excerpt, Class Recording Transcript)..." class="w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" />
-                  <textarea id="input-studio-source-paste-text" rows="4" placeholder="Paste full source text or notes here..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400 leading-relaxed"></textarea>
+                  <div class="text-[11px] font-bold text-indigo-300">Paste Text, Hebrew/English Story, Transcript or Source Excerpt</div>
+                  <input id="input-studio-source-paste-title" dir="auto" type="text" placeholder="Label (e.g. Bill Gates Story, Rashi Excerpt, Shiur Notes)..." class="w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" />
+                  <textarea id="input-studio-source-paste-text" dir="auto" rows="5" placeholder="Paste full Hebrew or English source text or notes here..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400 leading-relaxed"></textarea>
                   <div class="flex justify-end gap-2">
                     <button type="button" onclick="toggleStudioSourcePopover('paste')" class="px-3 py-1 rounded-lg bg-slate-800 text-slate-300 text-xs">Cancel</button>
                     <button type="button" onclick="addStudioPasteTextSource('${activeCourse.id}', '${selectedLesson.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold">Attach Notes</button>
                   </div>
                 </div>
 
-                <!-- Fluent Multi-Line AI Composer Box -->
-                <div class="rounded-2xl bg-slate-950 border border-slate-700/80 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-400 transition p-2.5 space-y-2">
+                <!-- Fluent Multi-Line AI Composer Box (with Bidirectional Auto-RTL & Screenshot Paste) -->
+                <div class="rounded-2xl bg-slate-950 border border-slate-700/80 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-400 transition p-3 space-y-2.5">
                   <textarea
                     id="input-studio-class-ai-prompt"
+                    dir="auto"
                     rows="3"
-                    placeholder="Write fluently here... Share your lesson vision, ask questions, or tell AI how to use your attached links and audio (Shift+Enter for new line, Enter to send)..."
-                    oninput="this.style.height='auto'; this.style.height=Math.min(this.scrollHeight, 220)+'px';"
+                    placeholder="Write fluently in English or Hebrew... Paste a screenshot (Cmd/Ctrl+V), attach links/audio below, or tell AI how to build this class (Shift+Enter for new line, Enter to send)..."
+                    onpaste="handleStudioComposerPaste(event, '${activeCourse.id}', '${selectedLesson.id}')"
+                    oninput="this.style.height='auto'; this.style.height=Math.min(this.scrollHeight, 260)+'px';"
                     onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendStudioClassAiMessage('${activeCourse.id}', '${selectedLesson.id}'); }"
-                    class="w-full bg-transparent text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none resize-none leading-relaxed min-h-[72px] max-h-[220px]"
+                    class="w-full bg-transparent text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none resize-none leading-relaxed min-h-[86px] max-h-[260px]"
                   ></textarea>
 
                   <!-- Attachment & Send Action Toolbar -->
@@ -12139,15 +12360,11 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                 </div>
                 `}
 
-                <!-- Editor Footer: Discrete Modal Fallback -->
-                <div class="pt-2 flex items-center justify-between border-t border-slate-800/80">
-                  <button type="button" onclick="openEditCustomLessonModal('${activeCourse.id}', '${selectedLesson.id}')" class="text-slate-500 hover:text-slate-300 text-xs flex items-center gap-1 transition" title="Edit Class">
-                    <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
-                    <span>Open in Modal Editor</span>
-                  </button>
+                <!-- Clean Section Footer (Modal Trap Removed) -->
+                <div class="pt-2 flex items-center justify-end border-t border-slate-800/80">
                   <button type="button" onclick="openAddStudyMaterialModal('${selectedLesson.id}')" class="text-amber-400 hover:text-amber-300 text-xs font-semibold flex items-center gap-1">
                     <i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i>
-                    <span>+ Add Custom Note</span>
+                    <span>Add Custom Note</span>
                   </button>
                 </div>
               </div>
@@ -12157,6 +12374,12 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
       `;
 
       container.innerHTML = html;
+      if (typeof container.querySelectorAll === 'function') {
+        const autoAreas = container.querySelectorAll('textarea.studio-autogrow');
+        if (autoAreas && typeof autoAreas.forEach === 'function') {
+          autoAreas.forEach(autoGrowStudioTextarea);
+        }
+      }
       if (window.lucide && typeof lucide.createIcons === 'function') {
         lucide.createIcons();
       }
@@ -16395,23 +16618,26 @@ Return STRICT JSON ONLY:
           }
 
           if (targetCourse) {
+            if (!Array.isArray(targetCourse.lessons)) targetCourse.lessons = [];
+            const clippedLesson = createStudioLessonObject(targetCourse, title || `Class ${targetCourse.lessons.length + 1}: Clipped Lesson`);
+            if (text || sourceUrl) {
+              clippedLesson.ai_sources = [{
+                id: 'src_clip_' + Date.now(),
+                kind: sourceUrl ? 'link' : 'text',
+                label: title || sourceUrl || 'Clipped Source',
+                url: sourceUrl || '',
+                extractedText: text || '',
+                status: 'ready',
+                created_at: new Date().toISOString()
+              }];
+            }
+            targetCourse.lessons.push(clippedLesson);
+            targetCourse.updated_at = new Date().toISOString();
+            APP_STATE.studioSelectedLessonId = clippedLesson.id;
+            studioWorkspaceTabMap[clippedLesson.id] = 'ai';
+            saveCustomCoursesToStorage(true);
             openCourseClassesView(targetCourse.id);
-            openAddCustomLessonModal(targetCourse.id);
-
-            if (title) {
-              const titleInput = document.getElementById('input-custom-lesson-title-en');
-              if (titleInput) titleInput.value = title;
-            }
-
-            if (text) {
-              const firstTextSec = (targetCourse.blueprint?.sections || []).find(s => s.type === 'text');
-              if (firstTextSec) {
-                const secInput = document.getElementById(`input-section-${firstTextSec.id}`);
-                if (secInput) secInput.value = text + (sourceUrl ? `\n\nSource: ${sourceUrl}` : '');
-              }
-              const hookInput = document.getElementById('input-custom-lesson-hook');
-              if (hookInput && !hookInput.value) hookInput.value = text;
-            }
+            renderCourseStudio(targetCourse.id, clippedLesson.id);
 
             showToast(APP_STATE.lang === 'he' ? 'תוכן השיעור נטען מהתוסף!' : 'Lesson loaded from Web Clipper / Extension!');
 
@@ -16813,7 +17039,7 @@ Return STRICT JSON ONLY:
 
       showToast(isHe ? `מייצר סעיף עם AI...` : `AI refining section...`);
 
-      const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key');
+      const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
       const candidateModels = [
         'gemini-3.5-flash',
         'gemini-3.1-flash-lite',
@@ -16951,7 +17177,7 @@ Class Topic / Instruction: ${promptText}
 ${detailsText ? 'Specific Emphases / Details: ' + detailsText : ''}
 ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSections.map(s => `${s.name} (type: ${s.type}, id: ${s.id})`).join('; ') : ''}`;
 
-      const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key');
+      const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
       const candidateModels = [
         'gemini-3.5-flash',
         'gemini-3.1-flash-lite',

@@ -3342,6 +3342,89 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
 
   sandbox.fetch = prevFetch35;
 
+  // --- GATE 36: Unified Full-Width No-Clipping Studio, RTL Auto-Grow, Per-Section AI Tweak & CORS Links ---
+  console.log('\n--- Running Gate 36: Clean No-Clipping Unified Lesson Studio Refresh ---');
+  assert(typeof sandbox.toggleStudioSyllabusRail === 'function', 'toggleStudioSyllabusRail is a function');
+  assert(typeof sandbox.handleStudioSectionTargetedTweak === 'function', 'handleStudioSectionTargetedTweak is a function');
+  assert(typeof sandbox.estimateTextareaRows === 'function', 'estimateTextareaRows is a function');
+  assert(typeof sandbox.promoteStudioSourceToLessonAudio === 'function', 'promoteStudioSourceToLessonAudio is a function');
+
+  const g36Course = studioCourse34;
+  const g36Lesson = g36Course.lessons[0];
+  sandbox.renderCourseStudio(g36Course.id, g36Lesson.id);
+  let g36Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+
+  assert(!g36Html.includes('Open in Modal Editor'), 'Unified Studio removes distracting Open in Modal Editor fallback link');
+  assert(g36Html.includes('studio-autogrow') && g36Html.includes('dir="auto"'), 'Section fields use auto-growing dir="auto" textareas with zero horizontal sentence clipping');
+  assert(sandbox.estimateTextareaRows('Line 1\nLine 2\nLine 3\n' + 'x'.repeat(210), 2, 12) >= 5, 'estimateTextareaRows scales height cleanly for multi-paragraph copy');
+
+  // Test Collapsible Focus View (12-column full width)
+  sandbox.toggleStudioSyllabusRail();
+  g36Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(g36Html.includes('md:col-span-12') && g36Html.includes('Show Syllabus'), 'Focus View expands Lesson Workspace cleanly across all 12 columns');
+  sandbox.toggleStudioSyllabusRail();
+
+  // Test CORS noembed link extraction + Source Preview + Teach Audio Promotion
+  const prevFetch36 = sandbox.fetch;
+  let calledNoembed = false;
+  sandbox.fetch = async (url, opts) => {
+    if (url.includes('noembed.com/embed')) {
+      calledNoembed = true;
+      return { ok: true, status: 200, json: async () => ({ title: 'Finding Freedom in Shabbat', author_name: 'Inspiration Lab' }) };
+    }
+    if (url.startsWith('https://r.jina.ai/')) {
+      return { ok: true, status: 200, text: async () => 'Detailed transcript about Bill Gates disconnect dinner.' };
+    }
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        candidates: [{
+          content: {
+            parts: [{
+              text: JSON.stringify({
+                setup: 'Rewritten Bill Gates dinner hook grounded in your story!',
+                takeaway: 'Disconnect to actually reconnect.'
+              })
+            }]
+          }
+        }]
+      })
+    };
+  };
+
+  getOrCreateElem('input-studio-source-url').value = 'https://www.youtube.com/watch?v=abc12345';
+  await sandbox.addStudioLinkSource(g36Course.id, g36Lesson.id);
+  assert(calledNoembed, 'addStudioLinkSource uses CORS-safe noembed.com endpoint for YouTube metadata');
+  assert(g36Lesson.ai_sources.some(s => s.extractedText.includes('Bill Gates disconnect dinner')), 'addStudioLinkSource stores extracted article transcript for AI');
+
+  // Toggle audio source promotion to Teach Class recordings
+  g36Lesson.ai_sources.push({
+    id: 'src_rec_36',
+    kind: 'audio',
+    label: 'Shiur Story Clip',
+    mimeType: 'audio/webm',
+    dataUrl: 'data:audio/webm;base64,QUJD',
+    base64Data: 'QUJD',
+    status: 'ready'
+  });
+  sandbox.promoteStudioSourceToLessonAudio(g36Course.id, g36Lesson.id, 'src_rec_36');
+  assert(Array.isArray(g36Lesson.recordings) && g36Lesson.recordings.some(r => r.sourceRefId === 'src_rec_36'), 'promoteStudioSourceToLessonAudio saves prep voice note to Teach Class Audio');
+
+  // Test Per-Section AI Tweak preserves sibling Pitfalls section while rewriting Hook
+  const prevPitfalls36 = g36Lesson.sections.sec34_pit;
+  await sandbox.handleStudioSectionTargetedTweak(g36Course.id, g36Lesson.id, 'sec34_hook', 'Use the Bill Gates story here');
+  const updatedHook36 = sandbox.parseStructuredSectionData(g36Lesson.sections.sec34_hook, 'example');
+  assert(updatedHook36.setup.includes('Bill Gates dinner hook'), 'handleStudioSectionTargetedTweak rewrote targeted section from attached source');
+  assert(g36Lesson.sections.sec34_pit === prevPitfalls36, 'handleStudioSectionTargetedTweak preserves all sibling sections intact');
+
+  // Verify openAiCreateClassModal opens Studio directly instead of popup modal
+  getOrCreateElem('modal-add-custom-lesson').classList.add('hidden');
+  sandbox.openAiCreateClassModal(g36Course.id);
+  assert(getOrCreateElem('modal-add-custom-lesson').classList.contains('hidden'), 'openAiCreateClassModal routes straight into Unified Studio without opening old popup modal');
+
+  sandbox.fetch = prevFetch36;
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
