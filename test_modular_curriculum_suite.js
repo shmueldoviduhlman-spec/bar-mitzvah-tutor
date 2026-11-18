@@ -1513,11 +1513,11 @@ assert(rehydratedInput.value.length > 0, 'Edit modal rehydrated dynamic section 
 console.log('\n--- Gate 19: Classes Tab Renaming, Hierarchy & Extension Bridge ---');
 
 // 1. Tab & Dock Renaming
-assert(sandbox.I18N.en.tabStudy === 'Classes', 'I18N en tabStudy is Classes');
-assert(sandbox.I18N.he.tabStudy === 'שיעורים', 'I18N he tabStudy is שיעורים');
-assert(sandbox.I18N.en.mobStudy === 'Classes', 'I18N en mobStudy is Classes');
-assert(sandbox.I18N.he.mobStudy === 'שיעורים', 'I18N he mobStudy is שיעורים');
-assert(indexHtml.includes('id="mob-lbl-study">Classes<'), 'HTML mobile dock label is Classes');
+assert(sandbox.I18N.en.tabStudy === 'Courses', 'I18N en tabStudy is Courses');
+assert(sandbox.I18N.he.tabStudy === 'קורסים', 'I18N he tabStudy is קורסים');
+assert(sandbox.I18N.en.mobStudy === 'Courses', 'I18N en mobStudy is Courses');
+assert(sandbox.I18N.he.mobStudy === 'קורסים', 'I18N he mobStudy is קורסים');
+assert(indexHtml.includes('id="mob-lbl-study">Courses<'), 'HTML mobile dock label is Courses');
 
 // 2. Course-First Navigation & switchTab('classes') Alias
 sandbox.switchTab('classes');
@@ -1527,7 +1527,7 @@ assert(sandbox.APP_STATE.insideCourseId === null, 'Entering classes resets insid
 // 3. Clean Slate Onboarding Copy & Elements
 assert(indexHtml.includes('Welcome to Classes'), 'HTML clean slate title welcomes educators to Classes');
 assert(indexHtml.includes('+ Add a Course'), 'HTML clean slate contains prominent + Add a Course button');
-assert(indexHtml.includes('Classes & Courses'), 'HTML courses directory header is Classes & Courses');
+assert(indexHtml.includes('id="lbl-courses-directory-title">My Courses<'), 'HTML courses directory header is My Courses');
 
 // 4. Interactive AI Course Structure Assistant
 assert(indexHtml.includes('id="input-ai-blueprint-prompt"'), 'HTML contains input-ai-blueprint-prompt');
