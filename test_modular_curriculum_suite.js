@@ -4318,6 +4318,114 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(!updatedG45Section.includes('*') && updatedG45Section.includes('Shabbat'), 'sendStudioClassAiMessage stores clean plain text without asterisks in section JSON');
   assert(!String(lastG45Reply.text || '').includes('*') && lastG45Reply.text.includes('clear'), 'sendStudioClassAiMessage strips markdown asterisks from Co-Builder chat replies');
 
+  // --- Gate 46: Course-Level Lesson Builder Playbook, Dead Model Removal, Sefaria/Link Grounding & Safe Retry on Error ---
+  console.log('\n--- Running Gate 46: Course Lesson Builder Playbook, Model Resilience & Safe Failure Guard ---');
+  assert(indexHtml.includes('id="input-architect-lesson-instructions"'), 'Course Architect modal exposes Lesson Builder Playbook textarea');
+  assert(typeof sandbox.retryStudioClassAiMessage === 'function' && typeof sandbox.fetchReadableUrlExtract === 'function', 'retryStudioClassAiMessage and fetchReadableUrlExtract helpers are exported');
+
+  // Dead hanging models removed from live fallback queues
+  const proQueue = sandbox.getGeminiCandidateModelsForTier('pro');
+  const stdQueue = sandbox.getGeminiCandidateModelsForTier('standard');
+  assert(!proQueue.includes('gemini-3.7-flash') && !proQueue.includes('gemini-3.8-flash'), 'Pro candidate queue removes hanging gemini-3.7-flash and dead gemini-3.8-flash models');
+  assert(!stdQueue.includes('gemini-3.7-flash') && !stdQueue.includes('gemini-3.8-flash'), 'Standard candidate queue removes hanging gemini-3.7-flash and dead gemini-3.8-flash models');
+
+  // Apply Architect Blueprint Update persists lesson_builder_instructions & renders section AI rules
+  const archInstrEl = sandbox.document.getElementById('input-architect-lesson-instructions');
+  sandbox.applyArchitectBlueprintUpdate({
+    course_title_en: 'Chumash Depth',
+    student_profile: 'Age 13 students',
+    guidelines: '45 min interactive',
+    lesson_builder_instructions: 'Always open with the Parsha storyline from Rashi, contrast two commentaries side by side in Voices of Chazal, and end with a concrete weekly takeaway.',
+    sections: [
+      { id: 'sec_g46_over', type: 'text', name: 'PARASHA OVERVIEW', ai_rule: 'Summarize narrative arc cleanly in 2 paragraphs' },
+      { id: 'sec_g46_flow', type: 'list', name: 'NARRATIVE FLOW', ai_rule: '5 sequential Torah milestones' }
+    ]
+  });
+  assert(archInstrEl.value.includes('Voices of Chazal'), 'applyArchitectBlueprintUpdate syncs lesson_builder_instructions into Course Architect Playbook textarea');
+  const archListEl = sandbox.document.getElementById('architect-sections-list');
+  assert(archListEl.innerHTML.includes('Lesson AI Rule') && archListEl.innerHTML.includes('Summarize narrative arc cleanly'), 'Architect sections panel visibly displays per-section Lesson AI Rule textarea');
+
+  // Create course and verify playbook persists & propagates to Lesson Co-Builder prompt + auto-Sefaria fetch
+  const g46Course = {
+    id: 'course_g46_playbook',
+    title_en: 'Chumash',
+    blueprint: {
+      student_profile: 'Teenagers',
+      guidelines: '45m interactive',
+      lesson_builder_instructions: 'Synthesize Rashi and Sforno side by side and explain every technical term clearly.',
+      allowed_resources: 'https://www.sefaria.org/Genesis.6.9\nChumash & Rashi',
+      strict_resources_only: true,
+      sections: [
+        { id: 'sec_g46_over', type: 'text', name: 'PARASHA OVERVIEW', ai_rule: 'Storyline overview' }
+      ]
+    },
+    lessons: [
+      {
+        id: 'les_g46_1',
+        lesson_num: 1,
+        title_en: 'Parashat Noach',
+        sections: {
+          sec_g46_over: JSON.stringify({ _structured: true, summary: 'Existing Saved Summary', body: 'Keep me intact on AI failure.' })
+        },
+        ai_chat_history: []
+      }
+    ]
+  };
+  sandbox.APP_STATE.customCourses.push(g46Course);
+  sandbox.APP_STATE.insideCourseId = g46Course.id;
+  sandbox.APP_STATE.activeCourseId = g46Course.id;
+  sandbox.APP_STATE.studioSelectedLessonId = 'les_g46_1';
+  sandbox.studioScreenMode = 'edit';
+
+  // When all AI models fail temporarily, NEVER overwrite lesson sections with prompt-echo or fake "Core Point 1" junk
+  sandbox.fetch = async (url) => {
+    if (String(url).includes('sefaria.org/api/texts')) {
+      return { ok: true, status: 200, json: async () => ({ ref: 'Genesis 6:9', text: 'These are the generations of Noah. Noah was a righteous man.', he: 'אלה תולדת נח נח איש צדיק תמים היה' }) };
+    }
+    return { ok: false, status: 503, json: async () => ({ error: { message: 'This model is currently experiencing high demand.' } }) };
+  };
+  await sandbox.sendStudioClassAiMessage(g46Course.id, 'les_g46_1', 'Please create a complete lesson parashat noach using the two provided links.');
+  const preservedSection = JSON.parse(g46Course.lessons[0].sections.sec_g46_over);
+  assert(preservedSection.body === 'Keep me intact on AI failure.', 'AI error never overwrites existing lesson sections with prompt echo or fake placeholder text');
+  const errChatMsg = g46Course.lessons[0].ai_chat_history[g46Course.lessons[0].ai_chat_history.length - 1];
+  assert(errChatMsg.isError === true && errChatMsg.retryPrompt.includes('parashat noach'), 'Failed AI reply attaches retryPrompt metadata for one-click recovery');
+  assert(lessonsCont.innerHTML.includes('Retry Request'), 'Studio AI chat bubble renders one-click Retry Request button when AI fails');
+
+  // Now retry with working Gemini mock and verify playbook + Sefaria extract were injected into prompt
+  let capturedSysPrompt = '';
+  let capturedUserPrompt = '';
+  sandbox.fetch = async (url, opts) => {
+    if (String(url).includes('generativelanguage.googleapis.com') && opts && opts.body) {
+      const parsedBody = JSON.parse(opts.body);
+      capturedSysPrompt = parsedBody?.systemInstruction?.parts?.[0]?.text || '';
+      capturedUserPrompt = parsedBody?.contents?.slice(-1)?.[0]?.parts?.[0]?.text || '';
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          candidates: [{
+            content: {
+              parts: [{
+                text: JSON.stringify({
+                  assistant_reply: 'Built Parashat Noach using your Course Playbook and Genesis 6:9.',
+                  sections: {
+                    sec_g46_over: { summary: 'Noah walks with G-d amidst corruption', body: 'In Genesis 6:9, Rashi and Sforno debate how Noah lived in his generation.' }
+                  }
+                })
+              }]
+            }
+          }]
+        })
+      };
+    }
+    return { ok: true, status: 200, json: async () => ({}) };
+  };
+  const errIdx = g46Course.lessons[0].ai_chat_history.length - 1;
+  await sandbox.retryStudioClassAiMessage(g46Course.id, 'les_g46_1', errIdx);
+  assert(capturedSysPrompt.includes('MASTER LESSON BUILDER INSTRUCTIONS') && capturedSysPrompt.includes('Synthesize Rashi and Sforno'), 'sendStudioClassAiMessage injects Course Lesson Builder Playbook directly into Gemini systemInstruction');
+  assert(capturedUserPrompt.includes('Noah was a righteous man'), 'sendStudioClassAiMessage automatically extracts Sefaria source links from Course Allowed Resources');
+  assert(g46Course.lessons[0].sections.sec_g46_over.includes('Rashi and Sforno debate'), 'Retry updates lesson section cleanly with real AI output');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);

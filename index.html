@@ -2132,6 +2132,17 @@
                     class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-1.5 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 leading-relaxed resize-y"
                   ></textarea>
                 </div>
+                <div class="sm:col-span-2">
+                  <label class="block text-[10px] font-mono uppercase text-emerald-300/90 mb-0.5">Lesson Builder Playbook (How AI Writes &amp; Combines Every Class)</label>
+                  <textarea
+                    id="input-architect-lesson-instructions"
+                    dir="auto"
+                    rows="2"
+                    placeholder="Clear instructions compiled for the Lesson Builder AI: how to weave approved sources together, depth/length of each section, tone, Hebrew/English usage, and what each finished class must look like..."
+                    oninput="updateArchitectMetadataField('lesson_builder_instructions', this.value)"
+                    class="w-full bg-slate-900 border border-emerald-500/30 rounded-xl py-1.5 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 leading-relaxed resize-y"
+                  ></textarea>
+                </div>
               </div>
 
               <!-- Live Custom Sections List -->
@@ -4573,8 +4584,8 @@
       return !!custom && custom.trim() !== '' && custom.trim() !== SYSTEM_DEFAULT_GEMINI_KEY;
     }
 
-    const GEMINI_PRO_MODELS = ['gemini-3.1-pro-preview', 'gemini-pro-latest', 'gemini-3-flash-preview', 'gemini-3.5-flash-lite', 'gemini-3.7-flash'];
-    const GEMINI_STANDARD_MODELS = ['gemini-3-flash-preview', 'gemini-3.5-flash-lite', 'gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-flash-lite-latest', 'gemini-3.8-flash'];
+    const GEMINI_PRO_MODELS = ['gemini-3.1-pro-preview', 'gemini-pro-latest', 'gemini-3-flash-preview', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-flash-latest'];
+    const GEMINI_STANDARD_MODELS = ['gemini-3-flash-preview', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-flash-latest'];
     const GEMINI_FAST_MODELS = ['gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3-flash-preview'];
     let aiProxyFallbackDisabledForSession = false;
 
@@ -4619,7 +4630,7 @@
       const tier = taskTier || getAiQualityTier() || 'standard';
       if (tier === 'pro') return [...GEMINI_PRO_MODELS];
       if (tier === 'fast') return [...GEMINI_FAST_MODELS];
-      const staleModels = new Set(['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite']);
+      const staleModels = new Set(['gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.1-flash-lite']);
       const queue = [];
       const activeModel = typeof APP_STATE !== 'undefined' && APP_STATE ? APP_STATE.geminiModel : '';
       if (activeModel && !String(activeModel).includes('-lite') && !staleModels.has(activeModel)) queue.push(activeModel);
@@ -4678,102 +4689,124 @@
       const candidateQueue = getGeminiCandidateModelsForTier(taskTier);
 
       let lastError = null;
-      const perAttemptTimeoutMs = (options && typeof options.timeoutMs === 'number') ? options.timeoutMs : 12000;
-      for (const model of candidateQueue) {
-        let triedProxyThisModel = false;
-        const controller = (typeof AbortController === 'function') ? new AbortController() : null;
-        const timerId = controller ? setTimeout(() => { try { controller.abort(); } catch (_) {} }, perAttemptTimeoutMs) : null;
-        try {
-          let resp = null;
-          if (useProxy && !aiProxyFallbackDisabledForSession) {
-            triedProxyThisModel = true;
-            let bearer = '';
-            try {
-              if (APP_STATE.cloud && APP_STATE.cloud.client && APP_STATE.cloud.client.auth && typeof APP_STATE.cloud.client.auth.getSession === 'function') {
-                const { data } = await APP_STATE.cloud.client.auth.getSession();
-                bearer = data?.session?.access_token || '';
-              }
-            } catch (_) {}
-            const proxyHeaders = { 'Content-Type': 'application/json', 'X-TutorPilot-Role': 'tutor' };
-            if (bearer) proxyHeaders['Authorization'] = `Bearer ${bearer}`;
-            const fetchOpts = {
-              method: 'POST',
-              headers: proxyHeaders,
-              body: JSON.stringify({ model, payload, taskTier })
-            };
-            if (controller) fetchOpts.signal = controller.signal;
-            resp = await fetch('/api/ai', fetchOpts);
-            if (resp.status === 404 || resp.status === 503) {
-              const pData = await resp.clone().json().catch(() => ({}));
-              if (resp.status === 404 || pData.fallbackDirect) {
-                aiProxyFallbackDisabledForSession = true;
-                resp = null;
+      const defaultTimeout = taskTier === 'pro' ? 30000 : 24000;
+      const perAttemptTimeoutMs = (options && typeof options.timeoutMs === 'number') ? options.timeoutMs : defaultTimeout;
+      const attemptModels = async (modelsToTry) => {
+        for (const model of modelsToTry) {
+          let triedProxyThisModel = false;
+          const controller = (typeof AbortController === 'function') ? new AbortController() : null;
+          const timerId = controller ? setTimeout(() => {
+            try { controller.abort(new Error(`Gemini timeout (${model})`)); } catch (_) {}
+          }, perAttemptTimeoutMs) : null;
+          try {
+            let resp = null;
+            if (useProxy && !aiProxyFallbackDisabledForSession) {
+              triedProxyThisModel = true;
+              let bearer = '';
+              try {
+                if (APP_STATE.cloud && APP_STATE.cloud.client && APP_STATE.cloud.client.auth && typeof APP_STATE.cloud.client.auth.getSession === 'function') {
+                  const { data } = await APP_STATE.cloud.client.auth.getSession();
+                  bearer = data?.session?.access_token || '';
+                }
+              } catch (_) {}
+              const proxyHeaders = { 'Content-Type': 'application/json', 'X-TutorPilot-Role': 'tutor' };
+              if (bearer) proxyHeaders['Authorization'] = `Bearer ${bearer}`;
+              const fetchOpts = {
+                method: 'POST',
+                headers: proxyHeaders,
+                body: JSON.stringify({ model, payload, taskTier })
+              };
+              if (controller) fetchOpts.signal = controller.signal;
+              resp = await fetch('/api/ai', fetchOpts);
+              if (resp.status === 404 || resp.status === 503) {
+                const pData = await resp.clone().json().catch(() => ({}));
+                if (resp.status === 404 || pData.fallbackDirect) {
+                  aiProxyFallbackDisabledForSession = true;
+                  resp = null;
+                }
               }
             }
-          }
 
-          if (!resp) {
-            if (!key) {
-              throw new Error('No Gemini API key configured');
-            }
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
-            const directOpts = {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload)
-            };
-            if (controller) directOpts.signal = controller.signal;
-            resp = await fetch(url, directOpts);
-          }
-
-          if (timerId) clearTimeout(timerId);
-
-          if (resp.ok) {
-            const data = await resp.json();
-            const parts = data?.candidates?.[0]?.content?.parts || [];
-            const text = parts.map(p => p.text || '').join('');
-            const hasFnCall = parts.some(p => !!p.functionCall);
-            if (text || (options && options.rawResponse && hasFnCall)) {
-              // Persist upgraded non-lite standard model cleanly (never permanently pin weak -lite fallback)
-              if (typeof APP_STATE !== 'undefined' && APP_STATE) APP_STATE.geminiModel = model;
-              if (typeof localStorage !== 'undefined' && !model.includes('-lite') && taskTier !== 'pro') {
-                localStorage.setItem('tutor_gemini_model', model);
+            if (!resp) {
+              if (!key) {
+                throw new Error('No Gemini API key configured');
               }
-              return (options && options.rawResponse) ? { data, workingModel: model } : text;
+              const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+              const directOpts = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              };
+              if (controller) directOpts.signal = controller.signal;
+              resp = await fetch(url, directOpts);
             }
-            const finishReason = data?.candidates?.[0]?.finishReason || 'EMPTY_RESPONSE';
-            lastError = new Error(`Model ${model} returned empty output (${finishReason})`);
-            continue;
-          }
 
-          const errData = await resp.json().catch(() => ({}));
-          const errMsg = errData?.error?.message || errData?.error || `API error ${resp.status}`;
-          lastError = new Error(errMsg);
-          if (resp.status === 400 || resp.status === 404 || resp.status === 500 || resp.status === 502 || resp.status === 503 || resp.status === 504 || resp.status === 429 ||
-              errMsg.includes('not found') || errMsg.includes('not supported') ||
-              errMsg.includes('no longer available') || errMsg.includes('high demand') ||
-              errMsg.includes('quota') || errMsg.includes('capacity')) {
-            continue;
+            if (timerId) clearTimeout(timerId);
+
+            if (resp.ok) {
+              const data = await resp.json();
+              const parts = data?.candidates?.[0]?.content?.parts || [];
+              const text = parts.map(p => p.text || '').join('');
+              const hasFnCall = parts.some(p => !!p.functionCall);
+              if (text || (options && options.rawResponse && hasFnCall)) {
+                if (typeof APP_STATE !== 'undefined' && APP_STATE) APP_STATE.geminiModel = model;
+                if (typeof localStorage !== 'undefined' && !model.includes('-lite') && taskTier !== 'pro') {
+                  localStorage.setItem('tutor_gemini_model', model);
+                }
+                return (options && options.rawResponse) ? { data, workingModel: model } : text;
+              }
+              const finishReason = data?.candidates?.[0]?.finishReason || 'EMPTY_RESPONSE';
+              lastError = new Error(`Model ${model} returned empty output (${finishReason})`);
+              continue;
+            }
+
+            const errData = await resp.json().catch(() => ({}));
+            const errMsg = errData?.error?.message || errData?.error || `API error ${resp.status}`;
+            lastError = new Error(errMsg);
+            if (resp.status === 400 || resp.status === 404 || resp.status === 500 || resp.status === 502 || resp.status === 503 || resp.status === 504 || resp.status === 429 ||
+                errMsg.includes('not found') || errMsg.includes('not supported') ||
+                errMsg.includes('no longer available') || errMsg.includes('high demand') ||
+                errMsg.includes('quota') || errMsg.includes('capacity')) {
+              continue;
+            }
+            throw lastError;
+          } catch (err) {
+            if (timerId) clearTimeout(timerId);
+            const rawMsg = err?.message || String(err || '');
+            const cleanErr = (err?.name === 'AbortError' || rawMsg.includes('aborted'))
+              ? new Error(`Gemini request timed out on ${model} (${Math.round(perAttemptTimeoutMs / 1000)}s)`)
+              : err;
+            lastError = cleanErr;
+            if (triedProxyThisModel && !aiProxyFallbackDisabledForSession && rawMsg.includes('Failed to fetch')) {
+              aiProxyFallbackDisabledForSession = true;
+            }
+            const msg = cleanErr?.message || '';
+            const isTimeoutOrAbort = err?.name === 'AbortError' || rawMsg.includes('aborted') || msg.includes('timed out') || msg.includes('timeout') || msg.includes('Failed to fetch');
+            if (isTimeoutOrAbort || msg.includes('not found') || msg.includes('not supported') ||
+                msg.includes('no longer available') || msg.includes('high demand') ||
+                msg.includes('quota') || msg.includes('capacity') ||
+                msg.includes('EMPTY_RESPONSE') || msg.includes('API error')) {
+              continue;
+            }
+            if (payload.generationConfig && payload.generationConfig.responseMimeType && msg.includes('JSON')) {
+              continue;
+            }
+            throw cleanErr;
           }
-          throw lastError;
-        } catch (err) {
-          if (timerId) clearTimeout(timerId);
-          lastError = err;
-          if (triedProxyThisModel && !aiProxyFallbackDisabledForSession && err?.message && err.message.includes('Failed to fetch')) {
-            aiProxyFallbackDisabledForSession = true;
-          }
-          const msg = err?.message || '';
-          const isTimeoutOrAbort = err?.name === 'AbortError' || msg.includes('aborted') || msg.includes('timeout') || msg.includes('Failed to fetch');
-          if (isTimeoutOrAbort || msg.includes('not found') || msg.includes('not supported') ||
-              msg.includes('no longer available') || msg.includes('high demand') ||
-              msg.includes('quota') || msg.includes('capacity') ||
-              msg.includes('EMPTY_RESPONSE') || msg.includes('API error')) {
-            continue;
-          }
-          if (payload.generationConfig && payload.generationConfig.responseMimeType && msg.includes('JSON')) {
-            continue;
-          }
-          throw err;
+        }
+        return null;
+      };
+
+      const firstPass = await attemptModels(candidateQueue);
+      if (firstPass !== null) return firstPass;
+
+      // Brief resilience retry on working Flash/Lite models if transient 503 overload occurred
+      const lastMsg = String(lastError?.message || '').toLowerCase();
+      if (perAttemptTimeoutMs >= 1000 && (lastMsg.includes('high demand') || lastMsg.includes('503') || lastMsg.includes('timed out'))) {
+        if (typeof setTimeout === 'function' && String(setTimeout).includes('[native code]')) {
+          await new Promise(r => setTimeout(r, 550));
+          const retryPass = await attemptModels(['gemini-3-flash-preview', 'gemini-flash-lite-latest', 'gemini-3.5-flash-lite']);
+          if (retryPass !== null) return retryPass;
         }
       }
 
@@ -4783,7 +4816,7 @@
 
     // Sanitize sticky weak -lite or stalling model from earlier browser sessions on startup
     const initialSavedModel = (typeof localStorage !== 'undefined' ? (localStorage.getItem('tutor_gemini_model') || '') : '');
-    const staleStartupModels = new Set(['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite']);
+    const staleStartupModels = new Set(['gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.1-flash-lite']);
     const initialResolvedModel = (initialSavedModel && !initialSavedModel.includes('-lite') && !staleStartupModels.has(initialSavedModel)) ? initialSavedModel : 'gemini-3-flash-preview';
     if (initialSavedModel && (initialSavedModel.includes('-lite') || staleStartupModels.has(initialSavedModel)) && typeof localStorage !== 'undefined') {
       localStorage.removeItem('tutor_gemini_model');
@@ -11342,6 +11375,7 @@ alter publication supabase_realtime add table public.students_sync;`;
           const prompt = `Refine ONLY the section "${sec.name}" (type: ${sec.type}) for class "${title}" in course "${course.title_en || course.title_he}".
 Target Students: ${bp.student_profile || course.target_level || 'General'}
 Course Guidelines: ${bp.guidelines || 'Clear, relatable, and engaging'}
+${bp.lesson_builder_instructions ? `\nMaster Lesson Builder Instructions: ${bp.lesson_builder_instructions}\n` : ''}
 ${allowedRule ? `\n${allowedRule}\n` : ''}
 Section Rule: ${sec.ai_rule || sec.hint || 'Be concise and clear'}
 Format Requirement: ${getSectionAiFormatRule(sec.type)}
@@ -12225,14 +12259,35 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       renderCourseStudio(courseId, lessonId);
 
       // Live browser metadata/text extraction via verified CORS endpoints
+      const extractedInfo = await fetchReadableUrlExtract(rawUrl, (ytTitle) => {
+        if (ytTitle) srcItem.label = ytTitle.slice(0, 48);
+      });
+
+      srcItem.extractedText = (extractedInfo.text || '').trim();
+      srcItem.blockedReason = extractedInfo.blockedReason || '';
+      srcItem.status = srcItem.extractedText ? 'ready' : 'link_only';
+      saveCustomCoursesToStorage(true);
+      renderCourseStudio(courseId, lessonId);
+      showToast(srcItem.extractedText ? 'Link analyzed & ready for AI!' : 'Link attached (website blocks auto-read — paste key excerpt if needed)');
+      return true;
+    }
+
+    var studioUrlExtractCache = {};
+
+    async function fetchReadableUrlExtract(rawUrl, onYouTubeTitle) {
+      if (!rawUrl || typeof fetch !== 'function') return { text: '', blockedReason: '' };
+      const cacheKey = String(rawUrl).trim();
+      if (studioUrlExtractCache[cacheKey]) return studioUrlExtractCache[cacheKey];
+
       let extracted = '';
+      let blockedReason = '';
       try {
         const isYt = /(?:youtube\.com\/watch|youtu\.be\/|youtube\.com\/shorts)/i.test(rawUrl);
-        if (isYt && typeof fetch === 'function') {
+        if (isYt) {
           let ytMeta = null;
           const tryYtMeta = async (endpointUrl) => {
             const ytCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-            const ytTimer = ytCtrl ? setTimeout(() => ytCtrl.abort(), 4500) : null;
+            const ytTimer = ytCtrl ? setTimeout(() => ytCtrl.abort(), 4000) : null;
             const ytResp = await fetch(endpointUrl, ytCtrl ? { signal: ytCtrl.signal } : {}).catch(() => null);
             if (ytTimer) clearTimeout(ytTimer);
             if (ytResp && ytResp.ok) {
@@ -12242,35 +12297,59 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
             return null;
           };
           ytMeta = await tryYtMeta(`https://noembed.com/embed?url=${encodeURIComponent(rawUrl)}`);
-          if (!ytMeta) {
-            ytMeta = await tryYtMeta(`https://www.youtube.com/oembed?url=${encodeURIComponent(rawUrl)}&format=json`);
-          }
+          if (!ytMeta) ytMeta = await tryYtMeta(`https://www.youtube.com/oembed?url=${encodeURIComponent(rawUrl)}&format=json`);
           if (ytMeta && ytMeta.title) {
-            srcItem.label = ytMeta.title.slice(0, 48);
+            if (typeof onYouTubeTitle === 'function') onYouTubeTitle(ytMeta.title);
             extracted += `YouTube Video Title: ${ytMeta.title}\nChannel: ${ytMeta.author_name || 'Unknown'}\n`;
           }
         }
-        if (typeof fetch === 'function') {
+
+        // Official public CORS-friendly JSON API support for Sefaria text links
+        let sefariaExtracted = false;
+        if (/sefaria\.org\/([^?#\s]+)/i.test(rawUrl)) {
+          const sefMatch = rawUrl.match(/sefaria\.org\/([^?#\s]+)/i);
+          const sefRef = sefMatch && sefMatch[1] ? sefMatch[1].replace(/\/$/, '') : '';
+          if (sefRef && !/^(topics|sheets|texts|search|explore)/i.test(sefRef)) {
+            const sCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+            const sTimer = sCtrl ? setTimeout(() => sCtrl.abort(), 4500) : null;
+            const sResp = await fetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(sefRef)}?context=0`, sCtrl ? { signal: sCtrl.signal } : {}).catch(() => null);
+            if (sTimer) clearTimeout(sTimer);
+            if (sResp && sResp.ok) {
+              const sData = await sResp.json().catch(() => null);
+              if (sData && (sData.text || sData.he)) {
+                const flattenTxt = (v) => Array.isArray(v) ? v.map(flattenTxt).join('\n') : String(v || '').replace(/<[^>]+>/g, '');
+                const enStr = flattenTxt(sData.text).trim().slice(0, 6000);
+                const heStr = flattenTxt(sData.he).trim().slice(0, 4000);
+                if (enStr || heStr) {
+                  sefariaExtracted = true;
+                  extracted += `Sefaria Passage (${sData.ref || sefRef}):\n${enStr}${heStr ? `\n\nHebrew:\n${heStr}` : ''}`;
+                }
+              }
+            }
+          }
+        }
+
+        if (!sefariaExtracted) {
           const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-          const timer = ctrl ? setTimeout(() => ctrl.abort(), 6000) : null;
+          const timer = ctrl ? setTimeout(() => ctrl.abort(), 5000) : null;
           const cleanFetchUrl = `https://r.jina.ai/${rawUrl}`;
           const resp = await fetch(cleanFetchUrl, ctrl ? { signal: ctrl.signal } : {}).catch(() => null);
           if (timer) clearTimeout(timer);
           if (resp && resp.ok) {
             const txt = await resp.text();
-            if (txt && txt.trim().length > 20) {
+            const isBotGate = /Title:\s*Just a moment|Enable JavaScript and cookies|cf-browser-verification|Attention Required! \| Cloudflare/i.test(txt || '');
+            if (isBotGate) {
+              blockedReason = 'cloudflare_or_anti_bot';
+            } else if (txt && txt.trim().length > 20) {
               extracted += (extracted ? '\n\n' : '') + txt.trim().slice(0, 12000);
             }
           }
         }
       } catch (e) {}
 
-      srcItem.extractedText = extracted.trim();
-      srcItem.status = srcItem.extractedText ? 'ready' : 'link_only';
-      saveCustomCoursesToStorage(true);
-      renderCourseStudio(courseId, lessonId);
-      showToast(srcItem.extractedText ? 'Link analyzed & ready for AI!' : 'Link attached (paste key text if page requires login)');
-      return true;
+      const result = { text: extracted.trim(), blockedReason };
+      studioUrlExtractCache[cacheKey] = result;
+      return result;
     }
 
     async function addStudioLinkSource(courseId, lessonId) {
@@ -12553,6 +12632,62 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       return sendStudioClassAiMessage(courseId, lessonId, prompt);
     }
 
+    function retryStudioClassAiMessage(courseId, lessonId, msgIdx) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course && (course.lessons || []).find(l => l.id === lessonId);
+      if (!course || !lesson || !Array.isArray(lesson.ai_chat_history)) return;
+      const msg = lesson.ai_chat_history[msgIdx];
+      const promptText = msg && msg.retryPrompt ? msg.retryPrompt : '';
+      if (!promptText) return;
+      return sendStudioClassAiMessage(courseId, lessonId, promptText);
+    }
+
+    async function resolveCourseAndMessageUrlsForAi(bp, userMsg, lesson) {
+      const urlRegex = /https?:\/\/[^\s"'<>)\]]+/gi;
+      const seen = new Set();
+      const urlsToResolve = [];
+      const addUrl = (u) => {
+        const clean = String(u || '').replace(/[.,;:!?]+$/, '').trim();
+        if (!clean || seen.has(clean)) return;
+        seen.add(clean);
+        urlsToResolve.push(clean);
+      };
+      (String((bp && bp.allowed_resources) || '').match(urlRegex) || []).forEach(addUrl);
+      (String(userMsg || '').match(urlRegex) || []).forEach(addUrl);
+      const lessonSources = Array.isArray(lesson && lesson.ai_sources) ? lesson.ai_sources : [];
+      lessonSources.forEach(s => { if (s && s.kind === 'link' && s.url) addUrl(s.url); });
+
+      if (urlsToResolve.length === 0) return { extraSourceText: '', blockedSites: [] };
+
+      const alreadyExtractedByUrl = {};
+      lessonSources.forEach(s => {
+        if (s && s.kind === 'link' && s.url && (s.extractedText || s.blockedReason)) {
+          alreadyExtractedByUrl[String(s.url).trim()] = { text: s.extractedText || '', blockedReason: s.blockedReason || '' };
+        }
+      });
+
+      const fetchedEntries = await Promise.all(urlsToResolve.slice(0, 6).map(async (url) => {
+        if (alreadyExtractedByUrl[url]) return { url, ...alreadyExtractedByUrl[url], fromLessonSource: true };
+        const info = await fetchReadableUrlExtract(url);
+        return { url, ...info, fromLessonSource: false };
+      }));
+
+      const extraChunks = [];
+      const blockedSites = [];
+      fetchedEntries.forEach(entry => {
+        if (entry.text && !entry.fromLessonSource) {
+          extraChunks.push(`[Course / Prompt Link: ${entry.url}]\n${entry.text.slice(0, 7000)}`);
+        } else if (!entry.text && entry.blockedReason) {
+          blockedSites.push(entry.url);
+        }
+      });
+
+      return {
+        extraSourceText: extraChunks.join('\n\n---\n\n'),
+        blockedSites
+      };
+    }
+
     async function sendStudioClassAiMessage(courseId, lessonId, overridePrompt, metaOpts = {}) {
       const cId = courseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId;
       const course = (APP_STATE.customCourses || []).find(c => c.id === cId);
@@ -12588,6 +12723,8 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       const syllabusOverview = (course.lessons || []).map((l, i) => `${i + 1}. ${l.title_en || l.title_he}${l.id === lesson.id ? '  <-- (CURRENT CLASS)' : ''}`).join('\n');
       const sources = ensureStudioLessonSources(lesson);
       const allowedRule = typeof buildCourseAllowedResourcesPromptRule === 'function' ? buildCourseAllowedResourcesPromptRule(bp) : '';
+      const masterPlaybook = String((bp && bp.lesson_builder_instructions) || '').trim();
+      const resolvedUrlContext = await resolveCourseAndMessageUrlsForAi(bp, userMsg, lesson);
 
       const parseClassAiJson = (rawText) => {
         if (!rawText) return null;
@@ -12642,6 +12779,12 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
             if (textSourcesSummary && lastUserTurn && lastUserTurn.role === 'user') {
               lastUserTurn.parts[0].text += `\n\nATTACHED REFERENCE SOURCES TO ANALYZE:\n${textSourcesSummary}`;
             }
+            if (resolvedUrlContext && resolvedUrlContext.extraSourceText && lastUserTurn && lastUserTurn.role === 'user') {
+              lastUserTurn.parts[0].text += `\n\nEXTRACTED COURSE / LINK WEBSITE CONTENT:\n${resolvedUrlContext.extraSourceText}`;
+            }
+            if (resolvedUrlContext && resolvedUrlContext.blockedSites && resolvedUrlContext.blockedSites.length > 0 && lastUserTurn && lastUserTurn.role === 'user') {
+              lastUserTurn.parts[0].text += `\n\nWEBSITE ACCESS NOTICE: Automated browser scraping was blocked by anti-bot protection on: ${resolvedUrlContext.blockedSites.join(', ')}. Draw from authentic, verified scholarship of those specified sources and cite your basis clearly (without inventing fake URL quotes).`;
+            }
 
             sources.forEach(s => {
               if (s.base64Data && lastUserTurn && lastUserTurn.role === 'user') {
@@ -12665,6 +12808,7 @@ Course Context:
 Course Title: "${course.title_en || course.title_he}"
 Target Students: ${bp.student_profile || lesson.level || course.target_level || 'General'}
 Course Teaching Guidelines: ${bp.guidelines || course.description_en || 'Engaging, structured, relatable'}
+${masterPlaybook ? `\nMASTER LESSON BUILDER INSTRUCTIONS (HOW EVERY LESSON IN THIS COURSE MUST BE WRITTEN & STRUCTURED):\n${masterPlaybook}\n` : ''}
 ${allowedRule ? `\n${allowedRule}\n` : ''}
 Course Syllabus Progression:
 ${syllabusOverview}
@@ -12717,9 +12861,18 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
         }
 
         if (!parsed || typeof parsed !== 'object') {
-          if (metaOpts.analyzeOnly) {
+          if (aiCallError) {
+            const rawReason = String(aiCallError.message || 'temporary connection issue');
+            const friendlyReason = rawReason.includes('aborted') ? 'request timed out under heavy load' : rawReason;
             parsed = {
-              assistant_reply: `I reviewed your ${sources.length} attached source(s) (${sources.map(s => s.label).join(', ')}). Tell me which ideas you want emphasized or click Auto-Draft All when ready.${aiCallError ? ` (AI notice: ${aiCallError.message || 'connection issue'})` : ''}`,
+              assistant_reply: `AI did not finish (${friendlyReason}). Your lesson sections were NOT modified so nothing was overwritten. Click Retry below to run your request again, or switch between Standard / Deep Pro above.`,
+              sections: {},
+              _aiFailedError: true,
+              retryPrompt: userMsg
+            };
+          } else if (metaOpts.analyzeOnly) {
+            parsed = {
+              assistant_reply: `I reviewed your ${sources.length} attached source(s) (${sources.map(s => s.label).join(', ')}). Tell me which ideas you want emphasized or click Auto-Draft All when ready.`,
               sections: {}
             };
           } else if (hasCustomBp) {
@@ -12728,13 +12881,13 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
               fallbackSecs[s.id] = buildStructuredSectionFallback(s, classTitle, bp.student_profile || '', userMsg);
             });
             parsed = {
-              assistant_reply: `I organized your input into all ${bpSections.length} sections of "${classTitle}". Review the Lesson Sections panel on the right or keep refining.${aiCallError ? ` (Live AI could not respond: ${aiCallError.message || 'network/model error'} — applied your draft locally so nothing is lost.)` : ''}`,
+              assistant_reply: `I organized your input into all ${bpSections.length} sections of "${classTitle}". Review the Lesson Sections panel on the right or keep refining.`,
               sections: fallbackSecs
             };
           } else {
             const draftLines = userMsg.split(/\n+/).map(l => l.replace(/^[•\-\*\d\.)]+\s*/, '').trim()).filter(l => l.length > 2);
             parsed = {
-              assistant_reply: `I updated the teaching blocks for "${classTitle}" using your draft.${aiCallError ? ` (Live AI error: ${aiCallError.message || 'network/model error'} — saved locally.)` : ''}`,
+              assistant_reply: `I updated the teaching blocks for "${classTitle}" using your draft.`,
               hook: userMsg.length >= 25 ? userMsg : `Real-world scenario connecting ${classTitle} to everyday student choices.`,
               anchors: draftLines.length >= 2 ? draftLines.slice(0, 7) : [`Core Concept: Foundational premise of ${classTitle}.`, `Why It Matters: Practical impact for today.`],
               pitfalls: `Clarify common misconceptions early before moving into examples.`,
@@ -12748,7 +12901,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
         let liveCourse = resolvedLivePre.course || course;
         let liveLesson = resolvedLivePre.lesson || lesson;
 
-        if (parsed.updated_title && typeof parsed.updated_title === 'string' && parsed.updated_title.trim()) {
+        if (!parsed._aiFailedError && parsed.updated_title && typeof parsed.updated_title === 'string' && parsed.updated_title.trim()) {
           captureStudioUndoSnapshot(liveLesson);
           liveLesson.title_en = parsed.updated_title.trim();
           liveLesson.title_he = parsed.updated_title.trim();
@@ -12756,7 +12909,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
 
         let updatedCount = 0;
         const updatedSecIds = [];
-        if (hasCustomBp) {
+        if (hasCustomBp && !parsed._aiFailedError) {
           let resolvedUpdates = resolveSectionUpdatesFromAiPayload(parsed, bpSections);
           // Discard any empty {} section objects so we trigger repair instead of writing blank fields
           Object.keys(resolvedUpdates).forEach(k => {
@@ -12772,10 +12925,12 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
           if (resolvedKeys.length === 0 && !metaOpts.analyzeOnly && bpSections.length > 0 && looksLikeEditOrDraft) {
             if ((apiKey || shouldUseAiProxy()) && typeof callGeminiApi === 'function') {
               try {
-                const forceSchemaLines = bpSections.map(s => `"${s.id}" (${s.name}, type ${s.type}): ${getSectionAiFormatRule(s.type)}`).join('\n');
+                const forceSchemaLines = bpSections.map(s => `"${s.id}" (${s.name}, type ${s.type}, rule: ${s.ai_rule || s.hint || 'Clear & engaging'}): ${getSectionAiFormatRule(s.type)}`).join('\n');
                 const forcePrompt = `The educator sent this draft/request for class "${classTitle}":
 "${userMsg}"
+${masterPlaybook ? `\nMASTER LESSON BUILDER INSTRUCTIONS:\n${masterPlaybook}\n` : ''}
 ${allowedRule ? `\n${allowedRule}\n` : ''}
+${resolvedUrlContext && resolvedUrlContext.extraSourceText ? `\nEXTRACTED LINK CONTENT:\n${resolvedUrlContext.extraSourceText.slice(0, 6000)}\n` : ''}
 Map and apply concrete non-empty teaching content into the lesson sections below right now. Write clean natural plain text with ZERO Markdown symbols (no **, *, _, #, or backticks). Return STRICT JSON ONLY matching this exact structure:
 {
   "sections": {
@@ -12801,13 +12956,6 @@ ${forceSchemaLines}`;
                 resolvedKeys = Object.keys(resolvedUpdates);
               } catch (_) {}
             }
-            if (resolvedKeys.length === 0 && userMsg.length >= 25) {
-              bpSections.forEach(s => {
-                const fb = buildStructuredSectionFallback(s, classTitle, bp.student_profile || '', userMsg);
-                if (fb) resolvedUpdates[s.id] = fb;
-              });
-              resolvedKeys = Object.keys(resolvedUpdates);
-            }
           }
 
           // Re-resolve live course & lesson again in case a second await occurred
@@ -12826,7 +12974,7 @@ ${forceSchemaLines}`;
               }
             });
           }
-        } else if (!hasCustomBp) {
+        } else if (!hasCustomBp && !parsed._aiFailedError) {
           const secMap = (parsed.sections && typeof parsed.sections === 'object') ? parsed.sections : {};
           const nextHook = parsed.hook || secMap.hook || secMap.intro || '';
           const nextAnchors = Array.isArray(parsed.anchors) ? parsed.anchors : (Array.isArray(secMap.anchors) ? secMap.anchors : null);
@@ -12860,14 +13008,22 @@ ${forceSchemaLines}`;
           liveLesson.ai_chat_history.push({ role: 'user', text: userMsg });
         }
         if (parsed.assistant_reply) {
-          liveLesson.ai_chat_history.push({ role: 'assistant', text: parsed.assistant_reply, updatedCount });
+          liveLesson.ai_chat_history.push({
+            role: 'assistant',
+            text: parsed.assistant_reply,
+            updatedCount,
+            isError: !!parsed._aiFailedError,
+            retryPrompt: parsed.retryPrompt || ''
+          });
         } else if (updatedCount > 0) {
           liveLesson.ai_chat_history.push({ role: 'assistant', text: `Updated ${updatedCount} lesson section${updatedCount === 1 ? '' : 's'} with your changes.`, updatedCount });
         }
 
         liveLesson.updated_at = new Date().toISOString();
         liveCourse.updated_at = liveLesson.updated_at;
-        showToast(updatedCount > 0 ? `Updated ${updatedCount} lesson section${updatedCount === 1 ? '' : 's'}!` : 'AI replied (no section changes requested)');
+        showToast(parsed._aiFailedError
+          ? 'AI busy or timed out — click Retry in chat'
+          : (updatedCount > 0 ? `Updated ${updatedCount} lesson section${updatedCount === 1 ? '' : 's'}!` : 'AI replied (no section changes requested)'));
       } finally {
         studioClassAiThinkingMap[targetLessonId] = false;
         endCourseAiLock(cId);
@@ -13652,17 +13808,18 @@ ${forceSchemaLines}`;
           </div>
 
           <!-- Optional Expandable Blueprint Rules Drawer -->
-          ${(bp && (bp.student_profile || bp.guidelines || bp.allowed_resources)) ? `
+          ${(bp && (bp.student_profile || bp.guidelines || bp.allowed_resources || bp.lesson_builder_instructions)) ? `
             <div id="studio-blueprint-summary-bar" class="${studioBlueprintDetailsOpen ? '' : 'hidden'} px-4 py-3 rounded-2xl bg-slate-900/75 border border-emerald-500/30 text-xs space-y-1.5 leading-relaxed">
               <div class="flex items-center justify-between gap-2">
                 <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-mono font-bold text-[10px]">Course Blueprint</span>
                 <button type="button" onclick="openEditCurrentCourseModal()" class="text-amber-400 hover:text-amber-300 text-xs font-semibold flex items-center gap-1">
-                  <i data-lucide="sliders" class="w-3 h-3"></i> Edit Architecture
+                  <i data-lucide="sliders" class="w-3 h-3"></i> Edit Architecture &amp; Playbook
                 </button>
               </div>
               <div id="studio-blueprint-expanded-details" class="text-slate-300 space-y-1">
                 ${bp.student_profile ? `<div><strong class="text-slate-400">Target Students:</strong> ${escapeHtml(bp.student_profile)}</div>` : ''}
                 ${bp.guidelines ? `<div><strong class="text-slate-400">Teaching Guidelines:</strong> ${escapeHtml(bp.guidelines)}</div>` : ''}
+                ${bp.lesson_builder_instructions ? `<div dir="auto" class="p-2 rounded-xl bg-emerald-950/35 border border-emerald-500/25"><strong class="text-emerald-300">Lesson Builder Playbook:</strong> <span class="text-emerald-100 whitespace-pre-wrap">${escapeHtml(bp.lesson_builder_instructions)}</span></div>` : ''}
                 ${bp.allowed_resources ? `<div dir="auto"><strong class="text-amber-300">Approved AI Resources (${bp.strict_resources_only !== false ? 'Strict ONLY' : 'Preferred'}):</strong> <span class="text-amber-100">${escapeHtml(bp.allowed_resources)}</span></div>` : ''}
               </div>
             </div>
@@ -13742,16 +13899,21 @@ ${forceSchemaLines}`;
 
               <!-- Fluent Conversational Stream -->
               <div id="studio-class-ai-messages" class="min-h-[240px] max-h-[44vh] overflow-y-auto space-y-2.5 pr-1">
-                ${classAiHistory.map(m => {
+                ${classAiHistory.map((m, mIdx) => {
                   const isUser = m.role === 'user';
                   return `
                     <div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
-                      <div dir="auto" class="max-w-[92%] rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed ${isUser ? 'bg-amber-500/15 border border-amber-500/30 text-amber-100' : 'bg-slate-950/90 border border-slate-800 text-slate-200'}">
-                        <span class="block text-[9px] font-mono uppercase tracking-wider mb-1 ${isUser ? 'text-amber-300' : 'text-indigo-400'}">${isUser ? 'You' : 'AI Co-Builder'}</span>
+                      <div dir="auto" class="max-w-[92%] rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed ${isUser ? 'bg-amber-500/15 border border-amber-500/30 text-amber-100' : (m.isError ? 'bg-rose-950/60 border border-rose-500/40 text-rose-100' : 'bg-slate-950/90 border border-slate-800 text-slate-200')}">
+                        <span class="block text-[9px] font-mono uppercase tracking-wider mb-1 ${isUser ? 'text-amber-300' : (m.isError ? 'text-rose-300' : 'text-indigo-400')}">${isUser ? 'You' : 'AI Co-Builder'}</span>
                         <div class="whitespace-pre-wrap break-words">${escapeHtml(isUser ? m.text : stripAiMarkdownFormatting(m.text))}</div>
                         ${(!isUser && m.updatedCount > 0) ? `
                           <button type="button" onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'sections')" class="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/35 text-[10px] font-bold transition">
                             <span>✓ Updated ${m.updatedCount} section${m.updatedCount === 1 ? '' : 's'}</span>
+                          </button>
+                        ` : ''}
+                        ${(!isUser && m.retryPrompt) ? `
+                          <button type="button" onclick="retryStudioClassAiMessage('${activeCourse.id}', '${selectedLesson.id}', ${mIdx})" class="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] font-bold transition">
+                            <span>↻ Retry Request</span>
                           </button>
                         ` : ''}
                       </div>
@@ -15001,6 +15163,7 @@ Course: "${course.title_en || course.title_he}"
 Class Title: "${classTitle}"
 Target Students: ${bp.student_profile || course.target_level || 'General'}
 Course Guidelines: ${bp.guidelines || course.description_en || 'Clear, structured, and easy to teach'}
+${bp.lesson_builder_instructions ? `\nMaster Lesson Builder Instructions: ${bp.lesson_builder_instructions}\n` : ''}
 ${allowedRule ? `\n${allowedRule}\n` : ''}
 Extra Teacher Instructions: ${userInstructions || 'Follow the course architecture strictly'}
 
@@ -15211,6 +15374,7 @@ Return STRICT JSON ONLY keyed by exact section ID matching each section's exact 
           const prompt = `Draft ONLY the section "${sec.name}" (type: ${sec.type}) for the class "${title}" in course "${course.title_en || course.title_he}".
 Target Students: ${bp.student_profile || course.target_level || 'General'}
 Course Guidelines: ${bp.guidelines || 'Clear and easy to teach'}
+${bp.lesson_builder_instructions ? `\nMaster Lesson Builder Instructions: ${bp.lesson_builder_instructions}\n` : ''}
 ${allowedRule ? `\n${allowedRule}\n` : ''}
 Section Rule: ${sec.ai_rule || sec.hint || 'Be concise and practical'}
 Format requirement: ${getSectionAiFormatRule(sec.type)}.
@@ -17370,7 +17534,7 @@ IV. Conclusion
 
     var COURSE_BLOCK_CATALOG = {
       text: { label: 'Text / Explanation', icon: 'file-text', color: 'cyan', placeholder: 'Write clear explanation or teaching notes...', default_rule: '1-sentence summary + clear plain explanation' },
-      list: { label: 'Bullet Points List', icon: 'list', color: 'amber', placeholder: 'One key point per line...', default_rule: '5-7 crisp bullet points with bold keywords' },
+      list: { label: 'Bullet Points List', icon: 'list', color: 'amber', placeholder: 'One key point per line...', default_rule: '5-7 crisp plain-text bullet points with clear topic labels' },
       steps: { label: 'Step-by-Step Flow', icon: 'list-ordered', color: 'emerald', placeholder: '1. First step...', default_rule: 'Ordered teaching steps with time pacing minutes' },
       quote: { label: 'Primary Source / Formula', icon: 'book-open', color: 'sky', placeholder: 'Enter key quote, verse, citation, or formula...', default_rule: 'Exact source text or formula + plain meaning' },
       bilingual_split: { label: 'Source & Translation Split', icon: 'columns', color: 'teal', placeholder: 'Original text paired line-by-line with translation...', default_rule: 'Side-by-side original phrases and clear plain meaning' },
@@ -17397,12 +17561,14 @@ IV. Conclusion
     var architectGuidelines = '';
     var architectAllowedResources = '';
     var architectStrictResourcesOnly = true;
+    var architectLessonInstructions = '';
 
     function updateArchitectMetadataField(field, value) {
       if (field === 'student_profile') architectStudentProfile = value;
       if (field === 'guidelines') architectGuidelines = value;
       if (field === 'allowed_resources') architectAllowedResources = value;
       if (field === 'strict_resources_only') architectStrictResourcesOnly = !!value;
+      if (field === 'lesson_builder_instructions') architectLessonInstructions = value;
     }
 
     function buildCourseAllowedResourcesPromptRule(bp) {
@@ -17413,7 +17579,7 @@ IV. Conclusion
         return `STRICT ALLOWED RESOURCES POLICY (MANDATORY WHITELIST):
 You MUST base EVERY fact, quote, citation, example, and teaching point STRICTLY AND EXCLUSIVELY on these approved course resources (plus any reference files/links explicitly attached by the teacher to this specific lesson):
 ${resourcesRaw}
-FORBIDDEN: Do NOT introduce ideas, quotes, commentaries, anecdotes, or outside curricula that fall outside these approved resources. Stay 100% faithful to this approved list.`;
+Note on Website Links: If any URL above is listed as a reference site (such as sefaria.org or chabad.org), synthesize directly from any extracted/attached page text provided OR authentic verified teachings from those exact named texts/traditions — never claim to have scraped a blocked page verbatim, and do NOT bring in unrelated outside philosophies.`;
       }
       return `PREFERRED APPROVED COURSE RESOURCES:
 Prioritize drawing facts, quotes, citations, and examples from these teacher-approved resources:
@@ -17528,13 +17694,15 @@ ${resourcesRaw}`;
                 <button type="button" onclick="removeBlueprintSection('${sec.id}')" class="p-1 rounded hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 transition" title="Remove"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
               </div>
             </div>
-            <input
-              type="text"
-              value="${escapeHtml(sec.ai_rule || sec.hint || '')}"
-              onchange="updateBlueprintSectionRule('${sec.id}', this.value)"
-              placeholder="Guideline / AI rule for this section..."
-              class="w-full bg-slate-950/70 border border-slate-800 rounded-lg py-1 px-2 text-[11px] text-slate-300 placeholder-slate-500 focus:outline-none focus:border-amber-400/70"
-            >
+            <div class="pt-0.5">
+              <label class="block text-[9px] font-mono uppercase tracking-wider text-emerald-400/90 mb-0.5">Lesson AI Rule (How to Write This Section)</label>
+              <textarea
+                rows="2"
+                onchange="updateBlueprintSectionRule('${sec.id}', this.value)"
+                placeholder="Specific instruction for how the Lesson Builder fills this section (tone, depth, sources, length)..."
+                class="w-full bg-slate-950/70 border border-slate-800 rounded-lg py-1 px-2 text-[11px] text-slate-300 placeholder-slate-500 focus:outline-none focus:border-amber-400/70 leading-snug resize-y"
+              >${escapeHtml(sec.ai_rule || sec.hint || '')}</textarea>
+            </div>
             <div id="bp-sec-opts-${sec.id}" class="hidden pt-1.5 border-t border-slate-800/80 flex items-center justify-between gap-2 flex-wrap text-[10px] text-slate-300">
               <div class="flex items-center gap-1.5">
                 <span class="text-slate-500">Color:</span>
@@ -17752,6 +17920,7 @@ ${resourcesRaw}`;
       const profInput = document.getElementById('input-architect-student-profile');
       const guideInput = document.getElementById('input-architect-guidelines');
       const resInput = document.getElementById('input-architect-allowed-resources');
+      const instrInput = document.getElementById('input-architect-lesson-instructions');
       const strictChk = document.getElementById('chk-architect-strict-resources');
 
       const hasExplicitTitle = !!(titleInput && titleInput.value && titleInput.value.trim());
@@ -17767,6 +17936,10 @@ ${resourcesRaw}`;
       if (updateObj.guidelines) {
         architectGuidelines = updateObj.guidelines;
         if (guideInput) guideInput.value = updateObj.guidelines;
+      }
+      if (updateObj.lesson_builder_instructions !== undefined && updateObj.lesson_builder_instructions !== null && String(updateObj.lesson_builder_instructions).trim() !== '') {
+        architectLessonInstructions = String(updateObj.lesson_builder_instructions).trim();
+        if (instrInput) instrInput.value = architectLessonInstructions;
       }
       if (updateObj.allowed_resources !== undefined && updateObj.allowed_resources !== null && String(updateObj.allowed_resources).trim() !== '') {
         architectAllowedResources = String(updateObj.allowed_resources).trim();
@@ -17859,6 +18032,7 @@ ${resourcesRaw}`;
             student_profile: architectStudentProfile || profInput?.value || '',
             guidelines: architectGuidelines || guideInput?.value || '',
             allowed_resources: architectAllowedResources || document.getElementById('input-architect-allowed-resources')?.value || '',
+            lesson_builder_instructions: architectLessonInstructions || document.getElementById('input-architect-lesson-instructions')?.value || '',
             strict_resources_only: architectStrictResourcesOnly,
             theme_style: document.getElementById('input-course-theme-style')?.value || 'glass_dark',
             density: document.getElementById('input-course-density')?.value || 'balanced',
@@ -17900,18 +18074,20 @@ Critical Mentoring & Conversation Rules:
 3. INCREMENTAL UPDATES & STRICT NAMING:
    - STRICT COURSE TITLE RULE: Keep whatever course name the educator entered verbatim! NEVER invent fancy subtitles, colons, marketing phrases, or extra words (such as "Journey Through...", "Foundations:", "Roots & Relevance", "Mastery", or "Insights"). If "course_title" in Current Live Blueprint State is non-empty, return that exact string unchanged in "course_title_en". If empty, use the teacher's exact short subject name verbatim.
    - STRICT ICON RULE: "suggested_icon" MUST be a single emoji or unicode symbol ONLY (such as "✦", "📖", "📜", "💡", "🎵", "📐"). NEVER return Lucide icon names or English words like "scroll", "book", or "sparkles".
-   - Update "course_title_en", "student_profile", "guidelines", "allowed_resources" (ONLY if the teacher specifies allowed books, websites, texts, or curricula to restrict AI to), "strict_resources_only" (boolean), "suggested_desc", "suggested_color" (amber|blue|emerald|purple|rose|cyan|orange|indigo|teal|slate), "suggested_icon", "theme_style" (glass_dark|editorial_clean|academic_serif|warm_notebook), "density" (compact|balanced|spacious), and "sections".
-   - Ask briefly when natural which approved books, sources, or texts AI is allowed to draw from when generating lessons, and capture them cleanly in "allowed_resources".
-   - If the educator already has sections designed and merely answered a clarifying question (like age "Between 12 to 13" or session length) without asking to replace sections, PRESERVE the existing section IDs/structure and refine their "ai_rule", "student_profile", "guidelines", and "allowed_resources" rather than wiping or replacing them with generic templates!
+   - Update "course_title_en", "student_profile", "guidelines", "lesson_builder_instructions", "allowed_resources" (ONLY if the teacher specifies allowed books, websites, texts, or curricula to restrict AI to), "strict_resources_only" (boolean), "suggested_desc", "suggested_color" (amber|blue|emerald|purple|rose|cyan|orange|indigo|teal|slate), "suggested_icon", "theme_style" (glass_dark|editorial_clean|academic_serif|warm_notebook), "density" (compact|balanced|spacious), and "sections".
+   - COMPILE MASTER LESSON BUILDER INSTRUCTIONS ("lesson_builder_instructions"): As you talk with the educator, always synthesize concrete, crystal-clear operational instructions for the Lesson Builder AI that builds every individual class later. Specify HOW the Lesson Builder must combine all provided books/websites/notes together, exact tone, narrative depth, commentary style, Hebrew/English handling, and what a finished class should look like. Write clean natural plain text with zero Markdown clutter.
+   - Ask briefly when natural which approved books, sources, websites, or teaching flow rules AI should follow when generating lessons, and capture them cleanly in "allowed_resources" and "lesson_builder_instructions".
+   - If the educator already has sections designed and merely answered a clarifying question (like age "Between 12 to 13" or session length) without asking to replace sections, PRESERVE the existing section IDs/structure and refine their "ai_rule", "student_profile", "guidelines", "lesson_builder_instructions", and "allowed_resources" rather than wiping or replacing them with generic templates!
    - If this is the opening pitch or the educator requests structural changes, design or update the ideal custom sections from the 20 available block types, giving each a tailored name and crisp "ai_rule" explaining how each class should fill it.
 4. Language: Respond in Hebrew if the educator writes in Hebrew, or English if they write in English.
 
 Return STRICT JSON ONLY:
 {
-  "assistant_reply": "Thoughtful, context-aware conversational response + 1 to 2 tailored follow-up questions...",
+  "assistant_reply": "Thoughtful, context-aware conversational response explaining your blueprint & Lesson Builder instruction updates + 1 to 2 tailored follow-up questions...",
   "course_title_en": "Exact course title stated by the educator verbatim (no extra subtitles or marketing words)",
   "student_profile": "Updated target learner profile incorporating all known details",
   "guidelines": "Concise teaching guidelines (pacing, tone, preparation/review structure, pedagogy)",
+  "lesson_builder_instructions": "Detailed master instructions for the Lesson Builder AI: how to synthesize sources/websites together, exact class look & feel, depth per section, commentary usage, and plain-text style rules",
   "allowed_resources": "",
   "strict_resources_only": true,
   "suggested_desc": "Short course summary",
@@ -17930,7 +18106,7 @@ Return STRICT JSON ONLY:
             temperature: 0.45,
             taskTier: getAiQualityTier()
           });
-          parsed = parseArchitectJson(raw);
+          parsed = stripMarkdownFromAiPayload(parseArchitectJson(raw));
         } catch (e) {
           aiCallError = e;
           console.warn("AI Architect Gemini call failed, activating smart fallback:", e);
@@ -18150,6 +18326,7 @@ Return STRICT JSON ONLY:
         const schoolId = (typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770') || 'school_main_770';
         const studentProf = (document.getElementById('input-architect-student-profile')?.value || architectStudentProfile || level).trim();
         const guidelinesVal = (document.getElementById('input-architect-guidelines')?.value || architectGuidelines || '').trim();
+        const lessonInstrVal = (document.getElementById('input-architect-lesson-instructions')?.value || architectLessonInstructions || '').trim();
         const allowedResVal = (document.getElementById('input-architect-allowed-resources')?.value || architectAllowedResources || '').trim();
         const strictResChk = document.getElementById('chk-architect-strict-resources');
         const strictResVal = strictResChk ? !!strictResChk.checked : (architectStrictResourcesOnly !== false);
@@ -18181,6 +18358,7 @@ Return STRICT JSON ONLY:
               version: '2.0',
               student_profile: studentProf,
               guidelines: guidelinesVal,
+              lesson_builder_instructions: lessonInstrVal,
               allowed_resources: allowedResVal,
               strict_resources_only: strictResVal,
               theme_style: themeStyle,
@@ -18244,6 +18422,7 @@ Return STRICT JSON ONLY:
       architectStudentProfile = '';
       architectGuidelines = '';
       architectAllowedResources = '';
+      architectLessonInstructions = '';
       architectStrictResourcesOnly = true;
       const profInput = document.getElementById('input-architect-student-profile');
       if (profInput) profInput.value = '';
@@ -18251,6 +18430,8 @@ Return STRICT JSON ONLY:
       if (guideInput) guideInput.value = '';
       const resInput = document.getElementById('input-architect-allowed-resources');
       if (resInput) resInput.value = '';
+      const instrInput = document.getElementById('input-architect-lesson-instructions');
+      if (instrInput) instrInput.value = '';
       const strictChk = document.getElementById('chk-architect-strict-resources');
       if (strictChk) strictChk.checked = true;
 
@@ -18310,6 +18491,7 @@ Return STRICT JSON ONLY:
       architectStudentProfile = bp.student_profile || course.target_level || '';
       architectGuidelines = bp.guidelines || course.description_en || '';
       architectAllowedResources = bp.allowed_resources || '';
+      architectLessonInstructions = bp.lesson_builder_instructions || '';
       architectStrictResourcesOnly = bp.strict_resources_only !== false;
       const profInput = document.getElementById('input-architect-student-profile');
       if (profInput) profInput.value = architectStudentProfile;
@@ -18317,6 +18499,8 @@ Return STRICT JSON ONLY:
       if (guideInput) guideInput.value = architectGuidelines;
       const resInput = document.getElementById('input-architect-allowed-resources');
       if (resInput) resInput.value = architectAllowedResources;
+      const instrInput = document.getElementById('input-architect-lesson-instructions');
+      if (instrInput) instrInput.value = architectLessonInstructions;
       const strictChk = document.getElementById('chk-architect-strict-resources');
       if (strictChk) strictChk.checked = architectStrictResourcesOnly;
       if (document.getElementById('input-course-theme-style')) {
@@ -18410,6 +18594,7 @@ Return STRICT JSON ONLY:
 
       const studentProf = (document.getElementById('input-architect-student-profile')?.value || architectStudentProfile || level).trim();
       const guidelinesVal = (document.getElementById('input-architect-guidelines')?.value || architectGuidelines || desc || '').trim();
+      const lessonInstrVal = (document.getElementById('input-architect-lesson-instructions')?.value || architectLessonInstructions || '').trim();
       const allowedResVal = (document.getElementById('input-architect-allowed-resources')?.value || architectAllowedResources || '').trim();
       const strictResChk = document.getElementById('chk-architect-strict-resources');
       const strictResVal = strictResChk ? !!strictResChk.checked : (architectStrictResourcesOnly !== false);
@@ -18420,6 +18605,7 @@ Return STRICT JSON ONLY:
         version: '2.0',
         student_profile: studentProf,
         guidelines: guidelinesVal,
+        lesson_builder_instructions: lessonInstrVal,
         allowed_resources: allowedResVal,
         strict_resources_only: strictResVal,
         theme_style: themeStyle,
@@ -21117,6 +21303,7 @@ JSON Schema:
 }
 Write clean natural plain text inside every JSON string with ZERO Markdown formatting (no **, *, _, #, or backticks).`;
 
+      const lessonInstrVal = (document.getElementById('input-architect-lesson-instructions')?.value || architectLessonInstructions || '').trim();
       const allowedResVal = (document.getElementById('input-architect-allowed-resources')?.value || architectAllowedResources || '').trim();
       const strictResChk = document.getElementById('chk-architect-strict-resources');
       const strictResVal = strictResChk ? !!strictResChk.checked : (architectStrictResourcesOnly !== false);
@@ -21129,6 +21316,7 @@ Topic: ${topic}
 Category: ${domain}
 Target Student Level: ${level}
 Language: ${langChoice}
+${lessonInstrVal ? `\nMASTER LESSON BUILDER INSTRUCTIONS:\n${lessonInstrVal}\n` : ''}
 ${allowedRule ? `\n${allowedRule}\n` : ''}
 Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per lesson, high-density memory points, and practical relatable student angles.'}`;
 
@@ -21170,13 +21358,17 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
             version: '2.0',
             student_profile: document.getElementById('input-architect-student-profile')?.value || architectStudentProfile || level,
             guidelines: document.getElementById('input-architect-guidelines')?.value || architectGuidelines || '',
+            lesson_builder_instructions: lessonInstrVal,
             allowed_resources: allowedResVal,
             strict_resources_only: strictResVal,
             sections: Array.isArray(currentBlueprintSections) ? currentBlueprintSections.map(s => ({ ...s })) : []
           };
-        } else if (allowedResVal) {
-          courseData.blueprint.allowed_resources = allowedResVal;
-          courseData.blueprint.strict_resources_only = strictResVal;
+        } else {
+          if (lessonInstrVal) courseData.blueprint.lesson_builder_instructions = lessonInstrVal;
+          if (allowedResVal) {
+            courseData.blueprint.allowed_resources = allowedResVal;
+            courseData.blueprint.strict_resources_only = strictResVal;
+          }
         }
 
         if (Array.isArray(courseData.lessons)) {
@@ -26280,10 +26472,8 @@ Respond ONLY with strict JSON (no markdown fences):
     var GEMINI_CANDIDATE_MODELS = [
       'gemini-3-flash-preview',
       'gemini-3.5-flash-lite',
-      'gemini-3.7-flash',
-      'gemini-3.5-flash',
       'gemini-flash-lite-latest',
-      'gemini-3.8-flash'
+      'gemini-flash-latest'
     ];
     if (typeof window !== 'undefined') window.GEMINI_CANDIDATE_MODELS = GEMINI_CANDIDATE_MODELS;
 
