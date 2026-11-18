@@ -10590,9 +10590,52 @@ alter publication supabase_realtime add table public.students_sync;`;
     // ==============================================
     // SPECIALIZED SECTION BLOCK ENGINE (11 BLOCK TYPES)
     // ==============================================
+    function stripAiMarkdownFormatting(text) {
+      if (text === null || text === undefined) return '';
+      let s = String(text);
+      if (!s) return s;
+      // Preserve standalone URLs verbatim
+      if (/^https?:\/\/\S+$/i.test(s.trim())) return s.trim();
+
+      s = s.replace(/```[a-zA-Z0-9_-]*\n?/g, '').replace(/```/g, '');
+      s = s.replace(/\*\*\*([^*\n]+?)\*\*\*/g, '$1');
+      s = s.replace(/___([^_\n]+?)___/g, '$1');
+      s = s.replace(/\*\*([^*\n]+?)\*\*/g, '$1');
+      s = s.replace(/(^|[^a-zA-Z0-9])__([^_\n]+?)__(?=[^a-zA-Z0-9]|$)/g, '$1$2');
+      // Strip paired italic asterisks (*word*) safely without affecting spaced math like 3 * 4
+      s = s.replace(/\*([^\s*\n](?:[^*\n]*[^\s*\n])?)\*/g, '$1');
+      s = s.replace(/(^|[^a-zA-Z0-9])_([^\s_\n](?:[^_\n]*[^\s_\n])?)_(?=[^a-zA-Z0-9]|$)/g, '$1$2');
+      s = s.replace(/`([^`\n]+?)`/g, '$1');
+      s = s.replace(/^[ \t]*#{1,6}[ \t]+/gm, '');
+      s = s.replace(/^[ \t]*\*[ \t]+/gm, '• ');
+      s = s.replace(/\*{2,}/g, '');
+      return s;
+    }
+
+    function stripMarkdownFromAiPayload(val, keyName = '') {
+      if (val === null || val === undefined) return val;
+      if (typeof val === 'string') {
+        if (keyName === 'url' || keyName === 'audio_url' || keyName === 'dataUrl') return val;
+        return stripAiMarkdownFormatting(val);
+      }
+      if (Array.isArray(val)) {
+        return val.map(item => stripMarkdownFromAiPayload(item, keyName));
+      }
+      if (typeof val === 'object') {
+        const cleanedObj = {};
+        Object.keys(val).forEach(k => {
+          cleanedObj[k] = stripMarkdownFromAiPayload(val[k], k);
+        });
+        return cleanedObj;
+      }
+      return val;
+    }
+
     function formatSectionInlineText(str) {
       let safe = escapeHtml(String(str || ''));
+      safe = safe.replace(/\*\*\*([^*\n]+?)\*\*\*/g, '<strong class="font-bold text-white"><em class="italic">$1</em></strong>');
       safe = safe.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-white">$1</strong>');
+      safe = safe.replace(/\*([^\s*\n](?:[^*\n]*[^\s*\n])?)\*/g, '<em class="italic text-slate-200">$1</em>');
       safe = safe.replace(/(^|[^a-zA-Z0-9])_([^_]+)_([^a-zA-Z0-9]|$)/g, '$1<em class="italic text-slate-200">$2</em>$3');
       safe = safe.replace(/`([^`]+)`/g, '<code class="px-1 py-0.5 rounded bg-slate-800 text-amber-300 font-mono text-[11px]">$1</code>');
       return safe;
@@ -11309,7 +11352,7 @@ ${currentVal || '(empty)'}
 ${textSources ? `Reference Materials to draw from:\n${textSources.slice(0, 6000)}\n` : ''}
 Educator's Specific Request: ${instruction}
 
-Return ONLY the updated value matching the Format Requirement cleanly.`;
+Return ONLY the updated value matching the Format Requirement cleanly. Write natural plain text without ANY Markdown symbols (no **, *, _, #, or backticks).`;
           const userParts = [{ text: prompt }];
           sources.forEach(s => {
             if (s.base64Data) userParts.push({ inlineData: { mimeType: s.mimeType || 'audio/webm', data: s.base64Data } });
@@ -11390,6 +11433,7 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
           <button type="button" onclick="handleStudioSectionTargetedTweak('${cId}', '${lId}', '${sec.id}')" class="px-2.5 py-1 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white text-[11px] font-bold shrink-0">Apply</button>
         </div>
       `;
+      const cleanEditField = (v) => escapeHtml(stripAiMarkdownFormatting(v));
 
       // 11. AUDIO STUDIO
       if (sec.type === 'audio') {
@@ -11436,7 +11480,7 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
                 <span>Audio Link</span>
               </button>
             </div>
-            <textarea dir="auto" rows="${estimateTextareaRows(rawVal, 2, 8)}" placeholder="${escapeHtml(sec.ai_rule || meta.placeholder)}" oninput="autoGrowStudioTextarea(this); handleStudioUpdateClassField('${cId}', '${lId}', 'sections.${sec.id}', this.value)" onblur="saveCustomCoursesToStorage(true)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400 leading-relaxed">${escapeHtml(rawVal)}</textarea>
+            <textarea dir="auto" rows="${estimateTextareaRows(rawVal, 2, 8)}" placeholder="${escapeHtml(sec.ai_rule || meta.placeholder)}" oninput="autoGrowStudioTextarea(this); handleStudioUpdateClassField('${cId}', '${lId}', 'sections.${sec.id}', this.value)" onblur="saveCustomCoursesToStorage(true)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400 leading-relaxed">${cleanEditField(rawVal)}</textarea>
           </div>
         `;
       }
@@ -11467,7 +11511,7 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
               </div>
             ` : '<p class="text-xs text-slate-500 italic">No bullet points yet. Add points below or click AI Draft.</p>'}
             <div class="flex items-center gap-2 pt-1">
-              <input id="${addId}" type="text" dir="auto" placeholder="**Concept**: Quick explanation (press Enter to add)..." class="flex-1 bg-slate-950 border border-slate-700/80 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400" onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleSectionListAddItem('${cId}', '${lId}', '${sec.id}', '${addId}'); }">
+              <input id="${addId}" type="text" dir="auto" placeholder="Concept: Quick explanation (press Enter to add)..." class="flex-1 bg-slate-950 border border-slate-700/80 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400" onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleSectionListAddItem('${cId}', '${lId}', '${sec.id}', '${addId}'); }">
               <button type="button" onclick="handleSectionListAddItem('${cId}', '${lId}', '${sec.id}', '${addId}')" class="px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-bold shrink-0">+ Add Point</button>
             </div>
           </div>
@@ -11486,7 +11530,7 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
                 ${d.steps.map((st, idx) => `
                   <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-start gap-2.5">
                     <span class="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold shrink-0 mt-1">Step ${idx + 1}</span>
-                    <textarea dir="auto" rows="${estimateTextareaRows(st.text, 1, 6)}" oninput="autoGrowStudioTextarea(this); handleSectionStepUpdate('${cId}', '${lId}', '${sec.id}', ${idx}, 'text', this.value)" class="studio-autogrow flex-1 bg-transparent text-xs sm:text-sm text-slate-200 focus:outline-none leading-relaxed resize-none py-0.5">${escapeHtml(st.text || '')}</textarea>
+                    <textarea dir="auto" rows="${estimateTextareaRows(st.text, 1, 6)}" oninput="autoGrowStudioTextarea(this); handleSectionStepUpdate('${cId}', '${lId}', '${sec.id}', ${idx}, 'text', this.value)" class="studio-autogrow flex-1 bg-transparent text-xs sm:text-sm text-slate-200 focus:outline-none leading-relaxed resize-none py-0.5">${cleanEditField(st.text || '')}</textarea>
                     <input type="text" value="${escapeHtml(st.mins || '')}" placeholder="min" oninput="handleSectionStepUpdate('${cId}', '${lId}', '${sec.id}', ${idx}, 'mins', this.value)" class="w-12 text-center bg-slate-900 border border-slate-800 rounded-lg py-1 px-1 text-[10px] font-mono text-emerald-300 focus:outline-none focus:border-emerald-400 shrink-0">
                     <button type="button" onclick="handleSectionStepDelete('${cId}', '${lId}', '${sec.id}', ${idx})" class="p-1 rounded hover:bg-rose-950/60 text-slate-500 hover:text-rose-400 shrink-0"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
                   </div>
@@ -11508,11 +11552,11 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
           <div id="studio-custom-block-${sec.id}" class="${cardCls}">
             ${headerHtml}
             <div class="flex items-center gap-2">
-              <input type="text" dir="auto" value="${escapeHtml(d.citation || '')}" placeholder="Source citation, verse, chapter, or theorem title..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'quote', 'citation', this.value)" class="flex-1 bg-slate-950/80 border border-slate-800 rounded-xl py-2 px-3 text-xs text-sky-300 font-semibold placeholder-slate-500 focus:outline-none focus:border-sky-400">
+              <input type="text" dir="auto" value="${cleanEditField(d.citation || '')}" placeholder="Source citation, verse, chapter, or theorem title..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'quote', 'citation', this.value)" class="flex-1 bg-slate-950/80 border border-slate-800 rounded-xl py-2 px-3 text-xs text-sky-300 font-semibold placeholder-slate-500 focus:outline-none focus:border-sky-400">
               <button type="button" onclick="toggleSectionQuoteRtl('${cId}', '${lId}', '${sec.id}')" class="px-2.5 py-2 rounded-xl border text-[10px] font-bold transition ${d.rtl ? 'bg-sky-500/20 border-sky-400 text-sky-300' : 'bg-slate-950 border-slate-700 text-slate-400 hover:text-white'}" title="Toggle Right-to-Left Hebrew/Arabic alignment">אבג RTL</button>
             </div>
-            <textarea rows="${estimateTextareaRows(d.quote, 2, 10)}" dir="${d.rtl ? 'rtl' : 'auto'}" placeholder="Enter original quote, primary text, or mathematical formula..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'quote', 'quote', this.value)" class="studio-autogrow w-full bg-slate-950/90 border border-sky-500/30 rounded-xl p-3 text-sm ${d.rtl ? 'text-right font-serif text-base' : 'font-mono text-sky-100'} placeholder-slate-500 focus:outline-none focus:border-sky-400 leading-relaxed">${escapeHtml(d.quote || '')}</textarea>
-            <textarea dir="auto" rows="${estimateTextareaRows(d.meaning, 2, 10)}" placeholder="Plain-language meaning or commentary..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'quote', 'meaning', this.value)" class="studio-autogrow w-full bg-slate-950/60 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-400 leading-relaxed">${escapeHtml(d.meaning || '')}</textarea>
+            <textarea rows="${estimateTextareaRows(d.quote, 2, 10)}" dir="${d.rtl ? 'rtl' : 'auto'}" placeholder="Enter original quote, primary text, or mathematical formula..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'quote', 'quote', this.value)" class="studio-autogrow w-full bg-slate-950/90 border border-sky-500/30 rounded-xl p-3 text-sm ${d.rtl ? 'text-right font-serif text-base' : 'font-mono text-sky-100'} placeholder-slate-500 focus:outline-none focus:border-sky-400 leading-relaxed">${cleanEditField(d.quote || '')}</textarea>
+            <textarea dir="auto" rows="${estimateTextareaRows(d.meaning, 2, 10)}" placeholder="Plain-language meaning or commentary..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'quote', 'meaning', this.value)" class="studio-autogrow w-full bg-slate-950/60 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-400 leading-relaxed">${cleanEditField(d.meaning || '')}</textarea>
           </div>
         `;
       }
@@ -11524,11 +11568,11 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
             ${headerHtml}
             <div>
               <label class="block text-[10px] font-mono uppercase text-slate-400 mb-1">Story / Problem Setup</label>
-              <textarea dir="auto" rows="${estimateTextareaRows(d.setup, 3, 14)}" placeholder="Tell the story, scenario, or initial problem setup..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'example', 'setup', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400 leading-relaxed">${escapeHtml(d.setup || '')}</textarea>
+              <textarea dir="auto" rows="${estimateTextareaRows(d.setup, 3, 14)}" placeholder="Tell the story, scenario, or initial problem setup..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'example', 'setup', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400 leading-relaxed">${cleanEditField(d.setup || '')}</textarea>
             </div>
             <div>
               <label class="block text-[10px] font-mono uppercase text-amber-400 mb-1">Punchline / Key Lesson / Solution (Collapsible in Teach Mode)</label>
-              <textarea dir="auto" rows="${estimateTextareaRows(d.takeaway, 2, 10)}" placeholder="The moral, insight, or final step-by-step answer..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'example', 'takeaway', this.value)" class="studio-autogrow w-full bg-slate-950/60 border border-amber-500/25 rounded-xl p-3 text-xs sm:text-sm text-amber-100 placeholder-slate-500 focus:outline-none focus:border-amber-400 leading-relaxed">${escapeHtml(d.takeaway || '')}</textarea>
+              <textarea dir="auto" rows="${estimateTextareaRows(d.takeaway, 2, 10)}" placeholder="The moral, insight, or final step-by-step answer..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'example', 'takeaway', this.value)" class="studio-autogrow w-full bg-slate-950/60 border border-amber-500/25 rounded-xl p-3 text-xs sm:text-sm text-amber-100 placeholder-slate-500 focus:outline-none focus:border-amber-400 leading-relaxed">${cleanEditField(d.takeaway || '')}</textarea>
             </div>
           </div>
         `;
@@ -11546,8 +11590,8 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
                     <span class="text-[10px] font-mono text-emerald-400 font-bold">Drill #${idx + 1}</span>
                     ${d.items.length > 1 ? `<button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'exercise', ${idx})" class="text-slate-500 hover:text-rose-400 text-[11px]">Remove</button>` : ''}
                   </div>
-                  <textarea dir="auto" rows="${estimateTextareaRows(item.q, 1, 6)}" placeholder="Question or drill prompt..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'exercise', ${idx}, 'q', this.value)" class="studio-autogrow w-full bg-slate-900 border border-slate-700/80 rounded-xl py-2 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 leading-relaxed resize-none">${escapeHtml(item.q || '')}</textarea>
-                  <textarea dir="auto" rows="${estimateTextareaRows(item.a, 1, 6)}" placeholder="Answer Key (hidden until revealed during class)..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'exercise', ${idx}, 'a', this.value)" class="studio-autogrow w-full bg-slate-900/70 border border-emerald-500/20 rounded-xl py-2 px-3 text-xs sm:text-sm text-emerald-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400 leading-relaxed resize-none">${escapeHtml(item.a || '')}</textarea>
+                  <textarea dir="auto" rows="${estimateTextareaRows(item.q, 1, 6)}" placeholder="Question or drill prompt..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'exercise', ${idx}, 'q', this.value)" class="studio-autogrow w-full bg-slate-900 border border-slate-700/80 rounded-xl py-2 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 leading-relaxed resize-none">${cleanEditField(item.q || '')}</textarea>
+                  <textarea dir="auto" rows="${estimateTextareaRows(item.a, 1, 6)}" placeholder="Answer Key (hidden until revealed during class)..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'exercise', ${idx}, 'a', this.value)" class="studio-autogrow w-full bg-slate-900/70 border border-emerald-500/20 rounded-xl py-2 px-3 text-xs sm:text-sm text-emerald-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400 leading-relaxed resize-none">${cleanEditField(item.a || '')}</textarea>
                 </div>
               `).join('')}
             </div>
@@ -11568,8 +11612,8 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
                     <span class="text-[10px] font-mono text-rose-400 font-bold">Trap &amp; Fix #${idx + 1}</span>
                     ${d.items.length > 1 ? `<button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'pitfalls', ${idx})" class="text-slate-500 hover:text-rose-400 text-[11px]">Remove</button>` : ''}
                   </div>
-                  <textarea dir="auto" rows="${estimateTextareaRows(item.trap, 2, 6)}" placeholder="Mistake or misconception students usually have..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'pitfalls', ${idx}, 'trap', this.value)" class="studio-autogrow w-full bg-slate-900 border border-rose-500/30 rounded-xl py-2 px-3 text-xs sm:text-sm text-rose-200 placeholder-slate-500 focus:outline-none focus:border-rose-400 leading-relaxed resize-none">${escapeHtml(item.trap || '')}</textarea>
-                  <textarea dir="auto" rows="${estimateTextareaRows(item.fix, 2, 8)}" placeholder="How to correct or reframe it cleanly..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'pitfalls', ${idx}, 'fix', this.value)" class="studio-autogrow w-full bg-slate-900/70 border border-emerald-500/25 rounded-xl py-2 px-3 text-xs sm:text-sm text-emerald-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400 leading-relaxed resize-none">${escapeHtml(item.fix || '')}</textarea>
+                  <textarea dir="auto" rows="${estimateTextareaRows(item.trap, 2, 6)}" placeholder="Mistake or misconception students usually have..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'pitfalls', ${idx}, 'trap', this.value)" class="studio-autogrow w-full bg-slate-900 border border-rose-500/30 rounded-xl py-2 px-3 text-xs sm:text-sm text-rose-200 placeholder-slate-500 focus:outline-none focus:border-rose-400 leading-relaxed resize-none">${cleanEditField(item.trap || '')}</textarea>
+                  <textarea dir="auto" rows="${estimateTextareaRows(item.fix, 2, 8)}" placeholder="How to correct or reframe it cleanly..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'pitfalls', ${idx}, 'fix', this.value)" class="studio-autogrow w-full bg-slate-900/70 border border-emerald-500/25 rounded-xl py-2 px-3 text-xs sm:text-sm text-emerald-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400 leading-relaxed resize-none">${cleanEditField(item.fix || '')}</textarea>
                 </div>
               `).join('')}
             </div>
@@ -11583,9 +11627,9 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
         return `
           <div id="studio-custom-block-${sec.id}" class="${cardCls}">
             ${headerHtml}
-            <textarea dir="auto" rows="${estimateTextareaRows(d.prompt, 2, 8)}" placeholder="Main question to spark conversation..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'discussion', 'prompt', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400 leading-relaxed">${escapeHtml(d.prompt || '')}</textarea>
-            <textarea dir="auto" rows="${estimateTextareaRows(d.followup, 2, 6)}" placeholder="Follow-up cue (e.g. If they say X, ask Y)..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'discussion', 'followup', this.value)" class="studio-autogrow w-full bg-slate-950/60 border border-indigo-500/25 rounded-xl p-2.5 text-xs sm:text-sm text-indigo-200 placeholder-slate-500 focus:outline-none focus:border-indigo-400 leading-relaxed resize-none">${escapeHtml(d.followup || '')}</textarea>
-            <textarea dir="auto" rows="${estimateTextareaRows(d.notes, 1, 6)}" placeholder="Quick note on student responses..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'discussion', 'notes', this.value)" class="studio-autogrow w-full bg-slate-950/40 border border-slate-800 rounded-xl p-2.5 text-xs sm:text-sm text-slate-300 placeholder-slate-500 focus:outline-none focus:border-slate-600 leading-relaxed resize-none">${escapeHtml(d.notes || '')}</textarea>
+            <textarea dir="auto" rows="${estimateTextareaRows(d.prompt, 2, 8)}" placeholder="Main question to spark conversation..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'discussion', 'prompt', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400 leading-relaxed">${cleanEditField(d.prompt || '')}</textarea>
+            <textarea dir="auto" rows="${estimateTextareaRows(d.followup, 2, 6)}" placeholder="Follow-up cue (e.g. If they say X, ask Y)..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'discussion', 'followup', this.value)" class="studio-autogrow w-full bg-slate-950/60 border border-indigo-500/25 rounded-xl p-2.5 text-xs sm:text-sm text-indigo-200 placeholder-slate-500 focus:outline-none focus:border-indigo-400 leading-relaxed resize-none">${cleanEditField(d.followup || '')}</textarea>
+            <textarea dir="auto" rows="${estimateTextareaRows(d.notes, 1, 6)}" placeholder="Quick note on student responses..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'discussion', 'notes', this.value)" class="studio-autogrow w-full bg-slate-950/40 border border-slate-800 rounded-xl p-2.5 text-xs sm:text-sm text-slate-300 placeholder-slate-500 focus:outline-none focus:border-slate-600 leading-relaxed resize-none">${cleanEditField(d.notes || '')}</textarea>
           </div>
         `;
       }
@@ -11596,8 +11640,8 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
         return `
           <div id="studio-custom-block-${sec.id}" class="${cardCls}">
             ${headerHtml}
-            <textarea dir="auto" rows="${estimateTextareaRows(d.mindset, 2, 8)}" placeholder="Core value or life mindset..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'reflection', 'mindset', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-400 leading-relaxed">${escapeHtml(d.mindset || '')}</textarea>
-            <textarea dir="auto" rows="${estimateTextareaRows(d.action, 2, 6)}" placeholder="Concrete action challenge for this week..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'reflection', 'action', this.value)" class="studio-autogrow w-full bg-slate-950/60 border border-purple-500/25 rounded-xl p-2.5 text-xs sm:text-sm text-purple-200 placeholder-slate-500 focus:outline-none focus:border-purple-400 leading-relaxed resize-none">${escapeHtml(d.action || '')}</textarea>
+            <textarea dir="auto" rows="${estimateTextareaRows(d.mindset, 2, 8)}" placeholder="Core value or life mindset..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'reflection', 'mindset', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-400 leading-relaxed">${cleanEditField(d.mindset || '')}</textarea>
+            <textarea dir="auto" rows="${estimateTextareaRows(d.action, 2, 6)}" placeholder="Concrete action challenge for this week..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'reflection', 'action', this.value)" class="studio-autogrow w-full bg-slate-950/60 border border-purple-500/25 rounded-xl p-2.5 text-xs sm:text-sm text-purple-200 placeholder-slate-500 focus:outline-none focus:border-purple-400 leading-relaxed resize-none">${cleanEditField(d.action || '')}</textarea>
             <div class="flex items-center justify-end gap-2 pt-1 flex-wrap">
               ${renderStudentQuickPickerHtml(pickerId)}
               <button type="button" onclick="assignSectionTaskToStudent('${cId}', '${lId}', '${sec.id}', 'reflection', '${pickerId}')" class="px-3 py-1 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 text-[11px] font-bold transition">+ Send to Student Goal</button>
@@ -11613,7 +11657,7 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
           <div id="studio-custom-block-${sec.id}" class="${cardCls}">
             ${headerHtml}
             <div class="flex items-start gap-2">
-              <textarea dir="auto" rows="${estimateTextareaRows(d.task, 2, 8)}" placeholder="Homework assignment instructions..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'homework', 'task', this.value)" class="studio-autogrow flex-1 bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-orange-400 leading-relaxed">${escapeHtml(d.task || '')}</textarea>
+              <textarea dir="auto" rows="${estimateTextareaRows(d.task, 2, 8)}" placeholder="Homework assignment instructions..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'homework', 'task', this.value)" class="studio-autogrow flex-1 bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-orange-400 leading-relaxed">${cleanEditField(d.task || '')}</textarea>
               <select onchange="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'homework', 'estMinutes', this.value)" class="bg-slate-950 border border-slate-700 rounded-xl py-2 px-2 text-xs text-orange-300 font-mono focus:outline-none">
                 ${['5m', '10m', '15m', '20m', '30m'].map(m => `<option value="${m}" ${(d.estMinutes || '15m') === m ? 'selected' : ''}>${m}</option>`).join('')}
               </select>
@@ -11635,16 +11679,16 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
             ${headerHtml}
             <div class="flex items-center justify-between gap-2">
               <div class="grid grid-cols-2 gap-2 flex-1">
-                <input type="text" value="${escapeHtml(d.leftLabel || 'Original Text')}" oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'bilingual_split', 'leftLabel', this.value)" class="bg-slate-950/70 border border-slate-800 rounded-lg py-1 px-2 text-[11px] font-bold text-teal-300">
-                <input type="text" value="${escapeHtml(d.rightLabel || 'Plain Explanation')}" oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'bilingual_split', 'rightLabel', this.value)" class="bg-slate-950/70 border border-slate-800 rounded-lg py-1 px-2 text-[11px] font-bold text-slate-300">
+                <input type="text" value="${cleanEditField(d.leftLabel || 'Original Text')}" oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'bilingual_split', 'leftLabel', this.value)" class="bg-slate-950/70 border border-slate-800 rounded-lg py-1 px-2 text-[11px] font-bold text-teal-300">
+                <input type="text" value="${cleanEditField(d.rightLabel || 'Plain Explanation')}" oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'bilingual_split', 'rightLabel', this.value)" class="bg-slate-950/70 border border-slate-800 rounded-lg py-1 px-2 text-[11px] font-bold text-slate-300">
               </div>
               <button type="button" onclick="toggleSectionQuoteRtl('${cId}', '${lId}', '${sec.id}', 'bilingual_split')" class="px-2 py-1 rounded-lg border text-[10px] font-bold ${isRtl ? 'bg-teal-500/20 border-teal-400 text-teal-300' : 'bg-slate-950 border-slate-700 text-slate-400'}">אבג RTL</button>
             </div>
             <div class="space-y-2.5">
               ${rows.map((r, idx) => `
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-start p-2.5 rounded-xl bg-slate-950/70 border border-slate-800">
-                  <textarea rows="${estimateTextareaRows(r.orig, 2, 10, 34)}" dir="${isRtl ? 'rtl' : 'auto'}" placeholder="Original verse/phrase..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'bilingual_split', ${idx}, 'orig', this.value)" class="studio-autogrow sm:col-span-5 bg-slate-900 border border-slate-700/80 rounded-xl p-2.5 text-xs sm:text-sm text-teal-100 leading-relaxed ${isRtl ? 'text-right font-serif text-base' : ''}">${escapeHtml(r.orig || '')}</textarea>
-                  <textarea rows="${estimateTextareaRows(r.trans, 2, 10, 42)}" dir="auto" placeholder="Translation / commentary..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'bilingual_split', ${idx}, 'trans', this.value)" class="studio-autogrow sm:col-span-6 bg-slate-900 border border-slate-700/80 rounded-xl p-2.5 text-xs sm:text-sm text-slate-200 leading-relaxed">${escapeHtml(r.trans || '')}</textarea>
+                  <textarea rows="${estimateTextareaRows(r.orig, 2, 10, 34)}" dir="${isRtl ? 'rtl' : 'auto'}" placeholder="Original verse/phrase..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'bilingual_split', ${idx}, 'orig', this.value)" class="studio-autogrow sm:col-span-5 bg-slate-900 border border-slate-700/80 rounded-xl p-2.5 text-xs sm:text-sm text-teal-100 leading-relaxed ${isRtl ? 'text-right font-serif text-base' : ''}">${cleanEditField(r.orig || '')}</textarea>
+                  <textarea rows="${estimateTextareaRows(r.trans, 2, 10, 42)}" dir="auto" placeholder="Translation / commentary..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'bilingual_split', ${idx}, 'trans', this.value)" class="studio-autogrow sm:col-span-6 bg-slate-900 border border-slate-700/80 rounded-xl p-2.5 text-xs sm:text-sm text-slate-200 leading-relaxed">${cleanEditField(r.trans || '')}</textarea>
                   <button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'bilingual_split', ${idx})" class="sm:col-span-1 text-slate-500 hover:text-rose-400 p-1.5 flex justify-center"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
                 </div>
               `).join('')}
@@ -11667,7 +11711,7 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
                   <tr>
                     ${headers.map((h, cIdx) => `
                       <th class="p-1 text-left">
-                        <input type="text" dir="auto" value="${escapeHtml(h)}" oninput="handleSectionTableUpdateHeader('${cId}', '${lId}', '${sec.id}', ${cIdx}, this.value)" class="w-full bg-blue-500/10 border border-blue-500/30 rounded-lg py-1.5 px-2.5 text-blue-300 font-bold text-xs">
+                        <input type="text" dir="auto" value="${cleanEditField(h)}" oninput="handleSectionTableUpdateHeader('${cId}', '${lId}', '${sec.id}', ${cIdx}, this.value)" class="w-full bg-blue-500/10 border border-blue-500/30 rounded-lg py-1.5 px-2.5 text-blue-300 font-bold text-xs">
                       </th>
                     `).join('')}
                     <th class="w-8"></th>
@@ -11678,7 +11722,7 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
                     <tr>
                       ${headers.map((_, cIdx) => `
                         <td class="p-1 align-top">
-                          <textarea dir="auto" rows="${estimateTextareaRows((r && r[cIdx]) || '', 1, 5, 28)}" oninput="autoGrowStudioTextarea(this); handleSectionTableUpdateCell('${cId}', '${lId}', '${sec.id}', ${rIdx}, ${cIdx}, this.value)" placeholder="Value..." class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-lg py-1.5 px-2.5 text-slate-200 text-xs leading-snug resize-none">${escapeHtml((r && r[cIdx]) || '')}</textarea>
+                          <textarea dir="auto" rows="${estimateTextareaRows((r && r[cIdx]) || '', 1, 5, 28)}" oninput="autoGrowStudioTextarea(this); handleSectionTableUpdateCell('${cId}', '${lId}', '${sec.id}', ${rIdx}, ${cIdx}, this.value)" placeholder="Value..." class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-lg py-1.5 px-2.5 text-slate-200 text-xs leading-snug resize-none">${cleanEditField((r && r[cIdx]) || '')}</textarea>
                         </td>
                       `).join('')}
                       <td class="p-1 text-center align-top">
@@ -11713,12 +11757,12 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
                       <span class="text-[10px] font-mono text-indigo-300 font-bold">Question #${qIdx + 1}</span>
                       ${items.length > 1 ? `<button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'quiz', ${qIdx})" class="text-[11px] text-slate-500 hover:text-rose-400">Remove</button>` : ''}
                     </div>
-                    <textarea dir="auto" rows="${estimateTextareaRows(item.q, 1, 5)}" placeholder="Quiz question..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'quiz', ${qIdx}, 'q', this.value)" class="studio-autogrow w-full bg-slate-900 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white font-semibold leading-relaxed resize-none">${escapeHtml(item.q || '')}</textarea>
+                    <textarea dir="auto" rows="${estimateTextareaRows(item.q, 1, 5)}" placeholder="Quiz question..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'quiz', ${qIdx}, 'q', this.value)" class="studio-autogrow w-full bg-slate-900 border border-slate-700 rounded-xl py-2 px-3 text-xs sm:text-sm text-white font-semibold leading-relaxed resize-none">${cleanEditField(item.q || '')}</textarea>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                       ${opts.map((opt, optIdx) => `
                         <div class="flex items-center gap-1.5">
                           <button type="button" onclick="handleSectionQuizCorrectSet('${cId}', '${lId}', '${sec.id}', ${qIdx}, ${optIdx})" class="px-2 py-1 rounded-lg border text-[10px] font-bold shrink-0 ${corr === optIdx ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300' : 'bg-slate-900 border-slate-700 text-slate-500'}" title="Mark as correct answer">${String.fromCharCode(65 + optIdx)}${corr === optIdx ? ' ✓' : ''}</button>
-                          <input type="text" dir="auto" value="${escapeHtml(opt || '')}" placeholder="Choice ${String.fromCharCode(65 + optIdx)}" oninput="handleSectionQuizOptionUpdate('${cId}', '${lId}', '${sec.id}', ${qIdx}, ${optIdx}, this.value)" class="flex-1 bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-2.5 text-xs text-slate-200">
+                          <input type="text" dir="auto" value="${cleanEditField(opt || '')}" placeholder="Choice ${String.fromCharCode(65 + optIdx)}" oninput="handleSectionQuizOptionUpdate('${cId}', '${lId}', '${sec.id}', ${qIdx}, ${optIdx}, this.value)" class="flex-1 bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-2.5 text-xs text-slate-200">
                         </div>
                       `).join('')}
                     </div>
@@ -11740,8 +11784,8 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
             <div class="space-y-2">
               ${items.map((item, idx) => `
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-start p-2.5 rounded-xl bg-slate-950/80 border border-purple-500/20">
-                  <textarea dir="auto" rows="${estimateTextareaRows(item.front, 1, 5, 28)}" placeholder="Front (Term / Question)..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'flashcards', ${idx}, 'front', this.value)" class="studio-autogrow sm:col-span-5 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2.5 text-xs text-purple-200 font-bold resize-none">${escapeHtml(item.front || '')}</textarea>
-                  <textarea dir="auto" rows="${estimateTextareaRows(item.back, 1, 5, 36)}" placeholder="Back (Definition / Answer)..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'flashcards', ${idx}, 'back', this.value)" class="studio-autogrow sm:col-span-6 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2.5 text-xs text-slate-200 resize-none">${escapeHtml(item.back || '')}</textarea>
+                  <textarea dir="auto" rows="${estimateTextareaRows(item.front, 1, 5, 28)}" placeholder="Front (Term / Question)..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'flashcards', ${idx}, 'front', this.value)" class="studio-autogrow sm:col-span-5 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2.5 text-xs text-purple-200 font-bold resize-none">${cleanEditField(item.front || '')}</textarea>
+                  <textarea dir="auto" rows="${estimateTextareaRows(item.back, 1, 5, 36)}" placeholder="Back (Definition / Answer)..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'flashcards', ${idx}, 'back', this.value)" class="studio-autogrow sm:col-span-6 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2.5 text-xs text-slate-200 resize-none">${cleanEditField(item.back || '')}</textarea>
                   <button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'flashcards', ${idx})" class="sm:col-span-1 text-slate-500 hover:text-rose-400 p-1.5 flex justify-center"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
                 </div>
               `).join('')}
@@ -11764,7 +11808,7 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
               </select>
               <span class="text-[11px] text-slate-400">Countdown activates inside Teach Class</span>
             </div>
-            <textarea dir="auto" rows="${estimateTextareaRows(d.prompt, 2, 8)}" placeholder="Activity prompt or timed drill instructions..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'timed_activity', 'prompt', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-orange-400 leading-relaxed">${escapeHtml(d.prompt || '')}</textarea>
+            <textarea dir="auto" rows="${estimateTextareaRows(d.prompt, 2, 8)}" placeholder="Activity prompt or timed drill instructions..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'timed_activity', 'prompt', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-orange-400 leading-relaxed">${cleanEditField(d.prompt || '')}</textarea>
           </div>
         `;
       }
@@ -11778,8 +11822,8 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
             <div class="space-y-2">
               ${items.map((item, idx) => `
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-start p-2 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <input type="text" dir="auto" value="${escapeHtml(item.speaker || '')}" placeholder="Speaker..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'dialogue', ${idx}, 'speaker', this.value)" class="sm:col-span-3 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2 text-xs text-cyan-300 font-bold">
-                  <textarea dir="auto" rows="${estimateTextareaRows(item.line, 1, 6, 48)}" placeholder="Dialogue line..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'dialogue', ${idx}, 'line', this.value)" class="studio-autogrow sm:col-span-8 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2.5 text-xs text-slate-200 resize-none">${escapeHtml(item.line || '')}</textarea>
+                  <input type="text" dir="auto" value="${cleanEditField(item.speaker || '')}" placeholder="Speaker..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'dialogue', ${idx}, 'speaker', this.value)" class="sm:col-span-3 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2 text-xs text-cyan-300 font-bold">
+                  <textarea dir="auto" rows="${estimateTextareaRows(item.line, 1, 6, 48)}" placeholder="Dialogue line..." oninput="autoGrowStudioTextarea(this); handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'dialogue', ${idx}, 'line', this.value)" class="studio-autogrow sm:col-span-8 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2.5 text-xs text-slate-200 resize-none">${cleanEditField(item.line || '')}</textarea>
                   <button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'dialogue', ${idx})" class="sm:col-span-1 text-slate-500 hover:text-rose-400 p-1.5 flex justify-center"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
                 </div>
               `).join('')}
@@ -11799,7 +11843,7 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
               <button type="button" onclick="triggerSectionImageUpload('${cId}', '${lId}', '${sec.id}')" class="px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 text-xs font-semibold shrink-0">Upload Image</button>
             </div>
             ${d.url ? `<div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950 p-2 max-h-56 flex justify-center"><img src="${escapeHtml(d.url)}" alt="${escapeHtml(d.caption || sec.name)}" class="max-h-52 rounded-lg object-contain"></div>` : ''}
-            <input type="text" dir="auto" value="${escapeHtml(d.caption || '')}" placeholder="Caption or visual teaching cue..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'image', 'caption', this.value)" class="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-1.5 px-3 text-xs text-slate-300">
+            <input type="text" dir="auto" value="${cleanEditField(d.caption || '')}" placeholder="Caption or visual teaching cue..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'image', 'caption', this.value)" class="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-1.5 px-3 text-xs text-slate-300">
           </div>
         `;
       }
@@ -11813,7 +11857,7 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
             <div class="space-y-2">
               ${items.map((item, idx) => `
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center p-2 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <input type="text" dir="auto" value="${escapeHtml(item.title || '')}" placeholder="Link / Video title..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'video_links', ${idx}, 'title', this.value)" class="sm:col-span-4 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2 text-xs text-white font-semibold">
+                  <input type="text" dir="auto" value="${cleanEditField(item.title || '')}" placeholder="Link / Video title..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'video_links', ${idx}, 'title', this.value)" class="sm:col-span-4 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2 text-xs text-white font-semibold">
                   <input type="text" value="${escapeHtml(item.url || '')}" placeholder="https://youtube.com/... or resource URL" oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'video_links', ${idx}, 'url', this.value)" class="sm:col-span-7 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2 text-xs text-rose-200 font-mono">
                   <button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'video_links', ${idx})" class="sm:col-span-1 text-slate-500 hover:text-rose-400 p-1 flex justify-center"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
                 </div>
@@ -11829,17 +11873,17 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
         return `
           <div id="studio-custom-block-${sec.id}" class="${cardCls} border-dashed">
             ${headerHtml}
-            <textarea dir="auto" rows="${estimateTextareaRows(d.cue, 2, 8)}" placeholder="Private prep cues, anticipated student questions, or pacing reminders (excluded from student views)..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'teacher_cue', 'cue', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-300 placeholder-slate-500 focus:outline-none focus:border-slate-500 leading-relaxed">${escapeHtml(d.cue || '')}</textarea>
+            <textarea dir="auto" rows="${estimateTextareaRows(d.cue, 2, 8)}" placeholder="Private prep cues, anticipated student questions, or pacing reminders (excluded from student views)..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'teacher_cue', 'cue', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-300 placeholder-slate-500 focus:outline-none focus:border-slate-500 leading-relaxed">${cleanEditField(d.cue || '')}</textarea>
           </div>
         `;
       }
 
-      // 1. TEXT / EXPLANATION (Auto-growing Full Readability + Formatted Highlight)
+      // 1. TEXT / EXPLANATION (Auto-growing Full Readability + Clean Plain Text)
       return `
         <div id="studio-custom-block-${sec.id}" class="${cardCls}">
           ${headerHtml}
-          <textarea dir="auto" rows="${estimateTextareaRows(d.summary, 1, 4)}" placeholder="Quick 1-sentence core takeaway (optional)..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'text', 'summary', this.value)" class="studio-autogrow w-full bg-slate-950/60 border border-cyan-500/20 rounded-xl py-2 px-3 text-xs sm:text-sm text-cyan-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-semibold leading-relaxed resize-none">${escapeHtml(d.summary || '')}</textarea>
-          <textarea dir="auto" rows="${estimateTextareaRows(d.body, 3, 16)}" placeholder="Main explanation (supports **bold** and \`code\` highlights)..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'text', 'body', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-${effColor}-400 leading-relaxed">${escapeHtml(d.body || '')}</textarea>
+          <textarea dir="auto" rows="${estimateTextareaRows(d.summary, 1, 4)}" placeholder="Quick 1-sentence core takeaway (optional)..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'text', 'summary', this.value)" class="studio-autogrow w-full bg-slate-950/60 border border-cyan-500/20 rounded-xl py-2 px-3 text-xs sm:text-sm text-cyan-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-semibold leading-relaxed resize-none">${cleanEditField(d.summary || '')}</textarea>
+          <textarea dir="auto" rows="${estimateTextareaRows(d.body, 3, 16)}" placeholder="Main explanation..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'text', 'body', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-${effColor}-400 leading-relaxed">${cleanEditField(d.body || '')}</textarea>
         </div>
       `;
     }
@@ -12637,6 +12681,7 @@ Collaboration & Action Rules:
   : 'MANDATORY EXECUTION RULE: Whenever the teacher sends you a draft, pasted notes, outline, feedback, or ANY instruction to create, edit, organize, rewrite, fix, shorten, expand, or populate the lesson, you MUST directly populate every matching section ID inside "sections" with rich, non-empty content right now! Do NOT leave sections as empty objects {} and do NOT just give advice in "assistant_reply" with an empty "sections": {} — apply the draft/changes into the lesson sections on the right using the exact ID strings (e.g. "sec_...").'}
 3. Maintain warm, intelligent, concise mentoring dialogue in "assistant_reply" summarizing the exact sections you updated.
 4. Respond in Hebrew if the teacher writes in Hebrew, or English if they write in English.
+5. CLEAN PLAIN TEXT ONLY: Never use Markdown formatting symbols (no **, *, _, #, or backticks) inside any lesson text or "assistant_reply". Write natural, clean prose without asterisks.
 
 ${hasCustomBp ? `Return STRICT JSON ONLY:
 {
@@ -12650,7 +12695,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
   "assistant_reply": "Brief summary of the lesson sections updated...",
   "updated_title": null,
   "hook": "...",
-  "anchors": ["**Key**: point"],
+  "anchors": ["Key Concept: concise plain-text explanation"],
   "sources": "...",
   "steps": "...",
   "pitfalls": "...",
@@ -12664,7 +12709,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
               temperature: 0.5,
               taskTier: getAiQualityTier()
             });
-            parsed = parseClassAiJson(raw);
+            parsed = stripMarkdownFromAiPayload(parseClassAiJson(raw));
           } catch (err) {
             aiCallError = err;
             console.warn('Class AI partner Gemini fallback:', err);
@@ -12691,7 +12736,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
             parsed = {
               assistant_reply: `I updated the teaching blocks for "${classTitle}" using your draft.${aiCallError ? ` (Live AI error: ${aiCallError.message || 'network/model error'} — saved locally.)` : ''}`,
               hook: userMsg.length >= 25 ? userMsg : `Real-world scenario connecting ${classTitle} to everyday student choices.`,
-              anchors: draftLines.length >= 2 ? draftLines.slice(0, 7) : [`**Core Concept**: Foundational premise of ${classTitle}.`, `**Why It Matters**: Practical impact for today.`],
+              anchors: draftLines.length >= 2 ? draftLines.slice(0, 7) : [`Core Concept: Foundational premise of ${classTitle}.`, `Why It Matters: Practical impact for today.`],
               pitfalls: `Clarify common misconceptions early before moving into examples.`,
               homework: `Reflect on one situation this week where ${classTitle} applies.`
             };
@@ -12731,7 +12776,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                 const forcePrompt = `The educator sent this draft/request for class "${classTitle}":
 "${userMsg}"
 ${allowedRule ? `\n${allowedRule}\n` : ''}
-Map and apply concrete non-empty teaching content into the lesson sections below right now. Return STRICT JSON ONLY matching this exact structure:
+Map and apply concrete non-empty teaching content into the lesson sections below right now. Write clean natural plain text with ZERO Markdown symbols (no **, *, _, #, or backticks). Return STRICT JSON ONLY matching this exact structure:
 {
   "sections": {
 ${bpSections.map(s => `    "${s.id}": <non-empty object matching ${s.type} shape>`).join(',\n')}
@@ -12745,7 +12790,7 @@ ${forceSchemaLines}`;
                   temperature: 0.35,
                   taskTier: getAiQualityTier()
                 });
-                const forcedParsed = parseClassAiJson(forcedRaw);
+                const forcedParsed = stripMarkdownFromAiPayload(parseClassAiJson(forcedRaw));
                 resolvedUpdates = resolveSectionUpdatesFromAiPayload(forcedParsed, bpSections);
                 Object.keys(resolvedUpdates).forEach(k => {
                   const matchedSec = bpSections.find(s => s.id === k);
@@ -13703,7 +13748,7 @@ ${forceSchemaLines}`;
                     <div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
                       <div dir="auto" class="max-w-[92%] rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed ${isUser ? 'bg-amber-500/15 border border-amber-500/30 text-amber-100' : 'bg-slate-950/90 border border-slate-800 text-slate-200'}">
                         <span class="block text-[9px] font-mono uppercase tracking-wider mb-1 ${isUser ? 'text-amber-300' : 'text-indigo-400'}">${isUser ? 'You' : 'AI Co-Builder'}</span>
-                        <div class="whitespace-pre-wrap break-words">${escapeHtml(m.text)}</div>
+                        <div class="whitespace-pre-wrap break-words">${escapeHtml(isUser ? m.text : stripAiMarkdownFormatting(m.text))}</div>
                         ${(!isUser && m.updatedCount > 0) ? `
                           <button type="button" onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'sections')" class="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/35 text-[10px] font-bold transition">
                             <span>✓ Updated ${m.updatedCount} section${m.updatedCount === 1 ? '' : 's'}</span>
@@ -13827,18 +13872,18 @@ ${forceSchemaLines}`;
                   </div>
                   <textarea
                     rows="3"
-                    placeholder="**First Concept**: Brief explanation&#10;**Second Concept**: Brief explanation"
+                    placeholder="First Concept: Brief explanation&#10;Second Concept: Brief explanation"
                     oninput="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'anchors_en', this.value)"
                     onblur="saveCustomCoursesToStorage(true)"
                     class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 font-mono focus:outline-none focus:border-amber-400 leading-relaxed"
-                  >${escapeHtml(anchorsRawText)}</textarea>
+                  >${escapeHtml(stripAiMarkdownFormatting(anchorsRawText))}</textarea>
                   <!-- Rendered chips preview -->
                   ${selectedAnchors.length > 0 ? `
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
                       ${selectedAnchors.map(a => `
                         <div class="p-2 rounded-lg bg-slate-950/70 border border-slate-800/80 text-slate-200 text-xs flex items-start gap-2">
                           <span class="text-amber-400 font-bold shrink-0">✦</span>
-                          <div class="leading-snug">${escapeHtml(typeof a === 'string' ? a : (a.point || a.title || ''))}</div>
+                          <div class="leading-snug">${formatSectionInlineText(typeof a === 'string' ? a : (a.point || a.title || ''))}</div>
                         </div>
                       `).join('')}
                     </div>
@@ -14523,8 +14568,8 @@ ${forceSchemaLines}`;
 
     function getSectionAiFormatRule(secType) {
       const rules = {
-        text: 'Return JSON: { "summary": "1-sentence core takeaway", "body": "Rich explanation with **bold** keywords" }',
-        list: 'Return JSON: { "items": ["**Key Idea 1**: explanation", "**Key Idea 2**: explanation"] }',
+        text: 'Return JSON: { "summary": "1-sentence core takeaway", "body": "Rich, clear natural plain-text explanation with zero Markdown symbols (no **, *, _, #, or backticks)" }',
+        list: 'Return JSON: { "items": ["Key Idea 1: plain-text explanation", "Key Idea 2: plain-text explanation"] }',
         steps: 'Return JSON: { "steps": [{ "text": "Step description", "mins": "4m" }] }',
         quote: 'Return JSON: { "citation": "Source/Formula title", "quote": "Exact text/formula", "meaning": "Plain explanation", "rtl": false }',
         bilingual_split: 'Return JSON: { "rtl": true, "leftLabel": "Original Text", "rightLabel": "Plain Meaning", "rows": [{ "orig": "Phrase 1", "trans": "Meaning 1" }] }',
@@ -14564,7 +14609,7 @@ ${forceSchemaLines}`;
 
     function normalizeSectionAiValue(val, secType) {
       if (secType === 'audio') {
-        return typeof val === 'string' ? val.trim() : JSON.stringify(val || '');
+        return typeof val === 'string' ? stripAiMarkdownFormatting(val).trim() : JSON.stringify(stripMarkdownFromAiPayload(val || ''));
       }
       let normalized = val;
       if (typeof val === 'string') {
@@ -14576,6 +14621,7 @@ ${forceSchemaLines}`;
           } catch (_) {}
         }
       }
+      normalized = stripMarkdownFromAiPayload(normalized);
       if (Array.isArray(normalized)) {
         if (secType === 'steps') {
           const steps = normalized.map(st => typeof st === 'string' ? { text: st, mins: '' } : st).filter(st => st && String(st.text || '').trim());
@@ -14585,7 +14631,9 @@ ${forceSchemaLines}`;
           const rows = normalized.map(r => (typeof r === 'string' ? { orig: r, trans: '' } : { orig: r.orig || r.source || r.text || '', trans: r.trans || r.meaning || r.explanation || '' })).filter(r => (r.orig || r.trans).trim());
           return rows.length ? JSON.stringify({ _structured: true, rtl: true, leftLabel: 'Original Text', rightLabel: 'Plain Explanation', rows }) : '';
         }
-        const items = normalized.filter(it => (typeof it === 'string' ? it.trim() !== '' : (it && typeof it === 'object' && Object.values(it).some(v => String(v || '').trim() !== ''))));
+        const items = normalized
+          .map(it => typeof it === 'string' ? it.replace(/^[•\-\*]\s+/, '').trim() : it)
+          .filter(it => (typeof it === 'string' ? it.trim() !== '' : (it && typeof it === 'object' && Object.values(it).some(v => String(v || '').trim() !== ''))));
         return items.length ? JSON.stringify({ _structured: true, items }) : '';
       }
       if (normalized && typeof normalized === 'object') {
@@ -14601,12 +14649,15 @@ ${forceSchemaLines}`;
             normalized = { rtl: normalized.rtl !== false, rows: [{ orig: normalized.orig || normalized.quote || '', trans: normalized.trans || normalized.meaning || '' }] };
           }
         }
+        if (secType === 'list' && Array.isArray(normalized.items)) {
+          normalized.items = normalized.items.map(it => typeof it === 'string' ? it.replace(/^[•\-\*]\s+/, '').trim() : it).filter(Boolean);
+        }
         if (!hasMeaningfulSectionObject(normalized, secType)) {
           return '';
         }
         return JSON.stringify({ _structured: true, ...normalized });
       }
-      const strVal = String(normalized || '').trim();
+      const strVal = stripAiMarkdownFormatting(String(normalized || '')).trim();
       if (!strVal) return '';
       if (secType === 'text') {
         const firstLine = strVal.split('\n')[0].replace(/^\*+|\*+$/g, '').trim();
@@ -14754,9 +14805,9 @@ ${forceSchemaLines}`;
         return JSON.stringify({
           _structured: true,
           items: draftLines.length >= 2 ? draftLines.slice(0, 8) : [
-            `**Core Point 1**: Foundational principle of ${classTitle}.`,
-            `**Core Point 2**: How ${classTitle} works in real life.`,
-            `**Core Point 3**: Key takeaway tailored to ${sp}.`
+            `Core Point 1: Foundational principle of ${classTitle}.`,
+            `Core Point 2: How ${classTitle} works in real life.`,
+            `Core Point 3: Key takeaway tailored to ${sp}.`
           ]
         });
       }
@@ -14915,7 +14966,7 @@ ${forceSchemaLines}`;
       return JSON.stringify({
         _structured: true,
         summary: `Clear overview of ${classTitle} tailored to ${sp}.`,
-        body: `**${sec.name}** for ${classTitle}: Focused explanation written for ${sp}.`
+        body: `${sec.name} for ${classTitle}: Focused explanation written for ${sp}.`
       });
     }
 
@@ -14956,6 +15007,7 @@ Extra Teacher Instructions: ${userInstructions || 'Follow the course architectur
 Required Custom Sections:
 ${specList}
 
+Write clean natural plain text inside all fields with ZERO Markdown symbols (no **, *, _, #, or backticks).
 Return STRICT JSON ONLY keyed by exact section ID matching each section's exact Shape:
 {
   "sections": {
@@ -15014,12 +15066,12 @@ Return STRICT JSON ONLY keyed by exact section ID matching each section's exact 
             {
               role: 'user',
               parts: [{
-                text: `You are an expert educator. Generate comprehensive modular teaching blocks for the class "${classTitle}" in the course "${course.title_en || course.title_he}" (${course.target_level || 'General'}). ${allowedRule ? `\n${allowedRule}\n` : ''}Instructions: ${userInstructions || 'Engaging and rigorous'}. Return JSON with fields: { "hook": "...", "anchors": ["...", "..."], "sources": "...", "steps": "...", "pitfalls": "...", "cheat_sheet": "...", "homework": "..." }.`
+                text: `You are an expert educator. Generate comprehensive modular teaching blocks for the class "${classTitle}" in the course "${course.title_en || course.title_he}" (${course.target_level || 'General'}). ${allowedRule ? `\n${allowedRule}\n` : ''}Instructions: ${userInstructions || 'Engaging and rigorous'}. Write clean plain text without ANY Markdown symbols (no **, *, _, #, or backticks). Return JSON with fields: { "hook": "...", "anchors": ["...", "..."], "sources": "...", "steps": "...", "pitfalls": "...", "cheat_sheet": "...", "homework": "..." }.`
               }]
             }
           ], apiKey, { responseMimeType: 'application/json', temperature: 0.7 });
           const cleaned = res.replace(/```json/gi, '').replace(/```/g, '').trim();
-          result = JSON.parse(cleaned);
+          result = stripMarkdownFromAiPayload(JSON.parse(cleaned));
         }
       } catch (err) {
         console.warn('Gemini API fallback for full class generation:', err);
@@ -15030,10 +15082,10 @@ Return STRICT JSON ONLY keyed by exact section ID matching each section's exact 
         result = {
           hook: `Imagine encountering a situation where ${classTitle} completely dictates the outcome. Why does this happen, and how can we master its mechanism?`,
           anchors: [
-            `**Core Definition**: The foundational premise and operational scope of ${classTitle}.`,
-            `**Mechanical Flow**: How ${classTitle} behaves step-by-step under standard conditions.`,
-            `**Critical Invariant**: The non-negotiable rule that governs all applications of ${classTitle}.`,
-            `**Real-World Reflection**: Why this principle matters in everyday professional practice.`
+            `Core Definition: The foundational premise and operational scope of ${classTitle}.`,
+            `Mechanical Flow: How ${classTitle} behaves step-by-step under standard conditions.`,
+            `Critical Invariant: The non-negotiable rule that governs all applications of ${classTitle}.`,
+            `Real-World Reflection: Why this principle matters in everyday professional practice.`
           ],
           sources: `Classical Reference Definition: "In all systems governed by ${classTitle}, equilibrium is achieved through consistent application of primary constraints."`,
           steps: `1. Identify the given boundary conditions for ${classTitle}.\n2. Formulate the primary governing equation or conceptual model.\n3. Verify against known exceptions and boundary limits.\n4. Summarize and articulate the decisive resolution.`,
@@ -15085,9 +15137,9 @@ Return STRICT JSON ONLY keyed by exact section ID matching each section's exact 
       try {
         const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
         if (apiKey || shouldUseAiProxy()) {
-          const prompt = `Write a high-impact pedagogical block for "${blockType}" regarding the topic "${title}" (${course.target_level || 'General'}). Return plain text only.`;
+          const prompt = `Write a high-impact pedagogical block for "${blockType}" regarding the topic "${title}" (${course.target_level || 'General'}). Return clean natural plain text only with ZERO Markdown symbols (no **, *, _, #, or backticks).`;
           generated = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey, { temperature: 0.6, taskTier: getAiQualityTier() });
-          generated = String(generated || '').replace(/```/g, '').trim();
+          generated = stripAiMarkdownFormatting(String(generated || '')).trim();
         }
       } catch (e) {
         console.warn('Mini block AI fallback:', e);
@@ -15099,7 +15151,7 @@ Return STRICT JSON ONLY keyed by exact section ID matching each section's exact 
         if (blockType === 'hook') {
           generated = `Consider what happens when you observe ${title} in the real world: why does it behave this way, and how does it challenge our initial assumptions?`;
         } else if (blockType === 'anchors') {
-          generated = `**Principle 1**: The primary law governing ${title}.\n**Principle 2**: How ${title} transforms under changing conditions.\n**Principle 3**: Key exceptions and verification standards for ${title}.`;
+          generated = `Principle 1: The primary law governing ${title}.\nPrinciple 2: How ${title} transforms under changing conditions.\nPrinciple 3: Key exceptions and verification standards for ${title}.`;
         } else if (blockType === 'sources') {
           generated = `Standard Citation on ${title}: "The foundational structure must be verified through rigorous observation and primary principles."`;
         } else if (blockType === 'steps') {
@@ -15161,7 +15213,8 @@ Target Students: ${bp.student_profile || course.target_level || 'General'}
 Course Guidelines: ${bp.guidelines || 'Clear and easy to teach'}
 ${allowedRule ? `\n${allowedRule}\n` : ''}
 Section Rule: ${sec.ai_rule || sec.hint || 'Be concise and practical'}
-Format requirement: ${getSectionAiFormatRule(sec.type)}.`;
+Format requirement: ${getSectionAiFormatRule(sec.type)}.
+Write natural, clean plain text inside all fields with ZERO Markdown symbols (no **, *, _, #, or backticks).`;
           let rawRes = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey, { temperature: 0.5, responseMimeType: sec.type !== 'audio' ? 'application/json' : undefined, taskTier: getAiQualityTier() });
           rawRes = String(rawRes || '').replace(/```json/gi, '').replace(/```/g, '').trim();
           if (sec.type !== 'audio' && rawRes.startsWith('{')) {
@@ -21038,22 +21091,22 @@ JSON Schema:
       "hook_en": "Opening real-world problem, teaser, or relatable question",
       "hook_he": "פתיח מעניין או שאלה מרתקת",
       "anchors_en": [
-        "**Keyword**: First clear factual anchor explaining the core mechanism.",
-        "**Keyword**: Second essential learning point.",
-        "**Keyword**: Third point.",
-        "**Keyword**: Fourth point.",
-        "**Keyword**: Fifth point.",
-        "**Keyword**: Sixth point.",
-        "**Keyword**: Seventh memorable concluding takeaway."
+        "Keyword: First clear factual anchor explaining the core mechanism.",
+        "Keyword: Second essential learning point.",
+        "Keyword: Third point.",
+        "Keyword: Fourth point.",
+        "Keyword: Fifth point.",
+        "Keyword: Sixth point.",
+        "Keyword: Seventh memorable concluding takeaway."
       ],
       "anchors_he": [
-        "**מילת מפתח**: עוגן ידע ראשון ברור ומדויק.",
-        "**מילת מפתח**: נקודה שנייה.",
-        "**מילת מפתח**: נקודה שלישית.",
-        "**מילת מפתח**: נקודה רביעית.",
-        "**מילת מפתח**: נקודה חמישית.",
-        "**מילת מפתח**: נקודה שישית.",
-        "**מילת מפתח**: נקודה שביעית לסיכום."
+        "מילת מפתח: עוגן ידע ראשון ברור ומדויק.",
+        "מילת מפתח: נקודה שנייה.",
+        "מילת מפתח: נקודה שלישית.",
+        "מילת מפתח: נקודה רביעית.",
+        "מילת מפתח: נקודה חמישית.",
+        "מילת מפתח: נקודה שישית.",
+        "מילת מפתח: נקודה שביעית לסיכום."
       ],
       "life_app_en": "Practical everyday life application or relatable angle for students.",
       "life_app_he": "חיבור מעשי ומשמעותי לחיי היומיום.",
@@ -21061,7 +21114,8 @@ JSON Schema:
       "discussion_he": "שאלת דיון מעוררת מחשבה."
     }
   ]
-}`;
+}
+Write clean natural plain text inside every JSON string with ZERO Markdown formatting (no **, *, _, #, or backticks).`;
 
       const allowedResVal = (document.getElementById('input-architect-allowed-resources')?.value || architectAllowedResources || '').trim();
       const strictResChk = document.getElementById('chk-architect-strict-resources');
@@ -21096,7 +21150,7 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
         if (cleanJsonStr.endsWith('```')) cleanJsonStr = cleanJsonStr.replace(/```$/, '');
         cleanJsonStr = cleanJsonStr.trim();
 
-        const courseData = JSON.parse(cleanJsonStr);
+        const courseData = stripMarkdownFromAiPayload(JSON.parse(cleanJsonStr));
         const exactUserTitle = (document.getElementById('input-create-course-title-en')?.value || '').trim() || topic;
         const exactUserTitleHe = (document.getElementById('input-create-course-title-he')?.value || '').trim();
         if (exactUserTitle) {
@@ -21209,22 +21263,22 @@ JSON Schema:
   "hook_en": "Opening real-world dilemma, teaser question, or relatable analogy tailored for young students and teens.",
   "hook_he": "פתיח מעניין או אנלוגיה מחיי היומיום של בני נוער.",
   "anchors_en": [
-    "**Keyword**: First essential factual or conceptual anchor explaining the core mechanism.",
-    "**Keyword**: Second essential knowledge point.",
-    "**Keyword**: Third knowledge point.",
-    "**Keyword**: Fourth knowledge point.",
-    "**Keyword**: Fifth knowledge point.",
-    "**Keyword**: Sixth knowledge point.",
-    "**Keyword**: Seventh memorable concluding takeaway."
+    "Keyword: First essential factual or conceptual anchor explaining the core mechanism.",
+    "Keyword: Second essential knowledge point.",
+    "Keyword: Third knowledge point.",
+    "Keyword: Fourth knowledge point.",
+    "Keyword: Fifth knowledge point.",
+    "Keyword: Sixth knowledge point.",
+    "Keyword: Seventh memorable concluding takeaway."
   ],
   "anchors_he": [
-    "**מילת מפתח**: עוגן ידע ראשון ברור ומדויק.",
-    "**מילת מפתח**: נקודה שנייה.",
-    "**מילת מפתח**: נקודה שלישית.",
-    "**מילת מפתח**: נקודה רביעית.",
-    "**מילת מפתח**: נקודה חמישית.",
-    "**מילת מפתח**: נקודה שישית.",
-    "**מילת מפתח**: נקודה שביעית לסיכום."
+    "מילת מפתח: עוגן ידע ראשון ברור ומדויק.",
+    "מילת מפתח: נקודה שנייה.",
+    "מילת מפתח: נקודה שלישית.",
+    "מילת מפתח: נקודה רביעית.",
+    "מילת מפתח: נקודה חמישית.",
+    "מילת מפתח: נקודה שישית.",
+    "מילת מפתח: נקודה שביעית לסיכום."
   ],
   "midrash_en": "Midrashic gem or rabbinic depth insight bringing traditional depth and beauty.",
   "midrash_he": "פנינת מדרש או עומק רעיוני מהמקורות.",
@@ -21233,7 +21287,8 @@ JSON Schema:
   "discussion_en": "Engaging discussion spark, debate dilemma, or riddle for the student to ponder.",
   "discussion_he": "שאלת דיון מרתקת או חידה מעוררת מחשבה.",
   "connections": "Pedagogical explanation of how this lesson connects to prior topics in this course."
-}`;
+}
+Write clean natural plain text inside every field with ZERO Markdown symbols (no **, *, _, #, or backticks).`;
 
       const userPrompt = `Create a complete rich lesson for the course "${course.title_en}":
 Topic / Idea: ${lessonTopic}
@@ -21261,7 +21316,7 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
         if (cleanJsonStr.endsWith('```')) cleanJsonStr = cleanJsonStr.replace(/```$/, '');
         cleanJsonStr = cleanJsonStr.trim();
 
-        const lessonData = JSON.parse(cleanJsonStr);
+        const lessonData = stripMarkdownFromAiPayload(JSON.parse(cleanJsonStr));
         if (!Array.isArray(course.lessons)) course.lessons = [];
 
         const newLesson = {

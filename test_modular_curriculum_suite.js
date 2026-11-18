@@ -4239,6 +4239,85 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(String(liveAfterLesson.sections.sec_g44_living || '').includes('Start one new mitzvah habit'), 'Auto-Draft populates LIVING THE TORAH reflection fields cleanly');
   assert(liveAfterLesson.ai_chat_history.some(m => m.role === 'user') && liveAfterLesson.ai_chat_history.some(m => m.role === 'assistant' && m.updatedCount === 3), 'AI chat history retains both user request and assistant confirmation pill despite mid-flight cloud sync');
 
+  // --- Gate 45: Clean AI Output (Zero Raw Markdown Asterisks / Backticks in Lesson & Chat Text) ---
+  console.log('\n--- Running Gate 45: Clean AI Text Output & Legacy Markdown Cleanup ---');
+  assert(typeof sandbox.stripAiMarkdownFormatting === 'function', 'stripAiMarkdownFormatting helper is exported');
+  const messySample = 'Parashat Bereshit opens with the **creation of the universe** out of nothingness (*Yesh Mi\'Ayin*). Also check `code` and ***Shabbat***.';
+  const cleanedSample = sandbox.stripAiMarkdownFormatting(messySample);
+  assert(!cleanedSample.includes('*') && !cleanedSample.includes('`') && cleanedSample.includes('creation of the universe') && cleanedSample.includes("(Yesh Mi'Ayin)"), 'stripAiMarkdownFormatting cleanly strips **bold**, *italic*, ***both***, and backticks');
+
+  const mathSample = 'Multiply 3 * 4 to get 12 cleanly';
+  assert(sandbox.stripAiMarkdownFormatting(mathSample) === mathSample, 'stripAiMarkdownFormatting preserves spaced multiplication expressions like 3 * 4');
+
+  const normText = JSON.parse(sandbox.normalizeSectionAiValue({ summary: '**Bereshit Overview**', body: messySample }, 'text'));
+  assert(!normText.summary.includes('*') && !normText.body.includes('*') && !normText.body.includes('`'), 'normalizeSectionAiValue eliminates markdown asterisks and backticks before saving text sections');
+
+  const normList = JSON.parse(sandbox.normalizeSectionAiValue({ items: ['* **First Idea**: Live intentionally', '**Second Idea**: Care for creation'] }, 'list'));
+  assert(normList.items[0] === 'First Idea: Live intentionally' && !normList.items[1].includes('*'), 'normalizeSectionAiValue cleans bullet list items of leading asterisks and bold syntax');
+
+  const legacyCourseG45 = {
+    id: 'course_g45_legacy',
+    title_en: 'Chumash',
+    blueprint: {
+      sections: [
+        { id: 'sec_g45_over', type: 'text', name: 'PARASHA OVERVIEW' }
+      ]
+    },
+    lessons: [
+      {
+        id: 'les_g45_1',
+        lesson_num: 1,
+        title_en: 'Parashat Bereshit',
+        sections: {
+          sec_g45_over: JSON.stringify({
+            _structured: true,
+            summary: '**In the Beginning**',
+            body: messySample
+          })
+        }
+      }
+    ]
+  };
+  const renderedEditCard = sandbox.renderCustomBlueprintSectionCard(
+    legacyCourseG45,
+    legacyCourseG45.lessons[0],
+    legacyCourseG45.blueprint.sections[0],
+    { color: 'cyan', icon: 'file-text', placeholder: 'Main explanation...' }
+  );
+  assert(!renderedEditCard.includes('**creation of the universe**') && !renderedEditCard.includes('(*Yesh Mi\'Ayin*)') && renderedEditCard.includes('creation of the universe'), 'renderCustomBlueprintSectionCard strips legacy markdown asterisks from Studio textarea boxes');
+  assert(!renderedEditCard.includes('(supports **bold**'), 'Studio main explanation textarea placeholder does not encourage raw markdown asterisks');
+
+  const inlineItalicCheck = sandbox.formatSectionInlineText('Nothingness (*Yesh Mi\'Ayin*)');
+  assert(inlineItalicCheck.includes('<em class="italic') && !inlineItalicCheck.includes('*'), 'formatSectionInlineText converts single-asterisk italics to clean HTML without leaving raw asterisks');
+
+  sandbox.APP_STATE.customCourses.push(legacyCourseG45);
+  sandbox.fetch = async () => ({
+    ok: true,
+    status: 200,
+    json: async () => ({
+      candidates: [{
+        content: {
+          parts: [{
+            text: JSON.stringify({
+              assistant_reply: 'Updated **PARASHA OVERVIEW** with *clear* themes.',
+              sections: {
+                sec_g45_over: {
+                  summary: '**Moral Awakening**',
+                  body: 'Parashat Bereshit highlights **Shabbat** and **Man (Adam)**.'
+                }
+              }
+            })
+          }]
+        }
+      }]
+    })
+  });
+  await sandbox.sendStudioClassAiMessage(legacyCourseG45.id, 'les_g45_1', 'Write an overview for Parashat Bereshit.');
+  const updatedG45Section = String(legacyCourseG45.lessons[0].sections.sec_g45_over || '');
+  const lastG45Reply = legacyCourseG45.lessons[0].ai_chat_history[legacyCourseG45.lessons[0].ai_chat_history.length - 1];
+  assert(!updatedG45Section.includes('*') && updatedG45Section.includes('Shabbat'), 'sendStudioClassAiMessage stores clean plain text without asterisks in section JSON');
+  assert(!String(lastG45Reply.text || '').includes('*') && lastG45Reply.text.includes('clear'), 'sendStudioClassAiMessage strips markdown asterisks from Co-Builder chat replies');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
