@@ -6584,13 +6584,11 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (newRecord && newRecord.id === targetCoursesId) {
         if (newRecord.completed_topics && Array.isArray(newRecord.completed_topics.courses)) {
           const delIds = newRecord.completed_topics.deleted_course_ids || [];
-          mergeCustomCoursesWithCloud(newRecord.completed_topics.courses, newRecord.updated_at, delIds);
-          populateCourseSelector();
-          renderLessonsCategoryView();
-          if (APP_STATE.insideCourseId) {
-            renderCourseStudio(APP_STATE.insideCourseId, APP_STATE.studioSelectedLessonId);
+          const hasCourseChanges = mergeCustomCoursesWithCloud(newRecord.completed_topics.courses, newRecord.updated_at, delIds);
+          if (hasCourseChanges) {
+            populateCourseSelector();
+            renderCommandCenter();
           }
-          renderCommandCenter();
         }
         return;
       }
@@ -10169,6 +10167,58 @@ alter publication supabase_realtime add table public.students_sync;`;
     var studioAiUpdatedSectionIds = {};
     var studioSectionRuleOpenMap = {};
     var studioSectionTweakOpenMap = {};
+    var studioAiDraftMap = {};
+    var studioIsComposing = false;
+    var studioPendingCloudRender = false;
+
+    function isStudioUserActivelyEditing() {
+      if (studioIsComposing) return true;
+      const activeEl = typeof document !== 'undefined' ? document.activeElement : null;
+      if (!activeEl) return false;
+      const wrapper = typeof document.getElementById === 'function' ? document.getElementById('course-studio-wrapper') : null;
+      if (!wrapper || typeof wrapper.contains !== 'function' || !wrapper.contains(activeEl)) return false;
+      const tag = (activeEl.tagName || '').toUpperCase();
+      return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || !!activeEl.isContentEditable;
+    }
+
+    function saveLiveStudioAiDraft(lessonId) {
+      const targetId = lessonId || APP_STATE.studioSelectedLessonId;
+      if (!targetId) return;
+      const promptEl = typeof document !== 'undefined' && typeof document.getElementById === 'function'
+        ? document.getElementById('input-studio-class-ai-prompt')
+        : null;
+      if (promptEl && typeof promptEl.value === 'string') {
+        studioAiDraftMap[targetId] = promptEl.value;
+      }
+    }
+
+    function flushPendingStudioCloudRender() {
+      if (!studioPendingCloudRender) return;
+      if (isStudioUserActivelyEditing()) return;
+      studioPendingCloudRender = false;
+      if (typeof renderLessonsCategoryView === 'function') renderLessonsCategoryView();
+      if (APP_STATE.insideCourseId) {
+        renderCourseStudio(APP_STATE.insideCourseId, APP_STATE.studioSelectedLessonId);
+      }
+    }
+
+    function handleStudioComposerInput(el, lessonId, event) {
+      if (!el) return;
+      const targetId = lessonId || APP_STATE.studioSelectedLessonId;
+      if (targetId) studioAiDraftMap[targetId] = el.value;
+      // Avoid collapsing height during active OS/IME speech dictation frames
+      const composing = studioIsComposing || !!(event && event.isComposing);
+      if (composing) {
+        if (el.scrollHeight > el.clientHeight) {
+          el.style.height = Math.min(el.scrollHeight, 240) + 'px';
+        }
+        return;
+      }
+      el.style.height = 'auto';
+      if (el.scrollHeight > 0) {
+        el.style.height = Math.min(el.scrollHeight, 240) + 'px';
+      }
+    }
 
     function captureStudioUndoSnapshot(lesson) {
       if (!lesson || !lesson.id) return;
@@ -11118,17 +11168,15 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       return lesson.ai_sources;
     }
 
-    async function addStudioLinkSource(courseId, lessonId) {
+    async function attachStudioLinkUrl(courseId, lessonId, rawUrlInput, noteInput) {
       const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
       const lesson = course && (course.lessons || []).find(l => l.id === lessonId);
-      if (!course || !lesson) return;
-      const urlInp = document.getElementById('input-studio-source-url');
-      const noteInp = document.getElementById('input-studio-source-note');
-      let rawUrl = (urlInp?.value || '').trim();
-      const note = (noteInp?.value || '').trim();
+      if (!course || !lesson) return false;
+      let rawUrl = String(rawUrlInput || '').trim();
+      const note = String(noteInput || '').trim();
       if (!rawUrl) {
         showToast('Please paste a valid URL first');
-        return;
+        return false;
       }
       if (!/^https?:\/\//i.test(rawUrl)) rawUrl = 'https://' + rawUrl;
 
@@ -11151,9 +11199,6 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
         created_at: new Date().toISOString()
       };
       sources.push(srcItem);
-      studioSourcePopoverMap.active = null;
-      if (urlInp) urlInp.value = '';
-      if (noteInp) noteInp.value = '';
       saveCustomCoursesToStorage(true);
       renderCourseStudio(courseId, lessonId);
 
@@ -11203,6 +11248,22 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       saveCustomCoursesToStorage(true);
       renderCourseStudio(courseId, lessonId);
       showToast(srcItem.extractedText ? 'Link analyzed & ready for AI!' : 'Link attached (paste key text if page requires login)');
+      return true;
+    }
+
+    async function addStudioLinkSource(courseId, lessonId) {
+      const urlInp = document.getElementById('input-studio-source-url');
+      const noteInp = document.getElementById('input-studio-source-note');
+      const rawUrl = (urlInp?.value || '').trim();
+      const note = (noteInp?.value || '').trim();
+      if (!rawUrl) {
+        showToast('Please paste a valid URL first');
+        return;
+      }
+      studioSourcePopoverMap.active = null;
+      if (urlInp) urlInp.value = '';
+      if (noteInp) noteInp.value = '';
+      return attachStudioLinkUrl(courseId, lessonId, rawUrl, note);
     }
 
     function addStudioPasteTextSource(courseId, lessonId) {
@@ -11243,22 +11304,41 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       inp.click();
     }
 
-    function handleStudioSourceFileSelected(event, fallbackCourseId, fallbackLessonId) {
-      const inp = event?.target;
-      const files = inp?.files ? Array.from(inp.files) : [];
+    function ingestStudioSourceFiles(courseId, lessonId, fileList) {
+      const files = fileList ? Array.from(fileList) : [];
       if (!files.length) return;
-      const cId = inp.getAttribute('data-course-id') || fallbackCourseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId;
-      const lId = inp.getAttribute('data-lesson-id') || fallbackLessonId || APP_STATE.studioSelectedLessonId;
+      const cId = courseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId;
+      const lId = lessonId || APP_STATE.studioSelectedLessonId;
       const course = (APP_STATE.customCourses || []).find(c => c.id === cId);
       const lesson = course && (course.lessons || []).find(l => l.id === lId);
       if (!course || !lesson) return;
 
       files.forEach(file => {
-        if (file.size > 12 * 1024 * 1024) {
-          showToast(`"${file.name}" exceeds 12MB browser limit. Please trim or split it.`);
+        if (!file) return;
+        const fSize = typeof file.size === 'number' ? file.size : 0;
+        const fName = file.name || 'Dropped File';
+        const fType = file.type || '';
+        if (fSize > 12 * 1024 * 1024) {
+          showToast(`"${fName}" exceeds 12MB browser limit. Please trim or split it.`);
           return;
         }
-        const isText = file.type.startsWith('text/') || /\.(txt|md|csv|json)$/i.test(file.name);
+        const isText = fType.startsWith('text/') || /\.(txt|md|csv|json)$/i.test(fName);
+        if (typeof FileReader === 'undefined' && typeof file.extractedText === 'string') {
+          ensureStudioLessonSources(lesson).push({
+            id: 'src_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+            kind: isText ? 'text' : (fType.startsWith('audio/') ? 'audio' : (fType.startsWith('image/') ? 'image' : 'file')),
+            label: fName,
+            mimeType: fType || 'application/octet-stream',
+            extractedText: file.extractedText || '',
+            base64Data: file.base64Data || '',
+            dataUrl: file.dataUrl || '',
+            status: 'ready',
+            created_at: new Date().toISOString()
+          });
+          saveCustomCoursesToStorage(true);
+          renderCourseStudio(cId, lId);
+          return;
+        }
         const reader = new FileReader();
         reader.onload = () => {
           const resultStr = String(reader.result || '');
@@ -11267,20 +11347,20 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
             sources.push({
               id: 'src_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
               kind: 'text',
-              label: file.name,
-              mimeType: file.type || 'text/plain',
+              label: fName,
+              mimeType: fType || 'text/plain',
               extractedText: resultStr.slice(0, 20000),
               status: 'ready',
               created_at: new Date().toISOString()
             });
           } else {
             const base64 = resultStr.includes(',') ? resultStr.split(',')[1] : resultStr;
-            const kind = file.type.startsWith('audio/') ? 'audio' : (file.type.startsWith('image/') ? 'image' : 'file');
+            const kind = fType.startsWith('audio/') ? 'audio' : (fType.startsWith('image/') ? 'image' : 'file');
             sources.push({
               id: 'src_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
               kind: kind,
-              label: file.name,
-              mimeType: file.type || (kind === 'audio' ? 'audio/mpeg' : 'application/octet-stream'),
+              label: fName,
+              mimeType: fType || (kind === 'audio' ? 'audio/mpeg' : 'application/octet-stream'),
               dataUrl: (kind === 'audio' || kind === 'image') ? resultStr : '',
               base64Data: base64,
               status: 'ready',
@@ -11289,11 +11369,65 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
           }
           saveCustomCoursesToStorage(true);
           renderCourseStudio(cId, lId);
-          showToast(`Attached "${file.name}" for AI analysis!`);
+          showToast(`Attached "${fName}" for AI analysis!`);
         };
         if (isText) reader.readAsText(file);
         else reader.readAsDataURL(file);
       });
+    }
+
+    function handleStudioSourceFileSelected(event, fallbackCourseId, fallbackLessonId) {
+      const inp = event?.target;
+      const files = inp?.files ? Array.from(inp.files) : [];
+      if (!files.length) return;
+      const cId = inp.getAttribute('data-course-id') || fallbackCourseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId;
+      const lId = inp.getAttribute('data-lesson-id') || fallbackLessonId || APP_STATE.studioSelectedLessonId;
+      ingestStudioSourceFiles(cId, lId, files);
+    }
+
+    function handleStudioComposerDragOver(event, zoneEl) {
+      if (event && typeof event.preventDefault === 'function') event.preventDefault();
+      if (event && typeof event.stopPropagation === 'function') event.stopPropagation();
+      if (event && event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+      if (zoneEl && zoneEl.classList) {
+        zoneEl.classList.add('ring-2', 'ring-indigo-400', 'border-indigo-400');
+      }
+    }
+
+    function handleStudioComposerDragLeave(event, zoneEl) {
+      if (!zoneEl || !zoneEl.classList) return;
+      if (event && event.relatedTarget && typeof zoneEl.contains === 'function' && zoneEl.contains(event.relatedTarget)) {
+        return;
+      }
+      zoneEl.classList.remove('ring-2', 'ring-indigo-400', 'border-indigo-400');
+    }
+
+    function handleStudioComposerDrop(event, courseId, lessonId, zoneEl) {
+      if (event && typeof event.preventDefault === 'function') event.preventDefault();
+      if (event && typeof event.stopPropagation === 'function') event.stopPropagation();
+      if (zoneEl && zoneEl.classList) {
+        zoneEl.classList.remove('ring-2', 'ring-indigo-400', 'border-indigo-400');
+      }
+      saveLiveStudioAiDraft(lessonId);
+      const dt = event && event.dataTransfer;
+      if (!dt) return;
+      if (dt.files && dt.files.length > 0) {
+        ingestStudioSourceFiles(courseId, lessonId, dt.files);
+        return;
+      }
+      const uriText = typeof dt.getData === 'function' ? (dt.getData('text/uri-list') || dt.getData('text/plain') || '').trim() : '';
+      if (!uriText) return;
+      const firstLine = uriText.split('\n').find(l => l && !l.startsWith('#')) || '';
+      if (/^https?:\/\//i.test(firstLine.trim())) {
+        attachStudioLinkUrl(courseId, lessonId, firstLine.trim(), '');
+        return;
+      }
+      const promptEl = document.getElementById('input-studio-class-ai-prompt');
+      if (promptEl) {
+        promptEl.value = (promptEl.value ? promptEl.value + '\n' : '') + uriText;
+        handleStudioComposerInput(promptEl, lessonId);
+        promptEl.focus();
+      }
     }
 
     async function toggleStudioSourceVoiceRecord(courseId, lessonId) {
@@ -11417,6 +11551,7 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       ensureStudioClassAiHistory(course, lesson);
       lesson.ai_chat_history.push({ role: 'user', text: userMsg });
       if (inputEl && overridePrompt === undefined) inputEl.value = '';
+      if (overridePrompt === undefined) delete studioAiDraftMap[lesson.id];
       studioClassAiThinkingMap[lesson.id] = true;
       renderCourseStudio(cId, lesson.id);
 
@@ -12109,6 +12244,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
     }
 
     function renderCourseStudio(targetCourseId, targetLessonId) {
+      saveLiveStudioAiDraft(APP_STATE.studioSelectedLessonId);
       const container = document.getElementById('tutor-hub-lessons-container');
       if (!container) return;
       const isHe = APP_STATE.lang === 'he';
@@ -12466,7 +12602,12 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
           <!-- FULL-WIDTH LIVE 5 / 7 SPLIT WORKBENCH ON DESKTOP -->
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
             <!-- LEFT 5/12: FLUENT AI CHAT & MULTIMODAL SOURCES -->
-            <div id="studio-class-ai-partner" class="${activeTab === 'ai' ? '' : 'hidden lg:block'} lg:col-span-5 p-4 rounded-3xl bg-slate-900/90 border border-indigo-500/35 shadow-xl space-y-3.5 lg:sticky lg:top-4">
+            <div id="studio-class-ai-partner" class="${activeTab === 'ai' ? '' : 'hidden lg:block'} lg:col-span-5 p-4 rounded-3xl bg-slate-900/90 border border-indigo-500/35 shadow-xl space-y-3.5 lg:sticky lg:top-4 transition"
+              ondragenter="handleStudioComposerDragOver(event, this)"
+              ondragover="handleStudioComposerDragOver(event, this)"
+              ondragleave="handleStudioComposerDragLeave(event, this)"
+              ondrop="handleStudioComposerDrop(event, '${activeCourse.id}', '${selectedLesson.id}', this)"
+            >
               <div class="flex items-center justify-between gap-2 flex-wrap">
                 <div class="flex items-center gap-2">
                   <span class="w-7 h-7 rounded-xl bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300">
@@ -12566,17 +12707,27 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
               </div>
 
               <!-- Fluent Multi-Line AI Composer Box -->
-              <div class="rounded-2xl bg-slate-950 border border-slate-700/80 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-400 transition p-3 space-y-2">
+              <div
+                id="studio-composer-dropzone"
+                ondragenter="handleStudioComposerDragOver(event, this)"
+                ondragover="handleStudioComposerDragOver(event, this)"
+                ondragleave="handleStudioComposerDragLeave(event, this)"
+                ondrop="handleStudioComposerDrop(event, '${activeCourse.id}', '${selectedLesson.id}', this)"
+                class="rounded-2xl bg-slate-950 border border-slate-700/80 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-400 transition p-3 space-y-2"
+              >
                 <textarea
                   id="input-studio-class-ai-prompt"
                   dir="auto"
                   rows="3"
                   placeholder="Write fluently in English or Hebrew... Ask AI to build, re-fix sections, or analyze links & audio (Shift+Enter new line)..."
                   onpaste="handleStudioComposerPaste(event, '${activeCourse.id}', '${selectedLesson.id}')"
-                  oninput="this.style.height='auto'; this.style.height=Math.min(this.scrollHeight, 240)+'px';"
-                  onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendStudioClassAiMessage('${activeCourse.id}', '${selectedLesson.id}'); }"
+                  oncompositionstart="studioIsComposing = true;"
+                  oncompositionend="studioIsComposing = false; handleStudioComposerInput(this, '${selectedLesson.id}', event);"
+                  oninput="handleStudioComposerInput(this, '${selectedLesson.id}', event);"
+                  onblur="saveLiveStudioAiDraft('${selectedLesson.id}'); setTimeout(flushPendingStudioCloudRender, 120);"
+                  onkeydown="if(event.key==='Enter' && !event.shiftKey && !event.isComposing && event.keyCode !== 229 && !studioIsComposing){ event.preventDefault(); sendStudioClassAiMessage('${activeCourse.id}', '${selectedLesson.id}'); }"
                   class="w-full bg-transparent text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none resize-none leading-relaxed min-h-[80px] max-h-[240px]"
-                ></textarea>
+                >${escapeHtml(studioAiDraftMap[selectedLesson.id] || '')}</textarea>
 
                 <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/80 flex-wrap">
                   <div class="flex items-center gap-1 flex-wrap">
@@ -12820,6 +12971,10 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
       `;
 
       container.innerHTML = html;
+      const restoredPromptEl = document.getElementById('input-studio-class-ai-prompt');
+      if (restoredPromptEl && selectedLesson && studioAiDraftMap[selectedLesson.id]) {
+        handleStudioComposerInput(restoredPromptEl, selectedLesson.id);
+      }
       if (typeof container.querySelectorAll === 'function') {
         const autoAreas = container.querySelectorAll('textarea.studio-autogrow');
         if (autoAreas && typeof autoAreas.forEach === 'function') {
@@ -14496,8 +14651,8 @@ Format requirement: ${getSectionAiFormatRule(sec.type)}.`;
           const localTs = localCourse.updated_at ? new Date(localCourse.updated_at).getTime() : 0;
           const cloudTs = cloudCourse.updated_at ? new Date(cloudCourse.updated_at).getTime() : 0;
 
-          // If cloud has newer timestamp or equal timestamp (with 5-second skew tolerance)
-          if ((cloudTs + 5000) >= localTs) {
+          // If cloud has newer timestamp (or within 5s skew) AND content actually differs
+          if ((cloudTs + 5000) >= localTs && JSON.stringify(localCourse) !== JSON.stringify(cloudCourse)) {
             APP_STATE.customCourses[localIdx] = cloudCourse;
             hasNewData = true;
           }
@@ -14506,18 +14661,23 @@ Format requirement: ${getSectionAiFormatRule(sec.type)}.`;
 
       if (hasNewData) {
         saveCustomCoursesToStorage(false);
-        renderLessonsCategoryView();
-        if (APP_STATE.insideCourseId) {
-          const activeCourse = APP_STATE.customCourses.find(c => c.id === APP_STATE.insideCourseId);
-          if (activeCourse) {
-            if (!activeCourse.lessons.some(l => l.id === APP_STATE.studioSelectedLessonId)) {
-              APP_STATE.studioSelectedLessonId = activeCourse.lessons.length > 0 ? activeCourse.lessons[0].id : null;
+        if (typeof isStudioUserActivelyEditing === 'function' && isStudioUserActivelyEditing()) {
+          studioPendingCloudRender = true;
+        } else {
+          renderLessonsCategoryView();
+          if (APP_STATE.insideCourseId) {
+            const activeCourse = APP_STATE.customCourses.find(c => c.id === APP_STATE.insideCourseId);
+            if (activeCourse) {
+              if (!activeCourse.lessons.some(l => l.id === APP_STATE.studioSelectedLessonId)) {
+                APP_STATE.studioSelectedLessonId = activeCourse.lessons.length > 0 ? activeCourse.lessons[0].id : null;
+              }
             }
+            renderCourseStudio(APP_STATE.insideCourseId, APP_STATE.studioSelectedLessonId);
           }
-          renderCourseStudio(APP_STATE.insideCourseId, APP_STATE.studioSelectedLessonId);
+          renderCommandCenter();
         }
-        renderCommandCenter();
       }
+      return hasNewData;
     }
 
     // ==========================================================

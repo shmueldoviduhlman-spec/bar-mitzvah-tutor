@@ -3542,6 +3542,53 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   const restoredHook37 = sandbox.parseStructuredSectionData(g37Course.lessons[0].sections.s37_hook, 'example');
   assert(restoredHook37.setup.includes('check notifications every 6 minutes'), 'undoLastStudioAiChange accurately restored previous lesson snapshot');
 
+  // Verify Desktop Drag & Drop + Speech/Dictation Draft Stability
+  assert(typeof sandbox.handleStudioComposerDrop === 'function', 'handleStudioComposerDrop is a function');
+  assert(typeof sandbox.handleStudioComposerInput === 'function', 'handleStudioComposerInput is a function');
+  assert(indexHtml.includes('id="studio-composer-dropzone"') && indexHtml.includes('ondrop="handleStudioComposerDrop'), 'AI Composer and panel expose native drag and drop handlers');
+  assert(indexHtml.includes('oncompositionstart=') && indexHtml.includes('!event.isComposing'), 'AI Composer guards live dictation/IME composition from premature Enter submission or height thrash');
+
+  // Simulate dictated draft inside prompt and verify it survives background identical cloud sync AND file drop
+  const promptMock = getOrCreateElem('input-studio-class-ai-prompt');
+  promptMock.value = 'Please include a warm mashal about listening';
+  sandbox.handleStudioComposerInput(promptMock, 'les_g37_1', { isComposing: true });
+
+  const sameIso = new Date().toISOString();
+  sandbox.APP_STATE.customCourses.forEach(c => { if (c) c.updated_at = sameIso; });
+  const cloudSnapshot = JSON.parse(JSON.stringify(sandbox.APP_STATE.customCourses));
+  const redundantSync = sandbox.mergeCustomCoursesWithCloud(cloudSnapshot, sameIso, []);
+  assert(redundantSync === false, 'Identical background 15s cloud sync does NOT trigger destructive Studio re-render');
+
+  // Simulate desktop text file drag & drop while dictated draft is in composer
+  sandbox.handleStudioComposerDrop(
+    {
+      preventDefault() {},
+      stopPropagation() {},
+      dataTransfer: {
+        files: [{ name: 'desktop_notes.txt', type: 'text/plain', size: 120, extractedText: 'Desktop lesson outline on Bitachon' }]
+      }
+    },
+    'course_g37_makeover',
+    'les_g37_1'
+  );
+  assert(g37Course.lessons[0].ai_sources.some(s => s.label === 'desktop_notes.txt'), 'handleStudioComposerDrop attaches dropped desktop files directly to AI sources');
+  assert(getOrCreateElem('tutor-hub-lessons-container').innerHTML.includes('Please include a warm mashal about listening'), 'Composer preserves dictated/typed draft across re-renders after file drop');
+
+  // Simulate dropped plain text snippet appending cleanly
+  sandbox.handleStudioComposerDrop(
+    {
+      preventDefault() {},
+      stopPropagation() {},
+      dataTransfer: {
+        files: [],
+        getData: (t) => (t === 'text/plain' ? 'Also keep it short' : '')
+      }
+    },
+    'course_g37_makeover',
+    'les_g37_1'
+  );
+  assert(getOrCreateElem('input-studio-class-ai-prompt').value.includes('Also keep it short'), 'handleStudioComposerDrop appends dropped text snippets into composer');
+
   sandbox.fetch = prevFetch37;
 
   console.log(`\n========================================`);
