@@ -3084,7 +3084,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
 
   const directReply = await sandbox.callGeminiApi('Ping test');
   assert(directReply === 'AI drafted custom block content via managed key', 'callGeminiApi skips 503 model and returns response using built-in managed key');
-  assert(sandbox.APP_STATE.geminiModel === 'gemini-3.1-flash-lite', 'callGeminiApi caches working fallback model on APP_STATE.geminiModel');
+  assert(sandbox.APP_STATE.geminiModel === 'gemini-3.8-flash', 'callGeminiApi routes standard requests through flagship gemini-3.8-flash model');
 
   // Test Multi-turn Architect conversation
   geminiRequests.length = 0;
@@ -4041,6 +4041,100 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(aiAttempt >= 2, 'sendStudioClassAiMessage runs self-healing section pass when initial reply omitted sections for a draft');
   assert(String(g42Course.lessons[0].sections.sec_g42_intro || '').includes('Peer Pressure Test'), 'Draft content is applied cleanly into blueprint intro section');
   assert(lessonsCont.innerHTML.includes('Updated 2 sections'), 'AI Co-Builder chat bubble surfaces confirmation badge showing exact updated section count');
+
+  // --- Gate 43: Smart AI Task Routing, Sticky-Lite Fix, PII Scrubbing & Cloudflare /api/ai Proxy ---
+  console.log('\n--- Running Gate 43: Smart AI Task Routing, Sticky-Lite Fix, PII Scrubbing & Cloudflare Edge Proxy ---');
+  assert(sandbox.GEMINI_CANDIDATE_MODELS[0] === 'gemini-3.8-flash', 'GEMINI_CANDIDATE_MODELS leads with flagship gemini-3.8-flash ahead of -lite models');
+  assert(typeof sandbox.getGeminiCandidateModelsForTier === 'function', 'getGeminiCandidateModelsForTier is defined');
+  assert(sandbox.getGeminiCandidateModelsForTier('pro')[0] === 'gemini-3.1-pro-preview', 'Pro taskTier prioritizes gemini-3.1-pro-preview');
+  assert(sandbox.getGeminiCandidateModelsForTier('standard')[0] === 'gemini-3.8-flash', 'Standard taskTier prioritizes gemini-3.8-flash');
+  assert(sandbox.getGeminiCandidateModelsForTier('fast')[0] === 'gemini-3.5-flash-lite', 'Fast taskTier routes lightweight tasks to flash-lite');
+
+  // Poisoned sticky -lite localStorage value is automatically evicted on standard routing
+  sandbox.APP_STATE.geminiModel = 'gemini-3.1-flash-lite';
+  sandbox.localStorage.setItem('tutor_gemini_model', 'gemini-3.1-flash-lite');
+  const rescuedQueue = sandbox.getGeminiCandidateModelsForTier('standard');
+  assert(rescuedQueue[0] === 'gemini-3.8-flash' && sandbox.localStorage.getItem('tutor_gemini_model') === null, 'getGeminiCandidateModelsForTier evicts poisoned sticky -lite model from localStorage');
+
+  // Fallback to -lite during a temporary outage does NOT permanently lock localStorage.tutor_gemini_model
+  sandbox.fetch = async (url) => {
+    if (!url.includes('-lite:')) {
+      return { ok: false, status: 503, json: async () => ({ error: { message: 'Temporary overload' } }) };
+    }
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({ candidates: [{ content: { parts: [{ text: 'Emergency lite response' }] } }] })
+    };
+  };
+  const liteFallbackRes = await sandbox.callGeminiApi('Quick ping', null, { taskTier: 'standard' });
+  assert(liteFallbackRes === 'Emergency lite response', 'callGeminiApi succeeds on emergency -lite overflow during overload');
+  assert(sandbox.localStorage.getItem('tutor_gemini_model') === null, 'callGeminiApi NEVER permanently locks weak -lite model into localStorage');
+
+  // Standard / Deep Pro Toggle state & UI persistence
+  assert(typeof sandbox.setAiQualityTier === 'function', 'setAiQualityTier is defined');
+  sandbox.setAiQualityTier('pro');
+  assert(sandbox.getAiQualityTier() === 'pro' && sandbox.localStorage.getItem('tutor_ai_quality_tier') === 'pro', 'setAiQualityTier persists Deep Pro preference cleanly');
+  sandbox.setAiQualityTier('standard');
+  assert(sandbox.getAiQualityTier() === 'standard' && sandbox.localStorage.getItem('tutor_ai_quality_tier') === 'standard', 'setAiQualityTier switches back to Standard Fast mode cleanly');
+  assert(indexHtml.includes('data-ai-tier-pill="pro"') && indexHtml.includes('Deep Pro'), 'Architect & Studio expose Standard / Deep Pro toggle pills');
+
+  // Privacy: getPortalContextData scrubs sensitive PII & guardian contacts before sending to AI
+  sandbox.APP_STATE.students = [{
+    id: 'stu_g43_pii',
+    name: 'Noam Levy',
+    subject: 'Chumash',
+    hourlyRate: '$95/hr',
+    studentAccessCode: 'XYZ999',
+    parentContact: { name: 'Sarah Levy', phone: '555-888-1234', email: 'sarah@private.org' },
+    notes: 'Call parent at 555-888-1234 or email sarah@private.org regarding Thursday makeup.'
+  }];
+  const safeAiContextStr = JSON.stringify(sandbox.getPortalContextData());
+  assert(!safeAiContextStr.includes('555-888-1234') && !safeAiContextStr.includes('sarah@private.org') && !safeAiContextStr.includes('$95/hr') && !safeAiContextStr.includes('XYZ999'), 'getPortalContextData scrubs guardian contacts, phone numbers, emails, fees, and portal codes');
+  assert(safeAiContextStr.includes('[redacted-phone]') && safeAiContextStr.includes('[redacted-email]'), 'getPortalContextData masks embedded phone/email PII inside teacher notes');
+
+  // Verify Cloudflare Pages Function proxy module (functions/api/ai.js)
+  const proxySrc = fs.readFileSync(path.join(__dirname, 'functions/api/ai.js'), 'utf8');
+  assert(proxySrc.includes('export async function onRequestPost') && proxySrc.includes('X-TutorPilot-Role'), 'functions/api/ai.js implements Cloudflare Pages Function proxy with role checks');
+  assert(proxySrc.includes('ALLOWED_GEMINI_MODELS') && proxySrc.includes('incrementAndCheckQuota'), 'functions/api/ai.js enforces model allowlist and per-user daily quota limiting');
+
+  // Behavioral test of proxy logic (role block, unconfigured secret fallback, quota cap)
+  const proxyCommonJs = proxySrc.replace(/export async function /g, 'async function ') + '\nmodule.exports = { onRequestPost, onRequestOptions };';
+  const proxySandbox = {
+    module: { exports: {} },
+    exports: {},
+    Response: class {
+      constructor(body, init = {}) {
+        this.body = body;
+        this.status = init.status || 200;
+        this.headers = init.headers || {};
+      }
+      async text() { return this.body; }
+      async json() { return JSON.parse(this.body); }
+    },
+    fetch: async () => ({ ok: true, status: 200, text: async () => JSON.stringify({ candidates: [{ content: { parts: [{ text: 'Proxied OK' }] } }] }) }),
+    Date, Math, Set, Map, JSON, String, Number, parseInt, encodeURIComponent, Object, Array
+  };
+  proxySandbox.exports = proxySandbox.module.exports;
+  vm.runInNewContext(proxyCommonJs, proxySandbox);
+  const { onRequestPost } = proxySandbox.module.exports;
+
+  const mkReq = (bodyObj, hdrs = {}) => ({
+    headers: { get: (k) => hdrs[k] || hdrs[k.toLowerCase()] || '' },
+    json: async () => bodyObj
+  });
+
+  const stuBlockedResp = await onRequestPost({ request: mkReq({ model: 'gemini-3.8-flash', payload: {} }, { 'X-TutorPilot-Role': 'student_portal' }), env: { GEMINI_API_KEY: 'secret' } });
+  assert(stuBlockedResp.status === 403, 'Edge proxy rejects Student Portal accounts with HTTP 403');
+
+  const unconfigResp = await onRequestPost({ request: mkReq({ model: 'gemini-3.8-flash', payload: {} }, { 'CF-Connecting-IP': '1.2.3.4' }), env: {} });
+  assert(unconfigResp.status === 503 && (await unconfigResp.json()).fallbackDirect === true, 'Edge proxy signals fallbackDirect: true when GEMINI_API_KEY env secret is unset');
+
+  const okResp1 = await onRequestPost({ request: mkReq({ model: 'gemini-3.8-flash', payload: {} }, { 'CF-Connecting-IP': '9.9.9.9' }), env: { GEMINI_API_KEY: 'server-secret', AI_DAILY_LIMIT: '2' } });
+  assert(okResp1.status === 200 && okResp1.headers['X-TutorPilot-Proxy'] === 'cloudflare-pages', 'Edge proxy forwards request securely when GEMINI_API_KEY is configured');
+  await onRequestPost({ request: mkReq({ model: 'gemini-3.8-flash', payload: {} }, { 'CF-Connecting-IP': '9.9.9.9' }), env: { GEMINI_API_KEY: 'server-secret', AI_DAILY_LIMIT: '2' } });
+  const quotaExceededResp = await onRequestPost({ request: mkReq({ model: 'gemini-3.8-flash', payload: {} }, { 'CF-Connecting-IP': '9.9.9.9' }), env: { GEMINI_API_KEY: 'server-secret', AI_DAILY_LIMIT: '2' } });
+  assert(quotaExceededResp.status === 429 && (await quotaExceededResp.json()).quotaExceeded === true, 'Edge proxy blocks excessive requests beyond AI_DAILY_LIMIT with HTTP 429');
 
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);

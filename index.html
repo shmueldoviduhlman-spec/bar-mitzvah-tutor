@@ -2036,12 +2036,18 @@
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full">
             <!-- LEFT PANE: MULTI-TURN AI ARCHITECT DISCUSSION -->
             <div class="lg:col-span-6 flex flex-col rounded-2xl bg-slate-950/70 border border-amber-500/30 p-3.5 space-y-3 min-h-[340px] max-h-[54vh]">
-              <div class="flex items-center justify-between border-b border-slate-800 pb-2 shrink-0">
+              <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2 shrink-0">
                 <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
                   <i data-lucide="message-square-sparkles" class="w-4 h-4 text-amber-400"></i>
                   <span>1. Discuss Structure with AI Architect</span>
                 </span>
-                <button type="button" onclick="resetArchitectConversation()" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">New Chat</button>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <div class="inline-flex items-center p-0.5 rounded-lg bg-slate-950/90 border border-slate-800">
+                    <button type="button" data-ai-tier-pill="standard" onclick="setAiQualityTier('standard')" class="px-2 py-0.5 rounded-md text-[10px] font-bold transition bg-indigo-500 text-white shadow">⚡ Standard</button>
+                    <button type="button" data-ai-tier-pill="pro" onclick="setAiQualityTier('pro')" class="px-2 py-0.5 rounded-md text-[10px] font-semibold text-slate-400 hover:text-white transition">✨ Deep Pro</button>
+                  </div>
+                  <button type="button" onclick="resetArchitectConversation()" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">New Chat</button>
+                </div>
               </div>
 
               <!-- Chat Messages Feed -->
@@ -4567,11 +4573,84 @@
       return !!custom && custom.trim() !== '' && custom.trim() !== SYSTEM_DEFAULT_GEMINI_KEY;
     }
 
+    const GEMINI_PRO_MODELS = ['gemini-3.1-pro-preview', 'gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-flash-latest'];
+    const GEMINI_STANDARD_MODELS = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-flash-latest', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
+    const GEMINI_FAST_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'];
+    let aiProxyFallbackDisabledForSession = false;
+
+    function getAiQualityTier() {
+      const stored = (typeof APP_STATE !== 'undefined' && APP_STATE && APP_STATE.aiQualityTier)
+        || (typeof localStorage !== 'undefined' ? localStorage.getItem('tutor_ai_quality_tier') : '');
+      return stored === 'pro' ? 'pro' : 'standard';
+    }
+
+    function setAiQualityTier(tier) {
+      const normalized = tier === 'pro' ? 'pro' : 'standard';
+      if (typeof APP_STATE !== 'undefined' && APP_STATE) {
+        APP_STATE.aiQualityTier = normalized;
+      }
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('tutor_ai_quality_tier', normalized);
+      }
+      document.querySelectorAll('[data-ai-tier-pill]').forEach(el => {
+        const pillTier = el.getAttribute('data-ai-tier-pill');
+        const active = pillTier === normalized;
+        el.className = active
+          ? (normalized === 'pro'
+            ? 'px-2 py-0.5 rounded-md text-[10px] font-bold transition bg-purple-500 text-white shadow'
+            : 'px-2 py-0.5 rounded-md text-[10px] font-bold transition bg-indigo-500 text-white shadow')
+          : 'px-2 py-0.5 rounded-md text-[10px] font-semibold text-slate-400 hover:text-white transition';
+      });
+      if (typeof updateAiStatusPill === 'function') updateAiStatusPill();
+      showToast(normalized === 'pro' ? 'Deep Pro AI mode enabled for heavy reasoning' : 'Standard Fast AI mode enabled');
+    }
+
+    function renderAiQualityTierToggleHtml(scopeId = 'global') {
+      const current = getAiQualityTier();
+      return `
+        <div id="ai-tier-toggle-${scopeId}" class="inline-flex items-center p-0.5 rounded-lg bg-slate-950/90 border border-slate-800 shrink-0" title="Switch AI speed vs depth">
+          <button type="button" data-ai-tier-pill="standard" onclick="setAiQualityTier('standard')" class="${current === 'standard' ? 'px-2 py-0.5 rounded-md text-[10px] font-bold transition bg-indigo-500 text-white shadow' : 'px-2 py-0.5 rounded-md text-[10px] font-semibold text-slate-400 hover:text-white transition'}">⚡ Standard</button>
+          <button type="button" data-ai-tier-pill="pro" onclick="setAiQualityTier('pro')" class="${current === 'pro' ? 'px-2 py-0.5 rounded-md text-[10px] font-bold transition bg-purple-500 text-white shadow' : 'px-2 py-0.5 rounded-md text-[10px] font-semibold text-slate-400 hover:text-white transition'}">✨ Deep Pro</button>
+        </div>
+      `;
+    }
+
+    function getGeminiCandidateModelsForTier(taskTier) {
+      const tier = taskTier || getAiQualityTier() || 'standard';
+      if (tier === 'pro') return [...GEMINI_PRO_MODELS];
+      if (tier === 'fast') return [...GEMINI_FAST_MODELS];
+      const queue = [];
+      const activeModel = typeof APP_STATE !== 'undefined' && APP_STATE ? APP_STATE.geminiModel : '';
+      if (activeModel && !String(activeModel).includes('-lite')) queue.push(activeModel);
+      const storedModel = typeof localStorage !== 'undefined' ? (localStorage.getItem('tutor_gemini_model') || '') : '';
+      if (storedModel && !storedModel.includes('-lite') && !queue.includes(storedModel)) {
+        queue.push(storedModel);
+      } else if (storedModel && storedModel.includes('-lite') && typeof localStorage !== 'undefined') {
+        localStorage.removeItem('tutor_gemini_model');
+      }
+      const baseList = (typeof GEMINI_CANDIDATE_MODELS !== 'undefined' && Array.isArray(GEMINI_CANDIDATE_MODELS))
+        ? GEMINI_CANDIDATE_MODELS
+        : GEMINI_STANDARD_MODELS;
+      baseList.forEach(m => { if (!queue.includes(m)) queue.push(m); });
+      GEMINI_STANDARD_MODELS.forEach(m => { if (!queue.includes(m)) queue.push(m); });
+      return queue;
+    }
+
+    function shouldUseAiProxy() {
+      if (aiProxyFallbackDisabledForSession) return false;
+      if (typeof isUsingCustomGeminiKey === 'function' && isUsingCustomGeminiKey()) return false;
+      if (typeof isStudentPortalActive === 'function' && isStudentPortalActive()) return false;
+      if (typeof window === 'undefined' || !window.location) return false;
+      const proto = String(window.location.protocol || '');
+      return proto === 'http:' || proto === 'https:';
+    }
+
     async function callGeminiApi(contentsOrPrompt, apiKeyOverride, options = {}) {
       const key = (apiKeyOverride && String(apiKeyOverride).trim())
         || getEffectiveGeminiApiKey()
         || (typeof localStorage !== 'undefined' ? (localStorage.getItem('gemini_api_key') || '') : '');
-      if (!key) {
+      const useProxy = shouldUseAiProxy() && !(apiKeyOverride && String(apiKeyOverride).trim() && apiKeyOverride !== SYSTEM_DEFAULT_GEMINI_KEY);
+      if (!key && !useProxy) {
         throw new Error('No Gemini API key configured');
       }
 
@@ -4585,45 +4664,72 @@
           ? { parts: [{ text: options.systemInstruction }] }
           : options.systemInstruction;
       }
+      if (options && options.tools) {
+        payload.tools = options.tools;
+      }
       const genConfig = {};
       if (options && typeof options.temperature === 'number') genConfig.temperature = options.temperature;
       if (options && options.responseMimeType) genConfig.responseMimeType = options.responseMimeType;
+      if (options && options.responseSchema) genConfig.responseSchema = options.responseSchema;
       if (Object.keys(genConfig).length > 0) payload.generationConfig = genConfig;
 
-      const candidateQueue = [];
-      if (typeof APP_STATE !== 'undefined' && APP_STATE && APP_STATE.geminiModel) candidateQueue.push(APP_STATE.geminiModel);
-      if (typeof localStorage !== 'undefined') {
-        const storedModel = localStorage.getItem('tutor_gemini_model');
-        if (storedModel && !candidateQueue.includes(storedModel)) candidateQueue.push(storedModel);
-      }
-      const fallbackModels = (typeof GEMINI_CANDIDATE_MODELS !== 'undefined' && Array.isArray(GEMINI_CANDIDATE_MODELS))
-        ? GEMINI_CANDIDATE_MODELS
-        : ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-flash-latest', 'gemini-3.8-flash'];
-      fallbackModels.forEach(m => {
-        if (!candidateQueue.includes(m)) candidateQueue.push(m);
-      });
-      ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-3.1-flash-lite'].forEach(m => {
-        if (!candidateQueue.includes(m)) candidateQueue.push(m);
-      });
+      const taskTier = (options && options.taskTier) || 'standard';
+      const candidateQueue = getGeminiCandidateModelsForTier(taskTier);
 
       let lastError = null;
       for (const model of candidateQueue) {
+        let triedProxyThisModel = false;
         try {
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
-          const resp = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
+          let resp = null;
+          if (useProxy && !aiProxyFallbackDisabledForSession) {
+            triedProxyThisModel = true;
+            let bearer = '';
+            try {
+              if (APP_STATE.cloud && APP_STATE.cloud.client && APP_STATE.cloud.client.auth && typeof APP_STATE.cloud.client.auth.getSession === 'function') {
+                const { data } = await APP_STATE.cloud.client.auth.getSession();
+                bearer = data?.session?.access_token || '';
+              }
+            } catch (_) {}
+            const proxyHeaders = { 'Content-Type': 'application/json', 'X-TutorPilot-Role': 'tutor' };
+            if (bearer) proxyHeaders['Authorization'] = `Bearer ${bearer}`;
+            resp = await fetch('/api/ai', {
+              method: 'POST',
+              headers: proxyHeaders,
+              body: JSON.stringify({ model, payload, taskTier })
+            });
+            if (resp.status === 404 || resp.status === 503) {
+              const pData = await resp.clone().json().catch(() => ({}));
+              if (resp.status === 404 || pData.fallbackDirect) {
+                aiProxyFallbackDisabledForSession = true;
+                resp = null;
+              }
+            }
+          }
+
+          if (!resp) {
+            if (!key) {
+              throw new Error('No Gemini API key configured');
+            }
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+            resp = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+          }
 
           if (resp.ok) {
             const data = await resp.json();
             const parts = data?.candidates?.[0]?.content?.parts || [];
             const text = parts.map(p => p.text || '').join('');
-            if (text) {
+            const hasFnCall = parts.some(p => !!p.functionCall);
+            if (text || (options && options.rawResponse && hasFnCall)) {
+              // Persist upgraded non-lite standard model cleanly (never permanently pin weak -lite fallback)
               if (typeof APP_STATE !== 'undefined' && APP_STATE) APP_STATE.geminiModel = model;
-              if (typeof localStorage !== 'undefined') localStorage.setItem('tutor_gemini_model', model);
-              return text;
+              if (typeof localStorage !== 'undefined' && !model.includes('-lite') && taskTier !== 'pro') {
+                localStorage.setItem('tutor_gemini_model', model);
+              }
+              return (options && options.rawResponse) ? { data, workingModel: model } : text;
             }
             const finishReason = data?.candidates?.[0]?.finishReason || 'EMPTY_RESPONSE';
             lastError = new Error(`Model ${model} returned empty output (${finishReason})`);
@@ -4631,7 +4737,7 @@
           }
 
           const errData = await resp.json().catch(() => ({}));
-          const errMsg = errData?.error?.message || `API error ${resp.status}`;
+          const errMsg = errData?.error?.message || errData?.error || `API error ${resp.status}`;
           lastError = new Error(errMsg);
           if (resp.status === 400 || resp.status === 404 || resp.status === 500 || resp.status === 502 || resp.status === 503 || resp.status === 504 || resp.status === 429 ||
               errMsg.includes('not found') || errMsg.includes('not supported') ||
@@ -4642,6 +4748,9 @@
           throw lastError;
         } catch (err) {
           lastError = err;
+          if (triedProxyThisModel && !aiProxyFallbackDisabledForSession && err?.message && err.message.includes('Failed to fetch')) {
+            aiProxyFallbackDisabledForSession = true;
+          }
           const msg = err?.message || '';
           if (msg.includes('not found') || msg.includes('not supported') ||
               msg.includes('no longer available') || msg.includes('high demand') ||
@@ -4659,6 +4768,13 @@
       throw lastError || new Error('No available Gemini model responded');
     }
     if (typeof window !== 'undefined') window.callGeminiApi = callGeminiApi;
+
+    // Sanitize sticky weak -lite model from earlier browser sessions on startup
+    const initialSavedModel = (typeof localStorage !== 'undefined' ? (localStorage.getItem('tutor_gemini_model') || '') : '');
+    const initialResolvedModel = (initialSavedModel && !initialSavedModel.includes('-lite')) ? initialSavedModel : 'gemini-3.8-flash';
+    if (initialSavedModel && initialSavedModel.includes('-lite') && typeof localStorage !== 'undefined') {
+      localStorage.removeItem('tutor_gemini_model');
+    }
 
     // Application State
     const APP_STATE = {
@@ -4678,7 +4794,8 @@
       expandedParshaIds: {},
       studyAdditions: {},
       geminiApiKey: localStorage.getItem('tutor_gemini_key') || '',
-      geminiModel: localStorage.getItem('tutor_gemini_model') || 'gemini-3.5-flash',
+      geminiModel: initialResolvedModel,
+      aiQualityTier: (typeof localStorage !== 'undefined' ? localStorage.getItem('tutor_ai_quality_tier') : '') === 'pro' ? 'pro' : 'standard',
       aiMessages: [],
       aiIsThinking: false,
       trackerFilter: 'all', // 'all', 'topics', 'chumash'
@@ -12492,7 +12609,8 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
           const raw = await callGeminiApi(contents, apiKey, {
             systemInstruction,
             responseMimeType: 'application/json',
-            temperature: 0.7
+            temperature: 0.5,
+            taskTier: getAiQualityTier()
           });
           parsed = parseClassAiJson(raw);
         } catch (err) {
@@ -12560,7 +12678,8 @@ Section Shapes:
 ${forceSchemaLines}`;
               const forcedRaw = await callGeminiApi(forcePrompt, apiKey, {
                 responseMimeType: 'application/json',
-                temperature: 0.45
+                temperature: 0.35,
+                taskTier: getAiQualityTier()
               });
               const forcedParsed = parseClassAiJson(forcedRaw);
               resolvedUpdates = resolveSectionUpdatesFromAiPayload(forcedParsed, bpSections);
@@ -13439,6 +13558,7 @@ ${forceSchemaLines}`;
                   </div>
                 </div>
                 <div class="flex items-center gap-1.5 flex-wrap">
+                  ${renderAiQualityTierToggleHtml('studio')}
                   ${attachedSources.length > 0 ? `
                     <button type="button" onclick="analyzeStudioSourcesWithAi('${activeCourse.id}', '${selectedLesson.id}')" class="px-2.5 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 font-bold text-[11px] flex items-center gap-1 transition">
                       <i data-lucide="search" class="w-3 h-3"></i>
@@ -14701,7 +14821,11 @@ Return STRICT JSON ONLY keyed by exact section ID matching each section's exact 
     ${bpSections.map(s => `"${s.id}": {}`).join(',\n    ')}
   }
 }`;
-            const res = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey, { responseMimeType: 'application/json', temperature: 0.7 });
+            const res = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey, {
+              responseMimeType: 'application/json',
+              temperature: 0.45,
+              taskTier: getAiQualityTier()
+            });
             const cleaned = res.replace(/```json/gi, '').replace(/```/g, '').trim();
             const parsed = JSON.parse(cleaned);
             if (parsed && parsed.sections) {
@@ -16037,7 +16161,7 @@ Format requirement: ${getSectionAiFormatRule(sec.type)}.`;
       const apiKey = getEffectiveGeminiApiKey();
       let generatedLevels = null;
 
-      if (apiKey) {
+      if ((apiKey || shouldUseAiProxy()) && typeof fetch === 'function') {
         try {
           const sys = `You are a world-class reading specialist and curriculum designer. Return ONLY a parseable JSON object without markdown or code backticks:
 {
@@ -16057,43 +16181,16 @@ Topic: ${topic}
 Level: ${level}
 Guidance: ${guidance || 'Provide clear target words, progressive phonetic difficulty, and colors red, orange, amber, emerald, blue, purple.'}`;
 
-          const candidateModels = [
-            'gemini-3.5-flash',
-            'gemini-3.1-flash-lite',
-            'gemini-3.5-flash-lite',
-            'gemini-flash-latest',
-            'gemini-3.8-flash'
-          ];
-
-          for (const model of candidateModels) {
-            try {
-              const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  contents: [{ role: 'user', parts: [{ text: sys + '\n\n' + prompt }] }],
-                  generationConfig: { responseMimeType: 'application/json' }
-                })
-              });
-
-              if (res.ok) {
-                const data = await res.json();
-                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (text) {
-                  let clean = text.trim();
-                  if (clean.startsWith('```json')) clean = clean.replace(/^```json/, '');
-                  if (clean.startsWith('```')) clean = clean.replace(/^```/, '');
-                  if (clean.endsWith('```')) clean = clean.replace(/```$/, '');
-                  clean = clean.trim();
-                  const parsed = JSON.parse(clean);
-                  if (parsed && Array.isArray(parsed.levels) && parsed.levels.length > 0) {
-                    generatedLevels = parsed.levels;
-                    break;
-                  }
-                }
-              }
-            } catch (errLoop) {
-              // Try next model candidate
+          const text = await callGeminiApi(sys + '\n\n' + prompt, apiKey, {
+            responseMimeType: 'application/json',
+            temperature: 0.45,
+            taskTier: getAiQualityTier()
+          });
+          if (text) {
+            const clean = String(text).replace(/```json/gi, '').replace(/```/g, '').trim();
+            const parsed = JSON.parse(clean);
+            if (parsed && Array.isArray(parsed.levels) && parsed.levels.length > 0) {
+              generatedLevels = parsed.levels;
             }
           }
         } catch (err) {
@@ -16475,7 +16572,7 @@ Guidance: ${guidance || 'Provide clear target words, progressive phonetic diffic
       const apiKey = getEffectiveGeminiApiKey();
       let generatedStages = null;
 
-      if (apiKey) {
+      if ((apiKey || shouldUseAiProxy()) && typeof fetch === 'function') {
         try {
           const sys = `You are an expert speech and capstone project coach. Return ONLY a parseable JSON object without markdown or code backticks:
 {
@@ -16494,43 +16591,16 @@ Project Type: ${topic}
 Target Audience / Level: ${level}
 Guidance: ${guidance || 'Provide clear deliverables per stage, speech rehearsal at ~125 words per minute, and final presentation completion.'}`;
 
-          const candidateModels = [
-            'gemini-3.5-flash',
-            'gemini-3.1-flash-lite',
-            'gemini-3.5-flash-lite',
-            'gemini-flash-latest',
-            'gemini-3.8-flash'
-          ];
-
-          for (const model of candidateModels) {
-            try {
-              const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  contents: [{ role: 'user', parts: [{ text: sys + '\n\n' + prompt }] }],
-                  generationConfig: { responseMimeType: 'application/json' }
-                })
-              });
-
-              if (res.ok) {
-                const data = await res.json();
-                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (text) {
-                  let clean = text.trim();
-                  if (clean.startsWith('```json')) clean = clean.replace(/^```json/, '');
-                  if (clean.startsWith('```')) clean = clean.replace(/^```/, '');
-                  if (clean.endsWith('```')) clean = clean.replace(/```$/, '');
-                  clean = clean.trim();
-                  const parsed = JSON.parse(clean);
-                  if (parsed && Array.isArray(parsed.stages) && parsed.stages.length > 0) {
-                    generatedStages = parsed.stages;
-                    break;
-                  }
-                }
-              }
-            } catch (errLoop) {
-              // Try next candidate model
+          const text = await callGeminiApi(sys + '\n\n' + prompt, apiKey, {
+            responseMimeType: 'application/json',
+            temperature: 0.45,
+            taskTier: getAiQualityTier()
+          });
+          if (text) {
+            const clean = String(text).replace(/```json/gi, '').replace(/```/g, '').trim();
+            const parsed = JSON.parse(clean);
+            if (parsed && Array.isArray(parsed.stages) && parsed.stages.length > 0) {
+              generatedStages = parsed.stages;
             }
           }
         } catch (err) {
@@ -17641,7 +17711,8 @@ Return STRICT JSON ONLY:
           const raw = await callGeminiApi(contents, apiKey, {
             systemInstruction,
             responseMimeType: 'application/json',
-            temperature: 0.75
+            temperature: 0.45,
+            taskTier: getAiQualityTier()
           });
           parsed = parseArchitectJson(raw);
         } catch (e) {
@@ -18709,36 +18780,16 @@ Return STRICT JSON ONLY:
       showToast(isHe ? `מייצר סעיף עם AI...` : `AI refining section...`);
 
       const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
-      const candidateModels = [
-        'gemini-3.5-flash',
-        'gemini-3.1-flash-lite',
-        'gemini-3.5-flash-lite',
-        'gemini-flash-latest',
-        'gemini-3.8-flash'
-      ];
-
       let generatedText = null;
 
-      if (apiKey) {
-        for (const model of candidateModels) {
-          try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-            const resp = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{ role: 'user', parts: [{ text: instruction }] }],
-                generationConfig: { temperature: 0.7 }
-              })
-            });
-            if (resp.ok) {
-              const resData = await resp.json();
-              generatedText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
-              if (generatedText) break;
-            }
-          } catch (e) {
-            console.warn("Mini block AI error:", e);
-          }
+      if (apiKey || shouldUseAiProxy()) {
+        try {
+          generatedText = await callGeminiApi(instruction, apiKey, {
+            temperature: 0.65,
+            taskTier: getAiQualityTier()
+          });
+        } catch (e) {
+          console.warn("Mini block AI error:", e);
         }
       }
 
@@ -18847,37 +18898,18 @@ ${detailsText ? 'Specific Emphases / Details: ' + detailsText : ''}
 ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSections.map(s => `${s.name} (type: ${s.type}, id: ${s.id})`).join('; ') : ''}`;
 
       const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
-      const candidateModels = [
-        'gemini-3.5-flash',
-        'gemini-3.1-flash-lite',
-        'gemini-3.5-flash-lite',
-        'gemini-flash-latest',
-        'gemini-3.8-flash'
-      ];
-
       let rawResponseText = null;
 
-      if (apiKey) {
-        for (const model of candidateModels) {
-          try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-            const resp = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{ role: 'user', parts: [{ text: currentValuesPrompt }] }],
-                systemInstruction: { parts: [{ text: systemInstruction }] },
-                generationConfig: { temperature: 0.7, responseMimeType: 'application/json' }
-              })
-            });
-            if (resp.ok) {
-              const resData = await resp.json();
-              rawResponseText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
-              if (rawResponseText) break;
-            }
-          } catch (e) {
-            console.warn("Model error:", e);
-          }
+      if ((apiKey || shouldUseAiProxy()) && typeof fetch === 'function') {
+        try {
+          rawResponseText = await callGeminiApi(currentValuesPrompt, apiKey, {
+            systemInstruction,
+            temperature: 0.45,
+            responseMimeType: 'application/json',
+            taskTier: getAiQualityTier()
+          });
+        } catch (e) {
+          console.warn("Model error:", e);
         }
       }
 
@@ -20884,52 +20916,15 @@ ${allowedRule ? `\n${allowedRule}\n` : ''}
 Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per lesson, high-density memory points, and practical relatable student angles.'}`;
 
       try {
-        const candidateModels = [
-          'gemini-3.5-flash',
-          'gemini-3.1-flash-lite',
-          'gemini-3.5-flash-lite',
-          'gemini-flash-latest',
-          'gemini-3.8-flash'
-        ];
-
-        let rawResponseText = null;
-        let lastErr = null;
-
-        for (const model of candidateModels) {
-          try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-            const resp = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-                systemInstruction: { parts: [{ text: systemInstruction }] },
-                generationConfig: {
-                  temperature: 0.7,
-                  responseMimeType: "application/json"
-                }
-              })
-            });
-
-            if (resp.ok) {
-              const resData = await resp.json();
-              rawResponseText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
-              if (rawResponseText) break;
-            } else {
-              const errJson = await resp.json().catch(() => ({}));
-              const msg = errJson.error?.message || `Status ${resp.status}`;
-              lastErr = new Error(msg);
-              if (resp.status === 404 || resp.status === 503 || resp.status === 429 || msg.includes('not found') || msg.includes('high demand') || msg.includes('quota') || msg.includes('not supported')) {
-                continue;
-              }
-            }
-          } catch (fetchErr) {
-            lastErr = fetchErr;
-          }
-        }
+        const rawResponseText = await callGeminiApi(userPrompt, apiKey, {
+          systemInstruction,
+          temperature: 0.45,
+          responseMimeType: 'application/json',
+          taskTier: getAiQualityTier()
+        });
 
         if (!rawResponseText) {
-          throw lastErr || new Error('Failed to generate course with Gemini AI');
+          throw new Error('Failed to generate course with Gemini AI');
         }
 
         let cleanJsonStr = rawResponseText.trim();
@@ -21086,52 +21081,15 @@ ${connectedLessonInfo ? 'Connection Requirement: ' + connectedLessonInfo : ''}
 Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual anchors with bold keyword reminders, structured points, real-world analogies, and an engaging discussion challenge.'}`;
 
       try {
-        const candidateModels = [
-          'gemini-3.5-flash',
-          'gemini-3.1-flash-lite',
-          'gemini-3.5-flash-lite',
-          'gemini-flash-latest',
-          'gemini-3.8-flash'
-        ];
-
-        let rawResponseText = null;
-        let lastErr = null;
-
-        for (const model of candidateModels) {
-          try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-            const resp = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-                systemInstruction: { parts: [{ text: systemInstruction }] },
-                generationConfig: {
-                  temperature: 0.7,
-                  responseMimeType: "application/json"
-                }
-              })
-            });
-
-            if (resp.ok) {
-              const resData = await resp.json();
-              rawResponseText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
-              if (rawResponseText) break;
-            } else {
-              const errJson = await resp.json().catch(() => ({}));
-              const msg = errJson.error?.message || `Status ${resp.status}`;
-              lastErr = new Error(msg);
-              if (resp.status === 404 || resp.status === 503 || resp.status === 429 || msg.includes('not found') || msg.includes('high demand') || msg.includes('quota') || msg.includes('not supported')) {
-                continue;
-              }
-            }
-          } catch (fetchErr) {
-            lastErr = fetchErr;
-          }
-        }
+        const rawResponseText = await callGeminiApi(userPrompt, apiKey, {
+          systemInstruction,
+          temperature: 0.45,
+          responseMimeType: 'application/json',
+          taskTier: getAiQualityTier()
+        });
 
         if (!rawResponseText) {
-          throw lastErr || new Error('Failed to generate lesson with Gemini AI');
+          throw new Error('Failed to generate lesson with Gemini AI');
         }
 
         let cleanJsonStr = rawResponseText.trim();
@@ -25924,10 +25882,11 @@ Respond ONLY with strict JSON (no markdown fences):
           }));
           if (recentTurns.length > 0 && recentTurns[0].role !== 'user') recentTurns.shift();
 
-          const rawResp = await callGeminiApi({
-            systemInstruction: { parts: [{ text: sysPrompt }] },
-            contents: recentTurns,
-            generationConfig: { temperature: 0.3, responseMimeType: 'application/json' }
+          const rawResp = await callGeminiApi(recentTurns, null, {
+            systemInstruction: sysPrompt,
+            temperature: 0.3,
+            responseMimeType: 'application/json',
+            taskTier: 'fast'
           });
           const cleaned = String(rawResp || '').replace(/```json/gi, '').replace(/```/g, '').trim();
           const fIdx = cleaned.indexOf('{');
@@ -26100,14 +26059,15 @@ Respond ONLY with strict JSON (no markdown fences):
       await sendAiPromptToGemini(userText);
     }
 
-    const GEMINI_CANDIDATE_MODELS = [
-      'gemini-3.5-flash',
-      'gemini-3.1-flash-lite',
-      'gemini-3.5-flash-lite',
-      'gemini-flash-latest',
+    var GEMINI_CANDIDATE_MODELS = [
       'gemini-3.8-flash',
-      'gemini-3.7-flash'
+      'gemini-3.7-flash',
+      'gemini-flash-latest',
+      'gemini-3.5-flash',
+      'gemini-3.5-flash-lite',
+      'gemini-3.1-flash-lite'
     ];
+    if (typeof window !== 'undefined') window.GEMINI_CANDIDATE_MODELS = GEMINI_CANDIDATE_MODELS;
 
     function findStudentFlexible(nameOrId) {
       if (!nameOrId) return null;
@@ -26220,54 +26180,17 @@ Guidelines:
       };
 
       try {
-        let candidateQueue = [];
-        if (APP_STATE.geminiModel) candidateQueue.push(APP_STATE.geminiModel);
-        const storedModel = localStorage.getItem('tutor_gemini_model');
-        if (storedModel && !candidateQueue.includes(storedModel)) candidateQueue.push(storedModel);
-        GEMINI_CANDIDATE_MODELS.forEach(m => {
-          if (!candidateQueue.includes(m)) candidateQueue.push(m);
+        const rawRes = await callGeminiApi(contents, apiKey, {
+          systemInstruction,
+          tools: requestPayload.tools,
+          rawResponse: true,
+          taskTier: getAiQualityTier()
         });
-
-        let data = null;
-        let workingModel = null;
-        let lastError = null;
-
-        for (const candidateModel of candidateQueue) {
-          try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${candidateModel}:generateContent?key=${apiKey}`;
-            const response = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(requestPayload)
-            });
-
-            if (response.ok) {
-              data = await response.json();
-              workingModel = candidateModel;
-              APP_STATE.geminiModel = workingModel;
-              localStorage.setItem('tutor_gemini_model', workingModel);
-              break;
-            }
-
-            const errData = await response.json().catch(() => ({}));
-            const errMsg = errData.error?.message || `API error ${response.status}`;
-            if (response.status === 404 || response.status === 503 || response.status === 429 || errMsg.includes('not found') || errMsg.includes('not supported') || errMsg.includes('high demand') || errMsg.includes('quota') || errMsg.includes('capacity')) {
-              lastError = new Error(errMsg);
-              continue;
-            } else {
-              throw new Error(errMsg);
-            }
-          } catch (modelErr) {
-            if (modelErr.message && (modelErr.message.includes('not found') || modelErr.message.includes('not supported') || modelErr.message.includes('high demand') || modelErr.message.includes('quota') || modelErr.message.includes('capacity'))) {
-              lastError = modelErr;
-              continue;
-            }
-            throw modelErr;
-          }
-        }
+        const data = rawRes && rawRes.data ? rawRes.data : rawRes;
+        const workingModel = rawRes && rawRes.workingModel ? rawRes.workingModel : (APP_STATE.geminiModel || 'gemini-3.8-flash');
 
         if (!data) {
-          throw lastError || new Error('No available Gemini model supported for this API key');
+          throw new Error('No available Gemini model supported for this API key');
         }
 
         const candidate = data.candidates?.[0]?.content;
@@ -26308,29 +26231,17 @@ Guidelines:
         }
 
         if (functionResponses.length > 0 && !modelText) {
-          const secondPayload = {
-            contents: [
+          try {
+            const secondContents = [
               ...contents,
               { role: 'model', parts },
               { role: 'user', parts: functionResponses }
-            ],
-            systemInstruction: {
-              parts: [{ text: systemInstruction }]
-            }
-          };
-
-          try {
-            const secondUrl = `https://generativelanguage.googleapis.com/v1beta/models/${workingModel}:generateContent?key=${apiKey}`;
-            const secondResp = await fetch(secondUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(secondPayload)
+            ];
+            const secondText = await callGeminiApi(secondContents, apiKey, {
+              systemInstruction,
+              taskTier: getAiQualityTier()
             });
-            if (secondResp.ok) {
-              const secondData = await secondResp.json();
-              const secondParts = secondData.candidates?.[0]?.content?.parts || [];
-              modelText = secondParts.map(p => p.text || '').join('');
-            }
+            if (secondText) modelText = secondText;
           } catch (e) {
             console.warn('Second turn warning:', e);
           }
@@ -27157,16 +27068,24 @@ Guidelines:
       return { success: false, error: `Unknown tool: ${name}` };
     }
 
+    function scrubAiPii(rawText) {
+      if (!rawText) return '';
+      return String(rawText)
+        .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[redacted-email]')
+        .replace(/(?:\+?\d[\d\s\-().]{6,}\d)/g, '[redacted-phone]')
+        .trim();
+    }
+
     function getPortalContextData() {
       const activeSchool = typeof getActiveSchool === 'function' ? getActiveSchool() : { id: 'school_main_770', name: 'Bar Mitzvah Academy' };
       const studentsSummary = (APP_STATE.students || []).map(s => {
-        const schedList = (Array.isArray(s.schedule) ? s.schedule : []).map(l => ({
+        const schedList = (Array.isArray(s.schedule) ? s.schedule : []).slice(-8).map(l => ({
           id: l.id,
           date: l.dateStr || l.date,
           timeSlot: l.time || l.timeSlot,
           subject: l.topic || l.subject
         }));
-        const metaList = (s.completed_topics?._meta?.lessons || []).map(l => ({
+        const metaList = (s.completed_topics?._meta?.lessons || []).slice(-8).map(l => ({
           id: l.id,
           date: l.date || l.dateStr,
           timeSlot: l.timeSlot || l.time,
@@ -27182,12 +27101,15 @@ Guidelines:
         const topicsCompleted = Object.keys(s.completedTopics || s.completed_topics || {}).filter(k => k !== '_meta' && (s.completedTopics?.[k] || s.completed_topics?.[k]));
         const parshiotCompleted = Object.keys(s.completedParshiot || s.completed_parshiot || {}).filter(k => s.completedParshiot?.[k] || s.completed_parshiot?.[k]);
 
+        // Strictly omit private PII (guardian email/phone, hourlyRate, portal access codes)
+        const cleanNotes = scrubAiPii((s.notes || '').slice(0, 160));
         return {
           id: s.id,
           name: s.name,
+          subject: s.subject || '',
           parsha: s.parsha || s.completed_topics?._meta?.parsha || s.parsha_or_date || s.parshaOrDate || '',
           barMitzvahDate: s.barMitzvahDate || s.completed_topics?._meta?.barMitzvahDate || '',
-          notes: s.notes || '',
+          notes: cleanNotes,
           completedTopicsCount: topicsCompleted.length,
           completedParshiotCount: parshiotCompleted.length,
           scheduledLessons: combinedLessons
@@ -27201,12 +27123,11 @@ Guidelines:
         category: c.category || '',
         target_level: c.target_level || '',
         totalLessons: (c.lessons || []).length,
-        lessons: (c.lessons || []).map(l => ({
+        lessons: (c.lessons || []).slice(0, 25).map(l => ({
           id: l.id,
           lesson_num: l.lesson_num,
           title_en: l.title_en,
-          title_he: l.title_he,
-          hook_en: (l.hook_en || '').slice(0, 140)
+          title_he: l.title_he
         }))
       }));
 
