@@ -3852,6 +3852,79 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(!sandbox.isStudentPortalActive() && getOrCreateElem('view-student-portal').classList.contains('hidden'), 'logoutStudentPortal terminates isolated student session cleanly');
   assert(!getOrCreateElem('lock-screen').classList.contains('hidden'), 'logoutStudentPortal returns safely to authentication lock screen');
 
+  // --- Gate 41: Clean My Courses Directory, Icon Normalization & Exact Title Preservation ---
+  console.log('\n--- Running Gate 41: Clean My Courses Directory, Course Icon Normalization & Exact Title Preservation ---');
+  assert(typeof sandbox.normalizeCourseIcon === 'function', 'normalizeCourseIcon is a function');
+  assert(sandbox.normalizeCourseIcon('scroll') === '📜', 'normalizeCourseIcon converts raw keyword "scroll" into clean 📜 emoji');
+  assert(sandbox.normalizeCourseIcon('book-open') === '📖', 'normalizeCourseIcon converts Lucide keyword "book-open" into clean 📖 emoji');
+  assert(sandbox.normalizeCourseIcon('unmapped_keyword_xyz') === '✦', 'normalizeCourseIcon replaces unknown ASCII icon text with safe ✦ fallback instead of overflowing card badge');
+  assert(sandbox.normalizeCourseIcon('🎵') === '🎵', 'normalizeCourseIcon keeps valid emoji icons intact');
+
+  // Verify My Courses grid renders clean vertical layout without truncating titles or leaking raw "scroll" text
+  sandbox.APP_STATE.customCourses = [
+    {
+      id: 'course_g41_chumash',
+      title_en: 'Chumash Weekly Parsha Foundations For Beginners',
+      icon: 'scroll',
+      color: 'amber',
+      lessons: [{ id: 'l_g41_1', lesson_num: 1, title_en: 'Bereshis' }]
+    }
+  ];
+  sandbox.renderCoursesCardsGrid();
+  const g41GridHtml = getOrCreateElem('courses-cards-grid').innerHTML;
+  assert(indexHtml.includes('id="courses-cards-grid" class="flex flex-col gap-3"'), 'My Courses grid uses clean single-column stacked row layout');
+  assert(g41GridHtml.includes('📜') && !g41GridHtml.includes('>scroll<') && !g41GridHtml.includes('font-mono'), 'Course badge displays normalized 📜 emoji and never renders raw ASCII "scroll" text');
+  assert(!g41GridHtml.includes('truncate'), 'Course card title wraps naturally without chopping words with truncate');
+
+  // Exact Course Title preservation in Architect even when user title is set or AI returns embellished subtitle
+  sandbox.openCreateCourseModal('ai');
+  getOrCreateElem('input-create-course-title-en').value = 'Chumash';
+  sandbox.applyArchitectBlueprintUpdate({
+    course_title_en: 'Journey Through the Chumash: Ancient Roots & Relevance',
+    forceTitle: true,
+    suggested_icon: 'scroll',
+    sections: [{ type: 'text', name: 'Story', ai_rule: 'Plain summary' }]
+  });
+  assert(getOrCreateElem('input-create-course-title-en').value === 'Chumash', 'applyArchitectBlueprintUpdate strictly preserves exact user-entered course name verbatim');
+  assert(getOrCreateElem('input-create-course-icon').value === '📜', 'applyArchitectBlueprintUpdate normalizes suggested_icon "scroll" into 📜');
+
+  // Offline fallback keeps exact short title called by user instead of inventing marketing phrases
+  sandbox.openCreateCourseModal('ai');
+  sandbox.fetch = async () => { throw new Error('Network offline'); };
+  getOrCreateElem('input-ai-blueprint-prompt').value = 'Chumash';
+  await sandbox.handleAiSuggestBlueprint();
+  assert(getOrCreateElem('input-create-course-title-en').value === 'Chumash', 'AI Architect fallback uses exact course name specified by teacher instead of "Chumash & Parsha Insights"');
+
+  // handleGenerateCurriculum preserves explicit user course name verbatim over Gemini's embellished title_en
+  getOrCreateElem('input-create-course-title-en').value = 'My Custom Chumash';
+  getOrCreateElem('ai-builder-topic').value = 'My Custom Chumash';
+  getOrCreateElem('ai-builder-domain').value = 'Chumash';
+  getOrCreateElem('ai-builder-level').value = 'Middle School';
+  getOrCreateElem('ai-builder-lessons-count').value = '2';
+  getOrCreateElem('ai-builder-language').value = 'English';
+  getOrCreateElem('ai-builder-guidance').value = '';
+  sandbox.fetch = async () => ({
+    ok: true,
+    status: 200,
+    json: async () => ({
+      candidates: [{
+        content: {
+          parts: [{
+            text: JSON.stringify({
+              title_en: 'Journey Through the Sacred Chumash Mastery',
+              title_he: 'חומש',
+              icon: 'scroll',
+              lessons: [{ lesson_num: 1, title_en: 'Intro', hook_en: 'Hook', anchors_en: ['Point 1'] }]
+            })
+          }]
+        }
+      }]
+    })
+  });
+  await sandbox.handleGenerateCurriculum({ preventDefault() {} });
+  const generatedCourse = sandbox.APP_STATE.customCourses.find(c => c.title_en === 'My Custom Chumash');
+  assert(!!generatedCourse && generatedCourse.icon === '📜', 'handleGenerateCurriculum locks exact course name verbatim and normalizes returned icon');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);

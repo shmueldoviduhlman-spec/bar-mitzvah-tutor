@@ -779,12 +779,12 @@
         <div id="tutor-hub-active-lessons" class="space-y-6">
 
           <!-- LEVEL 1: MY COURSES DIRECTORY -->
-          <div id="study-level-courses" class="space-y-5 max-w-4xl mx-auto">
+          <div id="study-level-courses" class="space-y-4 max-w-3xl mx-auto">
             <!-- Single Clean Header: My Courses + Add a New Course -->
-            <div id="courses-directory-header-bar" class="flex items-center justify-between gap-3 py-2 border-b border-slate-800/80">
+            <div id="courses-directory-header-bar" class="flex items-center justify-between gap-3 py-2.5 border-b border-slate-800/80">
               <div class="flex items-center gap-2.5">
                 <h3 class="text-lg sm:text-xl font-bold text-white tracking-tight" id="lbl-courses-directory-title">My Courses</h3>
-                <span id="courses-directory-count-badge" class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">0 Courses</span>
+                <span id="courses-directory-count-badge" class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-slate-800/90 text-slate-300 border border-slate-700/80">0 Courses</span>
                 <button id="btn-purge-all-courses" onclick="handlePurgeAllCourses()" class="hidden" aria-hidden="true">Clear All</button>
                 <p class="hidden" id="lbl-courses-directory-desc" aria-hidden="true"></p>
               </div>
@@ -803,7 +803,7 @@
             </div>
 
             <!-- Clean Clickable List of Courses -->
-            <div id="courses-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div id="courses-cards-grid" class="flex flex-col gap-3">
               <!-- Dynamically populated in renderCoursesCardsGrid -->
             </div>
           </div>
@@ -2269,7 +2269,18 @@
               >
             </div>
             <div class="sm:col-span-10 flex items-center gap-1.5 flex-wrap text-xs">
-              ${['✦','📖','💡','🎯','📜','📐','🎵','🔬','🌍','💬','⚡','🎓'].map(ic => `<button type="button" onclick="document.getElementById('input-create-course-icon').value='${ic}'" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">${ic}</button>`).join('')}
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='✦'" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">✦</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='📖'" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">📖</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='📜'" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">📜</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='💡'" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">💡</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='🎯'" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">🎯</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='📐'" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">📐</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='🎵'" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">🎵</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='🔬'" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">🔬</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='🌍'" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">🌍</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='💬'" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">💬</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='⚡'" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">⚡</button>
+              <button type="button" onclick="document.getElementById('input-create-course-icon').value='🎓'" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">🎓</button>
             </div>
           </div>
 
@@ -9997,6 +10008,81 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
+    const COURSE_ICON_KEYWORD_MAP = {
+      scroll: '📜',
+      torah: '📜',
+      book: '📖',
+      bookopen: '📖',
+      bookmarked: '📖',
+      books: '📚',
+      library: '📚',
+      sparkles: '✦',
+      sparkle: '✦',
+      star: '✦',
+      music: '🎵',
+      flame: '🔥',
+      fire: '🔥',
+      compass: '🧭',
+      graduationcap: '🎓',
+      school: '🎓',
+      lightbulb: '💡',
+      bulb: '💡',
+      heart: '❤️',
+      globe: '🌍',
+      award: '🏆',
+      trophy: '🏆',
+      messagecircle: '💬',
+      messagesquare: '💬',
+      chat: '💬',
+      calculator: '📐',
+      math: '📐',
+      ruler: '📐',
+      edit: '✍️',
+      pen: '✍️',
+      pencil: '✍️',
+      shield: '🛡️',
+      sun: '☀️',
+      leaf: '🌱',
+      sprout: '🌱',
+      target: '🎯',
+      zap: '⚡',
+      bolt: '⚡',
+      microscope: '🔬',
+      flask: '🔬'
+    };
+
+    function normalizeCourseIcon(rawIcon) {
+      if (rawIcon === null || rawIcon === undefined) return '✦';
+      const str = String(rawIcon).trim();
+      if (!str) return '✦';
+      const keyword = str.toLowerCase().replace(/^lucide[:\-_]?/i, '').replace(/[\s\-_]+/g, '');
+      if (COURSE_ICON_KEYWORD_MAP[keyword]) {
+        return COURSE_ICON_KEYWORD_MAP[keyword];
+      }
+      // Reject multi-letter ASCII words (e.g. unmapped Lucide icon names) so text never spills outside the badge
+      if (/^[\x20-\x7E]{2,}$/.test(str)) {
+        return '✦';
+      }
+      return str;
+    }
+
+    function getCourseAccentClasses(colorName) {
+      const key = String(colorName || 'amber').toLowerCase().trim();
+      const map = {
+        amber: 'bg-amber-500/12 border-amber-500/30 text-amber-400',
+        emerald: 'bg-emerald-500/12 border-emerald-500/30 text-emerald-400',
+        blue: 'bg-blue-500/12 border-blue-500/30 text-blue-400',
+        indigo: 'bg-indigo-500/12 border-indigo-500/30 text-indigo-400',
+        purple: 'bg-purple-500/12 border-purple-500/30 text-purple-400',
+        rose: 'bg-rose-500/12 border-rose-500/30 text-rose-400',
+        cyan: 'bg-cyan-500/12 border-cyan-500/30 text-cyan-400',
+        teal: 'bg-teal-500/12 border-teal-500/30 text-teal-400',
+        orange: 'bg-orange-500/12 border-orange-500/30 text-orange-400',
+        slate: 'bg-slate-800 border-slate-700 text-slate-300'
+      };
+      return map[key] || map.amber;
+    }
+
     function renderInsideCourseHeader(courseId) {
       const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
       if (!course) {
@@ -10017,7 +10103,7 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       if (titleEl) titleEl.textContent = title;
       if (descEl) descEl.textContent = desc || '';
-      if (iconEl) iconEl.textContent = course.icon || '✦';
+      if (iconEl) iconEl.textContent = normalizeCourseIcon(course.icon);
       if (catEl) catEl.textContent = course.category || 'General';
       if (lvlEl) lvlEl.textContent = course.target_level || 'Age 12-13';
 
@@ -10056,8 +10142,8 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       if (courses.length === 0) {
         grid.innerHTML = `
-          <div class="col-span-full text-center py-12 px-6 bg-slate-900/40 border border-dashed border-slate-800 rounded-3xl space-y-4 max-w-xl mx-auto">
-            <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mx-auto text-2xl font-mono">
+          <div class="text-center py-12 px-6 bg-slate-900/40 border border-dashed border-slate-800 rounded-3xl space-y-4 max-w-xl mx-auto w-full">
+            <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mx-auto text-2xl leading-none select-none">
               ✦
             </div>
             <div class="space-y-1.5">
@@ -10086,24 +10172,27 @@ alter publication supabase_realtime add table public.students_sync;`;
       grid.innerHTML = courses.map(c => {
         const title = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
         const lessonsCount = Array.isArray(c.lessons) ? c.lessons.length : 0;
-        const icon = c.icon || '✦';
+        const icon = normalizeCourseIcon(c.icon);
+        const accentCls = getCourseAccentClasses(c.color);
 
         return `
-          <div onclick="openCourseClassesView('${c.id}')" class="p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-900 transition cursor-pointer shadow-sm hover:shadow-lg flex items-center justify-between gap-3 group">
-            <div class="flex items-center gap-3.5 min-w-0 flex-1">
-              <span class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg font-mono shrink-0">
+          <div onclick="openCourseClassesView('${c.id}')" class="px-4 sm:px-5 py-3.5 sm:py-4 rounded-2xl bg-slate-900/80 border border-slate-800/90 hover:border-amber-500/45 hover:bg-slate-900 transition cursor-pointer shadow-sm hover:shadow-md flex items-center justify-between gap-4 group">
+            <div class="flex items-center gap-4 min-w-0 flex-1">
+              <span class="w-11 h-11 rounded-xl border ${accentCls} flex items-center justify-center text-xl leading-none shrink-0 overflow-hidden select-none">
                 ${escapeHtml(icon)}
               </span>
-              <div class="min-w-0 flex-1">
-                <h4 dir="auto" class="text-sm sm:text-base font-bold text-white group-hover:text-amber-300 transition truncate">${escapeHtml(title)}</h4>
-                <span class="text-xs font-mono text-slate-400">${lessonsCount} ${isHe ? 'שיעורים' : (lessonsCount === 1 ? 'Lesson' : 'Lessons')}</span>
+              <div class="min-w-0 flex-1 space-y-0.5">
+                <h4 dir="auto" class="text-sm sm:text-base font-bold text-white group-hover:text-amber-300 transition leading-snug break-words">${escapeHtml(title)}</h4>
+                <div class="flex items-center gap-2 text-xs text-slate-400">
+                  <span class="font-medium">${lessonsCount} ${isHe ? (lessonsCount === 1 ? 'שיעור' : 'שיעורים') : (lessonsCount === 1 ? 'Lesson' : 'Lessons')}</span>
+                </div>
               </div>
             </div>
             <div class="flex items-center gap-1 shrink-0">
-              <button type="button" onclick="event.stopPropagation(); openEditCustomCourseModal('${c.id}')" class="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Edit Course Architecture">
+              <button type="button" onclick="event.stopPropagation(); openEditCustomCourseModal('${c.id}')" class="p-2 rounded-xl text-slate-500 hover:text-white hover:bg-slate-800 sm:opacity-45 sm:group-hover:opacity-100 transition" title="Edit Course">
                 <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
               </button>
-              <button type="button" onclick="event.stopPropagation(); handleDeleteCustomCourseById('${c.id}')" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Delete Course">
+              <button type="button" onclick="event.stopPropagation(); handleDeleteCustomCourseById('${c.id}')" class="p-2 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-slate-800 sm:opacity-45 sm:group-hover:opacity-100 transition" title="Delete Course">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               </button>
               <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition ml-1 rtl:rotate-180"></i>
@@ -10111,6 +10200,10 @@ alter publication supabase_realtime add table public.students_sync;`;
           </div>
         `;
       }).join('');
+
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
     }
 
     function renderCourseClassesView(courseId) {
@@ -17109,6 +17202,25 @@ ${resourcesRaw}`;
       renderBlueprintSectionsList();
     }
 
+    function extractExactCourseTitleFromInput(explicitTitle, promptText) {
+      const cleanExplicit = String(explicitTitle || '').trim();
+      if (cleanExplicit) return cleanExplicit;
+      const raw = String(promptText || '').trim();
+      if (!raw) return 'New Course';
+      // Check explicit naming patterns like 'called "X"' or 'named X'
+      const namedMatch = raw.match(/(?:called|named|title(?:\s+is)?)\s+["'“]?([^"'\n,.;?!]{2,60})["'”]?/i);
+      if (namedMatch && namedMatch[1] && namedMatch[1].trim()) {
+        return namedMatch[1].trim();
+      }
+      // If user typed a short direct name (up to 6 words without question marks), keep their exact words
+      const firstLine = raw.split(/\n/)[0].trim().replace(/[?!]+$/, '');
+      const words = firstLine.split(/\s+/).filter(Boolean);
+      if (words.length > 0 && words.length <= 6 && !/^(make|create|build|i want|help me|please|hi|hello)\b/i.test(firstLine)) {
+        return firstLine;
+      }
+      return firstLine.slice(0, 48).trim() || 'New Course';
+    }
+
     function applyArchitectBlueprintUpdate(updateObj) {
       if (!updateObj || typeof updateObj !== 'object') return;
       const titleInput = document.getElementById('input-create-course-title-en');
@@ -17119,9 +17231,10 @@ ${resourcesRaw}`;
       const resInput = document.getElementById('input-architect-allowed-resources');
       const strictChk = document.getElementById('chk-architect-strict-resources');
 
-      if (updateObj.course_title_en && titleInput && (!titleInput.value || !titleInput.value.trim() || updateObj.forceTitle)) {
-        titleInput.value = updateObj.course_title_en;
-        if (titleHeInput) titleHeInput.value = updateObj.course_title_he || updateObj.course_title_en;
+      const hasExplicitTitle = !!(titleInput && titleInput.value && titleInput.value.trim());
+      if (!hasExplicitTitle && updateObj.course_title_en && titleInput) {
+        titleInput.value = String(updateObj.course_title_en).trim();
+        if (titleHeInput) titleHeInput.value = String(updateObj.course_title_he || updateObj.course_title_en).trim();
       }
       if (updateObj.suggested_desc && descInput) descInput.value = updateObj.suggested_desc;
       if (updateObj.student_profile) {
@@ -17142,7 +17255,7 @@ ${resourcesRaw}`;
       }
       if (updateObj.suggested_color) selectCourseColor(updateObj.suggested_color);
       if (updateObj.suggested_icon && document.getElementById('input-create-course-icon')) {
-        document.getElementById('input-create-course-icon').value = updateObj.suggested_icon;
+        document.getElementById('input-create-course-icon').value = normalizeCourseIcon(updateObj.suggested_icon);
       }
       if (updateObj.theme_style && document.getElementById('input-course-theme-style')) {
         document.getElementById('input-course-theme-style').value = updateObj.theme_style;
@@ -17261,7 +17374,10 @@ ${currentStateJson}
 Critical Mentoring & Conversation Rules:
 1. READ THE ENTIRE CONVERSATION CAREFULLY: Remember every detail the educator already gave you (age, student background, subject, session duration, tone, goals). NEVER re-ask a question the educator already answered!
 2. ENGAGE LIKE A WORLD-CLASS EDUCATOR: In "assistant_reply", respond directly and thoughtfully to what the educator just said. Offer concrete pedagogical insight tailored to those specific learners (e.g., for non-religious teens, open with relatable modern dilemmas, avoid unexplained jargon, use vivid analogies, end with an engaging question rather than preachy lectures). Briefly explain any changes you made to the blueprint sections/guidelines on the right, and ask 1 or 2 smart, focused follow-up questions that push the design forward (such as session length, how interactive vs lecture-based they want it, whether to include source quotes or homework, etc.). Write cleanly without markdown clutter.
-3. INCREMENTAL UPDATES: Update "course_title_en", "student_profile", "guidelines", "allowed_resources" (ONLY if the teacher specifies allowed books, websites, texts, or curricula to restrict AI to), "strict_resources_only" (boolean), "suggested_desc", "suggested_color" (amber|blue|emerald|purple|rose|cyan|orange|indigo|teal|slate), "suggested_icon", "theme_style" (glass_dark|editorial_clean|academic_serif|warm_notebook), "density" (compact|balanced|spacious), and "sections".
+3. INCREMENTAL UPDATES & STRICT NAMING:
+   - STRICT COURSE TITLE RULE: Keep whatever course name the educator entered verbatim! NEVER invent fancy subtitles, colons, marketing phrases, or extra words (such as "Journey Through...", "Foundations:", "Roots & Relevance", "Mastery", or "Insights"). If "course_title" in Current Live Blueprint State is non-empty, return that exact string unchanged in "course_title_en". If empty, use the teacher's exact short subject name verbatim.
+   - STRICT ICON RULE: "suggested_icon" MUST be a single emoji or unicode symbol ONLY (such as "✦", "📖", "📜", "💡", "🎵", "📐"). NEVER return Lucide icon names or English words like "scroll", "book", or "sparkles".
+   - Update "course_title_en", "student_profile", "guidelines", "allowed_resources" (ONLY if the teacher specifies allowed books, websites, texts, or curricula to restrict AI to), "strict_resources_only" (boolean), "suggested_desc", "suggested_color" (amber|blue|emerald|purple|rose|cyan|orange|indigo|teal|slate), "suggested_icon", "theme_style" (glass_dark|editorial_clean|academic_serif|warm_notebook), "density" (compact|balanced|spacious), and "sections".
    - Ask briefly when natural which approved books, sources, or texts AI is allowed to draw from when generating lessons, and capture them cleanly in "allowed_resources".
    - If the educator already has sections designed and merely answered a clarifying question (like age "Between 12 to 13" or session length) without asking to replace sections, PRESERVE the existing section IDs/structure and refine their "ai_rule", "student_profile", "guidelines", and "allowed_resources" rather than wiping or replacing them with generic templates!
    - If this is the opening pitch or the educator requests structural changes, design or update the ideal custom sections from the 20 available block types, giving each a tailored name and crisp "ai_rule" explaining how each class should fill it.
@@ -17270,7 +17386,7 @@ Critical Mentoring & Conversation Rules:
 Return STRICT JSON ONLY:
 {
   "assistant_reply": "Thoughtful, context-aware conversational response + 1 to 2 tailored follow-up questions...",
-  "course_title_en": "Refined Course Title",
+  "course_title_en": "Exact course title stated by the educator verbatim (no extra subtitles or marketing words)",
   "student_profile": "Updated target learner profile incorporating all known details",
   "guidelines": "Concise teaching guidelines (pacing, tone, preparation/review structure, pedagogy)",
   "allowed_resources": "",
@@ -17307,9 +17423,7 @@ Return STRICT JSON ONLY:
           ? (existingProfile ? `${existingProfile} (${extractedAge})` : `Age ${extractedAge}`)
           : existingProfile;
         const preserveExisting = Array.isArray(currentBlueprintSections) && currentBlueprintSections.length > 0;
-        const customTitle = titleInput?.value?.trim() || (
-          /\bjewish\b|\bjudaism\b|\bmitzv/i.test(combinedLower) ? 'Key Jewish Concepts & Big Ideas' : 'Custom Course'
-        );
+        const customTitle = extractExactCourseTitleFromInput(titleInput?.value, userMsg || allUserText);
         const levelVal = document.getElementById('ai-builder-level-unified')?.value || 'Standard / All Levels';
 
         if (preserveExisting && (!/\b(change|replace|rebuild|different sections|start over)\b/i.test(userMsg))) {
@@ -17324,8 +17438,8 @@ Return STRICT JSON ONLY:
           };
         } else if (/\b(music|guitar|piano|violin|drums|נגינה|מוזיקה)\b/i.test(combinedLower)) {
           parsed = {
-            assistant_reply: "Great! I structured a Music & Performance blueprint with Warmup Scales, Technique Drill, Repertoire Piece, and Audio Studio recordings. How long are your sessions, and what skill level are your students?",
-            course_title_en: titleInput?.value?.trim() || 'Music & Instrument Mastery',
+            assistant_reply: "Great! I structured a Music blueprint with Warmup Scales, Technique Drill, Repertoire Piece, and Audio Studio recordings. How long are your sessions, and what skill level are your students?",
+            course_title_en: customTitle,
             student_profile: mergedProfile || 'Beginner to intermediate music students',
             guidelines: 'Hands-on practice flow, clear rhythm cues, short daily drills',
             suggested_color: 'purple',
@@ -17341,7 +17455,7 @@ Return STRICT JSON ONLY:
         } else if (/\b(math|algebra|geometry|calculus|מתמטיקה)\b/i.test(combinedLower)) {
           parsed = {
             assistant_reply: "I built a Math blueprint with Core Formula, Worked Example, Common Traps, and Practice Drills. What grade level are your students, and how many practice problems do you want per class?",
-            course_title_en: titleInput?.value?.trim() || 'Mathematics Mastery',
+            course_title_en: customTitle,
             student_profile: mergedProfile || 'Middle / High School Math students',
             guidelines: 'Step-by-step clarity, visual intuition before formal rules',
             suggested_color: 'blue',
@@ -17374,7 +17488,7 @@ Return STRICT JSON ONLY:
         } else if (/\b(reading|phonics|fluency|קריאה|alef|hebrew reading)\b/i.test(combinedLower)) {
           parsed = {
             assistant_reply: "I designed a Reading & Fluency structure with Vowel/Rule Focus, Word Practice Ladder, Pronunciation Audio, and Speed Challenge. How long is each session, and what reading stage is your learner at?",
-            course_title_en: titleInput?.value?.trim() || 'Hebrew Reading & Fluency',
+            course_title_en: customTitle,
             student_profile: mergedProfile || 'Developing Hebrew readers',
             guidelines: 'Phonetic clarity, progressive syllable drills',
             suggested_color: 'emerald',
@@ -17384,7 +17498,7 @@ Return STRICT JSON ONLY:
         } else if (/\b(chumash|torah|parsha|חומש)\b/i.test(combinedLower)) {
           parsed = {
             assistant_reply: "I put together a Chumash blueprint featuring Story Flow, Core Ideas, Rashi / Midrash Insight, and Real-Life Lesson. How many minutes do you want to spend reviewing before teaching?",
-            course_title_en: titleInput?.value?.trim() || 'Chumash & Parsha Insights',
+            course_title_en: customTitle,
             student_profile: mergedProfile || '12-13 year old students',
             guidelines: '5-minute review, 15-minute lecture, plain everyday English',
             suggested_color: 'amber',
@@ -17523,7 +17637,7 @@ Return STRICT JSON ONLY:
           const titleHe = document.getElementById('input-create-course-title-he')?.value?.trim() || titleEn;
           const desc = document.getElementById('input-create-course-desc')?.value || guidelinesVal || '';
           const color = currentSelectedColor || 'amber';
-          const icon = document.getElementById('input-create-course-icon')?.value || '✦';
+          const icon = normalizeCourseIcon(document.getElementById('input-create-course-icon')?.value || '✦');
 
           const newCourse = {
             id: 'course_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
@@ -17565,8 +17679,9 @@ Return STRICT JSON ONLY:
           renderCommandCenter();
           showToast(isHe ? 'מבנה הקורס נשמר! התחל לבנות שיעורים.' : 'Course architecture locked! Start building classes.');
         } else {
+          const explicitTitle = (document.getElementById('input-create-course-title-en')?.value || '').trim();
           const aiTopic = document.getElementById('ai-builder-topic');
-          if (aiTopic) aiTopic.value = topic || titleVal;
+          if (aiTopic) aiTopic.value = explicitTitle || topic;
           const aiLevel = document.getElementById('ai-builder-level');
           if (aiLevel) aiLevel.value = level;
           const aiCount = document.getElementById('ai-builder-lessons-count');
@@ -17662,7 +17777,7 @@ Return STRICT JSON ONLY:
       document.getElementById('input-create-course-title-he').value = course.title_he || '';
       document.getElementById('input-create-course-desc').value = course.description_en || course.description_he || '';
       if (document.getElementById('input-create-course-icon')) {
-        document.getElementById('input-create-course-icon').value = course.icon || '✦';
+        document.getElementById('input-create-course-icon').value = normalizeCourseIcon(course.icon);
       }
 
       selectCourseColor(course.color || 'amber');
@@ -17757,7 +17872,7 @@ Return STRICT JSON ONLY:
       const titleHe = document.getElementById('input-create-course-title-he').value.trim();
       const desc = document.getElementById('input-create-course-desc').value.trim();
       const color = document.getElementById('input-create-course-color')?.value || currentSelectedColor || 'amber';
-      let icon = document.getElementById('input-create-course-icon').value.trim() || '✦';
+      let icon = normalizeCourseIcon(document.getElementById('input-create-course-icon').value);
 
       const formatType = document.getElementById('input-create-course-format-type')?.value || 'custom_blueprint';
       const category = document.getElementById('input-create-course-category')?.value || 'General Curriculum';
@@ -18796,7 +18911,7 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
       const cTitle = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
       const lTitle = isHe ? (lesson.title_he || lesson.title_en) : (lesson.title_en || lesson.title_he);
 
-      if (courseBadge) courseBadge.textContent = `${course.icon || '✦'} ${cTitle}`;
+      if (courseBadge) courseBadge.textContent = `${normalizeCourseIcon(course.icon)} ${cTitle}`;
       if (lessonTitle) lessonTitle.textContent = lTitle;
 
       renderTeleprompterContent(lesson, course);
@@ -20472,6 +20587,7 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
 
       const systemInstruction = `You are an elite master curriculum designer and pedagogical expert.
 Generate a structured, educational course curriculum based strictly on the provided specifications.
+STRICT TITLE RULE: Set "title_en" verbatim to "${topic}". NEVER invent subtitles, colons, marketing words, or extra phrases around the course name.
 You MUST return ONLY a valid, parseable JSON object with NO markdown backticks, NO code block markers, and NO conversational text.
 
 JSON Schema:
@@ -20586,6 +20702,17 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
         cleanJsonStr = cleanJsonStr.trim();
 
         const courseData = JSON.parse(cleanJsonStr);
+        const exactUserTitle = (document.getElementById('input-create-course-title-en')?.value || '').trim() || topic;
+        const exactUserTitleHe = (document.getElementById('input-create-course-title-he')?.value || '').trim();
+        if (exactUserTitle) {
+          courseData.title_en = exactUserTitle;
+          if (exactUserTitleHe) {
+            courseData.title_he = exactUserTitleHe;
+          } else if (!courseData.title_he) {
+            courseData.title_he = exactUserTitle;
+          }
+        }
+        courseData.icon = normalizeCourseIcon(courseData.icon || document.getElementById('input-create-course-icon')?.value || '✦');
         courseData.id = 'course_' + Date.now();
         courseData.created_at = new Date().toISOString();
         courseData.updated_at = new Date().toISOString();
@@ -22117,7 +22244,7 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
                   <div class="rounded-2xl bg-slate-950/70 border border-slate-800/90 overflow-hidden">
                     <div class="px-4 py-3 flex items-center justify-between gap-2 flex-wrap bg-slate-900/50 border-b border-slate-800/70">
                       <button type="button" onclick="toggleStudentDrawerCourseExpand('${course.id}')" class="flex items-center gap-2.5 min-w-0 text-left rtl:text-right group">
-                        <span class="text-base shrink-0">${escapeHtml(course.icon || '✦')}</span>
+                        <span class="text-base shrink-0 leading-none select-none">${escapeHtml(normalizeCourseIcon(course.icon))}</span>
                         <div class="min-w-0">
                           <div dir="auto" class="text-xs sm:text-sm font-bold text-white group-hover:text-amber-300 transition truncate">${escapeHtml(cTitle)}</div>
                         </div>
@@ -25451,13 +25578,13 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
             parameters: {
               type: "OBJECT",
               properties: {
-                title_en: { type: "STRING", description: "Course title in English" },
+                title_en: { type: "STRING", description: "Exact course title in English as specified by the teacher verbatim (NEVER invent extra words, subtitles, or colons)" },
                 title_he: { type: "STRING", description: "Course title in Hebrew" },
                 category: { type: "STRING", description: "Subject category (e.g. Mathematics, Sciences, Languages, Humanities, History, Arts, Judaic Studies)" },
                 target_level: { type: "STRING", description: "Target student age/grade level" },
                 description_en: { type: "STRING", description: "1-2 sentence course summary in English" },
                 description_he: { type: "STRING", description: "1-2 sentence course summary in Hebrew" },
-                icon: { type: "STRING", description: "Emoji icon symbol for the course (e.g. 📜, ✦, ⚡, 📖, 🔬)" }
+                icon: { type: "STRING", description: "Single emoji icon symbol ONLY for the course (e.g. 📜, ✦, ⚡, 📖, 🔬) - NEVER write icon names like scroll or book" }
               },
               required: ["title_en"]
             }
@@ -25468,12 +25595,12 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
             parameters: {
               type: "OBJECT",
               properties: {
-                course_title_en: { type: "STRING", description: "Course title in English" },
+                course_title_en: { type: "STRING", description: "Exact course title in English as specified by the teacher verbatim (NEVER invent extra words or subtitles)" },
                 course_title_he: { type: "STRING", description: "Course title in Hebrew" },
                 category: { type: "STRING", description: "Category/domain" },
                 target_level: { type: "STRING", description: "Target age/grade" },
                 description_en: { type: "STRING", description: "Course summary" },
-                icon: { type: "STRING", description: "Course emoji icon" },
+                icon: { type: "STRING", description: "Single course emoji icon symbol ONLY (e.g. 📜, ✦, 📖)" },
                 lessons: {
                   type: "ARRAY",
                   items: {
@@ -26437,7 +26564,7 @@ Guidelines:
         const targetLevel = (args.target_level || 'All Ages').trim();
         const descEn = (args.description_en || '').trim();
         const descHe = (args.description_he || descEn).trim();
-        const icon = (args.icon || '📚').trim();
+        const icon = normalizeCourseIcon(args.icon || '📚');
 
         const newCourse = {
           id: courseId,
@@ -26591,7 +26718,7 @@ Guidelines:
         const targetLevel = (args.target_level || 'All Ages').trim();
         const descEn = (args.description_en || '').trim();
         const descHe = (args.description_he || descEn).trim();
-        const icon = (args.icon || '📚').trim();
+        const icon = normalizeCourseIcon(args.icon || '📚');
 
         const formatAnchors = (rawAnchors) => {
           if (!rawAnchors) return [];
