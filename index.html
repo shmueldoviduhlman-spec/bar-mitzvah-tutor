@@ -2348,35 +2348,38 @@
   <!-- ============================================== -->
   <!-- MODAL: BUILD YOUR COURSE (UNIFIED STUDIO)      -->
   <!-- ============================================== -->
-  <div id="modal-create-course" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-4 hidden backdrop-blur-sm">
-    <div class="max-w-5xl w-full max-h-[94vh] bg-slate-900 border border-slate-700 rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col space-y-3">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3 shrink-0">
-        <div>
+  <div id="modal-create-course" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-0 sm:p-4 hidden backdrop-blur-sm">
+    <div class="max-w-5xl w-full h-[100dvh] sm:h-auto sm:max-h-[94vh] bg-slate-900 border-0 sm:border border-slate-700 rounded-none sm:rounded-3xl p-3.5 sm:p-6 shadow-2xl flex flex-col space-y-3 overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 sm:pb-3 shrink-0">
+        <div class="min-w-0">
           <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            <i data-lucide="compass" class="w-5 h-5 text-amber-400"></i>
-            <span id="modal-create-course-title">AI Course Architect</span>
+            <i data-lucide="compass" class="w-5 h-5 text-amber-400 shrink-0"></i>
+            <span id="modal-create-course-title" class="truncate">Course Builder</span>
           </h3>
-          <p class="text-xs text-slate-400 mt-0.5">Discuss your vision with the AI to design your custom class structure &amp; guidelines first</p>
+          <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">Name your course, chat with AI Co-Builder, and edit sections live in Course Preview</p>
         </div>
-        <button type="button" onclick="closeCreateCourseModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
+        <button type="button" onclick="closeCreateCourseModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition shrink-0">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <form onsubmit="handleSaveCustomCourse(event)" class="space-y-3 flex-1 overflow-y-auto pr-1 flex flex-col">
+      <form onsubmit="handleSaveCustomCourse(event)" class="space-y-3 flex-1 min-h-0 flex flex-col overflow-hidden">
         <!-- Hidden compatibility fields to ensure test compatibility -->
         <input type="hidden" id="input-create-course-format-type" value="custom_blueprint">
         <input type="hidden" id="input-create-course-category" value="General Curriculum">
         <input type="hidden" id="input-create-course-level" value="Standard / All Levels">
         <input type="hidden" id="input-create-course-color" value="amber">
 
-        <!-- 1. UNIFIED COURSE TITLE -->
+        <!-- 1. CLEAR STEP 1: COURSE NAME -->
         <div class="shrink-0 space-y-1">
-          <label class="block text-xs font-bold text-white">Course Title *</label>
+          <div class="flex items-center justify-between gap-2">
+            <label for="input-create-course-title-en" class="block text-xs font-extrabold text-white tracking-tight">Course Title <span class="text-amber-400">*</span></label>
+            <span class="text-[11px] text-slate-400 hidden sm:inline">Step 1: Name the course you are building</span>
+          </div>
           <input
             type="text"
             id="input-create-course-title-en"
-            placeholder="Enter your course title..."
+            placeholder="e.g. Jewish Foundations, Chumash Bereishit, Bar Mitzvah Prep..."
             class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-2.5 px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 font-semibold shadow-inner transition"
             required
             oninput="if(document.getElementById('input-create-course-title-he')) document.getElementById('input-create-course-title-he').value = this.value; updateArchitectHeaderPreview();"
@@ -2384,51 +2387,55 @@
           <input type="hidden" id="input-create-course-title-he">
         </div>
 
-        <!-- PANEL 1: CONVERSATIONAL AI ARCHITECT + LIVE BLUEPRINT (Default Visible) -->
-        <div id="panel-course-builder-ai" class="flex-1 min-h-0">
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full">
-            <!-- LEFT PANE: MULTI-TURN AI ARCHITECT DISCUSSION -->
-            <div class="lg:col-span-6 flex flex-col rounded-2xl bg-slate-950/70 border border-amber-500/30 p-3.5 space-y-3 min-h-[340px] max-h-[54vh]">
-              <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2 shrink-0">
-                <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-                  <i data-lucide="message-square-sparkles" class="w-4 h-4 text-amber-400"></i>
-                  <span>1. Discuss Structure with AI Architect</span>
-                </span>
+        <!-- PANEL 1: CONVERSATIONAL AI CO-BUILDER (LEFT) + LIVE COURSE PREVIEW (RIGHT) -->
+        <div id="panel-course-builder-ai" class="flex-1 min-h-0 flex flex-col overflow-hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 min-h-0 overflow-hidden">
+            <!-- LEFT PANE: AI CO-BUILDER DIALOGUE -->
+            <div id="architect-pane-ai" class="lg:col-span-6 flex flex-col rounded-2xl bg-slate-950/75 border border-indigo-500/35 p-3.5 space-y-3 min-h-0 flex-1 lg:max-h-[56vh]">
+              <div class="flex items-start justify-between gap-2 border-b border-slate-800 pb-2.5 shrink-0 flex-wrap">
+                <div class="min-w-0">
+                  <span class="text-xs sm:text-sm font-extrabold text-indigo-300 flex items-center gap-1.5">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-amber-400 shrink-0"></i>
+                    <span>AI Co-Builder</span>
+                  </span>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Chat to design your course — sections appear live in Course Preview</p>
+                </div>
                 <div class="flex items-center gap-1.5 shrink-0">
-                  <div class="inline-flex items-center p-0.5 rounded-lg bg-slate-950/90 border border-slate-800">
+                  <div class="inline-flex items-center p-0.5 rounded-lg bg-slate-900 border border-slate-800">
                     <button type="button" data-ai-tier-pill="standard" onclick="setAiQualityTier('standard')" class="px-2 py-0.5 rounded-md text-[10px] font-bold transition bg-indigo-500 text-white shadow">⚡ Standard</button>
                     <button type="button" data-ai-tier-pill="pro" onclick="setAiQualityTier('pro')" class="px-2 py-0.5 rounded-md text-[10px] font-semibold text-slate-400 hover:text-white transition">✨ Deep Pro</button>
                   </div>
-                  <button type="button" onclick="resetArchitectConversation()" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">New Chat</button>
+                  <button type="button" onclick="resetArchitectConversation()" class="text-[10px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">New Chat</button>
                 </div>
               </div>
 
               <!-- Chat Messages Feed -->
-              <div id="architect-chat-messages" class="flex-1 overflow-y-auto space-y-2.5 pr-1 text-xs leading-relaxed"></div>
+              <div id="architect-chat-messages" class="flex-1 min-h-0 overflow-y-auto space-y-3 pr-1 text-xs sm:text-sm leading-relaxed"></div>
 
               <!-- AI Loading State -->
               <div id="course-builder-ai-loading" class="hidden py-1.5 text-center shrink-0">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-medium animate-pulse">
                   <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>
-                  <span id="course-builder-ai-loading-text">Architecting your course structure...</span>
+                  <span id="course-builder-ai-loading-text">Building your course sections...</span>
                 </div>
               </div>
 
               <!-- Message Input & Send -->
-              <div class="flex items-end gap-2 pt-1 border-t border-slate-800/80 shrink-0">
+              <div class="flex items-end gap-2 pt-2 border-t border-slate-800/80 shrink-0">
                 <textarea
                   id="input-ai-blueprint-prompt"
+                  dir="auto"
                   rows="2"
-                  placeholder="Tell the AI what you want in each class, who your students are, or ask it to add/change sections..."
+                  placeholder="Tell AI Co-Builder who you teach & what you want in every lesson (e.g. 'Ages 12-13, hook, core concept, story, and discussion')..."
                   onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); handleAiSuggestBlueprint(); }"
-                  class="flex-1 bg-slate-900 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed resize-none"
+                  class="flex-1 bg-slate-900 border border-slate-700 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed resize-none"
                 ></textarea>
                 <button
                   type="button"
                   id="btn-ai-blueprint-suggest"
                   onclick="handleAiSuggestBlueprint()"
-                  class="px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shadow shrink-0"
-                  title="Send message to AI Architect"
+                  class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shadow shrink-0"
+                  title="Send message to AI Co-Builder"
                 >
                   <i data-lucide="send" class="w-3.5 h-3.5"></i>
                   <span>Send</span>
@@ -2436,31 +2443,41 @@
               </div>
             </div>
 
-            <!-- RIGHT PANE: CLEAN 3-TAB COURSE BLUEPRINT (SECTIONS / PLAYBOOK & SOURCES / THEME) -->
-            <div id="architect-live-blueprint" class="lg:col-span-6 flex flex-col rounded-2xl bg-slate-950/70 border border-slate-800 p-3.5 space-y-3 min-h-[360px] max-h-[58vh]">
-              <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2.5 shrink-0 flex-wrap">
-                <!-- 3-Tab Segmented Switcher inside Right Blueprint Panel -->
-                <div id="architect-right-tabs-bar" class="flex items-center gap-1 p-1 rounded-xl bg-slate-900 border border-slate-800">
-                  <button type="button" id="btn-arch-right-tab-sections" onclick="switchArchitectRightTab('sections')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition bg-amber-500 text-slate-950 shadow flex items-center gap-1">
+            <!-- RIGHT PANE: LIVE COURSE PREVIEW & EDITABLE SECTIONS -->
+            <div id="architect-live-blueprint" class="hidden lg:flex lg:col-span-6 flex-col rounded-2xl bg-slate-950/75 border border-slate-800 p-3.5 space-y-3 min-h-0 flex-1 lg:max-h-[56vh]">
+              <div class="space-y-2 border-b border-slate-800 pb-2.5 shrink-0">
+                <div class="flex items-center justify-between gap-2">
+                  <div>
+                    <span class="text-xs sm:text-sm font-extrabold text-white flex items-center gap-1.5">
+                      <i data-lucide="layout-list" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                      <span>Course Preview · Live Blueprint</span>
+                    </span>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Sections AI puts together for every lesson — tap any card to edit directly</p>
+                  </div>
+                  <span id="architect-sections-count-badge" class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0 font-bold">0 sections</span>
+                </div>
+
+                <!-- 3-Tab Segmented Switcher inside Right Preview Panel -->
+                <div id="architect-right-tabs-bar" class="flex items-center gap-1 p-1 rounded-xl bg-slate-900 border border-slate-800 overflow-x-auto no-scrollbar">
+                  <button type="button" id="btn-arch-right-tab-sections" onclick="switchArchitectRightTab('sections')" class="flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition bg-amber-500 text-slate-950 shadow flex items-center justify-center gap-1 whitespace-nowrap">
                     <i data-lucide="layers" class="w-3 h-3"></i>
-                    <span>1. Lesson Sections</span>
+                    <span>1. Sections</span>
                   </button>
-                  <button type="button" id="btn-arch-right-tab-playbook" onclick="switchArchitectRightTab('playbook')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition text-slate-300 hover:text-white flex items-center gap-1">
+                  <button type="button" id="btn-arch-right-tab-playbook" onclick="switchArchitectRightTab('playbook')" class="flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition text-slate-300 hover:text-white flex items-center justify-center gap-1 whitespace-nowrap">
                     <i data-lucide="book-open-check" class="w-3 h-3 text-emerald-400"></i>
-                    <span>2. AI Playbook &amp; Sources</span>
+                    <span>2. AI Rules &amp; Sources</span>
                   </button>
-                  <button type="button" id="btn-arch-right-tab-theme" onclick="switchCourseBuilderMode('manual')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition text-slate-300 hover:text-white flex items-center gap-1">
+                  <button type="button" id="btn-arch-right-tab-theme" onclick="switchCourseBuilderMode('manual')" class="flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition text-slate-300 hover:text-white flex items-center justify-center gap-1 whitespace-nowrap">
                     <i data-lucide="palette" class="w-3 h-3 text-indigo-400"></i>
-                    <span>3. Theme &amp; Look</span>
+                    <span>3. Theme</span>
                   </button>
                 </div>
-                <span id="architect-sections-count-badge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">0 sections</span>
               </div>
 
               <!-- TAB 1 PANEL: LESSON SECTIONS & STRUCTURE (Active by Default) -->
-              <div id="architect-tab-panel-sections" class="flex-1 flex flex-col min-h-0 space-y-2.5">
+              <div id="architect-tab-panel-sections" class="flex-1 flex flex-col min-h-0 space-y-3">
                 <!-- Live Custom Sections List -->
-                <div id="architect-sections-list" class="flex-1 overflow-y-auto space-y-2 pr-1"></div>
+                <div id="architect-sections-list" class="flex-1 overflow-y-auto space-y-3.5 pr-1"></div>
 
                 <!-- Quick Manual Add Section Bar -->
                 <div class="pt-2 border-t border-slate-800/80 flex items-center gap-1.5 flex-wrap shrink-0">
@@ -2568,7 +2585,7 @@
         </div>
 
         <!-- PANEL 2: THEME & OPTIONS (Rich Course Appearance, Layout Style & Setup Options) -->
-        <div id="panel-course-builder-manual" class="space-y-4 hidden">
+        <div id="panel-course-builder-manual" class="space-y-4 hidden flex-1 min-h-0 overflow-y-auto pr-1">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1">Student Level</label>
@@ -2677,8 +2694,21 @@
         </div>
 
         <!-- CLEAN UNIFIED MODAL FOOTER (One clear primary button) -->
+        <!-- Mobile-Only Bottom 2-Button Switcher (AI Co-Builder | Course Preview) -->
+        <div id="course-builder-mobile-bar" class="lg:hidden shrink-0 grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-slate-950 border border-slate-800 shadow-inner">
+          <button type="button" id="btn-course-mob-ai" onclick="setCourseBuilderMobilePane('ai')" class="py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-indigo-600 text-white shadow keep-white">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>AI Co-Builder</span>
+          </button>
+          <button type="button" id="btn-course-mob-preview" onclick="setCourseBuilderMobilePane('preview')" class="py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-slate-900 text-slate-300 border border-slate-800 hover:text-white">
+            <i data-lucide="layout-list" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>Course Preview</span>
+            <span id="course-mob-preview-count" class="px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono">0</span>
+          </button>
+        </div>
+
         <div class="flex items-center justify-between gap-2 text-xs text-slate-400 pt-2 border-t border-slate-800 shrink-0 flex-wrap">
-          <div class="flex items-center gap-1 p-0.5 rounded-xl bg-slate-950 border border-slate-800">
+          <div class="hidden lg:flex items-center gap-1 p-0.5 rounded-xl bg-slate-950 border border-slate-800">
             <button
               type="button"
               id="btn-course-builder-tab-ai"
@@ -2686,7 +2716,7 @@
               class="py-1 px-2.5 rounded-lg text-[11px] font-bold transition flex items-center gap-1 bg-amber-500 text-slate-950 shadow"
             >
               <i data-lucide="compass" class="w-3 h-3"></i>
-              <span>Architect &amp; Blueprint</span>
+              <span>AI Co-Builder &amp; Preview</span>
             </button>
             <button
               type="button"
@@ -11862,12 +11892,12 @@ alter publication supabase_realtime add table public.students_sync;`;
       const bp = (activeCourse && activeCourse.blueprint) || {};
       const style = bp.theme_style || 'glass_dark';
       const density = bp.density || 'balanced';
-      const pad = density === 'compact' ? 'p-3' : (density === 'spacious' ? 'p-5 sm:p-6' : 'p-4');
-      let skin = `bg-slate-900/80 border border-${effColor}-900/40`;
-      if (style === 'classic_framed') skin = `bg-slate-950/95 border-2 border-${effColor}-500/40 shadow-md`;
-      else if (style === 'minimal_clean') skin = `bg-transparent border border-slate-800`;
+      const pad = density === 'compact' ? 'p-3.5' : (density === 'spacious' ? 'p-5 sm:p-6' : 'p-4 sm:p-5');
+      let skin = `bg-slate-900/90 border-2 border-${effColor}-900/50 shadow-md`;
+      if (style === 'classic_framed') skin = `bg-slate-950/95 border-2 border-${effColor}-500/45 shadow-md`;
+      else if (style === 'minimal_clean') skin = `bg-slate-950/40 border-2 border-slate-800`;
       else if (style === 'high_contrast') skin = `bg-slate-950 border-2 border-${effColor}-400/60 shadow-lg`;
-      return `${pad} rounded-2xl ${skin} space-y-2.5`;
+      return `${pad} rounded-2xl ${skin} space-y-3`;
     }
 
     var studioScreenMode = 'list'; // 'list' | 'read' | 'edit'
@@ -12135,26 +12165,36 @@ Return ONLY the updated value matching the Format Requirement cleanly. Write nat
       }
     }
 
-    function renderCustomBlueprintSectionCard(activeCourse, selectedLesson, sec, meta) {
+    function renderCustomBlueprintSectionCard(activeCourse, selectedLesson, sec, meta, secIndex) {
       const cId = activeCourse.id;
       const lId = selectedLesson.id;
       const effColor = sec.color || meta.color || 'amber';
       const cardCls = getCourseCardThemeClasses(activeCourse, effColor);
       const isTeacherOnly = !!(sec.teacher_only || sec.type === 'teacher_cue');
       const rawVal = (selectedLesson.sections && selectedLesson.sections[sec.id]) || '';
+      const hasContent = String(rawVal || '').trim().length > 0;
       const isRuleOpen = !!studioSectionRuleOpenMap[sec.id];
       const isTweakOpen = !!studioSectionTweakOpenMap[sec.id];
       const wasUpdatedByAi = Array.isArray(studioAiUpdatedSectionIds[lId]) && studioAiUpdatedSectionIds[lId].includes(sec.id);
+      const sectionNumPill = secIndex
+        ? `<span class="px-2 py-0.5 rounded-lg bg-${effColor}-500/20 text-${effColor}-300 border border-${effColor}-500/40 text-[10px] font-mono font-bold uppercase tracking-wider shrink-0">Section ${secIndex}</span>`
+        : '';
+      const statusBadgeHtml = wasUpdatedByAi
+        ? '<span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold shrink-0">✓ Built by AI</span>'
+        : (hasContent
+          ? '<span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300/90 border border-emerald-500/25 shrink-0">✓ Ready</span>'
+          : '<span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800/90 text-slate-400 border border-slate-700/80 shrink-0">Empty · Type or Ask AI</span>');
 
       const headerHtml = `
-        <div class="flex items-center justify-between gap-2 flex-wrap">
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="text-xs font-bold uppercase tracking-wider text-${effColor}-300 flex items-center gap-1.5">
+        <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-800/80 flex-wrap">
+          <div class="flex items-center gap-2 min-w-0 flex-wrap">
+            ${sectionNumPill}
+            <span class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-${effColor}-300 flex items-center gap-1.5">
               <i data-lucide="${meta.icon}" class="w-4 h-4 text-${effColor}-400 shrink-0"></i>
               <span>${escapeHtml(sec.name)}</span>
             </span>
             ${isTeacherOnly ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Teacher Only</span>' : ''}
-            ${wasUpdatedByAi ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">✓ Updated</span>' : ''}
+            ${statusBadgeHtml}
           </div>
           <div class="flex items-center gap-2 shrink-0">
             <button type="button" onclick="toggleSectionTweakBar('${sec.id}')" class="text-[11px] px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-indigo-500/20 text-indigo-300 border border-slate-700 hover:border-indigo-400/50 flex items-center gap-1 font-semibold transition">
@@ -12175,12 +12215,15 @@ Return ONLY the updated value matching the Format Requirement cleanly. Write nat
         const allRecs = Array.isArray(selectedLesson.recordings) ? selectedLesson.recordings : (selectedLesson.audio_url ? [{ id: 'legacy_audio', title: 'Lesson Audio', url: selectedLesson.audio_url, type: 'audio' }] : []);
         const secRecs = allRecs.filter(r => !r.sectionId || r.sectionId === sec.id);
         return `
-          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-emerald-900/40 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
-                <i data-lucide="mic" class="w-4 h-4 text-emerald-400"></i>
-                <span>${escapeHtml(sec.name)}</span>
-              </span>
+          <div id="studio-custom-block-${sec.id}" class="p-4 sm:p-5 rounded-2xl bg-slate-900/90 border-2 border-emerald-900/50 shadow-md space-y-3">
+            <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-800/80 flex-wrap">
+              <div class="flex items-center gap-2 flex-wrap">
+                ${sectionNumPill}
+                <span class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
+                  <i data-lucide="mic" class="w-4 h-4 text-emerald-400"></i>
+                  <span>${escapeHtml(sec.name)}</span>
+                </span>
+              </div>
               <span class="text-[10px] font-mono text-slate-400">Audio & Voice Recordings • ${secRecs.length} file(s)</span>
             </div>
             ${secRecs.length > 0 ? `
@@ -12649,13 +12692,13 @@ Return ONLY the updated value matching the Format Requirement cleanly. Write nat
       if (!Array.isArray(lesson.ai_chat_history) || lesson.ai_chat_history.length === 0) {
         const bp = (course && course.blueprint) || {};
         const secCount = Array.isArray(bp.sections) ? bp.sections.length : 0;
-        const cTitle = lesson.title_en || lesson.title_he || 'this class';
+        const cTitle = lesson.title_en || lesson.title_he || 'this lesson';
         lesson.ai_chat_history = [
           {
             role: 'assistant',
             text: secCount > 0
-              ? `Ready to co-build "${cTitle}" inside your ${secCount}-section Blueprint${bp.student_profile ? ` (tailored for ${bp.student_profile})` : ''}. Click Auto-Draft Entire Class, or tell me what angle, story, or adjustments you want.`
-              : `Ready to co-build "${cTitle}". Click Auto-Draft Entire Class, or tell me your ideas and I will draft the class sections with you.`
+              ? `Hi! I am your AI Co-Builder for "${cTitle}".\n\nTell me what you want to teach (or attach a link, voice note, photo, or text), or tap Auto-Draft All. As we talk, I will fill out your ${secCount} sections live in Lesson Preview${bp.student_profile ? ` (tailored for ${bp.student_profile})` : ''}, where you can edit any text directly.`
+              : `Hi! I am your AI Co-Builder for "${cTitle}".\n\nTell me your ideas or attach source notes, or tap Auto-Draft All. As we talk, I will build your sections live in Lesson Preview so you can review and edit every part.`
           }
         ];
       }
@@ -12904,6 +12947,9 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
         studioClassAiOpenMap[targetId] = true;
       }
       renderCourseStudio(APP_STATE.insideCourseId || APP_STATE.activeCourseId, targetId);
+      if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+        try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (_) {}
+      }
       if (studioWorkspaceTabMap[targetId] === 'ai') {
         setTimeout(() => document.getElementById('input-studio-class-ai-prompt')?.focus(), 60);
       }
@@ -14452,11 +14498,11 @@ ${forceSchemaLines}`;
       recordLastOpenedLesson(activeCourse.id, selectedLesson.id);
 
       let html = `
-        <div id="course-studio-wrapper" class="max-w-7xl mx-auto space-y-4">
+        <div id="course-studio-wrapper" class="max-w-7xl mx-auto space-y-4 pb-32 lg:pb-6">
           <input type="file" id="input-studio-source-file" class="hidden" multiple onchange="handleStudioSourceFileSelected(event, '${activeCourse.id}', '${selectedLesson.id}')" />
 
           <!-- Calm Focused Edit Studio Top Bar -->
-          <div id="studio-edit-topbar" class="p-4 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-3">
+          <div id="studio-edit-topbar" class="p-3.5 sm:p-4 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-3">
             <div class="flex items-center justify-between gap-2 flex-wrap">
               <div class="flex items-center gap-2 flex-wrap">
                 <button type="button" onclick="exitStudioToLessonList('${activeCourse.id}')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 flex items-center gap-1 transition">
@@ -14490,8 +14536,15 @@ ${forceSchemaLines}`;
               </div>
             </div>
 
-            <!-- Full-Width Clean Lesson Title Input -->
-            <div>
+            <!-- Clear Labeled Lesson Title Input -->
+            <div class="space-y-1">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <label for="studio-class-title-input" class="text-[11px] font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+                  <i data-lucide="pencil" class="w-3 h-3 text-indigo-400"></i>
+                  <span>Lesson Title</span>
+                </label>
+                <span class="text-[11px] text-slate-400">Step 1: Name this lesson so AI builds the right content</span>
+              </div>
               <input
                 id="studio-class-title-input"
                 type="text"
@@ -14499,8 +14552,8 @@ ${forceSchemaLines}`;
                 value="${escapeHtml(selectedTitle)}"
                 oninput="handleStudioClassTitleChange('${activeCourse.id}', '${selectedLesson.id}', this.value)"
                 onblur="saveCustomCoursesToStorage(true)"
-                class="w-full text-base sm:text-xl font-extrabold text-white bg-slate-950/80 border border-slate-700/80 rounded-2xl px-4 py-2.5 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition"
-                placeholder="Enter lesson title..."
+                class="w-full text-base sm:text-xl font-extrabold text-white bg-slate-950/90 border border-slate-700/80 rounded-2xl px-4 py-2.5 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition"
+                placeholder="Type your lesson title (e.g., Why Do We Light Shabbat Candles?)..."
               />
               <!-- Hidden legacy metadata dropdowns (removed from visual clutter) -->
               <div class="hidden" aria-hidden="true">
@@ -14519,18 +14572,6 @@ ${forceSchemaLines}`;
                   <option value="draft" ${(!selectedLesson.status || selectedLesson.status === 'draft') ? 'selected' : ''}>Draft</option>
                 </select>
               </div>
-            </div>
-
-            <!-- Mobile-Only 2-Tab Switcher (< lg screens) -->
-            <div class="lg:hidden flex items-center p-1 rounded-2xl bg-slate-950/90 border border-slate-800 gap-1">
-              <button type="button" id="btn-studio-tab-ai" onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'ai')" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeTab === 'ai' ? 'bg-indigo-500/20 text-indigo-200 border border-indigo-400/50' : 'text-slate-400 hover:text-white'}">
-                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                <span>AI & Sources</span>
-              </button>
-              <button type="button" id="btn-studio-tab-sections" onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'sections')" title="Edit Class" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeTab === 'sections' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white'}">
-                <i data-lucide="layout-list" class="w-3.5 h-3.5"></i>
-                <span>Sections (${hasCustomSections ? `${filledSectionsCount}/${blueprintSections.length}` : filledSectionsCount})</span>
-              </button>
             </div>
           </div>
 
@@ -14561,14 +14602,14 @@ ${forceSchemaLines}`;
               ondragleave="handleStudioComposerDragLeave(event, this)"
               ondrop="handleStudioComposerDrop(event, '${activeCourse.id}', '${selectedLesson.id}', this)"
             >
-              <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-800/80 flex-wrap">
                 <div class="flex items-center gap-2">
-                  <span class="w-7 h-7 rounded-xl bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300">
+                  <span class="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shrink-0">
                     <i data-lucide="sparkles" class="w-4 h-4"></i>
                   </span>
                   <div>
-                    <h5 class="text-xs sm:text-sm font-bold text-white">AI Lesson Co-Builder</h5>
-                    <p class="text-[11px] text-slate-400">Add links, voice notes, or text & discuss changes live</p>
+                    <h5 class="text-xs sm:text-sm font-extrabold text-white">AI Co-Builder</h5>
+                    <p class="text-[11px] text-slate-400">Chat, attach sources, or refine — sections build live in Lesson Preview</p>
                   </div>
                 </div>
                 <div class="flex items-center gap-1.5 flex-wrap">
@@ -14634,8 +14675,8 @@ ${forceSchemaLines}`;
                         <span class="block text-[9px] font-mono uppercase tracking-wider mb-1 ${isUser ? 'text-amber-300' : (m.isError ? 'text-rose-300' : 'text-indigo-400')}">${isUser ? 'You' : 'AI Co-Builder'}</span>
                         <div class="whitespace-pre-wrap break-words">${escapeHtml(isUser ? m.text : stripAiMarkdownFormatting(m.text))}</div>
                         ${(!isUser && m.updatedCount > 0) ? `
-                          <button type="button" onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'sections')" class="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/35 text-[10px] font-bold transition">
-                            <span>✓ Updated ${m.updatedCount} section${m.updatedCount === 1 ? '' : 's'}</span>
+                          <button type="button" onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'sections')" class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold transition">
+                            <span>✓ Updated ${m.updatedCount} section${m.updatedCount === 1 ? '' : 's'} · View &amp; Edit in Lesson Preview</span>
                           </button>
                         ` : ''}
                         ${(!isUser && m.retryPrompt) ? `
@@ -14720,13 +14761,29 @@ ${forceSchemaLines}`;
               </div>
             </div>
 
-            <!-- RIGHT 7/12: LIVE PRE-LOADED LESSON SECTIONS UPDATING IN REAL TIME -->
-            <div id="studio-modular-blocks-container" class="${activeTab === 'sections' ? '' : 'hidden lg:block'} lg:col-span-7 space-y-3.5">
+            <!-- RIGHT 7/12: LIVE PRE-LOADED LESSON PREVIEW UPDATING IN REAL TIME -->
+            <div id="studio-modular-blocks-container" class="${activeTab === 'sections' ? '' : 'hidden lg:block'} lg:col-span-7 space-y-5">
+              <!-- Clear Lesson Preview Header Banner -->
+              <div class="p-3.5 sm:p-4 rounded-2xl bg-slate-900/90 border border-emerald-500/30 flex items-center justify-between gap-2 flex-wrap">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/35 flex items-center justify-center text-emerald-300 shrink-0">
+                    <i data-lucide="layout-list" class="w-4 h-4"></i>
+                  </span>
+                  <div>
+                    <h5 class="text-xs sm:text-sm font-extrabold text-white">Lesson Preview · Live Sections</h5>
+                    <p class="text-[11px] text-slate-400">Sections build here as you chat with AI. Tap inside any card below to edit directly.</p>
+                  </div>
+                </div>
+                <span class="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/35 text-[11px] font-mono font-bold shrink-0">
+                  ${hasCustomSections ? `${filledSectionsCount} / ${blueprintSections.length} ready` : `${filledSectionsCount} ready`}
+                </span>
+              </div>
+
               ${hasCustomSections ? `
-                <div class="space-y-3.5">
-                  ${blueprintSections.map(sec => {
+                <div class="space-y-5">
+                  ${blueprintSections.map((sec, idx) => {
                     const meta = (typeof COURSE_BLOCK_CATALOG !== 'undefined' && COURSE_BLOCK_CATALOG[sec.type]) ? COURSE_BLOCK_CATALOG[sec.type] : { label: 'Section', icon: 'layers', color: 'amber', placeholder: 'Enter content...' };
-                    return renderCustomBlueprintSectionCard(activeCourse, selectedLesson, sec, meta);
+                    return renderCustomBlueprintSectionCard(activeCourse, selectedLesson, sec, meta, idx + 1);
                   }).join('')}
                 </div>
               ` : `
@@ -14931,6 +14988,19 @@ ${forceSchemaLines}`;
                 </div>
               </div>
             </div>
+
+          <!-- Mobile-Only Fixed Bottom 2-Button Switcher (AI Co-Builder | Lesson Preview) -->
+          <div id="studio-mobile-builder-bar" class="lg:hidden fixed bottom-[calc(env(safe-area-inset-bottom,0px)+64px)] md:bottom-4 inset-x-3 z-30 p-1.5 rounded-2xl bg-slate-900/95 backdrop-blur-md border border-slate-700/90 shadow-2xl grid grid-cols-2 gap-2">
+            <button type="button" id="btn-studio-tab-ai" onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'ai')" class="py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeTab === 'ai' ? 'bg-indigo-600 text-white shadow keep-white' : 'bg-slate-950/80 text-slate-300 border border-slate-800 hover:text-white'}">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>AI Co-Builder</span>
+            </button>
+            <button type="button" id="btn-studio-tab-sections" onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'sections')" title="Edit Class" class="py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeTab === 'sections' ? 'bg-emerald-500 text-slate-950 shadow' : 'bg-slate-950/80 text-slate-300 border border-slate-800 hover:text-white'}">
+              <i data-lucide="layout-list" class="w-3.5 h-3.5"></i>
+              <span>Lesson Preview</span>
+              <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono ${activeTab === 'sections' ? 'bg-slate-950/20 text-slate-950 font-bold' : 'bg-emerald-500/20 text-emerald-300'}">${hasCustomSections ? `${filledSectionsCount}/${blueprintSections.length}` : filledSectionsCount}</span>
+            </button>
+          </div>
           </div>
       `;
 
@@ -18328,14 +18398,74 @@ ${resourcesRaw}`;
       }
     }
 
+    var courseBuilderMobilePane = 'ai';
+
+    function setCourseBuilderMobilePane(pane) {
+      courseBuilderMobilePane = pane === 'preview' ? 'preview' : 'ai';
+      if (typeof window !== 'undefined') window.courseBuilderMobilePane = courseBuilderMobilePane;
+
+      // Ensure main AI Co-Builder + Preview split panel is active (exiting Theme & Options if open)
+      const panelAi = document.getElementById('panel-course-builder-ai');
+      const panelManual = document.getElementById('panel-course-builder-manual');
+      const tabAi = document.getElementById('btn-course-builder-tab-ai');
+      const tabManual = document.getElementById('btn-course-builder-tab-manual');
+      if (panelAi) panelAi.classList.remove('hidden');
+      if (panelManual) panelManual.classList.add('hidden');
+      if (tabAi) tabAi.className = 'py-1 px-2.5 rounded-lg text-[11px] font-bold transition flex items-center gap-1 bg-amber-500 text-slate-950 shadow';
+      if (tabManual) tabManual.className = 'py-1 px-2.5 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 text-slate-400 hover:text-slate-200';
+
+      const paneAi = document.getElementById('architect-pane-ai');
+      const panePreview = document.getElementById('architect-live-blueprint');
+      const btnMobAi = document.getElementById('btn-course-mob-ai');
+      const btnMobPreview = document.getElementById('btn-course-mob-preview');
+      const badgeMobCount = document.getElementById('course-mob-preview-count');
+
+      if (paneAi) {
+        if (courseBuilderMobilePane === 'ai') {
+          paneAi.classList.remove('hidden');
+          paneAi.classList.add('flex');
+        } else {
+          paneAi.classList.add('hidden', 'lg:flex');
+          paneAi.classList.remove('flex');
+        }
+      }
+      if (panePreview) {
+        if (courseBuilderMobilePane === 'preview') {
+          panePreview.classList.remove('hidden');
+          panePreview.classList.add('flex');
+        } else {
+          panePreview.classList.add('hidden', 'lg:flex');
+          panePreview.classList.remove('flex');
+        }
+      }
+
+      if (btnMobAi) {
+        btnMobAi.className = courseBuilderMobilePane === 'ai'
+          ? 'py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-indigo-600 text-white shadow keep-white'
+          : 'py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-slate-900 text-slate-300 border border-slate-800 hover:text-white';
+      }
+      if (btnMobPreview) {
+        btnMobPreview.className = courseBuilderMobilePane === 'preview'
+          ? 'py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-emerald-500 text-slate-950 shadow'
+          : 'py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-slate-900 text-slate-300 border border-slate-800 hover:text-white';
+      }
+      if (badgeMobCount) {
+        badgeMobCount.className = courseBuilderMobilePane === 'preview'
+          ? 'px-1.5 py-0.5 rounded-full bg-slate-950/20 text-slate-950 text-[10px] font-mono font-bold'
+          : 'px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono';
+      }
+
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
     function resetArchitectConversation() {
       const title = document.getElementById('input-create-course-title-en')?.value?.trim() || '';
       architectChatHistory = [
         {
           role: 'assistant',
           text: title
-            ? `Let us design the architecture for "${title}". Who are your students, how long is each class, and what sections do you want inside every class?`
-            : 'Tell me what course you want to build! I will ask a few quick questions and shape your live class blueprint on the right so every class matches your exact teaching style.'
+            ? `Hi! I am your AI Co-Builder for "${title}".\n\nTell me:\n1) Who are your students (age or level)?\n2) How long is each class?\n3) What sections do you want inside every lesson?\n\nAs we chat, I will assemble your live sections in Course Preview so you can inspect and edit them anytime.`
+            : 'Hi! I am your AI Co-Builder.\n\nStep 1: Type your Course Title above.\nStep 2: Tell me here who your students are and what you want every class to include.\n\nAs we talk, I will build your course sections live in Course Preview so you can review and edit every part.'
         }
       ];
       renderArchitectChatMessages();
@@ -18353,13 +18483,18 @@ ${resourcesRaw}`;
         const isUser = msg.role === 'user';
         return `
           <div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
-            <div class="max-w-[90%] rounded-2xl px-3 py-2 ${isUser
+            <div class="max-w-[92%] rounded-2xl px-3.5 py-2.5 ${isUser
               ? 'bg-amber-500/20 border border-amber-500/40 text-amber-100 rounded-br-sm'
               : 'bg-slate-900 border border-slate-700/80 text-slate-200 rounded-bl-sm'}">
-              <div class="text-[10px] font-mono uppercase tracking-wider mb-0.5 ${isUser ? 'text-amber-300' : 'text-emerald-400'}">
-                ${isUser ? 'You' : 'AI Course Architect'}
+              <div class="text-[10px] font-mono uppercase tracking-wider mb-1 ${isUser ? 'text-amber-300' : 'text-indigo-300'}">
+                ${isUser ? 'You' : 'AI Co-Builder · AI Course Architect'}
               </div>
               <div class="whitespace-pre-wrap leading-relaxed">${escapeHtml(msg.text)}</div>
+              ${(!isUser && msg.updatedCount > 0) ? `
+                <button type="button" onclick="setCourseBuilderMobilePane('preview')" class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold transition">
+                  <span>✓ Course Preview updated (${msg.updatedCount} sections) · View &amp; Edit</span>
+                </button>
+              ` : ''}
             </div>
           </div>
         `;
@@ -18411,14 +18546,22 @@ ${resourcesRaw}`;
     function renderArchitectSectionsList() {
       const container = document.getElementById('architect-sections-list');
       const badge = document.getElementById('architect-sections-count-badge');
+      const mobCount = document.getElementById('course-mob-preview-count');
+      const totalCount = Array.isArray(currentBlueprintSections) ? currentBlueprintSections.length : 0;
       if (badge) {
-        badge.textContent = `${currentBlueprintSections.length} ${currentBlueprintSections.length === 1 ? 'section' : 'sections'}`;
+        badge.textContent = `${totalCount} ${totalCount === 1 ? 'section' : 'sections'}`;
+      }
+      if (mobCount) {
+        mobCount.textContent = String(totalCount);
       }
       if (!container) return;
       if (!Array.isArray(currentBlueprintSections) || currentBlueprintSections.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-6 px-3 rounded-xl border border-dashed border-slate-800 text-xs text-slate-400">
-            Discuss your course with the AI on the left, or use <strong>+ Add Section</strong> below to design your class structure.
+          <div class="text-center py-7 px-4 rounded-2xl border-2 border-dashed border-slate-800 bg-slate-900/40 space-y-2">
+            <div class="text-xs font-bold text-slate-200">No sections in Course Preview yet</div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              Chat with <strong>AI Co-Builder</strong> to generate your class sections automatically, or tap <strong>+ Add</strong> below to add a section manually.
+            </p>
           </div>
         `;
         return;
@@ -18426,59 +18569,75 @@ ${resourcesRaw}`;
       container.innerHTML = currentBlueprintSections.map((sec, idx) => {
         const meta = COURSE_BLOCK_CATALOG[sec.type] || COURSE_BLOCK_CATALOG.text;
         const effColor = sec.color || meta.color;
+        const ruleSummary = (sec.ai_rule || sec.hint || '').trim();
         return `
-          <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition space-y-1.5">
-            <div class="flex items-center justify-between gap-2">
-              <div class="flex items-center gap-1.5 flex-1 min-w-0">
-                <span class="text-[10px] font-mono text-slate-500 w-4 shrink-0">${idx + 1}.</span>
-                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-${effColor}-500/15 text-${effColor}-300 border border-${effColor}-500/30 shrink-0 flex items-center gap-1">
-                  <i data-lucide="${meta.icon}" class="w-3 h-3"></i>
+          <div class="p-3.5 rounded-2xl bg-slate-900/95 border-2 border-slate-800 hover:border-${effColor}-500/40 shadow-sm transition space-y-2.5">
+            <!-- Row 1: Section Number Badge, Format Pill & Controls -->
+            <div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-800/80 flex-wrap">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="px-2 py-0.5 rounded-lg bg-${effColor}-500/20 text-${effColor}-300 border border-${effColor}-500/40 text-[10px] font-mono font-bold uppercase tracking-wider shrink-0">Section ${idx + 1}</span>
+                <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md bg-slate-950 text-slate-300 border border-slate-800 shrink-0 flex items-center gap-1">
+                  <i data-lucide="${meta.icon}" class="w-3 h-3 text-${effColor}-400"></i>
                   <span>${meta.label.split(' ')[0]}</span>
                 </span>
-                <input
-                  type="text"
-                  value="${escapeHtml(sec.name || '')}"
-                  onchange="updateBlueprintSectionName('${sec.id}', this.value)"
-                  placeholder="Section name..."
-                  class="flex-1 min-w-0 bg-slate-950 border border-slate-700/80 rounded-lg py-1 px-2 text-xs text-white font-semibold focus:outline-none focus:border-amber-400"
-                >
               </div>
-              <div class="flex items-center gap-0.5 shrink-0">
-                <button type="button" onclick="toggleBlueprintSectionOptions('${sec.id}')" class="px-2 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-emerald-300 border border-slate-800 text-[10px] font-semibold transition flex items-center gap-1" title="Expand Section Rule & Options">
-                  <span>Rule</span>
+              <div class="flex items-center gap-1 shrink-0">
+                <button type="button" onclick="toggleBlueprintSectionOptions('${sec.id}')" class="px-2 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-emerald-300 border border-slate-700/80 text-[10px] font-bold transition flex items-center gap-1" title="Expand Section Rule &amp; Options">
+                  <span>Edit Rule</span>
                   <i data-lucide="chevron-down" class="w-3 h-3"></i>
                 </button>
-                <button type="button" onclick="moveBlueprintSection('${sec.id}', -1)" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition" title="Move Up"><i data-lucide="chevron-up" class="w-3.5 h-3.5"></i></button>
-                <button type="button" onclick="moveBlueprintSection('${sec.id}', 1)" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition" title="Move Down"><i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></button>
-                <button type="button" onclick="removeBlueprintSection('${sec.id}')" class="p-1 rounded hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 transition" title="Remove"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                <button type="button" onclick="moveBlueprintSection('${sec.id}', -1)" class="p-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white transition" title="Move Up"><i data-lucide="chevron-up" class="w-3.5 h-3.5"></i></button>
+                <button type="button" onclick="moveBlueprintSection('${sec.id}', 1)" class="p-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white transition" title="Move Down"><i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></button>
+                <button type="button" onclick="removeBlueprintSection('${sec.id}')" class="p-1 rounded-lg bg-slate-950 hover:bg-rose-950/60 border border-slate-800 text-slate-400 hover:text-rose-400 transition" title="Remove"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
               </div>
             </div>
-            <div id="bp-sec-opts-${sec.id}" class="hidden pt-2 border-t border-slate-800/80 space-y-2 text-[10px] text-slate-300">
+
+            <!-- Row 2: Dedicated Full-Width Editable Section Title -->
+            <div class="space-y-1">
+              <label class="block text-[10px] font-mono uppercase tracking-wider text-slate-400">Section Name (Tap to Edit)</label>
+              <input
+                type="text"
+                dir="auto"
+                value="${escapeHtml(sec.name || '')}"
+                onchange="updateBlueprintSectionName('${sec.id}', this.value)"
+                placeholder="Section name..."
+                class="w-full bg-slate-950 border border-slate-700/80 rounded-xl py-2 px-3 text-xs sm:text-sm text-white font-bold focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400"
+              >
+            </div>
+
+            ${ruleSummary ? `
+              <div class="text-[11px] text-slate-400 bg-slate-950/60 border border-slate-800/80 rounded-xl px-2.5 py-1.5 leading-snug">
+                <span class="text-emerald-400/90 font-semibold">AI builds:</span> ${escapeHtml(ruleSummary)}
+              </div>
+            ` : ''}
+
+            <div id="bp-sec-opts-${sec.id}" class="hidden pt-2.5 border-t border-slate-800/80 space-y-2.5 text-[10px] text-slate-300">
               <div>
-                <label class="block text-[9px] font-mono uppercase tracking-wider text-emerald-400/90 mb-0.5">Lesson AI Rule (How to Write This Section)</label>
+                <label class="block text-[10px] font-mono uppercase tracking-wider text-emerald-400/90 mb-1">Lesson AI Rule (How to Write This Section)</label>
                 <textarea
                   rows="2"
+                  dir="auto"
                   onchange="updateBlueprintSectionRule('${sec.id}', this.value)"
                   placeholder="Specific instruction for how the Lesson Builder fills this section (tone, depth, sources, length)..."
-                  class="w-full bg-slate-950/70 border border-slate-800 rounded-lg py-1 px-2 text-[11px] text-slate-300 placeholder-slate-500 focus:outline-none focus:border-amber-400/70 leading-snug resize-y"
+                  class="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl py-1.5 px-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-400/70 leading-snug resize-y"
                 >${escapeHtml(sec.ai_rule || sec.hint || '')}</textarea>
               </div>
               <div class="flex items-center justify-between gap-2 flex-wrap">
                 <div class="flex items-center gap-1.5">
-                  <span class="text-slate-500">Color:</span>
-                  <select onchange="updateBlueprintSectionProp('${sec.id}', 'color', this.value)" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-[10px] text-slate-200">
-                  <option value="">Auto (${meta.color})</option>
-                  ${['amber','emerald','cyan','blue','indigo','purple','rose','orange','teal','slate'].map(c => `<option value="${c}" ${sec.color === c ? 'selected' : ''}>${c}</option>`).join('')}
-                </select>
-              </div>
-              <label class="flex items-center gap-1 cursor-pointer">
-                <input type="checkbox" ${sec.rtl_default ? 'checked' : ''} onchange="updateBlueprintSectionProp('${sec.id}', 'rtl_default', this.checked)" class="rounded border-slate-700 bg-slate-950 text-amber-500">
-                <span>RTL Text</span>
-              </label>
-              <label class="flex items-center gap-1 cursor-pointer">
-                <input type="checkbox" ${(sec.teacher_only || sec.type === 'teacher_cue') ? 'checked' : ''} onchange="updateBlueprintSectionProp('${sec.id}', 'teacher_only', this.checked)" class="rounded border-slate-700 bg-slate-950 text-amber-500">
-                <span>Teacher Only</span>
-              </label>
+                  <span class="text-slate-400">Color:</span>
+                  <select onchange="updateBlueprintSectionProp('${sec.id}', 'color', this.value)" class="bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-slate-200">
+                    <option value="">Auto (${meta.color})</option>
+                    ${['amber','emerald','cyan','blue','indigo','purple','rose','orange','teal','slate'].map(c => `<option value="${c}" ${sec.color === c ? 'selected' : ''}>${c}</option>`).join('')}
+                  </select>
+                </div>
+                <label class="flex items-center gap-1.5 cursor-pointer text-[11px]">
+                  <input type="checkbox" ${sec.rtl_default ? 'checked' : ''} onchange="updateBlueprintSectionProp('${sec.id}', 'rtl_default', this.checked)" class="rounded border-slate-700 bg-slate-950 text-amber-500">
+                  <span>RTL Text</span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer text-[11px]">
+                  <input type="checkbox" ${(sec.teacher_only || sec.type === 'teacher_cue') ? 'checked' : ''} onchange="updateBlueprintSectionProp('${sec.id}', 'teacher_only', this.checked)" class="rounded border-slate-700 bg-slate-950 text-amber-500">
+                  <span>Teacher Only</span>
+                </label>
               </div>
             </div>
           </div>
@@ -18992,7 +19151,11 @@ Return STRICT JSON ONLY:
       applyArchitectBlueprintUpdate(parsed);
 
       if (parsed.assistant_reply) {
-        architectChatHistory.push({ role: 'assistant', text: parsed.assistant_reply });
+        architectChatHistory.push({
+          role: 'assistant',
+          text: parsed.assistant_reply,
+          updatedCount: Array.isArray(currentBlueprintSections) ? currentBlueprintSections.length : 0
+        });
         renderArchitectChatMessages();
       }
 
@@ -19214,6 +19377,7 @@ Return STRICT JSON ONLY:
       const delCourseBtn = document.getElementById('btn-modal-delete-course');
       if (delCourseBtn) delCourseBtn.classList.add('hidden');
 
+      if (typeof setCourseBuilderMobilePane === 'function') setCourseBuilderMobilePane('ai');
       switchCourseBuilderMode(initialMode || 'ai');
 
       modal.classList.remove('hidden');
@@ -19331,6 +19495,7 @@ Return STRICT JSON ONLY:
       renderBlueprintSectionsList();
 
       switchCourseBuilderMode('ai');
+      if (typeof setCourseBuilderMobilePane === 'function') setCourseBuilderMobilePane('ai');
 
       modal.classList.remove('hidden');
       if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();

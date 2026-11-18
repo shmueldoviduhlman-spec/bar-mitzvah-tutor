@@ -4792,6 +4792,78 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   const guideData = await resGuide.json();
   assert(resGuide.status === 200 && guideData.guide && guideData.guide.settings.includes('Connect External AI'), 'Capability 3 get_app_guide returns accurate TutorPilot website guide');
 
+  // --- Gate 50: Mobile Course & Lesson Builder 2-Button Bottom Switchers & Visual Clarity (M112) ---
+  console.log('\n--- Running Gate 50: Mobile Course & Lesson Builder 2-Button Bottom Switchers & Visual Clarity ---');
+  assert(indexHtml.includes('id="course-builder-mobile-bar"'), 'Course Builder HTML includes mobile bottom 2-button bar');
+  assert(indexHtml.includes('id="btn-course-mob-ai"') && indexHtml.includes('AI Co-Builder'), 'Course Builder bottom bar includes left AI Co-Builder button');
+  assert(indexHtml.includes('id="btn-course-mob-preview"') && indexHtml.includes('Course Preview'), 'Course Builder bottom bar includes right Course Preview button');
+  assert(indexHtml.includes('Step 1: Name the course you are building'), 'Course Builder displays clear Step 1 course title guidance');
+  assert(typeof sandbox.setCourseBuilderMobilePane === 'function', 'setCourseBuilderMobilePane is defined');
+
+  // Test Course Builder mobile pane switching & live count syncing
+  sandbox.openCreateCourseModal('ai');
+  assert(sandbox.courseBuilderMobilePane === 'ai', 'Opening Course Builder defaults mobile pane to AI Co-Builder');
+  assert(!getOrCreateElem('architect-pane-ai').classList.contains('hidden'), 'AI Co-Builder pane is visible on mobile initially');
+  assert(getOrCreateElem('architect-live-blueprint').classList.contains('hidden'), 'Course Preview pane is hidden on mobile initially');
+
+  sandbox.addBlueprintSection('text', 'Opening Story');
+  sandbox.addBlueprintSection('list', 'Key Takeaways');
+  const archSecHtml = getOrCreateElem('architect-sections-list').innerHTML;
+  assert(archSecHtml.includes('Section 1') && archSecHtml.includes('Section 2'), 'Course Preview renders clearly numbered separated section cards');
+  assert(archSecHtml.includes('Section Name (Tap to Edit)'), 'Course Preview renders clear full-width editable Section Name inputs');
+  assert(getOrCreateElem('course-mob-preview-count').textContent === '2', 'Course Preview mobile bottom button badge syncs live section count');
+
+  sandbox.setCourseBuilderMobilePane('preview');
+  assert(sandbox.courseBuilderMobilePane === 'preview', 'setCourseBuilderMobilePane switches to Course Preview');
+  assert(getOrCreateElem('architect-pane-ai').classList.contains('hidden'), 'AI Co-Builder pane hides on mobile when Course Preview is active');
+  assert(!getOrCreateElem('architect-live-blueprint').classList.contains('hidden'), 'Course Preview pane shows on mobile when active');
+
+  // Switching from Theme & Options back via mobile bottom bar restores main panel
+  sandbox.switchCourseBuilderMode('manual');
+  sandbox.setCourseBuilderMobilePane('ai');
+  assert(!getOrCreateElem('panel-course-builder-ai').classList.contains('hidden') && getOrCreateElem('panel-course-builder-manual').classList.contains('hidden'), 'Tapping mobile bottom bar exits Theme panel cleanly back to AI Co-Builder');
+  sandbox.closeCreateCourseModal();
+
+  // Test Lesson Builder mobile fixed bottom 2-button bar & visual separation
+  const m112Course = {
+    id: 'course_m112_mobile',
+    title_en: 'Shabbat Foundations',
+    title_he: 'Shabbat Foundations',
+    blueprint: {
+      sections: [
+        { id: 'sec_m112_1', type: 'text', name: 'Big Question', ai_rule: 'Ask a relatable opening question' },
+        { id: 'sec_m112_2', type: 'list', name: 'Core Laws', ai_rule: 'Three clear bullet points' }
+      ]
+    },
+    lessons: [
+      {
+        id: 'lesson_m112_1',
+        title_en: 'Why We Light Candles',
+        title_he: 'Why We Light Candles',
+        sections: { sec_m112_1: 'What makes Friday night feel completely different from Tuesday night?' }
+      }
+    ]
+  };
+  sandbox.APP_STATE.customCourses.push(m112Course);
+  sandbox.APP_STATE.insideCourseId = m112Course.id;
+  sandbox.APP_STATE.activeCourseId = m112Course.id;
+  sandbox.studioScreenMode = 'edit';
+  sandbox.setStudioWorkspaceTab(m112Course.lessons[0].id, 'ai');
+  const studioAiHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(studioAiHtml.includes('id="studio-mobile-builder-bar"'), 'Lesson Builder renders fixed bottom 2-button mobile switcher bar');
+  assert(studioAiHtml.includes('id="btn-studio-tab-ai"') && studioAiHtml.includes('AI Co-Builder'), 'Lesson Builder bottom bar includes left AI Co-Builder button');
+  assert(studioAiHtml.includes('id="btn-studio-tab-sections"') && studioAiHtml.includes('Lesson Preview'), 'Lesson Builder bottom bar includes right Lesson Preview button');
+  assert(studioAiHtml.includes('Step 1: Name this lesson so AI builds the right content'), 'Lesson Builder displays clear Lesson Title Step 1 guidance');
+  assert(studioAiHtml.includes('Lesson Preview · Live Sections'), 'Lesson Builder renders clear Lesson Preview header banner');
+  assert(studioAiHtml.includes('Section 1') && studioAiHtml.includes('Section 2'), 'Lesson Preview renders numbered separated section cards');
+  assert(studioAiHtml.includes('✓ Ready') && studioAiHtml.includes('Empty · Type or Ask AI'), 'Lesson Preview distinguishes built sections vs empty sections clearly');
+  assert(studioAiHtml.includes('id="studio-modular-blocks-container" class="hidden lg:block'), 'Lesson Preview hides on mobile while AI Co-Builder tab is active');
+
+  sandbox.setStudioWorkspaceTab(m112Course.lessons[0].id, 'sections');
+  const studioPreviewHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(studioPreviewHtml.includes('id="studio-class-ai-partner" class="hidden lg:block'), 'AI Co-Builder hides on mobile while Lesson Preview tab is active');
+  assert(studioPreviewHtml.includes('id="studio-modular-blocks-container" class=" lg:col-span-7'), 'Lesson Preview shows on mobile while Lesson Preview tab is active');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
