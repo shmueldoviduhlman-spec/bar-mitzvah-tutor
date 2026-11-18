@@ -3684,6 +3684,76 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
 
   sandbox.fetch = prevFetch38;
 
+  // --- GATE 39: Course Approved AI Resources Whitelist & Strict Lesson Generation Guard ---
+  console.log('\n--- Running Gate 39: Course Approved AI Resources Whitelist ---');
+  assert(indexHtml.includes('id="input-architect-allowed-resources"'), 'HTML includes Allowed Resources textarea in Course Architect');
+  assert(indexHtml.includes('id="chk-architect-strict-resources"'), 'HTML includes Strict ONLY resources toggle in Course Architect');
+  assert(typeof sandbox.buildCourseAllowedResourcesPromptRule === 'function', 'buildCourseAllowedResourcesPromptRule is defined');
+
+  const strictRule = sandbox.buildCourseAllowedResourcesPromptRule({
+    allowed_resources: 'Chumash & Rashi, Likutei Sichos, Sefer HaChinuch',
+    strict_resources_only: true
+  });
+  assert(strictRule.includes('STRICT ALLOWED RESOURCES POLICY') && strictRule.includes('Likutei Sichos'), 'Strict mode emits mandatory whitelist policy prompt');
+  const prefRule = sandbox.buildCourseAllowedResourcesPromptRule({
+    allowed_resources: 'Campbell Biology 12th Ed',
+    strict_resources_only: false
+  });
+  assert(prefRule.includes('PREFERRED APPROVED COURSE RESOURCES') && prefRule.includes('Campbell Biology'), 'Non-strict mode emits preferred resources prompt');
+
+  // Test Architect AI updating allowed_resources, saving course, rehydrating on edit, and showing in View Rules
+  sandbox.openCreateCourseModal('ai');
+  getOrCreateElem('input-create-course-title-en').value = 'Chumash Intensive Track';
+  sandbox.applyArchitectBlueprintUpdate({
+    student_profile: 'Teen Yeshiva prep',
+    guidelines: 'Direct textual analysis',
+    allowed_resources: 'Chumash Bereishit with Rashi & Likutei Sichos Vol 1',
+    strict_resources_only: true,
+    sections: [{ type: 'quote', name: 'Rashi Text' }, { type: 'text', name: 'Sicha Insight' }]
+  });
+  assert(getOrCreateElem('input-architect-allowed-resources').value.includes('Likutei Sichos Vol 1'), 'applyArchitectBlueprintUpdate updates Allowed Resources input');
+
+  getOrCreateElem('ai-builder-lessons-count-unified').value = 'blueprint';
+  await sandbox.handleGenerateFullCourseFromAi();
+  const resCourse = sandbox.APP_STATE.customCourses.find(c => c.title_en === 'Chumash Intensive Track');
+  assert(!!resCourse && resCourse.blueprint.allowed_resources.includes('Chumash Bereishit'), 'Saved course persists blueprint.allowed_resources');
+  assert(resCourse.blueprint.strict_resources_only === true, 'Saved course persists strict_resources_only flag');
+
+  // Rehydrate on Edit Course modal
+  getOrCreateElem('input-architect-allowed-resources').value = '';
+  sandbox.openEditCustomCourseModal(resCourse.id);
+  assert(getOrCreateElem('input-architect-allowed-resources').value.includes('Likutei Sichos Vol 1'), 'openEditCustomCourseModal rehydrates allowed_resources accurately');
+  sandbox.closeCreateCourseModal();
+
+  // Verify View Rules & ALL lesson AI prompts transmit the strict whitelist
+  sandbox.handleStudioAddNewClassQuick(resCourse.id);
+  const resLesson = resCourse.lessons[0];
+  resLesson.title_en = 'Vayeira: The Test of Chesed';
+  sandbox.enterStudioEditLessonMode(resCourse.id, resLesson.id);
+  const studioHtml39 = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(studioHtml39.includes('Approved AI Resources') && studioHtml39.includes('Likutei Sichos Vol 1'), 'Course Blueprint View Rules displays Approved AI Resources whitelist');
+
+  const prevFetch39 = sandbox.fetch;
+  const g39Prompts = [];
+  sandbox.fetch = async (url, opts) => {
+    const body = opts && opts.body ? JSON.parse(opts.body) : {};
+    g39Prompts.push(JSON.stringify(body));
+    if (g39Prompts.length === 1) {
+      return { ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text: JSON.stringify({ assistant_reply: 'Drafted strictly from Chumash & Rashi and Likutei Sichos.', sections: {} }) }] } }] }) };
+    }
+    return { ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text: JSON.stringify({ sections: { [resCourse.blueprint.sections[0].id]: { quote_text: 'Rashi excerpt' } } }) }] } }] }) };
+  };
+
+  getOrCreateElem('input-studio-class-ai-prompt').value = 'Draft insights for this class';
+  await sandbox.sendStudioClassAiMessage(resCourse.id, resLesson.id);
+  assert(g39Prompts[0].includes('STRICT ALLOWED RESOURCES POLICY') && g39Prompts[0].includes('Chumash Bereishit with Rashi'), 'sendStudioClassAiMessage enforces course Approved Resources whitelist');
+
+  sandbox.openStudioAiCoPilotModal(resCourse.id, resLesson.id);
+  await sandbox.executeStudioAiGenerateFullClass();
+  assert(g39Prompts[1] && g39Prompts[1].includes('STRICT ALLOWED RESOURCES POLICY'), 'executeStudioAiGenerateFullClass enforces course Approved Resources whitelist');
+
+  sandbox.fetch = prevFetch39;
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);

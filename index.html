@@ -2011,6 +2011,23 @@
                     class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-1.5 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
                   >
                 </div>
+                <div>
+                  <div class="flex items-center justify-between gap-2 mb-0.5">
+                    <label class="block text-[10px] font-mono uppercase text-amber-300/90">Allowed Resources (AI Whitelist)</label>
+                    <label class="inline-flex items-center gap-1 text-[10px] text-slate-300 cursor-pointer select-none">
+                      <input type="checkbox" id="chk-architect-strict-resources" checked onchange="updateArchitectMetadataField('strict_resources_only', this.checked)" class="rounded border-slate-700 bg-slate-900 text-amber-500 focus:ring-amber-400 w-3 h-3">
+                      <span>Strict: ONLY these</span>
+                    </label>
+                  </div>
+                  <textarea
+                    id="input-architect-allowed-resources"
+                    dir="auto"
+                    rows="2"
+                    placeholder="List the ONLY books, websites, commentaries, or texts AI may use (e.g. Chumash &amp; Rashi, Likutei Sichos, Khan Academy)... Leave empty for open knowledge."
+                    oninput="updateArchitectMetadataField('allowed_resources', this.value)"
+                    class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-1.5 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 leading-relaxed resize-y"
+                  ></textarea>
+                </div>
               </div>
 
               <!-- Live Custom Sections List -->
@@ -10342,9 +10359,11 @@ alter publication supabase_realtime add table public.students_sync;`;
         const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
         if (apiKey && typeof callGeminiApi === 'function') {
           const textSources = sources.map((s, idx) => `[Ref ${idx + 1}: ${s.label}] ${s.extractedText || s.note || s.url || ''}`).filter(Boolean).join('\n');
+          const allowedRule = typeof buildCourseAllowedResourcesPromptRule === 'function' ? buildCourseAllowedResourcesPromptRule(bp) : '';
           const prompt = `Refine ONLY the section "${sec.name}" (type: ${sec.type}) for class "${title}" in course "${course.title_en || course.title_he}".
 Target Students: ${bp.student_profile || course.target_level || 'General'}
 Course Guidelines: ${bp.guidelines || 'Clear, relatable, and engaging'}
+${allowedRule ? `\n${allowedRule}\n` : ''}
 Section Rule: ${sec.ai_rule || sec.hint || 'Be concise and clear'}
 Format Requirement: ${getSectionAiFormatRule(sec.type)}
 
@@ -10958,10 +10977,12 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
       try {
         const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
         if (apiKey && typeof callGeminiApi === 'function') {
+          const allowedRule = typeof buildCourseAllowedResourcesPromptRule === 'function' ? buildCourseAllowedResourcesPromptRule(bp) : '';
           const prompt = `You are planning a clean, sequential class syllabus for this custom course:
 Course Title: "${course.title_en || course.title_he}"
 Target Students: ${bp.student_profile || course.target_level || 'General'}
 Teaching Guidelines: ${bp.guidelines || course.description_en || 'Clear progression'}
+${allowedRule ? `\n${allowedRule}\n` : ''}
 Existing Classes:
 ${existingTitles || '(None yet - start from Class 1)'}
 Educator Request: ${focusInstruction || 'Suggest 6 logical next class titles tailored closely to these students.'}
@@ -11645,12 +11666,14 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
             : `Legacy modular blocks: hook_en=${JSON.stringify(lesson.hook_en || '')}, anchors=${JSON.stringify((lesson.anchors_en || []).length)} items, sources_text=${JSON.stringify(lesson.sources_text || '')}, steps_text=${JSON.stringify(lesson.steps_text || '')}, pitfalls_text=${JSON.stringify(lesson.pitfalls_text || '')}, homework_text=${JSON.stringify(lesson.homework_text || '')}`;
 
           const analyzeOnlyMode = !!metaOpts.analyzeOnly;
+          const allowedRule = typeof buildCourseAllowedResourcesPromptRule === 'function' ? buildCourseAllowedResourcesPromptRule(bp) : '';
           const systemInstruction = `You are TutorPilot's Master Lesson Co-Builder & Source Analyst. You collaborate fluently with the educator inside the Lesson Studio to analyze links, listen to voice/audio recordings, inspect images/PDFs/notes, discuss pedagogical angles, and craft exceptional lessons inside the custom Course Blueprint.
 
 Course Context:
 Course Title: "${course.title_en || course.title_he}"
 Target Students: ${bp.student_profile || lesson.level || course.target_level || 'General'}
 Course Teaching Guidelines: ${bp.guidelines || course.description_en || 'Engaging, structured, relatable'}
+${allowedRule ? `\n${allowedRule}\n` : ''}
 Course Syllabus Progression:
 ${syllabusOverview}
 
@@ -12532,7 +12555,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                     <span>Undo AI Change</span>
                   </button>
                 ` : ''}
-                ${(bp && (bp.student_profile || bp.guidelines)) ? `
+                ${(bp && (bp.student_profile || bp.guidelines || bp.allowed_resources)) ? `
                   <button type="button" onclick="toggleStudioBlueprintSummary()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 text-[11px] font-semibold flex items-center gap-1 transition">
                     <i data-lucide="book-open-check" class="w-3.5 h-3.5 text-emerald-400"></i>
                     <span>${studioBlueprintDetailsOpen ? 'Hide Rules' : 'View Rules'}</span>
@@ -12599,7 +12622,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
           </div>
 
           <!-- Optional Expandable Blueprint Rules Drawer -->
-          ${(bp && (bp.student_profile || bp.guidelines)) ? `
+          ${(bp && (bp.student_profile || bp.guidelines || bp.allowed_resources)) ? `
             <div id="studio-blueprint-summary-bar" class="${studioBlueprintDetailsOpen ? '' : 'hidden'} px-4 py-3 rounded-2xl bg-slate-900/75 border border-emerald-500/30 text-xs space-y-1.5 leading-relaxed">
               <div class="flex items-center justify-between gap-2">
                 <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-mono font-bold text-[10px]">Course Blueprint</span>
@@ -12610,6 +12633,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
               <div id="studio-blueprint-expanded-details" class="text-slate-300 space-y-1">
                 ${bp.student_profile ? `<div><strong class="text-slate-400">Target Students:</strong> ${escapeHtml(bp.student_profile)}</div>` : ''}
                 ${bp.guidelines ? `<div><strong class="text-slate-400">Teaching Guidelines:</strong> ${escapeHtml(bp.guidelines)}</div>` : ''}
+                ${bp.allowed_resources ? `<div dir="auto"><strong class="text-amber-300">Approved AI Resources (${bp.strict_resources_only !== false ? 'Strict ONLY' : 'Preferred'}):</strong> <span class="text-amber-100">${escapeHtml(bp.allowed_resources)}</span></div>` : ''}
               </div>
             </div>
           ` : '<div id="studio-blueprint-summary-bar" class="hidden">View Rules</div>'}
@@ -13721,11 +13745,13 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
         try {
           if (apiKey) {
             const specList = bpSections.map(s => `- ID "${s.id}" | Label: "${s.name}" | Type: ${s.type} | Rule: ${s.ai_rule || s.hint || 'Clear and engaging'} | Shape: ${getSectionAiFormatRule(s.type)}`).join('\n');
+            const allowedRule = typeof buildCourseAllowedResourcesPromptRule === 'function' ? buildCourseAllowedResourcesPromptRule(bp) : '';
             const prompt = `You are generating a complete class strictly inside this Course Architecture.
 Course: "${course.title_en || course.title_he}"
 Class Title: "${classTitle}"
 Target Students: ${bp.student_profile || course.target_level || 'General'}
 Course Guidelines: ${bp.guidelines || course.description_en || 'Clear, structured, and easy to teach'}
+${allowedRule ? `\n${allowedRule}\n` : ''}
 Extra Teacher Instructions: ${userInstructions || 'Follow the course architecture strictly'}
 
 Required Custom Sections:
@@ -13780,11 +13806,12 @@ Return STRICT JSON ONLY keyed by exact section ID matching each section's exact 
 
       try {
         if (apiKey) {
+          const allowedRule = typeof buildCourseAllowedResourcesPromptRule === 'function' ? buildCourseAllowedResourcesPromptRule(bp) : '';
           const res = await callGeminiApi([
             {
               role: 'user',
               parts: [{
-                text: `You are an expert educator. Generate comprehensive modular teaching blocks for the class "${classTitle}" in the course "${course.title_en || course.title_he}" (${course.target_level || 'General'}). Instructions: ${userInstructions || 'Engaging and rigorous'}. Return JSON with fields: { "hook": "...", "anchors": ["...", "..."], "sources": "...", "steps": "...", "pitfalls": "...", "cheat_sheet": "...", "homework": "..." }.`
+                text: `You are an expert educator. Generate comprehensive modular teaching blocks for the class "${classTitle}" in the course "${course.title_en || course.title_he}" (${course.target_level || 'General'}). ${allowedRule ? `\n${allowedRule}\n` : ''}Instructions: ${userInstructions || 'Engaging and rigorous'}. Return JSON with fields: { "hook": "...", "anchors": ["...", "..."], "sources": "...", "steps": "...", "pitfalls": "...", "cheat_sheet": "...", "homework": "..." }.`
               }]
             }
           ], apiKey, { responseMimeType: 'application/json', temperature: 0.7 });
@@ -13913,9 +13940,11 @@ Return STRICT JSON ONLY keyed by exact section ID matching each section's exact 
       try {
         const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
         if (apiKey) {
+          const allowedRule = typeof buildCourseAllowedResourcesPromptRule === 'function' ? buildCourseAllowedResourcesPromptRule(bp) : '';
           const prompt = `Draft ONLY the section "${sec.name}" (type: ${sec.type}) for the class "${title}" in course "${course.title_en || course.title_he}".
 Target Students: ${bp.student_profile || course.target_level || 'General'}
 Course Guidelines: ${bp.guidelines || 'Clear and easy to teach'}
+${allowedRule ? `\n${allowedRule}\n` : ''}
 Section Rule: ${sec.ai_rule || sec.hint || 'Be concise and practical'}
 Format requirement: ${getSectionAiFormatRule(sec.type)}.`;
           let rawRes = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey, { temperature: 0.7 });
@@ -16139,10 +16168,29 @@ IV. Conclusion
     var architectChatHistory = [];
     var architectStudentProfile = '';
     var architectGuidelines = '';
+    var architectAllowedResources = '';
+    var architectStrictResourcesOnly = true;
 
     function updateArchitectMetadataField(field, value) {
       if (field === 'student_profile') architectStudentProfile = value;
       if (field === 'guidelines') architectGuidelines = value;
+      if (field === 'allowed_resources') architectAllowedResources = value;
+      if (field === 'strict_resources_only') architectStrictResourcesOnly = !!value;
+    }
+
+    function buildCourseAllowedResourcesPromptRule(bp) {
+      const resourcesRaw = String((bp && bp.allowed_resources) || '').trim();
+      if (!resourcesRaw) return '';
+      const strictOnly = !bp || bp.strict_resources_only !== false;
+      if (strictOnly) {
+        return `STRICT ALLOWED RESOURCES POLICY (MANDATORY WHITELIST):
+You MUST base EVERY fact, quote, citation, example, and teaching point STRICTLY AND EXCLUSIVELY on these approved course resources (plus any reference files/links explicitly attached by the teacher to this specific lesson):
+${resourcesRaw}
+FORBIDDEN: Do NOT introduce ideas, quotes, commentaries, anecdotes, or outside curricula that fall outside these approved resources. Stay 100% faithful to this approved list.`;
+      }
+      return `PREFERRED APPROVED COURSE RESOURCES:
+Prioritize drawing facts, quotes, citations, and examples from these teacher-approved resources:
+${resourcesRaw}`;
     }
 
     function updateArchitectHeaderPreview() {
@@ -16457,6 +16505,8 @@ IV. Conclusion
       const descInput = document.getElementById('input-create-course-desc');
       const profInput = document.getElementById('input-architect-student-profile');
       const guideInput = document.getElementById('input-architect-guidelines');
+      const resInput = document.getElementById('input-architect-allowed-resources');
+      const strictChk = document.getElementById('chk-architect-strict-resources');
 
       if (updateObj.course_title_en && titleInput && (!titleInput.value || !titleInput.value.trim() || updateObj.forceTitle)) {
         titleInput.value = updateObj.course_title_en;
@@ -16470,6 +16520,14 @@ IV. Conclusion
       if (updateObj.guidelines) {
         architectGuidelines = updateObj.guidelines;
         if (guideInput) guideInput.value = updateObj.guidelines;
+      }
+      if (updateObj.allowed_resources !== undefined && updateObj.allowed_resources !== null && String(updateObj.allowed_resources).trim() !== '') {
+        architectAllowedResources = String(updateObj.allowed_resources).trim();
+        if (resInput) resInput.value = architectAllowedResources;
+      }
+      if (typeof updateObj.strict_resources_only === 'boolean') {
+        architectStrictResourcesOnly = updateObj.strict_resources_only;
+        if (strictChk) strictChk.checked = architectStrictResourcesOnly;
       }
       if (updateObj.suggested_color) selectCourseColor(updateObj.suggested_color);
       if (updateObj.suggested_icon && document.getElementById('input-create-course-icon')) {
@@ -16553,6 +16611,8 @@ IV. Conclusion
             course_title: titleInput?.value || '',
             student_profile: architectStudentProfile || profInput?.value || '',
             guidelines: architectGuidelines || guideInput?.value || '',
+            allowed_resources: architectAllowedResources || document.getElementById('input-architect-allowed-resources')?.value || '',
+            strict_resources_only: architectStrictResourcesOnly,
             theme_style: document.getElementById('input-course-theme-style')?.value || 'glass_dark',
             density: document.getElementById('input-course-density')?.value || 'balanced',
             sections: currentBlueprintSections
@@ -16590,8 +16650,9 @@ ${currentStateJson}
 Critical Mentoring & Conversation Rules:
 1. READ THE ENTIRE CONVERSATION CAREFULLY: Remember every detail the educator already gave you (age, student background, subject, session duration, tone, goals). NEVER re-ask a question the educator already answered!
 2. ENGAGE LIKE A WORLD-CLASS EDUCATOR: In "assistant_reply", respond directly and thoughtfully to what the educator just said. Offer concrete pedagogical insight tailored to those specific learners (e.g., for non-religious teens, open with relatable modern dilemmas, avoid unexplained jargon, use vivid analogies, end with an engaging question rather than preachy lectures). Briefly explain any changes you made to the blueprint sections/guidelines on the right, and ask 1 or 2 smart, focused follow-up questions that push the design forward (such as session length, how interactive vs lecture-based they want it, whether to include source quotes or homework, etc.). Write cleanly without markdown clutter.
-3. INCREMENTAL UPDATES: Update "course_title_en", "student_profile", "guidelines", "suggested_desc", "suggested_color" (amber|blue|emerald|purple|rose|cyan|orange|indigo|teal|slate), "suggested_icon", "theme_style" (glass_dark|editorial_clean|academic_serif|warm_notebook), "density" (compact|balanced|spacious), and "sections".
-   - If the educator already has sections designed and merely answered a clarifying question (like age "Between 12 to 13" or session length) without asking to replace sections, PRESERVE the existing section IDs/structure and refine their "ai_rule", "student_profile", and "guidelines" rather than wiping or replacing them with generic templates!
+3. INCREMENTAL UPDATES: Update "course_title_en", "student_profile", "guidelines", "allowed_resources" (ONLY if the teacher specifies allowed books, websites, texts, or curricula to restrict AI to), "strict_resources_only" (boolean), "suggested_desc", "suggested_color" (amber|blue|emerald|purple|rose|cyan|orange|indigo|teal|slate), "suggested_icon", "theme_style" (glass_dark|editorial_clean|academic_serif|warm_notebook), "density" (compact|balanced|spacious), and "sections".
+   - Ask briefly when natural which approved books, sources, or texts AI is allowed to draw from when generating lessons, and capture them cleanly in "allowed_resources".
+   - If the educator already has sections designed and merely answered a clarifying question (like age "Between 12 to 13" or session length) without asking to replace sections, PRESERVE the existing section IDs/structure and refine their "ai_rule", "student_profile", "guidelines", and "allowed_resources" rather than wiping or replacing them with generic templates!
    - If this is the opening pitch or the educator requests structural changes, design or update the ideal custom sections from the 20 available block types, giving each a tailored name and crisp "ai_rule" explaining how each class should fill it.
 4. Language: Respond in Hebrew if the educator writes in Hebrew, or English if they write in English.
 
@@ -16601,6 +16662,8 @@ Return STRICT JSON ONLY:
   "course_title_en": "Refined Course Title",
   "student_profile": "Updated target learner profile incorporating all known details",
   "guidelines": "Concise teaching guidelines (pacing, tone, preparation/review structure, pedagogy)",
+  "allowed_resources": "",
+  "strict_resources_only": true,
   "suggested_desc": "Short course summary",
   "suggested_color": "amber",
   "suggested_icon": "✦",
@@ -16838,6 +16901,9 @@ Return STRICT JSON ONLY:
         const schoolId = (typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_770') || 'school_main_770';
         const studentProf = (document.getElementById('input-architect-student-profile')?.value || architectStudentProfile || level).trim();
         const guidelinesVal = (document.getElementById('input-architect-guidelines')?.value || architectGuidelines || '').trim();
+        const allowedResVal = (document.getElementById('input-architect-allowed-resources')?.value || architectAllowedResources || '').trim();
+        const strictResChk = document.getElementById('chk-architect-strict-resources');
+        const strictResVal = strictResChk ? !!strictResChk.checked : (architectStrictResourcesOnly !== false);
         const themeStyle = document.getElementById('input-course-theme-style')?.value || 'glass_dark';
         const densityVal = document.getElementById('input-course-density')?.value || 'balanced';
 
@@ -16866,6 +16932,8 @@ Return STRICT JSON ONLY:
               version: '2.0',
               student_profile: studentProf,
               guidelines: guidelinesVal,
+              allowed_resources: allowedResVal,
+              strict_resources_only: strictResVal,
               theme_style: themeStyle,
               density: densityVal,
               architect_history: (architectChatHistory || []).slice(-12),
@@ -16925,10 +16993,16 @@ Return STRICT JSON ONLY:
 
       architectStudentProfile = '';
       architectGuidelines = '';
+      architectAllowedResources = '';
+      architectStrictResourcesOnly = true;
       const profInput = document.getElementById('input-architect-student-profile');
       if (profInput) profInput.value = '';
       const guideInput = document.getElementById('input-architect-guidelines');
       if (guideInput) guideInput.value = '';
+      const resInput = document.getElementById('input-architect-allowed-resources');
+      if (resInput) resInput.value = '';
+      const strictChk = document.getElementById('chk-architect-strict-resources');
+      if (strictChk) strictChk.checked = true;
 
       const label = document.getElementById('modal-create-course-title');
       if (label) label.textContent = APP_STATE.lang === 'he' ? 'אדריכל הקורסים (AI)' : 'AI Course Architect';
@@ -16985,10 +17059,16 @@ Return STRICT JSON ONLY:
       const bp = course.blueprint || {};
       architectStudentProfile = bp.student_profile || course.target_level || '';
       architectGuidelines = bp.guidelines || course.description_en || '';
+      architectAllowedResources = bp.allowed_resources || '';
+      architectStrictResourcesOnly = bp.strict_resources_only !== false;
       const profInput = document.getElementById('input-architect-student-profile');
       if (profInput) profInput.value = architectStudentProfile;
       const guideInput = document.getElementById('input-architect-guidelines');
       if (guideInput) guideInput.value = architectGuidelines;
+      const resInput = document.getElementById('input-architect-allowed-resources');
+      if (resInput) resInput.value = architectAllowedResources;
+      const strictChk = document.getElementById('chk-architect-strict-resources');
+      if (strictChk) strictChk.checked = architectStrictResourcesOnly;
       if (document.getElementById('input-course-theme-style')) {
         document.getElementById('input-course-theme-style').value = bp.theme_style || 'glass_dark';
       }
@@ -17080,6 +17160,9 @@ Return STRICT JSON ONLY:
 
       const studentProf = (document.getElementById('input-architect-student-profile')?.value || architectStudentProfile || level).trim();
       const guidelinesVal = (document.getElementById('input-architect-guidelines')?.value || architectGuidelines || desc || '').trim();
+      const allowedResVal = (document.getElementById('input-architect-allowed-resources')?.value || architectAllowedResources || '').trim();
+      const strictResChk = document.getElementById('chk-architect-strict-resources');
+      const strictResVal = strictResChk ? !!strictResChk.checked : (architectStrictResourcesOnly !== false);
       const themeStyle = document.getElementById('input-course-theme-style')?.value || 'glass_dark';
       const densityVal = document.getElementById('input-course-density')?.value || 'balanced';
 
@@ -17087,6 +17170,8 @@ Return STRICT JSON ONLY:
         version: '2.0',
         student_profile: studentProf,
         guidelines: guidelinesVal,
+        allowed_resources: allowedResVal,
+        strict_resources_only: strictResVal,
         theme_style: themeStyle,
         density: densityVal,
         architect_history: (architectChatHistory || []).slice(-12),
@@ -19819,11 +19904,19 @@ JSON Schema:
   ]
 }`;
 
+      const allowedResVal = (document.getElementById('input-architect-allowed-resources')?.value || architectAllowedResources || '').trim();
+      const strictResChk = document.getElementById('chk-architect-strict-resources');
+      const strictResVal = strictResChk ? !!strictResChk.checked : (architectStrictResourcesOnly !== false);
+      const allowedRule = typeof buildCourseAllowedResourcesPromptRule === 'function'
+        ? buildCourseAllowedResourcesPromptRule({ allowed_resources: allowedResVal, strict_resources_only: strictResVal })
+        : '';
+
       const userPrompt = `Create a ${lessonCount}-lesson structured curriculum for:
 Topic: ${topic}
 Category: ${domain}
 Target Student Level: ${level}
 Language: ${langChoice}
+${allowedRule ? `\n${allowedRule}\n` : ''}
 Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per lesson, high-density memory points, and practical relatable student angles.'}`;
 
       try {
@@ -19885,6 +19978,19 @@ Additional Specific Instructions: ${guidance || 'Provide 7 clear anchors per les
         courseData.id = 'course_' + Date.now();
         courseData.created_at = new Date().toISOString();
         courseData.updated_at = new Date().toISOString();
+        if (!courseData.blueprint || typeof courseData.blueprint !== 'object') {
+          courseData.blueprint = {
+            version: '2.0',
+            student_profile: document.getElementById('input-architect-student-profile')?.value || architectStudentProfile || level,
+            guidelines: document.getElementById('input-architect-guidelines')?.value || architectGuidelines || '',
+            allowed_resources: allowedResVal,
+            strict_resources_only: strictResVal,
+            sections: Array.isArray(currentBlueprintSections) ? currentBlueprintSections.map(s => ({ ...s })) : []
+          };
+        } else if (allowedResVal) {
+          courseData.blueprint.allowed_resources = allowedResVal;
+          courseData.blueprint.strict_resources_only = strictResVal;
+        }
 
         if (Array.isArray(courseData.lessons)) {
           courseData.lessons.forEach((l, idx) => {
