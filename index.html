@@ -1075,12 +1075,9 @@
                   <i data-lucide="plus" class="w-4 h-4"></i>
                   <span>New Lesson</span>
                 </button>
-                <button onclick="openEditCurrentCourseModal()" class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition active:scale-95" title="Edit Course Architecture & Blueprint">
-                  <i data-lucide="sliders" class="w-3.5 h-3.5 text-indigo-400"></i>
-                  <span>Course Rules & Blueprint</span>
-                </button>
-                <button onclick="handleDeleteActiveCustomCourse()" class="p-2.5 rounded-2xl bg-slate-800 hover:bg-rose-950/60 hover:text-rose-400 text-slate-400 text-xs transition border border-slate-700/60" title="Delete Course">
-                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <button onclick="openEditCurrentCourseModal()" class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition active:scale-95" title="Edit Course Architecture, AI Playbook, or Delete Course">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i>
+                  <span>Edit Course with AI</span>
                 </button>
               </div>
             </div>
@@ -2615,7 +2612,17 @@
               <span>Theme &amp; Options</span>
             </button>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              id="btn-modal-delete-course"
+              onclick="handleDeleteEditingCourseDoubleConfirm()"
+              class="hidden px-3 py-2 rounded-xl bg-rose-950/50 hover:bg-rose-900/70 text-rose-300 border border-rose-500/35 text-xs font-bold transition flex items-center gap-1.5"
+              title="Permanently delete this course (requires confirmation)"
+            >
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <span>Delete Course</span>
+            </button>
             <button
               type="button"
               onclick="closeCreateCourseModal()"
@@ -10821,18 +10828,10 @@ alter publication supabase_realtime add table public.students_sync;`;
           <div onclick="openCourseClassesView('${c.id}')" class="rounded-3xl bg-slate-900/90 border border-slate-800/90 hover:border-indigo-500/50 transition cursor-pointer shadow-sm hover:shadow-xl flex flex-col justify-between overflow-hidden group">
             <div>
               <!-- Vibrant Gradient Course Cover Banner -->
-              <div class="modern-gradient-cover keep-white h-24 bg-gradient-to-r ${gradCls} p-4 flex items-start justify-between relative overflow-hidden">
+              <div class="modern-gradient-cover keep-white h-20 bg-gradient-to-r ${gradCls} p-4 flex items-start justify-between relative overflow-hidden">
                 <span class="px-2.5 py-1 rounded-full bg-black/25 backdrop-blur-md text-white text-[10px] font-extrabold uppercase tracking-wider">
                   ${escapeHtml(c.category || 'Curriculum')}
                 </span>
-                <div class="flex items-center gap-1 relative z-10">
-                  <button type="button" onclick="event.stopPropagation(); openEditCustomCourseModal('${c.id}')" class="p-1.5 rounded-xl bg-black/20 hover:bg-black/40 text-white transition" title="Edit Course">
-                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-                  </button>
-                  <button type="button" onclick="event.stopPropagation(); handleDeleteCustomCourseById('${c.id}')" class="p-1.5 rounded-xl bg-black/20 hover:bg-rose-500/80 text-white transition" title="Delete Course">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                  </button>
-                </div>
               </div>
 
               <!-- Floating Course Icon & Body -->
@@ -10848,16 +10847,6 @@ alter publication supabase_realtime add table public.students_sync;`;
 
                 <h4 dir="auto" class="text-base sm:text-lg font-extrabold text-white group-hover:text-indigo-400 transition leading-snug break-words">${escapeHtml(title)}</h4>
                 <p dir="auto" class="text-xs text-slate-400 mt-1.5 line-clamp-2 leading-relaxed">${escapeHtml(desc)}</p>
-
-                ${bpSections.length > 0 ? `
-                  <div class="flex items-center gap-1.5 flex-wrap mt-3.5">
-                    ${bpSections.map(sec => `
-                      <span class="px-2 py-0.5 rounded-lg bg-slate-800/90 border border-slate-700/70 text-[10px] font-semibold text-slate-300">
-                        ${escapeHtml(sec.title || 'Section')}
-                      </span>
-                    `).join('')}
-                  </div>
-                ` : ''}
               </div>
             </div>
 
@@ -11937,18 +11926,10 @@ Return ONLY the updated value matching the Format Requirement cleanly. Write nat
             </span>
             ${isTeacherOnly ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Teacher Only</span>' : ''}
             ${wasUpdatedByAi ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">✓ Updated</span>' : ''}
-            ${sec.ai_rule ? `
-              <button type="button" onclick="toggleSectionRuleHint('${sec.id}')" class="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 transition" title="View section guideline">
-                ⓘ Rule
-              </button>
-            ` : ''}
           </div>
           <div class="flex items-center gap-2 shrink-0">
-            <button type="button" onclick="toggleSectionTweakBar('${sec.id}')" class="text-[11px] px-2 py-1 rounded-lg bg-slate-800/80 hover:bg-indigo-500/20 text-indigo-300 border border-slate-700 hover:border-indigo-400/50 flex items-center gap-1 font-semibold transition">
-              <i data-lucide="wand-2" class="w-3 h-3"></i> AI Tweak
-            </button>
-            <button type="button" onclick="handleStudioMiniBlockCustomAi('${cId}', '${lId}', '${sec.id}')" class="text-[11px] text-${effColor}-400 hover:text-${effColor}-300 flex items-center gap-1 font-semibold shrink-0" title="Auto-draft fresh content for this section">
-              <i data-lucide="sparkles" class="w-3 h-3"></i> AI Draft
+            <button type="button" onclick="toggleSectionTweakBar('${sec.id}')" class="text-[11px] px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-indigo-500/20 text-indigo-300 border border-slate-700 hover:border-indigo-400/50 flex items-center gap-1 font-semibold transition">
+              <i data-lucide="wand-2" class="w-3 h-3"></i> AI Refine
             </button>
           </div>
         </div>
@@ -13989,56 +13970,26 @@ ${forceSchemaLines}`;
         `;
       }
 
-      const lessonSwitcherHtml = lessons.length > 1 ? `
-        <select id="reader-lesson-switcher-select" onchange="jumpToStudioLesson('${activeCourse.id}', this.value)" class="bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-amber-400 cursor-pointer max-w-[240px] truncate" title="Jump to another lesson in this course">
-          ${lessons.map((les, idx) => {
-            const lName = isHe ? (les.title_he || les.title_en || 'Untitled') : (les.title_en || les.title_he || 'Untitled');
-            const lNo = les.lesson_num || (idx + 1);
-            return `<option value="${les.id}" ${les.id === selectedLesson.id ? 'selected' : ''}>${isHe ? 'שיעור' : 'Lesson'} ${lNo}: ${escapeHtml(lName)}</option>`;
-          }).join('')}
-        </select>
-      ` : '';
-
-      const sectionJumpListHtml = populatedJumpSections.length > 1 ? `
-        <div id="lesson-section-jump-list" class="flex items-center gap-1.5 flex-wrap pt-1">
-          <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 mr-1">${isHe ? 'קפוץ אל:' : 'Sections:'}</span>
-          ${populatedJumpSections.map(s => `
-            <button type="button" onclick="scrollToLessonSection('${s.id}')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/40 text-xs font-medium text-slate-300 hover:text-amber-300 transition">
-              <span class="font-mono text-amber-400 mr-1">${s.num}.</span>${escapeHtml(s.name)}
-            </button>
-          `).join('')}
-        </div>
-      ` : '';
-
       return `
         <div id="studio-lesson-reader" class="max-w-4xl mx-auto space-y-6">
-          <!-- Single Calm Reader Navigation Header + Top Lesson Switcher -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-slate-800/80">
-            <div class="flex items-center gap-2 flex-wrap">
-              <button type="button" onclick="exitStudioToLessonList('${activeCourse.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition">
-                <i data-lucide="arrow-left" class="w-3.5 h-3.5 rtl:rotate-180"></i>
-                <span>${isHe ? 'חזרה לרשימת השיעורים' : 'Lessons'}</span>
-              </button>
-              ${lessonSwitcherHtml}
-            </div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <button type="button" id="btn-reader-teach-class" onclick="openTutorTeleprompter('${activeCourse.id}', '${selectedLesson.id}')" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow transition active:scale-95">
-                <i data-lucide="presentation" class="w-3.5 h-3.5"></i>
-                <span>Teach Class</span>
-              </button>
-              <button type="button" id="btn-reader-edit-lesson" onclick="enterStudioEditLessonMode('${activeCourse.id}', '${selectedLesson.id}')" class="px-4 py-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 font-bold text-xs flex items-center gap-1.5 transition active:scale-95">
-                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-300"></i>
-                <span>Build / Edit with AI</span>
-              </button>
-            </div>
+          <!-- Clean Minimal Lesson Reader Header (Back to Lessons + Edit with AI) -->
+          <div class="flex items-center justify-between gap-3 py-3 border-b border-slate-800/80">
+            <button type="button" onclick="exitStudioToLessonList('${activeCourse.id}')" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition">
+              <i data-lucide="arrow-left" class="w-3.5 h-3.5 rtl:rotate-180"></i>
+              <span>${isHe ? 'חזרה לרשימת השיעורים' : 'Lessons'}</span>
+            </button>
+            <button type="button" id="btn-reader-edit-lesson" onclick="enterStudioEditLessonMode('${activeCourse.id}', '${selectedLesson.id}')" class="px-4 py-2 rounded-2xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 font-bold text-xs flex items-center gap-1.5 transition active:scale-95">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-300"></i>
+              <span>${isHe ? 'ערוך עם AI' : 'Edit with AI'}</span>
+            </button>
           </div>
 
-          <!-- Clean Document Hero Title (Click Title to Rename on the Spot) & Quick Section Jump List -->
-          <div class="space-y-2.5">
+          <!-- Clean Document Hero Title (Click Title to Rename on the Spot) -->
+          <div class="space-y-2">
             <div class="flex items-center gap-2 text-xs font-mono text-slate-400">
-              <span class="text-amber-400 font-bold">${escapeHtml(activeCourse.title_en || activeCourse.title_he || '')}</span>
+              <span class="text-indigo-400 font-bold">${escapeHtml(activeCourse.title_en || activeCourse.title_he || '')}</span>
               <span>•</span>
-              <span>Lesson ${selectedLesson.lesson_num || lessons.indexOf(selectedLesson) + 1} of ${lessons.length}</span>
+              <span>${isHe ? 'שיעור' : 'Lesson'} ${selectedLesson.lesson_num || lessons.indexOf(selectedLesson) + 1}</span>
             </div>
             <h1
               id="reader-lesson-title"
@@ -14048,9 +13999,8 @@ ${forceSchemaLines}`;
               title="${isHe ? 'לחץ כדי לשנות את שם השיעור במקום' : 'Click to rename lesson on the spot'}"
               onblur="handleInlineLessonTitleRename('${activeCourse.id}', '${selectedLesson.id}', this.textContent)"
               onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }"
-              class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug rounded-xl px-1 -mx-1 hover:bg-slate-800/40 focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition cursor-text"
+              class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug rounded-xl px-1 -mx-1 hover:bg-slate-800/40 focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-400/60 transition cursor-text"
             >${escapeHtml(selectedTitle)}</h1>
-            ${sectionJumpListHtml}
           </div>
 
           <!-- Formatted Lesson Document Body (Zero Cluttered Inputs) -->
@@ -14188,78 +14138,38 @@ ${forceSchemaLines}`;
       const mode = studioScreenMode || 'list';
 
       // ================================================================
-      // SCREEN 2: MODERN 2-COLUMN CHAPTER / LESSON CARDS GRID (studioScreenMode === 'list')
+      // SCREEN 2: CLEAN VERTICAL SYLLABUS LIST (ONLY Lesson # + Large Name)
       // ================================================================
       if (mode === 'list') {
         if (outerCourseHeader) outerCourseHeader.classList.remove('hidden');
-        const bpSecs = (activeCourse.blueprint && Array.isArray(activeCourse.blueprint.sections)) ? activeCourse.blueprint.sections : [];
         container.innerHTML = `
-          <div id="studio-lesson-list-screen" class="max-w-5xl mx-auto space-y-4">
-            <!-- 2-Column Visual Chapter Cards Grid -->
-            <div id="studio-syllabus-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div id="studio-lesson-list-screen" class="max-w-3xl mx-auto space-y-3">
+            <!-- Clean Vertical Syllabus List: Strictly Lesson Number + Large Lesson Name -->
+            <div id="studio-syllabus-list" class="space-y-2.5">
               ${lessons.map((les, idx) => {
                 const lTitle = isHe ? (les.title_he || les.title_en || 'Untitled Lesson') : (les.title_en || les.title_he || 'Untitled Lesson');
                 const lNum = les.lesson_num || (idx + 1);
-                const paddedNum = String(lNum).padStart(2, '0');
-                const secMap = (les && les.sections && typeof les.sections === 'object') ? les.sections : {};
-                const filledCount = Object.keys(secMap).filter(k => secMap[k] && String(secMap[k]).trim().length > 2).length;
-                const isReady = filledCount > 0;
                 return `
                   <div
                     id="studio-syllabus-item-${les.id}"
                     onclick="selectStudioClass('${les.id}')"
-                    class="p-5 rounded-3xl border border-slate-800/90 bg-slate-900/90 hover:border-indigo-500/50 transition cursor-pointer select-none group flex flex-col justify-between gap-4 shadow-sm hover:shadow-xl"
+                    class="px-5 py-4 rounded-2xl border border-slate-800/90 bg-slate-900/85 hover:border-indigo-500/50 hover:shadow-md transition cursor-pointer select-none group flex items-center justify-between gap-4 shadow-sm"
                   >
-                    <div class="space-y-3">
-                      <!-- Top Row: Chapter Pill + Status Badge + Reorder/Delete Actions -->
-                      <div class="flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2">
-                          <span class="px-2.5 py-1 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 font-mono text-[11px] font-extrabold tracking-wider uppercase">
-                            ${isHe ? 'שיעור' : 'Lesson'} ${paddedNum}
-                          </span>
-                          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isReady ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'}">
-                            ${isReady ? `${filledCount} ${isHe ? 'חלקים מוכנים' : 'Sections Ready'}` : (isHe ? 'טיוטה' : 'Ready to Draft')}
-                          </span>
-                        </div>
-
-                        <div class="flex items-center gap-0.5 shrink-0">
-                          <button type="button" onclick="event.stopPropagation(); handleStudioMoveClass('${activeCourse.id}', '${les.id}', -1)" class="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Move Up">
-                            <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
-                          </button>
-                          <button type="button" onclick="event.stopPropagation(); handleStudioMoveClass('${activeCourse.id}', '${les.id}', 1)" class="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Move Down">
-                            <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
-                          </button>
-                          <button type="button" onclick="event.stopPropagation(); handleStudioDeleteClass('${activeCourse.id}', '${les.id}')" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Delete Lesson">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                          </button>
-                        </div>
-                      </div>
-
-                      <!-- Chapter Title -->
-                      <h5 id="studio-syllabus-title-${les.id}" dir="auto" class="text-base sm:text-lg font-extrabold text-white group-hover:text-indigo-400 transition leading-snug break-words">${escapeHtml(lTitle)}</h5>
-
-                      <!-- Blueprint Section Chips -->
-                      ${bpSecs.length > 0 ? `
-                        <div class="flex items-center gap-1.5 flex-wrap pt-0.5">
-                          ${bpSecs.slice(0, 3).map(s => `
-                            <span class="px-2 py-0.5 rounded-lg bg-slate-800/80 border border-slate-700/70 text-[10px] font-semibold text-slate-400">
-                              ${escapeHtml(s.title || s.name || 'Section')}
-                            </span>
-                          `).join('')}
-                        </div>
-                      ` : ''}
+                    <div class="flex items-center gap-4 min-w-0 flex-1">
+                      <span class="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 font-mono text-sm font-extrabold flex items-center justify-center shrink-0">
+                        ${lNum}
+                      </span>
+                      <h5 id="studio-syllabus-title-${les.id}" dir="auto" class="text-base sm:text-xl font-extrabold text-white group-hover:text-indigo-400 transition leading-snug break-words">${escapeHtml(lTitle)}</h5>
                     </div>
 
-                    <!-- Bottom Action Row: Read & Teach + Edit with AI -->
-                    <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
-                      <button type="button" onclick="event.stopPropagation(); enterStudioEditLessonMode('${activeCourse.id}', '${les.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs font-bold transition">
-                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
-                        <span>${isHe ? 'ערוך עם AI' : 'Edit with AI'}</span>
+                    <div class="flex items-center gap-1 shrink-0">
+                      <button type="button" onclick="event.stopPropagation(); handleStudioMoveClass('${activeCourse.id}', '${les.id}', -1)" class="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Move Up">
+                        <i data-lucide="chevron-up" class="w-4 h-4"></i>
                       </button>
-                      <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-500/15 group-hover:bg-indigo-600 text-indigo-300 group-hover:text-white text-xs font-bold transition">
-                        <span>${isHe ? 'פתח שיעור' : 'Read & Teach'}</span>
-                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 rtl:rotate-180"></i>
-                      </span>
+                      <button type="button" onclick="event.stopPropagation(); handleStudioMoveClass('${activeCourse.id}', '${les.id}', 1)" class="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Move Down">
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                      </button>
+                      <i data-lucide="chevron-right" class="w-5 h-5 text-slate-400 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition ml-1 rtl:rotate-180"></i>
                     </div>
                   </div>
                 `;
@@ -14312,32 +14222,11 @@ ${forceSchemaLines}`;
       const anchorsRawText = selectedAnchors.map(a => typeof a === 'string' ? a : (a.point || a.title || '')).join('\n');
       recordLastOpenedLesson(activeCourse.id, selectedLesson.id);
 
-      const studioLessonSwitcherHtml = lessons.length > 1 ? `
-        <select id="studio-lesson-switcher-select" onchange="jumpToStudioLesson('${activeCourse.id}', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-xl px-2.5 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-amber-400 cursor-pointer max-w-[210px] truncate" title="Jump to another lesson">
-          ${lessons.map((les, idx) => {
-            const lName = isHe ? (les.title_he || les.title_en || 'Untitled') : (les.title_en || les.title_he || 'Untitled');
-            const lNo = les.lesson_num || (idx + 1);
-            return `<option value="${les.id}" ${les.id === selectedLesson.id ? 'selected' : ''}>${isHe ? 'שיעור' : 'Lesson'} ${lNo}: ${escapeHtml(lName)}</option>`;
-          }).join('')}
-        </select>
-      ` : '';
-
-      const studioSectionJumpHtml = hasCustomSections && blueprintSections.length > 1 ? `
-        <div id="studio-section-jump-list" class="flex items-center gap-1.5 flex-wrap pt-1">
-          <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 mr-1">${isHe ? 'קפוץ אל:' : 'Sections:'}</span>
-          ${blueprintSections.map((s, idx) => `
-            <button type="button" onclick="scrollToLessonSection('${s.id}')" class="px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/40 text-xs font-medium text-slate-300 hover:text-amber-300 transition">
-              <span class="font-mono text-amber-400 mr-1">${idx + 1}.</span>${escapeHtml(s.name || 'Section')}
-            </button>
-          `).join('')}
-        </div>
-      ` : '';
-
       let html = `
         <div id="course-studio-wrapper" class="max-w-7xl mx-auto space-y-4">
           <input type="file" id="input-studio-source-file" class="hidden" multiple onchange="handleStudioSourceFileSelected(event, '${activeCourse.id}', '${selectedLesson.id}')" />
 
-          <!-- Single Unified Edit Studio Bar -->
+          <!-- Calm Focused Edit Studio Top Bar -->
           <div id="studio-edit-topbar" class="p-4 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-3">
             <div class="flex items-center justify-between gap-2 flex-wrap">
               <div class="flex items-center gap-2 flex-wrap">
@@ -14345,7 +14234,6 @@ ${forceSchemaLines}`;
                   <i data-lucide="arrow-left" class="w-3.5 h-3.5 rtl:rotate-180"></i>
                   <span>Lessons</span>
                 </button>
-                ${studioLessonSwitcherHtml}
                 <button type="button" id="btn-edit-done-view-lesson" onclick="selectStudioClass('${selectedLesson.id}')" class="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center gap-1.5 transition">
                   <i data-lucide="check" class="w-3.5 h-3.5"></i>
                   <span>Done · View Lesson</span>
@@ -14366,21 +14254,15 @@ ${forceSchemaLines}`;
                     <span>${studioBlueprintDetailsOpen ? 'Hide Rules' : 'View Rules'}</span>
                   </button>
                 ` : ''}
-                <button type="button" onclick="openTutorTeleprompter('${activeCourse.id}', '${selectedLesson.id}')" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow transition active:scale-95">
-                  <i data-lucide="presentation" class="w-3.5 h-3.5"></i>
-                  <span>Teach Class</span>
-                </button>
-                <button type="button" onclick="handleStudioDuplicateClass('${activeCourse.id}', '${selectedLesson.id}')" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 transition" title="Duplicate Lesson">
-                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                </button>
-                <button type="button" onclick="handleStudioDeleteClass('${activeCourse.id}', '${selectedLesson.id}')" class="p-1.5 rounded-xl bg-slate-800 hover:bg-rose-950/60 hover:text-rose-400 text-slate-400 border border-slate-700/60 transition" title="Delete Lesson">
+                <button type="button" onclick="handleStudioDeleteClass('${activeCourse.id}', '${selectedLesson.id}')" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-950/60 hover:text-rose-400 text-slate-400 border border-slate-700/60 text-xs font-semibold flex items-center gap-1 transition" title="Delete Lesson">
                   <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  <span class="hidden sm:inline">Delete</span>
                 </button>
               </div>
             </div>
 
-            <!-- Full-Width Never-Clipped Title + Quick Section Jump List -->
-            <div class="space-y-2">
+            <!-- Full-Width Clean Lesson Title Input -->
+            <div>
               <input
                 id="studio-class-title-input"
                 type="text"
@@ -14388,10 +14270,9 @@ ${forceSchemaLines}`;
                 value="${escapeHtml(selectedTitle)}"
                 oninput="handleStudioClassTitleChange('${activeCourse.id}', '${selectedLesson.id}', this.value)"
                 onblur="saveCustomCoursesToStorage(true)"
-                class="w-full text-base sm:text-xl font-extrabold text-white bg-slate-950/80 border border-slate-700/80 rounded-2xl px-4 py-2.5 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 transition"
+                class="w-full text-base sm:text-xl font-extrabold text-white bg-slate-950/80 border border-slate-700/80 rounded-2xl px-4 py-2.5 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition"
                 placeholder="Enter lesson title..."
               />
-              ${studioSectionJumpHtml}
               <!-- Hidden legacy metadata dropdowns (removed from visual clutter) -->
               <div class="hidden" aria-hidden="true">
                 <select aria-label="Duration" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'duration', this.value)">
@@ -19101,6 +18982,9 @@ Return STRICT JSON ONLY:
       renderBlueprintSectionsList();
       resetArchitectConversation();
 
+      const delCourseBtn = document.getElementById('btn-modal-delete-course');
+      if (delCourseBtn) delCourseBtn.classList.add('hidden');
+
       switchCourseBuilderMode(initialMode || 'ai');
 
       modal.classList.remove('hidden');
@@ -19117,10 +19001,47 @@ Return STRICT JSON ONLY:
 
     let editingCourseId = null;
 
+    function handleDeleteEditingCourseDoubleConfirm() {
+      if (!editingCourseId) return;
+      const course = (APP_STATE.customCourses || []).find(c => c.id === editingCourseId);
+      if (!course) return;
+      const isHe = APP_STATE.lang === 'he';
+      const title = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
+      const step1 = confirm(isHe
+        ? `שלב 1 מתוך 2: האם אתה בטוח שברצונך למחוק את הקורס "${title}" וכל השיעורים שבו?`
+        : `Step 1 of 2: Are you sure you want to permanently delete "${title}" and all its lessons?`);
+      if (!step1) return;
+      const step2 = confirm(isHe
+        ? `אישור סופי (שלב 2 מתוך 2): פעולה זו אינה הפיכה. למחוק לצמיתות את הקורס "${title}"?`
+        : `FINAL CONFIRMATION (Step 2 of 2): This cannot be undone. Permanently delete "${title}"?`);
+      if (!step2) return;
+      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      if (email) {
+        const delKey = 'tutor_deleted_course_ids_' + email;
+        try {
+          const ids = JSON.parse(localStorage.getItem(delKey) || '[]');
+          if (!ids.includes(editingCourseId)) {
+            ids.push(editingCourseId);
+            localStorage.setItem(delKey, JSON.stringify(ids));
+          }
+        } catch (_) {}
+      }
+      APP_STATE.customCourses = (APP_STATE.customCourses || []).filter(c => c.id !== editingCourseId);
+      if (APP_STATE.insideCourseId === editingCourseId) APP_STATE.insideCourseId = null;
+      if (APP_STATE.activeCourseId === editingCourseId) APP_STATE.activeCourseId = null;
+      editingCourseId = null;
+      closeCreateCourseModal();
+      saveCustomCoursesToStorage(true);
+      showAllCoursesView();
+      showToast(isHe ? 'הקורס נמחק לצמיתות' : 'Course permanently deleted');
+    }
+
     function openEditCustomCourseModal(courseId) {
       const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
       if (!course) return;
       editingCourseId = courseId;
+      const delCourseBtn = document.getElementById('btn-modal-delete-course');
+      if (delCourseBtn) delCourseBtn.classList.remove('hidden');
       const modal = document.getElementById('modal-create-course');
       const titleEl = document.getElementById('modal-create-course-title');
       if (titleEl) titleEl.textContent = APP_STATE.lang === 'he' ? 'ערוך ושוחח על מבנה הקורס' : 'Edit & Discuss Course Architecture';

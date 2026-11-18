@@ -4469,27 +4469,30 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     ]
   };
   sandbox.APP_STATE.customCourses.push(g47Course);
+  sandbox.openCourseClassesView('course_g47_ui');
+  const g47SyllabusHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(!g47SyllabusHtml.includes('Sections Ready') && !g47SyllabusHtml.includes('Ready to Draft') && !g47SyllabusHtml.includes('Read &amp; Teach') && !g47SyllabusHtml.includes('Edit with AI'), 'Syllabus list displays strictly clean Lesson Number + Large Lesson Name without cluttered badges or extra card buttons');
+
   sandbox.selectStudioClass('les_g47_1');
   sandbox.renderCourseStudio('course_g47_ui', 'les_g47_1');
   const g47ReaderHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
-  assert(g47ReaderHtml.includes('id="reader-lesson-switcher-select"') && g47ReaderHtml.includes('Lesson 2: Noach'), 'Lesson Page header includes Top Lesson Switcher dropdown');
+  assert(!g47ReaderHtml.includes('id="reader-lesson-switcher-select"') && !g47ReaderHtml.includes('id="btn-reader-teach-class"') && !g47ReaderHtml.includes('id="lesson-section-jump-list"'), 'Lesson Page removes cluttered lesson dropdown, Teach Class button, and Sections jump list bar');
+  assert(g47ReaderHtml.includes('id="btn-reader-edit-lesson"') && g47ReaderHtml.includes('Edit with AI'), 'Lesson Page exposes clean Edit with AI button at the top');
   assert(g47ReaderHtml.includes('contenteditable="true"') && g47ReaderHtml.includes('handleInlineLessonTitleRename'), 'Lesson Page title supports Click-to-Rename on the spot');
-  assert(g47ReaderHtml.includes('id="lesson-section-jump-list"') && g47ReaderHtml.includes('scrollToLessonSection'), 'Lesson Page renders clickable Quick Section Jump List');
   const dupCount = (g47ReaderHtml.match(/Duplicate Text/g) || []).length;
   assert(dupCount === 1, 'Lesson Page deduplicates identical summary and body text so two identical text boxes never appear');
 
-  // Test inline title rename & top lesson switcher jump
+  // Test inline title rename & clean course cards (no card pencil/trash icons) + double-confirm delete helper
   sandbox.handleInlineLessonTitleRename('course_g47_ui', 'les_g47_1', 'Bereshit: Creation & Purpose');
   assert(g47Course.lessons[0].title_en === 'Bereshit: Creation & Purpose', 'handleInlineLessonTitleRename updates lesson title directly on the spot');
-  sandbox.jumpToStudioLesson('course_g47_ui', 'les_g47_2');
-  assert(sandbox.APP_STATE.studioSelectedLessonId === 'les_g47_2' && sandbox.APP_STATE.lastOpenedLessonId === 'les_g47_2', 'jumpToStudioLesson switches active lesson and records lastOpenedLessonId');
+  assert(typeof sandbox.handleDeleteEditingCourseDoubleConfirm === 'function', 'Safe double-confirmation course deletion helper is defined');
 
   // Test Visual Course Cover Cards, Left Sidebar Quick Course Tree & Removal of Continue Last Lesson Banner
   sandbox.showAllCoursesView();
   const continueBannerEl = getOrCreateElem('continue-last-lesson-banner');
   assert(continueBannerEl.classList.contains('hidden') && continueBannerEl.innerHTML === '', 'Continue Last Lesson banner is permanently removed and hidden per user preference');
   const g47CardsHtml = getOrCreateElem('courses-cards-grid').innerHTML;
-  assert(g47CardsHtml.includes('modern-gradient-cover') && g47CardsHtml.includes('Open Course'), 'My Courses renders rich Visual Course Cards with gradient covers and Open Course CTA');
+  assert(g47CardsHtml.includes('modern-gradient-cover') && g47CardsHtml.includes('Open Course') && !g47CardsHtml.includes('handleDeleteCustomCourseById'), 'My Courses renders clean Visual Course Cards without exposed edit/delete icon clutter');
   const g47SidebarTreeHtml = getOrCreateElem('sidebar-courses-quick-list').innerHTML;
   assert(g47SidebarTreeHtml.includes('Chumash Mastery'), 'Left Sidebar Your Courses tree populates live quick-jump course links');
 
