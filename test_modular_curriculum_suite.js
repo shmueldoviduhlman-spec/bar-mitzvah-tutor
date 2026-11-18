@@ -4433,6 +4433,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(sandbox.getThemeMode() === 'light', 'Default theme mode is Warm Daylight (light)');
   assert(sandbox.toggleThemeMode() === 'dark' && sandbox.localStorage.getItem('tutor_theme_mode') === 'dark', 'toggleThemeMode switches to Dark Mode and persists preference');
   assert(sandbox.toggleThemeMode() === 'light' && sandbox.localStorage.getItem('tutor_theme_mode') === 'light', 'toggleThemeMode switches back to Warm Daylight cleanly');
+  assert(indexHtml.includes('html.theme-daylight .text-rose-100') && indexHtml.includes('html.theme-daylight .text-emerald-100') && indexHtml.includes('html.theme-daylight .text-teal-100') && indexHtml.includes('html.theme-daylight .text-sky-100'), 'Warm Daylight theme enforces high-contrast ink for pale rose, emerald, teal, and sky section text');
 
   // Desktop Left Sidebar App Shell + Parchment Scroll Toggle + Live Daily Overview Section
   assert(indexHtml.includes('id="app-sidebar-shell"') && indexHtml.includes('id="desktop-sidebar-nav"') && indexHtml.includes('id="btn-sidebar-scroll-toggle"') && indexHtml.includes('id="sidebar-daily-overview-section"') && !indexHtml.includes('id="btn-header-command-center"') && !indexHtml.includes('id="sidebar-courses-quick-list"') && indexHtml.includes('id="main-bottom-dock" class="md:hidden'), 'Desktop sidebar exposes parchment scroll toggle and inline Daily Overview section without nav Today button or Your Courses tree');
