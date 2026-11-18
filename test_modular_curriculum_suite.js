@@ -3124,6 +3124,133 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
 
   sandbox.fetch = prevFetch;
 
+  // --- GATE 34: Clean 4/8 Class Studio, Inline Syllabus Planner & Embedded Conversational AI Co-Builder ---
+  console.log('\n--- Running Gate 34: Clean Class Studio & Embedded AI Class Partner ---');
+  assert(!indexHtml.includes('<span>+ Add Class</span>') && !indexHtml.includes('<span>+ Add Course</span>') && !indexHtml.includes('<span>+ Course</span>'), 'Header buttons avoid double ++ plus icon clutter');
+  assert(indexHtml.includes('id="inside-course-header-card"') && indexHtml.includes('overflow-hidden'), 'Course header prevents horizontal button clipping');
+
+  const studioCourse34 = {
+    id: 'course_clean_studio_34',
+    title_en: 'Jewish Foundations: Teen Relevance',
+    title_he: 'יסודות היהדות',
+    target_level: 'Middle School (Ages 12-14)',
+    color: 'amber',
+    icon: '✦',
+    blueprint: {
+      version: '2.0',
+      student_profile: '12-13 year old boy from a non-religious background',
+      guidelines: 'Start with relatable teen dilemma, zero unexplained jargon',
+      sections: [
+        { id: 'sec34_hook', type: 'example', name: 'The Modern Hook', ai_rule: 'Relatable teen dilemma setup & takeaway' },
+        { id: 'sec34_pit', type: 'pitfalls', name: 'Misconceptions & Clarifications', ai_rule: 'Address common teen questions cleanly' }
+      ]
+    },
+    lessons: [],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+  sandbox.APP_STATE.customCourses.push(studioCourse34);
+  sandbox.renderCourseStudio(studioCourse34.id);
+
+  const emptyStudio34Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(emptyStudio34Html.includes('executeStudioInlineSyllabusAi'), 'Empty Class Studio showcases AI Plan Syllabus directly');
+
+  const gate34FetchCalls = [];
+  const prevFetch34 = sandbox.fetch;
+  sandbox.fetch = async (url, opts) => {
+    const body = opts && opts.body ? JSON.parse(opts.body) : {};
+    gate34FetchCalls.push({ url, body });
+    const sysText = body.systemInstruction?.parts?.[0]?.text || '';
+    const lastUser = body.contents?.length ? body.contents[body.contents.length - 1].parts.map(p => p.text).join(' ') : '';
+
+    if (lastUser.includes('sequential next class') || lastUser.includes('Plan a syllabus') || lastUser.includes('Jewish Foundations')) {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          candidates: [{ content: { parts: [{ text: JSON.stringify(['Unplugging: Why Shabbat Beats Airplane Mode', 'Food With Intention: Beyond Diet Rules', 'Time Anchors: How Holidays Shape Identity']) }] } }]
+        })
+      };
+    }
+
+    if (lastUser.includes('Misconceptions') || lastUser.includes('Pitfalls')) {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          candidates: [{
+            content: {
+              parts: [{
+                text: JSON.stringify({
+                  assistant_reply: 'Sharpened only the Misconceptions section to directly answer teen pushback while keeping your Modern Hook unchanged.',
+                  updated_title: null,
+                  sections: {
+                    sec34_pit: { items: [{ trap: 'Shabbat feels like a list of boring no-no rules.', fix: 'Reframe Shabbat as a protected 25-hour upgrade for family, sleep, and real freedom.' }] }
+                  }
+                })
+              }]
+            }
+          }]
+        })
+      };
+    }
+
+    if (sysText.includes('Master Lesson Co-Builder')) {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          candidates: [{
+            content: {
+              parts: [{
+                text: JSON.stringify({
+                  assistant_reply: 'Drafted both your Modern Hook and Misconceptions sections tailored for a 12-13 year old teen!',
+                  updated_title: null,
+                  sections: {
+                    sec34_hook: { setup: 'Imagine your phone is locked in a drawer for 25 hours with zero notifications.', takeaway: 'That calm space is exactly what Shabbat builds every week.' },
+                    sec34_pit: { items: [{ trap: 'Thinking Shabbat means doing nothing.', fix: 'Show how it is filled with games, food, and real conversations.' }] }
+                  }
+                })
+              }]
+            }
+          }]
+        })
+      };
+    }
+    return { ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text: 'OK' }] } }] }) };
+  };
+
+  await sandbox.executeStudioInlineSyllabusAi(studioCourse34.id, 'Plan a syllabus for teen relevance');
+  assert(sandbox.studioInlineSyllabusSuggestions.length === 3, 'Inline AI Syllabus Planner parsed 3 class titles cleanly');
+  sandbox.addAllInlineSuggestedClasses(studioCourse34.id);
+  assert(studioCourse34.lessons.length === 3, 'addAllInlineSuggestedClasses populated course syllabus with all 3 classes');
+
+  const firstClass34 = studioCourse34.lessons[0];
+  sandbox.renderCourseStudio(studioCourse34.id, firstClass34.id);
+  const studio34Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(studio34Html.includes('md:col-span-4') && studio34Html.includes('md:col-span-8'), 'Studio upgraded to balanced 4/8 two-pane layout');
+  assert(studio34Html.includes('studio-blueprint-summary-bar') && studio34Html.includes('View Rules'), 'Blueprint banner uses sleek collapsible single-line summary bar');
+  assert(studio34Html.includes('studio-class-ai-partner') && !studio34Html.includes('id="studio-class-ai-partner" class="hidden'), 'Embedded AI Class Partner opens automatically on fresh empty classes');
+
+  // Auto-Draft whole class via Embedded AI Class Partner
+  await sandbox.triggerStudioQuickAutoDraftClass(studioCourse34.id, firstClass34.id, 'draft');
+  const draftedHook = sandbox.parseStructuredSectionData(firstClass34.sections.sec34_hook, 'example');
+  assert(draftedHook.setup.includes('25 hours'), 'triggerStudioQuickAutoDraftClass drafted custom Modern Hook block cleanly');
+
+  // Turn 2 Selective Refinement: ask AI Partner to update only Pitfalls without wiping Hook!
+  getOrCreateElem('input-studio-class-ai-prompt').value = 'Sharpen the Misconceptions / Pitfalls section for pushback';
+  await sandbox.sendStudioClassAiMessage(studioCourse34.id, firstClass34.id);
+  const stillIntactHook = sandbox.parseStructuredSectionData(firstClass34.sections.sec34_hook, 'example');
+  const updatedPit = sandbox.parseStructuredSectionData(firstClass34.sections.sec34_pit, 'pitfalls');
+  assert(stillIntactHook.setup.includes('25 hours'), 'Multi-turn AI Partner preserves untouched Hook block when refining Pitfalls');
+  assert(updatedPit.items[0].trap.includes('boring no-no rules'), 'Multi-turn AI Partner selectively updates targeted section cleanly');
+  assert(firstClass34.ai_chat_history.length >= 5, 'Per-class multi-turn conversation history persists on lesson');
+
+  const lastG34Body = gate34FetchCalls[gate34FetchCalls.length - 1].body;
+  assert(lastG34Body.contents.length === 3 && lastG34Body.contents[0].role === 'user', 'sendStudioClassAiMessage sends alternating multi-turn history to Gemini');
+
+  sandbox.fetch = prevFetch34;
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
