@@ -9576,6 +9576,540 @@ alter publication supabase_realtime add table public.students_sync;`;
       renderCourseStudio(targetCourseId, APP_STATE.studioSelectedLessonId);
     }
 
+    // ==============================================
+    // SPECIALIZED SECTION BLOCK ENGINE (11 BLOCK TYPES)
+    // ==============================================
+    function formatSectionInlineText(str) {
+      let safe = escapeHtml(String(str || ''));
+      safe = safe.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-white">$1</strong>');
+      safe = safe.replace(/(^|[^a-zA-Z0-9])_([^_]+)_([^a-zA-Z0-9]|$)/g, '$1<em class="italic text-slate-200">$2</em>$3');
+      safe = safe.replace(/`([^`]+)`/g, '<code class="px-1 py-0.5 rounded bg-slate-800 text-amber-300 font-mono text-[11px]">$1</code>');
+      return safe;
+    }
+
+    function parseStructuredSectionData(rawVal, type) {
+      if (rawVal && typeof rawVal === 'object') return rawVal;
+      const str = String(rawVal || '').trim();
+      if (str.startsWith('{') && str.endsWith('}')) {
+        try {
+          const parsed = JSON.parse(str);
+          if (parsed && typeof parsed === 'object') return parsed;
+        } catch (_) {}
+      }
+      if (type === 'list') {
+        const items = str ? str.split('\n').map(s => s.trim()).filter(Boolean) : [];
+        return { _structured: true, items };
+      }
+      if (type === 'steps') {
+        const lines = str ? str.split('\n').map(s => s.trim()).filter(Boolean) : [];
+        const steps = lines.map(line => {
+          const timeMatch = line.match(/^\[(\d+\s*m(?:in)?)\]\s*(.*)$/i);
+          const cleanLine = (timeMatch ? timeMatch[2] : line).replace(/^\d+[\.)]\s*/, '').trim();
+          return { text: cleanLine, mins: timeMatch ? timeMatch[1] : '' };
+        });
+        return { _structured: true, steps };
+      }
+      if (type === 'quote') {
+        return { _structured: true, citation: '', quote: str, meaning: '', rtl: false };
+      }
+      if (type === 'example') {
+        return { _structured: true, setup: str, takeaway: '' };
+      }
+      if (type === 'exercise') {
+        const lines = str ? str.split('\n').map(s => s.trim()).filter(Boolean) : [];
+        const items = lines.length > 0
+          ? lines.map(l => {
+              const parts = l.split('||');
+              return { q: (parts[0] || '').trim(), a: (parts[1] || '').trim() };
+            })
+          : [{ q: '', a: '' }];
+        return { _structured: true, items };
+      }
+      if (type === 'pitfalls') {
+        const lines = str ? str.split('\n').map(s => s.trim()).filter(Boolean) : [];
+        const items = lines.length > 0
+          ? lines.map(l => {
+              const parts = l.split(/->|\|\|/);
+              return { trap: (parts[0] || '').trim(), fix: (parts[1] || '').trim() };
+            })
+          : [{ trap: '', fix: '' }];
+        return { _structured: true, items };
+      }
+      if (type === 'discussion') {
+        return { _structured: true, prompt: str, followup: '', notes: '' };
+      }
+      if (type === 'reflection') {
+        return { _structured: true, mindset: str, action: '' };
+      }
+      if (type === 'homework') {
+        return { _structured: true, task: str, estMinutes: '15m' };
+      }
+      if (type === 'text') {
+        return { _structured: true, summary: '', body: str };
+      }
+      return str;
+    }
+
+    function saveStructuredSectionObject(courseId, lessonId, secId, obj, reRender = false) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      if (!course) return;
+      const lesson = (course.lessons || []).find(l => l.id === lessonId);
+      if (!lesson) return;
+      if (!lesson.sections || typeof lesson.sections !== 'object') lesson.sections = {};
+      lesson.sections[secId] = JSON.stringify({ _structured: true, ...obj });
+      course.updated_at = new Date().toISOString();
+      showStudioSavingIndicator();
+      saveCustomCoursesToStorage(true);
+      if (reRender) renderCourseStudio(courseId, lessonId);
+    }
+
+    function handleStudioUpdateStructuredField(courseId, lessonId, secId, secType, fieldKey, value, reRender = false) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      if (!course) return;
+      const lesson = (course.lessons || []).find(l => l.id === lessonId);
+      if (!lesson) return;
+      const data = parseStructuredSectionData(lesson.sections?.[secId], secType);
+      data[fieldKey] = value;
+      saveStructuredSectionObject(courseId, lessonId, secId, data, reRender);
+    }
+
+    function handleSectionListAddItem(courseId, lessonId, secId, inputId) {
+      const inp = document.getElementById(inputId);
+      const val = (inp?.value || '').trim();
+      if (!val) return;
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course?.lessons?.find(l => l.id === lessonId);
+      if (!lesson) return;
+      const data = parseStructuredSectionData(lesson.sections?.[secId], 'list');
+      data.items.push(val);
+      inp.value = '';
+      saveStructuredSectionObject(courseId, lessonId, secId, data, true);
+    }
+
+    function handleSectionListMoveItem(courseId, lessonId, secId, idx, dir) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course?.lessons?.find(l => l.id === lessonId);
+      if (!lesson) return;
+      const data = parseStructuredSectionData(lesson.sections?.[secId], 'list');
+      const target = idx + dir;
+      if (target < 0 || target >= data.items.length) return;
+      const tmp = data.items[idx];
+      data.items[idx] = data.items[target];
+      data.items[target] = tmp;
+      saveStructuredSectionObject(courseId, lessonId, secId, data, true);
+    }
+
+    function handleSectionListDeleteItem(courseId, lessonId, secId, idx) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course?.lessons?.find(l => l.id === lessonId);
+      if (!lesson) return;
+      const data = parseStructuredSectionData(lesson.sections?.[secId], 'list');
+      data.items.splice(idx, 1);
+      saveStructuredSectionObject(courseId, lessonId, secId, data, true);
+    }
+
+    function handleSectionStepAdd(courseId, lessonId, secId, textId, minsId) {
+      const textEl = document.getElementById(textId);
+      const minsEl = document.getElementById(minsId);
+      const txt = (textEl?.value || '').trim();
+      if (!txt) return;
+      const mins = (minsEl?.value || '').trim();
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course?.lessons?.find(l => l.id === lessonId);
+      if (!lesson) return;
+      const data = parseStructuredSectionData(lesson.sections?.[secId], 'steps');
+      data.steps.push({ text: txt, mins });
+      if (textEl) textEl.value = '';
+      if (minsEl) minsEl.value = '';
+      saveStructuredSectionObject(courseId, lessonId, secId, data, true);
+    }
+
+    function handleSectionStepUpdate(courseId, lessonId, secId, idx, field, val) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course?.lessons?.find(l => l.id === lessonId);
+      if (!lesson) return;
+      const data = parseStructuredSectionData(lesson.sections?.[secId], 'steps');
+      if (data.steps[idx]) {
+        data.steps[idx][field] = val;
+        saveStructuredSectionObject(courseId, lessonId, secId, data, false);
+      }
+    }
+
+    function handleSectionStepDelete(courseId, lessonId, secId, idx) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course?.lessons?.find(l => l.id === lessonId);
+      if (!lesson) return;
+      const data = parseStructuredSectionData(lesson.sections?.[secId], 'steps');
+      data.steps.splice(idx, 1);
+      saveStructuredSectionObject(courseId, lessonId, secId, data, true);
+    }
+
+    function handleSectionRepeaterAdd(courseId, lessonId, secId, secType) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course?.lessons?.find(l => l.id === lessonId);
+      if (!lesson) return;
+      const data = parseStructuredSectionData(lesson.sections?.[secId], secType);
+      data.items.push(secType === 'pitfalls' ? { trap: '', fix: '' } : { q: '', a: '' });
+      saveStructuredSectionObject(courseId, lessonId, secId, data, true);
+    }
+
+    function handleSectionRepeaterUpdate(courseId, lessonId, secId, secType, idx, field, val) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course?.lessons?.find(l => l.id === lessonId);
+      if (!lesson) return;
+      const data = parseStructuredSectionData(lesson.sections?.[secId], secType);
+      if (data.items[idx]) {
+        data.items[idx][field] = val;
+        saveStructuredSectionObject(courseId, lessonId, secId, data, false);
+      }
+    }
+
+    function handleSectionRepeaterDelete(courseId, lessonId, secId, secType, idx) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course?.lessons?.find(l => l.id === lessonId);
+      if (!lesson) return;
+      const data = parseStructuredSectionData(lesson.sections?.[secId], secType);
+      data.items.splice(idx, 1);
+      saveStructuredSectionObject(courseId, lessonId, secId, data, true);
+    }
+
+    function toggleSectionQuoteRtl(courseId, lessonId, secId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course?.lessons?.find(l => l.id === lessonId);
+      if (!lesson) return;
+      const data = parseStructuredSectionData(lesson.sections?.[secId], 'quote');
+      data.rtl = !data.rtl;
+      saveStructuredSectionObject(courseId, lessonId, secId, data, true);
+    }
+
+    function toggleLessonPreviewReveal(elId) {
+      const el = document.getElementById(elId);
+      if (el) el.classList.toggle('hidden');
+    }
+
+    function assignSectionTaskToStudent(courseId, lessonId, secId, secType, selectElId) {
+      const students = APP_STATE.students || [];
+      if (students.length === 0) {
+        showToast('Add a student first in the Students tab to assign directly');
+        return;
+      }
+      const selectEl = selectElId ? document.getElementById(selectElId) : null;
+      const targetStudentId = (selectEl && selectEl.value) || APP_STATE.activeStudentId || students[0].id;
+      const student = students.find(s => s.id === targetStudentId);
+      if (!student) return;
+
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course?.lessons?.find(l => l.id === lessonId);
+      if (!lesson) return;
+      const data = parseStructuredSectionData(lesson.sections?.[secId], secType);
+      ensureStudentSkills(student);
+
+      if (secType === 'homework') {
+        const hwTask = (data.task || '').trim();
+        if (!hwTask) {
+          showToast('Enter homework instructions first');
+          return;
+        }
+        const timeSuffix = data.estMinutes ? ` (${data.estMinutes})` : '';
+        student.skills.homework.task = `${lesson.title_en || 'Class'}: ${hwTask}${timeSuffix}`;
+        student.skills.homework.completed = false;
+        student.skills.homework.assignedDate = new Date().toISOString().split('T')[0];
+        saveStudentsToStorage(false);
+        if (APP_STATE.cloud.client) pushStudentToCloud(student);
+        showToast(`Homework assigned to ${student.name}!`);
+      } else if (secType === 'reflection') {
+        const goalText = (data.action || data.mindset || '').trim();
+        if (!goalText) {
+          showToast('Enter a life action or takeaway first');
+          return;
+        }
+        student.skills.customGoals.push({
+          id: 'goal_' + Date.now() + Math.random().toString(36).substr(2, 4),
+          title: goalText,
+          completed: false
+        });
+        saveStudentsToStorage(false);
+        if (APP_STATE.cloud.client) pushStudentToCloud(student);
+        showToast(`Life goal added to ${student.name}!`);
+      }
+    }
+
+    function renderStudentQuickPickerHtml(selectId) {
+      const students = APP_STATE.students || [];
+      if (students.length === 0) return '';
+      const activeId = APP_STATE.activeStudentId || students[0].id;
+      return `
+        <select id="${selectId}" class="bg-slate-950 border border-slate-700 rounded-lg py-1 px-2 text-[11px] text-slate-200 focus:outline-none focus:border-amber-400">
+          ${students.map(s => `<option value="${s.id}" ${s.id === activeId ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('')}
+        </select>
+      `;
+    }
+
+    function renderCustomBlueprintSectionCard(activeCourse, selectedLesson, sec, meta) {
+      const cId = activeCourse.id;
+      const lId = selectedLesson.id;
+      const rawVal = (selectedLesson.sections && selectedLesson.sections[sec.id]) || '';
+      const headerHtml = `
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-${meta.color}-300 flex items-center gap-1.5">
+            <i data-lucide="${meta.icon}" class="w-4 h-4 text-${meta.color}-400"></i>
+            <span>${escapeHtml(sec.name)}</span>
+          </span>
+          <button type="button" onclick="handleStudioMiniBlockCustomAi('${cId}', '${lId}', '${sec.id}')" class="text-[11px] text-${meta.color}-400 hover:text-${meta.color}-300 flex items-center gap-1 font-semibold shrink-0">
+            <i data-lucide="sparkles" class="w-3 h-3"></i> AI Draft
+          </button>
+        </div>
+        ${sec.ai_rule ? `<p class="text-[11px] text-slate-400 italic">Guideline: ${escapeHtml(sec.ai_rule)}</p>` : ''}
+      `;
+
+      // 11. AUDIO STUDIO
+      if (sec.type === 'audio') {
+        const allRecs = Array.isArray(selectedLesson.recordings) ? selectedLesson.recordings : (selectedLesson.audio_url ? [{ id: 'legacy_audio', title: 'Lesson Audio', url: selectedLesson.audio_url, type: 'audio' }] : []);
+        const secRecs = allRecs.filter(r => !r.sectionId || r.sectionId === sec.id);
+        return `
+          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-emerald-900/40 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
+                <i data-lucide="mic" class="w-4 h-4 text-emerald-400"></i>
+                <span>${escapeHtml(sec.name)}</span>
+              </span>
+              <span class="text-[10px] font-mono text-slate-400">Audio & Voice Recordings • ${secRecs.length} file(s)</span>
+            </div>
+            ${secRecs.length > 0 ? `
+              <div class="space-y-2">
+                ${secRecs.map(rec => `
+                  <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <i data-lucide="volume-2" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                      <span class="text-xs text-white font-medium truncate">${escapeHtml(rec.title || 'Lesson Audio')}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <audio controls src="${escapeHtml(rec.url)}" class="h-8 max-w-[220px]"></audio>
+                      <button type="button" onclick="deleteLessonAudio('${cId}', '${lId}', '${rec.id}')" class="text-slate-500 hover:text-red-400 p-1 rounded" title="Delete Recording">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                      </button>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : `<p class="text-xs text-slate-500 italic">No audio attached yet. Record a voice memo, upload an MP3, or paste a link.</p>`}
+            <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/60">
+              <button type="button" onclick="startVoiceRecording('lesson', '${lId}', '${cId}', '${sec.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition active:scale-95">
+                <i data-lucide="mic" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>Record Voice Memo</span>
+              </button>
+              <button type="button" onclick="triggerLessonAudioUpload('${cId}', '${lId}', '${sec.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition active:scale-95">
+                <i data-lucide="upload" class="w-3.5 h-3.5 text-slate-400"></i>
+                <span>Upload Audio File</span>
+              </button>
+              <button type="button" onclick="promptLessonAudioLink('${cId}', '${lId}', '${sec.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition active:scale-95">
+                <i data-lucide="link" class="w-3.5 h-3.5 text-slate-400"></i>
+                <span>Audio Link</span>
+              </button>
+            </div>
+            <textarea rows="2" placeholder="${escapeHtml(sec.ai_rule || meta.placeholder)}" oninput="handleStudioUpdateClassField('${cId}', '${lId}', 'sections.${sec.id}', this.value)" onblur="saveCustomCoursesToStorage(true)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400">${escapeHtml(rawVal)}</textarea>
+          </div>
+        `;
+      }
+
+      const d = parseStructuredSectionData(rawVal, sec.type);
+
+      // 2. BULLET POINTS LIST
+      if (sec.type === 'list') {
+        const addId = 'inp-list-add-' + sec.id;
+        return `
+          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-amber-900/40 space-y-3">
+            ${headerHtml}
+            ${d.items.length > 0 ? `
+              <div class="space-y-1.5">
+                ${d.items.map((item, idx) => `
+                  <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between gap-2">
+                    <div class="flex items-start gap-2 text-xs sm:text-sm text-slate-200 flex-1 min-w-0">
+                      <span class="text-amber-400 font-bold shrink-0 mt-0.5">✦</span>
+                      <div class="leading-snug flex-1">${formatSectionInlineText(item)}</div>
+                    </div>
+                    <div class="flex items-center gap-0.5 shrink-0">
+                      <button type="button" onclick="handleSectionListMoveItem('${cId}', '${lId}', '${sec.id}', ${idx}, -1)" class="p-1 rounded hover:bg-slate-800 text-slate-500 hover:text-white"><i data-lucide="chevron-up" class="w-3.5 h-3.5"></i></button>
+                      <button type="button" onclick="handleSectionListMoveItem('${cId}', '${lId}', '${sec.id}', ${idx}, 1)" class="p-1 rounded hover:bg-slate-800 text-slate-500 hover:text-white"><i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></button>
+                      <button type="button" onclick="handleSectionListDeleteItem('${cId}', '${lId}', '${sec.id}', ${idx})" class="p-1 rounded hover:bg-rose-950/60 text-slate-500 hover:text-rose-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : '<p class="text-xs text-slate-500 italic">No bullet points yet. Add points below or click AI Draft.</p>'}
+            <div class="flex items-center gap-2 pt-1">
+              <input id="${addId}" type="text" placeholder="**Concept**: Quick explanation (press Enter to add)..." class="flex-1 bg-slate-950 border border-slate-700/80 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400" onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleSectionListAddItem('${cId}', '${lId}', '${sec.id}', '${addId}'); }">
+              <button type="button" onclick="handleSectionListAddItem('${cId}', '${lId}', '${sec.id}', '${addId}')" class="px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-bold shrink-0">+ Add Point</button>
+            </div>
+          </div>
+        `;
+      }
+
+      // 3. STEP-BY-STEP FLOW
+      if (sec.type === 'steps') {
+        const textId = 'inp-step-txt-' + sec.id;
+        const minsId = 'inp-step-mins-' + sec.id;
+        return `
+          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-emerald-900/40 space-y-3">
+            ${headerHtml}
+            ${d.steps.length > 0 ? `
+              <div class="space-y-2">
+                ${d.steps.map((st, idx) => `
+                  <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center gap-2">
+                    <span class="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold shrink-0">Step ${idx + 1}</span>
+                    <input type="text" value="${escapeHtml(st.text || '')}" oninput="handleSectionStepUpdate('${cId}', '${lId}', '${sec.id}', ${idx}, 'text', this.value)" class="flex-1 bg-transparent text-xs sm:text-sm text-slate-200 focus:outline-none">
+                    <input type="text" value="${escapeHtml(st.mins || '')}" placeholder="min" oninput="handleSectionStepUpdate('${cId}', '${lId}', '${sec.id}', ${idx}, 'mins', this.value)" class="w-12 text-center bg-slate-900 border border-slate-800 rounded-lg py-0.5 px-1 text-[10px] font-mono text-emerald-300 focus:outline-none focus:border-emerald-400">
+                    <button type="button" onclick="handleSectionStepDelete('${cId}', '${lId}', '${sec.id}', ${idx})" class="p-1 rounded hover:bg-rose-950/60 text-slate-500 hover:text-rose-400 shrink-0"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                `).join('')}
+              </div>
+            ` : '<p class="text-xs text-slate-500 italic">No steps yet. Add numbered steps with optional minutes below.</p>'}
+            <div class="flex items-center gap-2 pt-1">
+              <input id="${textId}" type="text" placeholder="Add step description..." class="flex-1 bg-slate-950 border border-slate-700/80 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400" onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleSectionStepAdd('${cId}', '${lId}', '${sec.id}', '${textId}', '${minsId}'); }">
+              <input id="${minsId}" type="text" placeholder="3m" class="w-14 bg-slate-950 border border-slate-700/80 rounded-xl py-2 px-2 text-xs text-center text-emerald-300 placeholder-slate-500 font-mono focus:outline-none focus:border-emerald-400">
+              <button type="button" onclick="handleSectionStepAdd('${cId}', '${lId}', '${sec.id}', '${textId}', '${minsId}')" class="px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold shrink-0">+ Step</button>
+            </div>
+          </div>
+        `;
+      }
+
+      // 4. PRIMARY SOURCE / FORMULA
+      if (sec.type === 'quote') {
+        return `
+          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-sky-900/40 space-y-2.5">
+            ${headerHtml}
+            <div class="flex items-center gap-2">
+              <input type="text" value="${escapeHtml(d.citation || '')}" placeholder="Source citation, verse, chapter, or theorem title..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'quote', 'citation', this.value)" class="flex-1 bg-slate-950/80 border border-slate-800 rounded-xl py-1.5 px-3 text-xs text-sky-300 font-semibold placeholder-slate-500 focus:outline-none focus:border-sky-400">
+              <button type="button" onclick="toggleSectionQuoteRtl('${cId}', '${lId}', '${sec.id}')" class="px-2.5 py-1.5 rounded-xl border text-[10px] font-bold transition ${d.rtl ? 'bg-sky-500/20 border-sky-400 text-sky-300' : 'bg-slate-950 border-slate-700 text-slate-400 hover:text-white'}" title="Toggle Right-to-Left Hebrew/Arabic alignment">אבג RTL</button>
+            </div>
+            <textarea rows="2" dir="${d.rtl ? 'rtl' : 'ltr'}" placeholder="Enter original quote, primary text, or mathematical formula..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'quote', 'quote', this.value)" class="w-full bg-slate-950/90 border border-sky-500/30 rounded-xl p-3 text-sm ${d.rtl ? 'text-right font-serif text-base' : 'font-mono text-sky-100'} placeholder-slate-500 focus:outline-none focus:border-sky-400 leading-relaxed">${escapeHtml(d.quote || '')}</textarea>
+            <textarea rows="2" placeholder="Plain-language meaning or commentary..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'quote', 'meaning', this.value)" class="w-full bg-slate-950/60 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-400">${escapeHtml(d.meaning || '')}</textarea>
+          </div>
+        `;
+      }
+
+      // 5. STORY / WORKED EXAMPLE
+      if (sec.type === 'example') {
+        return `
+          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-amber-900/40 space-y-2.5">
+            ${headerHtml}
+            <div>
+              <label class="block text-[10px] font-mono uppercase text-slate-400 mb-1">Story / Problem Setup</label>
+              <textarea rows="2" placeholder="Tell the story, scenario, or initial problem setup..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'example', 'setup', this.value)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-400 leading-relaxed">${escapeHtml(d.setup || '')}</textarea>
+            </div>
+            <div>
+              <label class="block text-[10px] font-mono uppercase text-amber-400 mb-1">Punchline / Key Lesson / Solution (Collapsible in Teach Mode)</label>
+              <textarea rows="2" placeholder="The moral, insight, or final step-by-step answer..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'example', 'takeaway', this.value)" class="w-full bg-slate-950/60 border border-amber-500/20 rounded-xl p-2.5 text-xs text-amber-100 placeholder-slate-500 focus:outline-none focus:border-amber-400">${escapeHtml(d.takeaway || '')}</textarea>
+            </div>
+          </div>
+        `;
+      }
+
+      // 6. PRACTICE DRILL / EXERCISE
+      if (sec.type === 'exercise') {
+        return `
+          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-emerald-900/40 space-y-2.5">
+            ${headerHtml}
+            <div class="space-y-2">
+              ${d.items.map((item, idx) => `
+                <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-[10px] font-mono text-emerald-400 font-bold">Drill #${idx + 1}</span>
+                    ${d.items.length > 1 ? `<button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'exercise', ${idx})" class="text-slate-500 hover:text-rose-400 text-[11px]">Remove</button>` : ''}
+                  </div>
+                  <input type="text" value="${escapeHtml(item.q || '')}" placeholder="Question or drill prompt..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'exercise', ${idx}, 'q', this.value)" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400">
+                  <input type="text" value="${escapeHtml(item.a || '')}" placeholder="Answer Key (hidden until revealed during class)..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'exercise', ${idx}, 'a', this.value)" class="w-full bg-slate-900/70 border border-emerald-500/20 rounded-lg py-1.5 px-2.5 text-xs text-emerald-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400">
+                </div>
+              `).join('')}
+            </div>
+            <button type="button" onclick="handleSectionRepeaterAdd('${cId}', '${lId}', '${sec.id}', 'exercise')" class="text-xs px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 font-semibold transition">+ Add Practice Drill</button>
+          </div>
+        `;
+      }
+
+      // 7. COMMON PITFALLS
+      if (sec.type === 'pitfalls') {
+        return `
+          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-rose-900/40 space-y-2.5">
+            ${headerHtml}
+            <div class="space-y-2">
+              ${d.items.map((item, idx) => `
+                <div class="p-3 rounded-xl bg-slate-950/80 border border-rose-500/20 space-y-2">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-[10px] font-mono text-rose-400 font-bold">Trap &amp; Fix #${idx + 1}</span>
+                    ${d.items.length > 1 ? `<button type="button" onclick="handleSectionRepeaterDelete('${cId}', '${lId}', '${sec.id}', 'pitfalls', ${idx})" class="text-slate-500 hover:text-rose-400 text-[11px]">Remove</button>` : ''}
+                  </div>
+                  <input type="text" value="${escapeHtml(item.trap || '')}" placeholder="Mistake students usually make..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'pitfalls', ${idx}, 'trap', this.value)" class="w-full bg-slate-900 border border-rose-500/30 rounded-lg py-1.5 px-2.5 text-xs text-rose-200 placeholder-slate-500 focus:outline-none focus:border-rose-400">
+                  <input type="text" value="${escapeHtml(item.fix || '')}" placeholder="How to correct / clarify it..." oninput="handleSectionRepeaterUpdate('${cId}', '${lId}', '${sec.id}', 'pitfalls', ${idx}, 'fix', this.value)" class="w-full bg-slate-900/70 border border-emerald-500/20 rounded-lg py-1.5 px-2.5 text-xs text-emerald-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400">
+                </div>
+              `).join('')}
+            </div>
+            <button type="button" onclick="handleSectionRepeaterAdd('${cId}', '${lId}', '${sec.id}', 'pitfalls')" class="text-xs px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 font-semibold transition">+ Add Trap &amp; Fix</button>
+          </div>
+        `;
+      }
+
+      // 8. DISCUSSION QUESTION
+      if (sec.type === 'discussion') {
+        return `
+          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-indigo-900/40 space-y-2.5">
+            ${headerHtml}
+            <textarea rows="2" placeholder="Main question to spark conversation..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'discussion', 'prompt', this.value)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400">${escapeHtml(d.prompt || '')}</textarea>
+            <input type="text" value="${escapeHtml(d.followup || '')}" placeholder="Follow-up cue (e.g. If they say X, ask Y)..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'discussion', 'followup', this.value)" class="w-full bg-slate-950/60 border border-indigo-500/20 rounded-xl py-1.5 px-3 text-xs text-indigo-200 placeholder-slate-500 focus:outline-none focus:border-indigo-400">
+            <input type="text" value="${escapeHtml(d.notes || '')}" placeholder="Quick note on student responses..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'discussion', 'notes', this.value)" class="w-full bg-slate-950/40 border border-slate-800 rounded-xl py-1.5 px-3 text-xs text-slate-300 placeholder-slate-500 focus:outline-none focus:border-slate-600">
+          </div>
+        `;
+      }
+
+      // 9. LIFE TAKEAWAY / REFLECTION
+      if (sec.type === 'reflection') {
+        const pickerId = 'sel-goal-stu-' + sec.id;
+        return `
+          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-purple-900/40 space-y-2.5">
+            ${headerHtml}
+            <textarea rows="2" placeholder="Core value or life mindset..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'reflection', 'mindset', this.value)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-400">${escapeHtml(d.mindset || '')}</textarea>
+            <input type="text" value="${escapeHtml(d.action || '')}" placeholder="Concrete action challenge for this week..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'reflection', 'action', this.value)" class="w-full bg-slate-950/60 border border-purple-500/20 rounded-xl py-1.5 px-3 text-xs text-purple-200 placeholder-slate-500 focus:outline-none focus:border-purple-400">
+            <div class="flex items-center justify-end gap-2 pt-1 flex-wrap">
+              ${renderStudentQuickPickerHtml(pickerId)}
+              <button type="button" onclick="assignSectionTaskToStudent('${cId}', '${lId}', '${sec.id}', 'reflection', '${pickerId}')" class="px-3 py-1 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 text-[11px] font-bold transition">+ Send to Student Goal</button>
+            </div>
+          </div>
+        `;
+      }
+
+      // 10. HOMEWORK CHALLENGE
+      if (sec.type === 'homework') {
+        const pickerId = 'sel-hw-stu-' + sec.id;
+        return `
+          <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-orange-900/40 space-y-2.5">
+            ${headerHtml}
+            <div class="flex items-start gap-2">
+              <textarea rows="2" placeholder="Homework assignment instructions..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'homework', 'task', this.value)" class="flex-1 bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-orange-400">${escapeHtml(d.task || '')}</textarea>
+              <select onchange="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'homework', 'estMinutes', this.value)" class="bg-slate-950 border border-slate-700 rounded-xl py-2 px-2 text-xs text-orange-300 font-mono focus:outline-none">
+                ${['5m', '10m', '15m', '20m', '30m'].map(m => `<option value="${m}" ${(d.estMinutes || '15m') === m ? 'selected' : ''}>${m}</option>`).join('')}
+              </select>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-1 flex-wrap">
+              ${renderStudentQuickPickerHtml(pickerId)}
+              <button type="button" onclick="assignSectionTaskToStudent('${cId}', '${lId}', '${sec.id}', 'homework', '${pickerId}')" class="px-3 py-1 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/30 text-[11px] font-bold transition">Assign to Student</button>
+            </div>
+          </div>
+        `;
+      }
+
+      // 1. TEXT / EXPLANATION (Formatted Bold/Code Preview + Quick Summary)
+      return `
+        <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-${meta.color}-900/40 space-y-2.5">
+          ${headerHtml}
+          <input type="text" value="${escapeHtml(d.summary || '')}" placeholder="Quick 1-sentence core takeaway (optional)..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'text', 'summary', this.value)" class="w-full bg-slate-950/60 border border-cyan-500/20 rounded-xl py-1.5 px-3 text-xs text-cyan-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-semibold">
+          <textarea rows="3" placeholder="Main explanation (supports **bold** and \`code\` highlights)..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'text', 'body', this.value)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-${meta.color}-400 leading-relaxed">${escapeHtml(d.body || '')}</textarea>
+          ${(d.body && (d.body.includes('**') || d.body.includes('`'))) ? `
+            <div class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-xs text-slate-300 leading-relaxed">${formatSectionInlineText(d.body)}</div>
+          ` : ''}
+        </div>
+      `;
+    }
+
     function renderCourseStudio(targetCourseId, targetLessonId) {
       const container = document.getElementById('tutor-hub-lessons-container');
       if (!container) return;
@@ -9937,93 +10471,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                   <div class="space-y-4">
                     ${blueprintSections.map(sec => {
                       const meta = (typeof COURSE_BLOCK_CATALOG !== 'undefined' && COURSE_BLOCK_CATALOG[sec.type]) ? COURSE_BLOCK_CATALOG[sec.type] : { label: 'Section', icon: 'layers', color: 'amber', placeholder: 'Enter content...' };
-                      const secVal = (selectedLesson.sections && selectedLesson.sections[sec.id]) || '';
-                      if (sec.type === 'audio') {
-                        return `
-                          <div class="p-4 rounded-2xl bg-slate-900/80 border border-emerald-900/40 space-y-3">
-                            <div class="flex items-center justify-between">
-                              <span class="text-xs font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
-                                <i data-lucide="mic" class="w-4 h-4 text-emerald-400"></i>
-                                <span>${escapeHtml(sec.name)}</span>
-                              </span>
-                              <span class="text-[10px] font-mono text-slate-400">Audio & Voice Recordings • ${selectedRecordings.length} file(s)</span>
-                            </div>
-                            ${selectedRecordings.length > 0 ? `
-                              <div class="space-y-2">
-                                ${selectedRecordings.map(rec => `
-                                  <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                    <div class="flex items-center gap-2 min-w-0">
-                                      <i data-lucide="volume-2" class="w-4 h-4 text-emerald-400 shrink-0"></i>
-                                      <span class="text-xs text-white font-medium truncate">${escapeHtml(rec.title || 'Lesson Audio')}</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                      <audio controls src="${escapeHtml(rec.url)}" class="h-8 max-w-[220px]"></audio>
-                                      <button type="button" onclick="deleteLessonAudio('${activeCourse.id}', '${selectedLesson.id}', '${rec.id}')" class="text-slate-500 hover:text-red-400 p-1 rounded" title="Delete Recording">
-                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                      </button>
-                                    </div>
-                                  </div>
-                                `).join('')}
-                              </div>
-                            ` : `
-                              <p class="text-xs text-slate-500 italic">No audio attached to this class yet. Record a voice memo or upload an audio file.</p>
-                            `}
-                            <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/60">
-                              <button type="button" onclick="startVoiceRecording('lesson', '${selectedLesson.id}', '${activeCourse.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition active:scale-95">
-                                <i data-lucide="mic" class="w-3.5 h-3.5 text-emerald-400"></i>
-                                <span>Record Voice Memo</span>
-                              </button>
-                              <button type="button" onclick="triggerLessonAudioUpload('${activeCourse.id}', '${selectedLesson.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition active:scale-95">
-                                <i data-lucide="upload" class="w-3.5 h-3.5 text-slate-400"></i>
-                                <span>Upload Audio File</span>
-                              </button>
-                              <button type="button" onclick="promptLessonAudioLink('${activeCourse.id}', '${selectedLesson.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition active:scale-95">
-                                <i data-lucide="link" class="w-3.5 h-3.5 text-slate-400"></i>
-                                <span>Audio Link</span>
-                              </button>
-                            </div>
-                            <textarea
-                              rows="2"
-                              placeholder="${escapeHtml(sec.ai_rule || meta.placeholder)}"
-                              oninput="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'sections.${sec.id}', this.value)"
-                              onblur="saveCustomCoursesToStorage(true)"
-                              class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-400"
-                            >${escapeHtml(secVal)}</textarea>
-                          </div>
-                        `;
-                      }
-                      const listItems = (sec.type === 'list' && secVal) ? secVal.split('\n').map(l => l.trim()).filter(Boolean) : [];
-                      return `
-                        <div id="studio-custom-block-${sec.id}" class="p-4 rounded-2xl bg-slate-900/80 border border-${meta.color}-900/40 space-y-2">
-                          <div class="flex items-center justify-between gap-2">
-                            <span class="text-xs font-bold uppercase tracking-wider text-${meta.color}-300 flex items-center gap-1.5">
-                              <i data-lucide="${meta.icon}" class="w-4 h-4 text-${meta.color}-400"></i>
-                              <span>${escapeHtml(sec.name)}</span>
-                            </span>
-                            <button type="button" onclick="handleStudioMiniBlockCustomAi('${activeCourse.id}', '${selectedLesson.id}', '${sec.id}')" class="text-[11px] text-${meta.color}-400 hover:text-${meta.color}-300 flex items-center gap-1 font-semibold shrink-0">
-                              <i data-lucide="sparkles" class="w-3 h-3"></i> AI Draft
-                            </button>
-                          </div>
-                          ${sec.ai_rule ? `<p class="text-[11px] text-slate-400 italic">Guideline: ${escapeHtml(sec.ai_rule)}</p>` : ''}
-                          <textarea
-                            rows="${sec.type === 'list' || sec.type === 'steps' ? 4 : 3}"
-                            placeholder="${escapeHtml(meta.placeholder)}"
-                            oninput="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'sections.${sec.id}', this.value)"
-                            onblur="saveCustomCoursesToStorage(true)"
-                            class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-${meta.color}-400 leading-relaxed ${(sec.type === 'list' || sec.type === 'steps') ? 'font-mono' : ''}"
-                          >${escapeHtml(secVal)}</textarea>
-                          ${listItems.length > 0 ? `
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
-                              ${listItems.map(item => `
-                                <div class="p-2 rounded-lg bg-slate-950/70 border border-slate-800/80 text-slate-200 text-xs flex items-start gap-2">
-                                  <span class="text-${meta.color}-400 font-bold shrink-0">✦</span>
-                                  <div class="leading-snug">${escapeHtml(item)}</div>
-                                </div>
-                              `).join('')}
-                            </div>
-                          ` : ''}
-                        </div>
-                      `;
+                      return renderCustomBlueprintSectionCard(activeCourse, selectedLesson, sec, meta);
                     }).join('')}
                   </div>
                 ` : `
@@ -10730,6 +11178,120 @@ alter publication supabase_realtime add table public.students_sync;`;
       showToast(`Added ${studioCopilotContext.suggestedClasses.length} classes to course!`);
     }
 
+    function getSectionAiFormatRule(secType) {
+      const rules = {
+        text: 'Return JSON: { "summary": "1-sentence core takeaway", "body": "Rich explanation with **bold** keywords" }',
+        list: 'Return JSON: { "items": ["**Key Idea 1**: explanation", "**Key Idea 2**: explanation"] }',
+        steps: 'Return JSON: { "steps": [{ "text": "Step description", "mins": "4m" }] }',
+        quote: 'Return JSON: { "citation": "Source/Formula title", "quote": "Exact text/formula", "meaning": "Plain explanation", "rtl": false }',
+        example: 'Return JSON: { "setup": "Relatable story or problem setup", "takeaway": "Key lesson or final solution" }',
+        exercise: 'Return JSON: { "items": [{ "q": "Practice prompt 1", "a": "Answer key 1" }] }',
+        pitfalls: 'Return JSON: { "items": [{ "trap": "Common mistake", "fix": "How to correct it" }] }',
+        discussion: 'Return JSON: { "prompt": "Main engaging question", "followup": "If they say X, ask Y", "notes": "" }',
+        reflection: 'Return JSON: { "mindset": "Core value / takeaway", "action": "Concrete weekly action challenge" }',
+        homework: 'Return JSON: { "task": "Clear homework instructions", "estMinutes": "15m" }',
+        audio: 'Return a plain string with concise audio / recording cues'
+      };
+      return rules[secType] || rules.text;
+    }
+
+    function normalizeSectionAiValue(val, secType) {
+      if (secType === 'audio') {
+        return typeof val === 'string' ? val : JSON.stringify(val || '');
+      }
+      if (val && typeof val === 'object') {
+        return JSON.stringify({ _structured: true, ...val });
+      }
+      return String(val || '');
+    }
+
+    function buildStructuredSectionFallback(sec, classTitle, studentProfile) {
+      const sp = studentProfile || 'your students';
+      if (sec.type === 'list') {
+        return JSON.stringify({
+          _structured: true,
+          items: [
+            `**Core Point 1**: Foundational principle of ${classTitle}.`,
+            `**Core Point 2**: How ${classTitle} works in real life.`,
+            `**Core Point 3**: Key takeaway tailored to ${sp}.`
+          ]
+        });
+      }
+      if (sec.type === 'steps') {
+        return JSON.stringify({
+          _structured: true,
+          steps: [
+            { text: `Introduce ${classTitle} with a relatable check-in`, mins: '3m' },
+            { text: `Walk through the core mechanism step by step`, mins: '8m' },
+            { text: `Practice or apply the key idea together`, mins: '5m' }
+          ]
+        });
+      }
+      if (sec.type === 'quote') {
+        return JSON.stringify({
+          _structured: true,
+          citation: `Core Reference for ${classTitle}`,
+          quote: `Foundational principle or source statement for ${classTitle}`,
+          meaning: `Explained simply for ${sp}: clear everyday understanding of why this matters.`,
+          rtl: false
+        });
+      }
+      if (sec.type === 'example') {
+        return JSON.stringify({
+          _structured: true,
+          setup: `Imagine a real-world situation where ${classTitle} makes an immediate difference.`,
+          takeaway: `When you look closely at ${classTitle}, the underlying principle solves the challenge cleanly.`
+        });
+      }
+      if (sec.type === 'exercise') {
+        return JSON.stringify({
+          _structured: true,
+          items: [
+            { q: `Apply the main rule of ${classTitle} to a simple everyday scenario.`, a: `Identify the core rule first, then verify each step carefully.` },
+            { q: `Spot why a common assumption fails in ${classTitle}.`, a: `Check the boundary case before concluding.` }
+          ]
+        });
+      }
+      if (sec.type === 'pitfalls') {
+        return JSON.stringify({
+          _structured: true,
+          items: [
+            { trap: `Confusing surface appearance with the true mechanism of ${classTitle}`, fix: `Test with one clear contrasting example first.` }
+          ]
+        });
+      }
+      if (sec.type === 'discussion') {
+        return JSON.stringify({
+          _structured: true,
+          prompt: `If you had to explain ${classTitle} to a friend in one sentence, what would you say and why?`,
+          followup: `Ask them for one real-life example from their own week.`,
+          notes: ''
+        });
+      }
+      if (sec.type === 'reflection') {
+        return JSON.stringify({
+          _structured: true,
+          mindset: `Notice how ${classTitle} shapes everyday choices and perspective.`,
+          action: `Apply one small habit from ${classTitle} at least twice before next class.`
+        });
+      }
+      if (sec.type === 'homework') {
+        return JSON.stringify({
+          _structured: true,
+          task: `Review today's notes on ${classTitle} and bring 1 real-life example or question to our next session.`,
+          estMinutes: '15m'
+        });
+      }
+      if (sec.type === 'audio') {
+        return `Audio notes & cues for ${classTitle}.`;
+      }
+      return JSON.stringify({
+        _structured: true,
+        summary: `Clear overview of ${classTitle} tailored to ${sp}.`,
+        body: `**${sec.name}** for ${classTitle}: Focused explanation written for ${sp}.`
+      });
+    }
+
     async function executeStudioAiGenerateFullClass() {
       const course = (APP_STATE.customCourses || []).find(c => c.id === studioCopilotContext.courseId);
       if (!course) return;
@@ -10754,7 +11316,7 @@ alter publication supabase_realtime add table public.students_sync;`;
         let customSectionsMap = null;
         try {
           if (apiKey) {
-            const specList = bpSections.map(s => `- ID "${s.id}" | Label: "${s.name}" | Type: ${s.type} | Rule: ${s.ai_rule || s.hint || 'Clear and engaging'}`).join('\n');
+            const specList = bpSections.map(s => `- ID "${s.id}" | Label: "${s.name}" | Type: ${s.type} | Rule: ${s.ai_rule || s.hint || 'Clear and engaging'} | Shape: ${getSectionAiFormatRule(s.type)}`).join('\n');
             const prompt = `You are generating a complete class strictly inside this Course Architecture.
 Course: "${course.title_en || course.title_he}"
 Class Title: "${classTitle}"
@@ -10765,16 +11327,25 @@ Extra Teacher Instructions: ${userInstructions || 'Follow the course architectur
 Required Custom Sections:
 ${specList}
 
-Return STRICT JSON ONLY keyed by exact section ID (for "list" or "steps" types, join items with "\\n"):
+Return STRICT JSON ONLY keyed by exact section ID matching each section's exact Shape:
 {
   "sections": {
-    ${bpSections.map(s => `"${s.id}": "..."`).join(',\n    ')}
+    ${bpSections.map(s => `"${s.id}": {}`).join(',\n    ')}
   }
 }`;
             const res = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey);
             const cleaned = res.replace(/```json/gi, '').replace(/```/g, '').trim();
             const parsed = JSON.parse(cleaned);
-            if (parsed && parsed.sections) customSectionsMap = parsed.sections;
+            if (parsed && parsed.sections) {
+              customSectionsMap = {};
+              bpSections.forEach(s => {
+                if (parsed.sections[s.id] !== undefined) {
+                  customSectionsMap[s.id] = normalizeSectionAiValue(parsed.sections[s.id], s.type);
+                } else {
+                  customSectionsMap[s.id] = buildStructuredSectionFallback(s, classTitle, bp.student_profile);
+                }
+              });
+            }
           }
         } catch (err) {
           console.warn('Gemini API fallback for architecture-aware class generation:', err);
@@ -10783,23 +11354,7 @@ Return STRICT JSON ONLY keyed by exact section ID (for "list" or "steps" types, 
         if (!customSectionsMap) {
           customSectionsMap = {};
           bpSections.forEach(sec => {
-            if (sec.type === 'list') {
-              customSectionsMap[sec.id] = `**Core Point 1**: Foundational principle of ${classTitle}.\n**Core Point 2**: How ${classTitle} works in real life.\n**Core Point 3**: Key takeaway for ${bp.student_profile || 'students'}.`;
-            } else if (sec.type === 'steps') {
-              customSectionsMap[sec.id] = `1. Introduce ${classTitle} with a quick check-in.\n2. Walk through the core mechanism step by step.\n3. Practice or apply the key idea together.`;
-            } else if (sec.type === 'example') {
-              customSectionsMap[sec.id] = `Story / Example for ${classTitle}: Imagine a concrete everyday scenario where ${classTitle} makes an immediate difference.`;
-            } else if (sec.type === 'discussion') {
-              customSectionsMap[sec.id] = `If you had to explain ${classTitle} to a friend in one sentence, what would you say and why?`;
-            } else if (sec.type === 'reflection') {
-              customSectionsMap[sec.id] = `This week, look for one real-world moment to practice ${classTitle} in your daily routine.`;
-            } else if (sec.type === 'homework') {
-              customSectionsMap[sec.id] = `Review your notes on ${classTitle} and bring 1 question or real-life example to our next session.`;
-            } else if (sec.type === 'audio') {
-              customSectionsMap[sec.id] = `Audio notes & cues for ${classTitle}.`;
-            } else {
-              customSectionsMap[sec.id] = `${sec.name} for ${classTitle}: Clear, focused overview tailored to ${bp.student_profile || 'your students'}.`;
-            }
+            customSectionsMap[sec.id] = buildStructuredSectionFallback(sec, classTitle, bp.student_profile);
           });
         }
 
@@ -10809,9 +11364,10 @@ Return STRICT JSON ONLY keyed by exact section ID (for "list" or "steps" types, 
         if (previewBody) {
           previewBody.innerHTML = `
             <div class="space-y-1.5 text-slate-300">
-              ${bpSections.map(sec => `
-                <div><span class="text-amber-400 font-bold">${escapeHtml(sec.name)}:</span> ${escapeHtml(String(customSectionsMap[sec.id] || '').replace(/\n/g, ' ').slice(0, 140))}</div>
-              `).join('')}
+              ${bpSections.map(sec => {
+                const rawPreview = String(customSectionsMap[sec.id] || '').replace(/[{}"_]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140);
+                return `<div><span class="text-amber-400 font-bold">${escapeHtml(sec.name)}:</span> ${escapeHtml(rawPreview)}</div>`;
+              }).join('')}
             </div>
           `;
         }
@@ -10957,22 +11513,21 @@ Return STRICT JSON ONLY keyed by exact section ID (for "list" or "steps" types, 
 Target Students: ${bp.student_profile || course.target_level || 'General'}
 Course Guidelines: ${bp.guidelines || 'Clear and easy to teach'}
 Section Rule: ${sec.ai_rule || sec.hint || 'Be concise and practical'}
-Return plain text only (for lists/steps use newline separated lines).`;
-          generated = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey);
-          generated = generated.replace(/```/g, '').trim();
+Format requirement: ${getSectionAiFormatRule(sec.type)}.`;
+          let rawRes = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey);
+          rawRes = rawRes.replace(/```json/gi, '').replace(/```/g, '').trim();
+          if (sec.type !== 'audio' && rawRes.startsWith('{')) {
+            generated = normalizeSectionAiValue(JSON.parse(rawRes), sec.type);
+          } else {
+            generated = rawRes;
+          }
         }
       } catch (e) {
         console.warn('Custom block AI fallback:', e);
       }
 
       if (!generated) {
-        if (sec.type === 'list') {
-          generated = `**Point 1**: Key principle of ${title}.\n**Point 2**: How ${title} applies in practice.\n**Point 3**: Takeaway for ${bp.student_profile || 'students'}.`;
-        } else if (sec.type === 'steps') {
-          generated = `1. Introduce ${title}.\n2. Walk through the main steps.\n3. Check understanding with a quick example.`;
-        } else {
-          generated = `${sec.name} for ${title}: Tailored for ${bp.student_profile || 'your students'} (${sec.ai_rule || 'clear & engaging'}).`;
-        }
+        generated = buildStructuredSectionFallback(sec, title, bp.student_profile);
       }
 
       if (!lesson.sections || typeof lesson.sections !== 'object') lesson.sections = {};
@@ -15104,26 +15659,61 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
       teleprompterCheckedAnchors = {};
 
       const bpSections = (course && course.blueprint && Array.isArray(course.blueprint.sections)) ? course.blueprint.sections : [];
-      const hasCustomSections = bpSections.length > 0 && lesson.sections && Object.values(lesson.sections).some(v => v && String(v).trim().length > 0);
+      const hasCustomSections = bpSections.length > 0 && (
+        (lesson.sections && Object.values(lesson.sections).some(v => v && String(v).trim().length > 0)) ||
+        (Array.isArray(lesson.recordings) && lesson.recordings.length > 0)
+      );
 
       if (hasCustomSections) {
         let checkIdx = 0;
         const customHtml = `
           <div class="space-y-5 max-w-3xl mx-auto">
             ${bpSections.map(sec => {
-              const val = (lesson.sections && lesson.sections[sec.id]) ? String(lesson.sections[sec.id]).trim() : '';
-              if (!val && sec.type !== 'audio') return '';
+              const rawVal = (lesson.sections && lesson.sections[sec.id]) ? String(lesson.sections[sec.id]).trim() : '';
               const meta = (typeof COURSE_BLOCK_CATALOG !== 'undefined' && COURSE_BLOCK_CATALOG[sec.type]) ? COURSE_BLOCK_CATALOG[sec.type] : { icon: 'layers', color: 'amber' };
-              if (sec.type === 'list' || sec.type === 'steps') {
-                const items = val.split('\n').map(l => l.trim()).filter(Boolean);
+
+              if (sec.type === 'audio') {
+                const allRecs = Array.isArray(lesson.recordings) ? lesson.recordings : [];
+                const secRecs = allRecs.filter(r => !r.sectionId || r.sectionId === sec.id);
+                if (!rawVal && secRecs.length === 0) return '';
                 return `
-                  <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-${meta.color}-500/30 shadow-lg space-y-3">
+                  <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-emerald-500/30 shadow-lg space-y-3">
                     <div class="flex items-center justify-between">
-                      <span class="text-xs font-bold uppercase tracking-wider text-${meta.color}-300 flex items-center gap-1.5">
-                        <i data-lucide="${meta.icon}" class="w-4 h-4 text-${meta.color}-400"></i>
+                      <span class="text-xs font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
+                        <i data-lucide="mic" class="w-4 h-4 text-emerald-400"></i>
                         <span>${escapeHtml(sec.name)}</span>
                       </span>
-                      <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">${items.length} items</span>
+                      <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300">${secRecs.length} clip(s)</span>
+                    </div>
+                    ${secRecs.length > 0 ? `
+                      <div class="space-y-2">
+                        ${secRecs.map(rec => `
+                          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <span class="text-xs font-semibold text-white">${escapeHtml(rec.title || 'Audio Clip')}</span>
+                            <audio controls src="${escapeHtml(rec.url)}" class="h-8 max-w-full"></audio>
+                          </div>
+                        `).join('')}
+                      </div>
+                    ` : ''}
+                    ${rawVal ? `<p class="text-sm text-slate-200 leading-relaxed">${formatSectionInlineText(rawVal)}</p>` : ''}
+                  </div>
+                `;
+              }
+
+              if (!rawVal) return '';
+              const d = parseStructuredSectionData(rawVal, sec.type);
+
+              if (sec.type === 'list') {
+                const items = d.items || [];
+                if (items.length === 0) return '';
+                return `
+                  <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-amber-500/30 shadow-lg space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+                        <i data-lucide="${meta.icon}" class="w-4 h-4 text-amber-400"></i>
+                        <span>${escapeHtml(sec.name)}</span>
+                      </span>
+                      <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">${items.length} points</span>
                     </div>
                     <div class="space-y-2">
                       ${items.map(item => {
@@ -15131,7 +15721,7 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
                         return `
                           <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800/80 hover:border-slate-700 transition flex items-start gap-3 cursor-pointer select-none" onclick="toggleTeleprompterAnchorCheck(${myIdx})">
                             <div id="teleprompter-anchor-box-${myIdx}" class="w-5 h-5 rounded-lg border border-slate-700 bg-slate-950 flex items-center justify-center shrink-0 mt-0.5 transition"></div>
-                            <div id="teleprompter-anchor-text-${myIdx}" class="text-xs sm:text-sm text-slate-100 leading-relaxed flex-1">${escapeHtml(item)}</div>
+                            <div id="teleprompter-anchor-text-${myIdx}" class="text-xs sm:text-sm text-slate-100 leading-relaxed flex-1">${formatSectionInlineText(item)}</div>
                           </div>
                         `;
                       }).join('')}
@@ -15139,13 +15729,183 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
                   </div>
                 `;
               }
+
+              if (sec.type === 'steps') {
+                const stepsList = d.steps || [];
+                if (stepsList.length === 0) return '';
+                return `
+                  <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-emerald-500/30 shadow-lg space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
+                        <i data-lucide="list-ordered" class="w-4 h-4 text-emerald-400"></i>
+                        <span>${escapeHtml(sec.name)}</span>
+                      </span>
+                      <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">${stepsList.length} steps</span>
+                    </div>
+                    <div class="space-y-2">
+                      ${stepsList.map((st, idx) => {
+                        const myIdx = checkIdx++;
+                        return `
+                          <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800/80 hover:border-emerald-500/30 transition flex items-center gap-3 cursor-pointer select-none" onclick="toggleTeleprompterAnchorCheck(${myIdx})">
+                            <div id="teleprompter-anchor-box-${myIdx}" class="w-5 h-5 rounded-lg border border-slate-700 bg-slate-950 flex items-center justify-center shrink-0 transition"></div>
+                            <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold shrink-0">Step ${idx + 1}</span>
+                            <div id="teleprompter-anchor-text-${myIdx}" class="text-xs sm:text-sm text-slate-100 leading-relaxed flex-1">${formatSectionInlineText(st.text || '')}</div>
+                            ${st.mins ? `<span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-emerald-300 shrink-0">${escapeHtml(st.mins)}</span>` : ''}
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
+                  </div>
+                `;
+              }
+
+              if (sec.type === 'quote') {
+                if (!d.quote && !d.meaning) return '';
+                return `
+                  <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-sky-500/40 shadow-lg space-y-3">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                      <span class="text-xs font-bold uppercase tracking-wider text-sky-300 flex items-center gap-1.5">
+                        <i data-lucide="book-open" class="w-4 h-4 text-sky-400"></i>
+                        <span>${escapeHtml(sec.name)}</span>
+                      </span>
+                      ${d.citation ? `<span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-sky-500/15 text-sky-300 border border-sky-500/30">${escapeHtml(d.citation)}</span>` : ''}
+                    </div>
+                    ${d.quote ? `<div dir="${d.rtl ? 'rtl' : 'ltr'}" class="p-3.5 rounded-xl bg-slate-900 border border-sky-500/20 ${d.rtl ? 'text-right font-serif text-lg text-amber-100' : 'font-mono text-sm sm:text-base text-sky-100 text-center'} leading-relaxed whitespace-pre-wrap">${escapeHtml(d.quote)}</div>` : ''}
+                    ${d.meaning ? `<div class="text-sm text-slate-200 leading-relaxed">${formatSectionInlineText(d.meaning)}</div>` : ''}
+                  </div>
+                `;
+              }
+
+              if (sec.type === 'example') {
+                if (!d.setup && !d.takeaway) return '';
+                const revId = 'tp-ex-rev-' + sec.id;
+                return `
+                  <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-amber-500/30 shadow-lg space-y-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+                      <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+                      <span>${escapeHtml(sec.name)}</span>
+                    </span>
+                    ${d.setup ? `<div class="text-sm sm:text-base text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(d.setup)}</div>` : ''}
+                    ${d.takeaway ? `
+                      <div>
+                        <button type="button" onclick="toggleLessonPreviewReveal('${revId}')" class="px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-bold transition">Reveal Key Lesson / Solution</button>
+                        <div id="${revId}" class="hidden mt-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-100 leading-relaxed">${formatSectionInlineText(d.takeaway)}</div>
+                      </div>
+                    ` : ''}
+                  </div>
+                `;
+              }
+
+              if (sec.type === 'exercise') {
+                const drills = (d.items || []).filter(i => i.q || i.a);
+                if (drills.length === 0) return '';
+                return `
+                  <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-emerald-500/30 shadow-lg space-y-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
+                      <i data-lucide="dumbbell" class="w-4 h-4 text-emerald-400"></i>
+                      <span>${escapeHtml(sec.name)}</span>
+                    </span>
+                    <div class="space-y-2.5">
+                      ${drills.map((dr, idx) => {
+                        const ansId = `tp-drill-${sec.id}-${idx}`;
+                        return `
+                          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                            <div class="flex items-start justify-between gap-2">
+                              <div class="text-sm text-white font-medium"><span class="text-emerald-400 font-mono mr-1.5">#${idx + 1}</span>${formatSectionInlineText(dr.q)}</div>
+                              ${dr.a ? `<button type="button" onclick="toggleLessonPreviewReveal('${ansId}')" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold shrink-0">Answer</button>` : ''}
+                            </div>
+                            ${dr.a ? `<div id="${ansId}" class="hidden p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-200">${formatSectionInlineText(dr.a)}</div>` : ''}
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
+                  </div>
+                `;
+              }
+
+              if (sec.type === 'pitfalls') {
+                const traps = (d.items || []).filter(i => i.trap || i.fix);
+                if (traps.length === 0) return '';
+                return `
+                  <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-rose-500/30 shadow-lg space-y-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-rose-300 flex items-center gap-1.5">
+                      <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i>
+                      <span>${escapeHtml(sec.name)}</span>
+                    </span>
+                    <div class="space-y-2">
+                      ${traps.map(tr => `
+                        <div class="p-3 rounded-xl bg-slate-900 border border-rose-500/20 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs sm:text-sm">
+                          <div class="text-rose-200"><strong class="text-rose-400 uppercase text-[10px] block mb-0.5">Watch Out For</strong>${formatSectionInlineText(tr.trap)}</div>
+                          <div class="text-emerald-200"><strong class="text-emerald-400 uppercase text-[10px] block mb-0.5">Quick Fix</strong>${formatSectionInlineText(tr.fix)}</div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+                `;
+              }
+
+              if (sec.type === 'discussion') {
+                if (!d.prompt && !d.followup) return '';
+                const fId = 'tp-disc-fup-' + sec.id;
+                return `
+                  <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-indigo-500/30 shadow-lg space-y-2.5">
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+                      <i data-lucide="message-circle" class="w-4 h-4 text-indigo-400"></i>
+                      <span>${escapeHtml(sec.name)}</span>
+                    </span>
+                    ${d.prompt ? `<div class="text-sm sm:text-base text-white font-medium leading-relaxed">${formatSectionInlineText(d.prompt)}</div>` : ''}
+                    ${d.followup ? `
+                      <div>
+                        <button type="button" onclick="toggleLessonPreviewReveal('${fId}')" class="px-2.5 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-[11px] font-bold">Teacher Follow-up Cue</button>
+                        <div id="${fId}" class="hidden mt-2 p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-200">${formatSectionInlineText(d.followup)}</div>
+                      </div>
+                    ` : ''}
+                  </div>
+                `;
+              }
+
+              if (sec.type === 'reflection') {
+                if (!d.mindset && !d.action) return '';
+                return `
+                  <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-purple-500/30 shadow-lg space-y-2.5">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                      <span class="text-xs font-bold uppercase tracking-wider text-purple-300 flex items-center gap-1.5">
+                        <i data-lucide="heart-handshake" class="w-4 h-4 text-purple-400"></i>
+                        <span>${escapeHtml(sec.name)}</span>
+                      </span>
+                      <button type="button" onclick="assignSectionTaskToStudent('${course.id}', '${lesson.id}', '${sec.id}', 'reflection')" class="px-2.5 py-1 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 text-[11px] font-bold">+ Add Goal</button>
+                    </div>
+                    ${d.mindset ? `<div class="text-sm sm:text-base text-slate-100 leading-relaxed">${formatSectionInlineText(d.mindset)}</div>` : ''}
+                    ${d.action ? `<div class="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs sm:text-sm text-purple-200"><strong class="text-purple-300">Weekly Action:</strong> ${formatSectionInlineText(d.action)}</div>` : ''}
+                  </div>
+                `;
+              }
+
+              if (sec.type === 'homework') {
+                if (!d.task) return '';
+                return `
+                  <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-orange-500/30 shadow-lg space-y-2.5">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                      <span class="text-xs font-bold uppercase tracking-wider text-orange-300 flex items-center gap-1.5">
+                        <i data-lucide="check-square" class="w-4 h-4 text-orange-400"></i>
+                        <span>${escapeHtml(sec.name)} ${d.estMinutes ? `(${escapeHtml(d.estMinutes)})` : ''}</span>
+                      </span>
+                      <button type="button" onclick="assignSectionTaskToStudent('${course.id}', '${lesson.id}', '${sec.id}', 'homework')" class="px-2.5 py-1 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/30 text-[11px] font-bold">Assign to Student</button>
+                    </div>
+                    <div class="text-sm sm:text-base text-slate-100 leading-relaxed">${formatSectionInlineText(d.task)}</div>
+                  </div>
+                `;
+              }
+
+              // Default: TEXT / EXPLANATION
               return `
                 <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-${meta.color}-500/30 shadow-lg space-y-2">
                   <span class="text-xs font-bold uppercase tracking-wider text-${meta.color}-300 flex items-center gap-1.5">
                     <i data-lucide="${meta.icon}" class="w-4 h-4 text-${meta.color}-400"></i>
                     <span>${escapeHtml(sec.name)}</span>
                   </span>
-                  <div class="text-sm sm:text-base text-slate-100 leading-relaxed whitespace-pre-wrap">${escapeHtml(val)}</div>
+                  ${d.summary ? `<div class="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-xs sm:text-sm font-semibold text-cyan-200">${formatSectionInlineText(d.summary)}</div>` : ''}
+                  ${d.body ? `<div class="text-sm sm:text-base text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(d.body)}</div>` : ''}
                 </div>
               `;
             }).join('')}
@@ -15335,7 +16095,7 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
     let voiceRecordingTimerInterval = null;
     let voiceRecordingSeconds = 0;
 
-    async function startVoiceRecording(targetType, targetId, courseId) {
+    async function startVoiceRecording(targetType, targetId, courseId, sectionId = null) {
       const isHe = APP_STATE.lang === 'he';
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         alert(isHe ? 'הדפדפן שלך אינו תומך בהקלטת קול ישירה מהמיקרופון.' : 'Your browser does not support in-browser microphone recording.');
@@ -15345,7 +16105,7 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         activeAudioStream = stream;
-        currentRecordingTarget = { type: targetType, targetId: targetId, courseId: courseId };
+        currentRecordingTarget = { type: targetType, targetId: targetId, courseId: courseId, sectionId: sectionId };
         recordedAudioChunks = [];
         voiceRecordingSeconds = 0;
 
@@ -15452,6 +16212,7 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
           title: defaultTitle,
           url: base64Audio,
           type: 'audio',
+          sectionId: target.sectionId || null,
           date: new Date().toISOString()
         });
         course.updated_at = new Date().toISOString();
@@ -15497,8 +16258,8 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
     }
 
     let currentLessonAudioUploadTarget = null;
-    function triggerLessonAudioUpload(courseId, lessonId) {
-      currentLessonAudioUploadTarget = { courseId: courseId, lessonId: lessonId };
+    function triggerLessonAudioUpload(courseId, lessonId, sectionId = null) {
+      currentLessonAudioUploadTarget = { courseId: courseId, lessonId: lessonId, sectionId: sectionId };
       const fileInput = document.getElementById('lesson-audio-file-input');
       if (fileInput) {
         fileInput.value = '';
@@ -15535,6 +16296,7 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
           title: title,
           url: base64Audio,
           type: 'audio',
+          sectionId: currentLessonAudioUploadTarget.sectionId || null,
           date: new Date().toISOString()
         });
         course.updated_at = new Date().toISOString();
@@ -15545,7 +16307,7 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
       reader.readAsDataURL(file);
     }
 
-    function promptLessonAudioLink(courseId, lessonId) {
+    function promptLessonAudioLink(courseId, lessonId, sectionId = null) {
       const isHe = APP_STATE.lang === 'he';
       const url = prompt(isHe ? 'הזן קישור לקובץ שמע (MP3 או קישור ישיר):' : 'Enter direct audio link URL (e.g. MP3 link):');
       if (!url || !url.trim()) return;
@@ -15564,6 +16326,7 @@ ${blueprintSections.length > 0 ? 'Blueprint Sections to fill: ' + blueprintSecti
         title: title,
         url: url.trim(),
         type: 'link',
+        sectionId: sectionId || null,
         date: new Date().toISOString()
       });
       course.updated_at = new Date().toISOString();

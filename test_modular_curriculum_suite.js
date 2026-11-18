@@ -2819,6 +2819,97 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(getOrCreateElem('input-architect-student-profile').value === 'Teen beginner guitarists', 'Reopening Architect preserves existing student profile');
   assert(musicCourse.lessons.length === 1, 'Existing classes preserved when reopening Course Architect');
 
+  // ==============================================
+  // GATE 31: SPECIALIZED 11-SECTION BLOCK ENGINE & TELEPROMPTER PARITY
+  // ==============================================
+  console.log('\n--- Gate 31: Specialized 11-Section Block Engine & Teleprompter Parity ---');
+
+  assert(typeof sandbox.parseStructuredSectionData === 'function', 'parseStructuredSectionData is a function');
+  assert(typeof sandbox.formatSectionInlineText === 'function', 'formatSectionInlineText is a function');
+  assert(typeof sandbox.renderCustomBlueprintSectionCard === 'function', 'renderCustomBlueprintSectionCard is a function');
+  assert(typeof sandbox.assignSectionTaskToStudent === 'function', 'assignSectionTaskToStudent is a function');
+
+  const formattedBold = sandbox.formatSectionInlineText('**Key Idea**: Always check `x > 0`');
+  assert(formattedBold.includes('<strong') && formattedBold.includes('<code'), 'formatSectionInlineText formats bold & inline code cleanly');
+
+  const all11Course = {
+    id: 'course_all_11_test',
+    title_en: 'All 11 Blocks Lab',
+    blueprint: {
+      version: '2.0',
+      student_profile: 'Test Students',
+      guidelines: 'Structured specialized blocks',
+      sections: [
+        { id: 'sec_1_text', type: 'text', name: 'Overview' },
+        { id: 'sec_2_list', type: 'list', name: 'Core Bullets' },
+        { id: 'sec_3_steps', type: 'steps', name: 'Step Timeline' },
+        { id: 'sec_4_quote', type: 'quote', name: 'Hebrew Verse' },
+        { id: 'sec_5_ex', type: 'example', name: 'Worked Story' },
+        { id: 'sec_6_drill', type: 'exercise', name: 'Practice Drills' },
+        { id: 'sec_7_pit', type: 'pitfalls', name: 'Common Traps' },
+        { id: 'sec_8_disc', type: 'discussion', name: 'Debate Prompt' },
+        { id: 'sec_9_refl', type: 'reflection', name: 'Life Challenge' },
+        { id: 'sec_10_hw', type: 'homework', name: 'Weekly Homework' },
+        { id: 'sec_11_aud', type: 'audio', name: 'Audio Lab' }
+      ]
+    },
+    lessons: [
+      {
+        id: 'les_11_1',
+        lesson_num: 1,
+        title_en: 'Lesson With All 11 Blocks',
+        recordings: [{ id: 'rec_sec11', title: 'Track 1', url: 'https://example.com/a.mp3', sectionId: 'sec_11_aud' }],
+        sections: {}
+      }
+    ]
+  };
+
+  sandbox.APP_STATE.customCourses = [all11Course];
+  sandbox.APP_STATE.students = [
+    { id: 'stu_assign_test', name: 'Levi Student', skills: { customGoals: [], homework: { task: '', completed: false } } }
+  ];
+  sandbox.APP_STATE.activeStudentId = 'stu_assign_test';
+
+  // AI Draft all 11 sections via Copilot
+  sandbox.openStudioAiCoPilotModal(all11Course.id, 'les_11_1');
+  await sandbox.executeStudioAiGenerateFullClass();
+  sandbox.applyGeneratedContentToActiveClass();
+
+  sandbox.renderCourseStudio(all11Course.id, 'les_11_1');
+  const all11Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(all11Html.includes('אבג RTL'), 'Quote block provides RTL toggle control');
+  assert(all11Html.includes('Punchline / Key Lesson / Solution'), 'Example block provides collapsible takeaway field');
+  assert(all11Html.includes('+ Add Practice Drill'), 'Exercise block renders Q&A drill repeater');
+  assert(all11Html.includes('+ Add Trap &amp; Fix') || all11Html.includes('+ Add Trap & Fix'), 'Pitfalls block renders Trap & Fix repeater');
+  assert(all11Html.includes('Follow-up cue'), 'Discussion block renders follow-up cue field');
+  assert(all11Html.includes('+ Send to Student Goal'), 'Reflection block provides direct student goal assignment');
+  assert(all11Html.includes('Assign to Student'), 'Homework block provides direct student homework assignment');
+  assert(all11Html.includes('Track 1'), 'Audio block renders scoped section recording');
+
+  // Interactive mutations: Quote RTL toggle, Drill Add, Homework Assign
+  sandbox.toggleSectionQuoteRtl(all11Course.id, 'les_11_1', 'sec_4_quote');
+  const parsedQuote = sandbox.parseStructuredSectionData(all11Course.lessons[0].sections['sec_4_quote'], 'quote');
+  assert(parsedQuote.rtl === true, 'toggleSectionQuoteRtl flipped rtl state');
+
+  sandbox.handleSectionRepeaterAdd(all11Course.id, 'les_11_1', 'sec_6_drill', 'exercise');
+  const parsedExercise = sandbox.parseStructuredSectionData(all11Course.lessons[0].sections['sec_6_drill'], 'exercise');
+  assert(parsedExercise.items.length === 3, 'handleSectionRepeaterAdd added new Q&A drill');
+
+  sandbox.assignSectionTaskToStudent(all11Course.id, 'les_11_1', 'sec_10_hw', 'homework');
+  assert(sandbox.APP_STATE.students[0].skills.homework.task.includes('Lesson With All 11 Blocks'), 'assignSectionTaskToStudent pushed homework directly to student');
+
+  sandbox.assignSectionTaskToStudent(all11Course.id, 'les_11_1', 'sec_9_refl', 'reflection');
+  assert(sandbox.APP_STATE.students[0].skills.customGoals.length === 1, 'assignSectionTaskToStudent added life goal directly to student');
+
+  // Teleprompter rendering of all 11 specialized sections including embedded <audio>
+  sandbox.openTutorTeleprompter(all11Course.id, 'les_11_1');
+  const tpHtml = getOrCreateElem('teleprompter-content-container').innerHTML;
+  assert(tpHtml.includes('Step 1'), 'Teleprompter renders Step badges');
+  assert(tpHtml.includes('Reveal Key Lesson / Solution'), 'Teleprompter renders Example reveal button');
+  assert(tpHtml.includes('Watch Out For') && tpHtml.includes('Quick Fix'), 'Teleprompter renders Pitfalls Trap & Fix alert cards');
+  assert(tpHtml.includes('<audio controls'), 'Teleprompter embeds playable <audio> controls directly inside Audio sections');
+  sandbox.closeTutorTeleprompter();
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
