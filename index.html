@@ -186,6 +186,33 @@
         <p id="auth-subtitle" class="text-xs text-slate-400 mt-1">The Operating System for Tutors & Educators</p>
       </div>
 
+      <!-- Primary Role Switcher: Teacher Login vs Student Login -->
+      <div class="flex items-center bg-slate-950 p-1 rounded-2xl border border-slate-800 gap-1" id="auth-role-switcher">
+        <button
+          type="button"
+          id="tab-lock-role-teacher"
+          onclick="handleAuthRoleSwitch('teacher')"
+          class="flex-1 py-2 px-2 text-xs font-bold rounded-xl transition bg-brand-600 text-white shadow flex items-center justify-center gap-1.5"
+        >
+          <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
+          <span>Teacher Login</span>
+        </button>
+        <button
+          type="button"
+          id="tab-lock-role-student"
+          onclick="handleAuthRoleSwitch('student')"
+          class="flex-1 py-2 px-2 text-xs font-semibold rounded-xl transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5"
+        >
+          <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+          <span>Student Login</span>
+        </button>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- TEACHER AUTH CONTAINER                         -->
+      <!-- ============================================== -->
+      <div id="auth-teacher-container" class="space-y-4">
+
       <!-- Continue with Google Button -->
       <button
         type="button"
@@ -407,6 +434,61 @@
           </p>
         </div>
       </form>
+      </div> <!-- End #auth-teacher-container -->
+
+      <!-- ============================================== -->
+      <!-- STUDENT PORTAL LOGIN CONTAINER                 -->
+      <!-- ============================================== -->
+      <div id="auth-student-container" class="hidden space-y-3.5 pt-1">
+        <div class="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/25 text-xs text-indigo-200 leading-relaxed">
+          Enter your <strong>exact name</strong> and the <strong>6-character Student Code</strong> sent by your teacher to view your personal homework, goals, and notes.
+        </div>
+
+        <form id="form-auth-student" onsubmit="handleStudentPortalLogin(event)" class="space-y-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1" for="student-login-name">Your Exact Name *</label>
+            <input
+              type="text"
+              id="student-login-name"
+              dir="auto"
+              required
+              autocomplete="name"
+              placeholder="e.g. Ethan Levi"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1" for="student-login-code">Student Access Code *</label>
+            <input
+              type="text"
+              id="student-login-code"
+              required
+              maxlength="12"
+              autocomplete="off"
+              autocapitalize="characters"
+              spellcheck="false"
+              placeholder="e.g. K7M9P2"
+              oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-3.5 text-sm font-mono tracking-widest text-amber-300 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500 uppercase"
+            >
+          </div>
+
+          <div id="student-login-error" class="hidden text-xs text-rose-400 font-medium flex items-center gap-1.5 p-2.5 rounded-xl bg-rose-950/30 border border-rose-900/40">
+            <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+            <span id="student-login-error-text">Name and Student Code did not match.</span>
+          </div>
+
+          <button
+            type="submit"
+            id="btn-student-login-submit"
+            class="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-brand-600 hover:from-indigo-500 hover:to-brand-500 text-white text-sm font-bold rounded-xl transition duration-150 active:scale-95 shadow-md flex items-center justify-center gap-2"
+          >
+            <i data-lucide="arrow-right-circle" class="w-4 h-4"></i>
+            <span>Open My Student Profile</span>
+          </button>
+        </form>
+      </div>
 
       <div id="auth-footer-text" class="pt-2 text-[11px] text-slate-500 text-center border-t border-slate-800">
         🔒 Secure Password Protection • Stays Open on this Device for 30 Days
@@ -429,8 +511,8 @@
           <span id="app-title" class="text-base sm:text-lg font-bold text-white tracking-tight">TutorPilot</span>
         </div>
 
-        <!-- Right: User Profile, Language Switch & Settings Gear -->
-        <div class="flex items-center gap-1.5 shrink-0">
+        <!-- Right: Teacher Profile Controls OR Student Portal Header Controls -->
+        <div id="teacher-header-controls" class="flex items-center gap-1.5 shrink-0">
 
           <!-- User Profile & Session Pill -->
           <div class="relative">
@@ -497,6 +579,17 @@
             <i data-lucide="settings" class="w-4 h-4"></i>
           </button>
 
+        </div>
+
+        <div id="student-header-controls" class="hidden flex items-center gap-2 shrink-0">
+          <span class="px-2.5 py-1 rounded-lg bg-indigo-500/15 border border-indigo-400/35 text-indigo-200 text-xs font-bold">Student Portal</span>
+          <button type="button" onclick="toggleLanguage()" class="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition">
+            <i data-lucide="languages" class="w-3.5 h-3.5 text-brand-400"></i>
+          </button>
+          <button type="button" id="btn-student-portal-logout" onclick="logoutStudentPortal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold transition">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            <span>Log Out</span>
+          </button>
         </div>
       </div>
 
@@ -1530,6 +1623,11 @@
       </div>
 
     </section>
+
+    <!-- ============================================== -->
+    <!-- ISOLATED STUDENT PORTAL VIEW (STUDENT ACCESS)  -->
+    <!-- ============================================== -->
+    <section id="view-student-portal" class="hidden max-w-3xl mx-auto space-y-5"></section>
 
   </main>
 
@@ -5647,8 +5745,31 @@ alter publication supabase_realtime add table public.students_sync;`;
       };
     }
 
+    function generateStudentAccessCode(existingStudents) {
+      const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+      const used = new Set(
+        (Array.isArray(existingStudents) ? existingStudents : (APP_STATE.students || []))
+          .map(s => String((s && s.studentAccessCode) || '').toUpperCase().trim())
+          .filter(Boolean)
+      );
+      for (let attempt = 0; attempt < 25; attempt++) {
+        let code = '';
+        for (let i = 0; i < 6; i++) {
+          code += alphabet[Math.floor(Math.random() * alphabet.length)];
+        }
+        if (!used.has(code)) return code;
+      }
+      return 'ST' + Math.random().toString(36).substr(2, 4).toUpperCase();
+    }
+
     function ensureStudentSkills(student) {
       if (!student) return;
+      if (!student.studentAccessCode || !String(student.studentAccessCode).trim()) {
+        student.studentAccessCode = generateStudentAccessCode(APP_STATE.students);
+      }
+      if (!Array.isArray(student.sharedNotes)) {
+        student.sharedNotes = [];
+      }
       if (!student.skills || typeof student.skills !== 'object') {
         student.skills = getDefaultStudentSkills();
       }
@@ -6383,6 +6504,12 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     async function fetchCloudStudents() {
+      if (typeof isStudentPortalActive === 'function' && isStudentPortalActive()) {
+        if (typeof refreshStudentPortalRecord === 'function') {
+          return refreshStudentPortalRecord();
+        }
+        return;
+      }
       if (!APP_STATE.currentUser || !APP_STATE.cloud.client) return;
       try {
         const { data, error } = await APP_STATE.cloud.client
@@ -6527,6 +6654,8 @@ alter publication supabase_realtime add table public.students_sync;`;
                 status: meta.status || 'active',
                 parentContact: meta.parentContact || { name: '', phone: '', email: '' },
                 hourlyRate: meta.hourlyRate || '',
+                studentAccessCode: meta.studentAccessCode || generateStudentAccessCode(APP_STATE.students),
+                sharedNotes: Array.isArray(meta.sharedNotes) ? meta.sharedNotes : [],
                 schedule: scheduleList,
                 completedTopics: cleanCompletedTopics,
                 completedParshiot: row.completed_parshiot || {},
@@ -6658,6 +6787,12 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
 
       if (eventType === 'INSERT' || eventType === 'UPDATE') {
+        if (typeof isStudentPortalActive === 'function' && isStudentPortalActive()) {
+          if (newRecord && APP_STATE.studentPortalSession && newRecord.id === APP_STATE.studentPortalSession.studentId) {
+            if (typeof refreshStudentPortalRecord === 'function') refreshStudentPortalRecord();
+          }
+          return;
+        }
         if (!newRecord || !newRecord.id || newRecord.id.startsWith('__')) return;
         const meta = (newRecord.completed_topics && newRecord.completed_topics._meta) || {};
 
@@ -6717,6 +6852,8 @@ alter publication supabase_realtime add table public.students_sync;`;
           status: meta.status || 'active',
           parentContact: meta.parentContact || { name: '', phone: '', email: '' },
           hourlyRate: meta.hourlyRate || '',
+          studentAccessCode: meta.studentAccessCode || generateStudentAccessCode(APP_STATE.students),
+          sharedNotes: Array.isArray(meta.sharedNotes) ? meta.sharedNotes : [],
           schedule: scheduleList,
           completedTopics: cleanCompletedTopics,
           completedParshiot: newRecord.completed_parshiot || {},
@@ -6739,6 +6876,12 @@ alter publication supabase_realtime add table public.students_sync;`;
         }
         showToast(isHe ? ('סונכרן בזמן אמת: ' + updatedStudent.name) : ('Live update synced: ' + updatedStudent.name));
       } else if (eventType === 'DELETE') {
+        if (typeof isStudentPortalActive === 'function' && isStudentPortalActive()) {
+          if (oldRecord && APP_STATE.studentPortalSession && oldRecord.id === APP_STATE.studentPortalSession.studentId) {
+            if (typeof logoutStudentPortal === 'function') logoutStudentPortal('Student access removed');
+          }
+          return;
+        }
         if (!oldRecord || !oldRecord.id || oldRecord.id.startsWith('__')) return;
         const exists = APP_STATE.students.some(s => s.id === oldRecord.id);
         if (!exists) return;
@@ -6775,6 +6918,9 @@ alter publication supabase_realtime add table public.students_sync;`;
           status: student.status || 'active',
           parentContact: student.parentContact || { name: '', phone: '', email: '' },
           hourlyRate: student.hourlyRate || '',
+          studentAccessCode: student.studentAccessCode || generateStudentAccessCode(APP_STATE.students),
+          sharedNotes: Array.isArray(student.sharedNotes) ? student.sharedNotes : [],
+          _meta_teacher_note_backup: true,
           schedule: cleanSchedule.map(s => ({
             ...s,
             status: s.status || 'scheduled',
@@ -6947,6 +7093,477 @@ alter publication supabase_realtime add table public.students_sync;`;
         return 'tutor_students_v1';
       }
       return 'tutor_students_' + schoolId.replace(/[^a-z0-9]/g, '_');
+    }
+
+    function isStudentPortalActive() {
+      return Boolean(APP_STATE.studentPortalSession && APP_STATE.studentPortalSession.studentId);
+    }
+
+    function handleAuthRoleSwitch(role) {
+      const btnTeacher = document.getElementById('tab-lock-role-teacher');
+      const btnStudent = document.getElementById('tab-lock-role-student');
+      const boxTeacher = document.getElementById('auth-teacher-container');
+      const boxStudent = document.getElementById('auth-student-container');
+      const isStudent = role === 'student';
+
+      if (btnTeacher) {
+        btnTeacher.className = isStudent
+          ? 'flex-1 py-2 px-2 text-xs font-semibold rounded-xl transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5'
+          : 'flex-1 py-2 px-2 text-xs font-bold rounded-xl transition bg-brand-600 text-white shadow flex items-center justify-center gap-1.5';
+      }
+      if (btnStudent) {
+        btnStudent.className = isStudent
+          ? 'flex-1 py-2 px-2 text-xs font-bold rounded-xl transition bg-indigo-600 text-white shadow flex items-center justify-center gap-1.5'
+          : 'flex-1 py-2 px-2 text-xs font-semibold rounded-xl transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5';
+      }
+      if (boxTeacher) boxTeacher.classList.toggle('hidden', isStudent);
+      if (boxStudent) boxStudent.classList.toggle('hidden', !isStudent);
+
+      if (isStudent) {
+        const nameInp = document.getElementById('student-login-name');
+        if (nameInp) setTimeout(() => nameInp.focus(), 80);
+      } else {
+        handleAuthTabSwitch('signin');
+      }
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function mapCloudRowToPortalStudent(row) {
+      if (!row || !row.id || String(row.id).startsWith('__')) return null;
+      const meta = (row.completed_topics && row.completed_topics._meta) || {};
+      const scheduleList = Array.isArray(meta.schedule) ? meta.schedule : (Array.isArray(meta.lessons) ? meta.lessons : []);
+      return {
+        id: row.id,
+        name: row.name || '',
+        subject: meta.subject || ((row.parsha_or_date || '').split(' (')[0]) || '',
+        gradeOrDate: meta.gradeOrDate || '',
+        gradeLevel: meta.gradeLevel || 'Standard / All Levels',
+        avatar: meta.avatar || '',
+        studentAccessCode: String(meta.studentAccessCode || '').toUpperCase().trim(),
+        sharedNotes: Array.isArray(meta.sharedNotes) ? meta.sharedNotes : [],
+        skills: meta.skills || getDefaultStudentSkills(),
+        schedule: scheduleList.map(l => ({
+          id: l.id || '',
+          dateStr: l.dateStr || l.date || '',
+          time: l.time || l.timeSlot || '',
+          status: l.status || 'scheduled',
+          repeatWeekly: !!l.repeatWeekly
+        }))
+      };
+    }
+
+    function collectLocalStudentsForPortalVerification() {
+      const found = [];
+      const seenIds = new Set();
+      const pushList = (arr) => {
+        if (!Array.isArray(arr)) return;
+        arr.forEach(s => {
+          if (s && s.id && !seenIds.has(s.id)) {
+            seenIds.add(s.id);
+            found.push(s);
+          }
+        });
+      };
+      pushList(APP_STATE.students);
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('tutor_students')) {
+            const list = JSON.parse(localStorage.getItem(k) || '[]');
+            pushList(list);
+          }
+        }
+      } catch (e) {}
+      return found;
+    }
+
+    async function handleStudentPortalLogin(e) {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      const nameInput = document.getElementById('student-login-name');
+      const codeInput = document.getElementById('student-login-code');
+      const errBox = document.getElementById('student-login-error');
+      const errTxt = document.getElementById('student-login-error-text');
+      const submitBtn = document.getElementById('btn-student-login-submit');
+
+      const enteredName = (nameInput?.value || '').trim().replace(/\s+/g, ' ');
+      const enteredCode = (codeInput?.value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (errBox) errBox.classList.add('hidden');
+
+      if (!enteredName || !enteredCode) {
+        if (errTxt) errTxt.textContent = 'Please enter both your exact name and Student Code.';
+        if (errBox) errBox.classList.remove('hidden');
+        return false;
+      }
+
+      if (submitBtn) submitBtn.disabled = true;
+      let matchedStudent = null;
+
+      try {
+        const client = typeof getSupabaseAuthClient === 'function' ? getSupabaseAuthClient() : null;
+        if (client) {
+          const { data, error } = await client
+            .from('students_sync')
+            .select('id, name, parsha_or_date, completed_topics, updated_at');
+          if (!error && Array.isArray(data)) {
+            const matchRow = data.find(row => {
+              if (!row || !row.id || String(row.id).startsWith('__')) return false;
+              const rowName = String(row.name || '').trim().replace(/\s+/g, ' ').toLowerCase();
+              const rowCode = String((row.completed_topics && row.completed_topics._meta && row.completed_topics._meta.studentAccessCode) || '').trim().toUpperCase();
+              return rowName === enteredName.toLowerCase() && rowCode && rowCode === enteredCode;
+            });
+            if (matchRow) matchedStudent = mapCloudRowToPortalStudent(matchRow);
+          }
+        }
+      } catch (err) {
+        console.warn('Student login cloud lookup error:', err);
+      }
+
+      if (!matchedStudent) {
+        const localCandidates = collectLocalStudentsForPortalVerification();
+        const localHit = localCandidates.find(s => {
+          const sName = String(s.name || '').trim().replace(/\s+/g, ' ').toLowerCase();
+          const sCode = String(s.studentAccessCode || '').trim().toUpperCase();
+          return sName === enteredName.toLowerCase() && sCode && sCode === enteredCode;
+        });
+        if (localHit) {
+          matchedStudent = {
+            id: localHit.id,
+            name: localHit.name,
+            subject: localHit.subject || '',
+            gradeOrDate: localHit.gradeOrDate || localHit.barMitzvahDate || '',
+            gradeLevel: localHit.gradeLevel || 'Standard / All Levels',
+            avatar: localHit.avatar || '',
+            studentAccessCode: String(localHit.studentAccessCode || '').toUpperCase().trim(),
+            sharedNotes: Array.isArray(localHit.sharedNotes) ? localHit.sharedNotes : [],
+            skills: JSON.parse(JSON.stringify(localHit.skills || getDefaultStudentSkills())),
+            schedule: Array.isArray(localHit.schedule) ? localHit.schedule.map(l => ({
+              id: l.id || '',
+              dateStr: l.dateStr || '',
+              time: l.time || '',
+              status: l.status || 'scheduled',
+              repeatWeekly: !!l.repeatWeekly
+            })) : []
+          };
+        }
+      }
+
+      if (submitBtn) submitBtn.disabled = false;
+
+      if (!matchedStudent) {
+        if (errTxt) errTxt.textContent = 'Exact name and Student Code did not match. Ask your teacher to check your code.';
+        if (errBox) errBox.classList.remove('hidden');
+        return false;
+      }
+
+      activateStudentPortalSession(matchedStudent, enteredCode);
+      return true;
+    }
+
+    function activateStudentPortalSession(studentRecord, accessCode) {
+      if (!studentRecord || !studentRecord.id) return;
+      const normalizedCode = String(accessCode || studentRecord.studentAccessCode || '').trim().toUpperCase();
+      APP_STATE.currentUser = null;
+      APP_STATE.customCourses = [];
+      APP_STATE.students = [];
+      APP_STATE.studentPortalSession = {
+        studentId: studentRecord.id,
+        studentName: studentRecord.name,
+        accessCode: normalizedCode,
+        expiresAt: Date.now() + ONE_MONTH_MS
+      };
+      APP_STATE.studentPortalStudent = {
+        id: studentRecord.id,
+        name: studentRecord.name || '',
+        subject: studentRecord.subject || '',
+        gradeOrDate: studentRecord.gradeOrDate || '',
+        gradeLevel: studentRecord.gradeLevel || 'Standard / All Levels',
+        avatar: studentRecord.avatar || '',
+        studentAccessCode: normalizedCode,
+        sharedNotes: Array.isArray(studentRecord.sharedNotes) ? studentRecord.sharedNotes : [],
+        skills: JSON.parse(JSON.stringify(studentRecord.skills || getDefaultStudentSkills())),
+        schedule: Array.isArray(studentRecord.schedule) ? studentRecord.schedule : []
+      };
+      try {
+        localStorage.setItem('tutor_student_portal_session', JSON.stringify(APP_STATE.studentPortalSession));
+        localStorage.setItem('tutor_student_portal_snapshot', JSON.stringify(APP_STATE.studentPortalStudent));
+      } catch (e) {}
+
+      // Strict UI Isolation: hide teacher lock screen, teacher chrome, tabs, bottom dock & views
+      const lockScreen = document.getElementById('lock-screen');
+      if (lockScreen) lockScreen.classList.add('hidden');
+      const teacherHeader = document.getElementById('teacher-header-controls');
+      if (teacherHeader) teacherHeader.classList.add('hidden');
+      const studentHeader = document.getElementById('student-header-controls');
+      if (studentHeader) studentHeader.classList.remove('hidden');
+      const bottomDock = document.getElementById('main-bottom-dock');
+      if (bottomDock) bottomDock.classList.add('hidden');
+      const cmdTrigger = document.getElementById('container-top-command-center-trigger');
+      if (cmdTrigger) cmdTrigger.classList.add('hidden');
+
+      ['view-study', 'view-students', 'view-calendar', 'view-ai'].forEach(vId => {
+        const el = document.getElementById(vId);
+        if (el) el.classList.add('hidden');
+      });
+      const portalEl = document.getElementById('view-student-portal');
+      if (portalEl) portalEl.classList.remove('hidden');
+
+      renderStudentPortalView();
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    async function refreshStudentPortalRecord() {
+      const sess = APP_STATE.studentPortalSession;
+      if (!sess || !sess.studentId) return;
+      try {
+        const client = typeof getSupabaseAuthClient === 'function' ? getSupabaseAuthClient() : null;
+        if (client) {
+          const { data, error } = await client
+            .from('students_sync')
+            .select('id, name, parsha_or_date, completed_topics, updated_at')
+            .eq('id', sess.studentId);
+          if (!error && Array.isArray(data)) {
+            if (data.length === 0) {
+              logoutStudentPortal('Your student profile is no longer active.');
+              return;
+            }
+            const fresh = mapCloudRowToPortalStudent(data[0]);
+            if (!fresh || !fresh.studentAccessCode || fresh.studentAccessCode !== sess.accessCode) {
+              logoutStudentPortal('Your access code was updated by your teacher. Please sign in with the new code.');
+              return;
+            }
+            APP_STATE.studentPortalStudent = fresh;
+            localStorage.setItem('tutor_student_portal_snapshot', JSON.stringify(fresh));
+            renderStudentPortalView();
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Student portal cloud refresh skipped:', e);
+      }
+    }
+
+    function logoutStudentPortal(reasonMsg) {
+      APP_STATE.studentPortalSession = null;
+      APP_STATE.studentPortalStudent = null;
+      try {
+        localStorage.removeItem('tutor_student_portal_session');
+        localStorage.removeItem('tutor_student_portal_snapshot');
+      } catch (e) {}
+
+      const portalEl = document.getElementById('view-student-portal');
+      if (portalEl) {
+        portalEl.innerHTML = '';
+        portalEl.classList.add('hidden');
+      }
+      const studentHeader = document.getElementById('student-header-controls');
+      if (studentHeader) studentHeader.classList.add('hidden');
+      const teacherHeader = document.getElementById('teacher-header-controls');
+      if (teacherHeader) teacherHeader.classList.remove('hidden');
+      const bottomDock = document.getElementById('main-bottom-dock');
+      if (bottomDock) bottomDock.classList.remove('hidden');
+      const cmdTrigger = document.getElementById('container-top-command-center-trigger');
+      if (cmdTrigger) cmdTrigger.classList.remove('hidden');
+
+      const lockScreen = document.getElementById('lock-screen');
+      if (lockScreen) lockScreen.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+      handleAuthRoleSwitch('student');
+      if (reasonMsg) showToast(reasonMsg);
+    }
+
+    async function pushStudentPortalProgress() {
+      const stu = APP_STATE.studentPortalStudent;
+      if (!stu || !stu.id) return;
+      try {
+        localStorage.setItem('tutor_student_portal_snapshot', JSON.stringify(stu));
+      } catch (e) {}
+
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('tutor_students')) {
+            const list = JSON.parse(localStorage.getItem(k) || '[]');
+            if (Array.isArray(list)) {
+              const hit = list.find(x => x && x.id === stu.id);
+              if (hit) {
+                hit.skills = hit.skills || {};
+                hit.skills.homework = stu.skills.homework;
+                hit.skills.customGoals = stu.skills.customGoals;
+                localStorage.setItem(k, JSON.stringify(list));
+              }
+            }
+          }
+        }
+      } catch (e) {}
+
+      const client = typeof getSupabaseAuthClient === 'function' ? getSupabaseAuthClient() : null;
+      if (!client) return;
+      try {
+        const { data, error } = await client
+          .from('students_sync')
+          .select('id, completed_topics')
+          .eq('id', stu.id);
+        if (!error && Array.isArray(data) && data[0]) {
+          const existingCt = data[0].completed_topics || {};
+          const existingMeta = existingCt._meta || {};
+          const mergedSkills = { ...(existingMeta.skills || {}), homework: stu.skills.homework, customGoals: stu.skills.customGoals };
+          const updatedCt = {
+            ...existingCt,
+            _meta: {
+              ...existingMeta,
+              skills: mergedSkills
+            }
+          };
+          await client.from('students_sync').update({
+            completed_topics: updatedCt,
+            updated_at: new Date().toISOString()
+          }).eq('id', stu.id);
+        }
+      } catch (err) {
+        console.warn('Student portal sync push warning:', err);
+      }
+    }
+
+    function toggleStudentPortalHomework() {
+      const stu = APP_STATE.studentPortalStudent;
+      if (!stu) return;
+      if (!stu.skills) stu.skills = getDefaultStudentSkills();
+      if (!stu.skills.homework) stu.skills.homework = { task: '', assignedDate: '', completed: false };
+      stu.skills.homework.completed = !stu.skills.homework.completed;
+      pushStudentPortalProgress();
+      renderStudentPortalView();
+      showToast(stu.skills.homework.completed ? 'Homework marked complete!' : 'Homework marked incomplete');
+    }
+
+    function toggleStudentPortalGoal(goalId) {
+      const stu = APP_STATE.studentPortalStudent;
+      if (!stu || !stu.skills || !Array.isArray(stu.skills.customGoals)) return;
+      const g = stu.skills.customGoals.find(x => x.id === goalId);
+      if (!g) return;
+      g.completed = !g.completed;
+      pushStudentPortalProgress();
+      renderStudentPortalView();
+    }
+
+    function renderStudentPortalView() {
+      const container = document.getElementById('view-student-portal');
+      const stu = APP_STATE.studentPortalStudent;
+      if (!container || !stu) return;
+      const isHe = APP_STATE.lang === 'he';
+      const skills = stu.skills || {};
+      const hw = skills.homework || {};
+      const goals = Array.isArray(skills.customGoals) ? skills.customGoals : [];
+      const sharedNotes = Array.isArray(stu.sharedNotes) ? stu.sharedNotes : [];
+      const todayStr = new Date().toISOString().split('T')[0];
+      const upcomingSessions = (Array.isArray(stu.schedule) ? stu.schedule : [])
+        .filter(s => s && s.status !== 'cancelled' && (!s.dateStr || s.dateStr >= todayStr))
+        .slice(0, 6);
+
+      const initial = (stu.name || 'S').charAt(0).toUpperCase();
+      const avatarHtml = stu.avatar
+        ? `<img src="${stu.avatar}" class="w-14 h-14 rounded-2xl object-cover border border-indigo-400/50 shadow shrink-0">`
+        : `<div class="w-14 h-14 rounded-2xl bg-indigo-500/20 text-indigo-200 border border-indigo-400/40 flex items-center justify-center font-extrabold text-xl shrink-0">${escapeHtml(initial)}</div>`;
+
+      const doneGoalsCount = goals.filter(g => g.completed).length;
+
+      container.innerHTML = `
+        <!-- Calm Student Portal Welcome Banner -->
+        <div class="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl flex items-center justify-between gap-4 flex-wrap">
+          <div class="flex items-center gap-4 min-w-0">
+            ${avatarHtml}
+            <div class="min-w-0 space-y-1">
+              <div class="text-[11px] font-mono uppercase tracking-wider text-indigo-300 font-bold">${isHe ? 'אזור אישי לתלמיד' : 'My Student Profile'}</div>
+              <h1 dir="auto" class="text-xl sm:text-2xl font-extrabold text-white truncate">${escapeHtml(stu.name)}</h1>
+              <div class="flex items-center gap-2 flex-wrap text-xs text-slate-400">
+                ${stu.subject ? `<span class="px-2 py-0.5 rounded-md bg-slate-950 border border-slate-800 text-amber-300 font-medium">${escapeHtml(stu.subject)}</span>` : ''}
+                ${stu.gradeLevel && stu.gradeLevel !== 'Standard / All Levels' ? `<span class="px-2 py-0.5 rounded-md bg-slate-950 border border-slate-800">${escapeHtml(stu.gradeLevel)}</span>` : ''}
+                ${stu.gradeOrDate ? `<span class="font-mono text-slate-300">${escapeHtml(stu.gradeOrDate)}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. Homework Card -->
+        <div id="student-portal-homework-card" class="p-5 rounded-3xl bg-slate-900/80 border ${hw.task ? (hw.completed ? 'border-emerald-500/40' : 'border-amber-500/40') : 'border-slate-800'} space-y-3 shadow-lg">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <h2 class="text-sm font-bold text-amber-300 flex items-center gap-2">
+              <i data-lucide="clipboard-list" class="w-4 h-4 text-amber-400"></i>
+              <span>${isHe ? 'שיעורי בית ומשימות' : 'My Homework'}</span>
+              ${hw.assignedDate ? `<span class="text-[11px] font-mono text-slate-500">(${escapeHtml(hw.assignedDate)})</span>` : ''}
+            </h2>
+            ${(hw.task && hw.task.trim()) ? `
+              <button type="button" id="btn-student-portal-toggle-hw" onclick="toggleStudentPortalHomework()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${hw.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow'}">
+                <i data-lucide="${hw.completed ? 'check-circle-2' : 'circle'}" class="w-3.5 h-3.5"></i>
+                <span>${hw.completed ? (isHe ? 'הושלם' : 'Completed') : (isHe ? 'סמן כהושלם' : 'Mark Completed')}</span>
+              </button>
+            ` : ''}
+          </div>
+          ${(hw.task && hw.task.trim())
+            ? `<p dir="auto" class="text-sm sm:text-base leading-relaxed ${hw.completed ? 'line-through text-slate-400' : 'text-slate-100'}">${escapeHtml(hw.task)}</p>`
+            : `<p class="text-xs text-slate-500 italic">${isHe ? 'אין שיעורי בית כרגע.' : 'No active homework assigned right now.'}</p>`}
+        </div>
+
+        <!-- 2. Assignments & Learning Goals -->
+        <div id="student-portal-goals-card" class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 shadow-lg">
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="text-sm font-bold text-emerald-300 flex items-center gap-2">
+              <i data-lucide="check-square" class="w-4 h-4 text-emerald-400"></i>
+              <span>${isHe ? 'משימות ויעדים אישיים' : 'My Assignments & Goals'}</span>
+            </h2>
+            <span class="text-xs font-mono px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-300">${doneGoalsCount} / ${goals.length}</span>
+          </div>
+          ${goals.length === 0 ? `
+            <p class="text-xs text-slate-500 italic">${isHe ? 'המורה טרם הוסיף יעדים אישיים.' : 'Your teacher has not added individual goals yet.'}</p>
+          ` : `
+            <div class="space-y-2">
+              ${goals.map(g => `
+                <label class="flex items-center gap-3 p-3 rounded-2xl bg-slate-950/75 border ${g.completed ? 'border-emerald-500/30' : 'border-slate-800 hover:border-slate-700'} cursor-pointer transition select-none">
+                  <input type="checkbox" ${g.completed ? 'checked' : ''} onchange="toggleStudentPortalGoal('${g.id}')" class="rounded border-slate-700 text-emerald-500 focus:ring-emerald-500 bg-slate-900 w-4 h-4 shrink-0" />
+                  <span dir="auto" class="text-xs sm:text-sm ${g.completed ? 'line-through text-slate-500' : 'text-slate-100 font-medium'}">${escapeHtml(g.title)}</span>
+                </label>
+              `).join('')}
+            </div>
+          `}
+        </div>
+
+        <!-- 3. Custom Notes Shared by Teacher (Strictly separate from Private Teacher Notes) -->
+        <div id="student-portal-notes-card" class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 shadow-lg">
+          <h2 class="text-sm font-bold text-indigo-300 flex items-center gap-2">
+            <i data-lucide="message-square-text" class="w-4 h-4 text-indigo-400"></i>
+            <span>${isHe ? 'הערות ודגשים מהמורה' : 'Notes from Teacher'}</span>
+          </h2>
+          ${sharedNotes.length === 0 ? `
+            <p class="text-xs text-slate-500 italic">${isHe ? 'אין הערות ששותפו איתך עדיין.' : 'No shared notes or reminders from your teacher yet.'}</p>
+          ` : `
+            <div class="space-y-2.5">
+              ${sharedNotes.slice().reverse().map(n => `
+                <div class="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-1">
+                  ${n.dateLabel ? `<div class="text-[10px] font-mono text-slate-500">${escapeHtml(n.dateLabel)}</div>` : ''}
+                  <div dir="auto" class="text-xs sm:text-sm text-slate-100 leading-relaxed whitespace-pre-wrap">${typeof formatSectionInlineText === 'function' ? formatSectionInlineText(n.text || '') : escapeHtml(n.text || '')}</div>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
+
+        <!-- 4. Upcoming Scheduled Sessions (Date & Time Only) -->
+        ${upcomingSessions.length > 0 ? `
+          <div id="student-portal-schedule-card" class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 shadow-lg">
+            <h2 class="text-sm font-bold text-sky-300 flex items-center gap-2">
+              <i data-lucide="calendar" class="w-4 h-4 text-sky-400"></i>
+              <span>${isHe ? 'מפגשים קרובים' : 'Upcoming Sessions'}</span>
+            </h2>
+            <div class="flex flex-wrap gap-2">
+              ${upcomingSessions.map(s => `
+                <div class="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 flex items-center gap-2">
+                  <span class="font-mono font-bold text-sky-300">${escapeHtml(s.dateStr || 'Weekly')}</span>
+                  ${s.time ? `<span class="text-slate-400">${escapeHtml(s.time)}</span>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      `;
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
     }
 
     function handleAuthTabSwitch(tab) {
@@ -8359,8 +8976,28 @@ alter publication supabase_realtime add table public.students_sync;`;
 
     async function checkPasscodeAuth() {
       const lockScreen = document.getElementById('lock-screen');
+      const searchStr = typeof window !== 'undefined' ? (window.location.search || '') : '';
+      const hashStr = typeof window !== 'undefined' ? (window.location.hash || '') : '';
+      const isStudentLink = searchStr.includes('student=1') || hashStr.includes('student-login');
 
-      // 1. Check active persistent session in localStorage
+      // 0. Check active persistent Student Portal session (unless explicit teacher auth link)
+      const rawStudentSess = localStorage.getItem('tutor_student_portal_session');
+      if (rawStudentSess && !hashStr.includes('access_token=')) {
+        try {
+          const sSess = JSON.parse(rawStudentSess);
+          if (sSess && sSess.expiresAt && Date.now() < sSess.expiresAt && sSess.studentId && sSess.accessCode) {
+            const snapRaw = localStorage.getItem('tutor_student_portal_snapshot');
+            const snapStudent = snapRaw ? JSON.parse(snapRaw) : { id: sSess.studentId, name: sSess.studentName || 'Student', studentAccessCode: sSess.accessCode };
+            activateStudentPortalSession(snapStudent, sSess.accessCode);
+            return 'student';
+          } else {
+            localStorage.removeItem('tutor_student_portal_session');
+            localStorage.removeItem('tutor_student_portal_snapshot');
+          }
+        } catch (e) {}
+      }
+
+      // 1. Check active persistent Teacher session in localStorage
       const raw = localStorage.getItem('tutor_auth_session');
       if (raw) {
         try {
@@ -8415,7 +9052,12 @@ alter publication supabase_realtime add table public.students_sync;`;
       // 3. Not authenticated - display lock screen
       if (lockScreen) {
         lockScreen.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
-        handleAuthTabSwitch('signin');
+        if (isStudentLink && typeof handleAuthRoleSwitch === 'function') {
+          handleAuthRoleSwitch('student');
+        } else {
+          if (typeof handleAuthRoleSwitch === 'function') handleAuthRoleSwitch('teacher');
+          else handleAuthTabSwitch('signin');
+        }
       }
       return false;
     }
@@ -8436,9 +9078,15 @@ alter publication supabase_realtime add table public.students_sync;`;
       applyLanguageDirection();
       lucide.createIcons();
 
-      const isAuthed = await checkPasscodeAuth();
-      if (!isAuthed) {
+      const authResult = await checkPasscodeAuth();
+      if (!authResult) {
         return; // Strict Zero-State Protection: halt immediately if not logged in
+      }
+      if (authResult === 'student' || isStudentPortalActive()) {
+        initSupabaseCloud();
+        refreshStudentPortalRecord();
+        lucide.createIcons();
+        return;
       }
 
       checkUrlJoinCode();
@@ -8461,7 +9109,11 @@ alter publication supabase_realtime add table public.students_sync;`;
       APP_STATE.lang = APP_STATE.lang === 'en' ? 'he' : 'en';
       localStorage.setItem('tutor_lang', APP_STATE.lang);
       applyLanguageDirection();
-      renderAllViews();
+      if (typeof isStudentPortalActive === 'function' && isStudentPortalActive()) {
+        renderStudentPortalView();
+      } else {
+        renderAllViews();
+      }
       showToast(I18N[APP_STATE.lang].toastLangSwitch);
     }
 
@@ -9090,6 +9742,9 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     function switchTab(tabId) {
+      if (typeof isStudentPortalActive === 'function' && isStudentPortalActive()) {
+        return; // Hard isolation: logged-in students cannot navigate into teacher tabs
+      }
       // Compatibility aliases
       if (tabId === 'topics') {
         tabId = 'study';
@@ -20941,7 +21596,67 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       renderStudentDrawer(student.id, true);
     }
 
+    function copyStudentPortalInvite(studentId) {
+      const student = (APP_STATE.students || []).find(s => s.id === studentId);
+      if (!student) return;
+      ensureStudentSkills(student);
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
+      const baseOrigin = (typeof window !== 'undefined' && window.location && window.location.origin && !window.location.origin.startsWith('file:'))
+        ? window.location.origin
+        : 'https://tutorpilot.pages.dev';
+      const inviteUrl = `${baseOrigin}/?student=1`;
+      const inviteText = `TutorPilot Student Portal\nLink: ${inviteUrl}\nName: ${student.name}\nCode: ${student.studentAccessCode}`;
+      if (typeof copyToClipboardText === 'function') {
+        copyToClipboardText(inviteText, 'Copied Student Login link & access code!');
+      } else {
+        showToast(`Code: ${student.studentAccessCode}`);
+      }
+    }
+
+    function regenerateStudentAccessCode(studentId) {
+      const student = (APP_STATE.students || []).find(s => s.id === studentId);
+      if (!student) return;
+      student.studentAccessCode = generateStudentAccessCode(APP_STATE.students);
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderStudentDrawer(student.id, true);
+      showToast(`New Student Code generated: ${student.studentAccessCode}`);
+    }
+
+    function addStudentSharedNote(studentId) {
+      const student = (APP_STATE.students || []).find(s => s.id === studentId);
+      const inp = document.getElementById('input-drawer-shared-note');
+      const txt = (inp?.value || '').trim();
+      if (!student || !txt) {
+        if (inp) inp.focus();
+        return;
+      }
+      if (!Array.isArray(student.sharedNotes)) student.sharedNotes = [];
+      student.sharedNotes.push({
+        id: 'snote_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        text: txt,
+        dateLabel: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        created_at: new Date().toISOString()
+      });
+      if (inp) inp.value = '';
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderStudentDrawer(student.id, true);
+      showToast('Note shared with student!');
+    }
+
+    function deleteStudentSharedNote(studentId, noteId) {
+      const student = (APP_STATE.students || []).find(s => s.id === studentId);
+      if (!student || !Array.isArray(student.sharedNotes)) return;
+      student.sharedNotes = student.sharedNotes.filter(n => n.id !== noteId);
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderStudentDrawer(student.id, true);
+    }
+
     function openStudentDrawer(studentId) {
+      if (typeof isStudentPortalActive === 'function' && isStudentPortalActive()) return;
       APP_STATE.activeStudentDrawerId = studentId;
       APP_STATE.activeStudentId = studentId;
       const drawer = document.getElementById('drawer-student-detail');
@@ -21462,21 +22177,84 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
           `;
         }
 
-        // 5. Full-Width Auto-Growing Tutor Notes (Zero squished side Save button!)
+        // 5. Student Portal Access Bar + Shared Student Notes + Full-Width Private Tutor Notes
         const noteRows = typeof estimateTextareaRows === 'function' ? estimateTextareaRows(student.notes || '', 3, 12) : 3;
+        const sharedNotes = Array.isArray(student.sharedNotes) ? student.sharedNotes : [];
+        const portalCode = student.studentAccessCode || '';
+
+        const portalAccessCardHtml = `
+          <div id="drawer-student-portal-access-card" class="px-4 py-3 rounded-2xl bg-indigo-950/35 border border-indigo-500/35 flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-400/35 text-indigo-300 flex items-center justify-center shrink-0">
+                <i data-lucide="key-round" class="w-4 h-4"></i>
+              </span>
+              <div class="min-w-0">
+                <div class="text-[11px] font-bold text-indigo-200">${isHe ? 'גישת תלמיד לאזור האישי' : 'Student Portal Access'}</div>
+                <div class="text-xs text-slate-300 flex items-center gap-2 flex-wrap">
+                  <span>${isHe ? 'שם מדויק:' : 'Name:'} <strong class="text-white">${escapeHtml(student.name)}</strong></span>
+                  <span>•</span>
+                  <span>${isHe ? 'קוד:' : 'Code:'} <code id="drawer-student-access-code" class="px-2 py-0.5 rounded-md bg-slate-950 border border-indigo-400/40 text-amber-300 font-mono font-bold tracking-wider">${escapeHtml(portalCode)}</code></span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" id="btn-copy-student-invite" onclick="copyStudentPortalInvite('${student.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-[11px] transition active:scale-95 flex items-center gap-1.5 shadow">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                <span>${isHe ? 'העתק קישור וקוד' : 'Copy Link & Code'}</span>
+              </button>
+              <button type="button" id="btn-regen-student-code" onclick="regenerateStudentAccessCode('${student.id}')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-amber-300 border border-slate-700 transition" title="${isHe ? 'צור קוד חדש' : 'Regenerate Code'}">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        `;
+
+        const sharedNotesCardHtml = `
+          <div id="drawer-shared-notes-card" class="p-4 rounded-2xl bg-slate-950/65 border border-indigo-500/25 space-y-2.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-indigo-300 flex items-center gap-1.5">
+                <i data-lucide="message-square-text" class="w-3.5 h-3.5 text-indigo-400"></i>
+                <span>${isHe ? 'הערות ודגשים משותפים לתלמיד' : 'Shared Notes for Student'}</span>
+              </span>
+              <span class="text-[10px] font-mono text-indigo-300/80">${isHe ? 'גלוי לתלמיד' : 'Visible to Student'}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <input id="input-drawer-shared-note" dir="auto" type="text" placeholder="${isHe ? 'כתוב הערה, תזכורת או קישור שיוצג לתלמיד...' : 'Add a note, reminder, or link the student will see...'}" onkeydown="if(event.key==='Enter' && !event.isComposing && event.keyCode !== 229){ event.preventDefault(); addStudentSharedNote('${student.id}'); }" class="flex-1 bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" />
+              <button type="button" id="btn-add-shared-note" onclick="addStudentSharedNote('${student.id}')" class="px-3.5 py-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 text-xs font-bold shrink-0 transition">Send</button>
+            </div>
+            ${sharedNotes.length > 0 ? `
+              <div class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                ${sharedNotes.slice().reverse().map(n => `
+                  <div class="flex items-start justify-between gap-2 px-3 py-2 rounded-xl bg-slate-900/70 border border-slate-800/80 text-xs">
+                    <div class="min-w-0 flex-1 space-y-0.5">
+                      ${n.dateLabel ? `<span class="text-[10px] font-mono text-slate-500 block">${escapeHtml(n.dateLabel)}</span>` : ''}
+                      <div dir="auto" class="text-slate-200 whitespace-pre-wrap leading-relaxed">${escapeHtml(n.text || '')}</div>
+                    </div>
+                    <button type="button" onclick="deleteStudentSharedNote('${student.id}', '${n.id}')" class="text-slate-500 hover:text-rose-400 p-0.5 shrink-0" title="Remove shared note">
+                      <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            ` : `<p class="text-[11px] text-slate-500 italic">${isHe ? 'עדיין אין הערות משותפות.' : 'No shared student notes yet.'}</p>`}
+          </div>
+        `;
 
         body.innerHTML = `
           ${studentAiCardHtml}
+          ${portalAccessCardHtml}
           ${cardCrmGuardianHtml}
           ${homeworkBannerHtml}
           ${cardCustomGoalsHtml}
+          ${sharedNotesCardHtml}
 
-          <!-- Full-Width Tutor Notes (Auto-Grows & Cloud Auto-Saves) -->
+          <!-- Full-Width Private Tutor Notes (Hidden from Student) -->
           <div class="bg-slate-950/65 border border-slate-800/90 rounded-2xl p-4 space-y-2">
-            <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center justify-between text-xs gap-2 flex-wrap">
               <span class="font-bold text-slate-200 flex items-center gap-1.5">
-                <i data-lucide="file-text" class="w-3.5 h-3.5 text-amber-400"></i>
+                <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-400"></i>
                 <span>${t.collaborativeNotesTitle}</span>
+                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">Private · Teacher Only</span>
               </span>
               <span class="text-[10px] font-mono text-emerald-400/90">✓ Auto-saves</span>
             </div>
@@ -22120,6 +22898,8 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
           email: guardianEmail
         },
         hourlyRate: hourlyRate,
+        studentAccessCode: generateStudentAccessCode(APP_STATE.students),
+        sharedNotes: [],
         avatar: APP_STATE.newStudentPendingAvatar || '',
         orderIndex: APP_STATE.students.length,
         notes: notes,
@@ -24880,6 +25660,8 @@ Respond ONLY with strict JSON (no markdown fences):
           email: d.guardianEmail || ''
         },
         hourlyRate: d.hourlyRate || '',
+        studentAccessCode: generateStudentAccessCode(APP_STATE.students),
+        sharedNotes: [],
         avatar: '',
         orderIndex: (APP_STATE.students || []).length,
         notes: (d.notes || '').trim(),
@@ -25256,6 +26038,8 @@ Guidelines:
             email: guardianEmail
           },
           hourlyRate: hourlyRate,
+          studentAccessCode: generateStudentAccessCode(APP_STATE.students),
+          sharedNotes: [],
           avatar: '',
           orderIndex: (APP_STATE.students || []).length,
           notes: (args.notes || '').trim(),
@@ -27245,7 +28029,7 @@ ${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output 
   <!-- ============================================== -->
   <!-- BOTTOM DOCK (Unified Navigation - 4 Tabs)      -->
   <!-- ============================================== -->
-  <nav class="fixed bottom-0 left-0 right-0 z-40 glass-nav border-t border-slate-800/90 mobile-safe-bottom px-3 pt-1.5">
+  <nav id="main-bottom-dock" class="fixed bottom-0 left-0 right-0 z-40 glass-nav border-t border-slate-800/90 mobile-safe-bottom px-3 pt-1.5">
     <div class="grid grid-cols-4 items-center w-full max-w-lg mx-auto gap-1">
 
       <button onclick="switchTab('study')" id="mob-tab-study" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-brand-400 font-bold bg-brand-500/10 w-full" title="Classes & Courses">

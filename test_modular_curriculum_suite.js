@@ -3755,6 +3755,103 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
 
   sandbox.fetch = prevFetch39;
 
+  // --- GATE 40: Dual Login Gate, Student Codes & Strictly Isolated Student Portal ---
+  console.log('\n--- Running Gate 40: Dual Login Gate, Student Codes & Isolated Student Portal ---');
+  assert(indexHtml.includes('id="tab-lock-role-teacher"') && indexHtml.includes('id="tab-lock-role-student"'), 'Lock screen exposes both Teacher Login and Student Login tabs');
+  assert(indexHtml.includes('id="student-login-name"') && indexHtml.includes('id="student-login-code"'), 'Student Login form includes Exact Name and Access Code inputs');
+  assert(typeof sandbox.generateStudentAccessCode === 'function', 'generateStudentAccessCode is a function');
+  assert(typeof sandbox.handleStudentPortalLogin === 'function', 'handleStudentPortalLogin is a function');
+  assert(typeof sandbox.regenerateStudentAccessCode === 'function', 'regenerateStudentAccessCode is a function');
+  assert(typeof sandbox.addStudentSharedNote === 'function', 'addStudentSharedNote is a function');
+  assert(typeof sandbox.toggleStudentPortalHomework === 'function', 'toggleStudentPortalHomework is a function');
+  assert(typeof sandbox.toggleStudentPortalGoal === 'function', 'toggleStudentPortalGoal is a function');
+  assert(typeof sandbox.logoutStudentPortal === 'function', 'logoutStudentPortal is a function');
+
+  // Create student with Private Tutor Notes, Guardian Billing, Homework, Goals & Shared Student Note
+  const g40Student = {
+    id: 'stu_portal_test_40',
+    name: 'Noam Ben-Ari',
+    subject: 'Algebra Foundations',
+    gradeLevel: 'Middle School (7th)',
+    gradeOrDate: 'Spring 2027',
+    hourlyRate: '$95/hr',
+    parentContact: { name: 'Miriam Ben-Ari', phone: '+1 555-3210', email: 'miriam@secret.com' },
+    notes: 'PRIVATE TEACHER NOTE: Parent asked about focus struggles and billing balance.',
+    skills: {
+      homework: { task: 'Solve exercises 1 to 5 on quadratic factoring', assignedDate: 'Nov 18', completed: false },
+      customGoals: [{ id: 'goal_40_1', title: 'Master factoring without calculator', completed: false }]
+    },
+    schedule: [{ id: 'sess_40_1', dateStr: '2099-12-10', time: '5:00 PM', topic: 'Teacher secret outline', status: 'scheduled' }],
+    sharedNotes: []
+  };
+  sandbox.ensureStudentSkills(g40Student);
+  assert(/^[A-Z0-9]{6}$/.test(g40Student.studentAccessCode), 'ensureStudentSkills automatically generates unique 6-character alphanumeric Student Access Code');
+
+  sandbox.APP_STATE.students = [g40Student];
+  sandbox.saveStudentsToStorage(false);
+
+  // Add shared student note from teacher drawer
+  sandbox.openStudentDrawer(g40Student.id);
+  const teacherDrawerHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(teacherDrawerHtml.includes('drawer-student-portal-access-card') && teacherDrawerHtml.includes(g40Student.studentAccessCode), 'Teacher Student Profile displays Portal Access Code card');
+  assert(teacherDrawerHtml.includes('Private · Teacher Only') && teacherDrawerHtml.includes('drawer-shared-notes-card'), 'Teacher Student Profile separates Private Notes from Shared Notes for Student');
+
+  getOrCreateElem('input-drawer-shared-note').value = 'Remember to review the purple worksheet before Thursday!';
+  sandbox.addStudentSharedNote(g40Student.id);
+  assert(g40Student.sharedNotes.length === 1, 'addStudentSharedNote attaches custom shared note cleanly');
+
+  // Verify Regenerate Code invalidates old code
+  const oldCode40 = g40Student.studentAccessCode;
+  sandbox.regenerateStudentAccessCode(g40Student.id);
+  assert(g40Student.studentAccessCode !== oldCode40 && /^[A-Z0-9]{6}$/.test(g40Student.studentAccessCode), 'regenerateStudentAccessCode issues fresh unique 6-character code');
+  sandbox.saveStudentsToStorage(false);
+  sandbox.closeStudentDrawer();
+
+  // Fail login on wrong code or wrong name
+  getOrCreateElem('student-login-name').value = 'Noam Ben-Ari';
+  getOrCreateElem('student-login-code').value = oldCode40;
+  const oldCodeRejected = await sandbox.handleStudentPortalLogin();
+  assert(oldCodeRejected === false && !sandbox.isStudentPortalActive(), 'Student login rejects revoked access code');
+
+  getOrCreateElem('student-login-name').value = 'Wrong Name';
+  getOrCreateElem('student-login-code').value = g40Student.studentAccessCode;
+  const wrongNameRejected = await sandbox.handleStudentPortalLogin();
+  assert(wrongNameRejected === false && !sandbox.isStudentPortalActive(), 'Student login rejects mismatching student name');
+
+  // Succeed login with Exact Name + Current Access Code
+  getOrCreateElem('student-login-name').value = 'noam ben-ari';
+  getOrCreateElem('student-login-code').value = g40Student.studentAccessCode;
+  const loginOk = await sandbox.handleStudentPortalLogin();
+  assert(loginOk === true && sandbox.isStudentPortalActive() === true, 'Student login succeeds when exact name and access code match');
+
+  // Strict Data & Chrome Isolation Checks
+  assert(sandbox.APP_STATE.students.length === 0 && sandbox.APP_STATE.customCourses.length === 0, 'Student Portal session keeps teacher students & courses arrays strictly empty');
+  assert(getOrCreateElem('teacher-header-controls').classList.contains('hidden'), 'Student Portal hides teacher header controls');
+  assert(getOrCreateElem('main-bottom-dock').classList.contains('hidden'), 'Student Portal hides teacher bottom dock navigation');
+  assert(!getOrCreateElem('view-student-portal').classList.contains('hidden'), 'Student Portal view container is visible');
+
+  sandbox.switchTab('study');
+  assert(getOrCreateElem('view-study').classList.contains('hidden'), 'switchTab is hard-blocked while logged in as student');
+
+  // Content Visibility & Privacy Boundaries
+  const portalHtml = getOrCreateElem('view-student-portal').innerHTML;
+  assert(portalHtml.includes('Solve exercises 1 to 5 on quadratic factoring'), 'Student Portal renders student Homework');
+  assert(portalHtml.includes('Master factoring without calculator'), 'Student Portal renders Assignments & Goals');
+  assert(portalHtml.includes('Remember to review the purple worksheet before Thursday!'), 'Student Portal renders Shared Notes posted for student');
+  assert(portalHtml.includes('2099-12-10') && portalHtml.includes('5:00 PM'), 'Student Portal renders upcoming session date & time');
+  assert(!portalHtml.includes('PRIVATE TEACHER NOTE') && !portalHtml.includes('$95/hr') && !portalHtml.includes('miriam@secret.com') && !portalHtml.includes('Teacher secret outline'), 'Student Portal NEVER exposes private tutor notes, billing rate, guardian email, or teacher lesson notes');
+
+  // Interactive Check-offs sync back cleanly
+  sandbox.toggleStudentPortalHomework();
+  assert(sandbox.APP_STATE.studentPortalStudent.skills.homework.completed === true, 'Student can mark Homework completed inside Student Portal');
+  sandbox.toggleStudentPortalGoal('goal_40_1');
+  assert(sandbox.APP_STATE.studentPortalStudent.skills.customGoals[0].completed === true, 'Student can mark Assignment/Goal completed inside Student Portal');
+
+  // Clean Logout restores lock screen in Student Login mode
+  sandbox.logoutStudentPortal();
+  assert(!sandbox.isStudentPortalActive() && getOrCreateElem('view-student-portal').classList.contains('hidden'), 'logoutStudentPortal terminates isolated student session cleanly');
+  assert(!getOrCreateElem('lock-screen').classList.contains('hidden'), 'logoutStudentPortal returns safely to authentication lock screen');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
