@@ -685,29 +685,21 @@
         <!-- Active lessons list when the tutor has classes -->
         <div id="tutor-hub-active-lessons" class="space-y-6">
 
-          <!-- LEVEL 1: COURSES DIRECTORY (PART 1) -->
-          <div id="study-level-courses" class="space-y-5 max-w-5xl mx-auto">
-            <!-- Header for Courses Directory -->
-            <div id="courses-directory-header-bar" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-lg backdrop-blur">
-              <div class="space-y-1">
-                <div class="flex items-center gap-2">
-                  <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                    <i data-lucide="layers" class="w-5 h-5 text-amber-400"></i>
-                    <span id="lbl-courses-directory-title">My Courses</span>
-                  </h3>
-                  <span id="courses-directory-count-badge" class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">0 Courses</span>
-                  <button id="btn-purge-all-courses" onclick="handlePurgeAllCourses()" class="text-[11px] text-slate-500 hover:text-rose-400 transition hidden items-center gap-1 ml-2" title="Clear all courses and start fresh">
-                    <i data-lucide="trash-2" class="w-3 h-3"></i>
-                    <span>Clear All</span>
-                  </button>
-                </div>
-                <p class="text-xs text-slate-400" id="lbl-courses-directory-desc">Select a course to open its Studio, or create a new course.</p>
+          <!-- LEVEL 1: MY COURSES DIRECTORY -->
+          <div id="study-level-courses" class="space-y-5 max-w-4xl mx-auto">
+            <!-- Single Clean Header: My Courses + Add a New Course -->
+            <div id="courses-directory-header-bar" class="flex items-center justify-between gap-3 py-2 border-b border-slate-800/80">
+              <div class="flex items-center gap-2.5">
+                <h3 class="text-lg sm:text-xl font-bold text-white tracking-tight" id="lbl-courses-directory-title">My Courses</h3>
+                <span id="courses-directory-count-badge" class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">0 Courses</span>
+                <button id="btn-purge-all-courses" onclick="handlePurgeAllCourses()" class="hidden" aria-hidden="true">Clear All</button>
+                <p class="hidden" id="lbl-courses-directory-desc" aria-hidden="true"></p>
               </div>
-              <div id="courses-directory-top-actions" class="flex items-center gap-2 shrink-0 flex-wrap">
+              <div id="courses-directory-top-actions" class="flex items-center gap-2 shrink-0">
                 <button onclick="openExtensionBridgeModal()" id="btn-open-extension-bridge" class="hidden" aria-hidden="true">Web Clipper</button>
                 <button onclick="openCreateCourseModal('ai')" id="btn-top-add-course" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-bold transition active:scale-95 shadow">
                   <i data-lucide="plus" class="w-4 h-4"></i>
-                  <span>Add Course</span>
+                  <span>Add a New Course</span>
                 </button>
               </div>
             </div>
@@ -717,45 +709,42 @@
               <input id="input-quick-course-title" type="text" value="" />
             </div>
 
-            <!-- Grid of Course Cards -->
-            <div id="courses-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Clean Clickable List of Courses -->
+            <div id="courses-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <!-- Dynamically populated in renderCoursesCardsGrid -->
             </div>
           </div>
 
-          <!-- LEVEL 2: INSIDE COURSE / CLASSES VIEW (PART 2) -->
-          <div id="study-level-classes" class="space-y-4 max-w-6xl mx-auto hidden">
-            <!-- Clean Streamlined Course Header Bar -->
-            <div id="inside-course-header-card" class="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-lg backdrop-blur overflow-hidden">
+          <!-- LEVEL 2: INSIDE COURSE (LESSONS LIST -> READER -> EDIT STUDIO) -->
+          <div id="study-level-classes" class="space-y-4 max-w-7xl mx-auto hidden">
+            <!-- Course Header Bar (Shown on Lesson Names List screen; hidden inside Reader & Edit modes to avoid stacked headers) -->
+            <div id="inside-course-header-card" class="max-w-3xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-slate-800/80 overflow-hidden">
               <div class="flex items-center gap-3 min-w-0 flex-1">
-                <button onclick="showAllCoursesView()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition active:scale-95 border border-slate-700 shadow-sm shrink-0" title="Back to All Courses">
-                  <i data-lucide="arrow-left" class="w-4 h-4 rtl:rotate-180"></i>
-                  <span>All Courses</span>
+                <button onclick="showAllCoursesView()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition active:scale-95 border border-slate-700 shrink-0" title="Back to My Courses">
+                  <i data-lucide="arrow-left" class="w-3.5 h-3.5 rtl:rotate-180"></i>
+                  <span>My Courses</span>
                 </button>
-                <div class="h-6 w-px bg-slate-800 shrink-0"></div>
-                <div class="space-y-0.5 min-w-0 flex-1">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <span id="active-course-display-icon" class="text-base text-amber-400 font-mono">✦</span>
-                    <h3 id="active-course-display-title" class="text-sm sm:text-base font-bold text-white truncate">Course Title</h3>
-                    <span id="active-course-display-category" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">Judaic Studies</span>
-                    <span id="active-course-display-level" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">Level</span>
-                    <span id="active-course-display-stats" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hidden sm:inline-flex">0 Classes</span>
-                  </div>
-                  <p id="active-course-display-desc" class="text-[11px] text-slate-400 truncate"></p>
+                <div class="flex items-center gap-2 min-w-0 flex-1">
+                  <span id="active-course-display-icon" class="text-base text-amber-400 font-mono shrink-0">✦</span>
+                  <h3 id="active-course-display-title" class="text-base sm:text-lg font-bold text-white truncate">Course Title</h3>
+                  <span id="active-course-display-stats" class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">0 Lessons</span>
+                  <span id="active-course-display-category" class="hidden"></span>
+                  <span id="active-course-display-level" class="hidden"></span>
+                  <p id="active-course-display-desc" class="hidden"></p>
                 </div>
               </div>
 
-              <!-- Focused, Non-Overflowing Course Actions -->
+              <!-- Focused Course Actions -->
               <div class="flex items-center gap-2 shrink-0 flex-wrap justify-end">
                 <button onclick="openStudioBatchOutlineModal()" class="hidden" aria-hidden="true">Batch Outline</button>
                 <button onclick="openStudioAiCoPilotModal()" class="hidden" aria-hidden="true">AI Co-Pilot</button>
                 <button onclick="openAddCustomLessonModal()" class="hidden" aria-hidden="true">Legacy Add Class</button>
                 <button onclick="openAiCreateClassModal()" class="hidden" aria-hidden="true">AI Create Class</button>
-                <button onclick="handleStudioAddNewClassQuick()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition active:scale-95 shadow">
+                <button onclick="handleStudioAddNewClassQuick()" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition active:scale-95 shadow">
                   <i data-lucide="plus" class="w-4 h-4"></i>
-                  <span>Add Class</span>
+                  <span>New Lesson</span>
                 </button>
-                <button onclick="openEditCurrentCourseModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition active:scale-95" title="Discuss & Edit Course Blueprint / Architecture">
+                <button onclick="openEditCurrentCourseModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition active:scale-95" title="Edit Course Architecture & Blueprint">
                   <i data-lucide="sliders" class="w-3.5 h-3.5 text-amber-400"></i>
                   <span>Blueprint</span>
                 </button>
@@ -9196,18 +9185,21 @@ alter publication supabase_realtime add table public.students_sync;`;
 
     function showAllCoursesView() {
       APP_STATE.insideCourseId = null;
+      if (typeof studioScreenMode !== 'undefined') studioScreenMode = 'list';
       renderLessonsCategoryView();
     }
 
     function openCourseClassesView(courseId) {
       APP_STATE.insideCourseId = courseId;
       APP_STATE.activeCourseId = courseId;
+      studioScreenMode = 'list';
       renderLessonsCategoryView();
     }
 
     function handleSelectCoursePill(courseId) {
       APP_STATE.activeCourseId = courseId;
       APP_STATE.insideCourseId = courseId;
+      studioScreenMode = 'list';
       populateCourseSelector();
       renderLessonsCategoryView();
     }
@@ -9219,12 +9211,10 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       if (!container || !navBar) return;
 
-      if (courses.length === 0) {
-        navBar.classList.add('hidden');
-        return;
-      }
+      // Always keep duplicate quick-switcher pill bar hidden so My Courses stays single-header clean
+      navBar.classList.add('hidden');
+      if (courses.length === 0) return;
 
-      navBar.classList.remove('hidden');
       const isHe = APP_STATE.lang === 'he';
       const activeId = APP_STATE.insideCourseId || APP_STATE.activeCourseId || (courses[0] && courses[0].id);
 
@@ -9303,13 +9293,12 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       const isInsideCourse = !!APP_STATE.insideCourseId;
 
+      if (navBar) navBar.classList.add('hidden');
       if (isInsideCourse) {
-        if (navBar) navBar.classList.add('hidden');
         if (levelCourses) levelCourses.classList.add('hidden');
         if (levelClasses) levelClasses.classList.remove('hidden');
         renderInsideCourseHeader(APP_STATE.insideCourseId);
       } else {
-        if (navBar && courses.length > 0) navBar.classList.remove('hidden');
         if (levelCourses) levelCourses.classList.remove('hidden');
         if (levelClasses) levelClasses.classList.add('hidden');
         renderCoursesCardsGrid();
@@ -9416,60 +9405,28 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       grid.innerHTML = courses.map(c => {
         const title = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
-        const desc = isHe ? (c.description_he || c.description_en) : (c.description_en || c.description_he);
         const lessonsCount = Array.isArray(c.lessons) ? c.lessons.length : 0;
         const icon = c.icon || '✦';
 
         return `
-          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 transition shadow-lg flex flex-col justify-between space-y-4 group">
-            <div class="space-y-2.5">
-              <div class="flex items-start justify-between gap-2">
-                <div class="flex items-center gap-2.5">
-                  <span class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg font-mono shrink-0">
-                    ${escapeHtml(icon)}
-                  </span>
-                  <div>
-                    <h4 class="text-base font-bold text-white group-hover:text-amber-300 transition cursor-pointer" onclick="openCourseClassesView('${c.id}')">${escapeHtml(title)}</h4>
-                    <div class="flex items-center gap-2 mt-0.5 flex-wrap">
-                      <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">
-                        ${escapeHtml(c.category || 'General')}
-                      </span>
-                      ${c.target_level ? `
-                        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                          ${escapeHtml(c.target_level)}
-                        </span>
-                      ` : ''}
-                    </div>
-                  </div>
-                </div>
-                <div class="flex items-center gap-1 shrink-0">
-                  <button onclick="openEditCustomCourseModal('${c.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Edit Course">
-                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-                  </button>
-                  <button onclick="handleDeleteCustomCourseById('${c.id}')" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition" title="Delete Course">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                  </button>
-                </div>
-              </div>
-
-              ${desc ? `<p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">${escapeHtml(desc)}</p>` : ''}
-            </div>
-
-            <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
-              <span class="text-xs font-mono text-slate-400 flex items-center gap-1.5">
-                <i data-lucide="book-open" class="w-3.5 h-3.5 text-slate-500"></i>
-                <span>${lessonsCount} ${isHe ? 'שיעורים' : (lessonsCount === 1 ? 'Class' : 'Classes')}</span>
+          <div onclick="openCourseClassesView('${c.id}')" class="p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-900 transition cursor-pointer shadow-sm hover:shadow-lg flex items-center justify-between gap-3 group">
+            <div class="flex items-center gap-3.5 min-w-0 flex-1">
+              <span class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg font-mono shrink-0">
+                ${escapeHtml(icon)}
               </span>
-              <div class="flex items-center gap-2">
-                <button onclick="handleCourseCardAddClass('${c.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition flex items-center gap-1">
-                  <i data-lucide="plus" class="w-3 h-3"></i>
-                  <span>Class</span>
-                </button>
-                <button onclick="openCourseClassesView('${c.id}')" class="px-3.5 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition flex items-center gap-1 shadow">
-                  <span>Open Classes</span>
-                  <i data-lucide="arrow-right" class="w-3.5 h-3.5 rtl:rotate-180"></i>
-                </button>
+              <div class="min-w-0 flex-1">
+                <h4 dir="auto" class="text-sm sm:text-base font-bold text-white group-hover:text-amber-300 transition truncate">${escapeHtml(title)}</h4>
+                <span class="text-xs font-mono text-slate-400">${lessonsCount} ${isHe ? 'שיעורים' : (lessonsCount === 1 ? 'Lesson' : 'Lessons')}</span>
               </div>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button type="button" onclick="event.stopPropagation(); openEditCustomCourseModal('${c.id}')" class="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Edit Course Architecture">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+              </button>
+              <button type="button" onclick="event.stopPropagation(); handleDeleteCustomCourseById('${c.id}')" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Delete Course">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition ml-1 rtl:rotate-180"></i>
             </div>
           </div>
         `;
@@ -9479,6 +9436,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     function renderCourseClassesView(courseId) {
       APP_STATE.insideCourseId = courseId;
       APP_STATE.activeCourseId = courseId;
+      studioScreenMode = 'list';
       renderLessonsCategoryView();
     }
 
@@ -9599,12 +9557,13 @@ alter publication supabase_realtime add table public.students_sync;`;
       course.updated_at = new Date().toISOString();
       APP_STATE.studioSelectedLessonId = newLesson.id;
       APP_STATE.studioMobileView = 'editor';
+      studioScreenMode = 'edit';
 
       saveCustomCoursesToStorage(true);
-      renderCourseClassesView(courseId);
+      renderLessonsCategoryView();
       renderCourseStudio(courseId, newLesson.id);
       renderCommandCenter();
-      showToast('New class added!');
+      showToast('New lesson ready to build!');
 
       setTimeout(() => {
         const titleInput = document.getElementById('studio-class-title-input');
@@ -9625,10 +9584,10 @@ alter publication supabase_realtime add table public.students_sync;`;
       const newLesson = {
         id: 'lesson_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
         lesson_num: nextNum,
-        title_en: `Class ${nextNum}: New Class`,
+        title_en: `Lesson ${nextNum}: New Lesson`,
         title_he: `שיעור ${nextNum}: שיעור חדש`,
         duration: '45m',
-        level: course.target_level || 'Standard / All Levels',
+        level: (course.blueprint && course.blueprint.student_profile) || course.target_level || 'Standard / All Levels',
         status: 'draft',
         hook_en: '',
         hook_he: '',
@@ -9643,6 +9602,8 @@ alter publication supabase_realtime add table public.students_sync;`;
         discussion_he: '',
         recordings: [],
         sections: {},
+        ai_sources: [],
+        ai_chat_history: [],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -9651,11 +9612,13 @@ alter publication supabase_realtime add table public.students_sync;`;
       course.updated_at = new Date().toISOString();
       APP_STATE.studioSelectedLessonId = newLesson.id;
       APP_STATE.studioMobileView = 'editor';
+      studioScreenMode = 'edit';
+      studioWorkspaceTabMap[newLesson.id] = 'ai';
 
       saveCustomCoursesToStorage(true);
       renderCourseStudio(course.id, newLesson.id);
       renderCommandCenter();
-      showToast(APP_STATE.lang === 'he' ? 'שיעור חדש נוסף!' : 'New class added to course!');
+      showToast(APP_STATE.lang === 'he' ? 'שיעור חדש נוסף!' : 'New lesson created!');
 
       setTimeout(() => {
         const input = document.getElementById('studio-class-title-input');
@@ -9671,7 +9634,27 @@ alter publication supabase_realtime add table public.students_sync;`;
       APP_STATE.studioMobileView = 'editor';
       if (!APP_STATE.expandedCustomLessonIds) APP_STATE.expandedCustomLessonIds = {};
       APP_STATE.expandedCustomLessonIds[lessonId] = true;
+      studioScreenMode = 'read';
       renderCourseStudio(APP_STATE.insideCourseId || APP_STATE.activeCourseId, lessonId);
+    }
+
+    function enterStudioEditLessonMode(courseId, lessonId) {
+      const cId = courseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId;
+      const lId = lessonId || APP_STATE.studioSelectedLessonId;
+      if (cId) {
+        APP_STATE.insideCourseId = cId;
+        APP_STATE.activeCourseId = cId;
+      }
+      if (lId) APP_STATE.studioSelectedLessonId = lId;
+      studioScreenMode = 'edit';
+      if (lId) studioWorkspaceTabMap[lId] = 'ai';
+      renderCourseStudio(cId, lId);
+    }
+
+    function exitStudioToLessonList(courseId) {
+      const cId = courseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId;
+      studioScreenMode = 'list';
+      renderCourseStudio(cId, APP_STATE.studioSelectedLessonId);
     }
 
     function setStudioMobileView(view) {
@@ -10181,8 +10164,56 @@ alter publication supabase_realtime add table public.students_sync;`;
       return `${pad} rounded-2xl ${skin} space-y-2.5`;
     }
 
+    var studioScreenMode = 'list'; // 'list' | 'read' | 'edit'
+    var studioUndoSnapshotMap = {};
+    var studioAiUpdatedSectionIds = {};
     var studioSectionRuleOpenMap = {};
     var studioSectionTweakOpenMap = {};
+
+    function captureStudioUndoSnapshot(lesson) {
+      if (!lesson || !lesson.id) return;
+      studioUndoSnapshotMap[lesson.id] = {
+        title_en: lesson.title_en || '',
+        title_he: lesson.title_he || '',
+        sections: JSON.parse(JSON.stringify(lesson.sections || {})),
+        hook_en: lesson.hook_en || '',
+        anchors_en: JSON.parse(JSON.stringify(lesson.anchors_en || [])),
+        sources_text: lesson.sources_text || '',
+        steps_text: lesson.steps_text || '',
+        pitfalls_text: lesson.pitfalls_text || '',
+        cheat_sheet_text: lesson.cheat_sheet_text || '',
+        homework_text: lesson.homework_text || ''
+      };
+    }
+
+    function undoLastStudioAiChange(courseId, lessonId) {
+      const cId = courseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId;
+      const lId = lessonId || APP_STATE.studioSelectedLessonId;
+      const course = (APP_STATE.customCourses || []).find(c => c.id === cId);
+      const lesson = course && (course.lessons || []).find(l => l.id === lId);
+      const snap = lesson && studioUndoSnapshotMap[lesson.id];
+      if (!course || !lesson || !snap) return;
+
+      lesson.title_en = snap.title_en;
+      lesson.title_he = snap.title_he;
+      lesson.sections = JSON.parse(JSON.stringify(snap.sections || {}));
+      lesson.hook_en = snap.hook_en;
+      lesson.anchors_en = JSON.parse(JSON.stringify(snap.anchors_en || []));
+      lesson.anchors_he = lesson.anchors_en;
+      lesson.sources_text = snap.sources_text;
+      lesson.steps_text = snap.steps_text;
+      lesson.pitfalls_text = snap.pitfalls_text;
+      lesson.cheat_sheet_text = snap.cheat_sheet_text;
+      lesson.homework_text = snap.homework_text;
+      delete studioUndoSnapshotMap[lesson.id];
+      delete studioAiUpdatedSectionIds[lesson.id];
+
+      lesson.updated_at = new Date().toISOString();
+      course.updated_at = new Date().toISOString();
+      saveCustomCoursesToStorage(true);
+      renderCourseStudio(cId, lesson.id);
+      showToast('Restored prior lesson version!');
+    }
 
     function estimateTextareaRows(text, minRows = 2, maxRows = 12, charsPerLine = 68) {
       const str = String(text || '');
@@ -10276,8 +10307,10 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
       }
 
       if (generated) {
+        captureStudioUndoSnapshot(lesson);
         if (!lesson.sections) lesson.sections = {};
         lesson.sections[sectionId] = generated;
+        studioAiUpdatedSectionIds[lesson.id] = [sectionId];
         lesson.updated_at = new Date().toISOString();
         course.updated_at = new Date().toISOString();
         studioSectionTweakOpenMap[sectionId] = false;
@@ -10299,6 +10332,7 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
       const rawVal = (selectedLesson.sections && selectedLesson.sections[sec.id]) || '';
       const isRuleOpen = !!studioSectionRuleOpenMap[sec.id];
       const isTweakOpen = !!studioSectionTweakOpenMap[sec.id];
+      const wasUpdatedByAi = Array.isArray(studioAiUpdatedSectionIds[lId]) && studioAiUpdatedSectionIds[lId].includes(sec.id);
 
       const headerHtml = `
         <div class="flex items-center justify-between gap-2 flex-wrap">
@@ -10308,6 +10342,7 @@ Return ONLY the updated value matching the Format Requirement cleanly.`;
               <span>${escapeHtml(sec.name)}</span>
             </span>
             ${isTeacherOnly ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Teacher Only</span>' : ''}
+            ${wasUpdatedByAi ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">✓ Updated</span>' : ''}
             ${sec.ai_rule ? `
               <button type="button" onclick="toggleSectionRuleHint('${sec.id}')" class="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 transition" title="View section guideline">
                 ⓘ Rule
@@ -11538,20 +11573,28 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
       }
 
       if (parsed.updated_title && typeof parsed.updated_title === 'string' && parsed.updated_title.trim()) {
+        captureStudioUndoSnapshot(lesson);
         lesson.title_en = parsed.updated_title.trim();
         lesson.title_he = parsed.updated_title.trim();
       }
 
       let updatedCount = 0;
+      const updatedSecIds = [];
       if (hasCustomBp && parsed.sections && typeof parsed.sections === 'object') {
+        const willMutate = bpSections.some(s => parsed.sections[s.id] !== undefined);
+        if (willMutate && !studioUndoSnapshotMap[lesson.id]) captureStudioUndoSnapshot(lesson);
+        else if (willMutate) captureStudioUndoSnapshot(lesson);
         if (!lesson.sections) lesson.sections = {};
         bpSections.forEach(s => {
           if (parsed.sections[s.id] !== undefined) {
             lesson.sections[s.id] = normalizeSectionAiValue(parsed.sections[s.id], s.type);
+            updatedSecIds.push(s.id);
             updatedCount++;
           }
         });
       } else if (!hasCustomBp) {
+        const willMutateLegacy = !!(parsed.hook || (Array.isArray(parsed.anchors) && parsed.anchors.length) || parsed.sources || parsed.steps || parsed.pitfalls || parsed.cheat_sheet || parsed.homework);
+        if (willMutateLegacy) captureStudioUndoSnapshot(lesson);
         if (parsed.hook) { lesson.hook_en = parsed.hook; updatedCount++; }
         if (Array.isArray(parsed.anchors) && parsed.anchors.length) {
           lesson.anchors_en = parsed.anchors.map(pt => ({ id: 'anc_' + Math.random().toString(36).substr(2, 6), point: pt }));
@@ -11563,6 +11606,9 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
         if (parsed.pitfalls) { lesson.pitfalls_text = parsed.pitfalls; updatedCount++; }
         if (parsed.cheat_sheet) { lesson.cheat_sheet_text = parsed.cheat_sheet; updatedCount++; }
         if (parsed.homework) { lesson.homework_text = parsed.homework; updatedCount++; }
+      }
+      if (updatedSecIds.length > 0) {
+        studioAiUpdatedSectionIds[lesson.id] = updatedSecIds;
       }
 
       if (parsed.assistant_reply) {
@@ -11578,11 +11624,494 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
       showToast(updatedCount > 0 ? `Updated ${updatedCount} lesson section${updatedCount === 1 ? '' : 's'}!` : 'AI analysis complete!');
     }
 
+    function toggleReaderElement(elId) {
+      const el = document.getElementById(elId);
+      if (el) el.classList.toggle('hidden');
+    }
+
+    function flipReaderCard(cardId) {
+      const front = document.getElementById(cardId + '-front');
+      const back = document.getElementById(cardId + '-back');
+      if (front && back) {
+        front.classList.toggle('hidden');
+        back.classList.toggle('hidden');
+      }
+    }
+
+    function selectReaderQuizOption(qId, optIdx, correctIdx) {
+      for (let i = 0; i < 6; i++) {
+        const btn = document.getElementById(`${qId}-opt-${i}`);
+        if (!btn) break;
+        if (i === correctIdx) {
+          btn.className = 'w-full text-left px-3 py-2 rounded-xl border text-xs sm:text-sm font-semibold transition bg-emerald-500/20 border-emerald-400 text-emerald-200';
+        } else if (i === optIdx) {
+          btn.className = 'w-full text-left px-3 py-2 rounded-xl border text-xs sm:text-sm transition bg-rose-500/20 border-rose-400 text-rose-200';
+        } else {
+          btn.className = 'w-full text-left px-3 py-2 rounded-xl border text-xs sm:text-sm transition bg-slate-950/60 border-slate-800 text-slate-400';
+        }
+      }
+    }
+
+    function renderSectionReadOnlyHtml(activeCourse, lesson, sec, meta) {
+      const cId = activeCourse.id;
+      const lId = lesson.id;
+      const effColor = sec.color || meta.color || 'amber';
+      const cardCls = getCourseCardThemeClasses(activeCourse, effColor);
+      const rawVal = (lesson.sections && lesson.sections[sec.id]) || '';
+      const d = parseStructuredSectionData(rawVal, sec.type);
+      const headerHtml = `
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-${effColor}-300 flex items-center gap-2">
+            <i data-lucide="${meta.icon}" class="w-4 h-4 text-${effColor}-400 shrink-0"></i>
+            <span>${escapeHtml(sec.name)}</span>
+          </span>
+          ${(sec.teacher_only || sec.type === 'teacher_cue') ? '<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Teacher Cue</span>' : ''}
+        </div>
+      `;
+
+      if (sec.type === 'audio') {
+        const allRecs = Array.isArray(lesson.recordings) ? lesson.recordings : (lesson.audio_url ? [{ id: 'legacy_audio', title: 'Lesson Audio', url: lesson.audio_url }] : []);
+        const secRecs = allRecs.filter(r => !r.sectionId || r.sectionId === sec.id);
+        if (secRecs.length === 0 && !String(rawVal).trim()) return '';
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            ${secRecs.map(rec => `
+              <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <span class="text-xs font-semibold text-white">${escapeHtml(rec.title || 'Lesson Audio')}</span>
+                <audio controls src="${escapeHtml(rec.url)}" class="h-8 max-w-full"></audio>
+              </div>
+            `).join('')}
+            ${String(rawVal).trim() ? `<p dir="auto" class="text-sm text-slate-200 whitespace-pre-wrap leading-relaxed">${formatSectionInlineText(rawVal)}</p>` : ''}
+          </div>
+        `;
+      }
+
+      if (sec.type === 'list') {
+        if (!d.items || d.items.length === 0) return '';
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            <ul class="space-y-2.5">
+              ${d.items.map(item => `
+                <li dir="auto" class="flex items-start gap-2.5 text-sm sm:text-base text-slate-100 leading-relaxed">
+                  <span class="text-${effColor}-400 font-bold shrink-0 mt-0.5">✦</span>
+                  <div class="flex-1">${formatSectionInlineText(item)}</div>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        `;
+      }
+
+      if (sec.type === 'steps') {
+        if (!d.steps || d.steps.length === 0) return '';
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            <ol class="space-y-2.5">
+              ${d.steps.map((st, idx) => `
+                <li dir="auto" class="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-start gap-3">
+                  <span class="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-mono font-bold shrink-0 mt-0.5">${idx + 1}</span>
+                  <span class="flex-1 text-sm sm:text-base text-slate-100 leading-relaxed">${formatSectionInlineText(st.text || '')}</span>
+                  ${st.mins ? `<span class="text-[11px] font-mono text-emerald-300 shrink-0">${escapeHtml(st.mins)}</span>` : ''}
+                </li>
+              `).join('')}
+            </ol>
+          </div>
+        `;
+      }
+
+      if (sec.type === 'quote') {
+        if (!d.quote && !d.meaning && !d.citation) return '';
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            ${d.citation ? `<div dir="auto" class="text-xs font-bold text-sky-300">${escapeHtml(d.citation)}</div>` : ''}
+            ${d.quote ? `<blockquote dir="${d.rtl ? 'rtl' : 'auto'}" class="p-4 rounded-xl bg-slate-950/80 border-l-4 border-sky-400 text-base sm:text-lg text-sky-100 leading-relaxed whitespace-pre-wrap ${d.rtl ? 'text-right font-serif' : ''}">${escapeHtml(d.quote)}</blockquote>` : ''}
+            ${d.meaning ? `<p dir="auto" class="text-sm sm:text-base text-slate-200 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(d.meaning)}</p>` : ''}
+          </div>
+        `;
+      }
+
+      if (sec.type === 'example') {
+        if (!d.setup && !d.takeaway) return '';
+        const revId = `read-takeaway-${sec.id}`;
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            ${d.setup ? `<div dir="auto" class="text-sm sm:text-base text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(d.setup)}</div>` : ''}
+            ${d.takeaway ? `
+              <div class="pt-1">
+                <button type="button" onclick="toggleReaderElement('${revId}')" class="text-xs font-bold text-amber-300 hover:text-amber-200 flex items-center gap-1 mb-1.5">
+                  <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
+                  <span>Key Lesson / Takeaway</span>
+                </button>
+                <div id="${revId}" dir="auto" class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-sm text-amber-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(d.takeaway)}</div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
+
+      if (sec.type === 'bilingual_split') {
+        const rows = (Array.isArray(d.rows) ? d.rows : []).filter(r => (r.orig || r.trans || '').trim());
+        if (rows.length === 0) return '';
+        const isRtl = (d.rtl !== undefined ? d.rtl : !!sec.rtl_default);
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            <div class="space-y-3">
+              ${rows.map(r => `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-950/75 border border-slate-800/80">
+                  <div dir="${isRtl ? 'rtl' : 'auto'}" class="text-base sm:text-lg text-teal-100 leading-relaxed whitespace-pre-wrap ${isRtl ? 'text-right font-serif' : ''}">${escapeHtml(r.orig || '')}</div>
+                  <div dir="auto" class="text-sm sm:text-base text-slate-200 leading-relaxed whitespace-pre-wrap md:border-l md:border-slate-800 md:pl-3">${formatSectionInlineText(r.trans || '')}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      if (sec.type === 'pitfalls') {
+        const items = (Array.isArray(d.items) ? d.items : []).filter(it => (it.trap || it.fix || '').trim());
+        if (items.length === 0) return '';
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            <div class="space-y-3">
+              ${items.map(it => `
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div dir="auto" class="p-3 rounded-xl bg-rose-950/35 border border-rose-500/25 text-sm text-rose-100 leading-relaxed">
+                    <span class="block text-[10px] font-mono uppercase text-rose-400 font-bold mb-1">Common Thought</span>
+                    ${formatSectionInlineText(it.trap || '')}
+                  </div>
+                  <div dir="auto" class="p-3 rounded-xl bg-emerald-950/35 border border-emerald-500/25 text-sm text-emerald-100 leading-relaxed">
+                    <span class="block text-[10px] font-mono uppercase text-emerald-400 font-bold mb-1">How to Reframe It</span>
+                    ${formatSectionInlineText(it.fix || '')}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      if (sec.type === 'discussion') {
+        if (!d.prompt && !d.followup && !d.notes) return '';
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            ${d.prompt ? `<div dir="auto" class="text-base sm:text-lg font-semibold text-white leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(d.prompt)}</div>` : ''}
+            ${d.followup ? `<div dir="auto" class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/25 text-xs sm:text-sm text-indigo-200 leading-relaxed"><strong class="font-mono uppercase text-[10px] text-indigo-300 mr-1.5">Follow-up Cue:</strong>${formatSectionInlineText(d.followup)}</div>` : ''}
+            ${d.notes ? `<div dir="auto" class="text-xs sm:text-sm text-slate-300 italic leading-relaxed">${formatSectionInlineText(d.notes)}</div>` : ''}
+          </div>
+        `;
+      }
+
+      if (sec.type === 'reflection' || sec.type === 'homework') {
+        const mainText = sec.type === 'reflection' ? d.mindset : d.task;
+        const subText = sec.type === 'reflection' ? d.action : (d.estMinutes ? `Estimated time: ${d.estMinutes}` : '');
+        if (!mainText && !subText) return '';
+        const pickerId = `read-stu-${sec.id}`;
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            ${mainText ? `<div dir="auto" class="text-sm sm:text-base text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(mainText)}</div>` : ''}
+            ${subText ? `<div dir="auto" class="p-3 rounded-xl bg-slate-950/70 border border-${effColor}-500/25 text-sm text-${effColor}-200 leading-relaxed">${formatSectionInlineText(subText)}</div>` : ''}
+            <div class="flex items-center justify-end gap-2 pt-1 flex-wrap">
+              ${renderStudentQuickPickerHtml(pickerId)}
+              <button type="button" onclick="assignSectionTaskToStudent('${cId}', '${lId}', '${sec.id}', '${sec.type}', '${pickerId}')" class="px-3 py-1 rounded-lg bg-${effColor}-500/20 hover:bg-${effColor}-500/30 text-${effColor}-300 border border-${effColor}-500/30 text-[11px] font-bold transition">
+                ${sec.type === 'reflection' ? '+ Send to Student Goal' : 'Assign to Student'}
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      if (sec.type === 'exercise') {
+        const items = (Array.isArray(d.items) ? d.items : []).filter(it => (it.q || it.a || '').trim());
+        if (items.length === 0) return '';
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            <div class="space-y-2.5">
+              ${items.map((it, idx) => `
+                <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+                  <div dir="auto" class="text-sm font-semibold text-white"><span class="text-emerald-400 font-mono mr-1.5">#${idx + 1}</span>${formatSectionInlineText(it.q || '')}</div>
+                  ${it.a ? `
+                    <button type="button" onclick="toggleReaderElement('read-ex-ans-${sec.id}-${idx}')" class="text-xs font-bold text-emerald-300 hover:underline">Reveal Answer</button>
+                    <div id="read-ex-ans-${sec.id}-${idx}" dir="auto" class="hidden p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-500/25 text-xs sm:text-sm text-emerald-200">${formatSectionInlineText(it.a)}</div>
+                  ` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      if (sec.type === 'quiz') {
+        const items = (Array.isArray(d.items) ? d.items : []).filter(it => (it.q || '').trim());
+        if (items.length === 0) return '';
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            <div class="space-y-3.5">
+              ${items.map((it, qIdx) => {
+                const qDomId = `read-q-${sec.id}-${qIdx}`;
+                const corr = typeof it.correct === 'number' ? it.correct : 0;
+                return `
+                  <div class="p-3.5 rounded-xl bg-slate-950/75 border border-indigo-500/25 space-y-2">
+                    <div dir="auto" class="text-sm font-bold text-white">${qIdx + 1}. ${escapeHtml(it.q || '')}</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      ${(it.options || []).map((opt, optIdx) => `
+                        <button type="button" id="${qDomId}-opt-${optIdx}" onclick="selectReaderQuizOption('${qDomId}', ${optIdx}, ${corr})" dir="auto" class="w-full text-left px-3 py-2 rounded-xl border text-xs sm:text-sm transition bg-slate-900/90 hover:bg-slate-800 border-slate-800 text-slate-200">
+                          <strong class="font-mono mr-1.5 text-indigo-300">${String.fromCharCode(65 + optIdx)}.</strong>${escapeHtml(opt || '')}
+                        </button>
+                      `).join('')}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      if (sec.type === 'flashcards') {
+        const items = (Array.isArray(d.items) ? d.items : []).filter(it => (it.front || it.back || '').trim());
+        if (items.length === 0) return '';
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              ${items.map((it, idx) => {
+                const fId = `read-fc-${sec.id}-${idx}`;
+                return `
+                  <div onclick="flipReaderCard('${fId}')" class="p-4 rounded-xl bg-slate-950/80 border border-purple-500/30 hover:border-purple-400 cursor-pointer transition space-y-1">
+                    <div id="${fId}-front" dir="auto" class="text-sm font-bold text-purple-200">${escapeHtml(it.front || '')}<span class="block text-[10px] font-mono text-slate-500 mt-2">Click to flip</span></div>
+                    <div id="${fId}-back" dir="auto" class="hidden text-sm text-emerald-200">${formatSectionInlineText(it.back || '')}<span class="block text-[10px] font-mono text-slate-500 mt-2">Click to flip back</span></div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      if (sec.type === 'table') {
+        const headers = Array.isArray(d.headers) ? d.headers : [];
+        const rows = (Array.isArray(d.rows) ? d.rows : []).filter(r => r && r.some(c => String(c || '').trim()));
+        if (headers.length === 0 && rows.length === 0) return '';
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs sm:text-sm border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-800 text-blue-300">
+                    ${headers.map(h => `<th dir="auto" class="p-2.5 text-left font-bold">${escapeHtml(h)}</th>`).join('')}
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows.map(r => `
+                    <tr class="border-b border-slate-800/60">
+                      ${headers.map((_, idx) => `<td dir="auto" class="p-2.5 text-slate-200 align-top">${formatSectionInlineText((r && r[idx]) || '')}</td>`).join('')}
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      if (sec.type === 'dialogue') {
+        const items = (Array.isArray(d.items) ? d.items : []).filter(it => (it.speaker || it.line || '').trim());
+        if (items.length === 0) return '';
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            <div class="space-y-2">
+              ${items.map(it => `
+                <div dir="auto" class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-sm text-slate-200">
+                  <strong class="text-cyan-300 mr-2">${escapeHtml(it.speaker || 'Speaker')}:</strong>${formatSectionInlineText(it.line || '')}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      if (sec.type === 'image') {
+        if (!d.url && !d.caption) return '';
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            ${d.url ? `<div class="rounded-xl overflow-hidden bg-slate-950 border border-slate-800 p-2 flex justify-center"><img src="${escapeHtml(d.url)}" alt="${escapeHtml(d.caption || sec.name)}" class="max-h-80 rounded-lg object-contain"></div>` : ''}
+            ${d.caption ? `<p dir="auto" class="text-xs sm:text-sm text-slate-300 italic text-center">${escapeHtml(d.caption)}</p>` : ''}
+          </div>
+        `;
+      }
+
+      if (sec.type === 'video_links') {
+        const items = (Array.isArray(d.items) ? d.items : []).filter(it => (it.title || it.url || '').trim());
+        if (items.length === 0) return '';
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            <div class="space-y-2">
+              ${items.map(it => `
+                <a href="${escapeHtml(it.url || '#')}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-3 rounded-xl bg-slate-950/75 border border-slate-800 hover:border-rose-400/50 text-sm text-rose-200 transition">
+                  <span class="font-semibold">${escapeHtml(it.title || it.url || 'Resource')}</span>
+                  <i data-lucide="external-link" class="w-4 h-4 shrink-0"></i>
+                </a>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      if (sec.type === 'timed_activity') {
+        if (!d.prompt) return '';
+        return `
+          <div class="${cardCls}">
+            ${headerHtml}
+            <div class="text-xs font-mono text-orange-300">Activity Timer: ${Math.round((parseInt(d.seconds, 10) || 180) / 60)} min</div>
+            <p dir="auto" class="text-sm sm:text-base text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(d.prompt)}</p>
+          </div>
+        `;
+      }
+
+      if (sec.type === 'teacher_cue') {
+        if (!d.cue) return '';
+        return `
+          <div class="${cardCls} border-dashed">
+            ${headerHtml}
+            <p dir="auto" class="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(d.cue)}</p>
+          </div>
+        `;
+      }
+
+      if (!d.summary && !d.body) return '';
+      return `
+        <div class="${cardCls}">
+          ${headerHtml}
+          ${d.summary ? `<div dir="auto" class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-sm font-semibold text-cyan-200 leading-relaxed">${formatSectionInlineText(d.summary)}</div>` : ''}
+          ${d.body ? `<div dir="auto" class="text-sm sm:text-base text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(d.body)}</div>` : ''}
+        </div>
+      `;
+    }
+
+    function renderLessonCleanReader(activeCourse, selectedLesson, lessons) {
+      const isHe = APP_STATE.lang === 'he';
+      const bp = activeCourse.blueprint || {};
+      const blueprintSections = Array.isArray(bp.sections) ? bp.sections : [];
+      const hasCustomSections = blueprintSections.length > 0;
+      const selectedTitle = isHe ? (selectedLesson.title_he || selectedLesson.title_en || 'Untitled Lesson') : (selectedLesson.title_en || selectedLesson.title_he || 'Untitled Lesson');
+
+      let bodyHtml = '';
+      if (hasCustomSections) {
+        bodyHtml = blueprintSections.map(sec => {
+          const meta = (typeof COURSE_BLOCK_CATALOG !== 'undefined' && COURSE_BLOCK_CATALOG[sec.type]) ? COURSE_BLOCK_CATALOG[sec.type] : { label: 'Section', icon: 'layers', color: 'amber' };
+          return renderSectionReadOnlyHtml(activeCourse, selectedLesson, sec, meta);
+        }).filter(Boolean).join('');
+      } else {
+        const legacyParts = [];
+        if (selectedLesson.hook_en || selectedLesson.hook_he) {
+          legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-amber-900/30 space-y-2"><span class="text-xs font-bold uppercase tracking-wider text-amber-400">Opening Hook</span><p dir="auto" class="text-base text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(selectedLesson.hook_en || selectedLesson.hook_he)}</p></div>`);
+        }
+        const anchors = selectedLesson.anchors_en && selectedLesson.anchors_en.length ? selectedLesson.anchors_en : (selectedLesson.anchors_he || []);
+        if (anchors.length) {
+          legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2.5"><span class="text-xs font-bold uppercase tracking-wider text-amber-300">Core Knowledge Anchors</span><ul class="space-y-2">${anchors.map(a => `<li dir="auto" class="text-sm sm:text-base text-slate-100 flex items-start gap-2"><span class="text-amber-400 font-bold">✦</span><span>${formatSectionInlineText(typeof a === 'string' ? a : (a.point || a.title || ''))}</span></li>`).join('')}</ul></div>`);
+        }
+        if (selectedLesson.sources_text) legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-cyan-900/30 space-y-2"><span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Primary Sources</span><p dir="auto" class="text-sm sm:text-base text-cyan-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(selectedLesson.sources_text)}</p></div>`);
+        if (selectedLesson.steps_text) legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-emerald-900/30 space-y-2"><span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Step by Step Flow</span><p dir="auto" class="text-sm sm:text-base text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(selectedLesson.steps_text)}</p></div>`);
+        if (selectedLesson.pitfalls_text) legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-rose-900/30 space-y-2"><span class="text-xs font-bold uppercase tracking-wider text-rose-400">Common Pitfalls</span><p dir="auto" class="text-sm sm:text-base text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(selectedLesson.pitfalls_text)}</p></div>`);
+        if (selectedLesson.homework_text) legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-purple-900/30 space-y-2"><span class="text-xs font-bold uppercase tracking-wider text-purple-400">Homework Challenge</span><p dir="auto" class="text-sm sm:text-base text-purple-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(selectedLesson.homework_text)}</p></div>`);
+        bodyHtml = legacyParts.join('');
+      }
+
+      const audioSecIds = new Set(blueprintSections.filter(s => s.type === 'audio').map(s => s.id));
+      const allRecs = Array.isArray(selectedLesson.recordings) ? selectedLesson.recordings : (selectedLesson.audio_url ? [{ id: 'legacy_audio', title: 'Lesson Audio', url: selectedLesson.audio_url }] : []);
+      const readerExtraAudio = allRecs.filter(r => !r.sectionId || !audioSecIds.has(r.sectionId));
+      if (readerExtraAudio.length > 0) {
+        bodyHtml += `
+          <div class="p-5 sm:p-6 rounded-2xl bg-slate-900/85 border border-indigo-500/25 space-y-3">
+            <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-300">
+              <i data-lucide="volume-2" class="w-4 h-4 text-indigo-400"></i>
+              <span>Audio & Voice Recordings</span>
+            </div>
+            <div class="space-y-2.5">
+              ${readerExtraAudio.map(r => `
+                <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span dir="auto" class="text-xs sm:text-sm font-medium text-white">${escapeHtml(r.title || 'Lesson Audio')}</span>
+                  <audio controls src="${escapeHtml(r.url)}" class="h-8 max-w-xs"></audio>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div id="studio-lesson-reader" class="max-w-4xl mx-auto space-y-6">
+          <!-- Single Calm Reader Navigation Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-slate-800/80">
+            <button type="button" onclick="exitStudioToLessonList('${activeCourse.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 self-start transition">
+              <i data-lucide="arrow-left" class="w-3.5 h-3.5 rtl:rotate-180"></i>
+              <span>${isHe ? 'חזרה לרשימת השיעורים' : 'Lessons'}</span>
+            </button>
+            <div class="flex items-center gap-2 flex-wrap">
+              <button type="button" id="btn-reader-teach-class" onclick="openTutorTeleprompter('${activeCourse.id}', '${selectedLesson.id}')" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow transition active:scale-95">
+                <i data-lucide="presentation" class="w-3.5 h-3.5"></i>
+                <span>Teach Class</span>
+              </button>
+              <button type="button" id="btn-reader-edit-lesson" onclick="enterStudioEditLessonMode('${activeCourse.id}', '${selectedLesson.id}')" class="px-4 py-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 font-bold text-xs flex items-center gap-1.5 transition active:scale-95">
+                <i data-lucide="pencil" class="w-3.5 h-3.5 text-indigo-300"></i>
+                <span>Edit Lesson</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Clean Document Hero Title -->
+          <div class="space-y-2">
+            <div class="flex items-center gap-2 text-xs font-mono text-slate-400">
+              <span class="text-amber-400 font-bold">${escapeHtml(activeCourse.title_en || activeCourse.title_he || '')}</span>
+              <span>•</span>
+              <span>Lesson ${selectedLesson.lesson_num || lessons.indexOf(selectedLesson) + 1} of ${lessons.length}</span>
+              ${selectedLesson.duration ? `<span>•</span><span>${escapeHtml(selectedLesson.duration)}</span>` : ''}
+            </div>
+            <h1 id="reader-lesson-title" dir="auto" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">${escapeHtml(selectedTitle)}</h1>
+          </div>
+
+          <!-- Formatted Lesson Document Body (Zero Cluttered Inputs) -->
+          ${bodyHtml ? `
+            <div id="reader-sections-body" class="space-y-4">
+              ${bodyHtml}
+            </div>
+          ` : `
+            <div class="text-center py-12 px-6 rounded-3xl bg-slate-900/50 border border-dashed border-slate-800 space-y-4">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-300 mx-auto">
+                <i data-lucide="sparkles" class="w-5 h-5"></i>
+              </div>
+              <div class="space-y-1">
+                <h4 class="text-base font-bold text-white">This lesson does not have content yet</h4>
+                <p class="text-xs text-slate-400 max-w-md mx-auto">Click Edit Lesson to speak with AI, drop links or voice notes, and build your sections inside your Course Blueprint.</p>
+              </div>
+              <button type="button" onclick="enterStudioEditLessonMode('${activeCourse.id}', '${selectedLesson.id}')" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition">
+                Edit Lesson with AI
+              </button>
+            </div>
+          `}
+        </div>
+      `;
+    }
+
     function renderCourseStudio(targetCourseId, targetLessonId) {
       const container = document.getElementById('tutor-hub-lessons-container');
       if (!container) return;
       const isHe = APP_STATE.lang === 'he';
-      const t = I18N[APP_STATE.lang] || {};
       const courses = APP_STATE.customCourses || [];
       if (courses.length === 0) return;
 
@@ -11594,26 +12123,28 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
       }
 
       const lessons = Array.isArray(activeCourse.lessons) ? activeCourse.lessons : [];
+      const outerCourseHeader = document.getElementById('inside-course-header-card');
 
       // Update header metrics
       const statsEl = document.getElementById('active-course-display-stats');
       if (statsEl) {
-        statsEl.textContent = `${lessons.length} ${isHe ? (lessons.length === 1 ? 'שיעור' : 'שיעורים') : (lessons.length === 1 ? 'Class' : 'Classes')}`;
+        statsEl.textContent = `${lessons.length} ${isHe ? (lessons.length === 1 ? 'שיעור' : 'שיעורים') : (lessons.length === 1 ? 'Lesson' : 'Lessons')}`;
       }
 
-      // EMPTY STATE: Clean AI-First Studio Canvas
+      // EMPTY STATE: Course Has Zero Lessons Yet
       if (lessons.length === 0) {
+        if (outerCourseHeader) outerCourseHeader.classList.remove('hidden');
         container.innerHTML = `
           <div id="course-studio-empty-state" class="text-center py-10 px-6 bg-slate-900/50 border border-slate-800 rounded-3xl space-y-5 max-w-2xl mx-auto shadow-xl">
             <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mx-auto text-2xl font-mono">
               ✦
             </div>
             <div class="space-y-1.5">
-              <h4 class="text-base sm:text-lg font-bold text-white">${isHe ? 'סטודיו השיעורים מוכן' : 'Build Your Classes Inside This Blueprint'}</h4>
+              <h4 class="text-base sm:text-lg font-bold text-white">${isHe ? 'הקורס מוכן ליצירת שיעורים' : 'Ready to Build Lessons'}</h4>
               <p class="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
                 ${isHe
-                  ? 'בקש מהבינה המלאכותית לתכנן עבורך סילבוס שלם, או הוסף שיעור ראשון והתחל לנתח קישורים, שמע והערות יחד עם AI.'
-                  : 'Let AI plan your syllabus arc, or add your first class below to share links, voice notes, and ideas with AI.'}
+                  ? 'צור שיעור ראשון עם בינה מלאכותית או תכנן רשימת שיעורים שלמה.'
+                  : 'Create your first lesson from scratch with AI, or plan multiple lesson titles for this course.'}
               </p>
             </div>
 
@@ -11622,7 +12153,8 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                 <input
                   id="input-studio-quick-class"
                   type="text"
-                  placeholder="${isHe ? '+ הקלד שם שיעור ראשון ולחץ Enter...' : '+ Type first class title and press Enter...'}"
+                  dir="auto"
+                  placeholder="${isHe ? '+ הקלד שם שיעור ראשון ולחץ Enter...' : '+ Type first lesson name and press Enter...'}"
                   class="flex-1 px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition"
                   autocomplete="off"
                 />
@@ -11638,11 +12170,11 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
             <div class="flex items-center justify-center gap-2 pt-1 flex-wrap">
               <button type="button" onclick="executeStudioInlineSyllabusAi('${activeCourse.id}')" class="px-4 py-2 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/40 text-xs font-bold transition active:scale-95 shadow flex items-center gap-1.5">
                 <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i>
-                <span>${isHe ? 'תכנן סילבוס עם AI' : 'AI Plan Syllabus'}</span>
+                <span>${isHe ? 'תכנן שיעורים עם AI' : 'Plan Syllabus with AI'}</span>
               </button>
               <button type="button" onclick="openStudioBatchOutlineModal('${activeCourse.id}')" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs font-semibold transition active:scale-95 shadow flex items-center gap-1.5">
                 <i data-lucide="layers" class="w-3.5 h-3.5 text-amber-400"></i>
-                <span>${isHe ? 'הדבק רשימת שיעורים' : 'Paste Outline'}</span>
+                <span>${isHe ? 'הדבק רשימה' : 'Paste Outline'}</span>
               </button>
               <button onclick="openStudioAiCoPilotModal('${activeCourse.id}')" class="hidden">AI Generate Syllabus</button>
               <button onclick="openAddCustomLessonModal('${activeCourse.id}')" class="hidden">+ Add Class</button>
@@ -11659,7 +12191,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                   <div class="space-y-1.5">
                     ${studioInlineSyllabusSuggestions.map((s, idx) => `
                       <div class="p-2 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2 text-xs text-slate-200">
-                        <span class="truncate"><strong class="text-amber-400 font-mono mr-1.5">${idx + 1}.</strong>${escapeHtml(s)}</span>
+                        <span dir="auto" class="truncate"><strong class="text-amber-400 font-mono mr-1.5">${idx + 1}.</strong>${escapeHtml(s)}</span>
                         <button type="button" onclick="addInlineSuggestedClass('${activeCourse.id}', ${idx})" class="px-2 py-0.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-[11px] font-bold shrink-0">+ Add</button>
                       </div>
                     `).join('')}
@@ -11675,9 +12207,6 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
 
       // Resolve Selected Lesson
       let selectedLessonId = targetLessonId;
-      if (!selectedLessonId && APP_STATE.expandedCustomLessonIds) {
-        selectedLessonId = Object.keys(APP_STATE.expandedCustomLessonIds).find(id => lessons.some(l => l.id === id));
-      }
       if (!selectedLessonId && APP_STATE.studioSelectedLessonId && lessons.some(l => l.id === APP_STATE.studioSelectedLessonId)) {
         selectedLessonId = APP_STATE.studioSelectedLessonId;
       }
@@ -11686,488 +12215,406 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
       }
       APP_STATE.studioSelectedLessonId = selectedLessonId;
 
-      let selectedLesson = lessons.find(l => l.id === selectedLessonId) || lessons[0];
+      const selectedLesson = lessons.find(l => l.id === selectedLessonId) || lessons[0];
+      const mode = studioScreenMode || 'list';
+
+      // ================================================================
+      // SCREEN 2: CLEAN COURSE LESSON NAMES LIST (studioScreenMode === 'list')
+      // ================================================================
+      if (mode === 'list') {
+        if (outerCourseHeader) outerCourseHeader.classList.remove('hidden');
+        container.innerHTML = `
+          <div id="studio-lesson-list-screen" class="max-w-3xl mx-auto space-y-4">
+            <!-- Clean Scannable List: Strictly Lesson Number + Lesson Name -->
+            <div id="studio-syllabus-list" class="space-y-2">
+              ${lessons.map((les, idx) => {
+                const lTitle = isHe ? (les.title_he || les.title_en || 'Untitled Lesson') : (les.title_en || les.title_he || 'Untitled Lesson');
+                return `
+                  <div
+                    id="studio-syllabus-item-${les.id}"
+                    onclick="selectStudioClass('${les.id}')"
+                    class="p-3.5 sm:p-4 rounded-2xl border border-slate-800/90 bg-slate-900/75 hover:bg-slate-900 hover:border-amber-500/50 transition cursor-pointer select-none group flex items-center justify-between gap-3 shadow-sm"
+                  >
+                    <div class="flex items-center gap-3.5 min-w-0 flex-1">
+                      <span class="w-7 h-7 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-400 flex items-center justify-center font-mono text-xs font-bold shrink-0">
+                        ${les.lesson_num || idx + 1}
+                      </span>
+                      <h5 id="studio-syllabus-title-${les.id}" dir="auto" class="text-sm sm:text-base font-bold text-white group-hover:text-amber-300 transition truncate">${escapeHtml(lTitle)}</h5>
+                    </div>
+
+                    <div class="flex items-center gap-1 shrink-0">
+                      <button type="button" onclick="event.stopPropagation(); handleStudioMoveClass('${activeCourse.id}', '${les.id}', -1)" class="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Move Up">
+                        <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+                      </button>
+                      <button type="button" onclick="event.stopPropagation(); handleStudioMoveClass('${activeCourse.id}', '${les.id}', 1)" class="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Move Down">
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                      </button>
+                      <button type="button" onclick="event.stopPropagation(); handleStudioDeleteClass('${activeCourse.id}', '${les.id}')" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Delete Lesson">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                      </button>
+                      <i data-lucide="arrow-right" class="w-4 h-4 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition ml-1 rtl:rotate-180"></i>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+
+            <!-- Quiet Add / Syllabus Tools Below List -->
+            <div id="studio-rapid-add-box" class="p-3.5 rounded-2xl bg-slate-900/50 border border-slate-800/80 space-y-2.5">
+              <form onsubmit="handleStudioQuickAddClass(event, '${activeCourse.id}'); return false;" class="flex items-center gap-2">
+                <input
+                  id="input-studio-quick-class"
+                  type="text"
+                  dir="auto"
+                  placeholder="${isHe ? '+ הקלד שם שיעור ולחץ Enter...' : '+ Type lesson name and press Enter...'}"
+                  class="flex-1 min-w-0 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:border-amber-400 transition"
+                  autocomplete="off"
+                />
+                <button type="submit" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs shrink-0 transition border border-slate-700">
+                  ${isHe ? 'הוסף' : 'Quick Add'}
+                </button>
+              </form>
+              <div class="flex items-center justify-between text-xs pt-1">
+                <button type="button" onclick="toggleStudioSyllabusAiDrawer('${activeCourse.id}')" class="text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 font-semibold transition">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                  <span>${isHe ? 'תכנון סילבוס AI' : 'Plan Syllabus with AI'}</span>
+                </button>
+                <button type="button" onclick="openStudioBatchOutlineModal('${activeCourse.id}')" class="text-slate-400 hover:text-amber-300 flex items-center gap-1.5 font-semibold transition">
+                  <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                  <span>${isHe ? 'הדבק רשימה' : 'Paste Outline'}</span>
+                </button>
+              </div>
+
+              <div id="studio-inline-syllabus-drawer" class="${studioInlineSyllabusOpen ? '' : 'hidden'} pt-2 border-t border-indigo-500/20 space-y-2">
+                <div class="flex items-center gap-1.5">
+                  <input
+                    id="input-studio-inline-syllabus-prompt"
+                    type="text"
+                    dir="auto"
+                    placeholder="Topic focus (optional)..."
+                    onkeydown="if(event.key==='Enter'){ event.preventDefault(); executeStudioInlineSyllabusAi('${activeCourse.id}'); }"
+                    class="flex-1 min-w-0 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400"
+                  />
+                  <button type="button" onclick="executeStudioInlineSyllabusAi('${activeCourse.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold shrink-0">Suggest</button>
+                </div>
+                ${studioInlineSyllabusThinking ? `<p class="text-[11px] text-amber-400 animate-pulse font-mono">Planning sequence with Gemini...</p>` : ''}
+                ${(studioInlineSyllabusSuggestions && studioInlineSyllabusSuggestions.length > 0) ? `
+                  <div class="space-y-1.5 max-h-48 overflow-y-auto">
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 px-0.5">
+                      <span>Click + Add on any lesson:</span>
+                      <button type="button" onclick="addAllInlineSuggestedClasses('${activeCourse.id}')" class="text-emerald-400 hover:underline font-bold">+ Add All</button>
+                    </div>
+                    ${studioInlineSyllabusSuggestions.map((s, sIdx) => `
+                      <div class="p-2 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-2 text-xs text-slate-200">
+                        <span dir="auto" class="truncate">${escapeHtml(s)}</span>
+                        <button type="button" onclick="addInlineSuggestedClass('${activeCourse.id}', ${sIdx})" class="px-2.5 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold shrink-0">+ Add</button>
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+        if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+        return;
+      }
+
+      // ================================================================
+      // SCREEN 3: CLEAN FULL-PAGE LESSON READER (studioScreenMode === 'read')
+      // ================================================================
+      if (mode === 'read') {
+        if (outerCourseHeader) outerCourseHeader.classList.add('hidden');
+        container.innerHTML = renderLessonCleanReader(activeCourse, selectedLesson, lessons);
+        if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+        return;
+      }
+
+      // ================================================================
+      // SCREEN 4: UNIFIED LIVE SPLIT BUILD / EDIT LESSON STUDIO ('edit')
+      // ================================================================
+      if (outerCourseHeader) outerCourseHeader.classList.add('hidden');
       let selectedIdx = lessons.indexOf(selectedLesson);
       if (selectedIdx < 0) selectedIdx = 0;
 
-      const mobileView = APP_STATE.studioMobileView || 'syllabus';
       const bp = activeCourse.blueprint || {};
       const blueprintSections = Array.isArray(bp.sections) ? bp.sections : [];
       const hasCustomSections = blueprintSections.length > 0;
-
       const activeTab = getStudioWorkspaceTab(activeCourse, selectedLesson);
       const isClassAiThinking = !!studioClassAiThinkingMap[selectedLesson.id];
       const classAiHistory = ensureStudioClassAiHistory(activeCourse, selectedLesson);
       const attachedSources = ensureStudioLessonSources(selectedLesson);
-      const lastChatMsg = classAiHistory[classAiHistory.length - 1];
+      const hasUndoSnap = !!studioUndoSnapshotMap[selectedLesson.id];
 
       const filledSectionsCount = hasCustomSections
         ? blueprintSections.filter(s => selectedLesson.sections && selectedLesson.sections[s.id] && String(selectedLesson.sections[s.id]).trim() !== '').length
         : [selectedLesson.hook_en, (selectedLesson.anchors_en || []).length ? '1' : '', selectedLesson.sources_text, selectedLesson.steps_text, selectedLesson.pitfalls_text, selectedLesson.homework_text].filter(Boolean).length;
 
-      // Active Class details
       const selectedTitle = isHe ? (selectedLesson.title_he || selectedLesson.title_en || '') : (selectedLesson.title_en || selectedLesson.title_he || '');
       const selectedRecordings = Array.isArray(selectedLesson.recordings) ? selectedLesson.recordings : (selectedLesson.audio_url ? [{ id: 'legacy_audio', title: 'Lesson Audio', url: selectedLesson.audio_url, type: 'audio' }] : []);
       const selectedAnchors = isHe ? (selectedLesson.anchors_he && selectedLesson.anchors_he.length ? selectedLesson.anchors_he : selectedLesson.anchors_en || []) : (selectedLesson.anchors_en && selectedLesson.anchors_en.length ? selectedLesson.anchors_en : selectedLesson.anchors_he || []);
       const anchorsRawText = selectedAnchors.map(a => typeof a === 'string' ? a : (a.point || a.title || '')).join('\n');
 
       let html = `
-        <div id="course-studio-wrapper" class="space-y-4">
+        <div id="course-studio-wrapper" class="max-w-7xl mx-auto space-y-4">
           <input type="file" id="input-studio-source-file" class="hidden" multiple onchange="handleStudioSourceFileSelected(event, '${activeCourse.id}', '${selectedLesson.id}')" />
 
-          <!-- Mobile Segmented Navigation Switcher -->
-          <div class="md:hidden flex items-center p-1 bg-slate-900 border border-slate-800 rounded-2xl">
-            <button
-              type="button"
-              id="btn-studio-mob-tab-syllabus"
-              onclick="setStudioMobileView('syllabus')"
-              class="flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 ${mobileView === 'syllabus' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'}"
-            >
-              <i data-lucide="list-ordered" class="w-3.5 h-3.5"></i>
-              <span>${isHe ? 'סילבוס' : 'Syllabus'} (${lessons.length})</span>
-            </button>
-            <button
-              type="button"
-              id="btn-studio-mob-tab-editor"
-              onclick="setStudioMobileView('editor')"
-              class="flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 ${mobileView === 'editor' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'}"
-            >
-              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-              <span>${isHe ? 'סדנת שיעור' : 'Lesson Studio'}</span>
-            </button>
-          </div>
-
-          <!-- Two-Pane Balanced Studio Grid (Collapsible 4/8 -> 12 Full Width) -->
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
-            <!-- ============================================== -->
-            <!-- LEFT PANE: COLLAPSIBLE SYLLABUS SIDEBAR        -->
-            <!-- ============================================== -->
-            <div id="studio-syllabus-pane" class="${studioSyllabusCollapsed ? 'hidden' : 'md:col-span-4'} space-y-3 ${mobileView === 'editor' && !studioSyllabusCollapsed ? 'hidden md:block' : ''}">
-              <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-sm flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <i data-lucide="book-marked" class="w-4 h-4 text-amber-400"></i>
-                  <h4 class="text-xs sm:text-sm font-bold text-white tracking-tight">${isHe ? 'סילבוס הקורס' : 'Course Syllabus'}</h4>
-                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">${lessons.length}</span>
-                </div>
-                <span class="text-[10px] font-mono text-slate-400">~${Math.round(lessons.length * 45 / 60 * 10) / 10} hrs</span>
+          <!-- Single Unified Edit Studio Bar -->
+          <div id="studio-edit-topbar" class="p-4 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-3">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="flex items-center gap-2 flex-wrap">
+                <button type="button" onclick="exitStudioToLessonList('${activeCourse.id}')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 flex items-center gap-1 transition">
+                  <i data-lucide="arrow-left" class="w-3.5 h-3.5 rtl:rotate-180"></i>
+                  <span>Lessons</span>
+                </button>
+                <button type="button" id="btn-edit-done-view-lesson" onclick="selectStudioClass('${selectedLesson.id}')" class="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center gap-1.5 transition">
+                  <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  <span>Done · View Lesson</span>
+                </button>
+                <span id="studio-save-indicator" class="text-[11px] font-mono text-emerald-400">✓ Auto-saved</span>
               </div>
 
-              <div id="studio-syllabus-list" class="space-y-1.5 max-h-[58vh] overflow-y-auto pr-1">
-                ${lessons.map((les, idx) => {
-                  const lTitle = isHe ? (les.title_he || les.title_en || 'Untitled') : (les.title_en || les.title_he || 'Untitled');
-                  const isSel = les.id === selectedLesson.id;
-                  const recordings = Array.isArray(les.recordings) ? les.recordings : (les.audio_url ? [1] : []);
+              <div class="flex items-center gap-1.5 flex-wrap">
+                ${hasUndoSnap ? `
+                  <button type="button" id="btn-undo-studio-ai" onclick="undoLastStudioAiChange('${activeCourse.id}', '${selectedLesson.id}')" class="px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/35 text-xs font-bold flex items-center gap-1.5 transition">
+                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                    <span>Undo AI Change</span>
+                  </button>
+                ` : ''}
+                ${(bp && (bp.student_profile || bp.guidelines)) ? `
+                  <button type="button" onclick="toggleStudioBlueprintSummary()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 text-[11px] font-semibold flex items-center gap-1 transition">
+                    <i data-lucide="book-open-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    <span>${studioBlueprintDetailsOpen ? 'Hide Rules' : 'View Rules'}</span>
+                  </button>
+                ` : ''}
+                <button type="button" onclick="openTutorTeleprompter('${activeCourse.id}', '${selectedLesson.id}')" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow transition active:scale-95">
+                  <i data-lucide="presentation" class="w-3.5 h-3.5"></i>
+                  <span>Teach Class</span>
+                </button>
+                <button type="button" onclick="handleStudioDuplicateClass('${activeCourse.id}', '${selectedLesson.id}')" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 transition" title="Duplicate Lesson">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                </button>
+                <button type="button" onclick="handleStudioDeleteClass('${activeCourse.id}', '${selectedLesson.id}')" class="p-1.5 rounded-xl bg-slate-800 hover:bg-rose-950/60 hover:text-rose-400 text-slate-400 border border-slate-700/60 transition" title="Delete Lesson">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
 
-                  let blockCount = 0;
-                  if (les.hook_en || les.hook_he) blockCount++;
-                  if ((les.anchors_en && les.anchors_en.length) || (les.anchors_he && les.anchors_he.length)) blockCount++;
-                  if (les.sources_text) blockCount++;
-                  if (les.steps_text) blockCount++;
-                  if (les.pitfalls_text) blockCount++;
-                  if (les.cheat_sheet_text) blockCount++;
-                  if (les.homework_text) blockCount++;
-                  if (recordings.length > 0) blockCount++;
-                  if (les.sections) {
-                    blockCount += Object.values(les.sections).filter(v => v !== undefined && v !== null && String(v).trim() !== '').length;
-                  }
+            <!-- Full-Width Never-Clipped Title + Wrap-Safe Pills -->
+            <div class="space-y-2.5">
+              <input
+                id="studio-class-title-input"
+                type="text"
+                dir="auto"
+                value="${escapeHtml(selectedTitle)}"
+                oninput="handleStudioClassTitleChange('${activeCourse.id}', '${selectedLesson.id}', this.value)"
+                onblur="saveCustomCoursesToStorage(true)"
+                class="w-full text-base sm:text-lg font-bold text-white bg-slate-950/80 border border-slate-700/80 rounded-2xl px-4 py-2.5 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 transition"
+                placeholder="Enter lesson title..."
+              />
+              <div class="flex flex-wrap items-center gap-2">
+                <select aria-label="Duration" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'duration', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-xl py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
+                  <option value="15m" ${selectedLesson.duration === '15m' ? 'selected' : ''}>15 min</option>
+                  <option value="30m" ${selectedLesson.duration === '30m' ? 'selected' : ''}>30 min</option>
+                  <option value="45m" ${(!selectedLesson.duration || selectedLesson.duration === '45m') ? 'selected' : ''}>45 min</option>
+                  <option value="60m" ${selectedLesson.duration === '60m' ? 'selected' : ''}>60 min</option>
+                  <option value="90m" ${selectedLesson.duration === '90m' ? 'selected' : ''}>90 min</option>
+                </select>
+                <select aria-label="Level" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'level', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-xl py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
+                  <option value="Standard / All Levels" ${(!selectedLesson.level || selectedLesson.level === 'Standard / All Levels') ? 'selected' : ''}>All Levels</option>
+                  <option value="Elementary (Ages 8-11)" ${selectedLesson.level?.includes('Elementary') ? 'selected' : ''}>Elementary (Ages 8-11)</option>
+                  <option value="Middle School (Ages 12-14)" ${selectedLesson.level?.includes('Middle') ? 'selected' : ''}>Middle School (Ages 12-14)</option>
+                  <option value="High School (Ages 15-18)" ${selectedLesson.level?.includes('High') ? 'selected' : ''}>High School (Ages 15-18)</option>
+                  <option value="Adult / Professional" ${selectedLesson.level?.includes('Adult') ? 'selected' : ''}>Adult / Professional</option>
+                </select>
+                <select aria-label="Status" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'status', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-xl py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
+                  <option value="ready" ${selectedLesson.status === 'ready' ? 'selected' : ''}>Ready to Teach</option>
+                  <option value="draft" ${(!selectedLesson.status || selectedLesson.status === 'draft') ? 'selected' : ''}>Draft</option>
+                </select>
+              </div>
+            </div>
 
-                  return `
-                    <div
-                      id="studio-syllabus-item-${les.id}"
-                      onclick="selectStudioClass('${les.id}')"
-                      class="p-2.5 rounded-2xl border transition cursor-pointer select-none group relative ${isSel ? 'border-amber-500/80 bg-slate-900 ring-1 ring-amber-500/30 shadow-md' : 'border-slate-800/80 bg-slate-900/50 hover:bg-slate-800/40 hover:border-slate-700'}"
-                    >
-                      <div class="flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2 min-w-0 flex-1">
-                          <div class="flex flex-col items-center justify-center shrink-0 text-slate-600 group-hover:text-slate-400">
-                            <button type="button" onclick="event.stopPropagation(); handleStudioMoveClass('${activeCourse.id}', '${les.id}', -1)" class="p-0.5 hover:text-amber-400 transition" title="Move Up">
-                              <i data-lucide="chevron-up" class="w-3 h-3"></i>
-                            </button>
-                            <button type="button" onclick="event.stopPropagation(); handleStudioMoveClass('${activeCourse.id}', '${les.id}', 1)" class="p-0.5 hover:text-amber-400 transition" title="Move Down">
-                              <i data-lucide="chevron-down" class="w-3 h-3"></i>
-                            </button>
-                          </div>
+            <!-- Mobile-Only 2-Tab Switcher (< lg screens) -->
+            <div class="lg:hidden flex items-center p-1 rounded-2xl bg-slate-950/90 border border-slate-800 gap-1">
+              <button type="button" id="btn-studio-tab-ai" onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'ai')" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeTab === 'ai' ? 'bg-indigo-500/20 text-indigo-200 border border-indigo-400/50' : 'text-slate-400 hover:text-white'}">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>AI & Sources</span>
+              </button>
+              <button type="button" id="btn-studio-tab-sections" onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'sections')" title="Edit Class" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeTab === 'sections' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white'}">
+                <i data-lucide="layout-list" class="w-3.5 h-3.5"></i>
+                <span>Sections (${hasCustomSections ? `${filledSectionsCount}/${blueprintSections.length}` : filledSectionsCount})</span>
+              </button>
+            </div>
+          </div>
 
-                          <div class="w-6 h-6 rounded-lg ${isSel ? 'bg-amber-500 text-slate-950' : 'bg-amber-500/10 border border-amber-500/20 text-amber-400'} flex items-center justify-center font-mono text-[11px] font-bold shrink-0">
-                            ${les.lesson_num || idx + 1}
-                          </div>
+          <!-- Optional Expandable Blueprint Rules Drawer -->
+          ${(bp && (bp.student_profile || bp.guidelines)) ? `
+            <div id="studio-blueprint-summary-bar" class="${studioBlueprintDetailsOpen ? '' : 'hidden'} px-4 py-3 rounded-2xl bg-slate-900/75 border border-emerald-500/30 text-xs space-y-1.5 leading-relaxed">
+              <div class="flex items-center justify-between gap-2">
+                <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-mono font-bold text-[10px]">Course Blueprint</span>
+                <button type="button" onclick="openEditCurrentCourseModal()" class="text-amber-400 hover:text-amber-300 text-xs font-semibold flex items-center gap-1">
+                  <i data-lucide="sliders" class="w-3 h-3"></i> Edit Architecture
+                </button>
+              </div>
+              <div id="studio-blueprint-expanded-details" class="text-slate-300 space-y-1">
+                ${bp.student_profile ? `<div><strong class="text-slate-400">Target Students:</strong> ${escapeHtml(bp.student_profile)}</div>` : ''}
+                ${bp.guidelines ? `<div><strong class="text-slate-400">Teaching Guidelines:</strong> ${escapeHtml(bp.guidelines)}</div>` : ''}
+              </div>
+            </div>
+          ` : '<div id="studio-blueprint-summary-bar" class="hidden">View Rules</div>'}
 
-                          <div class="min-w-0 flex-1">
-                            <h5 id="studio-syllabus-title-${les.id}" class="text-xs font-bold text-white truncate group-hover:text-amber-300 transition">${escapeHtml(lTitle)}</h5>
-                            <div class="flex items-center gap-1.5 mt-0.5 text-[10px] font-mono text-slate-400">
-                              <span>${les.duration || '45m'}</span>
-                              <span>•</span>
-                              <span>${blockCount} filled</span>
-                              ${(les.ai_sources && les.ai_sources.length) ? `<span>•</span><span class="text-indigo-400">${les.ai_sources.length} ref</span>` : ''}
+          <!-- FULL-WIDTH LIVE 5 / 7 SPLIT WORKBENCH ON DESKTOP -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            <!-- LEFT 5/12: FLUENT AI CHAT & MULTIMODAL SOURCES -->
+            <div id="studio-class-ai-partner" class="${activeTab === 'ai' ? '' : 'hidden lg:block'} lg:col-span-5 p-4 rounded-3xl bg-slate-900/90 border border-indigo-500/35 shadow-xl space-y-3.5 lg:sticky lg:top-4">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <div class="flex items-center gap-2">
+                  <span class="w-7 h-7 rounded-xl bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                  </span>
+                  <div>
+                    <h5 class="text-xs sm:text-sm font-bold text-white">AI Lesson Co-Builder</h5>
+                    <p class="text-[11px] text-slate-400">Add links, voice notes, or text & discuss changes live</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  ${attachedSources.length > 0 ? `
+                    <button type="button" onclick="analyzeStudioSourcesWithAi('${activeCourse.id}', '${selectedLesson.id}')" class="px-2.5 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 font-bold text-[11px] flex items-center gap-1 transition">
+                      <i data-lucide="search" class="w-3 h-3"></i>
+                      <span>Analyze Sources</span>
+                    </button>
+                  ` : ''}
+                  <button type="button" onclick="triggerStudioQuickAutoDraftClass('${activeCourse.id}', '${selectedLesson.id}', 'draft')" class="px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[11px] flex items-center gap-1 transition active:scale-95 shadow-sm">
+                    <i data-lucide="zap" class="w-3 h-3"></i>
+                    <span>Auto-Draft All</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Attached Reference Sources Tray -->
+              ${attachedSources.length > 0 ? `
+                <div id="studio-attached-sources-tray" class="p-2.5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
+                  <div class="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                    <span>Reference Sources (${attachedSources.length})</span>
+                    <span class="text-indigo-400">Active for AI</span>
+                  </div>
+                  <div class="flex flex-col gap-2">
+                    ${attachedSources.map(src => {
+                      const iconName = src.kind === 'audio' ? 'mic' : (src.kind === 'link' ? 'link' : (src.kind === 'image' ? 'image' : 'file-text'));
+                      const badgeText = src.status === 'fetching' ? 'Reading...' : (src.extractedText ? `${Math.max(1, Math.round(src.extractedText.length / 100) / 10)}k chars` : (src.base64Data ? 'Media ready' : 'Link attached'));
+                      const previewOpen = !!studioSourcePreviewMap[src.id];
+                      return `
+                        <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 flex flex-col gap-1.5">
+                          <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-1.5 min-w-0">
+                              <i data-lucide="${iconName}" class="w-3.5 h-3.5 text-indigo-400 shrink-0"></i>
+                              <span dir="auto" class="text-xs font-semibold text-white truncate">${escapeHtml(src.label)}</span>
                             </div>
+                            <button type="button" onclick="removeStudioSource('${activeCourse.id}', '${selectedLesson.id}', '${src.id}')" class="text-slate-500 hover:text-rose-400 shrink-0 p-0.5" title="Remove source">
+                              <i data-lucide="x" class="w-3 h-3"></i>
+                            </button>
                           </div>
+                          <div class="flex items-center justify-between gap-2 text-[10px] font-mono">
+                            <span class="${src.status === 'fetching' ? 'text-amber-400 animate-pulse' : 'text-emerald-400'}">${badgeText}</span>
+                            ${src.extractedText ? `<button type="button" onclick="toggleStudioSourcePreview('${src.id}')" class="text-indigo-300 hover:underline">${previewOpen ? 'Hide Text ▲' : 'View Read Text ▾'}</button>` : ''}
+                            ${(src.kind === 'audio' && src.dataUrl) ? `<button type="button" onclick="promoteStudioSourceToLessonAudio('${activeCourse.id}', '${selectedLesson.id}', '${src.id}')" class="${src.savedToTeachAudio ? 'text-emerald-300 font-bold' : 'text-amber-300 hover:underline'}">${src.savedToTeachAudio ? '✓ In Teach Audio' : '+ Teach Audio'}</button>` : ''}
+                          </div>
+                          ${(src.extractedText && previewOpen) ? `<div id="studio-source-preview-${src.id}" dir="auto" class="p-2 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-300 max-h-28 overflow-y-auto whitespace-pre-wrap leading-relaxed">${escapeHtml(src.extractedText.slice(0, 1500))}</div>` : `<div id="studio-source-preview-${src.id}" class="hidden"></div>`}
+                          ${(src.kind === 'image' && src.dataUrl) ? `<img src="${src.dataUrl}" alt="${escapeHtml(src.label)}" class="max-h-20 rounded-lg object-contain bg-slate-950 p-1 border border-slate-800" />` : ''}
+                          ${(src.kind === 'audio' && src.dataUrl) ? `<audio controls src="${src.dataUrl}" class="h-7 w-full"></audio>` : ''}
                         </div>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+              ` : ''}
 
-                        <button type="button" onclick="event.stopPropagation(); openTutorTeleprompter('${activeCourse.id}', '${les.id}')" class="p-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold transition opacity-80 group-hover:opacity-100 shrink-0" title="Teach Class">
-                          <i data-lucide="presentation" class="w-3.5 h-3.5"></i>
-                        </button>
+              <!-- Fluent Conversational Stream -->
+              <div id="studio-class-ai-messages" class="min-h-[240px] max-h-[44vh] overflow-y-auto space-y-2.5 pr-1">
+                ${classAiHistory.map(m => {
+                  const isUser = m.role === 'user';
+                  return `
+                    <div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
+                      <div dir="auto" class="max-w-[92%] rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed ${isUser ? 'bg-amber-500/15 border border-amber-500/30 text-amber-100' : 'bg-slate-950/90 border border-slate-800 text-slate-200'}">
+                        <span class="block text-[9px] font-mono uppercase tracking-wider mb-1 ${isUser ? 'text-amber-300' : 'text-indigo-400'}">${isUser ? 'You' : 'AI Co-Builder'}</span>
+                        <div class="whitespace-pre-wrap break-words">${escapeHtml(m.text)}</div>
                       </div>
                     </div>
                   `;
                 }).join('')}
+                ${isClassAiThinking ? `<div class="text-xs text-amber-400 animate-pulse font-mono px-1 py-1">AI Co-Builder is analyzing sources & updating your lesson...</div>` : ''}
               </div>
 
-              <!-- Rapid-Fire Class Adder & Syllabus AI Tools -->
-              <div id="studio-rapid-add-box" class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-sm space-y-2.5">
-                <form onsubmit="handleStudioQuickAddClass(event, '${activeCourse.id}'); return false;" class="flex items-center gap-1.5">
-                  <input
-                    id="input-studio-quick-class"
-                    type="text"
-                    placeholder="${isHe ? '+ שם שיעור ולחץ Enter...' : '+ New class title & Enter...'}"
-                    class="flex-1 min-w-0 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700/80 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition"
-                    autocomplete="off"
-                  />
-                  <button
-                    type="submit"
-                    class="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shrink-0 transition active:scale-95 shadow"
-                  >
-                    ${isHe ? 'הוסף' : 'Add'}
-                  </button>
-                </form>
-                <div class="flex items-center justify-between text-[11px] pt-1.5 border-t border-slate-800/60">
-                  <button
-                    type="button"
-                    onclick="toggleStudioSyllabusAiDrawer('${activeCourse.id}')"
-                    class="text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-semibold transition"
-                    title="Plan next classes with AI"
-                  >
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                    <span>${isHe ? 'תכנון סילבוס AI' : 'AI Plan Syllabus'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onclick="openStudioBatchOutlineModal('${activeCourse.id}')"
-                    class="text-slate-400 hover:text-amber-300 flex items-center gap-1 font-semibold transition"
-                    title="Paste a full list of class titles"
-                  >
-                    <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-                    <span>${isHe ? 'הדבק סילבוס' : 'Paste Outline'}</span>
-                  </button>
+              <!-- Inline Attachment Mini-Drawers -->
+              <div id="studio-source-popover-link" class="${studioSourcePopoverMap.active === 'link' ? '' : 'hidden'} p-3 rounded-2xl bg-slate-950 border border-indigo-500/30 space-y-2">
+                <div class="text-[11px] font-bold text-indigo-300">Attach Web Article or YouTube Link for AI to Analyze</div>
+                <input id="input-studio-source-url" type="url" placeholder="https://..." class="w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" onkeydown="if(event.key==='Enter'){ event.preventDefault(); addStudioLinkSource('${activeCourse.id}', '${selectedLesson.id}'); }" />
+                <div class="flex items-center gap-2">
+                  <input id="input-studio-source-note" dir="auto" type="text" placeholder="Optional note..." class="flex-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" />
+                  <button type="button" onclick="addStudioLinkSource('${activeCourse.id}', '${selectedLesson.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold shrink-0">Attach Link</button>
                 </div>
+              </div>
 
-                <!-- Inline AI Syllabus Planner Drawer -->
-                <div id="studio-inline-syllabus-drawer" class="${studioInlineSyllabusOpen ? '' : 'hidden'} pt-2 border-t border-indigo-500/20 space-y-2">
-                  <div class="flex items-center gap-1.5">
-                    <input
-                      id="input-studio-inline-syllabus-prompt"
-                      type="text"
-                      placeholder="Topic focus (optional)..."
-                      onkeydown="if(event.key==='Enter'){ event.preventDefault(); executeStudioInlineSyllabusAi('${activeCourse.id}'); }"
-                      class="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400"
-                    />
-                    <button type="button" onclick="executeStudioInlineSyllabusAi('${activeCourse.id}')" class="px-2.5 py-1.5 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 text-[11px] font-bold shrink-0">Suggest</button>
+              <div id="studio-source-popover-paste" class="${studioSourcePopoverMap.active === 'paste' ? '' : 'hidden'} p-3 rounded-2xl bg-slate-950 border border-indigo-500/30 space-y-2">
+                <div class="text-[11px] font-bold text-indigo-300">Paste Text, Hebrew/English Story or Notes</div>
+                <input id="input-studio-source-paste-title" dir="auto" type="text" placeholder="Label (e.g. Bill Gates Story, Rashi Excerpt)..." class="w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" />
+                <textarea id="input-studio-source-paste-text" dir="auto" rows="4" placeholder="Paste full Hebrew or English source text here..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400 leading-relaxed"></textarea>
+                <div class="flex justify-end gap-2">
+                  <button type="button" onclick="toggleStudioSourcePopover('paste')" class="px-3 py-1 rounded-lg bg-slate-800 text-slate-300 text-xs">Cancel</button>
+                  <button type="button" onclick="addStudioPasteTextSource('${activeCourse.id}', '${selectedLesson.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold">Attach Notes</button>
+                </div>
+              </div>
+
+              <!-- Fluent Multi-Line AI Composer Box -->
+              <div class="rounded-2xl bg-slate-950 border border-slate-700/80 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-400 transition p-3 space-y-2">
+                <textarea
+                  id="input-studio-class-ai-prompt"
+                  dir="auto"
+                  rows="3"
+                  placeholder="Write fluently in English or Hebrew... Ask AI to build, re-fix sections, or analyze links & audio (Shift+Enter new line)..."
+                  onpaste="handleStudioComposerPaste(event, '${activeCourse.id}', '${selectedLesson.id}')"
+                  oninput="this.style.height='auto'; this.style.height=Math.min(this.scrollHeight, 240)+'px';"
+                  onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendStudioClassAiMessage('${activeCourse.id}', '${selectedLesson.id}'); }"
+                  class="w-full bg-transparent text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none resize-none leading-relaxed min-h-[80px] max-h-[240px]"
+                ></textarea>
+
+                <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/80 flex-wrap">
+                  <div class="flex items-center gap-1 flex-wrap">
+                    <button type="button" onclick="toggleStudioSourcePopover('link')" class="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-[11px] font-semibold flex items-center gap-1 transition" title="Attach Web Link / YouTube">
+                      <i data-lucide="link" class="w-3 h-3 text-sky-400"></i>
+                      <span>Link</span>
+                    </button>
+                    <button type="button" onclick="toggleStudioSourceVoiceRecord('${activeCourse.id}', '${selectedLesson.id}')" class="px-2 py-1 rounded-lg border text-[11px] font-semibold flex items-center gap-1 transition ${studioSourceRecordingActive ? 'bg-rose-500/20 border-rose-500 text-rose-300 animate-pulse' : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-800'}" title="Record Voice Explanation">
+                      <i data-lucide="mic" class="w-3 h-3 ${studioSourceRecordingActive ? 'text-rose-400' : 'text-emerald-400'}"></i>
+                      <span>${studioSourceRecordingActive ? 'Stop' : 'Voice'}</span>
+                    </button>
+                    <button type="button" onclick="triggerStudioSourceFileUpload('${activeCourse.id}', '${selectedLesson.id}', 'audio/*,image/*,.pdf,.txt,.md,.csv')" class="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-[11px] font-semibold flex items-center gap-1 transition" title="Upload Audio, Photo, PDF, or Text File">
+                      <i data-lucide="paperclip" class="w-3 h-3 text-amber-400"></i>
+                      <span>File</span>
+                    </button>
+                    <button type="button" onclick="toggleStudioSourcePopover('paste')" class="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-[11px] font-semibold flex items-center gap-1 transition" title="Paste Hebrew/English Story or Text">
+                      <i data-lucide="file-text" class="w-3 h-3 text-purple-400"></i>
+                      <span>Paste</span>
+                    </button>
                   </div>
-                  ${studioInlineSyllabusThinking ? `<p class="text-[11px] text-amber-400 animate-pulse font-mono">Planning sequence with Gemini...</p>` : ''}
-                  ${(studioInlineSyllabusSuggestions && studioInlineSyllabusSuggestions.length > 0) ? `
-                    <div class="space-y-1.5 max-h-48 overflow-y-auto">
-                      <div class="flex items-center justify-between text-[10px] text-slate-400 px-0.5">
-                        <span>Click + Add on any class:</span>
-                        <button type="button" onclick="addAllInlineSuggestedClasses('${activeCourse.id}')" class="text-emerald-400 hover:underline font-bold">+ Add All</button>
-                      </div>
-                      ${studioInlineSyllabusSuggestions.map((s, sIdx) => `
-                        <div class="p-1.5 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between gap-1.5 text-[11px] text-slate-200">
-                          <span class="truncate">${escapeHtml(s)}</span>
-                          <button type="button" onclick="addInlineSuggestedClass('${activeCourse.id}', ${sIdx})" class="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold shrink-0">+ Add</button>
-                        </div>
-                      `).join('')}
-                    </div>
-                  ` : ''}
+                  <button type="button" onclick="sendStudioClassAiMessage('${activeCourse.id}', '${selectedLesson.id}')" class="px-3.5 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs shrink-0 transition active:scale-95 shadow flex items-center gap-1.5">
+                    <span>Send</span>
+                    <i data-lucide="send" class="w-3 h-3"></i>
+                  </button>
                 </div>
               </div>
             </div>
 
-            <!-- ============================================== -->
-            <!-- RIGHT PANE: CALM FULL-READABILITY CLASS STUDIO -->
-            <!-- ============================================== -->
-            <div id="studio-active-class-pane" class="${studioSyllabusCollapsed ? 'md:col-span-12' : 'md:col-span-8'} space-y-3.5 ${mobileView === 'syllabus' && !studioSyllabusCollapsed ? 'hidden md:block' : 'block'}">
-              <!-- Calm Unified Class Header -->
-              <div class="p-4 sm:p-5 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-3.5">
-                <div class="flex items-center justify-between gap-2 flex-wrap">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <button type="button" onclick="setStudioMobileView('syllabus')" class="md:hidden flex items-center gap-1 text-xs text-amber-400 font-bold hover:underline mr-1">
-                      <i data-lucide="arrow-left" class="w-3.5 h-3.5 rtl:rotate-180"></i>
-                      <span>${isHe ? 'סילבוס' : 'Syllabus'}</span>
-                    </button>
-                    <button type="button" id="btn-toggle-syllabus-rail" onclick="toggleStudioSyllabusRail()" class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-semibold transition" title="Show or hide Syllabus rail for full-width writing">
-                      <i data-lucide="${studioSyllabusCollapsed ? 'panel-left-open' : 'panel-left-close'}" class="w-3.5 h-3.5 text-amber-400"></i>
-                      <span>${studioSyllabusCollapsed ? `Show Syllabus (${lessons.length})` : 'Focus View'}</span>
-                    </button>
-                    <span class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold">
-                      Class ${selectedIdx + 1} of ${lessons.length}
-                    </span>
-                    <span id="studio-save-indicator" class="text-[11px] font-mono text-emerald-400">✓ Auto-saved</span>
-                  </div>
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    ${(bp && (bp.student_profile || bp.guidelines)) ? `
-                      <button type="button" onclick="toggleStudioBlueprintSummary()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 text-[11px] font-semibold flex items-center gap-1 transition" title="View Course Blueprint & Guidelines">
-                        <i data-lucide="book-open-check" class="w-3.5 h-3.5 text-emerald-400"></i>
-                        <span>${studioBlueprintDetailsOpen ? 'Hide Rules' : 'View Rules'}</span>
-                      </button>
-                    ` : ''}
-                    <button type="button" onclick="openTutorTeleprompter('${activeCourse.id}', '${selectedLesson.id}')" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow active:scale-95 transition" title="Launch Teaching Mode">
-                      <i data-lucide="presentation" class="w-3.5 h-3.5"></i>
-                      <span>Teach Class</span>
-                    </button>
-                    <button type="button" onclick="handleStudioDuplicateClass('${activeCourse.id}', '${selectedLesson.id}')" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition border border-slate-700/60" title="Duplicate Class">
-                      <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                    </button>
-                    <button type="button" onclick="handleStudioDeleteClass('${activeCourse.id}', '${selectedLesson.id}')" class="p-1.5 rounded-xl bg-slate-800 hover:bg-rose-950/60 hover:text-rose-400 text-slate-400 transition border border-slate-700/60" title="Delete Class">
-                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Full-Width Never-Clipped Class Title + Calm Wrap-Safe Metadata Chips -->
-                <div class="space-y-2.5">
-                  <input
-                    id="studio-class-title-input"
-                    type="text"
-                    dir="auto"
-                    value="${escapeHtml(selectedTitle)}"
-                    oninput="handleStudioClassTitleChange('${activeCourse.id}', '${selectedLesson.id}', this.value)"
-                    onblur="saveCustomCoursesToStorage(true)"
-                    class="w-full text-base sm:text-lg font-bold text-white bg-slate-950/75 border border-slate-700/80 rounded-2xl px-4 py-2.5 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 transition"
-                    placeholder="Enter class title..."
-                  />
-                  <div class="flex flex-wrap items-center gap-2">
-                    <select aria-label="Duration" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'duration', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-xl py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
-                      <option value="15m" ${selectedLesson.duration === '15m' ? 'selected' : ''}>15 min</option>
-                      <option value="30m" ${selectedLesson.duration === '30m' ? 'selected' : ''}>30 min</option>
-                      <option value="45m" ${(!selectedLesson.duration || selectedLesson.duration === '45m') ? 'selected' : ''}>45 min</option>
-                      <option value="60m" ${selectedLesson.duration === '60m' ? 'selected' : ''}>60 min</option>
-                      <option value="90m" ${selectedLesson.duration === '90m' ? 'selected' : ''}>90 min</option>
-                    </select>
-                    <select aria-label="Level" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'level', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-xl py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
-                      <option value="Standard / All Levels" ${(!selectedLesson.level || selectedLesson.level === 'Standard / All Levels') ? 'selected' : ''}>All Levels</option>
-                      <option value="Elementary (Ages 8-11)" ${selectedLesson.level?.includes('Elementary') ? 'selected' : ''}>Elementary (Ages 8-11)</option>
-                      <option value="Middle School (Ages 12-14)" ${selectedLesson.level?.includes('Middle') ? 'selected' : ''}>Middle School (Ages 12-14)</option>
-                      <option value="High School (Ages 15-18)" ${selectedLesson.level?.includes('High') ? 'selected' : ''}>High School (Ages 15-18)</option>
-                      <option value="Adult / Professional" ${selectedLesson.level?.includes('Adult') ? 'selected' : ''}>Adult / Professional</option>
-                    </select>
-                    <select aria-label="Status" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'status', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-xl py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
-                      <option value="ready" ${selectedLesson.status === 'ready' ? 'selected' : ''}>Ready to Teach</option>
-                      <option value="draft" ${(!selectedLesson.status || selectedLesson.status === 'draft') ? 'selected' : ''}>Draft</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Clean 2-Tab Mode Switcher -->
-                <div class="flex items-center p-1 rounded-2xl bg-slate-950/90 border border-slate-800 gap-1">
-                  <button
-                    type="button"
-                    id="btn-studio-tab-ai"
-                    onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'ai')"
-                    class="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeTab === 'ai' ? 'bg-indigo-500/20 text-indigo-200 border border-indigo-400/50 shadow-sm' : 'text-slate-400 hover:text-white'}"
-                  >
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5 ${activeTab === 'ai' ? 'text-indigo-300' : 'text-slate-500'}"></i>
-                    <span>${isHe ? 'בנה ושוחח עם AI' : 'Build with AI & Sources'}</span>
-                    ${attachedSources.length > 0 ? `<span class="px-1.5 py-0.5 rounded-full bg-indigo-500/30 text-[10px] font-mono text-indigo-200">${attachedSources.length} ref</span>` : ''}
-                  </button>
-                  <button
-                    type="button"
-                    id="btn-studio-tab-sections"
-                    onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'sections')"
-                    title="Edit Class"
-                    class="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeTab === 'sections' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'}"
-                  >
-                    <i data-lucide="layout-list" class="w-3.5 h-3.5"></i>
-                    <span>${isHe ? 'תוכן השיעור' : 'Lesson Sections'} (${hasCustomSections ? `${filledSectionsCount}/${blueprintSections.length}` : filledSectionsCount})</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Collapsible Course Blueprint Drawer (Hidden unless expanded, saving clean canvas height) -->
-              ${(bp && (bp.student_profile || bp.guidelines)) ? `
-                <div id="studio-blueprint-summary-bar" class="${studioBlueprintDetailsOpen ? '' : 'hidden'} px-4 py-3 rounded-2xl bg-slate-900/75 border border-emerald-500/30 text-xs space-y-1.5 leading-relaxed">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-mono font-bold text-[10px]">Course Blueprint</span>
-                    <button type="button" onclick="openEditCurrentCourseModal()" class="text-amber-400 hover:text-amber-300 text-xs font-semibold flex items-center gap-1">
-                      <i data-lucide="sliders" class="w-3 h-3"></i> Edit Architecture
-                    </button>
-                  </div>
-                  <div id="studio-blueprint-expanded-details" class="text-slate-300 space-y-1">
-                    ${bp.student_profile ? `<div><strong class="text-slate-400">Target Students:</strong> ${escapeHtml(bp.student_profile)}</div>` : ''}
-                    ${bp.guidelines ? `<div><strong class="text-slate-400">Teaching Guidelines:</strong> ${escapeHtml(bp.guidelines)}</div>` : ''}
-                    <button type="button" onclick="toggleStudioBlueprintSummary()" class="text-slate-400 hover:text-white text-[11px] font-semibold">Hide Rules ▲</button>
-                  </div>
-                </div>
-              ` : '<div id="studio-blueprint-summary-bar" class="hidden">View Rules</div>'}
-
-              <!-- ======================================================= -->
-              <!-- TAB 1: MULTIMODAL AI CLASS WORKBENCH                    -->
-              <!-- ======================================================= -->
-              <div id="studio-class-ai-partner" class="${activeTab === 'ai' ? '' : 'hidden'} p-4 rounded-3xl bg-slate-900/90 border border-indigo-500/35 shadow-xl space-y-3.5">
-                <div class="flex items-center justify-between gap-2 flex-wrap">
-                  <div class="flex items-center gap-2.5">
-                    <span class="w-7 h-7 rounded-xl bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300">
-                      <i data-lucide="sparkles" class="w-4 h-4"></i>
-                    </span>
-                    <div>
-                      <h5 class="text-xs sm:text-sm font-bold text-white">AI Class Co-Builder & Source Analyzer</h5>
-                      <p class="text-[11px] text-slate-400">Write freely, drop links, record audio, or upload notes for AI to analyze first</p>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    ${attachedSources.length > 0 ? `
-                      <button type="button" onclick="analyzeStudioSourcesWithAi('${activeCourse.id}', '${selectedLesson.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 font-bold text-[11px] flex items-center gap-1 transition">
-                        <i data-lucide="search" class="w-3 h-3"></i>
-                        <span>Analyze Sources First</span>
-                      </button>
-                    ` : ''}
-                    <button type="button" onclick="triggerStudioQuickAutoDraftClass('${activeCourse.id}', '${selectedLesson.id}', 'draft')" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[11px] flex items-center gap-1 transition active:scale-95 shadow-sm">
-                      <i data-lucide="zap" class="w-3 h-3"></i>
-                      <span>Auto-Draft Class</span>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Attached Reference Sources Tray -->
-                ${attachedSources.length > 0 ? `
-                  <div id="studio-attached-sources-tray" class="p-2.5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
-                    <div class="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-400">
-                      <span>Attached Reference Sources (${attachedSources.length})</span>
-                      <span class="text-indigo-400">Included on every AI message</span>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                      ${attachedSources.map(src => {
-                        const iconName = src.kind === 'audio' ? 'mic' : (src.kind === 'link' ? 'link' : (src.kind === 'image' ? 'image' : 'file-text'));
-                        const badgeText = src.status === 'fetching' ? 'Reading...' : (src.extractedText ? `${Math.max(1, Math.round(src.extractedText.length / 100) / 10)}k chars` : (src.base64Data ? 'Media ready' : 'Link attached'));
-                        const previewOpen = !!studioSourcePreviewMap[src.id];
-                        return `
-                          <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 flex flex-col gap-1.5 max-w-full sm:max-w-[300px]">
-                            <div class="flex items-center justify-between gap-2">
-                              <div class="flex items-center gap-1.5 min-w-0">
-                                <i data-lucide="${iconName}" class="w-3.5 h-3.5 text-indigo-400 shrink-0"></i>
-                                <span dir="auto" class="text-xs font-semibold text-white truncate">${escapeHtml(src.label)}</span>
-                              </div>
-                              <button type="button" onclick="removeStudioSource('${activeCourse.id}', '${selectedLesson.id}', '${src.id}')" class="text-slate-500 hover:text-rose-400 shrink-0 p-0.5" title="Remove source">
-                                <i data-lucide="x" class="w-3 h-3"></i>
-                              </button>
-                            </div>
-                            <div class="flex items-center justify-between gap-2 text-[10px] font-mono">
-                              <span class="${src.status === 'fetching' ? 'text-amber-400 animate-pulse' : 'text-emerald-400'}">${badgeText}</span>
-                              ${src.extractedText ? `<button type="button" onclick="toggleStudioSourcePreview('${src.id}')" class="text-indigo-300 hover:underline">${previewOpen ? 'Hide Text ▲' : 'View Read Text ▾'}</button>` : ''}
-                              ${(src.kind === 'audio' && src.dataUrl) ? `<button type="button" onclick="promoteStudioSourceToLessonAudio('${activeCourse.id}', '${selectedLesson.id}', '${src.id}')" class="${src.savedToTeachAudio ? 'text-emerald-300 font-bold' : 'text-amber-300 hover:underline'}">${src.savedToTeachAudio ? '✓ In Teach Audio' : '+ Teach Audio'}</button>` : ''}
-                            </div>
-                            ${(src.extractedText && previewOpen) ? `<div id="studio-source-preview-${src.id}" dir="auto" class="p-2 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-300 max-h-32 overflow-y-auto whitespace-pre-wrap leading-relaxed">${escapeHtml(src.extractedText.slice(0, 1500))}</div>` : `<div id="studio-source-preview-${src.id}" class="hidden"></div>`}
-                            ${(src.kind === 'image' && src.dataUrl) ? `<img src="${src.dataUrl}" alt="${escapeHtml(src.label)}" class="max-h-24 rounded-lg object-contain bg-slate-950 p-1 border border-slate-800" />` : ''}
-                            ${(src.kind === 'audio' && src.dataUrl) ? `<audio controls src="${src.dataUrl}" class="h-7 w-full"></audio>` : ''}
-                          </div>
-                        `;
-                      }).join('')}
-                    </div>
-                  </div>
-                ` : ''}
-
-                <!-- Fluent Conversational Stream -->
-                <div id="studio-class-ai-messages" class="min-h-[260px] max-h-[54vh] overflow-y-auto space-y-3 pr-1">
-                  ${classAiHistory.map((m, mIdx) => {
-                    const isUser = m.role === 'user';
-                    const showSwitchBanner = (!isUser && m.updatedCount > 0 && mIdx === classAiHistory.length - 1);
-                    return `
-                      <div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
-                        <div dir="auto" class="max-w-[92%] rounded-2xl px-4 py-3 text-xs sm:text-sm leading-relaxed ${isUser ? 'bg-amber-500/15 border border-amber-500/30 text-amber-100' : 'bg-slate-950/90 border border-slate-800 text-slate-200'}">
-                          <span class="block text-[9px] font-mono uppercase tracking-wider mb-1 ${isUser ? 'text-amber-300' : 'text-indigo-400'}">${isUser ? 'You' : 'AI Co-Builder'}</span>
-                          <div class="whitespace-pre-wrap break-words">${escapeHtml(m.text)}</div>
-                          ${showSwitchBanner ? `
-                            <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2">
-                              <span class="text-[11px] text-emerald-400 font-semibold">✓ Updated ${m.updatedCount} section${m.updatedCount === 1 ? '' : 's'}</span>
-                              <button type="button" onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'sections')" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[11px] transition">
-                                View Lesson Sections →
-                              </button>
-                            </div>
-                          ` : ''}
-                        </div>
-                      </div>
-                    `;
+            <!-- RIGHT 7/12: LIVE PRE-LOADED LESSON SECTIONS UPDATING IN REAL TIME -->
+            <div id="studio-modular-blocks-container" class="${activeTab === 'sections' ? '' : 'hidden lg:block'} lg:col-span-7 space-y-3.5">
+              ${hasCustomSections ? `
+                <div class="space-y-3.5">
+                  ${blueprintSections.map(sec => {
+                    const meta = (typeof COURSE_BLOCK_CATALOG !== 'undefined' && COURSE_BLOCK_CATALOG[sec.type]) ? COURSE_BLOCK_CATALOG[sec.type] : { label: 'Section', icon: 'layers', color: 'amber', placeholder: 'Enter content...' };
+                    return renderCustomBlueprintSectionCard(activeCourse, selectedLesson, sec, meta);
                   }).join('')}
-                  ${isClassAiThinking ? `<div class="text-xs text-amber-400 animate-pulse font-mono px-1 py-1">Analyzing your message & attached sources with Gemini...</div>` : ''}
                 </div>
-
-                <!-- Inline Attachment Mini-Drawers (Link / Paste Text) -->
-                <div id="studio-source-popover-link" class="${studioSourcePopoverMap.active === 'link' ? '' : 'hidden'} p-3 rounded-2xl bg-slate-950 border border-indigo-500/30 space-y-2">
-                  <div class="text-[11px] font-bold text-indigo-300">Attach Web Article or YouTube Link for AI to Analyze</div>
-                  <input id="input-studio-source-url" type="url" placeholder="https://..." class="w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" onkeydown="if(event.key==='Enter'){ event.preventDefault(); addStudioLinkSource('${activeCourse.id}', '${selectedLesson.id}'); }" />
-                  <div class="flex items-center gap-2">
-                    <input id="input-studio-source-note" dir="auto" type="text" placeholder="Optional note: focus on minute 4 or key proof..." class="flex-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" />
-                    <button type="button" onclick="addStudioLinkSource('${activeCourse.id}', '${selectedLesson.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold shrink-0">Attach Link</button>
-                  </div>
-                </div>
-
-                <div id="studio-source-popover-paste" class="${studioSourcePopoverMap.active === 'paste' ? '' : 'hidden'} p-3 rounded-2xl bg-slate-950 border border-indigo-500/30 space-y-2">
-                  <div class="text-[11px] font-bold text-indigo-300">Paste Text, Hebrew/English Story, Transcript or Source Excerpt</div>
-                  <input id="input-studio-source-paste-title" dir="auto" type="text" placeholder="Label (e.g. Bill Gates Story, Rashi Excerpt, Shiur Notes)..." class="w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" />
-                  <textarea id="input-studio-source-paste-text" dir="auto" rows="5" placeholder="Paste full Hebrew or English source text or notes here..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400 leading-relaxed"></textarea>
-                  <div class="flex justify-end gap-2">
-                    <button type="button" onclick="toggleStudioSourcePopover('paste')" class="px-3 py-1 rounded-lg bg-slate-800 text-slate-300 text-xs">Cancel</button>
-                    <button type="button" onclick="addStudioPasteTextSource('${activeCourse.id}', '${selectedLesson.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold">Attach Notes</button>
-                  </div>
-                </div>
-
-                <!-- Fluent Multi-Line AI Composer Box (with Bidirectional Auto-RTL & Screenshot Paste) -->
-                <div class="rounded-2xl bg-slate-950 border border-slate-700/80 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-400 transition p-3 space-y-2.5">
-                  <textarea
-                    id="input-studio-class-ai-prompt"
-                    dir="auto"
-                    rows="3"
-                    placeholder="Write fluently in English or Hebrew... Paste a screenshot (Cmd/Ctrl+V), attach links/audio below, or tell AI how to build this class (Shift+Enter for new line, Enter to send)..."
-                    onpaste="handleStudioComposerPaste(event, '${activeCourse.id}', '${selectedLesson.id}')"
-                    oninput="this.style.height='auto'; this.style.height=Math.min(this.scrollHeight, 260)+'px';"
-                    onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendStudioClassAiMessage('${activeCourse.id}', '${selectedLesson.id}'); }"
-                    class="w-full bg-transparent text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none resize-none leading-relaxed min-h-[86px] max-h-[260px]"
-                  ></textarea>
-
-                  <!-- Attachment & Send Action Toolbar -->
-                  <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/80 flex-wrap">
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                      <button type="button" onclick="toggleStudioSourcePopover('link')" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-[11px] font-semibold flex items-center gap-1 transition" title="Attach URL / Web Page / YouTube Link">
-                        <i data-lucide="link" class="w-3.5 h-3.5 text-sky-400"></i>
-                        <span>Add Link</span>
-                      </button>
-                      <button type="button" onclick="toggleStudioSourceVoiceRecord('${activeCourse.id}', '${selectedLesson.id}')" class="px-2.5 py-1.5 rounded-xl border text-[11px] font-semibold flex items-center gap-1 transition ${studioSourceRecordingActive ? 'bg-rose-500/20 border-rose-500 text-rose-300 animate-pulse' : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-800'}" title="Record a voice explanation for AI to listen to">
-                        <i data-lucide="mic" class="w-3.5 h-3.5 ${studioSourceRecordingActive ? 'text-rose-400' : 'text-emerald-400'}"></i>
-                        <span>${studioSourceRecordingActive ? 'Stop Recording' : 'Record Audio'}</span>
-                      </button>
-                      <button type="button" onclick="triggerStudioSourceFileUpload('${activeCourse.id}', '${selectedLesson.id}', 'audio/*,image/*,.pdf,.txt,.md,.csv')" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-[11px] font-semibold flex items-center gap-1 transition" title="Upload Audio (MP3/WAV/M4A), Photo, PDF, or Text File">
-                        <i data-lucide="paperclip" class="w-3.5 h-3.5 text-amber-400"></i>
-                        <span>Upload Audio / File</span>
-                      </button>
-                      <button type="button" onclick="toggleStudioSourcePopover('paste')" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-[11px] font-semibold flex items-center gap-1 transition" title="Paste source text, transcript, or notes">
-                        <i data-lucide="file-text" class="w-3.5 h-3.5 text-purple-400"></i>
-                        <span>Paste Text</span>
-                      </button>
-                    </div>
-                    <button type="button" onclick="sendStudioClassAiMessage('${activeCourse.id}', '${selectedLesson.id}')" class="px-4 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs shrink-0 transition active:scale-95 shadow flex items-center gap-1.5">
-                      <span>Send</span>
-                      <i data-lucide="send" class="w-3 h-3"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- ======================================================= -->
-              <!-- TAB 2: LESSON SECTIONS EDITOR                           -->
-              <!-- ======================================================= -->
-              <div id="studio-modular-blocks-container" class="${activeTab === 'sections' ? '' : 'hidden'} space-y-3.5">
-                <div class="flex items-center justify-between px-1">
-                  <span class="text-xs font-semibold text-slate-400">${hasCustomSections ? `${blueprintSections.length} Blueprint Sections` : 'Standard Lesson Blocks'}</span>
-                  <button type="button" onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'ai')" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Refine with AI & Sources
-                  </button>
-                </div>
-                ${hasCustomSections ? `
-                  <div class="space-y-3.5">
-                    ${blueprintSections.map(sec => {
-                      const meta = (typeof COURSE_BLOCK_CATALOG !== 'undefined' && COURSE_BLOCK_CATALOG[sec.type]) ? COURSE_BLOCK_CATALOG[sec.type] : { label: 'Section', icon: 'layers', color: 'amber', placeholder: 'Enter content...' };
-                      return renderCustomBlueprintSectionCard(activeCourse, selectedLesson, sec, meta);
-                    }).join('')}
-                  </div>
-                ` : `
+              ` : `
                 <!-- 1. Opening Hook Block -->
                 <div class="p-4 rounded-2xl bg-slate-900/80 border border-amber-900/30 space-y-2">
                   <div class="flex items-center justify-between">
@@ -12370,7 +12817,6 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
               </div>
             </div>
           </div>
-        </div>
       `;
 
       container.innerHTML = html;

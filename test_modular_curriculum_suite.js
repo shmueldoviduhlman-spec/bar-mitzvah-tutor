@@ -432,10 +432,10 @@ sandbox.saveRecordedAudioToTarget(
 assert(Array.isArray(createdLesson.recordings) && createdLesson.recordings.length === 1, 'Audio recording successfully attached to lesson');
 assert(createdLesson.recordings[0].title === 'Voice Memo - Siman 1 Overview', 'Attached audio title matches');
 
-// Test Audio player rendering in expanded lesson
+// Test Audio player rendering in expanded lesson / edit lesson view
 if (!sandbox.APP_STATE.expandedCustomLessonIds) sandbox.APP_STATE.expandedCustomLessonIds = {};
 sandbox.APP_STATE.expandedCustomLessonIds[createdLesson.id] = true;
-sandbox.renderLessonsCategoryView();
+sandbox.enterStudioEditLessonMode(createdCourse.id, createdLesson.id);
 const activeLessonsHtmlAfterAudio = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
 assert(activeLessonsHtmlAfterAudio.includes('<audio controls') || activeLessonsHtmlAfterAudio.includes('audio/webm'), 'Expanded lesson renders HTML5 audio player');
 assert(activeLessonsHtmlAfterAudio.includes('Voice Memo - Siman 1 Overview'), 'Expanded lesson renders audio recording title');
@@ -1213,9 +1213,9 @@ assert(typeof sandbox.handleSelectCoursePill === 'function', 'handleSelectCourse
 
 sandbox.renderCoursePickerPills();
 const navBarElem = getOrCreateElem('study-courses-nav-bar');
-assert(!navBarElem.classList.contains('hidden'), 'study-courses-nav-bar is visible when courses exist');
+assert(navBarElem.classList.contains('hidden'), 'study-courses-nav-bar stays hidden to eliminate duplicate course bar clutter');
 const pillsContainer = getOrCreateElem('study-courses-pills-container');
-assert(pillsContainer.innerHTML.includes('Graded Hebrew Reading'), 'Course picker renders pills for active courses');
+assert(pillsContainer.innerHTML.includes('Graded Hebrew Reading'), 'Course picker renders pills data for internal sync');
 
 sandbox.handleSelectCoursePill(savedReadingCourse.id);
 assert(sandbox.APP_STATE.activeCourseId === savedReadingCourse.id, 'handleSelectCoursePill updates activeCourseId');
@@ -1494,9 +1494,9 @@ assert(blueprintLesson.sections && typeof blueprintLesson.sections === 'object',
 assert(blueprintLesson.sections[blueprintCourse.blueprint.sections[0].id], 'Saved lesson preserved dynamic section content');
 assert(blueprintLesson.hook_en, 'Saved lesson preserved resolved hook fallback for compatibility');
 
-// 9. Class Header Discreet Edit Pencil & Custom Section Display
+// 9. Class Header & Custom Section Display inside Edit Lesson Studio
 sandbox.APP_STATE.expandedCustomLessonIds[blueprintLesson.id] = true;
-sandbox.renderTutorHubActiveLessons(blueprintCourse.id);
+sandbox.enterStudioEditLessonMode(blueprintCourse.id, blueprintLesson.id);
 const lessonsContainerHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
 
 assert(lessonsContainerHtml.includes('title="Edit Class"') || lessonsContainerHtml.includes('edit-2'), 'Class card header includes discreet Edit Class button');
@@ -2457,10 +2457,13 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(testStudioCourse.lessons.length === 2, 'Quick-Add successfully created second class');
   assert(testStudioCourse.lessons[1].lesson_num === 2, 'Second class lesson_num is 2');
 
-  // 5. Two-Pane Studio Rendering Verification
+  // 5. Screen 2 Clean Lesson List + Screen 4 Live 5/7 Studio Rendering Verification
+  const listScreenHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(listScreenHtml.includes('1. Kinematics &amp; Velocity') || listScreenHtml.includes('1. Kinematics & Velocity'), 'Screen 2 Lesson List renders quick-added lesson names');
+  sandbox.enterStudioEditLessonMode('course_studio_test_1', testStudioCourse.lessons[0].id);
   const studioActiveHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
-  assert(studioActiveHtml.includes('studio-syllabus-pane'), 'Studio renders Left Pane (Syllabus Outline Tree)');
-  assert(studioActiveHtml.includes('studio-active-class-pane'), 'Studio renders Right Pane (Active Class Editor)');
+  assert(studioActiveHtml.includes('studio-class-ai-partner') && studioActiveHtml.includes('lg:col-span-5'), 'Screen 4 Edit Studio renders Left Pane (5/12 AI Co-Builder & Sources)');
+  assert(studioActiveHtml.includes('studio-modular-blocks-container') && studioActiveHtml.includes('lg:col-span-7'), 'Screen 4 Edit Studio renders Right Pane (7/12 Lesson Sections)');
   assert(studioActiveHtml.includes('studio-class-title-input'), 'Active class renders in-place editable title input');
   assert(studioActiveHtml.includes('studio-save-indicator'), 'Active class renders live auto-save indicator');
   assert(studioActiveHtml.includes('Opening Hook / Real-World Analogy'), 'Active class renders Opening Hook modular block');
@@ -2803,6 +2806,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
 
   getOrCreateElem('input-studio-quick-class').value = 'Class 1: Open Chords & Strumming';
   sandbox.handleStudioQuickAddClass(null, musicCourse.id);
+  sandbox.enterStudioEditLessonMode(musicCourse.id, musicCourse.lessons[0].id);
   const studioMusicHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
   assert(studioMusicHtml.includes('Warmup &amp; Scales') || studioMusicHtml.includes('Warmup & Scales'), 'Dynamic Studio renders custom Music section Warmup & Scales');
   assert(studioMusicHtml.includes('Ear Training Q&amp;A') || studioMusicHtml.includes('Ear Training Q&A'), 'Dynamic Studio renders manually added custom section');
@@ -2876,7 +2880,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   await sandbox.executeStudioAiGenerateFullClass();
   sandbox.applyGeneratedContentToActiveClass();
 
-  sandbox.renderCourseStudio(all11Course.id, 'les_11_1');
+  sandbox.enterStudioEditLessonMode(all11Course.id, 'les_11_1');
   const all11Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
   assert(all11Html.includes('אבג RTL'), 'Quote block provides RTL toggle control');
   assert(all11Html.includes('Punchline / Key Lesson / Solution'), 'Example block provides collapsible takeaway field');
@@ -2964,7 +2968,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   await sandbox.executeStudioAiGenerateFullClass();
   sandbox.applyGeneratedContentToActiveClass();
 
-  sandbox.renderCourseStudio(labCourse.id, labLessonId);
+  sandbox.enterStudioEditLessonMode(labCourse.id, labLessonId);
   const labHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
   assert(labHtml.includes('border-2'), 'Classic Framed theme style applied to section cards');
   assert(labHtml.includes('+ Add Row') && labHtml.includes('+ Column'), 'Table editor renders row & column controls');
@@ -3226,11 +3230,11 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(studioCourse34.lessons.length === 3, 'addAllInlineSuggestedClasses populated course syllabus with all 3 classes');
 
   const firstClass34 = studioCourse34.lessons[0];
-  sandbox.renderCourseStudio(studioCourse34.id, firstClass34.id);
+  sandbox.enterStudioEditLessonMode(studioCourse34.id, firstClass34.id);
   const studio34Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
-  assert(studio34Html.includes('md:col-span-4') && studio34Html.includes('md:col-span-8'), 'Studio upgraded to balanced 4/8 two-pane layout');
+  assert(studio34Html.includes('lg:col-span-5') && studio34Html.includes('lg:col-span-7'), 'Studio upgraded to full-width 5/7 live split layout on desktop');
   assert(studio34Html.includes('studio-blueprint-summary-bar') && studio34Html.includes('View Rules'), 'Blueprint banner uses sleek collapsible single-line summary bar');
-  assert(studio34Html.includes('studio-class-ai-partner') && !studio34Html.includes('id="studio-class-ai-partner" class="hidden'), 'Embedded AI Class Partner opens automatically on fresh empty classes');
+  assert(studio34Html.includes('studio-class-ai-partner') && !studio34Html.includes('id="studio-class-ai-partner" class="hidden '), 'Embedded AI Class Partner opens automatically on fresh empty classes');
 
   // Auto-Draft whole class via Embedded AI Class Partner
   await sandbox.triggerStudioQuickAutoDraftClass(studioCourse34.id, firstClass34.id, 'draft');
@@ -3260,23 +3264,23 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(typeof sandbox.removeStudioSource === 'function', 'removeStudioSource is a function');
   assert(indexHtml.includes('id="input-studio-class-ai-prompt"') && indexHtml.includes('<textarea'), 'Fluent multi-line composer uses expanding <textarea>');
 
-  // Verify stacked course picker nav bar hides cleanly inside Level 2 Course Studio
+  // Verify duplicate stacked course picker nav bar remains hidden in both Courses Directory and Class Studio
   sandbox.openCourseClassesView(studioCourse34.id);
   assert(getOrCreateElem('study-courses-nav-bar').classList.contains('hidden'), 'Top course picker bar hides inside Class Studio to prevent stacked bar clutter');
   sandbox.showAllCoursesView();
-  assert(!getOrCreateElem('study-courses-nav-bar').classList.contains('hidden'), 'Top course picker bar remains visible in Courses Directory');
+  assert(getOrCreateElem('study-courses-nav-bar').classList.contains('hidden'), 'Top course picker bar stays hidden in My Courses directory to avoid duplicate header clutter');
 
-  // Verify clean 2-tab switching on a fresh lesson
+  // Verify clean mobile 2-tab switching + desktop live split inside Edit Lesson Studio
   const srcLesson35 = studioCourse34.lessons[1];
   sandbox.openCourseClassesView(studioCourse34.id);
-  sandbox.renderCourseStudio(studioCourse34.id, srcLesson35.id);
+  sandbox.enterStudioEditLessonMode(studioCourse34.id, srcLesson35.id);
   let g35Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
-  assert(g35Html.includes('id="btn-studio-tab-ai"') && g35Html.includes('id="btn-studio-tab-sections"'), 'Studio renders clean 2-tab switcher (AI Studio vs Lesson Sections)');
-  assert(g35Html.includes('id="studio-modular-blocks-container" class="hidden'), 'Lesson Sections panel stays cleanly hidden while working in AI Studio tab');
+  assert(g35Html.includes('id="btn-studio-tab-ai"') && g35Html.includes('id="btn-studio-tab-sections"'), 'Studio renders clean mobile 2-tab switcher (AI & Sources vs Sections)');
+  assert(g35Html.includes('id="studio-modular-blocks-container" class="hidden'), 'On mobile < lg screens, Sections panel yields cleanly to AI & Sources tab');
 
   sandbox.setStudioWorkspaceTab(srcLesson35.id, 'sections');
   g35Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
-  assert(g35Html.includes('id="studio-class-ai-partner" class="hidden') && !g35Html.includes('id="studio-modular-blocks-container" class="hidden'), 'Switching to Lesson Sections tab shows only clean editable sections');
+  assert(g35Html.includes('id="studio-class-ai-partner" class="hidden') && !g35Html.includes('id="studio-modular-blocks-container" class="hidden'), 'Switching to Sections tab focuses Sections panel on mobile while remaining 5/7 live on desktop');
 
   sandbox.setStudioWorkspaceTab(srcLesson35.id, 'ai');
 
@@ -3351,18 +3355,17 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
 
   const g36Course = studioCourse34;
   const g36Lesson = g36Course.lessons[0];
-  sandbox.renderCourseStudio(g36Course.id, g36Lesson.id);
+  sandbox.enterStudioEditLessonMode(g36Course.id, g36Lesson.id);
   let g36Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
 
   assert(!g36Html.includes('Open in Modal Editor'), 'Unified Studio removes distracting Open in Modal Editor fallback link');
   assert(g36Html.includes('studio-autogrow') && g36Html.includes('dir="auto"'), 'Section fields use auto-growing dir="auto" textareas with zero horizontal sentence clipping');
   assert(sandbox.estimateTextareaRows('Line 1\nLine 2\nLine 3\n' + 'x'.repeat(210), 2, 12) >= 5, 'estimateTextareaRows scales height cleanly for multi-paragraph copy');
 
-  // Test Collapsible Focus View (12-column full width)
-  sandbox.toggleStudioSyllabusRail();
-  g36Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
-  assert(g36Html.includes('md:col-span-12') && g36Html.includes('Show Syllabus'), 'Focus View expands Lesson Workspace cleanly across all 12 columns');
-  sandbox.toggleStudioSyllabusRail();
+  // Verify back-to-lessons cleanly returns to Screen 2 List Mode
+  sandbox.exitStudioToLessonList(g36Course.id);
+  assert(getOrCreateElem('tutor-hub-lessons-container').innerHTML.includes('studio-lesson-list-screen'), 'exitStudioToLessonList returns cleanly to Screen 2 Lesson List');
+  sandbox.enterStudioEditLessonMode(g36Course.id, g36Lesson.id);
 
   // Test CORS noembed link extraction + Source Preview + Teach Audio Promotion
   const prevFetch36 = sandbox.fetch;
@@ -3424,6 +3427,122 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(getOrCreateElem('modal-add-custom-lesson').classList.contains('hidden'), 'openAiCreateClassModal routes straight into Unified Studio without opening old popup modal');
 
   sandbox.fetch = prevFetch36;
+
+  // --- GATE 37: Total Classes & Lessons Makeover (My Courses -> Clean List -> Document Reader -> 5/7 Edit Studio + AI Undo) ---
+  console.log('\n--- Running Gate 37: Total Classes & Lessons Makeover (4-Screen Flow + Reader + AI Undo) ---');
+  assert(typeof sandbox.enterStudioEditLessonMode === 'function', 'enterStudioEditLessonMode is a function');
+  assert(typeof sandbox.exitStudioToLessonList === 'function', 'exitStudioToLessonList is a function');
+  assert(typeof sandbox.renderLessonCleanReader === 'function', 'renderLessonCleanReader is a function');
+  assert(typeof sandbox.renderSectionReadOnlyHtml === 'function', 'renderSectionReadOnlyHtml is a function');
+  assert(typeof sandbox.undoLastStudioAiChange === 'function', 'undoLastStudioAiChange is a function');
+
+  const g37Course = {
+    id: 'course_g37_makeover',
+    title_en: 'Modern Jewish Philosophy',
+    category: 'General Curriculum',
+    target_level: 'High School (Ages 15-18)',
+    blueprint: {
+      version: '2.0',
+      student_profile: 'Curious teen thinkers',
+      guidelines: 'Socratic style, clean narrative',
+      sections: [
+        { id: 's37_hook', type: 'example', name: 'Modern Hook' },
+        { id: 's37_cards', type: 'flashcards', name: 'Key Concepts' },
+        { id: 's37_quiz', type: 'quiz', name: 'Quick Check' },
+        { id: 's37_pit', type: 'pitfalls', name: 'Misconceptions' }
+      ]
+    },
+    lessons: [
+      {
+        id: 'les_g37_1',
+        lesson_num: 1,
+        title_en: 'Time vs Space: The Architecture of Shabbat',
+        duration: '45m',
+        status: 'ready',
+        recordings: [{ id: 'rec_g37_1', title: 'Intro Story Clip', url: 'https://example.com/intro.mp3' }],
+        sections: {
+          s37_hook: JSON.stringify({ setup: 'Why do we check notifications every 6 minutes?', takeaway: 'Shabbat creates a sanctuary in time rather than space.' }),
+          s37_cards: JSON.stringify({ items: [{ front: 'Menuchah', back: 'Restorative peace & intentional cessation' }] }),
+          s37_quiz: JSON.stringify({ items: [{ q: 'What does Heschel call Shabbat?', options: ['A palace in time', 'A museum'], correct: 0 }] }),
+          s37_pit: JSON.stringify({ items: [{ trap: 'Shabbat is passive boredom', fix: 'Active celebration of presence and community' }] })
+        }
+      }
+    ]
+  };
+  sandbox.APP_STATE.customCourses.push(g37Course);
+
+  // Screen 1: My Courses shows clean single header, Add a New Course, clickable cards, and hides duplicate yellow bar
+  sandbox.showAllCoursesView();
+  assert(getOrCreateElem('study-courses-nav-bar').classList.contains('hidden'), 'Screen 1 My Courses hides duplicate top yellow bar');
+  assert(indexHtml.includes('+ Add a New Course'), 'Screen 1 header features Add a New Course CTA');
+  const cardsGridHtml = getOrCreateElem('courses-cards-grid').innerHTML;
+  assert(cardsGridHtml.includes('openCourseClassesView(\'course_g37_makeover\')'), 'Course card is directly clickable to open its lessons');
+
+  // Screen 2: Inside Course opens strictly clean Lesson Number + Name list
+  sandbox.openCourseClassesView('course_g37_makeover');
+  assert(!getOrCreateElem('inside-course-header-card').classList.contains('hidden'), 'Screen 2 Lesson List displays Inside Course header card');
+  const screen2Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(screen2Html.includes('studio-lesson-list-screen'), 'Screen 2 renders dedicated clean Lesson List view');
+  assert(screen2Html.includes('Time vs Space: The Architecture of Shabbat'), 'Screen 2 displays lesson title cleanly');
+  assert(!screen2Html.includes('studio-class-ai-partner') && !screen2Html.includes('studio-lesson-reader'), 'Screen 2 omits raw editor forms and reader body to stay uncluttered');
+
+  // Screen 3: Clicking a lesson opens Full Clean Lesson Reader with zero raw input fields + Edit Lesson CTA
+  sandbox.selectStudioClass('les_g37_1');
+  assert(getOrCreateElem('inside-course-header-card').classList.contains('hidden'), 'Screen 3 Reader hides top Inside Course header so only one clean Reader bar is shown');
+  const screen3Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(screen3Html.includes('studio-lesson-reader'), 'Screen 3 renders Clean Full Lesson Reader');
+  assert(screen3Html.includes('Why do we check notifications every 6 minutes?'), 'Screen 3 renders formatted lesson story prose');
+  assert(screen3Html.includes('flipReaderCard') && screen3Html.includes('selectReaderQuizOption') && screen3Html.includes('toggleReaderElement'), 'Screen 3 renders interactive flip flashcards, quiz options, and reveal toggles');
+  assert(screen3Html.includes('Intro Story Clip') && screen3Html.includes('<audio controls'), 'Screen 3 renders playable HTML5 audio recordings');
+  assert(!screen3Html.includes('<textarea'), 'Screen 3 Reader contains zero raw textarea inputs');
+  assert(screen3Html.includes('id="btn-reader-edit-lesson"'), 'Screen 3 Reader exposes prominent Edit Lesson button');
+
+  // Screen 4: Clicking Edit Lesson enters Unified 5/7 Split Studio pre-loaded with existing content
+  sandbox.enterStudioEditLessonMode('course_g37_makeover', 'les_g37_1');
+  assert(getOrCreateElem('inside-course-header-card').classList.contains('hidden'), 'Screen 4 Edit Studio hides extra course header for full workspace breathing room');
+  let screen4Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(screen4Html.includes('studio-edit-topbar') && screen4Html.includes('btn-edit-done-view-lesson'), 'Screen 4 renders single unified Edit topbar with Done View Lesson action');
+  assert(screen4Html.includes('lg:col-span-5') && screen4Html.includes('lg:col-span-7'), 'Screen 4 renders 5/7 desktop live split (AI Co-Builder + Lesson Sections)');
+  assert(screen4Html.includes('Why do we check notifications every 6 minutes?'), 'Screen 4 Edit Studio pre-loads existing lesson sections in real time');
+
+  // Clicking + New Lesson enters identical Screen 4 Edit Studio on fresh lesson
+  sandbox.handleStudioAddNewClassQuick('course_g37_makeover');
+  assert(g37Course.lessons.length === 2, 'handleStudioAddNewClassQuick created Lesson 2');
+  assert(getOrCreateElem('tutor-hub-lessons-container').innerHTML.includes('studio-class-ai-partner'), 'New Lesson enters Screen 4 Build/Edit Studio directly');
+
+  // Verify AI update pill + Undo AI Change snapshot restore on Lesson 1
+  sandbox.enterStudioEditLessonMode('course_g37_makeover', 'les_g37_1');
+  const prevFetch37 = sandbox.fetch;
+  sandbox.fetch = async () => ({
+    ok: true,
+    status: 200,
+    json: async () => ({
+      candidates: [{
+        content: {
+          parts: [{
+            text: JSON.stringify({
+              assistant_reply: 'Rewrote your Modern Hook with a gaming console shutdown analogy.',
+              sections: {
+                s37_hook: { setup: 'Imagine your Wi-Fi router unplugs automatically every Friday evening.', takeaway: 'Reclaiming attention is real freedom.' }
+              }
+            })
+          }]
+        }
+      }]
+    })
+  });
+
+  getOrCreateElem('input-studio-class-ai-prompt').value = 'Rewrite the Modern Hook using a Wi-Fi analogy';
+  await sandbox.sendStudioClassAiMessage('course_g37_makeover', 'les_g37_1');
+  assert(sandbox.parseStructuredSectionData(g37Course.lessons[0].sections.s37_hook, 'example').setup.includes('Wi-Fi router'), 'AI Co-Builder live-updated targeted section inside Screen 4');
+  screen4Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(screen4Html.includes('✓ Updated') && screen4Html.includes('id="btn-undo-studio-ai"'), 'Screen 4 displays Updated badge on AI-modified section and Undo AI Change button');
+
+  sandbox.undoLastStudioAiChange('course_g37_makeover', 'les_g37_1');
+  const restoredHook37 = sandbox.parseStructuredSectionData(g37Course.lessons[0].sections.s37_hook, 'example');
+  assert(restoredHook37.setup.includes('check notifications every 6 minutes'), 'undoLastStudioAiChange accurately restored previous lesson snapshot');
+
+  sandbox.fetch = prevFetch37;
 
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
