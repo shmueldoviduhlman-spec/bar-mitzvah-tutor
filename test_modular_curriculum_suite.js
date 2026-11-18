@@ -4434,8 +4434,8 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(sandbox.toggleThemeMode() === 'dark' && sandbox.localStorage.getItem('tutor_theme_mode') === 'dark', 'toggleThemeMode switches to Dark Mode and persists preference');
   assert(sandbox.toggleThemeMode() === 'light' && sandbox.localStorage.getItem('tutor_theme_mode') === 'light', 'toggleThemeMode switches back to Warm Daylight cleanly');
 
-  // Desktop Left Sidebar App Shell & Live Quick-Jump Course Tree
-  assert(indexHtml.includes('id="app-sidebar-shell"') && indexHtml.includes('id="desktop-sidebar-nav"') && indexHtml.includes('id="sidebar-courses-quick-list"') && indexHtml.includes('id="main-bottom-dock" class="md:hidden'), 'Desktop uses fixed Left Sidebar App Shell with live Your Courses tree while hiding mobile bottom dock on md+ screens');
+  // Desktop Left Sidebar App Shell (clean nav without redundant Your Courses tree)
+  assert(indexHtml.includes('id="app-sidebar-shell"') && indexHtml.includes('id="desktop-sidebar-nav"') && !indexHtml.includes('id="sidebar-courses-quick-list"') && indexHtml.includes('id="main-bottom-dock" class="md:hidden'), 'Desktop uses fixed Left Sidebar App Shell without redundant Your Courses tree while hiding mobile bottom dock on md+ screens');
 
   // Tab 1: 1-Click Continue Last Lesson, Top Lesson Switcher, Click-to-Rename Title, Quick Section Jump List & 3-Tab Course Architect
   const g47Course = {
@@ -4493,8 +4493,6 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(continueBannerEl.classList.contains('hidden') && continueBannerEl.innerHTML === '', 'Continue Last Lesson banner is permanently removed and hidden per user preference');
   const g47CardsHtml = getOrCreateElem('courses-cards-grid').innerHTML;
   assert(g47CardsHtml.includes('modern-gradient-cover') && !g47CardsHtml.includes('Click to open chapters') && !g47CardsHtml.includes('Structured interactive curriculum') && !g47CardsHtml.includes('handleDeleteCustomCourseById'), 'My Courses renders ultra-clean Visual Course Cards without filler descriptions, footer buttons, or exposed edit/delete clutter');
-  const g47SidebarTreeHtml = getOrCreateElem('sidebar-courses-quick-list').innerHTML;
-  assert(g47SidebarTreeHtml.includes('Chumash Mastery'), 'Left Sidebar Your Courses tree populates live quick-jump course links');
 
   // Test 3-Tab Course Architect Right Panel switcher
   assert(typeof sandbox.switchArchitectRightTab === 'function', 'switchArchitectRightTab is defined');

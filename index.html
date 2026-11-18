@@ -797,15 +797,6 @@
         </button>
       </nav>
 
-      <!-- Desktop Live Quick-Jump Course Tree inside Left Sidebar -->
-      <div class="hidden md:flex flex-col gap-1.5 pt-3 border-t border-slate-800/70 flex-1 min-h-0">
-        <div class="flex items-center justify-between px-2.5">
-          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Your Courses</span>
-          <button type="button" onclick="switchTab('study'); backToCoursesOverview();" class="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition">View All</button>
-        </div>
-        <div id="sidebar-courses-quick-list" class="space-y-1 overflow-y-auto pr-1 max-h-56 no-scrollbar"></div>
-      </div>
-
     </div>
 
     <!-- Student Portal Header Controls (Shown only when logged in as Student) -->
@@ -10731,30 +10722,6 @@ alter publication supabase_realtime add table public.students_sync;`;
       return list[(idx || 0) % list.length];
     }
 
-    function renderSidebarCoursesQuickList(courses) {
-      const listEl = document.getElementById('sidebar-courses-quick-list');
-      if (!listEl) return;
-      const isHe = APP_STATE.lang === 'he';
-      if (!Array.isArray(courses) || courses.length === 0) {
-        listEl.innerHTML = `<div class="px-2.5 py-2 text-[11px] text-slate-500">${isHe ? 'אין קורסים עדיין' : 'No courses yet'}</div>`;
-        return;
-      }
-      listEl.innerHTML = courses.map(c => {
-        const title = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
-        const icon = normalizeCourseIcon(c.icon);
-        const isCurrent = APP_STATE.insideCourseId === c.id && APP_STATE.activeTab === 'study';
-        return `
-          <button type="button" onclick="switchTab('study'); openCourseClassesView('${c.id}')" class="w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold transition ${isCurrent ? 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/70 hover:text-white'}">
-            <span class="flex items-center gap-2 min-w-0">
-              <span class="text-sm shrink-0">${escapeHtml(icon)}</span>
-              <span class="line-clamp-1 text-left rtl:text-right">${escapeHtml(title)}</span>
-            </span>
-            <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-800/80 text-slate-400 shrink-0">${Array.isArray(c.lessons) ? c.lessons.length : 0}</span>
-          </button>
-        `;
-      }).join('');
-    }
-
     function renderCoursesCardsGrid() {
       const grid = document.getElementById('courses-cards-grid');
       const countBadge = document.getElementById('courses-directory-count-badge');
@@ -10769,7 +10736,6 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
 
       renderContinueLastLessonBanner();
-      renderSidebarCoursesQuickList(courses);
 
       if (purgeBtn) {
         purgeBtn.classList.add('hidden');
