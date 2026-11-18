@@ -2910,6 +2910,84 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(tpHtml.includes('<audio controls'), 'Teleprompter embeds playable <audio> controls directly inside Audio sections');
   sandbox.closeTutorTeleprompter();
 
+  // ==============================================
+  // GATE 32: 20-SECTION UNIVERSAL ARCHITECT CATALOG, THEMES & INTERACTIVE AI
+  // ==============================================
+  console.log('\n--- Gate 32: 20-Section Universal Architect Catalog, Themes & Interactive AI ---');
+
+  assert(Object.keys(sandbox.COURSE_BLOCK_CATALOG).length >= 20, 'COURSE_BLOCK_CATALOG supports 20+ specialized block types');
+  assert(indexHtml.includes('value="bilingual_split"') && indexHtml.includes('value="quiz"') && indexHtml.includes('value="flashcards"'), 'HTML dropdown includes new interactive section options');
+  assert(indexHtml.includes('id="input-course-theme-style"') && indexHtml.includes('id="input-course-density"'), 'HTML includes expanded Theme Style and Density selectors');
+  assert(indexHtml.includes('data-color="teal"') && indexHtml.includes('data-color="orange"') && indexHtml.includes('data-color="slate"'), 'HTML includes 10 expanded course color swatches');
+
+  // Auto default rules + per-section customization overrides
+  sandbox.openCreateCourseModal('ai');
+  getOrCreateElem('input-create-course-title-en').value = 'Universal All-20 Studio Lab';
+  sandbox.addBlueprintSection('bilingual_split', 'Source & Translation');
+  sandbox.addBlueprintSection('table', 'Rules Comparison');
+  sandbox.addBlueprintSection('quiz', 'Quick Check');
+  sandbox.addBlueprintSection('flashcards', 'Key Terms');
+  sandbox.addBlueprintSection('timed_activity', 'Speed Drill');
+  sandbox.addBlueprintSection('dialogue', 'Roleplay');
+  sandbox.addBlueprintSection('image', 'Diagram');
+  sandbox.addBlueprintSection('video_links', 'Video Clips');
+  sandbox.addBlueprintSection('teacher_cue', 'Prep Cue');
+
+  assert(sandbox.currentBlueprintSections.length === 9, 'Added all 9 new section types');
+  assert(Boolean(sandbox.currentBlueprintSections[0].ai_rule), 'addBlueprintSection automatically sets default AI rule');
+  assert(sandbox.currentBlueprintSections[0].rtl_default === true, 'bilingual_split defaults rtl_default to true');
+  assert(sandbox.currentBlueprintSections[8].teacher_only === true, 'teacher_cue defaults teacher_only to true');
+
+  const tableSecId = sandbox.currentBlueprintSections[1].id;
+  sandbox.updateBlueprintSectionProp(tableSecId, 'color', 'emerald');
+  assert(sandbox.currentBlueprintSections[1].color === 'emerald', 'Per-section color override saved cleanly');
+
+  getOrCreateElem('input-course-theme-style').value = 'classic_framed';
+  getOrCreateElem('input-course-density').value = 'compact';
+  sandbox.selectCourseColor('indigo');
+  getOrCreateElem('ai-builder-lessons-count-unified').value = 'blueprint';
+  await sandbox.handleGenerateFullCourseFromAi();
+
+  const labCourse = sandbox.APP_STATE.customCourses.find(c => c.title_en === 'Universal All-20 Studio Lab');
+  assert(!!labCourse, 'Universal All-20 Studio Lab created');
+  assert(labCourse.blueprint.theme_style === 'classic_framed', 'Course saved classic_framed theme style');
+  assert(labCourse.blueprint.density === 'compact', 'Course saved compact density');
+  assert(labCourse.color === 'indigo', 'Course saved indigo color theme');
+
+  getOrCreateElem('input-studio-quick-class').value = 'Session 1: Full Interactive Demo';
+  sandbox.handleStudioQuickAddClass(null, labCourse.id);
+  const labLessonId = labCourse.lessons[0].id;
+
+  // Architecture-Aware AI drafts all 9 new structured block types
+  sandbox.openStudioAiCoPilotModal(labCourse.id, labLessonId);
+  await sandbox.executeStudioAiGenerateFullClass();
+  sandbox.applyGeneratedContentToActiveClass();
+
+  sandbox.renderCourseStudio(labCourse.id, labLessonId);
+  const labHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(labHtml.includes('border-2'), 'Classic Framed theme style applied to section cards');
+  assert(labHtml.includes('+ Add Row') && labHtml.includes('+ Column'), 'Table editor renders row & column controls');
+  assert(labHtml.includes('+ Add Question'), 'Quiz editor renders question repeater');
+  assert(labHtml.includes('+ Add Flashcard'), 'Flashcards editor renders front/back repeater');
+  assert(labHtml.includes('Upload Image'), 'Image block provides local image upload');
+  assert(labHtml.includes('+ Add Video / Link'), 'Video & Resource Links editor renders link repeater');
+  assert(labHtml.includes('Teacher Only'), 'Teacher Cue section displays Teacher Only badge');
+
+  // Interactive mutations: table row add + flashcard add
+  sandbox.handleSectionTableAddRow(labCourse.id, labLessonId, tableSecId);
+  const parsedTable = sandbox.parseStructuredSectionData(labCourse.lessons[0].sections[tableSecId], 'table');
+  assert(parsedTable.rows.length === 3, 'handleSectionTableAddRow added new comparison row');
+
+  // Teleprompter interactivity across new blocks
+  sandbox.openTutorTeleprompter(labCourse.id, labLessonId);
+  const tpLabHtml = getOrCreateElem('teleprompter-content-container').innerHTML;
+  assert(tpLabHtml.includes('Click card to flip') && tpLabHtml.includes('flipFlashcardElement'), 'Teleprompter renders clickable flip flashcards');
+  assert(tpLabHtml.includes('selectQuizChoice'), 'Teleprompter renders interactive multiple-choice quiz');
+  assert(tpLabHtml.includes('startSectionCountdown'), 'Teleprompter renders interactive timed activity countdown controls');
+  assert(tpLabHtml.includes('<table'), 'Teleprompter renders comparison matrix table');
+  assert(tpLabHtml.includes('(Teacher Only)'), 'Teleprompter highlights Private Teacher Cue box');
+  sandbox.closeTutorTeleprompter();
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
