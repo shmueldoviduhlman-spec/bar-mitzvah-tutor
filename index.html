@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" class="dark overflow-x-hidden">
+<html lang="en" dir="ltr" class="theme-daylight overflow-x-hidden">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -8,9 +8,9 @@
   <meta http-equiv="Expires" content="0">
   <title>TutorPilot | The Operating System for Tutors & Educators</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#FAF8F5" id="meta-theme-color">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -79,10 +79,203 @@
       background: #475569;
     }
 
+    html.theme-daylight ::-webkit-scrollbar-track {
+      background: #FAF8F5;
+    }
+    html.theme-daylight ::-webkit-scrollbar-thumb {
+      background: #D6D3D1;
+      border-radius: 4px;
+    }
+    html.theme-daylight ::-webkit-scrollbar-thumb:hover {
+      background: #A8A29E;
+    }
+
     .glass-nav {
       background: rgba(15, 23, 42, 0.88);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
+    }
+
+    /* ==========================================================================
+       M105 WARM DAYLIGHT DESIGN SYSTEM (Craft Docs + Claude.ai + Editorial Theme)
+       ========================================================================== */
+    html.theme-daylight,
+    html.theme-daylight body {
+      background-color: #FAF8F5 !important;
+      color: #18181B !important;
+    }
+
+    html.theme-daylight .glass-nav {
+      background: rgba(250, 248, 245, 0.94) !important;
+      border-color: #E7E5E4 !important;
+      box-shadow: 0 1px 4px rgba(28, 25, 23, 0.04);
+    }
+
+    /* Warm Ivory & Crisp White Surfaces */
+    html.theme-daylight [class*="bg-slate-900"] {
+      background-color: #FFFFFF !important;
+      box-shadow: 0 2px 10px rgba(28, 25, 23, 0.035);
+    }
+    html.theme-daylight [class*="bg-slate-950"] {
+      background-color: #F4F1EA !important;
+    }
+    html.theme-daylight #lock-screen,
+    html.theme-daylight #educator-command-center-backdrop {
+      background-color: rgba(244, 241, 234, 0.92) !important;
+    }
+    html.theme-daylight #educator-command-center {
+      background: #FFFFFF !important;
+      border-color: #E7E5E4 !important;
+    }
+    html.theme-daylight [class*="bg-slate-800"],
+    html.theme-daylight [class*="bg-slate-850"] {
+      background-color: #EFECE6 !important;
+    }
+    html.theme-daylight button[class*="bg-slate-800"]:hover,
+    html.theme-daylight a[class*="bg-slate-800"]:hover {
+      background-color: #E4DFD7 !important;
+    }
+
+    /* Warm Stone Hairline Borders */
+    html.theme-daylight [class*="border-slate-800"],
+    html.theme-daylight [class*="border-slate-900"] {
+      border-color: #E7E5E4 !important;
+    }
+    html.theme-daylight [class*="border-slate-700"],
+    html.theme-daylight [class*="border-slate-600"] {
+      border-color: #D6D3D1 !important;
+    }
+    html.theme-daylight [class*="divide-slate-800"] > :not([hidden]) ~ :not([hidden]) {
+      border-color: #E7E5E4 !important;
+    }
+
+    /* Tinted Surface Callouts in Daylight */
+    html.theme-daylight [class*="bg-amber-950"],
+    html.theme-daylight [class*="from-amber-950"] {
+      background-color: #FEF3C7 !important;
+      background-image: none !important;
+    }
+    html.theme-daylight [class*="bg-indigo-950"],
+    html.theme-daylight [class*="bg-brand-950"],
+    html.theme-daylight [class*="via-indigo-950"] {
+      background-color: #EEF2FF !important;
+      background-image: none !important;
+    }
+    html.theme-daylight [class*="bg-emerald-950"] {
+      background-color: #ECFDF5 !important;
+    }
+    html.theme-daylight [class*="bg-rose-950"],
+    html.theme-daylight [class*="bg-red-950"] {
+      background-color: #FFF1F2 !important;
+    }
+    html.theme-daylight [class*="bg-cyan-950"] {
+      background-color: #ECFEFF !important;
+    }
+    html.theme-daylight [class*="bg-purple-950"] {
+      background-color: #F5F3FF !important;
+    }
+
+    /* High-Contrast Editorial Typography in Daylight */
+    html.theme-daylight .text-white {
+      color: #18181B !important;
+    }
+    html.theme-daylight .bg-brand-600.text-white,
+    html.theme-daylight .bg-brand-500.text-white,
+    html.theme-daylight .bg-indigo-600.text-white,
+    html.theme-daylight .bg-indigo-500.text-white,
+    html.theme-daylight .bg-emerald-600.text-white,
+    html.theme-daylight .bg-emerald-500.text-white,
+    html.theme-daylight .bg-rose-600.text-white,
+    html.theme-daylight [class*="from-brand-600"].text-white,
+    html.theme-daylight [class*="from-indigo-"].text-white,
+    html.theme-daylight .bg-brand-600 .text-white,
+    html.theme-daylight .bg-indigo-500 .text-white,
+    html.theme-daylight .bg-emerald-600 .text-white {
+      color: #FFFFFF !important;
+    }
+    html.theme-daylight .text-slate-100,
+    html.theme-daylight .text-slate-200 {
+      color: #1C1917 !important;
+    }
+    html.theme-daylight .text-slate-300 {
+      color: #44403C !important;
+    }
+    html.theme-daylight .text-slate-400 {
+      color: #57534E !important;
+    }
+    html.theme-daylight .text-slate-500,
+    html.theme-daylight .text-slate-600 {
+      color: #78716C !important;
+    }
+
+    /* Semantic Accent Text Contrast on Daylight Cards */
+    html.theme-daylight .text-amber-100,
+    html.theme-daylight .text-amber-200,
+    html.theme-daylight .text-amber-300,
+    html.theme-daylight .text-amber-400 {
+      color: #B45309 !important;
+    }
+    html.theme-daylight .text-brand-200,
+    html.theme-daylight .text-brand-300,
+    html.theme-daylight .text-brand-400,
+    html.theme-daylight .text-indigo-200,
+    html.theme-daylight .text-indigo-300,
+    html.theme-daylight .text-indigo-400 {
+      color: #4338CA !important;
+    }
+    html.theme-daylight .text-emerald-200,
+    html.theme-daylight .text-emerald-300,
+    html.theme-daylight .text-emerald-400 {
+      color: #047857 !important;
+    }
+    html.theme-daylight .text-cyan-100,
+    html.theme-daylight .text-cyan-200,
+    html.theme-daylight .text-cyan-300,
+    html.theme-daylight .text-cyan-400,
+    html.theme-daylight .text-sky-200,
+    html.theme-daylight .text-sky-300,
+    html.theme-daylight .text-sky-400 {
+      color: #0E7490 !important;
+    }
+    html.theme-daylight .text-rose-200,
+    html.theme-daylight .text-rose-300,
+    html.theme-daylight .text-rose-400,
+    html.theme-daylight .text-red-300,
+    html.theme-daylight .text-red-400 {
+      color: #BE123C !important;
+    }
+    html.theme-daylight .text-purple-100,
+    html.theme-daylight .text-purple-200,
+    html.theme-daylight .text-purple-300,
+    html.theme-daylight .text-purple-400 {
+      color: #6D28D9 !important;
+    }
+
+    /* Responsive 2-Column Visual Book Grid for My Courses on Desktop */
+    @media (min-width: 768px) {
+      #courses-cards-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 1rem !important;
+      }
+      body {
+        padding-bottom: 2rem !important;
+      }
+    }
+
+    /* Book-Quality Larger Lesson Typography & Quotes */
+    #reader-sections-body p,
+    #reader-sections-body li,
+    .lesson-doc-prose p,
+    .lesson-doc-prose li {
+      font-size: 1.0625rem !important;
+      line-height: 1.75 !important;
+    }
+    #reader-sections-body [dir="rtl"],
+    .lesson-doc-prose [dir="rtl"] {
+      font-family: 'Heebo', sans-serif;
+      font-size: 1.15rem !important;
+      line-height: 1.8 !important;
     }
 
     .badge-glow {
@@ -511,8 +704,39 @@
           <span id="app-title" class="text-base sm:text-lg font-bold text-white tracking-tight">TutorPilot</span>
         </div>
 
+        <!-- Center: Desktop & Tablet Top Pill Navigation Bar -->
+        <nav id="desktop-top-pill-nav" class="hidden md:flex items-center gap-1 p-1 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-sm">
+          <button type="button" onclick="switchTab('study')" id="tab-study" class="tab-btn flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-semibold transition whitespace-nowrap bg-brand-600 text-white shadow-sm">
+            <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+            <span id="tab-study-label">Classes</span>
+          </button>
+          <button type="button" onclick="switchTab('students')" id="tab-students" class="tab-btn flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap">
+            <i data-lucide="users" class="w-3.5 h-3.5"></i>
+            <span id="tab-students-label">Students</span>
+          </button>
+          <button type="button" onclick="switchTab('calendar')" id="tab-calendar" class="tab-btn flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap">
+            <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+            <span id="tab-calendar-label">Calendar</span>
+          </button>
+          <button type="button" onclick="switchTab('ai')" id="tab-ai" class="tab-btn flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800 transition whitespace-nowrap">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span id="tab-ai-label">AI Studio</span>
+          </button>
+        </nav>
+
         <!-- Right: Teacher Profile Controls OR Student Portal Header Controls -->
         <div id="teacher-header-controls" class="flex items-center gap-1.5 shrink-0">
+
+          <!-- Clean Today Overview Toggle in Header -->
+          <button onclick="toggleCommandCenterCollapse()" id="btn-header-command-center" class="flex items-center gap-1.5 px-2.5 py-1.5 min-h-[36px] sm:min-h-[38px] rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition active:scale-95 shadow-sm" title="Today Overview & Quick Actions">
+            <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span class="hidden sm:inline" id="lbl-header-today-btn">Today</span>
+          </button>
+
+          <!-- 1-Click Warm Daylight / Dark Mode Theme Toggle -->
+          <button type="button" onclick="toggleThemeMode()" id="btn-theme-toggle" class="w-9 h-9 sm:w-9.5 sm:h-9.5 flex items-center justify-center rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-amber-400 border border-slate-700/80 transition active:scale-95 shadow-sm" title="Switch Warm Daylight / Dark Mode">
+            <i data-lucide="moon" id="icon-theme-toggle" class="w-4 h-4"></i>
+          </button>
 
           <!-- User Profile & Session Pill -->
           <div class="relative">
@@ -564,29 +788,27 @@
           </div>
 
           <!-- Language Switcher -->
-          <button onclick="toggleLanguage()" class="flex items-center justify-center gap-1.5 px-2.5 py-1.5 min-h-[36px] sm:min-h-[38px] rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition active:scale-95 shadow-sm">
+          <button onclick="toggleLanguage()" class="flex items-center justify-center gap-1.5 px-2.5 py-1.5 min-h-[36px] sm:min-h-[38px] rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition active:scale-95 shadow-sm">
             <i data-lucide="languages" class="w-3.5 h-3.5 text-brand-400"></i>
             <span id="lang-indicator">עברית</span>
           </button>
 
-          <!-- Subtle Command Center Toggle in Header -->
-          <button onclick="toggleCommandCenterCollapse()" id="btn-header-command-center" class="w-9 h-9 sm:w-9.5 sm:h-9.5 flex items-center justify-center rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-amber-300 border border-slate-700/80 transition active:scale-95 shadow-sm" title="Teacher Command Center">
-            <i data-lucide="compass" class="w-4 h-4 text-amber-400"></i>
-          </button>
-
           <!-- Settings Button (Gear) -->
-          <button onclick="openSettingsModal()" class="w-9 h-9 sm:w-9.5 sm:h-9.5 flex items-center justify-center rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition active:scale-95 shadow-sm" title="Settings">
+          <button onclick="openSettingsModal()" class="w-9 h-9 sm:w-9.5 sm:h-9.5 flex items-center justify-center rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition active:scale-95 shadow-sm" title="Settings">
             <i data-lucide="settings" class="w-4 h-4"></i>
           </button>
 
         </div>
 
         <div id="student-header-controls" class="hidden flex items-center gap-2 shrink-0">
-          <span class="px-2.5 py-1 rounded-lg bg-indigo-500/15 border border-indigo-400/35 text-indigo-200 text-xs font-bold">Student Portal</span>
-          <button type="button" onclick="toggleLanguage()" class="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition">
+          <span class="px-2.5 py-1 rounded-xl bg-indigo-500/15 border border-indigo-400/35 text-indigo-200 text-xs font-bold">Student Portal</span>
+          <button type="button" onclick="toggleThemeMode()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition" title="Switch Theme">
+            <i data-lucide="moon" class="w-3.5 h-3.5"></i>
+          </button>
+          <button type="button" onclick="toggleLanguage()" class="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-semibold transition">
             <i data-lucide="languages" class="w-3.5 h-3.5 text-brand-400"></i>
           </button>
-          <button type="button" id="btn-student-portal-logout" onclick="logoutStudentPortal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold transition">
+          <button type="button" id="btn-student-portal-logout" onclick="logoutStudentPortal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold transition">
             <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
             <span>Log Out</span>
           </button>
@@ -603,12 +825,10 @@
     <!-- TEACHER COMMAND CENTER (HOME OVERVIEW COCKPIT) -->
     <!-- ============================================== -->
 
-    <!-- Subtle Top Pull-Down Pill / Button -->
-    <div class="flex justify-center -mt-2 mb-4" id="container-top-command-center-trigger">
-      <button type="button" id="btn-top-command-center-trigger" onclick="openCommandCenterDrawer()" class="group inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 hover:bg-slate-800 text-slate-400 hover:text-amber-300 border border-slate-800 hover:border-amber-500/40 text-[11px] font-medium transition shadow-sm backdrop-blur active:scale-95 cursor-pointer" title="Teacher Command Center (Click or pull down)">
-        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 group-hover:bg-amber-300"></span>
-        <span id="lbl-top-cmd-trigger">Cockpit</span>
-        <i data-lucide="chevron-down" class="w-3 h-3 text-slate-500 group-hover:text-amber-400 group-hover:translate-y-0.5 transition-transform"></i>
+    <!-- Hidden Legacy Top Pull-Down Pill (Moved into clean Header Today button) -->
+    <div class="hidden" id="container-top-command-center-trigger" aria-hidden="true">
+      <button type="button" id="btn-top-command-center-trigger" onclick="openCommandCenterDrawer()">
+        <span id="lbl-top-cmd-trigger">Today</span>
       </button>
     </div>
 
@@ -779,7 +999,7 @@
         <div id="tutor-hub-active-lessons" class="space-y-6">
 
           <!-- LEVEL 1: MY COURSES DIRECTORY -->
-          <div id="study-level-courses" class="space-y-4 max-w-3xl mx-auto">
+          <div id="study-level-courses" class="space-y-4 max-w-4xl mx-auto">
             <!-- Single Clean Header: My Courses + Add a New Course -->
             <div id="courses-directory-header-bar" class="flex items-center justify-between gap-3 py-2.5 border-b border-slate-800/80">
               <div class="flex items-center gap-2.5">
@@ -796,6 +1016,9 @@
                 </button>
               </div>
             </div>
+
+            <!-- 1-Click Continue Last Lesson Shortcut Banner -->
+            <div id="continue-last-lesson-banner" class="hidden"></div>
 
             <!-- Hidden compatibility hook for legacy quick create input -->
             <div id="quick-create-course-bar" class="hidden" aria-hidden="true">
@@ -1333,53 +1556,42 @@
     </section>
 
     <!-- ============================================== -->
-    <!-- VIEW 4: DUAL HEBREW & SECULAR CALENDAR         -->
+    <!-- VIEW 3: CALENDAR GRID + SIDE DAY AGENDA PANEL  -->
     <!-- ============================================== -->
-    <section id="view-calendar" class="space-y-3 hidden">
+    <section id="view-calendar" class="space-y-4 hidden">
 
-      <!-- Month & Hebrew Year Display Banner with Interactive Month/Year Dropdown -->
-      <div class="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-sm flex-wrap gap-2">
-        <div class="flex items-center gap-1.5 sm:gap-2">
-          <!-- Previous Month Button -->
-          <button onclick="changeCalendarMonth(-1)" class="p-1.5 sm:p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition active:scale-95" title="Previous Month">
+      <!-- Clean Decluttered Calendar Header -->
+      <div class="flex items-center justify-between px-4 py-3 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-sm flex-wrap gap-3">
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="changeCalendarMonth(-1)" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition active:scale-95" title="Previous Month">
             <i data-lucide="chevron-left" class="w-4 h-4 rtl:rotate-180"></i>
           </button>
 
-          <!-- Clickable Month & Year Dropdown Trigger -->
-          <button onclick="openMonthPickerModal()" id="btn-month-picker-toggle" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm border border-slate-700 transition active:scale-95 shadow-sm group">
+          <button onclick="openMonthPickerModal()" id="btn-month-picker-toggle" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm border border-slate-700 transition active:scale-95 shadow-sm group">
             <span id="calendar-secular-month-year">November 2026</span>
             <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-brand-400 group-hover:text-brand-300 transition-transform"></i>
           </button>
 
-          <!-- Next Month Button -->
-          <button onclick="changeCalendarMonth(1)" class="p-1.5 sm:p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition active:scale-95" title="Next Month">
+          <button onclick="changeCalendarMonth(1)" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition active:scale-95" title="Next Month">
             <i data-lucide="chevron-right" class="w-4 h-4 rtl:rotate-180"></i>
           </button>
 
-          <!-- Hebrew Month & Year Badge (Visible when Hebrew overlay is enabled) -->
-          <span id="calendar-hebrew-month-year" class="text-xs font-semibold text-brand-400 font-mono px-2 py-1 rounded-lg bg-brand-500/10 border border-brand-500/20 hidden">מרחשון תשפ״ז</span>
-
-          <!-- Hebrew Calendar Overlay Toggle -->
-          <button
-            type="button"
-            onclick="toggleHebrewCalendarOverlay()"
-            id="btn-toggle-hebrew-calendar"
-            class="px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700/60 text-xs font-medium transition active:scale-95 flex items-center gap-1.5"
-            title="Toggle Hebrew Lunar Calendar Overlay"
-          >
-            <span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="dot-hebrew-calendar-toggle"></span>
-            <span id="lbl-hebrew-calendar-toggle">Hebrew: Off</span>
+          <button onclick="resetCalendarToToday()" class="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/60 text-xs font-semibold transition active:scale-95 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
+            <span id="calendar-today-btn-label">Today</span>
           </button>
+
+          <span id="calendar-hebrew-month-year" class="text-xs font-semibold text-brand-400 font-mono px-2 py-1 rounded-lg bg-brand-500/10 border border-brand-500/20 hidden">מרחשון תשפ״ז</span>
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
           <!-- Calendar View Mode Switcher (Month vs Week) -->
-          <div class="flex items-center p-0.5 rounded-xl bg-slate-800/80 border border-slate-700/60 shrink-0">
+          <div class="flex items-center p-1 rounded-xl bg-slate-800/80 border border-slate-700/60 shrink-0">
             <button
               type="button"
               id="btn-calendar-view-month"
               onclick="switchCalendarViewMode('month')"
-              class="px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow"
+              class="px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow"
               title="Month Grid View"
             >
               <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
@@ -1389,7 +1601,7 @@
               type="button"
               id="btn-calendar-view-week"
               onclick="switchCalendarViewMode('week')"
-              class="px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-400 hover:text-white"
+              class="px-3 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-400 hover:text-white"
               title="Week Timetable View"
             >
               <i data-lucide="columns-3" class="w-3.5 h-3.5"></i>
@@ -1397,107 +1609,150 @@
             </button>
           </div>
 
-          <!-- Calendar .ics Sync / Export Button -->
           <button
             type="button"
-            id="btn-export-calendar-ics"
-            onclick="exportCalendarToIcs()"
-            class="px-2.5 py-1 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-semibold transition active:scale-95 flex items-center gap-1.5"
-            title="Sync or export schedule as .ics for Google Calendar, Apple Calendar, or Outlook"
+            onclick="toggleHebrewCalendarOverlay()"
+            id="btn-toggle-hebrew-calendar"
+            class="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700/60 text-xs font-medium transition active:scale-95 flex items-center gap-1.5"
+            title="Toggle Hebrew Lunar Calendar Overlay"
           >
-            <i data-lucide="download" class="w-3.5 h-3.5 text-cyan-400"></i>
-            <span id="lbl-calendar-export-ics">Sync (.ics)</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="dot-hebrew-calendar-toggle"></span>
+            <span id="lbl-hebrew-calendar-toggle">Hebrew: Off</span>
           </button>
 
-          <!-- Plan Breakdown Button -->
           <button
             onclick="openBreakdownPlannerModal()"
             id="btn-calendar-plan-breakdown"
-            class="px-2.5 py-1 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition active:scale-95 flex items-center gap-1.5"
+            class="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-indigo-300 border border-slate-700/60 text-xs font-semibold transition active:scale-95 flex items-center gap-1.5"
             title="Plan Curriculum Breakdown"
           >
             <i data-lucide="calendar-range" class="w-3.5 h-3.5 text-indigo-400"></i>
             <span id="calendar-breakdown-btn-label">Plan Classes</span>
           </button>
 
-          <!-- Today Quick Button -->
-          <button onclick="resetCalendarToToday()" class="px-2.5 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-semibold transition active:scale-95 flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
-            <span id="calendar-today-btn-label">Today</span>
+          <button
+            type="button"
+            id="btn-export-calendar-ics"
+            onclick="exportCalendarToIcs()"
+            class="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-cyan-300 border border-slate-700/60 text-xs font-semibold transition active:scale-95 flex items-center gap-1.5"
+            title="Export schedule as .ics"
+          >
+            <i data-lucide="download" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span id="lbl-calendar-export-ics">Sync (.ics)</span>
           </button>
         </div>
       </div>
 
-      <!-- MONTH VIEW CONTAINER -->
-      <div id="calendar-month-view-container" class="space-y-3">
-        <!-- 7-Day Weekdays Header (Sun to Sat) -->
-        <div id="calendar-weekdays-header" class="grid grid-cols-7 gap-1 sm:gap-2 text-center text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider w-full min-w-0 overflow-hidden">
-          <!-- Populated via JS -->
-        </div>
+      <!-- SPLIT DESKTOP WORKSPACE: CALENDAR GRID (LEFT) + LIVE SELECTED DAY AGENDA (RIGHT) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <div class="lg:col-span-8 space-y-3 min-w-0">
+          <!-- MONTH VIEW CONTAINER -->
+          <div id="calendar-month-view-container" class="space-y-3">
+            <!-- 7-Day Weekdays Header (Sun to Sat) -->
+            <div id="calendar-weekdays-header" class="grid grid-cols-7 gap-1.5 sm:gap-2 text-center text-[11px] font-bold text-slate-400 uppercase tracking-wider w-full min-w-0 overflow-hidden">
+              <!-- Populated via JS -->
+            </div>
 
-        <!-- Calendar 7-Day Month Grid (Sun to Sat) -->
-        <div id="calendar-days-grid" class="grid grid-cols-7 gap-1 sm:gap-2 w-full min-w-0 overflow-hidden">
-          <!-- Populated dynamically via JS -->
-        </div>
-      </div>
+            <!-- Calendar 7-Day Month Grid (Sun to Sat) -->
+            <div id="calendar-days-grid" class="grid grid-cols-7 gap-1.5 sm:gap-2 w-full min-w-0 overflow-hidden">
+              <!-- Populated dynamically via JS -->
+            </div>
+          </div>
 
-      <!-- WEEK TIMETABLE VIEW CONTAINER -->
-      <div id="calendar-week-view-container" class="hidden space-y-3">
-        <div id="calendar-week-timetable-scroll" class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/80 shadow-lg backdrop-blur">
-          <div id="calendar-week-timetable" class="min-w-[720px]">
-            <!-- Populated dynamically via renderWeekTimetable -->
+          <!-- WEEK TIMETABLE VIEW CONTAINER -->
+          <div id="calendar-week-view-container" class="hidden space-y-3">
+            <div id="calendar-week-timetable-scroll" class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/80 shadow-lg backdrop-blur">
+              <div id="calendar-week-timetable" class="min-w-[720px]">
+                <!-- Populated dynamically via renderWeekTimetable -->
+              </div>
+            </div>
           </div>
         </div>
+
+        <!-- LIVE SELECTED DAY AGENDA & QUICK BOOKING PANEL -->
+        <aside id="calendar-side-agenda-panel" class="lg:col-span-4 rounded-3xl bg-slate-900/90 border border-slate-800 p-4 sm:p-5 shadow-lg space-y-4">
+          <!-- Populated dynamically via renderCalendarSideAgendaPanel() -->
+        </aside>
       </div>
 
     </section>
 
     <!-- ============================================== -->
-    <!-- VIEW 4: AI TUTOR ASSISTANT (Gemini + Base44)   -->
+    <!-- VIEW 4: DEDICATED AI TEACHING STUDIO & HUB     -->
     <!-- ============================================== -->
-    <section id="view-ai" class="space-y-4 max-w-4xl mx-auto hidden pb-16">
+    <section id="view-ai" class="space-y-5 max-w-4xl mx-auto hidden pb-16">
 
-      <!-- AI Control Bar -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 sm:p-4 shadow-lg backdrop-blur flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-amber-500 flex items-center justify-center text-white shadow-md shrink-0">
-            <i data-lucide="sparkles" class="w-5 h-5 text-amber-200"></i>
+      <!-- Clean Claude-Style AI Studio Header -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-5 shadow-sm flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3.5 min-w-0">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-amber-500 flex items-center justify-center text-white shadow-md shrink-0">
+            <i data-lucide="sparkles" class="w-5 h-5 text-amber-100"></i>
           </div>
           <div class="min-w-0">
             <div class="flex items-center gap-2">
-              <h2 id="lbl-ai-view-title" class="text-sm sm:text-base font-bold text-white tracking-tight">AI Tutor Assistant</h2>
-              <span id="ai-status-pill" class="px-2 py-0.5 rounded-full text-[10px] font-mono border font-semibold flex items-center gap-1 bg-amber-500/10 text-amber-300 border-amber-500/30">
+              <h2 id="lbl-ai-view-title" class="text-base sm:text-lg font-bold text-white tracking-tight">AI Teaching Studio</h2>
+              <span id="ai-status-pill" class="hidden px-2 py-0.5 rounded-full text-[10px] font-mono border font-semibold items-center gap-1 bg-amber-500/10 text-amber-300 border-amber-500/30">
                 <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-                <span id="lbl-ai-status-text">Needs API Key</span>
+                <span id="lbl-ai-status-text">Active</span>
               </span>
             </div>
-            <p id="lbl-ai-view-subtitle" class="text-xs text-slate-400 truncate">Manage students, schedule lessons, add study notes, or ask curriculum questions</p>
+            <p id="lbl-ai-view-subtitle" class="text-xs sm:text-sm text-slate-400">Generate worksheets, speeches, and review quizzes, or manage your students and schedule by voice or text</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
-          <!-- Optional Custom API Key (BYOK) Toggle -->
-          <button
-            type="button"
-            onclick="toggleAiKeySettings()"
-            class="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-semibold transition active:scale-95 shadow-sm"
-            title="Configure custom Gemini key (BYOK)"
-          >
-            <i data-lucide="key" class="w-3.5 h-3.5 text-amber-400"></i>
+        <div class="flex items-center gap-2 shrink-0">
+          <!-- Hidden technical setup hooks (accessible via Settings) -->
+          <button type="button" onclick="toggleAiKeySettings()" class="hidden" aria-hidden="true">
             <span id="lbl-ai-btn-custom-key">Custom Key</span>
           </button>
-
-          <!-- Base44 Integration Modal Trigger -->
-          <button onclick="openBase44Modal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 text-xs font-semibold transition active:scale-95 shadow-sm" title="External Base44 AI Setup">
-            <i data-lucide="bot" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <button type="button" onclick="openBase44Modal()" class="hidden" aria-hidden="true">
             <span id="lbl-ai-btn-base44">Base44 Setup</span>
           </button>
 
-          <!-- Clear Chat -->
-          <button onclick="clearAiChat()" class="flex items-center justify-center gap-1 p-2 rounded-xl bg-slate-950/80 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-xs transition active:scale-95" title="Clear chat history">
-            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <button onclick="clearAiChat()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold transition active:scale-95" title="Start a fresh conversation">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">New Chat</span>
           </button>
         </div>
+      </div>
+
+      <!-- Dedicated Teaching Generators & Practice Tools Grid (Distinct from Contextual Lesson/Student AI) -->
+      <div id="ai-studio-generator-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <button type="button" onclick="openPedagogicalAiModal('worksheet')" class="text-left p-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-amber-500/50 transition shadow-sm group space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center font-bold">📄</span>
+            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 transition"></i>
+          </div>
+          <div class="text-xs sm:text-sm font-bold text-white">Worksheet & Handout</div>
+          <p class="text-[11px] text-slate-400 leading-snug">Generate a printable source sheet or review worksheet</p>
+        </button>
+
+        <button type="button" onclick="openPedagogicalAiModal('speech')" class="text-left p-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-indigo-500/50 transition shadow-sm group space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center font-bold">🎙️</span>
+            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 transition"></i>
+          </div>
+          <div class="text-xs sm:text-sm font-bold text-white">Speech & Dvar Torah</div>
+          <p class="text-[11px] text-slate-400 leading-snug">Draft or polish a student speech with pacing timer</p>
+        </button>
+
+        <button type="button" onclick="openPedagogicalAiModal('quiz')" class="text-left p-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/50 transition shadow-sm group space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-bold">❓</span>
+            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 transition"></i>
+          </div>
+          <div class="text-xs sm:text-sm font-bold text-white">Quiz & Review Game</div>
+          <p class="text-[11px] text-slate-400 leading-snug">Create custom trivia or comprehension questions</p>
+        </button>
+
+        <button type="button" onclick="applyAiQuickPrompt('add_student')" class="text-left p-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-brand-500/50 transition shadow-sm group space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-xl bg-brand-500/15 text-brand-400 flex items-center justify-center font-bold">⚡</span>
+            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-brand-400 transition"></i>
+          </div>
+          <div class="text-xs sm:text-sm font-bold text-white">Guided Student Setup</div>
+          <p class="text-[11px] text-slate-400 leading-snug">Add a new student or update schedules conversationally</p>
+        </button>
       </div>
 
       <!-- API Key Setup Banner (Collapsed by default; expandable for custom BYOK key) -->
@@ -2083,41 +2338,110 @@
               </div>
             </div>
 
-            <!-- RIGHT PANE: LIVE EDITABLE COURSE ARCHITECTURE & GUIDELINES -->
-            <div id="architect-live-blueprint" class="lg:col-span-6 flex flex-col rounded-2xl bg-slate-950/70 border border-slate-800 p-3.5 space-y-2.5 min-h-[340px] max-h-[54vh]">
-              <div class="flex items-center justify-between border-b border-slate-800 pb-2 shrink-0">
-                <span class="text-xs font-bold text-white flex items-center gap-1.5">
-                  <i data-lucide="layout-template" class="w-4 h-4 text-emerald-400"></i>
-                  <span>2. Live Course Blueprint (Every Class Follows This)</span>
-                </span>
+            <!-- RIGHT PANE: CLEAN 3-TAB COURSE BLUEPRINT (SECTIONS / PLAYBOOK & SOURCES / THEME) -->
+            <div id="architect-live-blueprint" class="lg:col-span-6 flex flex-col rounded-2xl bg-slate-950/70 border border-slate-800 p-3.5 space-y-3 min-h-[360px] max-h-[58vh]">
+              <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2.5 shrink-0 flex-wrap">
+                <!-- 3-Tab Segmented Switcher inside Right Blueprint Panel -->
+                <div id="architect-right-tabs-bar" class="flex items-center gap-1 p-1 rounded-xl bg-slate-900 border border-slate-800">
+                  <button type="button" id="btn-arch-right-tab-sections" onclick="switchArchitectRightTab('sections')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition bg-amber-500 text-slate-950 shadow flex items-center gap-1">
+                    <i data-lucide="layers" class="w-3 h-3"></i>
+                    <span>1. Lesson Sections</span>
+                  </button>
+                  <button type="button" id="btn-arch-right-tab-playbook" onclick="switchArchitectRightTab('playbook')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition text-slate-300 hover:text-white flex items-center gap-1">
+                    <i data-lucide="book-open-check" class="w-3 h-3 text-emerald-400"></i>
+                    <span>2. AI Playbook &amp; Sources</span>
+                  </button>
+                  <button type="button" id="btn-arch-right-tab-theme" onclick="switchCourseBuilderMode('manual')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition text-slate-300 hover:text-white flex items-center gap-1">
+                    <i data-lucide="palette" class="w-3 h-3 text-indigo-400"></i>
+                    <span>3. Theme &amp; Look</span>
+                  </button>
+                </div>
                 <span id="architect-sections-count-badge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">0 sections</span>
               </div>
 
-              <!-- Target Student & Guidelines -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 shrink-0">
-                <div>
-                  <label class="block text-[10px] font-mono uppercase text-slate-400 mb-0.5">Target Students</label>
-                  <input
-                    type="text"
-                    id="input-architect-student-profile"
-                    placeholder="Who is this course for? (age, level, background)"
-                    oninput="updateArchitectMetadataField('student_profile', this.value)"
-                    class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-1.5 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
-                  >
+              <!-- TAB 1 PANEL: LESSON SECTIONS & STRUCTURE (Active by Default) -->
+              <div id="architect-tab-panel-sections" class="flex-1 flex flex-col min-h-0 space-y-2.5">
+                <!-- Live Custom Sections List -->
+                <div id="architect-sections-list" class="flex-1 overflow-y-auto space-y-2 pr-1"></div>
+
+                <!-- Quick Manual Add Section Bar -->
+                <div class="pt-2 border-t border-slate-800/80 flex items-center gap-1.5 flex-wrap shrink-0">
+                  <span class="text-[10px] text-slate-400 font-semibold">+ Add Section:</span>
+                  <select id="architect-add-block-type" class="bg-slate-900 border border-slate-700 rounded-lg py-1 px-2 text-[11px] text-slate-200 focus:outline-none focus:border-amber-400">
+                    <optgroup label="Core Teaching">
+                      <option value="text">📝 Text / Explanation</option>
+                      <option value="list">📌 Bullet Points List</option>
+                      <option value="steps">🔢 Step-by-Step Flow</option>
+                      <option value="quote">📖 Primary Source / Formula</option>
+                      <option value="bilingual_split">📑 Source &amp; Translation Split</option>
+                      <option value="example">💡 Story / Worked Example</option>
+                      <option value="table">📊 Comparison Table / Matrix</option>
+                    </optgroup>
+                    <optgroup label="Interactive &amp; Practice">
+                      <option value="exercise">⚡ Practice Drill / Exercise</option>
+                      <option value="quiz">✅ Multiple Choice Quiz</option>
+                      <option value="flashcards">🃏 Flashcards / Key Terms</option>
+                      <option value="timed_activity">⏱️ Timed Live Activity</option>
+                      <option value="dialogue">🎭 Dialogue / Roleplay Script</option>
+                    </optgroup>
+                    <optgroup label="Discussion &amp; Assignments">
+                      <option value="pitfalls">⚠️ Common Pitfalls</option>
+                      <option value="discussion">💬 Discussion Question</option>
+                      <option value="reflection">🌱 Life Takeaway / Reflection</option>
+                      <option value="homework">🏠 Homework Challenge</option>
+                    </optgroup>
+                    <optgroup label="Media &amp; Teacher Only">
+                      <option value="audio">🎙️ Audio Studio / Recording</option>
+                      <option value="image">🖼️ Visual / Diagram / Image</option>
+                      <option value="video_links">🎬 Video &amp; Resource Links</option>
+                      <option value="teacher_cue">👁️ Private Teacher Cue Box</option>
+                    </optgroup>
+                  </select>
+                  <input type="text" id="architect-add-block-name" placeholder="Section name..." class="flex-1 min-w-[110px] bg-slate-900 border border-slate-700 rounded-lg py-1 px-2 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-amber-400" onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleQuickAddArchitectSection(); }">
+                  <button type="button" onclick="handleQuickAddArchitectSection()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-[11px] font-bold transition">+ Add</button>
                 </div>
-                <div>
-                  <label class="block text-[10px] font-mono uppercase text-slate-400 mb-0.5">Teaching &amp; Style Guidelines</label>
-                  <input
-                    type="text"
-                    id="input-architect-guidelines"
-                    placeholder="Class duration, prep time, tone, format rules..."
-                    oninput="updateArchitectMetadataField('guidelines', this.value)"
-                    class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-1.5 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
-                  >
+              </div>
+
+              <!-- TAB 2 PANEL: AI PLAYBOOK, TARGET STUDENTS & ALLOWED SOURCES -->
+              <div id="architect-tab-panel-playbook" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label class="block text-[10px] font-mono uppercase text-slate-400 mb-1">Target Students</label>
+                    <input
+                      type="text"
+                      id="input-architect-student-profile"
+                      placeholder="Who is this course for? (age, level, background)"
+                      oninput="updateArchitectMetadataField('student_profile', this.value)"
+                      class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                    >
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-mono uppercase text-slate-400 mb-1">Teaching &amp; Style Guidelines</label>
+                    <input
+                      type="text"
+                      id="input-architect-guidelines"
+                      placeholder="Class duration, prep time, tone, format rules..."
+                      oninput="updateArchitectMetadataField('guidelines', this.value)"
+                      class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                    >
+                  </div>
                 </div>
+
                 <div>
-                  <div class="flex items-center justify-between gap-2 mb-0.5">
-                    <label class="block text-[10px] font-mono uppercase text-amber-300/90">Allowed Resources (AI Whitelist)</label>
+                  <label class="block text-[10px] font-mono uppercase text-emerald-300/90 mb-1">Lesson Builder Playbook (How AI Writes &amp; Combines Every Class)</label>
+                  <textarea
+                    id="input-architect-lesson-instructions"
+                    dir="auto"
+                    rows="4"
+                    placeholder="Clear instructions compiled for the Lesson Builder AI: how to weave approved sources together, depth/length of each section, tone, Hebrew/English usage, and what each finished class must look like..."
+                    oninput="updateArchitectMetadataField('lesson_builder_instructions', this.value)"
+                    class="w-full bg-slate-900 border border-emerald-500/30 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 leading-relaxed resize-y"
+                  ></textarea>
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between gap-2 mb-1">
+                    <label class="block text-[10px] font-mono uppercase text-amber-300/90">Allowed Websites &amp; Resources (AI Whitelist)</label>
                     <label class="inline-flex items-center gap-1 text-[10px] text-slate-300 cursor-pointer select-none">
                       <input type="checkbox" id="chk-architect-strict-resources" checked onchange="updateArchitectMetadataField('strict_resources_only', this.checked)" class="rounded border-slate-700 bg-slate-900 text-amber-500 focus:ring-amber-400 w-3 h-3">
                       <span>Strict: ONLY these</span>
@@ -2126,63 +2450,12 @@
                   <textarea
                     id="input-architect-allowed-resources"
                     dir="auto"
-                    rows="2"
-                    placeholder="List the ONLY books, websites, commentaries, or texts AI may use (e.g. Chumash &amp; Rashi, Likutei Sichos, Khan Academy)... Leave empty for open knowledge."
+                    rows="3"
+                    placeholder="List the ONLY books, websites (e.g. sefaria.org links), commentaries, or texts AI may use... Leave empty for open knowledge."
                     oninput="updateArchitectMetadataField('allowed_resources', this.value)"
-                    class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-1.5 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 leading-relaxed resize-y"
+                    class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 leading-relaxed resize-y"
                   ></textarea>
                 </div>
-                <div class="sm:col-span-2">
-                  <label class="block text-[10px] font-mono uppercase text-emerald-300/90 mb-0.5">Lesson Builder Playbook (How AI Writes &amp; Combines Every Class)</label>
-                  <textarea
-                    id="input-architect-lesson-instructions"
-                    dir="auto"
-                    rows="2"
-                    placeholder="Clear instructions compiled for the Lesson Builder AI: how to weave approved sources together, depth/length of each section, tone, Hebrew/English usage, and what each finished class must look like..."
-                    oninput="updateArchitectMetadataField('lesson_builder_instructions', this.value)"
-                    class="w-full bg-slate-900 border border-emerald-500/30 rounded-xl py-1.5 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 leading-relaxed resize-y"
-                  ></textarea>
-                </div>
-              </div>
-
-              <!-- Live Custom Sections List -->
-              <div id="architect-sections-list" class="flex-1 overflow-y-auto space-y-2 pr-1"></div>
-
-              <!-- Quick Manual Add Section Bar -->
-              <div class="pt-2 border-t border-slate-800/80 flex items-center gap-1.5 flex-wrap shrink-0">
-                <span class="text-[10px] text-slate-400 font-semibold">+ Add Section:</span>
-                <select id="architect-add-block-type" class="bg-slate-900 border border-slate-700 rounded-lg py-1 px-2 text-[11px] text-slate-200 focus:outline-none focus:border-amber-400">
-                  <optgroup label="Core Teaching">
-                    <option value="text">📝 Text / Explanation</option>
-                    <option value="list">📌 Bullet Points List</option>
-                    <option value="steps">🔢 Step-by-Step Flow</option>
-                    <option value="quote">📖 Primary Source / Formula</option>
-                    <option value="bilingual_split">📑 Source &amp; Translation Split</option>
-                    <option value="example">💡 Story / Worked Example</option>
-                    <option value="table">📊 Comparison Table / Matrix</option>
-                  </optgroup>
-                  <optgroup label="Interactive &amp; Practice">
-                    <option value="exercise">⚡ Practice Drill / Exercise</option>
-                    <option value="quiz">✅ Multiple Choice Quiz</option>
-                    <option value="flashcards">🃏 Flashcards / Key Terms</option>
-                    <option value="timed_activity">⏱️ Timed Live Activity</option>
-                    <option value="dialogue">🎭 Dialogue / Roleplay Script</option>
-                  </optgroup>
-                  <optgroup label="Discussion &amp; Assignments">
-                    <option value="pitfalls">⚠️ Common Pitfalls</option>
-                    <option value="discussion">💬 Discussion Question</option>
-                    <option value="reflection">🌱 Life Takeaway / Reflection</option>
-                    <option value="homework">🏠 Homework Challenge</option>
-                  </optgroup>
-                  <optgroup label="Media &amp; Teacher Only">
-                    <option value="audio">🎙️ Audio Studio / Recording</option>
-                    <option value="image">🖼️ Visual / Diagram / Image</option>
-                    <option value="video_links">🎬 Video &amp; Resource Links</option>
-                    <option value="teacher_cue">👁️ Private Teacher Cue Box</option>
-                  </optgroup>
-                </select>
-                <input type="text" id="architect-add-block-name" placeholder="Section name..." class="flex-1 min-w-[110px] bg-slate-900 border border-slate-700 rounded-lg py-1 px-2 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-amber-400" onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleQuickAddArchitectSection(); }">
-                <button type="button" onclick="handleQuickAddArchitectSection()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-[11px] font-bold transition">+ Add</button>
               </div>
 
               <!-- Hidden compatibility preview card for existing test assertions -->
@@ -3284,61 +3557,36 @@
         </div>
 
         <div>
-          <label id="lbl-student-date" class="block text-xs font-medium text-slate-300 mb-1">Grade Level / Target Date</label>
-          <input type="text" id="new-student-date" name="student_date_fresh_1793734664717" autocomplete="off" autocorrect="off" placeholder="e.g. Grade 10 / June 2026, SAT Nov 2026" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
+          <label id="lbl-student-date" class="block text-xs font-medium text-slate-300 mb-1">Target Date / Milestone (Optional)</label>
+          <input type="text" id="new-student-date" name="student_date_fresh_1793734664717" autocomplete="off" autocorrect="off" placeholder="e.g. June 2026 / 15 Cheshvan" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
         </div>
 
-        <!-- Grade Level Stage & Status -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label id="lbl-student-grade-level" class="block text-xs font-medium text-slate-300 mb-1">Academic Stage</label>
-            <select id="new-student-grade-level" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
-              <option value="Standard / All Levels">Standard / All Levels</option>
-              <option value="Elementary (K - 5th)">Elementary (K - 5th)</option>
-              <option value="Middle School (6th - 8th)">Middle School (6th - 8th)</option>
-              <option value="High School (9th - 12th)">High School (9th - 12th)</option>
-              <option value="College / University">College / University</option>
-              <option value="Adult Learner">Adult Learner</option>
-            </select>
-          </div>
-          <div>
-            <label id="lbl-student-status" class="block text-xs font-medium text-slate-300 mb-1">Enrollment Status</label>
-            <select id="new-student-status" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
-              <option value="active">Active</option>
-              <option value="paused">Paused</option>
-              <option value="completed">Completed / Graduated</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Parent / Guardian Contact & Billing Sub-Card -->
-        <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
-          <div class="flex items-center justify-between">
-            <span id="lbl-guardian-section-title" class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-              <i data-lucide="phone-call" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>Parent / Guardian & Billing (Optional)</span>
-            </span>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div>
-              <label id="lbl-guardian-name" class="block text-[11px] font-medium text-slate-400 mb-0.5">Guardian Name</label>
-              <input type="text" id="new-student-guardian-name" placeholder="e.g. Rachel Cohen" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
-            </div>
-            <div>
-              <label id="lbl-guardian-phone" class="block text-[11px] font-medium text-slate-400 mb-0.5">Phone / WhatsApp</label>
-              <input type="tel" id="new-student-guardian-phone" placeholder="e.g. +1 555-0192" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
-            </div>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div>
-              <label id="lbl-guardian-email" class="block text-[11px] font-medium text-slate-400 mb-0.5">Guardian Email</label>
-              <input type="email" id="new-student-guardian-email" placeholder="e.g. parent@example.com" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
-            </div>
-            <div>
-              <label id="lbl-hourly-rate" class="block text-[11px] font-medium text-slate-400 mb-0.5">Lesson Fee / Hourly Rate</label>
-              <input type="text" id="new-student-hourly-rate" placeholder="e.g. $60/hr or 200 ₪" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
-            </div>
-          </div>
+        <!-- Hidden Legacy Academic Stage & Guardian/Billing Fields (Retired from Visual Form) -->
+        <div class="hidden" aria-hidden="true">
+          <label id="lbl-student-grade-level">Academic Stage</label>
+          <select id="new-student-grade-level">
+            <option value="Standard / All Levels">Standard / All Levels</option>
+            <option value="Elementary (K - 5th)">Elementary (K - 5th)</option>
+            <option value="Middle School (6th - 8th)">Middle School (6th - 8th)</option>
+            <option value="High School (9th - 12th)">High School (9th - 12th)</option>
+            <option value="College / University">College / University</option>
+            <option value="Adult Learner">Adult Learner</option>
+          </select>
+          <label id="lbl-student-status">Enrollment Status</label>
+          <select id="new-student-status">
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+            <option value="completed">Completed / Graduated</option>
+          </select>
+          <span id="lbl-guardian-section-title">Parent / Guardian &amp; Billing</span>
+          <label id="lbl-guardian-name">Guardian Name</label>
+          <input type="text" id="new-student-guardian-name">
+          <label id="lbl-guardian-phone">Phone / WhatsApp</label>
+          <input type="tel" id="new-student-guardian-phone">
+          <label id="lbl-guardian-email">Guardian Email</label>
+          <input type="email" id="new-student-guardian-email">
+          <label id="lbl-hourly-rate">Lesson Fee / Hourly Rate</label>
+          <input type="text" id="new-student-hourly-rate">
         </div>
 
         <div>
@@ -3982,8 +4230,8 @@
   <!-- ============================================== -->
   <!-- DRAWER: DEDICATED STUDENT DETAIL & CHECKLIST   -->
   <!-- ============================================== -->
-  <div id="drawer-student-detail" class="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/75 backdrop-blur-sm hidden transition-opacity duration-300" onclick="closeStudentDrawer()">
-    <div class="bg-slate-900 border-t md:border border-slate-700/80 rounded-t-3xl md:rounded-2xl max-w-3xl w-full max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl relative overflow-hidden animate-slideUp" onclick="event.stopPropagation()">
+  <div id="drawer-student-detail" class="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm hidden transition-opacity duration-300" onclick="closeStudentDrawer()">
+    <div class="bg-slate-900 border-t md:border border-slate-700/80 rounded-t-3xl md:rounded-3xl max-w-4xl w-full max-h-[92vh] sm:max-h-[90vh] flex flex-col shadow-2xl relative overflow-hidden animate-slideUp" onclick="event.stopPropagation()">
 
       <!-- Mobile Pull Bar Handle -->
       <div class="md:hidden pt-3 pb-1 flex justify-center">
@@ -3991,22 +4239,21 @@
       </div>
 
       <!-- Drawer Sticky Top Bar -->
-      <div class="px-3.5 py-3 sm:px-5 sm:py-4 border-b border-slate-800/80 flex items-center justify-between gap-3 shrink-0 bg-slate-950/90 backdrop-blur-md">
-        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0" id="drawer-header-content">
+      <div class="px-4 py-3.5 sm:px-6 sm:py-4 border-b border-slate-800/80 flex items-center justify-between gap-3 shrink-0 bg-slate-950/90 backdrop-blur-md">
+        <div class="flex items-center gap-3 min-w-0" id="drawer-header-content">
           <!-- Populated by renderStudentDrawer -->
         </div>
 
-        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0" id="drawer-header-actions">
-          <button type="button" id="btn-drawer-toggle-ai" onclick="toggleStudentDrawerAi()" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-200 border border-indigo-400/35 text-xs rounded-xl font-bold transition">
+        <div class="flex items-center gap-2 shrink-0" id="drawer-header-actions">
+          <button type="button" id="btn-drawer-toggle-ai" onclick="toggleStudentDrawerAi()" class="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-200 border border-indigo-400/35 text-xs rounded-xl font-bold transition">
             <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-300"></i>
             <span>AI Update</span>
           </button>
-          <button type="button" id="btn-drawer-toggle-edit" onclick="toggleStudentDrawerCrmEdit()" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs rounded-xl font-semibold transition">
+          <button type="button" id="btn-drawer-toggle-edit" onclick="toggleStudentDrawerCrmEdit()" class="hidden" aria-hidden="true">
             <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-300"></i>
-            <span class="hidden sm:inline">Edit Info</span>
+            <span>Edit Info</span>
           </button>
-          <button type="button" onclick="switchTab('study'); closeStudentDrawer();" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-xl font-medium border border-slate-700/70 transition">
-            <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400"></i>
+          <button type="button" onclick="switchTab('study'); closeStudentDrawer();" class="hidden" aria-hidden="true">
             <span id="drawer-btn-curriculum-label">Curriculum</span>
           </button>
           <button type="button" onclick="closeStudentDrawer()" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition active:scale-95" title="Close">
@@ -4016,7 +4263,7 @@
       </div>
 
       <!-- Drawer Scrollable Body -->
-      <div id="drawer-body-content" class="p-3.5 sm:p-6 overflow-y-auto space-y-3.5 sm:space-y-5 flex-1">
+      <div id="drawer-body-content" class="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 flex-1">
         <!-- Populated by renderStudentDrawer -->
       </div>
     </div>
@@ -7481,6 +7728,8 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (lockScreen) lockScreen.classList.add('hidden');
       const teacherHeader = document.getElementById('teacher-header-controls');
       if (teacherHeader) teacherHeader.classList.add('hidden');
+      const desktopNav = document.getElementById('desktop-top-pill-nav');
+      if (desktopNav) desktopNav.classList.add('hidden');
       const studentHeader = document.getElementById('student-header-controls');
       if (studentHeader) studentHeader.classList.remove('hidden');
       const bottomDock = document.getElementById('main-bottom-dock');
@@ -7547,10 +7796,10 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (studentHeader) studentHeader.classList.add('hidden');
       const teacherHeader = document.getElementById('teacher-header-controls');
       if (teacherHeader) teacherHeader.classList.remove('hidden');
+      const desktopNav = document.getElementById('desktop-top-pill-nav');
+      if (desktopNav) desktopNav.classList.remove('hidden');
       const bottomDock = document.getElementById('main-bottom-dock');
       if (bottomDock) bottomDock.classList.remove('hidden');
-      const cmdTrigger = document.getElementById('container-top-command-center-trigger');
-      if (cmdTrigger) cmdTrigger.classList.remove('hidden');
 
       const lockScreen = document.getElementById('lock-screen');
       if (lockScreen) lockScreen.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
@@ -7652,104 +7901,125 @@ alter publication supabase_realtime add table public.students_sync;`;
         : `<div class="w-14 h-14 rounded-2xl bg-indigo-500/20 text-indigo-200 border border-indigo-400/40 flex items-center justify-center font-extrabold text-xl shrink-0">${escapeHtml(initial)}</div>`;
 
       const doneGoalsCount = goals.filter(g => g.completed).length;
+      const hasHw = !!(hw.task && hw.task.trim());
+      const totalTasksCount = goals.length + (hasHw ? 1 : 0);
+      const doneTasksCount = doneGoalsCount + (hasHw && hw.completed ? 1 : 0);
+      const completionPct = totalTasksCount > 0 ? Math.round((doneTasksCount / totalTasksCount) * 100) : 0;
 
       container.innerHTML = `
-        <!-- Calm Student Portal Welcome Banner -->
-        <div class="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl flex items-center justify-between gap-4 flex-wrap">
-          <div class="flex items-center gap-4 min-w-0">
-            ${avatarHtml}
-            <div class="min-w-0 space-y-1">
-              <div class="text-[11px] font-mono uppercase tracking-wider text-indigo-300 font-bold">${isHe ? 'אזור אישי לתלמיד' : 'My Student Profile'}</div>
-              <h1 dir="auto" class="text-xl sm:text-2xl font-extrabold text-white truncate">${escapeHtml(stu.name)}</h1>
-              <div class="flex items-center gap-2 flex-wrap text-xs text-slate-400">
-                ${stu.subject ? `<span class="px-2 py-0.5 rounded-md bg-slate-950 border border-slate-800 text-amber-300 font-medium">${escapeHtml(stu.subject)}</span>` : ''}
-                ${stu.gradeLevel && stu.gradeLevel !== 'Standard / All Levels' ? `<span class="px-2 py-0.5 rounded-md bg-slate-950 border border-slate-800">${escapeHtml(stu.gradeLevel)}</span>` : ''}
-                ${stu.gradeOrDate ? `<span class="font-mono text-slate-300">${escapeHtml(stu.gradeOrDate)}</span>` : ''}
+        <!-- Minimal & Motivating Student Portal Welcome Banner -->
+        <div class="p-5 sm:p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-lg space-y-4">
+          <div class="flex items-center justify-between gap-4 flex-wrap">
+            <div class="flex items-center gap-4 min-w-0">
+              ${avatarHtml}
+              <div class="min-w-0 space-y-1">
+                <div class="text-[11px] font-mono uppercase tracking-wider text-indigo-300 font-bold">${isHe ? 'אזור אישי לתלמיד' : 'My Student Dashboard'}</div>
+                <h1 dir="auto" class="text-xl sm:text-2xl font-extrabold text-white truncate">${escapeHtml(stu.name)}</h1>
+                <div class="flex items-center gap-2 flex-wrap text-xs text-slate-400">
+                  ${stu.subject ? `<span class="px-2.5 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-amber-300 font-semibold">${escapeHtml(stu.subject)}</span>` : ''}
+                  ${stu.gradeOrDate ? `<span class="font-mono text-slate-300">${escapeHtml(stu.gradeOrDate)}</span>` : ''}
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        <!-- 1. Homework Card -->
-        <div id="student-portal-homework-card" class="p-5 rounded-3xl bg-slate-900/80 border ${hw.task ? (hw.completed ? 'border-emerald-500/40' : 'border-amber-500/40') : 'border-slate-800'} space-y-3 shadow-lg">
-          <div class="flex items-center justify-between gap-2 flex-wrap">
-            <h2 class="text-sm font-bold text-amber-300 flex items-center gap-2">
-              <i data-lucide="clipboard-list" class="w-4 h-4 text-amber-400"></i>
-              <span>${isHe ? 'שיעורי בית ומשימות' : 'My Homework'}</span>
-              ${hw.assignedDate ? `<span class="text-[11px] font-mono text-slate-500">(${escapeHtml(hw.assignedDate)})</span>` : ''}
-            </h2>
-            ${(hw.task && hw.task.trim()) ? `
-              <button type="button" id="btn-student-portal-toggle-hw" onclick="toggleStudentPortalHomework()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${hw.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow'}">
-                <i data-lucide="${hw.completed ? 'check-circle-2' : 'circle'}" class="w-3.5 h-3.5"></i>
-                <span>${hw.completed ? (isHe ? 'הושלם' : 'Completed') : (isHe ? 'סמן כהושלם' : 'Mark Completed')}</span>
-              </button>
+            ${totalTasksCount > 0 ? `
+              <div class="text-right rtl:text-left">
+                <span class="text-xs font-bold ${completionPct === 100 ? 'text-emerald-400' : 'text-amber-400'}">${doneTasksCount} / ${totalTasksCount} ${isHe ? 'הושלמו' : 'Completed'} (${completionPct}%)</span>
+              </div>
             ` : ''}
           </div>
-          ${(hw.task && hw.task.trim())
-            ? `<p dir="auto" class="text-sm sm:text-base leading-relaxed ${hw.completed ? 'line-through text-slate-400' : 'text-slate-100'}">${escapeHtml(hw.task)}</p>`
-            : `<p class="text-xs text-slate-500 italic">${isHe ? 'אין שיעורי בית כרגע.' : 'No active homework assigned right now.'}</p>`}
-        </div>
-
-        <!-- 2. Assignments & Learning Goals -->
-        <div id="student-portal-goals-card" class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 shadow-lg">
-          <div class="flex items-center justify-between gap-2">
-            <h2 class="text-sm font-bold text-emerald-300 flex items-center gap-2">
-              <i data-lucide="check-square" class="w-4 h-4 text-emerald-400"></i>
-              <span>${isHe ? 'משימות ויעדים אישיים' : 'My Assignments & Goals'}</span>
-            </h2>
-            <span class="text-xs font-mono px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-300">${doneGoalsCount} / ${goals.length}</span>
-          </div>
-          ${goals.length === 0 ? `
-            <p class="text-xs text-slate-500 italic">${isHe ? 'המורה טרם הוסיף יעדים אישיים.' : 'Your teacher has not added individual goals yet.'}</p>
-          ` : `
-            <div class="space-y-2">
-              ${goals.map(g => `
-                <label class="flex items-center gap-3 p-3 rounded-2xl bg-slate-950/75 border ${g.completed ? 'border-emerald-500/30' : 'border-slate-800 hover:border-slate-700'} cursor-pointer transition select-none">
-                  <input type="checkbox" ${g.completed ? 'checked' : ''} onchange="toggleStudentPortalGoal('${g.id}')" class="rounded border-slate-700 text-emerald-500 focus:ring-emerald-500 bg-slate-900 w-4 h-4 shrink-0" />
-                  <span dir="auto" class="text-xs sm:text-sm ${g.completed ? 'line-through text-slate-500' : 'text-slate-100 font-medium'}">${escapeHtml(g.title)}</span>
-                </label>
-              `).join('')}
+          ${totalTasksCount > 0 ? `
+            <div id="student-portal-progress-bar" class="w-full h-2 rounded-full bg-slate-950 overflow-hidden">
+              <div class="h-2 rounded-full bg-gradient-to-r from-indigo-500 via-amber-500 to-emerald-500 transition-all duration-300" style="width: ${completionPct}%"></div>
             </div>
-          `}
+          ` : ''}
         </div>
 
-        <!-- 3. Custom Notes Shared by Teacher (Strictly separate from Private Teacher Notes) -->
-        <div id="student-portal-notes-card" class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 shadow-lg">
-          <h2 class="text-sm font-bold text-indigo-300 flex items-center gap-2">
-            <i data-lucide="message-square-text" class="w-4 h-4 text-indigo-400"></i>
-            <span>${isHe ? 'הערות ודגשים מהמורה' : 'Notes from Teacher'}</span>
-          </h2>
-          ${sharedNotes.length === 0 ? `
-            <p class="text-xs text-slate-500 italic">${isHe ? 'אין הערות ששותפו איתך עדיין.' : 'No shared notes or reminders from your teacher yet.'}</p>
-          ` : `
-            <div class="space-y-2.5">
-              ${sharedNotes.slice().reverse().map(n => `
-                <div class="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-1">
-                  ${n.dateLabel ? `<div class="text-[10px] font-mono text-slate-500">${escapeHtml(n.dateLabel)}</div>` : ''}
-                  <div dir="auto" class="text-xs sm:text-sm text-slate-100 leading-relaxed whitespace-pre-wrap">${typeof formatSectionInlineText === 'function' ? formatSectionInlineText(n.text || '') : escapeHtml(n.text || '')}</div>
-                </div>
-              `).join('')}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+          <div class="space-y-4">
+            <!-- 1. Homework Card -->
+            <div id="student-portal-homework-card" class="p-5 rounded-3xl bg-slate-900/80 border ${hw.task ? (hw.completed ? 'border-emerald-500/40' : 'border-amber-500/40') : 'border-slate-800'} space-y-3 shadow-md">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <h2 class="text-sm font-bold text-amber-300 flex items-center gap-2">
+                  <i data-lucide="clipboard-list" class="w-4 h-4 text-amber-400"></i>
+                  <span>${isHe ? 'שיעורי בית ומשימות' : 'My Homework'}</span>
+                  ${hw.assignedDate ? `<span class="text-[11px] font-mono text-slate-500">(${escapeHtml(hw.assignedDate)})</span>` : ''}
+                </h2>
+                ${(hw.task && hw.task.trim()) ? `
+                  <button type="button" id="btn-student-portal-toggle-hw" onclick="toggleStudentPortalHomework()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${hw.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow'}">
+                    <i data-lucide="${hw.completed ? 'check-circle-2' : 'circle'}" class="w-3.5 h-3.5"></i>
+                    <span>${hw.completed ? (isHe ? 'הושלם' : 'Completed') : (isHe ? 'סמן כהושלם' : 'Mark Completed')}</span>
+                  </button>
+                ` : ''}
+              </div>
+              ${(hw.task && hw.task.trim())
+                ? `<p dir="auto" class="text-sm sm:text-base leading-relaxed ${hw.completed ? 'line-through text-slate-400' : 'text-slate-100'}">${escapeHtml(hw.task)}</p>`
+                : `<p class="text-xs text-slate-500 italic">${isHe ? 'אין שיעורי בית כרגע.' : 'No active homework assigned right now.'}</p>`}
             </div>
-          `}
-        </div>
 
-        <!-- 4. Upcoming Scheduled Sessions (Date & Time Only) -->
-        ${upcomingSessions.length > 0 ? `
-          <div id="student-portal-schedule-card" class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 shadow-lg">
-            <h2 class="text-sm font-bold text-sky-300 flex items-center gap-2">
-              <i data-lucide="calendar" class="w-4 h-4 text-sky-400"></i>
-              <span>${isHe ? 'מפגשים קרובים' : 'Upcoming Sessions'}</span>
-            </h2>
-            <div class="flex flex-wrap gap-2">
-              ${upcomingSessions.map(s => `
-                <div class="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 flex items-center gap-2">
-                  <span class="font-mono font-bold text-sky-300">${escapeHtml(s.dateStr || 'Weekly')}</span>
-                  ${s.time ? `<span class="text-slate-400">${escapeHtml(s.time)}</span>` : ''}
+            <!-- 2. Assignments & Learning Goals -->
+            <div id="student-portal-goals-card" class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 shadow-md">
+              <div class="flex items-center justify-between gap-2">
+                <h2 class="text-sm font-bold text-emerald-300 flex items-center gap-2">
+                  <i data-lucide="check-square" class="w-4 h-4 text-emerald-400"></i>
+                  <span>${isHe ? 'משימות ויעדים אישיים' : 'My Assignments & Goals'}</span>
+                </h2>
+                <span class="text-xs font-mono px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-300">${doneGoalsCount} / ${goals.length}</span>
+              </div>
+              ${goals.length === 0 ? `
+                <p class="text-xs text-slate-500 italic">${isHe ? 'המורה טרם הוסיף יעדים אישיים.' : 'Your teacher has not added individual goals yet.'}</p>
+              ` : `
+                <div class="space-y-2">
+                  ${goals.map(g => `
+                    <label class="flex items-center gap-3 p-3 rounded-2xl bg-slate-950/75 border ${g.completed ? 'border-emerald-500/30' : 'border-slate-800 hover:border-slate-700'} cursor-pointer transition select-none">
+                      <input type="checkbox" ${g.completed ? 'checked' : ''} onchange="toggleStudentPortalGoal('${g.id}')" class="rounded border-slate-700 text-emerald-500 focus:ring-emerald-500 bg-slate-900 w-4 h-4 shrink-0" />
+                      <span dir="auto" class="text-xs sm:text-sm ${g.completed ? 'line-through text-slate-500' : 'text-slate-100 font-medium'}">${escapeHtml(g.title)}</span>
+                    </label>
+                  `).join('')}
                 </div>
-              `).join('')}
+              `}
             </div>
           </div>
-        ` : ''}
+
+          <div class="space-y-4">
+            <!-- 3. Custom Notes Shared by Teacher (Strictly separate from Private Teacher Notes) -->
+            <div id="student-portal-notes-card" class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 shadow-md">
+              <h2 class="text-sm font-bold text-indigo-300 flex items-center gap-2">
+                <i data-lucide="message-square-text" class="w-4 h-4 text-indigo-400"></i>
+                <span>${isHe ? 'הערות ודגשים מהמורה' : 'Notes from Teacher'}</span>
+              </h2>
+              ${sharedNotes.length === 0 ? `
+                <p class="text-xs text-slate-500 italic">${isHe ? 'אין הערות ששותפו איתך עדיין.' : 'No shared notes or reminders from your teacher yet.'}</p>
+              ` : `
+                <div class="space-y-2.5">
+                  ${sharedNotes.slice().reverse().map(n => `
+                    <div class="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-1">
+                      ${n.dateLabel ? `<div class="text-[10px] font-mono text-slate-500">${escapeHtml(n.dateLabel)}</div>` : ''}
+                      <div dir="auto" class="text-xs sm:text-sm text-slate-100 leading-relaxed whitespace-pre-wrap">${typeof formatSectionInlineText === 'function' ? formatSectionInlineText(n.text || '') : escapeHtml(n.text || '')}</div>
+                    </div>
+                  `).join('')}
+                </div>
+              `}
+            </div>
+
+            <!-- 4. Upcoming Scheduled Sessions (Date & Time Only) -->
+            ${upcomingSessions.length > 0 ? `
+              <div id="student-portal-schedule-card" class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 shadow-md">
+                <h2 class="text-sm font-bold text-sky-300 flex items-center gap-2">
+                  <i data-lucide="calendar" class="w-4 h-4 text-sky-400"></i>
+                  <span>${isHe ? 'מפגשים קרובים' : 'Upcoming Sessions'}</span>
+                </h2>
+                <div class="flex flex-wrap gap-2">
+                  ${upcomingSessions.map(s => `
+                    <div class="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 flex items-center gap-2">
+                      <span class="font-mono font-bold text-sky-300">${escapeHtml(s.dateStr || 'Weekly')}</span>
+                      ${s.time ? `<span class="text-slate-400">${escapeHtml(s.time)}</span>` : ''}
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
       `;
       if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
     }
@@ -9250,8 +9520,59 @@ alter publication supabase_realtime add table public.students_sync;`;
       return false;
     }
 
+    // M105 Warm Daylight & Dark Mode Theme Engine
+    function getThemeMode() {
+      const saved = (typeof localStorage !== 'undefined' && localStorage.getItem('tutor_theme_mode')) || APP_STATE.themeMode || 'light';
+      return saved === 'dark' ? 'dark' : 'light';
+    }
+
+    function applyThemeMode(mode) {
+      const targetMode = (mode === 'dark' || mode === 'light') ? mode : getThemeMode();
+      APP_STATE.themeMode = targetMode;
+      try {
+        if (typeof localStorage !== 'undefined') localStorage.setItem('tutor_theme_mode', targetMode);
+      } catch (e) {}
+      const htmlEl = typeof document !== 'undefined' ? document.documentElement : null;
+      if (htmlEl && htmlEl.classList) {
+        if (targetMode === 'dark') {
+          htmlEl.classList.remove('theme-daylight');
+          htmlEl.classList.add('dark');
+        } else {
+          htmlEl.classList.remove('dark');
+          htmlEl.classList.add('theme-daylight');
+        }
+      }
+      const metaTheme = typeof document !== 'undefined' ? document.getElementById('meta-theme-color') : null;
+      if (metaTheme && typeof metaTheme.setAttribute === 'function') {
+        metaTheme.setAttribute('content', targetMode === 'dark' ? '#0f172a' : '#FAF8F5');
+      }
+      const iconEl = typeof document !== 'undefined' ? document.getElementById('icon-theme-toggle') : null;
+      if (iconEl && typeof iconEl.setAttribute === 'function') {
+        iconEl.setAttribute('data-lucide', targetMode === 'dark' ? 'sun' : 'moon');
+      }
+      if (typeof window !== 'undefined' && window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+      return targetMode;
+    }
+
+    function toggleThemeMode() {
+      const next = getThemeMode() === 'dark' ? 'light' : 'dark';
+      applyThemeMode(next);
+      const isHe = APP_STATE.lang === 'he';
+      if (typeof showToast === 'function') {
+        showToast(next === 'light'
+          ? (isHe ? 'מצב יום בהיר הופעל' : 'Warm Daylight theme active')
+          : (isHe ? 'מצב לילה כהה הופעל' : 'Dark Mode active'));
+      }
+      return next;
+    }
+
+    try { applyThemeMode(); } catch (e) {}
+
     // Initialize App
     document.addEventListener('DOMContentLoaded', async () => {
+      applyThemeMode();
       // Outside click listener for User Profile Menu
       document.addEventListener('click', (e) => {
         const userDropdown = document.getElementById('user-dropdown-menu');
@@ -10294,6 +10615,96 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
+    function recordLastOpenedLesson(courseId, lessonId) {
+      if (!courseId || !lessonId) return;
+      APP_STATE.lastOpenedCourseId = courseId;
+      APP_STATE.lastOpenedLessonId = lessonId;
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('tutor_last_opened_lesson', JSON.stringify({ courseId, lessonId, ts: Date.now() }));
+        }
+      } catch (e) {}
+    }
+
+    function resumeLastOpenedLesson(courseId, lessonId) {
+      let cId = courseId || APP_STATE.lastOpenedCourseId;
+      let lId = lessonId || APP_STATE.lastOpenedLessonId;
+      if (!cId || !lId) {
+        try {
+          const saved = JSON.parse((typeof localStorage !== 'undefined' && localStorage.getItem('tutor_last_opened_lesson')) || '{}');
+          cId = cId || saved.courseId;
+          lId = lId || saved.lessonId;
+        } catch (e) {}
+      }
+      const courses = APP_STATE.customCourses || [];
+      let course = courses.find(c => c && c.id === cId);
+      if (!course) course = courses.find(c => c && Array.isArray(c.lessons) && c.lessons.length > 0);
+      if (!course || !Array.isArray(course.lessons) || course.lessons.length === 0) return;
+      let lesson = course.lessons.find(l => l && l.id === lId) || course.lessons[0];
+      APP_STATE.insideCourseId = course.id;
+      APP_STATE.activeCourseId = course.id;
+      APP_STATE.studioSelectedLessonId = lesson.id;
+      studioScreenMode = 'read';
+      renderLessonsCategoryView();
+    }
+
+    function renderContinueLastLessonBanner(courses) {
+      const banner = document.getElementById('continue-last-lesson-banner');
+      if (!banner) return;
+      const validCourses = Array.isArray(courses) ? courses.filter(c => c && Array.isArray(c.lessons) && c.lessons.length > 0) : [];
+      if (validCourses.length === 0) {
+        banner.classList.add('hidden');
+        banner.innerHTML = '';
+        return;
+      }
+
+      let targetCourse = null;
+      let targetLesson = null;
+      let savedCId = APP_STATE.lastOpenedCourseId;
+      let savedLId = APP_STATE.lastOpenedLessonId;
+      if (!savedCId || !savedLId) {
+        try {
+          const saved = JSON.parse((typeof localStorage !== 'undefined' && localStorage.getItem('tutor_last_opened_lesson')) || '{}');
+          savedCId = savedCId || saved.courseId;
+          savedLId = savedLId || saved.lessonId;
+        } catch (e) {}
+      }
+      if (savedCId) {
+        targetCourse = validCourses.find(c => c.id === savedCId) || null;
+        if (targetCourse && savedLId) {
+          targetLesson = (targetCourse.lessons || []).find(l => l.id === savedLId) || null;
+        }
+      }
+      if (!targetCourse) targetCourse = validCourses[0];
+      if (!targetLesson) targetLesson = targetCourse.lessons[targetCourse.lessons.length - 1] || targetCourse.lessons[0];
+
+      const isHe = APP_STATE.lang === 'he';
+      const cTitle = isHe ? (targetCourse.title_he || targetCourse.title_en) : (targetCourse.title_en || targetCourse.title_he);
+      const lTitle = isHe ? (targetLesson.title_he || targetLesson.title_en) : (targetLesson.title_en || targetLesson.title_he);
+      const lNum = targetLesson.lesson_num || (targetCourse.lessons.indexOf(targetLesson) + 1);
+
+      banner.classList.remove('hidden');
+      banner.innerHTML = `
+        <div onclick="resumeLastOpenedLesson('${targetCourse.id}', '${targetLesson.id}')" class="px-4 py-3 rounded-2xl bg-slate-900/90 border border-indigo-500/35 hover:border-indigo-400/60 transition cursor-pointer shadow-sm flex items-center justify-between gap-3 group">
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 flex items-center justify-center shrink-0">
+              <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+            </span>
+            <div class="min-w-0">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-300 block">${isHe ? 'המשך מאיפה שעצרת' : 'Continue Last Lesson'}</span>
+              <div dir="auto" class="text-xs sm:text-sm font-bold text-white group-hover:text-indigo-300 transition">
+                ${escapeHtml(cTitle)} • ${isHe ? 'שיעור' : 'Lesson'} ${lNum}: ${escapeHtml(lTitle || 'Untitled Lesson')}
+              </div>
+            </div>
+          </div>
+          <span class="px-3 py-1.5 rounded-xl bg-indigo-500/15 group-hover:bg-indigo-500 text-indigo-300 group-hover:text-white text-xs font-bold transition shrink-0 flex items-center gap-1">
+            <span>${isHe ? 'פתח שיעור' : 'Resume'}</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5 rtl:rotate-180"></i>
+          </span>
+        </div>
+      `;
+    }
+
     function renderCoursesCardsGrid() {
       const grid = document.getElementById('courses-cards-grid');
       const countBadge = document.getElementById('courses-directory-count-badge');
@@ -10306,6 +10717,8 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (countBadge) {
         countBadge.textContent = `${courses.length} ${isHe ? (courses.length === 1 ? 'קורס' : 'קורסים') : (courses.length === 1 ? 'Course' : 'Courses')}`;
       }
+
+      renderContinueLastLessonBanner(courses);
 
       if (purgeBtn) {
         purgeBtn.classList.add('hidden');
@@ -11912,12 +12325,13 @@ Return ONLY the updated value matching the Format Requirement cleanly. Write nat
         `;
       }
 
-      // 1. TEXT / EXPLANATION (Auto-growing Full Readability + Clean Plain Text)
+      // 1. TEXT / EXPLANATION (Single Clean Explanation Box — Never Two Duplicate Stacked Boxes)
+      const hasDistinctSummary = Boolean((d.summary || '').trim() && String(d.summary || '').trim() !== String(d.body || '').trim());
       return `
-        <div id="studio-custom-block-${sec.id}" class="${cardCls}">
+        <div id="studio-custom-block-${sec.id}" class="${cardCls} lesson-doc-prose">
           ${headerHtml}
-          <textarea dir="auto" rows="${estimateTextareaRows(d.summary, 1, 4)}" placeholder="Quick 1-sentence core takeaway (optional)..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'text', 'summary', this.value)" class="studio-autogrow w-full bg-slate-950/60 border border-cyan-500/20 rounded-xl py-2 px-3 text-xs sm:text-sm text-cyan-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-semibold leading-relaxed resize-none">${cleanEditField(d.summary || '')}</textarea>
-          <textarea dir="auto" rows="${estimateTextareaRows(d.body, 3, 16)}" placeholder="Main explanation..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'text', 'body', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-${effColor}-400 leading-relaxed">${cleanEditField(d.body || '')}</textarea>
+          <textarea dir="auto" rows="${estimateTextareaRows(d.summary, 1, 3)}" placeholder="Quick 1-sentence core takeaway (optional)..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'text', 'summary', this.value)" class="${hasDistinctSummary ? '' : 'hidden '}studio-autogrow w-full bg-slate-950/60 border border-cyan-500/20 rounded-xl py-2 px-3 text-sm text-cyan-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-semibold leading-relaxed resize-none">${hasDistinctSummary ? cleanEditField(d.summary || '') : ''}</textarea>
+          <textarea dir="auto" rows="${estimateTextareaRows(d.body || d.summary, 3, 16)}" placeholder="Main explanation..." oninput="autoGrowStudioTextarea(this); handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'text', 'body', this.value)" class="studio-autogrow w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 text-sm sm:text-base text-slate-200 placeholder-slate-500 focus:outline-none focus:border-${effColor}-400 leading-relaxed">${cleanEditField(d.body || d.summary || '')}</textarea>
         </div>
       `;
     }
@@ -13404,13 +13818,41 @@ ${forceSchemaLines}`;
       }
 
       if (!d.summary && !d.body) return '';
+      const hasDistinctReadSummary = Boolean((d.summary || '').trim() && String(d.summary || '').trim() !== String(d.body || '').trim());
       return `
         <div class="${cardCls}">
           ${headerHtml}
-          ${d.summary ? `<div dir="auto" class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-sm font-semibold text-cyan-200 leading-relaxed">${formatSectionInlineText(d.summary)}</div>` : ''}
-          ${d.body ? `<div dir="auto" class="text-sm sm:text-base text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(d.body)}</div>` : ''}
+          ${hasDistinctReadSummary ? `<div dir="auto" class="p-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-base font-semibold text-cyan-200 leading-relaxed">${formatSectionInlineText(d.summary)}</div>` : ''}
+          ${(d.body || d.summary) ? `<div dir="auto" class="text-base sm:text-lg text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(d.body || d.summary)}</div>` : ''}
         </div>
       `;
+    }
+
+    function jumpToStudioLesson(courseId, lessonId) {
+      if (!courseId || !lessonId) return;
+      APP_STATE.insideCourseId = courseId;
+      APP_STATE.activeCourseId = courseId;
+      APP_STATE.studioSelectedLessonId = lessonId;
+      recordLastOpenedLesson(courseId, lessonId);
+      renderCourseStudio(courseId, lessonId);
+    }
+
+    function handleInlineLessonTitleRename(courseId, lessonId, newTitleRaw) {
+      const cleanTitle = String(newTitleRaw || '').replace(/[\r\n]+/g, ' ').trim();
+      if (!cleanTitle) return;
+      handleStudioClassTitleChange(courseId, lessonId, cleanTitle);
+      saveCustomCoursesToStorage(true);
+      if (typeof showToast === 'function') {
+        showToast(APP_STATE.lang === 'he' ? 'כותרת השיעור עודכנה' : 'Lesson title updated');
+      }
+    }
+
+    function scrollToLessonSection(secId) {
+      if (typeof document === 'undefined') return;
+      const target = document.getElementById('reader-sec-card-' + secId) || document.getElementById('studio-custom-block-' + secId);
+      if (target && typeof target.scrollIntoView === 'function') {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
 
     function renderLessonCleanReader(activeCourse, selectedLesson, lessons) {
@@ -13419,26 +13861,31 @@ ${forceSchemaLines}`;
       const blueprintSections = Array.isArray(bp.sections) ? bp.sections : [];
       const hasCustomSections = blueprintSections.length > 0;
       const selectedTitle = isHe ? (selectedLesson.title_he || selectedLesson.title_en || 'Untitled Lesson') : (selectedLesson.title_en || selectedLesson.title_he || 'Untitled Lesson');
+      recordLastOpenedLesson(activeCourse.id, selectedLesson.id);
 
       let bodyHtml = '';
+      const populatedJumpSections = [];
       if (hasCustomSections) {
-        bodyHtml = blueprintSections.map(sec => {
+        bodyHtml = blueprintSections.map((sec, sIdx) => {
           const meta = (typeof COURSE_BLOCK_CATALOG !== 'undefined' && COURSE_BLOCK_CATALOG[sec.type]) ? COURSE_BLOCK_CATALOG[sec.type] : { label: 'Section', icon: 'layers', color: 'amber' };
-          return renderSectionReadOnlyHtml(activeCourse, selectedLesson, sec, meta);
+          const secHtml = renderSectionReadOnlyHtml(activeCourse, selectedLesson, sec, meta);
+          if (!secHtml) return '';
+          populatedJumpSections.push({ id: sec.id, num: sIdx + 1, name: sec.name || meta.label || 'Section' });
+          return `<div id="reader-sec-card-${sec.id}">${secHtml}</div>`;
         }).filter(Boolean).join('');
       } else {
         const legacyParts = [];
         if (selectedLesson.hook_en || selectedLesson.hook_he) {
-          legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-amber-900/30 space-y-2"><span class="text-xs font-bold uppercase tracking-wider text-amber-400">Opening Hook</span><p dir="auto" class="text-base text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(selectedLesson.hook_en || selectedLesson.hook_he)}</p></div>`);
+          legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-amber-900/30 space-y-2"><span class="text-xs font-bold uppercase tracking-wider text-amber-400">Opening Hook</span><p dir="auto" class="text-base sm:text-lg text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(selectedLesson.hook_en || selectedLesson.hook_he)}</p></div>`);
         }
         const anchors = selectedLesson.anchors_en && selectedLesson.anchors_en.length ? selectedLesson.anchors_en : (selectedLesson.anchors_he || []);
         if (anchors.length) {
-          legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2.5"><span class="text-xs font-bold uppercase tracking-wider text-amber-300">Core Knowledge Anchors</span><ul class="space-y-2">${anchors.map(a => `<li dir="auto" class="text-sm sm:text-base text-slate-100 flex items-start gap-2"><span class="text-amber-400 font-bold">✦</span><span>${formatSectionInlineText(typeof a === 'string' ? a : (a.point || a.title || ''))}</span></li>`).join('')}</ul></div>`);
+          legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2.5"><span class="text-xs font-bold uppercase tracking-wider text-amber-300">Core Knowledge Anchors</span><ul class="space-y-2">${anchors.map(a => `<li dir="auto" class="text-base sm:text-lg text-slate-100 flex items-start gap-2"><span class="text-amber-400 font-bold">✦</span><span>${formatSectionInlineText(typeof a === 'string' ? a : (a.point || a.title || ''))}</span></li>`).join('')}</ul></div>`);
         }
-        if (selectedLesson.sources_text) legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-cyan-900/30 space-y-2"><span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Primary Sources</span><p dir="auto" class="text-sm sm:text-base text-cyan-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(selectedLesson.sources_text)}</p></div>`);
-        if (selectedLesson.steps_text) legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-emerald-900/30 space-y-2"><span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Step by Step Flow</span><p dir="auto" class="text-sm sm:text-base text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(selectedLesson.steps_text)}</p></div>`);
-        if (selectedLesson.pitfalls_text) legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-rose-900/30 space-y-2"><span class="text-xs font-bold uppercase tracking-wider text-rose-400">Common Pitfalls</span><p dir="auto" class="text-sm sm:text-base text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(selectedLesson.pitfalls_text)}</p></div>`);
-        if (selectedLesson.homework_text) legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-purple-900/30 space-y-2"><span class="text-xs font-bold uppercase tracking-wider text-purple-400">Homework Challenge</span><p dir="auto" class="text-sm sm:text-base text-purple-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(selectedLesson.homework_text)}</p></div>`);
+        if (selectedLesson.sources_text) legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-cyan-900/30 space-y-2"><span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Primary Sources</span><p dir="auto" class="text-base sm:text-lg text-cyan-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(selectedLesson.sources_text)}</p></div>`);
+        if (selectedLesson.steps_text) legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-emerald-900/30 space-y-2"><span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Step by Step Flow</span><p dir="auto" class="text-base sm:text-lg text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(selectedLesson.steps_text)}</p></div>`);
+        if (selectedLesson.pitfalls_text) legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-rose-900/30 space-y-2"><span class="text-xs font-bold uppercase tracking-wider text-rose-400">Common Pitfalls</span><p dir="auto" class="text-base sm:text-lg text-slate-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(selectedLesson.pitfalls_text)}</p></div>`);
+        if (selectedLesson.homework_text) legacyParts.push(`<div class="p-5 rounded-2xl bg-slate-900/80 border border-purple-900/30 space-y-2"><span class="text-xs font-bold uppercase tracking-wider text-purple-400">Homework Challenge</span><p dir="auto" class="text-base sm:text-lg text-purple-100 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(selectedLesson.homework_text)}</p></div>`);
         bodyHtml = legacyParts.join('');
       }
 
@@ -13464,40 +13911,73 @@ ${forceSchemaLines}`;
         `;
       }
 
+      const lessonSwitcherHtml = lessons.length > 1 ? `
+        <select id="reader-lesson-switcher-select" onchange="jumpToStudioLesson('${activeCourse.id}', this.value)" class="bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-amber-400 cursor-pointer max-w-[240px] truncate" title="Jump to another lesson in this course">
+          ${lessons.map((les, idx) => {
+            const lName = isHe ? (les.title_he || les.title_en || 'Untitled') : (les.title_en || les.title_he || 'Untitled');
+            const lNo = les.lesson_num || (idx + 1);
+            return `<option value="${les.id}" ${les.id === selectedLesson.id ? 'selected' : ''}>${isHe ? 'שיעור' : 'Lesson'} ${lNo}: ${escapeHtml(lName)}</option>`;
+          }).join('')}
+        </select>
+      ` : '';
+
+      const sectionJumpListHtml = populatedJumpSections.length > 1 ? `
+        <div id="lesson-section-jump-list" class="flex items-center gap-1.5 flex-wrap pt-1">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 mr-1">${isHe ? 'קפוץ אל:' : 'Sections:'}</span>
+          ${populatedJumpSections.map(s => `
+            <button type="button" onclick="scrollToLessonSection('${s.id}')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/40 text-xs font-medium text-slate-300 hover:text-amber-300 transition">
+              <span class="font-mono text-amber-400 mr-1">${s.num}.</span>${escapeHtml(s.name)}
+            </button>
+          `).join('')}
+        </div>
+      ` : '';
+
       return `
         <div id="studio-lesson-reader" class="max-w-4xl mx-auto space-y-6">
-          <!-- Single Calm Reader Navigation Header -->
+          <!-- Single Calm Reader Navigation Header + Top Lesson Switcher -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-slate-800/80">
-            <button type="button" onclick="exitStudioToLessonList('${activeCourse.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 self-start transition">
-              <i data-lucide="arrow-left" class="w-3.5 h-3.5 rtl:rotate-180"></i>
-              <span>${isHe ? 'חזרה לרשימת השיעורים' : 'Lessons'}</span>
-            </button>
+            <div class="flex items-center gap-2 flex-wrap">
+              <button type="button" onclick="exitStudioToLessonList('${activeCourse.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition">
+                <i data-lucide="arrow-left" class="w-3.5 h-3.5 rtl:rotate-180"></i>
+                <span>${isHe ? 'חזרה לרשימת השיעורים' : 'Lessons'}</span>
+              </button>
+              ${lessonSwitcherHtml}
+            </div>
             <div class="flex items-center gap-2 flex-wrap">
               <button type="button" id="btn-reader-teach-class" onclick="openTutorTeleprompter('${activeCourse.id}', '${selectedLesson.id}')" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow transition active:scale-95">
                 <i data-lucide="presentation" class="w-3.5 h-3.5"></i>
                 <span>Teach Class</span>
               </button>
               <button type="button" id="btn-reader-edit-lesson" onclick="enterStudioEditLessonMode('${activeCourse.id}', '${selectedLesson.id}')" class="px-4 py-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 font-bold text-xs flex items-center gap-1.5 transition active:scale-95">
-                <i data-lucide="pencil" class="w-3.5 h-3.5 text-indigo-300"></i>
-                <span>Edit Lesson</span>
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-300"></i>
+                <span>Build / Edit with AI</span>
               </button>
             </div>
           </div>
 
-          <!-- Clean Document Hero Title -->
-          <div class="space-y-2">
+          <!-- Clean Document Hero Title (Click Title to Rename on the Spot) & Quick Section Jump List -->
+          <div class="space-y-2.5">
             <div class="flex items-center gap-2 text-xs font-mono text-slate-400">
               <span class="text-amber-400 font-bold">${escapeHtml(activeCourse.title_en || activeCourse.title_he || '')}</span>
               <span>•</span>
               <span>Lesson ${selectedLesson.lesson_num || lessons.indexOf(selectedLesson) + 1} of ${lessons.length}</span>
-              ${selectedLesson.duration ? `<span>•</span><span>${escapeHtml(selectedLesson.duration)}</span>` : ''}
             </div>
-            <h1 id="reader-lesson-title" dir="auto" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">${escapeHtml(selectedTitle)}</h1>
+            <h1
+              id="reader-lesson-title"
+              dir="auto"
+              contenteditable="true"
+              spellcheck="false"
+              title="${isHe ? 'לחץ כדי לשנות את שם השיעור במקום' : 'Click to rename lesson on the spot'}"
+              onblur="handleInlineLessonTitleRename('${activeCourse.id}', '${selectedLesson.id}', this.textContent)"
+              onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }"
+              class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug rounded-xl px-1 -mx-1 hover:bg-slate-800/40 focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition cursor-text"
+            >${escapeHtml(selectedTitle)}</h1>
+            ${sectionJumpListHtml}
           </div>
 
           <!-- Formatted Lesson Document Body (Zero Cluttered Inputs) -->
           ${bodyHtml ? `
-            <div id="reader-sections-body" class="space-y-4">
+            <div id="reader-sections-body" class="space-y-5 lesson-doc-prose">
               ${bodyHtml}
             </div>
           ` : `
@@ -13507,10 +13987,10 @@ ${forceSchemaLines}`;
               </div>
               <div class="space-y-1">
                 <h4 class="text-base font-bold text-white">This lesson does not have content yet</h4>
-                <p class="text-xs text-slate-400 max-w-md mx-auto">Click Edit Lesson to speak with AI, drop links or voice notes, and build your sections inside your Course Blueprint.</p>
+                <p class="text-xs text-slate-400 max-w-md mx-auto">Click Build / Edit with AI to speak with AI, drop links or voice notes, and build your sections inside your Course Blueprint.</p>
               </div>
               <button type="button" onclick="enterStudioEditLessonMode('${activeCourse.id}', '${selectedLesson.id}')" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition">
-                Edit Lesson with AI
+                Build Lesson with AI
               </button>
             </div>
           `}
@@ -13714,6 +14194,28 @@ ${forceSchemaLines}`;
       const selectedRecordings = Array.isArray(selectedLesson.recordings) ? selectedLesson.recordings : (selectedLesson.audio_url ? [{ id: 'legacy_audio', title: 'Lesson Audio', url: selectedLesson.audio_url, type: 'audio' }] : []);
       const selectedAnchors = isHe ? (selectedLesson.anchors_he && selectedLesson.anchors_he.length ? selectedLesson.anchors_he : selectedLesson.anchors_en || []) : (selectedLesson.anchors_en && selectedLesson.anchors_en.length ? selectedLesson.anchors_en : selectedLesson.anchors_he || []);
       const anchorsRawText = selectedAnchors.map(a => typeof a === 'string' ? a : (a.point || a.title || '')).join('\n');
+      recordLastOpenedLesson(activeCourse.id, selectedLesson.id);
+
+      const studioLessonSwitcherHtml = lessons.length > 1 ? `
+        <select id="studio-lesson-switcher-select" onchange="jumpToStudioLesson('${activeCourse.id}', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-xl px-2.5 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-amber-400 cursor-pointer max-w-[210px] truncate" title="Jump to another lesson">
+          ${lessons.map((les, idx) => {
+            const lName = isHe ? (les.title_he || les.title_en || 'Untitled') : (les.title_en || les.title_he || 'Untitled');
+            const lNo = les.lesson_num || (idx + 1);
+            return `<option value="${les.id}" ${les.id === selectedLesson.id ? 'selected' : ''}>${isHe ? 'שיעור' : 'Lesson'} ${lNo}: ${escapeHtml(lName)}</option>`;
+          }).join('')}
+        </select>
+      ` : '';
+
+      const studioSectionJumpHtml = hasCustomSections && blueprintSections.length > 1 ? `
+        <div id="studio-section-jump-list" class="flex items-center gap-1.5 flex-wrap pt-1">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 mr-1">${isHe ? 'קפוץ אל:' : 'Sections:'}</span>
+          ${blueprintSections.map((s, idx) => `
+            <button type="button" onclick="scrollToLessonSection('${s.id}')" class="px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/40 text-xs font-medium text-slate-300 hover:text-amber-300 transition">
+              <span class="font-mono text-amber-400 mr-1">${idx + 1}.</span>${escapeHtml(s.name || 'Section')}
+            </button>
+          `).join('')}
+        </div>
+      ` : '';
 
       let html = `
         <div id="course-studio-wrapper" class="max-w-7xl mx-auto space-y-4">
@@ -13727,6 +14229,7 @@ ${forceSchemaLines}`;
                   <i data-lucide="arrow-left" class="w-3.5 h-3.5 rtl:rotate-180"></i>
                   <span>Lessons</span>
                 </button>
+                ${studioLessonSwitcherHtml}
                 <button type="button" id="btn-edit-done-view-lesson" onclick="selectStudioClass('${selectedLesson.id}')" class="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center gap-1.5 transition">
                   <i data-lucide="check" class="w-3.5 h-3.5"></i>
                   <span>Done · View Lesson</span>
@@ -13760,8 +14263,8 @@ ${forceSchemaLines}`;
               </div>
             </div>
 
-            <!-- Full-Width Never-Clipped Title + Wrap-Safe Pills -->
-            <div class="space-y-2.5">
+            <!-- Full-Width Never-Clipped Title + Quick Section Jump List -->
+            <div class="space-y-2">
               <input
                 id="studio-class-title-input"
                 type="text"
@@ -13769,25 +14272,23 @@ ${forceSchemaLines}`;
                 value="${escapeHtml(selectedTitle)}"
                 oninput="handleStudioClassTitleChange('${activeCourse.id}', '${selectedLesson.id}', this.value)"
                 onblur="saveCustomCoursesToStorage(true)"
-                class="w-full text-base sm:text-lg font-bold text-white bg-slate-950/80 border border-slate-700/80 rounded-2xl px-4 py-2.5 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 transition"
+                class="w-full text-base sm:text-xl font-extrabold text-white bg-slate-950/80 border border-slate-700/80 rounded-2xl px-4 py-2.5 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 transition"
                 placeholder="Enter lesson title..."
               />
-              <div class="flex flex-wrap items-center gap-2">
-                <select aria-label="Duration" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'duration', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-xl py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
+              ${studioSectionJumpHtml}
+              <!-- Hidden legacy metadata dropdowns (removed from visual clutter) -->
+              <div class="hidden" aria-hidden="true">
+                <select aria-label="Duration" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'duration', this.value)">
                   <option value="15m" ${selectedLesson.duration === '15m' ? 'selected' : ''}>15 min</option>
                   <option value="30m" ${selectedLesson.duration === '30m' ? 'selected' : ''}>30 min</option>
                   <option value="45m" ${(!selectedLesson.duration || selectedLesson.duration === '45m') ? 'selected' : ''}>45 min</option>
                   <option value="60m" ${selectedLesson.duration === '60m' ? 'selected' : ''}>60 min</option>
                   <option value="90m" ${selectedLesson.duration === '90m' ? 'selected' : ''}>90 min</option>
                 </select>
-                <select aria-label="Level" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'level', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-xl py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
+                <select aria-label="Level" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'level', this.value)">
                   <option value="Standard / All Levels" ${(!selectedLesson.level || selectedLesson.level === 'Standard / All Levels') ? 'selected' : ''}>All Levels</option>
-                  <option value="Elementary (Ages 8-11)" ${selectedLesson.level?.includes('Elementary') ? 'selected' : ''}>Elementary (Ages 8-11)</option>
-                  <option value="Middle School (Ages 12-14)" ${selectedLesson.level?.includes('Middle') ? 'selected' : ''}>Middle School (Ages 12-14)</option>
-                  <option value="High School (Ages 15-18)" ${selectedLesson.level?.includes('High') ? 'selected' : ''}>High School (Ages 15-18)</option>
-                  <option value="Adult / Professional" ${selectedLesson.level?.includes('Adult') ? 'selected' : ''}>Adult / Professional</option>
                 </select>
-                <select aria-label="Status" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'status', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-xl py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
+                <select aria-label="Status" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'status', this.value)">
                   <option value="ready" ${selectedLesson.status === 'ready' ? 'selected' : ''}>Ready to Teach</option>
                   <option value="draft" ${(!selectedLesson.status || selectedLesson.status === 'draft') ? 'selected' : ''}>Draft</option>
                 </select>
@@ -17640,6 +18141,35 @@ ${resourcesRaw}`;
       container.scrollTop = container.scrollHeight;
     }
 
+    var architectRightActiveTab = 'sections';
+
+    function switchArchitectRightTab(tabName) {
+      architectRightActiveTab = tabName === 'playbook' ? 'playbook' : 'sections';
+      const panelSections = document.getElementById('architect-tab-panel-sections');
+      const panelPlaybook = document.getElementById('architect-tab-panel-playbook');
+      const btnSections = document.getElementById('btn-arch-right-tab-sections');
+      const btnPlaybook = document.getElementById('btn-arch-right-tab-playbook');
+
+      if (panelSections) {
+        if (architectRightActiveTab === 'sections') panelSections.classList.remove('hidden');
+        else panelSections.classList.add('hidden');
+      }
+      if (panelPlaybook) {
+        if (architectRightActiveTab === 'playbook') panelPlaybook.classList.remove('hidden');
+        else panelPlaybook.classList.add('hidden');
+      }
+      if (btnSections) {
+        btnSections.className = architectRightActiveTab === 'sections'
+          ? 'px-2.5 py-1 rounded-lg text-[11px] font-bold transition bg-amber-500 text-slate-950 shadow flex items-center gap-1'
+          : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold transition text-slate-300 hover:text-white flex items-center gap-1';
+      }
+      if (btnPlaybook) {
+        btnPlaybook.className = architectRightActiveTab === 'playbook'
+          ? 'px-2.5 py-1 rounded-lg text-[11px] font-bold transition bg-emerald-500 text-slate-950 shadow flex items-center gap-1'
+          : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold transition text-slate-300 hover:text-white flex items-center gap-1';
+      }
+    }
+
     function toggleBlueprintSectionOptions(secId) {
       const panel = document.getElementById('bp-sec-opts-' + secId);
       if (panel) panel.classList.toggle('hidden');
@@ -17688,25 +18218,29 @@ ${resourcesRaw}`;
                 >
               </div>
               <div class="flex items-center gap-0.5 shrink-0">
-                <button type="button" onclick="toggleBlueprintSectionOptions('${sec.id}')" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-amber-300 transition" title="Section Theme & Options"><i data-lucide="sliders" class="w-3.5 h-3.5"></i></button>
+                <button type="button" onclick="toggleBlueprintSectionOptions('${sec.id}')" class="px-2 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-emerald-300 border border-slate-800 text-[10px] font-semibold transition flex items-center gap-1" title="Expand Section Rule & Options">
+                  <span>Rule</span>
+                  <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                </button>
                 <button type="button" onclick="moveBlueprintSection('${sec.id}', -1)" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition" title="Move Up"><i data-lucide="chevron-up" class="w-3.5 h-3.5"></i></button>
                 <button type="button" onclick="moveBlueprintSection('${sec.id}', 1)" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition" title="Move Down"><i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></button>
                 <button type="button" onclick="removeBlueprintSection('${sec.id}')" class="p-1 rounded hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 transition" title="Remove"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
               </div>
             </div>
-            <div class="pt-0.5">
-              <label class="block text-[9px] font-mono uppercase tracking-wider text-emerald-400/90 mb-0.5">Lesson AI Rule (How to Write This Section)</label>
-              <textarea
-                rows="2"
-                onchange="updateBlueprintSectionRule('${sec.id}', this.value)"
-                placeholder="Specific instruction for how the Lesson Builder fills this section (tone, depth, sources, length)..."
-                class="w-full bg-slate-950/70 border border-slate-800 rounded-lg py-1 px-2 text-[11px] text-slate-300 placeholder-slate-500 focus:outline-none focus:border-amber-400/70 leading-snug resize-y"
-              >${escapeHtml(sec.ai_rule || sec.hint || '')}</textarea>
-            </div>
-            <div id="bp-sec-opts-${sec.id}" class="hidden pt-1.5 border-t border-slate-800/80 flex items-center justify-between gap-2 flex-wrap text-[10px] text-slate-300">
-              <div class="flex items-center gap-1.5">
-                <span class="text-slate-500">Color:</span>
-                <select onchange="updateBlueprintSectionProp('${sec.id}', 'color', this.value)" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-[10px] text-slate-200">
+            <div id="bp-sec-opts-${sec.id}" class="hidden pt-2 border-t border-slate-800/80 space-y-2 text-[10px] text-slate-300">
+              <div>
+                <label class="block text-[9px] font-mono uppercase tracking-wider text-emerald-400/90 mb-0.5">Lesson AI Rule (How to Write This Section)</label>
+                <textarea
+                  rows="2"
+                  onchange="updateBlueprintSectionRule('${sec.id}', this.value)"
+                  placeholder="Specific instruction for how the Lesson Builder fills this section (tone, depth, sources, length)..."
+                  class="w-full bg-slate-950/70 border border-slate-800 rounded-lg py-1 px-2 text-[11px] text-slate-300 placeholder-slate-500 focus:outline-none focus:border-amber-400/70 leading-snug resize-y"
+                >${escapeHtml(sec.ai_rule || sec.hint || '')}</textarea>
+              </div>
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-slate-500">Color:</span>
+                  <select onchange="updateBlueprintSectionProp('${sec.id}', 'color', this.value)" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-[10px] text-slate-200">
                   <option value="">Auto (${meta.color})</option>
                   ${['amber','emerald','cyan','blue','indigo','purple','rose','orange','teal','slate'].map(c => `<option value="${c}" ${sec.color === c ? 'selected' : ''}>${c}</option>`).join('')}
                 </select>
@@ -17719,6 +18253,7 @@ ${resourcesRaw}`;
                 <input type="checkbox" ${(sec.teacher_only || sec.type === 'teacher_cue') ? 'checked' : ''} onchange="updateBlueprintSectionProp('${sec.id}', 'teacher_only', this.checked)" class="rounded border-slate-700 bg-slate-950 text-amber-500">
                 <span>Teacher Only</span>
               </label>
+              </div>
             </div>
           </div>
         `;
@@ -22664,59 +23199,13 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
               </div>
             </div>
           </div>
-        ` : (hasPopulatedCrm ? `
-          <div id="drawer-profile-summary-card" class="px-4 py-3 rounded-2xl bg-slate-950/65 border border-slate-800/90 flex items-center justify-between gap-3 flex-wrap">
-            <div class="flex items-center gap-x-4 gap-y-1.5 flex-wrap text-xs">
-              ${(student.subject || student.parsha) ? `
-                <div class="flex items-center gap-1.5 text-slate-300">
-                  <span class="text-slate-500">Focus:</span>
-                  <span dir="auto" class="font-semibold text-white">${escapeHtml(student.subject || student.parsha)}</span>
-                </div>
-              ` : ''}
-              ${currentHourlyRate ? `
-                <div class="flex items-center gap-1.5 text-slate-300">
-                  <span class="text-slate-500">Rate:</span>
-                  <span class="font-mono font-semibold text-amber-300">${escapeHtml(currentHourlyRate)}</span>
-                </div>
-              ` : ''}
-              ${guardian.name ? `
-                <div class="flex items-center gap-1.5 text-slate-300">
-                  <span class="text-slate-500">Guardian:</span>
-                  <span dir="auto" class="font-semibold text-white">${escapeHtml(guardian.name)}</span>
-                </div>
-              ` : ''}
-              ${guardian.phone ? `<span class="text-[11px] font-mono text-slate-400">${escapeHtml(guardian.phone)}</span>` : ''}
-              ${guardian.email ? `<span class="text-[11px] font-mono text-slate-400">${escapeHtml(guardian.email)}</span>` : ''}
-            </div>
-            <div class="flex items-center gap-1.5 flex-wrap shrink-0">
-              ${guardian.phone ? `
-                <a href="https://wa.me/${cleanPhone}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-lg bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600/30 text-[11px] font-semibold flex items-center gap-1 transition">
-                  <i data-lucide="message-circle" class="w-3 h-3 text-emerald-400"></i>
-                  <span>WhatsApp</span>
-                </a>
-                <a href="tel:${guardian.phone}" class="px-2.5 py-1 rounded-lg bg-sky-600/20 text-sky-300 border border-sky-500/30 hover:bg-sky-600/30 text-[11px] font-semibold flex items-center gap-1 transition">
-                  <i data-lucide="phone-call" class="w-3 h-3 text-sky-400"></i>
-                  <span>${isHe ? 'חייג' : 'Call'}</span>
-                </a>
-              ` : ''}
-              ${guardian.email ? `
-                <a href="mailto:${guardian.email}?subject=${encodeURIComponent((isHe ? 'עדכון לימודי: ' : 'Tutoring Update: ') + student.name)}" class="px-2.5 py-1 rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30 text-[11px] font-semibold flex items-center gap-1 transition">
-                  <i data-lucide="mail" class="w-3 h-3 text-indigo-400"></i>
-                  <span>${isHe ? 'אימייל' : 'Email'}</span>
-                </a>
-              ` : ''}
-              <button type="button" onclick="toggleStudentDrawerCrmEdit('${student.id}')" class="px-2 py-1 rounded-lg text-[11px] text-slate-400 hover:text-white hover:bg-slate-800 transition">Edit</button>
-            </div>
-          </div>
         ` : `
-          <div id="drawer-profile-summary-card" class="px-4 py-2.5 rounded-2xl bg-slate-950/45 border border-dashed border-slate-800 flex items-center justify-between gap-2 text-xs">
-            <span class="text-slate-500">Stage, guardian contact &amp; fee details are empty</span>
-            <button type="button" onclick="toggleStudentDrawerCrmEdit('${student.id}')" class="text-amber-400 hover:text-amber-300 font-semibold text-[11px] flex items-center gap-1 transition">
-              <i data-lucide="plus" class="w-3 h-3"></i>
-              <span>Add Guardian &amp; Fee Info</span>
-            </button>
+          <div id="drawer-profile-summary-card" class="hidden" aria-hidden="true">
+            ${escapeHtml(guardian.name || '')} ${escapeHtml(guardian.phone || '')} ${escapeHtml(guardian.email || '')} ${escapeHtml(currentHourlyRate || '')}
+            ${guardian.phone ? `<a href="https://wa.me/${cleanPhone}">WhatsApp</a><a href="tel:${guardian.phone}">Call</a>` : ''}
+            ${guardian.email ? `<a href="mailto:${guardian.email}">Email</a>` : ''}
           </div>
-        `);
+        `;
 
         // 2. Clean Active Homework Card (No double ++)
         const homeworkBannerHtml = (hw.task && hw.task.trim())
@@ -22972,36 +23461,68 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
           </div>
         `;
 
+        const activeProfileTab = (typeof studentProfileTabMap !== 'undefined' && studentProfileTabMap[student.id]) || 'progress';
+
         body.innerHTML = `
           ${studentAiCardHtml}
-          ${portalAccessCardHtml}
           ${cardCrmGuardianHtml}
-          ${homeworkBannerHtml}
-          ${cardCustomGoalsHtml}
-          ${sharedNotesCardHtml}
 
-          <!-- Full-Width Private Tutor Notes (Hidden from Student) -->
-          <div class="bg-slate-950/65 border border-slate-800/90 rounded-2xl p-4 space-y-2">
-            <div class="flex items-center justify-between text-xs gap-2 flex-wrap">
-              <span class="font-bold text-slate-200 flex items-center gap-1.5">
-                <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-400"></i>
-                <span>${t.collaborativeNotesTitle}</span>
-                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">Private · Teacher Only</span>
-              </span>
-              <span class="text-[10px] font-mono text-emerald-400/90">✓ Auto-saves</span>
-            </div>
-            <textarea
-              id="drawer-student-notes-input"
-              dir="auto"
-              rows="${noteRows}"
-              oninput="handleDrawerNotesInput('${student.id}', this.value); if(typeof autoGrowStudioTextarea==='function'){ autoGrowStudioTextarea(this); }"
-              onblur="saveDrawerStudentNotes('${student.id}')"
-              placeholder="${t.notesPlaceholder}"
-              class="studio-autogrow w-full bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 leading-relaxed resize-none"
-            >${escapeHtml(student.notes || '')}</textarea>
+          <!-- Clean 2-Tab Student Profile Switcher (1. Progress & Tutor Notes | 2. Student Portal & Shared) -->
+          <div id="student-profile-tabs-bar" class="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-950 border border-slate-800">
+            <button
+              type="button"
+              id="btn-student-profile-tab-progress"
+              onclick="switchStudentProfileTab('${student.id}', 'progress')"
+              class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeProfileTab === 'progress' ? 'bg-brand-600 text-white shadow' : 'text-slate-400 hover:text-white'}"
+            >
+              <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+              <span>${isHe ? '1. קורסים והערות מורה' : '1. Progress & Tutor Notes'}</span>
+            </button>
+            <button
+              type="button"
+              id="btn-student-profile-tab-portal"
+              onclick="switchStudentProfileTab('${student.id}', 'portal')"
+              class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeProfileTab === 'portal' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}"
+            >
+              <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+              <span>${isHe ? '2. אזור התלמיד ומשימות' : '2. Student Portal & Shared'}</span>
+            </button>
           </div>
 
-          ${coursesCurriculumHtml}
+          <!-- TAB 1: PROGRESS & PRIVATE TUTOR NOTES (Teacher Only) -->
+          <div id="student-profile-panel-progress" class="${activeProfileTab === 'progress' ? 'space-y-4' : 'hidden space-y-4'}">
+            ${coursesCurriculumHtml}
+
+            <!-- Full-Width Private Tutor Notes (Hidden from Student) -->
+            <div class="bg-slate-950/65 border border-slate-800/90 rounded-2xl p-4 space-y-2">
+              <div class="flex items-center justify-between text-xs gap-2 flex-wrap">
+                <span class="font-bold text-slate-200 flex items-center gap-1.5">
+                  <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>${t.collaborativeNotesTitle}</span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">Private · Teacher Only</span>
+                </span>
+                <span class="text-[10px] font-mono text-emerald-400/90">✓ Auto-saves</span>
+              </div>
+              <textarea
+                id="drawer-student-notes-input"
+                dir="auto"
+                rows="${noteRows}"
+                oninput="handleDrawerNotesInput('${student.id}', this.value); if(typeof autoGrowStudioTextarea==='function'){ autoGrowStudioTextarea(this); }"
+                onblur="saveDrawerStudentNotes('${student.id}')"
+                placeholder="${t.notesPlaceholder}"
+                class="studio-autogrow w-full bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 leading-relaxed resize-none"
+              >${escapeHtml(student.notes || '')}</textarea>
+            </div>
+          </div>
+
+          <!-- TAB 2: STUDENT PORTAL ACCESS, HOMEWORK, GOALS & SHARED STUDENT NOTES -->
+          <div id="student-profile-panel-portal" class="${activeProfileTab === 'portal' ? 'space-y-4' : 'hidden space-y-4'}">
+            ${portalAccessCardHtml}
+            ${homeworkBannerHtml}
+            ${cardCustomGoalsHtml}
+            ${sharedNotesCardHtml}
+          </div>
+
           ${cardParshaReadingHtml}
         `;
       }
@@ -23012,6 +23533,14 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       if (window.lucide && typeof lucide.createIcons === 'function') {
         lucide.createIcons();
       }
+    }
+
+    var studentProfileTabMap = {};
+
+    function switchStudentProfileTab(studentId, tabName) {
+      if (!studentId) return;
+      studentProfileTabMap[studentId] = tabName === 'portal' ? 'portal' : 'progress';
+      renderStudentDrawer(studentId, true);
     }
 
     function updateStudentDrawerField(studentId, field, value) {
@@ -23329,13 +23858,6 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
                         <i data-lucide="book-open" class="w-3 h-3 text-brand-400 shrink-0"></i>
                         <span class="truncate">${activeCourses.length} ${isHe ? (activeCourses.length === 1 ? 'קורס' : 'קורסים') : (activeCourses.length === 1 ? 'Course' : 'Courses')}</span>
                       </span>
-                      ${stageVal && stageVal !== 'Standard / All Levels' ? `
-                        <span class="text-slate-600 font-bold">•</span>
-                        <span class="inline-flex items-center gap-1 text-slate-400 font-medium text-[11px] truncate">
-                          <i data-lucide="graduation-cap" class="w-3 h-3 text-slate-500 shrink-0"></i>
-                          <span class="truncate">${escapeHtml(stageVal)}</span>
-                        </span>
-                      ` : ''}
                       ${cardDate ? `
                         <span class="text-slate-600 font-bold">•</span>
                         <span class="inline-flex items-center gap-1 text-slate-300 font-mono text-[11px]">
@@ -23343,39 +23865,13 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
                           <span class="truncate">${cardDate}</span>
                         </span>
                       ` : ''}
-                      ${hasGuardian ? `
-                        <span class="text-slate-600 font-bold">•</span>
-                        <span class="inline-flex items-center gap-1 text-amber-300/90 font-medium text-[11px] truncate" title="${escapeHtml(guardianInfo.phone || '')}">
-                          <i data-lucide="user-check" class="w-3 h-3 text-amber-400 shrink-0"></i>
-                          <span class="truncate">${escapeHtml(guardianInfo.name || guardianInfo.phone)}</span>
-                        </span>
-                      ` : ''}
                     </div>
                   </div>
                 </div>
 
-                <!-- Reorder and Progress Badge -->
+                <!-- Clean Progress Badge -->
                 <div class="flex items-center gap-1.5 shrink-0" onclick="event.stopPropagation()">
-                  <div class="flex items-center bg-slate-950/80 border border-slate-800 rounded-lg p-0.5">
-                    <button
-                      onclick="moveStudentUp('${student.id}', event)"
-                      ${idx === 0 ? 'disabled' : ''}
-                      title="${t.moveUp}"
-                      class="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-20 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition"
-                    >
-                      <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>
-                    </button>
-                    <button
-                      onclick="moveStudentDown('${student.id}', event)"
-                      ${idx === filteredStudents.length - 1 ? 'disabled' : ''}
-                      title="${t.moveDown}"
-                      class="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-20 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition"
-                    >
-                      <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
-                    </button>
-                  </div>
-
-                  <span class="text-xs font-mono font-bold px-2 py-1 rounded-lg ${
+                  <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-xl ${
                     overallPct > 50 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                   }">
                     ${overallPct}%
@@ -23387,25 +23883,21 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
               ${progressBarsHtml}
             </div>
 
-            <!-- Footer: Notes preview, hourly rate and details action -->
+            <!-- Footer: Notes preview and clean Open Profile action -->
             <div class="mt-4 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
               <span class="truncate max-w-[170px] italic text-slate-400">
                 ${student.notes ? student.notes : t.noNotesText}
               </span>
-              <div class="flex items-center gap-2">
-                ${student.hourlyRate ? `
-                  <span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] text-amber-300 font-mono font-semibold">
-                    ${escapeHtml(student.hourlyRate)}
-                  </span>
-                ` : ''}
-                <div class="flex items-center gap-1">
-                  <span class="text-[10px] text-brand-400 font-medium group-hover:underline flex items-center gap-0.5">
-                    ${isHe ? 'לצפייה בפרטים' : 'View details'} <i data-lucide="${isHe ? 'chevron-left' : 'chevron-right'}" class="w-3 h-3"></i>
-                  </span>
-                  <button onclick="event.stopPropagation(); deleteStudent('${student.id}')" title="${t.deleteStudentTitle}" class="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-slate-800 transition">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                  </button>
-                </div>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="event.stopPropagation(); copyStudentPortalInvite('${student.id}')" title="Copy Student Portal Link &amp; Code" class="px-2 py-1 rounded-lg bg-slate-950/80 hover:bg-indigo-500/20 text-indigo-300 border border-slate-800 text-[10px] font-mono font-bold transition">
+                  ${escapeHtml(student.studentAccessCode || 'Code')}
+                </button>
+                <span class="text-[11px] text-brand-400 font-bold group-hover:underline flex items-center gap-0.5">
+                  ${isHe ? 'פתח פרופיל' : 'Open Profile'} <i data-lucide="${isHe ? 'chevron-left' : 'chevron-right'}" class="w-3.5 h-3.5"></i>
+                </span>
+                <button onclick="event.stopPropagation(); deleteStudent('${student.id}')" title="${t.deleteStudentTitle}" class="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-slate-800 transition">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -23961,6 +24453,80 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       return sessions;
     }
 
+    function selectCalendarDayAgenda(dateStr) {
+      if (!dateStr) return;
+      APP_STATE.calendar.selectedDateStr = dateStr;
+      renderCalendarSideAgendaPanel(dateStr);
+    }
+
+    function renderCalendarSideAgendaPanel(targetDateStr) {
+      const panel = document.getElementById('calendar-side-agenda-panel');
+      if (!panel) return;
+      const isHe = APP_STATE.lang === 'he';
+      const t = I18N[APP_STATE.lang] || I18N.en;
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const dateStr = targetDateStr || APP_STATE.calendar.selectedDateStr || todayStr;
+      APP_STATE.calendar.selectedDateStr = dateStr;
+
+      const parts = String(dateStr).split('-');
+      const dateObj = parts.length === 3 ? new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)) : now;
+      const dayOfWeekName = (t.daysOfWeekFull && t.daysOfWeekFull[dateObj.getDay()]) || 'Selected Day';
+      const showHebrew = !!APP_STATE.enableHebrewCalendar;
+      const hebrewInfo = showHebrew && typeof getHebrewDateInfo === 'function' ? getHebrewDateInfo(dateObj) : null;
+      const sessions = getScheduledSessionsForDate(dateObj);
+
+      panel.innerHTML = `
+        <div class="flex items-start justify-between gap-2 border-b border-slate-800 pb-3">
+          <div>
+            <span class="text-[10px] font-mono uppercase tracking-wider text-amber-400 font-bold block">${dateStr === todayStr ? (isHe ? 'היום ביומן' : 'Today\'s Schedule') : (isHe ? 'סדר יום נבחר' : 'Selected Day Agenda')}</span>
+            <h3 class="text-base font-extrabold text-white mt-0.5">${escapeHtml(dayOfWeekName)} · ${escapeHtml(dateStr)}</h3>
+            ${hebrewInfo ? `<p class="text-xs font-mono text-brand-300 mt-0.5">${escapeHtml(hebrewInfo.dayHebrewNumeral)} ${escapeHtml(hebrewInfo.monthName)} ${escapeHtml(hebrewInfo.yearHebrewNumeral)}</p>` : ''}
+          </div>
+          <span class="px-2.5 py-1 rounded-full bg-slate-950 border border-slate-800 text-xs font-mono text-slate-300 shrink-0">${sessions.length} ${isHe ? 'שיעורים' : (sessions.length === 1 ? 'session' : 'sessions')}</span>
+        </div>
+
+        ${sessions.length === 0 ? `
+          <div class="py-8 px-4 text-center rounded-2xl bg-slate-950/60 border border-dashed border-slate-800 space-y-2">
+            <i data-lucide="calendar-plus" class="w-7 h-7 text-slate-500 mx-auto"></i>
+            <p class="text-xs text-slate-400">${isHe ? 'אין שיעורים קבועים ליום זה עדיין.' : 'No sessions scheduled for this day yet.'}</p>
+          </div>
+        ` : `
+          <div class="space-y-2.5 max-h-[48vh] overflow-y-auto pr-1">
+            ${sessions.map(s => {
+              const isDone = s.status === 'completed';
+              return `
+                <div class="p-3.5 rounded-2xl bg-slate-950/80 border ${isDone ? 'border-emerald-500/40' : 'border-slate-800'} space-y-2">
+                  <div class="flex items-center justify-between gap-2">
+                    <button type="button" onclick="openStudentDrawer('${s.studentId}')" class="text-sm font-bold text-white hover:text-amber-300 transition text-left truncate">
+                      ${escapeHtml(s.studentName)}
+                    </button>
+                    <span class="px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold shrink-0">${escapeHtml(s.time || '')}</span>
+                  </div>
+                  ${s.topic ? `<p dir="auto" class="text-xs text-slate-300 leading-snug">${escapeHtml(s.topic)}</p>` : ''}
+                  <div class="flex items-center justify-between gap-2 pt-1">
+                    <button type="button" onclick="openStudentDrawer('${s.studentId}')" class="text-[11px] font-semibold text-brand-400 hover:underline">${isHe ? 'פרופיל תלמיד' : 'Student Profile'}</button>
+                    <button type="button" onclick="openScheduleLessonModal('${dateStr}', '${s.id}')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] font-semibold text-slate-300 transition">${isHe ? 'ערוך שיעור' : 'Manage'}</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `}
+
+        <button
+          type="button"
+          id="btn-side-agenda-add-lesson"
+          onclick="openScheduleLessonModal('${dateStr}')"
+          class="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition active:scale-95 shadow flex items-center justify-center gap-1.5"
+        >
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>${isHe ? 'קבע שיעור ליום זה' : 'Schedule Lesson for This Date'}</span>
+        </button>
+      `;
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
     function renderCalendar() {
       const monthContainer = document.getElementById('calendar-month-view-container');
       const weekContainer = document.getElementById('calendar-week-view-container');
@@ -23978,6 +24544,8 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
           btnWeek.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-400 hover:text-white';
         }
       }
+
+      renderCalendarSideAgendaPanel(APP_STATE.calendar.selectedDateStr);
 
       if (isWeek) {
         if (monthContainer) monthContainer.classList.add('hidden');
@@ -24508,6 +25076,7 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       APP_STATE.calendar.selectedDateStr = dateStr;
       APP_STATE.calendar.selectedSessionId = targetSessionId || null;
       APP_STATE.calendar.isAddFormVisible = !targetSessionId || !!defaultTimeStr;
+      renderCalendarSideAgendaPanel(dateStr);
       const modal = document.getElementById('modal-schedule-lesson');
       if (!modal) return;
 
@@ -28726,7 +29295,7 @@ ${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output 
   <!-- ============================================== -->
   <!-- BOTTOM DOCK (Unified Navigation - 4 Tabs)      -->
   <!-- ============================================== -->
-  <nav id="main-bottom-dock" class="fixed bottom-0 left-0 right-0 z-40 glass-nav border-t border-slate-800/90 mobile-safe-bottom px-3 pt-1.5">
+  <nav id="main-bottom-dock" class="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-nav border-t border-slate-800/90 mobile-safe-bottom px-3 pt-1.5">
     <div class="grid grid-cols-4 items-center w-full max-w-lg mx-auto gap-1">
 
       <button onclick="switchTab('study')" id="mob-tab-study" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-brand-400 font-bold bg-brand-500/10 w-full" title="Classes & Courses">

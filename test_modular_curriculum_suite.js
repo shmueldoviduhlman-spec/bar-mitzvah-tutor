@@ -4426,6 +4426,95 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(capturedUserPrompt.includes('Noah was a righteous man'), 'sendStudioClassAiMessage automatically extracts Sefaria source links from Course Allowed Resources');
   assert(g46Course.lessons[0].sections.sec_g46_over.includes('Rashi and Sforno debate'), 'Retry updates lesson section cleanly with real AI output');
 
+  // --- Gate 47: M105 Complete UI & UX Makeover (Warm Daylight Theme, Desktop Pill Nav, Unified Lesson Page, 3-Tab Architect, 2-Tab Student Profile, Split Calendar & AI Studio) ---
+  console.log('\n--- Running Gate 47: M105 Complete UI & UX Makeover ---');
+  assert(indexHtml.includes('class="theme-daylight overflow-x-hidden"') && indexHtml.includes('id="btn-theme-toggle"'), 'HTML defaults to Warm Daylight theme and exposes 1-click Theme Toggle button');
+  assert(typeof sandbox.getThemeMode === 'function' && typeof sandbox.toggleThemeMode === 'function', 'Theme engine helpers getThemeMode and toggleThemeMode are defined');
+  assert(sandbox.getThemeMode() === 'light', 'Default theme mode is Warm Daylight (light)');
+  assert(sandbox.toggleThemeMode() === 'dark' && sandbox.localStorage.getItem('tutor_theme_mode') === 'dark', 'toggleThemeMode switches to Dark Mode and persists preference');
+  assert(sandbox.toggleThemeMode() === 'light' && sandbox.localStorage.getItem('tutor_theme_mode') === 'light', 'toggleThemeMode switches back to Warm Daylight cleanly');
+
+  // Desktop Top Pill Navigation & Clean Header Today Trigger
+  assert(indexHtml.includes('id="desktop-top-pill-nav"') && indexHtml.includes('id="main-bottom-dock" class="md:hidden'), 'Desktop uses centered Top Pill Navigation while hiding mobile bottom dock on md+ screens');
+
+  // Tab 1: 1-Click Continue Last Lesson, Top Lesson Switcher, Click-to-Rename Title, Quick Section Jump List & 3-Tab Course Architect
+  const g47Course = {
+    id: 'course_g47_ui',
+    title_en: 'Chumash Mastery',
+    blueprint: {
+      sections: [
+        { id: 'sec_g47_1', type: 'text', name: 'Parasha Overview' },
+        { id: 'sec_g47_2', type: 'list', name: 'Core Milestones' }
+      ]
+    },
+    lessons: [
+      {
+        id: 'les_g47_1',
+        lesson_num: 1,
+        title_en: 'Lesson 1: Bereshit',
+        sections: {
+          sec_g47_1: JSON.stringify({ _structured: true, summary: 'Duplicate Text', body: 'Duplicate Text' }),
+          sec_g47_2: JSON.stringify({ _structured: true, items: ['Day 1 Light', 'Day 7 Shabbat'] })
+        }
+      },
+      {
+        id: 'les_g47_2',
+        lesson_num: 2,
+        title_en: 'Lesson 2: Noach',
+        sections: {
+          sec_g47_1: JSON.stringify({ _structured: true, summary: '', body: 'Noah builds the ark.' }),
+          sec_g47_2: JSON.stringify({ _structured: true, items: ['The Flood', 'The Rainbow Covenant'] })
+        }
+      }
+    ]
+  };
+  sandbox.APP_STATE.customCourses.push(g47Course);
+  sandbox.selectStudioClass('les_g47_1');
+  sandbox.renderCourseStudio('course_g47_ui', 'les_g47_1');
+  const g47ReaderHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(g47ReaderHtml.includes('id="reader-lesson-switcher-select"') && g47ReaderHtml.includes('Lesson 2: Noach'), 'Lesson Page header includes Top Lesson Switcher dropdown');
+  assert(g47ReaderHtml.includes('contenteditable="true"') && g47ReaderHtml.includes('handleInlineLessonTitleRename'), 'Lesson Page title supports Click-to-Rename on the spot');
+  assert(g47ReaderHtml.includes('id="lesson-section-jump-list"') && g47ReaderHtml.includes('scrollToLessonSection'), 'Lesson Page renders clickable Quick Section Jump List');
+  const dupCount = (g47ReaderHtml.match(/Duplicate Text/g) || []).length;
+  assert(dupCount === 1, 'Lesson Page deduplicates identical summary and body text so two identical text boxes never appear');
+
+  // Test inline title rename & top lesson switcher jump
+  sandbox.handleInlineLessonTitleRename('course_g47_ui', 'les_g47_1', 'Bereshit: Creation & Purpose');
+  assert(g47Course.lessons[0].title_en === 'Bereshit: Creation & Purpose', 'handleInlineLessonTitleRename updates lesson title directly on the spot');
+  sandbox.jumpToStudioLesson('course_g47_ui', 'les_g47_2');
+  assert(sandbox.APP_STATE.studioSelectedLessonId === 'les_g47_2' && sandbox.APP_STATE.lastOpenedLessonId === 'les_g47_2', 'jumpToStudioLesson switches active lesson and records lastOpenedLessonId');
+
+  // Test 1-Click Continue Last Lesson Banner in My Courses
+  sandbox.showAllCoursesView();
+  const continueBannerHtml = getOrCreateElem('continue-last-lesson-banner').innerHTML;
+  assert(continueBannerHtml.includes('Continue Last Lesson') && continueBannerHtml.includes('Lesson 2: Noach'), 'My Courses displays 1-click Continue Last Lesson shortcut banner');
+
+  // Test 3-Tab Course Architect Right Panel switcher
+  assert(typeof sandbox.switchArchitectRightTab === 'function', 'switchArchitectRightTab is defined');
+  sandbox.switchArchitectRightTab('playbook');
+  assert(!getOrCreateElem('architect-tab-panel-playbook').classList.contains('hidden') && getOrCreateElem('architect-tab-panel-sections').classList.contains('hidden'), 'switchArchitectRightTab switches Course Architect to AI Playbook & Sources tab');
+  sandbox.switchArchitectRightTab('sections');
+  assert(!getOrCreateElem('architect-tab-panel-sections').classList.contains('hidden'), 'switchArchitectRightTab returns to Lesson Sections tab');
+
+  // Tab 2: Clean Student Roster Cards & 2-Tab Student Profile
+  sandbox.renderStudents();
+  const g47RosterHtml = getOrCreateElem('students-list').innerHTML;
+  assert(!g47RosterHtml.includes('moveStudentUp') && !g47RosterHtml.includes('moveStudentDown'), 'Student Roster Cards remove Up/Down arrow reorder clutter');
+  const targetStu47 = sandbox.APP_STATE.students[0];
+  sandbox.openStudentDrawer(targetStu47.id);
+  const g47ProfileHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(g47ProfileHtml.includes('id="student-profile-tabs-bar"') && g47ProfileHtml.includes('id="student-profile-panel-progress"') && g47ProfileHtml.includes('id="student-profile-panel-portal"'), 'Student Profile renders 2-tab layout separating Teacher Progress & Private Notes from Student Portal & Shared items');
+  sandbox.switchStudentProfileTab(targetStu47.id, 'portal');
+  assert(sandbox.studentProfileTabMap[targetStu47.id] === 'portal', 'switchStudentProfileTab switches to Student Portal & Shared tab');
+
+  // Tab 3: Split Calendar Grid + Live Side Day Agenda Panel
+  assert(indexHtml.includes('id="calendar-side-agenda-panel"') && typeof sandbox.renderCalendarSideAgendaPanel === 'function', 'Calendar tab includes Live Side Day Agenda Panel');
+  sandbox.selectCalendarDayAgenda('2026-11-18');
+  assert(getOrCreateElem('calendar-side-agenda-panel').innerHTML.includes('2026-11-18') && getOrCreateElem('calendar-side-agenda-panel').innerHTML.includes('btn-side-agenda-add-lesson'), 'selectCalendarDayAgenda updates Live Side Day Agenda Panel for clicked date');
+
+  // Tab 4: Dedicated AI Studio Generator Cards
+  assert(indexHtml.includes('id="ai-studio-generator-cards"') && indexHtml.includes('Worksheet & Handout') && indexHtml.includes('Speech & Dvar Torah'), 'Dedicated AI Studio tab displays 4 visual Teaching Generator & Assistant cards');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
