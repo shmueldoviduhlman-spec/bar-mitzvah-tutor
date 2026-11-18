@@ -9296,10 +9296,12 @@ alter publication supabase_realtime add table public.students_sync;`;
       const isInsideCourse = !!APP_STATE.insideCourseId;
 
       if (isInsideCourse) {
+        if (navBar) navBar.classList.add('hidden');
         if (levelCourses) levelCourses.classList.add('hidden');
         if (levelClasses) levelClasses.classList.remove('hidden');
         renderInsideCourseHeader(APP_STATE.insideCourseId);
       } else {
+        if (navBar && courses.length > 0) navBar.classList.remove('hidden');
         if (levelCourses) levelCourses.classList.remove('hidden');
         if (levelClasses) levelClasses.classList.add('hidden');
         renderCoursesCardsGrid();
@@ -10833,19 +10835,304 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       showToast(APP_STATE.lang === 'he' ? 'כל השיעורים נוספו בהצלחה!' : 'Added all planned classes!');
     }
 
+    var studioWorkspaceTabMap = {};
+    var studioSourcePopoverMap = {};
+    var studioSourceRecordingActive = false;
+    var studioSourceMediaRecorder = null;
+    var studioSourceAudioChunks = [];
+
+    function getStudioWorkspaceTab(course, lesson) {
+      if (!lesson) return 'ai';
+      if (studioWorkspaceTabMap[lesson.id]) return studioWorkspaceTabMap[lesson.id];
+      return isStudioLessonEmpty(course, lesson) ? 'ai' : 'sections';
+    }
+
+    function setStudioWorkspaceTab(lessonId, tabName) {
+      const targetId = lessonId || APP_STATE.studioSelectedLessonId;
+      if (!targetId) return;
+      studioWorkspaceTabMap[targetId] = (tabName === 'sections') ? 'sections' : 'ai';
+      if (studioWorkspaceTabMap[targetId] === 'ai') {
+        studioClassAiOpenMap[targetId] = true;
+      }
+      renderCourseStudio(APP_STATE.insideCourseId || APP_STATE.activeCourseId, targetId);
+      if (studioWorkspaceTabMap[targetId] === 'ai') {
+        setTimeout(() => document.getElementById('input-studio-class-ai-prompt')?.focus(), 60);
+      }
+    }
+
+    function toggleStudioSourcePopover(mode) {
+      const current = studioSourcePopoverMap.active || null;
+      studioSourcePopoverMap.active = (current === mode) ? null : mode;
+      const linkBox = document.getElementById('studio-source-popover-link');
+      const pasteBox = document.getElementById('studio-source-popover-paste');
+      if (linkBox) linkBox.classList.toggle('hidden', studioSourcePopoverMap.active !== 'link');
+      if (pasteBox) pasteBox.classList.toggle('hidden', studioSourcePopoverMap.active !== 'paste');
+      if (studioSourcePopoverMap.active === 'link') setTimeout(() => document.getElementById('input-studio-source-url')?.focus(), 50);
+      if (studioSourcePopoverMap.active === 'paste') setTimeout(() => document.getElementById('input-studio-source-paste-text')?.focus(), 50);
+    }
+
+    function ensureStudioLessonSources(lesson) {
+      if (!lesson) return [];
+      if (!Array.isArray(lesson.ai_sources)) lesson.ai_sources = [];
+      return lesson.ai_sources;
+    }
+
+    async function addStudioLinkSource(courseId, lessonId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course && (course.lessons || []).find(l => l.id === lessonId);
+      if (!course || !lesson) return;
+      const urlInp = document.getElementById('input-studio-source-url');
+      const noteInp = document.getElementById('input-studio-source-note');
+      let rawUrl = (urlInp?.value || '').trim();
+      const note = (noteInp?.value || '').trim();
+      if (!rawUrl) {
+        showToast('Please paste a valid URL first');
+        return;
+      }
+      if (!/^https?:\/\//i.test(rawUrl)) rawUrl = 'https://' + rawUrl;
+
+      const srcId = 'src_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+      const sources = ensureStudioLessonSources(lesson);
+      let displayLabel = rawUrl;
+      try {
+        const parsedUrl = new URL(rawUrl);
+        displayLabel = parsedUrl.hostname.replace(/^www\./, '') + (parsedUrl.pathname !== '/' ? parsedUrl.pathname.slice(0, 28) : '');
+      } catch (e) {}
+
+      const srcItem = {
+        id: srcId,
+        kind: 'link',
+        label: displayLabel,
+        url: rawUrl,
+        note: note,
+        extractedText: '',
+        status: 'fetching',
+        created_at: new Date().toISOString()
+      };
+      sources.push(srcItem);
+      studioSourcePopoverMap.active = null;
+      if (urlInp) urlInp.value = '';
+      if (noteInp) noteInp.value = '';
+      saveCustomCoursesToStorage(true);
+      renderCourseStudio(courseId, lessonId);
+
+      // Live browser metadata/text extraction for YouTube & readable web pages
+      let extracted = '';
+      try {
+        const isYt = /(?:youtube\.com\/watch|youtu\.be\/|youtube\.com\/shorts)/i.test(rawUrl);
+        if (isYt && typeof fetch === 'function') {
+          const ytCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+          const ytTimer = ytCtrl ? setTimeout(() => ytCtrl.abort(), 5000) : null;
+          const ytResp = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(rawUrl)}&format=json`, ytCtrl ? { signal: ytCtrl.signal } : {}).catch(() => null);
+          if (ytTimer) clearTimeout(ytTimer);
+          if (ytResp && ytResp.ok) {
+            const ytMeta = await ytResp.json().catch(() => null);
+            if (ytMeta && ytMeta.title) {
+              srcItem.label = ytMeta.title.slice(0, 48);
+              extracted += `YouTube Video Title: ${ytMeta.title}\nChannel: ${ytMeta.author_name || 'Unknown'}\n`;
+            }
+          }
+        }
+        if (typeof fetch === 'function') {
+          const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+          const timer = ctrl ? setTimeout(() => ctrl.abort(), 6000) : null;
+          const cleanFetchUrl = `https://r.jina.ai/${rawUrl}`;
+          const resp = await fetch(cleanFetchUrl, ctrl ? { signal: ctrl.signal } : {}).catch(() => null);
+          if (timer) clearTimeout(timer);
+          if (resp && resp.ok) {
+            const txt = await resp.text();
+            if (txt && txt.trim().length > 20) {
+              extracted += (extracted ? '\n\n' : '') + txt.trim().slice(0, 12000);
+            }
+          }
+        }
+      } catch (e) {}
+
+      srcItem.extractedText = extracted.trim();
+      srcItem.status = srcItem.extractedText ? 'ready' : 'link_only';
+      saveCustomCoursesToStorage(true);
+      renderCourseStudio(courseId, lessonId);
+      showToast(srcItem.extractedText ? 'Link analyzed & ready for AI!' : 'Link attached (paste key text if page requires login)');
+    }
+
+    function addStudioPasteTextSource(courseId, lessonId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course && (course.lessons || []).find(l => l.id === lessonId);
+      if (!course || !lesson) return;
+      const titleInp = document.getElementById('input-studio-source-paste-title');
+      const textInp = document.getElementById('input-studio-source-paste-text');
+      const txt = (textInp?.value || '').trim();
+      const title = (titleInp?.value || '').trim() || 'Pasted Notes / Excerpt';
+      if (!txt) {
+        showToast('Please paste some text or notes first');
+        return;
+      }
+      ensureStudioLessonSources(lesson).push({
+        id: 'src_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        kind: 'text',
+        label: title.slice(0, 48),
+        extractedText: txt.slice(0, 18000),
+        status: 'ready',
+        created_at: new Date().toISOString()
+      });
+      studioSourcePopoverMap.active = null;
+      if (titleInp) titleInp.value = '';
+      if (textInp) textInp.value = '';
+      saveCustomCoursesToStorage(true);
+      renderCourseStudio(courseId, lessonId);
+      showToast('Reference notes attached for AI analysis!');
+    }
+
+    function triggerStudioSourceFileUpload(courseId, lessonId, acceptFilter) {
+      const inp = document.getElementById('input-studio-source-file');
+      if (!inp) return;
+      inp.setAttribute('data-course-id', courseId);
+      inp.setAttribute('data-lesson-id', lessonId);
+      inp.accept = acceptFilter || 'audio/*,image/*,.pdf,.txt,.md,.csv';
+      inp.value = '';
+      inp.click();
+    }
+
+    function handleStudioSourceFileSelected(event, fallbackCourseId, fallbackLessonId) {
+      const inp = event?.target;
+      const files = inp?.files ? Array.from(inp.files) : [];
+      if (!files.length) return;
+      const cId = inp.getAttribute('data-course-id') || fallbackCourseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId;
+      const lId = inp.getAttribute('data-lesson-id') || fallbackLessonId || APP_STATE.studioSelectedLessonId;
+      const course = (APP_STATE.customCourses || []).find(c => c.id === cId);
+      const lesson = course && (course.lessons || []).find(l => l.id === lId);
+      if (!course || !lesson) return;
+
+      files.forEach(file => {
+        if (file.size > 12 * 1024 * 1024) {
+          showToast(`"${file.name}" exceeds 12MB browser limit. Please trim or split it.`);
+          return;
+        }
+        const isText = file.type.startsWith('text/') || /\.(txt|md|csv|json)$/i.test(file.name);
+        const reader = new FileReader();
+        reader.onload = () => {
+          const resultStr = String(reader.result || '');
+          const sources = ensureStudioLessonSources(lesson);
+          if (isText) {
+            sources.push({
+              id: 'src_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+              kind: 'text',
+              label: file.name,
+              mimeType: file.type || 'text/plain',
+              extractedText: resultStr.slice(0, 20000),
+              status: 'ready',
+              created_at: new Date().toISOString()
+            });
+          } else {
+            const base64 = resultStr.includes(',') ? resultStr.split(',')[1] : resultStr;
+            const kind = file.type.startsWith('audio/') ? 'audio' : (file.type.startsWith('image/') ? 'image' : 'file');
+            sources.push({
+              id: 'src_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+              kind: kind,
+              label: file.name,
+              mimeType: file.type || (kind === 'audio' ? 'audio/mpeg' : 'application/octet-stream'),
+              dataUrl: (kind === 'audio' || kind === 'image') ? resultStr : '',
+              base64Data: base64,
+              status: 'ready',
+              created_at: new Date().toISOString()
+            });
+          }
+          saveCustomCoursesToStorage(true);
+          renderCourseStudio(cId, lId);
+          showToast(`Attached "${file.name}" for AI analysis!`);
+        };
+        if (isText) reader.readAsText(file);
+        else reader.readAsDataURL(file);
+      });
+    }
+
+    async function toggleStudioSourceVoiceRecord(courseId, lessonId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course && (course.lessons || []).find(l => l.id === lessonId);
+      if (!course || !lesson) return;
+
+      if (studioSourceRecordingActive && studioSourceMediaRecorder) {
+        try {
+          studioSourceMediaRecorder.stop();
+        } catch (e) {}
+        studioSourceRecordingActive = false;
+        renderCourseStudio(courseId, lessonId);
+        return;
+      }
+
+      if (typeof navigator === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
+        showToast('Live microphone unavailable here; upload an audio file instead');
+        triggerStudioSourceFileUpload(courseId, lessonId, 'audio/*');
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        studioSourceAudioChunks = [];
+        const recorder = new MediaRecorder(stream);
+        studioSourceMediaRecorder = recorder;
+        recorder.ondataavailable = ev => {
+          if (ev.data && ev.data.size > 0) studioSourceAudioChunks.push(ev.data);
+        };
+        recorder.onstop = () => {
+          stream.getTracks().forEach(t => t.stop());
+          const mime = recorder.mimeType || 'audio/webm';
+          const blob = new Blob(studioSourceAudioChunks, { type: mime });
+          const reader = new FileReader();
+          reader.onload = () => {
+            const dataUrl = String(reader.result || '');
+            const base64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+            ensureStudioLessonSources(lesson).push({
+              id: 'src_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+              kind: 'audio',
+              label: `Voice Note (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`,
+              mimeType: mime,
+              dataUrl: dataUrl,
+              base64Data: base64,
+              status: 'ready',
+              created_at: new Date().toISOString()
+            });
+            saveCustomCoursesToStorage(true);
+            renderCourseStudio(courseId, lessonId);
+            showToast('Voice note attached! AI can now listen and analyze it.');
+          };
+          reader.readAsDataURL(blob);
+        };
+        recorder.start();
+        studioSourceRecordingActive = true;
+        renderCourseStudio(courseId, lessonId);
+      } catch (err) {
+        studioSourceRecordingActive = false;
+        showToast('Microphone permission denied or unavailable.');
+      }
+    }
+
+    function removeStudioSource(courseId, lessonId, sourceId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course && (course.lessons || []).find(l => l.id === lessonId);
+      if (!course || !lesson || !Array.isArray(lesson.ai_sources)) return;
+      lesson.ai_sources = lesson.ai_sources.filter(s => s.id !== sourceId);
+      saveCustomCoursesToStorage(true);
+      renderCourseStudio(courseId, lessonId);
+    }
+
+    async function analyzeStudioSourcesWithAi(courseId, lessonId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course && (course.lessons || []).find(l => l.id === lessonId);
+      if (!course || !lesson) return;
+      const sources = ensureStudioLessonSources(lesson);
+      if (sources.length === 0) {
+        showToast('Attach at least one link, audio note, file, or text excerpt first');
+        return;
+      }
+      return sendStudioClassAiMessage(courseId, lessonId, 'Analyze all of my attached links, audio recordings, files, and notes carefully. Summarize the key takeaways, suggest the best teaching angle for these specific students, and ask if I want any changes before you draft the lesson sections.', { analyzeOnly: true });
+    }
+
     function toggleStudioClassAiPartner(lessonId) {
       const targetId = lessonId || APP_STATE.studioSelectedLessonId;
       if (!targetId) return;
-      studioClassAiOpenMap[targetId] = !studioClassAiOpenMap[targetId];
-      const panel = document.getElementById('studio-class-ai-partner');
-      if (panel) {
-        panel.classList.toggle('hidden', !studioClassAiOpenMap[targetId]);
-        if (studioClassAiOpenMap[targetId]) {
-          setTimeout(() => document.getElementById('input-studio-class-ai-prompt')?.focus(), 60);
-        }
-      } else {
-        renderCourseStudio(APP_STATE.insideCourseId || APP_STATE.activeCourseId, targetId);
-      }
+      const curTab = studioWorkspaceTabMap[targetId];
+      setStudioWorkspaceTab(targetId, curTab === 'ai' ? 'sections' : 'ai');
     }
 
     async function triggerStudioQuickAutoDraftClass(courseId, lessonId, mode) {
@@ -10853,13 +11140,14 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       const lesson = course && (course.lessons || []).find(l => l.id === lessonId);
       if (!course || !lesson) return;
       const title = lesson.title_en || lesson.title_he || 'this class';
+      const hasSources = Array.isArray(lesson.ai_sources) && lesson.ai_sources.length > 0;
       const prompt = mode === 'sharpen'
         ? `Review all current sections of "${title}" and sharpen them so every example, tone, and activity connects powerfully with our target students (${(course.blueprint && course.blueprint.student_profile) || 'these students'}).`
-        : `Draft complete, vivid, teach-ready content for every section of "${title}" strictly following our Course Blueprint & Teaching Guidelines.`;
+        : `Draft complete, vivid, teach-ready content for every section of "${title}" strictly following our Course Blueprint & Teaching Guidelines${hasSources ? ' and weaving in all insights from my attached reference sources and audio' : ''}.`;
       return sendStudioClassAiMessage(courseId, lessonId, prompt);
     }
 
-    async function sendStudioClassAiMessage(courseId, lessonId, overridePrompt) {
+    async function sendStudioClassAiMessage(courseId, lessonId, overridePrompt, metaOpts = {}) {
       const cId = courseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId;
       const course = (APP_STATE.customCourses || []).find(c => c.id === cId);
       const lId = lessonId || APP_STATE.studioSelectedLessonId;
@@ -10874,6 +11162,7 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
         return;
       }
 
+      studioWorkspaceTabMap[lesson.id] = 'ai';
       studioClassAiOpenMap[lesson.id] = true;
       ensureStudioClassAiHistory(course, lesson);
       lesson.ai_chat_history.push({ role: 'user', text: userMsg });
@@ -10886,6 +11175,7 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       const hasCustomBp = bpSections.length > 0;
       const classTitle = lesson.title_en || lesson.title_he || 'Untitled Class';
       const syllabusOverview = (course.lessons || []).map((l, i) => `${i + 1}. ${l.title_en || l.title_he}${l.id === lesson.id ? '  <-- (CURRENT CLASS)' : ''}`).join('\n');
+      const sources = ensureStudioLessonSources(lesson);
 
       const parseClassAiJson = (rawText) => {
         if (!rawText) return null;
@@ -10923,11 +11213,39 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
             contents.push({ role: 'user', parts: [{ text: userMsg }] });
           }
 
+          // Attach multimodal parts (voice notes, uploaded audio, photos, PDFs) & text extracts cleanly to latest user turn
+          const lastUserTurn = contents[contents.length - 1];
+          const textSourcesSummary = sources.map((s, sIdx) => {
+            if (s.kind === 'link') {
+              return `[Source ${sIdx + 1} - Link]: ${s.label} (${s.url})${s.note ? `\nTeacher Note: ${s.note}` : ''}${s.extractedText ? `\nExtracted Content:\n${s.extractedText.slice(0, 8000)}` : '\n(URL attached; direct web text unavailable)'}`;
+            }
+            if (s.kind === 'text') {
+              return `[Source ${sIdx + 1} - Document/Notes]: ${s.label}\n${(s.extractedText || '').slice(0, 10000)}`;
+            }
+            return `[Source ${sIdx + 1} - Attached Media (${s.kind})]: ${s.label} (${s.mimeType || ''})`;
+          }).join('\n\n---\n\n');
+
+          if (textSourcesSummary && lastUserTurn && lastUserTurn.role === 'user') {
+            lastUserTurn.parts[0].text += `\n\nATTACHED REFERENCE SOURCES TO ANALYZE:\n${textSourcesSummary}`;
+          }
+
+          sources.forEach(s => {
+            if (s.base64Data && lastUserTurn && lastUserTurn.role === 'user') {
+              lastUserTurn.parts.push({
+                inlineData: {
+                  mimeType: s.mimeType || 'audio/webm',
+                  data: s.base64Data
+                }
+              });
+            }
+          });
+
           const currentSectionSnapshot = hasCustomBp
             ? bpSections.map(s => `- ID "${s.id}" | Name: "${s.name}" | Type: ${s.type} | Guideline: ${s.ai_rule || s.hint || 'Clear & engaging'} | Exact Shape: ${getSectionAiFormatRule(s.type)} | Current Draft Value: ${JSON.stringify((lesson.sections && lesson.sections[s.id]) || '')}`).join('\n')
             : `Legacy modular blocks: hook_en=${JSON.stringify(lesson.hook_en || '')}, anchors=${JSON.stringify((lesson.anchors_en || []).length)} items, sources_text=${JSON.stringify(lesson.sources_text || '')}, steps_text=${JSON.stringify(lesson.steps_text || '')}, pitfalls_text=${JSON.stringify(lesson.pitfalls_text || '')}, homework_text=${JSON.stringify(lesson.homework_text || '')}`;
 
-          const systemInstruction = `You are TutorPilot's Master Lesson Co-Builder. You collaborate directly with the teacher inside the Lesson Editor to brainstorm, draft, and refine ONE specific class inside its custom Course Blueprint.
+          const analyzeOnlyMode = !!metaOpts.analyzeOnly;
+          const systemInstruction = `You are TutorPilot's Master Lesson Co-Builder & Source Analyst. You collaborate fluently with the educator inside the Lesson Studio to analyze links, listen to voice/audio recordings, inspect images/PDFs/notes, discuss pedagogical angles, and craft exceptional lessons inside the custom Course Blueprint.
 
 Course Context:
 Course Title: "${course.title_en || course.title_he}"
@@ -10941,23 +11259,22 @@ Current Class: "${classTitle}" (Duration: ${lesson.duration || '45m'})
 Class Sections & Current Draft State:
 ${currentSectionSnapshot}
 
-Collaboration Rules:
-1. Read the full multi-turn conversation for this class and address the teacher's exact request in "assistant_reply" (concise, warm, collaborative mentor tone; briefly state what sections you updated and offer 1 smart refinement idea).
-2. If the teacher asks to draft the class, populate ALL required sections matching each section's exact Shape so it renders cleanly in TutorPilot's interactive blocks.
-3. If the teacher asks to tweak ONLY one or two sections (e.g. "change the hook" or "make Pitfalls punchier"), ONLY include those specific section IDs inside "sections" so untouched sections remain safely preserved!
-4. Keep alignment 100% consistent with the Course Teaching Guidelines and Student Profile, and avoid repeating examples from other classes in the syllabus.
-5. Respond in Hebrew if the teacher writes in Hebrew, or English if they write in English.
+Collaboration & Analysis Rules:
+1. ANALYZE ALL ATTACHED SOURCES FIRST: If the teacher attached links, audio recordings, images, PDFs, or pasted notes, deeply synthesize what is inside them (including transcribing/understanding spoken audio or reading textbook pages) and ground your reply and lesson content specifically in those materials.
+2. ${analyzeOnlyMode ? 'THE TEACHER ASKED TO ANALYZE SOURCES BEFORE WRITING SECTIONS: Return an empty "sections": {} object, give a clear insightful breakdown of what you found across their links/audio/notes, propose how each section could use those ideas, and invite them to confirm or tweak before drafting.' : 'If the teacher asks to draft the class or discuss an idea with a clear direction, populate the appropriate sections matching each section\'s exact Shape. If they ask to adjust ONLY specific sections (e.g. Hook or Pitfalls), ONLY include those section IDs inside "sections" so untouched sections remain safely preserved!'}
+3. Maintain warm, intelligent, concise mentoring dialogue in "assistant_reply" so the teacher can think out loud and refine smoothly over multiple turns.
+4. Respond in Hebrew if the teacher writes in Hebrew, or English if they write in English.
 
 ${hasCustomBp ? `Return STRICT JSON ONLY:
 {
-  "assistant_reply": "Concise conversational reply explaining edits + optional next tip...",
+  "assistant_reply": "Thoughtful response referencing analyzed audio/links/notes, summarizing changes made, and offering 1 sharp next question or tip...",
   "updated_title": null,
   "sections": {
     "<section_id>": <value matching exact Shape>
   }
 }` : `Return STRICT JSON ONLY:
 {
-  "assistant_reply": "Concise conversational reply...",
+  "assistant_reply": "Thoughtful response...",
   "updated_title": null,
   "hook": "...",
   "anchors": ["**Key**: point"],
@@ -10980,19 +11297,23 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
       }
 
       if (!parsed || typeof parsed !== 'object') {
-        // Offline / Fallback synthesis
-        if (hasCustomBp) {
+        if (metaOpts.analyzeOnly) {
+          parsed = {
+            assistant_reply: `I reviewed your ${sources.length} attached source(s) (${sources.map(s => s.label).join(', ')}). Tell me which ideas you want emphasized or click Auto-Draft Class when ready.`,
+            sections: {}
+          };
+        } else if (hasCustomBp) {
           const fallbackSecs = {};
           bpSections.forEach(s => {
             fallbackSecs[s.id] = buildStructuredSectionFallback(s, classTitle, bp.student_profile || userMsg);
           });
           parsed = {
-            assistant_reply: `I drafted structured content for all ${bpSections.length} sections of "${classTitle}". Review any block below or tell me which section you would like to adjust.`,
+            assistant_reply: `I drafted structured content for all ${bpSections.length} sections of "${classTitle}". Switch to Lesson Sections to inspect them or continue chatting below to refine.`,
             sections: fallbackSecs
           };
         } else {
           parsed = {
-            assistant_reply: `I drafted modular teaching blocks for "${classTitle}". Feel free to ask for deeper tweaks or a different angle.`,
+            assistant_reply: `I drafted modular teaching blocks for "${classTitle}". Review them in Lesson Sections or keep discussing ideas here.`,
             hook: `Real-world scenario connecting ${classTitle} to everyday student choices.`,
             anchors: [`**Core Concept**: Foundational premise of ${classTitle}.`, `**Why It Matters**: Practical impact for today.`],
             pitfalls: `Clarify common misconceptions early before moving into examples.`,
@@ -11006,28 +11327,31 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
         lesson.title_he = parsed.updated_title.trim();
       }
 
+      let updatedCount = 0;
       if (hasCustomBp && parsed.sections && typeof parsed.sections === 'object') {
         if (!lesson.sections) lesson.sections = {};
         bpSections.forEach(s => {
           if (parsed.sections[s.id] !== undefined) {
             lesson.sections[s.id] = normalizeSectionAiValue(parsed.sections[s.id], s.type);
+            updatedCount++;
           }
         });
       } else if (!hasCustomBp) {
-        if (parsed.hook) lesson.hook_en = parsed.hook;
+        if (parsed.hook) { lesson.hook_en = parsed.hook; updatedCount++; }
         if (Array.isArray(parsed.anchors) && parsed.anchors.length) {
           lesson.anchors_en = parsed.anchors.map(pt => ({ id: 'anc_' + Math.random().toString(36).substr(2, 6), point: pt }));
           lesson.anchors_he = lesson.anchors_en;
+          updatedCount++;
         }
-        if (parsed.sources) lesson.sources_text = parsed.sources;
-        if (parsed.steps) lesson.steps_text = parsed.steps;
-        if (parsed.pitfalls) lesson.pitfalls_text = parsed.pitfalls;
-        if (parsed.cheat_sheet) lesson.cheat_sheet_text = parsed.cheat_sheet;
-        if (parsed.homework) lesson.homework_text = parsed.homework;
+        if (parsed.sources) { lesson.sources_text = parsed.sources; updatedCount++; }
+        if (parsed.steps) { lesson.steps_text = parsed.steps; updatedCount++; }
+        if (parsed.pitfalls) { lesson.pitfalls_text = parsed.pitfalls; updatedCount++; }
+        if (parsed.cheat_sheet) { lesson.cheat_sheet_text = parsed.cheat_sheet; updatedCount++; }
+        if (parsed.homework) { lesson.homework_text = parsed.homework; updatedCount++; }
       }
 
       if (parsed.assistant_reply) {
-        lesson.ai_chat_history.push({ role: 'assistant', text: parsed.assistant_reply });
+        lesson.ai_chat_history.push({ role: 'assistant', text: parsed.assistant_reply, updatedCount });
       }
 
       course.updated_at = new Date().toISOString();
@@ -11036,7 +11360,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
       saveCustomCoursesToStorage(true);
       renderCourseStudio(cId, lesson.id);
       renderCommandCenter();
-      showToast(APP_STATE.lang === 'he' ? 'השיעור עודכן בעזרת AI!' : 'Class updated by AI Partner!');
+      showToast(updatedCount > 0 ? `Updated ${updatedCount} lesson section${updatedCount === 1 ? '' : 's'}!` : 'AI analysis complete!');
     }
 
     function renderCourseStudio(targetCourseId, targetLessonId) {
@@ -11073,12 +11397,11 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
               <h4 class="text-base sm:text-lg font-bold text-white">${isHe ? 'סטודיו השיעורים מוכן' : 'Build Your Classes Inside This Blueprint'}</h4>
               <p class="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
                 ${isHe
-                  ? 'בקש מהבינה המלאכותית לתכנן עבורך סילבוס שלם, או הוסף שיעור ראשון והתחל לבנות אותו יחד עם AI.'
-                  : 'Let AI propose a tailored multi-class syllabus matching your Blueprint, or type your first class title below to co-build it with AI.'}
+                  ? 'בקש מהבינה המלאכותית לתכנן עבורך סילבוס שלם, או הוסף שיעור ראשון והתחל לנתח קישורים, שמע והערות יחד עם AI.'
+                  : 'Let AI plan your syllabus arc, or add your first class below to share links, voice notes, and ideas with AI.'}
               </p>
             </div>
 
-            <!-- Rapid-Fire 1-Line Input inside Empty State -->
             <div class="max-w-md mx-auto pt-1">
               <form onsubmit="handleStudioQuickAddClass(event, '${activeCourse.id}'); return false;" class="flex items-center gap-2">
                 <input
@@ -11097,7 +11420,6 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
               </form>
             </div>
 
-            <!-- Action shortcuts -->
             <div class="flex items-center justify-center gap-2 pt-1 flex-wrap">
               <button type="button" onclick="executeStudioInlineSyllabusAi('${activeCourse.id}')" class="px-4 py-2 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/40 text-xs font-bold transition active:scale-95 shadow flex items-center gap-1.5">
                 <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i>
@@ -11107,7 +11429,6 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                 <i data-lucide="layers" class="w-3.5 h-3.5 text-amber-400"></i>
                 <span>${isHe ? 'הדבק רשימת שיעורים' : 'Paste Outline'}</span>
               </button>
-              <!-- Hidden compatibility buttons -->
               <button onclick="openStudioAiCoPilotModal('${activeCourse.id}')" class="hidden">AI Generate Syllabus</button>
               <button onclick="openAddCustomLessonModal('${activeCourse.id}')" class="hidden">+ Add Class</button>
               <button onclick="openAiCreateClassModal('${activeCourse.id}')" class="hidden">AI Create Class</button>
@@ -11159,13 +11480,15 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
       const blueprintSections = Array.isArray(bp.sections) ? bp.sections : [];
       const hasCustomSections = blueprintSections.length > 0;
 
-      // Default AI Class Partner open for fresh/empty classes so teachers start in collaborative mode
-      if (studioClassAiOpenMap[selectedLesson.id] === undefined) {
-        studioClassAiOpenMap[selectedLesson.id] = isStudioLessonEmpty(activeCourse, selectedLesson);
-      }
-      const isClassAiOpen = !!studioClassAiOpenMap[selectedLesson.id];
+      const activeTab = getStudioWorkspaceTab(activeCourse, selectedLesson);
       const isClassAiThinking = !!studioClassAiThinkingMap[selectedLesson.id];
       const classAiHistory = ensureStudioClassAiHistory(activeCourse, selectedLesson);
+      const attachedSources = ensureStudioLessonSources(selectedLesson);
+      const lastChatMsg = classAiHistory[classAiHistory.length - 1];
+
+      const filledSectionsCount = hasCustomSections
+        ? blueprintSections.filter(s => selectedLesson.sections && selectedLesson.sections[s.id] && String(selectedLesson.sections[s.id]).trim() !== '').length
+        : [selectedLesson.hook_en, (selectedLesson.anchors_en || []).length ? '1' : '', selectedLesson.sources_text, selectedLesson.steps_text, selectedLesson.pitfalls_text, selectedLesson.homework_text].filter(Boolean).length;
 
       // Active Class details
       const selectedTitle = isHe ? (selectedLesson.title_he || selectedLesson.title_en || '') : (selectedLesson.title_en || selectedLesson.title_he || '');
@@ -11175,6 +11498,8 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
 
       let html = `
         <div id="course-studio-wrapper" class="space-y-4">
+          <input type="file" id="input-studio-source-file" class="hidden" multiple onchange="handleStudioSourceFileSelected(event, '${activeCourse.id}', '${selectedLesson.id}')" />
+
           <!-- Mobile Segmented Navigation Switcher -->
           <div class="md:hidden flex items-center p-1 bg-slate-900 border border-slate-800 rounded-2xl">
             <button
@@ -11193,7 +11518,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
               class="flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 ${mobileView === 'editor' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'}"
             >
               <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-              <span>${isHe ? 'עורך שיעור' : 'Class Editor'}</span>
+              <span>${isHe ? 'סדנת שיעור' : 'Lesson Studio'}</span>
             </button>
           </div>
 
@@ -11203,7 +11528,6 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
             <!-- LEFT PANE: CLEAN SYLLABUS SIDEBAR (Col 4)      -->
             <!-- ============================================== -->
             <div id="studio-syllabus-pane" class="md:col-span-4 space-y-3 ${mobileView === 'editor' ? 'hidden md:block' : 'block'}">
-              <!-- Syllabus Header -->
               <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-sm flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <i data-lucide="book-marked" class="w-4 h-4 text-amber-400"></i>
@@ -11213,7 +11537,6 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                 <span class="text-[10px] font-mono text-slate-400">~${Math.round(lessons.length * 45 / 60 * 10) / 10} hrs</span>
               </div>
 
-              <!-- Sleek Scannable Syllabus Items List -->
               <div id="studio-syllabus-list" class="space-y-1.5 max-h-[58vh] overflow-y-auto pr-1">
                 ${lessons.map((les, idx) => {
                   const lTitle = isHe ? (les.title_he || les.title_en || 'Untitled') : (les.title_en || les.title_he || 'Untitled');
@@ -11260,7 +11583,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                               <span>${les.duration || '45m'}</span>
                               <span>•</span>
                               <span>${blockCount} filled</span>
-                              ${recordings.length > 0 ? `<span>•</span><span class="text-indigo-400 flex items-center gap-0.5"><i data-lucide="volume-2" class="w-2.5 h-2.5"></i> ${recordings.length}</span>` : ''}
+                              ${(les.ai_sources && les.ai_sources.length) ? `<span>•</span><span class="text-indigo-400">${les.ai_sources.length} ref</span>` : ''}
                             </div>
                           </div>
                         </div>
@@ -11344,10 +11667,10 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
             </div>
 
             <!-- ============================================== -->
-            <!-- RIGHT PANE: ACTIVE CLASS WORKSPACE (Col 8)     -->
+            <!-- RIGHT PANE: CALM 2-TAB LESSON WORKSPACE (Col 8)-->
             <!-- ============================================== -->
             <div id="studio-active-class-pane" class="md:col-span-8 space-y-3.5 ${mobileView === 'syllabus' ? 'hidden md:block' : 'block'}">
-              <!-- Active Class Header Card -->
+              <!-- Clean Class Identity Bar -->
               <div class="p-4 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-3">
                 <div class="flex items-center justify-between gap-2 flex-wrap">
                   <div class="flex items-center gap-2 flex-wrap">
@@ -11361,11 +11684,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                     <span id="studio-save-indicator" class="text-[11px] font-mono text-emerald-400">✓ Auto-saved</span>
                   </div>
                   <div class="flex items-center gap-1.5 flex-wrap">
-                    <button type="button" id="btn-toggle-class-ai-partner" onclick="toggleStudioClassAiPartner('${selectedLesson.id}')" class="px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition active:scale-95 ${isClassAiOpen ? 'bg-indigo-500/20 border-indigo-400 text-indigo-200 shadow-sm' : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-indigo-300'}" title="Discuss & build this class with AI Partner">
-                      <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i>
-                      <span>AI Partner</span>
-                    </button>
-                    <button type="button" onclick="openTutorTeleprompter('${activeCourse.id}', '${selectedLesson.id}')" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow active:scale-95 transition" title="Launch Teaching Mode">
+                    <button type="button" onclick="openTutorTeleprompter('${activeCourse.id}', '${selectedLesson.id}')" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow active:scale-95 transition" title="Launch Teaching Mode">
                       <i data-lucide="presentation" class="w-3.5 h-3.5"></i>
                       <span>Teach Class</span>
                     </button>
@@ -11378,10 +11697,9 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                   </div>
                 </div>
 
-                <!-- Editable Class Title + Sleek Metadata Row -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 items-end">
+                <!-- Editable Class Title + Sleek Inline Metadata -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 items-center">
                   <div class="lg:col-span-6">
-                    <label class="block text-[10px] font-mono uppercase text-slate-400 mb-1">Class Title</label>
                     <input
                       id="studio-class-title-input"
                       type="text"
@@ -11393,8 +11711,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                     />
                   </div>
                   <div class="lg:col-span-2">
-                    <label class="block text-[10px] font-mono uppercase text-slate-400 mb-1">Duration</label>
-                    <select onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'duration', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                    <select aria-label="Duration" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'duration', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-2 text-xs text-white focus:outline-none focus:border-amber-400">
                       <option value="15m" ${selectedLesson.duration === '15m' ? 'selected' : ''}>15 min</option>
                       <option value="30m" ${selectedLesson.duration === '30m' ? 'selected' : ''}>30 min</option>
                       <option value="45m" ${(!selectedLesson.duration || selectedLesson.duration === '45m') ? 'selected' : ''}>45 min</option>
@@ -11403,8 +11720,7 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                     </select>
                   </div>
                   <div class="lg:col-span-2">
-                    <label class="block text-[10px] font-mono uppercase text-slate-400 mb-1">Level</label>
-                    <select onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'level', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                    <select aria-label="Level" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'level', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-2 text-xs text-white focus:outline-none focus:border-amber-400">
                       <option value="Standard / All Levels" ${(!selectedLesson.level || selectedLesson.level === 'Standard / All Levels') ? 'selected' : ''}>All Levels</option>
                       <option value="Elementary (Ages 8-11)" ${selectedLesson.level?.includes('Elementary') ? 'selected' : ''}>Elementary</option>
                       <option value="Middle School (Ages 12-14)" ${selectedLesson.level?.includes('Middle') ? 'selected' : ''}>Middle School</option>
@@ -11413,16 +11729,38 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                     </select>
                   </div>
                   <div class="lg:col-span-2">
-                    <label class="block text-[10px] font-mono uppercase text-slate-400 mb-1">Status</label>
-                    <select onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'status', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                    <select aria-label="Status" onchange="handleStudioUpdateClassField('${activeCourse.id}', '${selectedLesson.id}', 'status', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-2 text-xs text-white focus:outline-none focus:border-amber-400">
                       <option value="ready" ${selectedLesson.status === 'ready' ? 'selected' : ''}>Ready</option>
                       <option value="draft" ${(!selectedLesson.status || selectedLesson.status === 'draft') ? 'selected' : ''}>Draft</option>
                     </select>
                   </div>
                 </div>
+
+                <!-- Clean 2-Tab Mode Switcher -->
+                <div class="flex items-center p-1 rounded-2xl bg-slate-950/90 border border-slate-800 gap-1">
+                  <button
+                    type="button"
+                    id="btn-studio-tab-ai"
+                    onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'ai')"
+                    class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeTab === 'ai' ? 'bg-indigo-500/20 text-indigo-200 border border-indigo-400/50 shadow-sm' : 'text-slate-400 hover:text-white'}"
+                  >
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 ${activeTab === 'ai' ? 'text-indigo-300' : 'text-slate-500'}"></i>
+                    <span>${isHe ? 'בנה ושוחח עם AI' : 'Build & Discuss with AI'}</span>
+                    ${attachedSources.length > 0 ? `<span class="px-1.5 py-0.5 rounded-full bg-indigo-500/30 text-[10px] font-mono text-indigo-200">${attachedSources.length} ref</span>` : ''}
+                  </button>
+                  <button
+                    type="button"
+                    id="btn-studio-tab-sections"
+                    onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'sections')"
+                    class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeTab === 'sections' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'}"
+                  >
+                    <i data-lucide="layout-list" class="w-3.5 h-3.5"></i>
+                    <span>${isHe ? 'תוכן השיעור' : 'Lesson Sections'} (${hasCustomSections ? `${filledSectionsCount}/${blueprintSections.length}` : filledSectionsCount})</span>
+                  </button>
+                </div>
               </div>
 
-              <!-- Compact Collapsible Course Blueprint Strip (Saves Vertical Space) -->
+              <!-- Compact Collapsible Course Blueprint Strip -->
               ${(bp && (bp.student_profile || bp.guidelines)) ? `
                 <div id="studio-blueprint-summary-bar" class="px-3.5 py-2 rounded-2xl bg-slate-900/60 border border-slate-800/90 text-[11px] space-y-2">
                   <div class="flex items-center justify-between gap-2 flex-wrap">
@@ -11446,62 +11784,161 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
                 </div>
               ` : ''}
 
-              <!-- Embedded Conversational AI Class Partner Panel -->
-              <div id="studio-class-ai-partner" class="${isClassAiOpen ? '' : 'hidden'} p-3.5 rounded-2xl bg-slate-900/90 border border-indigo-500/40 shadow-lg space-y-3">
+              <!-- ======================================================= -->
+              <!-- TAB 1: MULTIMODAL AI CLASS WORKBENCH                    -->
+              <!-- ======================================================= -->
+              <div id="studio-class-ai-partner" class="${activeTab === 'ai' ? '' : 'hidden'} p-4 rounded-3xl bg-slate-900/90 border border-indigo-500/35 shadow-xl space-y-3.5">
                 <div class="flex items-center justify-between gap-2 flex-wrap">
-                  <div class="flex items-center gap-2">
-                    <span class="w-6 h-6 rounded-lg bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300">
-                      <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                  <div class="flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-xl bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300">
+                      <i data-lucide="sparkles" class="w-4 h-4"></i>
                     </span>
                     <div>
-                      <h5 class="text-xs font-bold text-white">AI Class Co-Builder</h5>
-                      <p class="text-[10px] text-slate-400">Discusses, drafts & refines all sections inside your Blueprint</p>
+                      <h5 class="text-xs sm:text-sm font-bold text-white">AI Class Co-Builder & Source Analyzer</h5>
+                      <p class="text-[11px] text-slate-400">Write freely, drop links, record audio, or upload notes for AI to analyze first</p>
                     </div>
                   </div>
                   <div class="flex items-center gap-1.5 flex-wrap">
-                    <button type="button" onclick="triggerStudioQuickAutoDraftClass('${activeCourse.id}', '${selectedLesson.id}', 'draft')" class="px-2.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[11px] flex items-center gap-1 transition active:scale-95 shadow-sm">
+                    ${attachedSources.length > 0 ? `
+                      <button type="button" onclick="analyzeStudioSourcesWithAi('${activeCourse.id}', '${selectedLesson.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 font-bold text-[11px] flex items-center gap-1 transition">
+                        <i data-lucide="search" class="w-3 h-3"></i>
+                        <span>Analyze Sources First</span>
+                      </button>
+                    ` : ''}
+                    <button type="button" onclick="triggerStudioQuickAutoDraftClass('${activeCourse.id}', '${selectedLesson.id}', 'draft')" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[11px] flex items-center gap-1 transition active:scale-95 shadow-sm">
                       <i data-lucide="zap" class="w-3 h-3"></i>
                       <span>Auto-Draft Class</span>
-                    </button>
-                    <button type="button" onclick="triggerStudioQuickAutoDraftClass('${activeCourse.id}', '${selectedLesson.id}', 'sharpen')" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 font-semibold text-[11px] transition">
-                      Sharpen for Students
                     </button>
                   </div>
                 </div>
 
-                <!-- Per-Class AI Chat Thread -->
-                <div id="studio-class-ai-messages" class="max-h-44 overflow-y-auto space-y-2 pr-1">
-                  ${classAiHistory.map(m => {
+                <!-- Attached Reference Sources Tray -->
+                ${attachedSources.length > 0 ? `
+                  <div id="studio-attached-sources-tray" class="p-2.5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                      <span>Attached Reference Sources (${attachedSources.length})</span>
+                      <span class="text-indigo-400">Included on every AI message</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                      ${attachedSources.map(src => {
+                        const iconName = src.kind === 'audio' ? 'mic' : (src.kind === 'link' ? 'link' : (src.kind === 'image' ? 'image' : 'file-text'));
+                        const badgeText = src.status === 'fetching' ? 'Reading...' : (src.extractedText ? `${Math.max(1, Math.round(src.extractedText.length / 100) / 10)}k chars` : (src.base64Data ? 'Media ready' : 'Link attached'));
+                        return `
+                          <div class="p-2 rounded-xl bg-slate-900 border border-slate-700/80 flex flex-col gap-1.5 max-w-full sm:max-w-[260px]">
+                            <div class="flex items-center justify-between gap-2">
+                              <div class="flex items-center gap-1.5 min-w-0">
+                                <i data-lucide="${iconName}" class="w-3.5 h-3.5 text-indigo-400 shrink-0"></i>
+                                <span class="text-xs font-semibold text-white truncate">${escapeHtml(src.label)}</span>
+                              </div>
+                              <button type="button" onclick="removeStudioSource('${activeCourse.id}', '${selectedLesson.id}', '${src.id}')" class="text-slate-500 hover:text-rose-400 shrink-0 p-0.5" title="Remove source">
+                                <i data-lucide="x" class="w-3 h-3"></i>
+                              </button>
+                            </div>
+                            <div class="flex items-center justify-between gap-2 text-[10px] font-mono">
+                              <span class="${src.status === 'fetching' ? 'text-amber-400 animate-pulse' : 'text-emerald-400'}">${badgeText}</span>
+                            </div>
+                            ${(src.kind === 'audio' && src.dataUrl) ? `<audio controls src="${src.dataUrl}" class="h-7 w-full"></audio>` : ''}
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
+                  </div>
+                ` : ''}
+
+                <!-- Conversation Stream -->
+                <div id="studio-class-ai-messages" class="max-h-72 overflow-y-auto space-y-2.5 pr-1">
+                  ${classAiHistory.map((m, mIdx) => {
                     const isUser = m.role === 'user';
+                    const showSwitchBanner = (!isUser && m.updatedCount > 0 && mIdx === classAiHistory.length - 1);
                     return `
                       <div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
-                        <div class="max-w-[90%] rounded-xl px-3 py-2 text-xs leading-relaxed ${isUser ? 'bg-amber-500/15 border border-amber-500/30 text-amber-100' : 'bg-slate-950/90 border border-slate-800 text-slate-200'}">
-                          <span class="block text-[9px] font-mono uppercase tracking-wider mb-0.5 ${isUser ? 'text-amber-300' : 'text-indigo-400'}">${isUser ? 'You' : 'AI Co-Builder'}</span>
-                          <span class="whitespace-pre-wrap">${escapeHtml(m.text)}</span>
+                        <div class="max-w-[92%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${isUser ? 'bg-amber-500/15 border border-amber-500/30 text-amber-100' : 'bg-slate-950/90 border border-slate-800 text-slate-200'}">
+                          <span class="block text-[9px] font-mono uppercase tracking-wider mb-1 ${isUser ? 'text-amber-300' : 'text-indigo-400'}">${isUser ? 'You' : 'AI Co-Builder'}</span>
+                          <div class="whitespace-pre-wrap">${escapeHtml(m.text)}</div>
+                          ${showSwitchBanner ? `
+                            <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                              <span class="text-[11px] text-emerald-400 font-semibold">✓ Updated ${m.updatedCount} section${m.updatedCount === 1 ? '' : 's'}</span>
+                              <button type="button" onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'sections')" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[11px] transition">
+                                View Lesson Sections →
+                              </button>
+                            </div>
+                          ` : ''}
                         </div>
                       </div>
                     `;
                   }).join('')}
-                  ${isClassAiThinking ? `<div class="text-xs text-amber-400 animate-pulse font-mono px-1">AI Co-Builder is shaping your class sections...</div>` : ''}
+                  ${isClassAiThinking ? `<div class="text-xs text-amber-400 animate-pulse font-mono px-1 py-1">Analyzing your message & attached sources with Gemini...</div>` : ''}
                 </div>
 
-                <!-- Conversational Class Prompt Bar -->
-                <div class="flex items-center gap-2">
-                  <input
+                <!-- Inline Attachment Mini-Drawers (Link / Paste Text) -->
+                <div id="studio-source-popover-link" class="${studioSourcePopoverMap.active === 'link' ? '' : 'hidden'} p-3 rounded-2xl bg-slate-950 border border-indigo-500/30 space-y-2">
+                  <div class="text-[11px] font-bold text-indigo-300">Attach Web Article or YouTube Link for AI to Analyze</div>
+                  <input id="input-studio-source-url" type="url" placeholder="https://..." class="w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" onkeydown="if(event.key==='Enter'){ event.preventDefault(); addStudioLinkSource('${activeCourse.id}', '${selectedLesson.id}'); }" />
+                  <div class="flex items-center gap-2">
+                    <input id="input-studio-source-note" type="text" placeholder="Optional note: focus on minute 4 or key proof..." class="flex-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" />
+                    <button type="button" onclick="addStudioLinkSource('${activeCourse.id}', '${selectedLesson.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold shrink-0">Attach Link</button>
+                  </div>
+                </div>
+
+                <div id="studio-source-popover-paste" class="${studioSourcePopoverMap.active === 'paste' ? '' : 'hidden'} p-3 rounded-2xl bg-slate-950 border border-indigo-500/30 space-y-2">
+                  <div class="text-[11px] font-bold text-indigo-300">Paste Text, Transcript, Story or Source Excerpt</div>
+                  <input id="input-studio-source-paste-title" type="text" placeholder="Label (e.g. Rashi Excerpt, Class Recording Transcript)..." class="w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" />
+                  <textarea id="input-studio-source-paste-text" rows="4" placeholder="Paste full source text or notes here..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400 leading-relaxed"></textarea>
+                  <div class="flex justify-end gap-2">
+                    <button type="button" onclick="toggleStudioSourcePopover('paste')" class="px-3 py-1 rounded-lg bg-slate-800 text-slate-300 text-xs">Cancel</button>
+                    <button type="button" onclick="addStudioPasteTextSource('${activeCourse.id}', '${selectedLesson.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold">Attach Notes</button>
+                  </div>
+                </div>
+
+                <!-- Fluent Multi-Line AI Composer Box -->
+                <div class="rounded-2xl bg-slate-950 border border-slate-700/80 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-400 transition p-2.5 space-y-2">
+                  <textarea
                     id="input-studio-class-ai-prompt"
-                    type="text"
-                    placeholder="Ask AI to draft, refine a specific section, or try a new analogy (press Enter)..."
-                    onkeydown="if(event.key==='Enter'){ event.preventDefault(); sendStudioClassAiMessage('${activeCourse.id}', '${selectedLesson.id}'); }"
-                    class="flex-1 min-w-0 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700/80 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition"
-                  />
-                  <button type="button" onclick="sendStudioClassAiMessage('${activeCourse.id}', '${selectedLesson.id}')" class="px-3.5 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs shrink-0 transition active:scale-95">
-                    Send
-                  </button>
+                    rows="3"
+                    placeholder="Write fluently here... Share your lesson vision, ask questions, or tell AI how to use your attached links and audio (Shift+Enter for new line, Enter to send)..."
+                    oninput="this.style.height='auto'; this.style.height=Math.min(this.scrollHeight, 220)+'px';"
+                    onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendStudioClassAiMessage('${activeCourse.id}', '${selectedLesson.id}'); }"
+                    class="w-full bg-transparent text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none resize-none leading-relaxed min-h-[72px] max-h-[220px]"
+                  ></textarea>
+
+                  <!-- Attachment & Send Action Toolbar -->
+                  <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/80 flex-wrap">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <button type="button" onclick="toggleStudioSourcePopover('link')" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-[11px] font-semibold flex items-center gap-1 transition" title="Attach URL / Web Page / YouTube Link">
+                        <i data-lucide="link" class="w-3.5 h-3.5 text-sky-400"></i>
+                        <span>Add Link</span>
+                      </button>
+                      <button type="button" onclick="toggleStudioSourceVoiceRecord('${activeCourse.id}', '${selectedLesson.id}')" class="px-2.5 py-1.5 rounded-xl border text-[11px] font-semibold flex items-center gap-1 transition ${studioSourceRecordingActive ? 'bg-rose-500/20 border-rose-500 text-rose-300 animate-pulse' : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-800'}" title="Record a voice explanation for AI to listen to">
+                        <i data-lucide="mic" class="w-3.5 h-3.5 ${studioSourceRecordingActive ? 'text-rose-400' : 'text-emerald-400'}"></i>
+                        <span>${studioSourceRecordingActive ? 'Stop Recording' : 'Record Audio'}</span>
+                      </button>
+                      <button type="button" onclick="triggerStudioSourceFileUpload('${activeCourse.id}', '${selectedLesson.id}', 'audio/*,image/*,.pdf,.txt,.md,.csv')" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-[11px] font-semibold flex items-center gap-1 transition" title="Upload Audio (MP3/WAV/M4A), Photo, PDF, or Text File">
+                        <i data-lucide="paperclip" class="w-3.5 h-3.5 text-amber-400"></i>
+                        <span>Upload Audio / File</span>
+                      </button>
+                      <button type="button" onclick="toggleStudioSourcePopover('paste')" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-[11px] font-semibold flex items-center gap-1 transition" title="Paste source text, transcript, or notes">
+                        <i data-lucide="file-text" class="w-3.5 h-3.5 text-purple-400"></i>
+                        <span>Paste Text</span>
+                      </button>
+                    </div>
+                    <button type="button" onclick="sendStudioClassAiMessage('${activeCourse.id}', '${selectedLesson.id}')" class="px-4 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs shrink-0 transition active:scale-95 shadow flex items-center gap-1.5">
+                      <span>Send</span>
+                      <i data-lucide="send" class="w-3 h-3"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <!-- Modular Blocks Container -->
-              <div id="studio-modular-blocks-container" class="space-y-3.5">
+              <!-- ======================================================= -->
+              <!-- TAB 2: LESSON SECTIONS EDITOR                           -->
+              <!-- ======================================================= -->
+              <div id="studio-modular-blocks-container" class="${activeTab === 'sections' ? '' : 'hidden'} space-y-3.5">
+                <div class="flex items-center justify-between px-1">
+                  <span class="text-xs font-semibold text-slate-400">${hasCustomSections ? `${blueprintSections.length} Blueprint Sections` : 'Standard Lesson Blocks'}</span>
+                  <button type="button" onclick="setStudioWorkspaceTab('${selectedLesson.id}', 'ai')" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Refine with AI & Sources
+                  </button>
+                </div>
                 ${hasCustomSections ? `
                   <div class="space-y-3.5">
                     ${blueprintSections.map(sec => {

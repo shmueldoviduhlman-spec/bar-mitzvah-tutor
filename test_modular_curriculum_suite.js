@@ -3251,6 +3251,97 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
 
   sandbox.fetch = prevFetch34;
 
+  // --- GATE 35: Clean Two-Tab Lesson Workbench, Fluent Composer & Multimodal Source Analyzer (Links, Audio, Notes) ---
+  console.log('\n--- Running Gate 35: Clean Two-Tab Lesson Studio & Multimodal Source Analysis ---');
+  assert(typeof sandbox.setStudioWorkspaceTab === 'function', 'setStudioWorkspaceTab is a function');
+  assert(typeof sandbox.addStudioLinkSource === 'function', 'addStudioLinkSource is a function');
+  assert(typeof sandbox.addStudioPasteTextSource === 'function', 'addStudioPasteTextSource is a function');
+  assert(typeof sandbox.analyzeStudioSourcesWithAi === 'function', 'analyzeStudioSourcesWithAi is a function');
+  assert(typeof sandbox.removeStudioSource === 'function', 'removeStudioSource is a function');
+  assert(indexHtml.includes('id="input-studio-class-ai-prompt"') && indexHtml.includes('<textarea'), 'Fluent multi-line composer uses expanding <textarea>');
+
+  // Verify stacked course picker nav bar hides cleanly inside Level 2 Course Studio
+  sandbox.openCourseClassesView(studioCourse34.id);
+  assert(getOrCreateElem('study-courses-nav-bar').classList.contains('hidden'), 'Top course picker bar hides inside Class Studio to prevent stacked bar clutter');
+  sandbox.showAllCoursesView();
+  assert(!getOrCreateElem('study-courses-nav-bar').classList.contains('hidden'), 'Top course picker bar remains visible in Courses Directory');
+
+  // Verify clean 2-tab switching on a fresh lesson
+  const srcLesson35 = studioCourse34.lessons[1];
+  sandbox.openCourseClassesView(studioCourse34.id);
+  sandbox.renderCourseStudio(studioCourse34.id, srcLesson35.id);
+  let g35Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(g35Html.includes('id="btn-studio-tab-ai"') && g35Html.includes('id="btn-studio-tab-sections"'), 'Studio renders clean 2-tab switcher (AI Studio vs Lesson Sections)');
+  assert(g35Html.includes('id="studio-modular-blocks-container" class="hidden'), 'Lesson Sections panel stays cleanly hidden while working in AI Studio tab');
+
+  sandbox.setStudioWorkspaceTab(srcLesson35.id, 'sections');
+  g35Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(g35Html.includes('id="studio-class-ai-partner" class="hidden') && !g35Html.includes('id="studio-modular-blocks-container" class="hidden'), 'Switching to Lesson Sections tab shows only clean editable sections');
+
+  sandbox.setStudioWorkspaceTab(srcLesson35.id, 'ai');
+
+  // Mock Link extraction + Multimodal Gemini call verifying inlineData audio + extracted link text
+  const prevFetch35 = sandbox.fetch;
+  const g35Payloads = [];
+  sandbox.fetch = async (url, opts) => {
+    if (url.includes('youtube.com/oembed')) {
+      return { ok: true, status: 200, json: async () => ({ title: 'Why Keep Kosher? Teen Deep Dive', author_name: 'Jewish Insights' }) };
+    }
+    if (url.startsWith('https://r.jina.ai/')) {
+      return { ok: true, status: 200, text: async () => 'Article summary: Mindful eating connects everyday life to values and discipline.' };
+    }
+    const body = opts && opts.body ? JSON.parse(opts.body) : {};
+    g35Payloads.push(body);
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        candidates: [{
+          content: {
+            parts: [{
+              text: JSON.stringify({
+                assistant_reply: 'I read your attached link (Mindful Eating) and listened to your voice memo! Here is a tailored plan: frame Kosher as intentional living.',
+                sections: {}
+              })
+            }]
+          }
+        }]
+      })
+    };
+  };
+
+  getOrCreateElem('input-studio-source-url').value = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+  getOrCreateElem('input-studio-source-note').value = 'Use his analogy at 2:10';
+  await sandbox.addStudioLinkSource(studioCourse34.id, srcLesson35.id);
+  assert(srcLesson35.ai_sources.length === 1 && srcLesson35.ai_sources[0].extractedText.includes('Mindful eating'), 'addStudioLinkSource extracted YouTube metadata & article text for AI analysis');
+
+  getOrCreateElem('input-studio-source-paste-title').value = 'Torah Source Sheet';
+  getOrCreateElem('input-studio-source-paste-text').value = 'Vayikra 11 commentary on spiritual mindfulness.';
+  sandbox.addStudioPasteTextSource(studioCourse34.id, srcLesson35.id);
+  assert(srcLesson35.ai_sources.length === 2, 'addStudioPasteTextSource attached pasted reference excerpt cleanly');
+
+  // Simulate attached recorded voice note base64 audio inlineData
+  srcLesson35.ai_sources.push({
+    id: 'src_audio_35',
+    kind: 'audio',
+    label: 'Teacher Voice Memo',
+    mimeType: 'audio/webm',
+    dataUrl: 'data:audio/webm;base64,T2dnUwAC',
+    base64Data: 'T2dnUwAC',
+    status: 'ready'
+  });
+
+  await sandbox.analyzeStudioSourcesWithAi(studioCourse34.id, srcLesson35.id);
+  const lastTurnParts = g35Payloads[g35Payloads.length - 1].contents.slice(-1)[0].parts;
+  assert(lastTurnParts.some(p => p.text && p.text.includes('Mindful eating') && p.text.includes('Torah Source Sheet')), 'AI prompt receives extracted web link text & pasted notes');
+  assert(lastTurnParts.some(p => p.inlineData && p.inlineData.mimeType === 'audio/webm' && p.inlineData.data === 'T2dnUwAC'), 'AI payload transmits audio voice note via native Gemini inlineData');
+  assert(!srcLesson35.sections || Object.keys(srcLesson35.sections).length === 0, 'Analyze Sources First proposes insights without prematurely overwriting lesson sections');
+
+  sandbox.removeStudioSource(studioCourse34.id, srcLesson35.id, 'src_audio_35');
+  assert(srcLesson35.ai_sources.length === 2, 'removeStudioSource removes unwanted attachment cleanly');
+
+  sandbox.fetch = prevFetch35;
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
