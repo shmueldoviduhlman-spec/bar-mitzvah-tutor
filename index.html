@@ -4446,6 +4446,93 @@
       return !!custom && custom.trim() !== '' && custom.trim() !== SYSTEM_DEFAULT_GEMINI_KEY;
     }
 
+    async function callGeminiApi(contentsOrPrompt, apiKeyOverride, options = {}) {
+      const key = (apiKeyOverride && String(apiKeyOverride).trim())
+        || getEffectiveGeminiApiKey()
+        || (typeof localStorage !== 'undefined' ? (localStorage.getItem('gemini_api_key') || '') : '');
+      if (!key) {
+        throw new Error('No Gemini API key configured');
+      }
+
+      const contents = Array.isArray(contentsOrPrompt)
+        ? contentsOrPrompt
+        : [{ role: 'user', parts: [{ text: String(contentsOrPrompt || '') }] }];
+
+      const payload = { contents };
+      if (options && options.systemInstruction) {
+        payload.systemInstruction = typeof options.systemInstruction === 'string'
+          ? { parts: [{ text: options.systemInstruction }] }
+          : options.systemInstruction;
+      }
+      const genConfig = {};
+      if (options && typeof options.temperature === 'number') genConfig.temperature = options.temperature;
+      if (options && options.responseMimeType) genConfig.responseMimeType = options.responseMimeType;
+      if (Object.keys(genConfig).length > 0) payload.generationConfig = genConfig;
+
+      const candidateQueue = [];
+      if (typeof APP_STATE !== 'undefined' && APP_STATE && APP_STATE.geminiModel) candidateQueue.push(APP_STATE.geminiModel);
+      if (typeof localStorage !== 'undefined') {
+        const storedModel = localStorage.getItem('tutor_gemini_model');
+        if (storedModel && !candidateQueue.includes(storedModel)) candidateQueue.push(storedModel);
+      }
+      const fallbackModels = (typeof GEMINI_CANDIDATE_MODELS !== 'undefined' && Array.isArray(GEMINI_CANDIDATE_MODELS))
+        ? GEMINI_CANDIDATE_MODELS
+        : ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-flash-latest', 'gemini-3.8-flash'];
+      fallbackModels.forEach(m => {
+        if (!candidateQueue.includes(m)) candidateQueue.push(m);
+      });
+      if (!candidateQueue.includes('gemini-3.1-flash-lite')) candidateQueue.push('gemini-3.1-flash-lite');
+
+      let lastError = null;
+      for (const model of candidateQueue) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+          const resp = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (resp.ok) {
+            const data = await resp.json();
+            const parts = data?.candidates?.[0]?.content?.parts || [];
+            const text = parts.map(p => p.text || '').join('');
+            if (text) {
+              if (typeof APP_STATE !== 'undefined' && APP_STATE) APP_STATE.geminiModel = model;
+              if (typeof localStorage !== 'undefined') localStorage.setItem('tutor_gemini_model', model);
+              return text;
+            }
+          }
+
+          const errData = await resp.json().catch(() => ({}));
+          const errMsg = errData?.error?.message || `API error ${resp.status}`;
+          lastError = new Error(errMsg);
+          if (resp.status === 404 || resp.status === 503 || resp.status === 429 ||
+              errMsg.includes('not found') || errMsg.includes('not supported') ||
+              errMsg.includes('no longer available') || errMsg.includes('high demand') ||
+              errMsg.includes('quota') || errMsg.includes('capacity')) {
+            continue;
+          }
+          throw lastError;
+        } catch (err) {
+          lastError = err;
+          const msg = err?.message || '';
+          if (msg.includes('not found') || msg.includes('not supported') ||
+              msg.includes('no longer available') || msg.includes('high demand') ||
+              msg.includes('quota') || msg.includes('capacity')) {
+            continue;
+          }
+          if (payload.generationConfig && payload.generationConfig.responseMimeType && msg.includes('JSON')) {
+            continue;
+          }
+          throw err;
+        }
+      }
+
+      throw lastError || new Error('No available Gemini model responded');
+    }
+    if (typeof window !== 'undefined') window.callGeminiApi = callGeminiApi;
+
     // Application State
     const APP_STATE = {
       lang: localStorage.getItem('tutor_lang') || 'en', // 'en' or 'he'
@@ -11511,7 +11598,7 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       let suggestions = [];
       try {
-        const apiKey = localStorage.getItem('gemini_api_key');
+        const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
         if (apiKey) {
           const res = await callGeminiApi([
             {
@@ -11520,7 +11607,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                 text: `Suggest 5 sequential class titles for the course "${course.title_en || course.title_he}" (${course.target_level || 'General'}). Existing syllabus: [${existingLessons}]. Focus instructions: ${userPrompt || 'Build natural progression'}. Return a JSON array of strings only, e.g. ["Title 1", "Title 2", ...].`
               }]
             }
-          ], apiKey);
+          ], apiKey, { responseMimeType: 'application/json', temperature: 0.7 });
           const cleaned = res.replace(/```json/gi, '').replace(/```/g, '').trim();
           suggestions = JSON.parse(cleaned);
         }
@@ -11865,7 +11952,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       const bp = course.blueprint || {};
       const bpSections = Array.isArray(bp.sections) ? bp.sections : [];
       const hasCustomBp = bpSections.length > 0;
-      const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key');
+      const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
 
       if (hasCustomBp) {
         let customSectionsMap = null;
@@ -11888,7 +11975,7 @@ Return STRICT JSON ONLY keyed by exact section ID matching each section's exact 
     ${bpSections.map(s => `"${s.id}": {}`).join(',\n    ')}
   }
 }`;
-            const res = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey);
+            const res = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey, { responseMimeType: 'application/json', temperature: 0.7 });
             const cleaned = res.replace(/```json/gi, '').replace(/```/g, '').trim();
             const parsed = JSON.parse(cleaned);
             if (parsed && parsed.sections) {
@@ -11938,7 +12025,7 @@ Return STRICT JSON ONLY keyed by exact section ID matching each section's exact 
                 text: `You are an expert educator. Generate comprehensive modular teaching blocks for the class "${classTitle}" in the course "${course.title_en || course.title_he}" (${course.target_level || 'General'}). Instructions: ${userInstructions || 'Engaging and rigorous'}. Return JSON with fields: { "hook": "...", "anchors": ["...", "..."], "sources": "...", "steps": "...", "pitfalls": "...", "cheat_sheet": "...", "homework": "..." }.`
               }]
             }
-          ], apiKey);
+          ], apiKey, { responseMimeType: 'application/json', temperature: 0.7 });
           const cleaned = res.replace(/```json/gi, '').replace(/```/g, '').trim();
           result = JSON.parse(cleaned);
         }
@@ -12001,10 +12088,10 @@ Return STRICT JSON ONLY keyed by exact section ID matching each section's exact 
 
       let generated = '';
       try {
-        const apiKey = localStorage.getItem('gemini_api_key');
+        const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
         if (apiKey) {
           const prompt = `Write a high-impact pedagogical block for "${blockType}" regarding the topic "${title}" (${course.target_level || 'General'}). Return plain text only.`;
-          generated = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey);
+          generated = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey, { temperature: 0.7 });
           generated = generated.replace(/```/g, '').trim();
         }
       } catch (e) {
@@ -12062,14 +12149,14 @@ Return STRICT JSON ONLY keyed by exact section ID matching each section's exact 
 
       let generated = '';
       try {
-        const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key');
+        const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
         if (apiKey) {
           const prompt = `Draft ONLY the section "${sec.name}" (type: ${sec.type}) for the class "${title}" in course "${course.title_en || course.title_he}".
 Target Students: ${bp.student_profile || course.target_level || 'General'}
 Course Guidelines: ${bp.guidelines || 'Clear and easy to teach'}
 Section Rule: ${sec.ai_rule || sec.hint || 'Be concise and practical'}
 Format requirement: ${getSectionAiFormatRule(sec.type)}.`;
-          let rawRes = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey);
+          let rawRes = await callGeminiApi([{ role: 'user', parts: [{ text: prompt }] }], apiKey, { temperature: 0.7 });
           rawRes = rawRes.replace(/```json/gi, '').replace(/```/g, '').trim();
           if (sec.type !== 'audio' && rawRes.startsWith('{')) {
             generated = normalizeSectionAiValue(JSON.parse(rawRes), sec.type);
@@ -14282,9 +14369,9 @@ IV. Conclusion
     };
     if (typeof window !== 'undefined') window.COURSE_BLOCK_CATALOG = COURSE_BLOCK_CATALOG;
 
-    let architectChatHistory = [];
-    let architectStudentProfile = '';
-    let architectGuidelines = '';
+    var architectChatHistory = [];
+    var architectStudentProfile = '';
+    var architectGuidelines = '';
 
     function updateArchitectMetadataField(field, value) {
       if (field === 'student_profile') architectStudentProfile = value;
@@ -14320,6 +14407,7 @@ IV. Conclusion
     }
 
     function renderArchitectChatMessages() {
+      if (typeof window !== 'undefined') window.architectChatHistory = architectChatHistory;
       const container = document.getElementById('architect-chat-messages');
       if (!container) return;
       if (!Array.isArray(architectChatHistory) || architectChatHistory.length === 0) {
@@ -14650,6 +14738,8 @@ IV. Conclusion
       const promptInput = document.getElementById('input-ai-blueprint-prompt');
       const titleInput = document.getElementById('input-create-course-title-en');
       const descInput = document.getElementById('input-create-course-desc');
+      const profInput = document.getElementById('input-architect-student-profile');
+      const guideInput = document.getElementById('input-architect-guidelines');
       const userMsg = (promptInput?.value || '').trim();
       const courseTitle = (userMsg || titleInput?.value || descInput?.value || '').trim();
 
@@ -14670,77 +14760,132 @@ IV. Conclusion
       const loadingEl = document.getElementById('course-builder-ai-loading');
       if (loadingEl) loadingEl.classList.remove('hidden');
 
-      const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key');
+      const apiKey = APP_STATE.geminiApiKey || localStorage.getItem('tutor_gemini_key') || localStorage.getItem('gemini_api_key') || getEffectiveGeminiApiKey();
       let parsed = null;
+      let aiCallError = null;
+
+      const parseArchitectJson = (rawText) => {
+        if (!rawText) return null;
+        let cleaned = String(rawText).replace(/```json/gi, '').replace(/```/g, '').trim();
+        try {
+          return JSON.parse(cleaned);
+        } catch (err) {
+          const firstBrace = cleaned.indexOf('{');
+          const lastBrace = cleaned.lastIndexOf('}');
+          if (firstBrace !== -1 && lastBrace > firstBrace) {
+            return JSON.parse(cleaned.slice(firstBrace, lastBrace + 1));
+          }
+          throw err;
+        }
+      };
 
       if (apiKey) {
         try {
-          const catalogSummary = Object.entries(COURSE_BLOCK_CATALOG).map(([k, v]) => `"${k}" (${v.label})`).join(', ');
+          const catalogSummary = Object.entries(COURSE_BLOCK_CATALOG).map(([k, v]) => `"${k}" (${v.label}: ${v.default_rule || v.hint || ''})`).join('\n');
           const currentStateJson = JSON.stringify({
             course_title: titleInput?.value || '',
-            student_profile: architectStudentProfile || document.getElementById('input-architect-student-profile')?.value || '',
-            guidelines: architectGuidelines || document.getElementById('input-architect-guidelines')?.value || '',
+            student_profile: architectStudentProfile || profInput?.value || '',
+            guidelines: architectGuidelines || guideInput?.value || '',
+            theme_style: document.getElementById('input-course-theme-style')?.value || 'glass_dark',
+            density: document.getElementById('input-course-density')?.value || 'balanced',
             sections: currentBlueprintSections
           });
-          const convoText = architectChatHistory.map(m => `${m.role === 'user' ? 'Educator' : 'Architect'}: ${m.text}`).join('\n');
 
-          const systemPrompt = `You are TutorPilot's Expert Course Architect. Your job is to collaborate in a multi-turn discussion with the educator to design a bespoke, tailored Course Architecture & Guidelines before any classes are created.
-Every subject has a unique structure (e.g., Music needs Warmup/Technique/Repertoire/Audio; Math needs Core Formula/Worked Example/Practice Drills/Pitfalls; Jewish Concepts needs Hook/Bullet Points/Story or Rashi/Life Takeaway/Discussion).
-Available block types: ${catalogSummary}.
-Current live blueprint state: ${currentStateJson}
+          // Build proper alternating user/model Gemini turns from architectChatHistory
+          const contents = [];
+          const normalizedHistory = architectChatHistory.filter(m => m && m.text && String(m.text).trim());
+          normalizedHistory.forEach(m => {
+            const role = m.role === 'user' ? 'user' : 'model';
+            if (contents.length === 0 && role !== 'user') {
+              return; // Skip initial welcome greeting so contents always starts with user turn
+            }
+            const last = contents[contents.length - 1];
+            if (last && last.role === role) {
+              last.parts[0].text += '\n' + String(m.text);
+            } else {
+              contents.push({ role, parts: [{ text: String(m.text) }] });
+            }
+          });
+          if (contents.length === 0) {
+            contents.push({ role: 'user', parts: [{ text: `Course idea: ${courseTitle}` }] });
+          }
 
-Conversation so far:
-${convoText}
+          const systemInstruction = `You are TutorPilot's Master Course Architect: a sharp, deeply knowledgeable, conversational curriculum design partner and master educator across all disciplines (Jewish concepts & texts, humanities, STEM, music, languages).
 
-Rules:
-1. Reply conversationally in "assistant_reply": acknowledge what the educator asked, explain any structural updates you made to the blueprint, and ask 1 to 3 sharp clarifying questions (about student profile, prep time, lecture length, tone, or specific blocks) if helpful to refine the course further.
-2. Update the blueprint fields ("course_title_en", "student_profile", "guidelines", "sections") to immediately reflect the educator's wishes. Give each section an "ai_rule" explaining how classes should be written for it.
+Your role is to collaborate with the educator in a natural multi-turn mentoring conversation BEFORE they write individual classes, shaping their custom Course Architecture & Guidelines on the right panel.
+
+Available Class Section Types (pick the exact types that best fit this teacher's pedagogy):
+${catalogSummary}
+
+Current Live Blueprint State:
+${currentStateJson}
+
+Critical Mentoring & Conversation Rules:
+1. READ THE ENTIRE CONVERSATION CAREFULLY: Remember every detail the educator already gave you (age, student background, subject, session duration, tone, goals). NEVER re-ask a question the educator already answered!
+2. ENGAGE LIKE A WORLD-CLASS EDUCATOR: In "assistant_reply", respond directly and thoughtfully to what the educator just said. Offer concrete pedagogical insight tailored to those specific learners (e.g., for non-religious teens, open with relatable modern dilemmas, avoid unexplained jargon, use vivid analogies, end with an engaging question rather than preachy lectures). Briefly explain any changes you made to the blueprint sections/guidelines on the right, and ask 1 or 2 smart, focused follow-up questions that push the design forward (such as session length, how interactive vs lecture-based they want it, whether to include source quotes or homework, etc.). Write cleanly without markdown clutter.
+3. INCREMENTAL UPDATES: Update "course_title_en", "student_profile", "guidelines", "suggested_desc", "suggested_color" (amber|blue|emerald|purple|rose|cyan|orange|indigo|teal|slate), "suggested_icon", "theme_style" (glass_dark|editorial_clean|academic_serif|warm_notebook), "density" (compact|balanced|spacious), and "sections".
+   - If the educator already has sections designed and merely answered a clarifying question (like age "Between 12 to 13" or session length) without asking to replace sections, PRESERVE the existing section IDs/structure and refine their "ai_rule", "student_profile", and "guidelines" rather than wiping or replacing them with generic templates!
+   - If this is the opening pitch or the educator requests structural changes, design or update the ideal custom sections from the 20 available block types, giving each a tailored name and crisp "ai_rule" explaining how each class should fill it.
+4. Language: Respond in Hebrew if the educator writes in Hebrew, or English if they write in English.
+
 Return STRICT JSON ONLY:
 {
-  "assistant_reply": "Conversational response + clarifying questions...",
+  "assistant_reply": "Thoughtful, context-aware conversational response + 1 to 2 tailored follow-up questions...",
   "course_title_en": "Refined Course Title",
-  "student_profile": "Target student description",
-  "guidelines": "Concise teaching & style rules (prep time, lecture length, tone)",
+  "student_profile": "Updated target learner profile incorporating all known details",
+  "guidelines": "Concise teaching guidelines (pacing, tone, preparation/review structure, pedagogy)",
   "suggested_desc": "Short course summary",
   "suggested_color": "amber",
   "suggested_icon": "✦",
+  "theme_style": "glass_dark",
+  "density": "balanced",
   "sections": [
-    { "type": "text", "name": "Custom Section Name", "ai_rule": "Rule for generating this section" }
+    { "id": "optional_existing_id", "type": "text", "name": "Custom Section Name", "ai_rule": "Exact generation instruction tailored to these students" }
   ]
 }`;
 
-          if (typeof callGeminiApi === 'function') {
-            const raw = await callGeminiApi([{ role: 'user', parts: [{ text: systemPrompt }] }], apiKey);
-            const cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
-            parsed = JSON.parse(cleaned);
-          } else {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-            const resp = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{ role: 'user', parts: [{ text: systemPrompt }] }],
-                generationConfig: { responseMimeType: 'application/json' }
-              })
-            });
-            if (resp.ok) {
-              const resJson = await resp.json();
-              const text = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
-              if (text) parsed = JSON.parse(text.replace(/```json/gi, '').replace(/```/g, '').trim());
-            }
-          }
+          const raw = await callGeminiApi(contents, apiKey, {
+            systemInstruction,
+            responseMimeType: 'application/json',
+            temperature: 0.75
+          });
+          parsed = parseArchitectJson(raw);
         } catch (e) {
-          console.warn("AI Architect discussion fallback:", e);
+          aiCallError = e;
+          console.warn("AI Architect Gemini call failed, activating smart fallback:", e);
         }
       }
 
       if (!parsed || !Array.isArray(parsed.sections)) {
-        const lower = courseTitle.toLowerCase();
-        if (lower.includes('music') || lower.includes('guitar') || lower.includes('piano') || lower.includes('נגינה') || lower.includes('מוזיקה')) {
+        const allUserText = architectChatHistory.filter(m => m.role === 'user').map(m => m.text).join(' ');
+        const combinedLower = allUserText.toLowerCase();
+        const ageMatches = (userMsg + ' ' + allUserText).match(/(\d{1,2}\s*(?:to|-|–)\s*\d{1,2}(?:\s*year[s\-\s]*old)?)/gi) || [];
+        const extractedAge = ageMatches.length ? ageMatches[0].trim() : '';
+        const existingProfile = (profInput?.value || architectStudentProfile || '').trim();
+        const mergedProfile = extractedAge && !existingProfile.includes(extractedAge)
+          ? (existingProfile ? `${existingProfile} (${extractedAge})` : `Age ${extractedAge}`)
+          : existingProfile;
+        const preserveExisting = Array.isArray(currentBlueprintSections) && currentBlueprintSections.length > 0;
+        const customTitle = titleInput?.value?.trim() || (
+          /\bjewish\b|\bjudaism\b|\bmitzv/i.test(combinedLower) ? 'Key Jewish Concepts & Big Ideas' : 'Custom Course'
+        );
+        const levelVal = document.getElementById('ai-builder-level-unified')?.value || 'Standard / All Levels';
+
+        if (preserveExisting && (!/\b(change|replace|rebuild|different sections|start over)\b/i.test(userMsg))) {
+          parsed = {
+            assistant_reply: extractedAge
+              ? `Great, I updated the Target Students profile for age ${extractedAge} and kept your ${currentBlueprintSections.length} blueprint sections intact. How long is each session, and would you like each class to be more discussion driven or story and analogy driven?${aiCallError ? ' (Live AI connection hiccuped; please try your next message shortly.)' : ''}`
+              : `Got it! I noted that for "${customTitle}" and preserved your ${currentBlueprintSections.length} blueprint sections. What session length and homework or practice rhythm work best for your students?`,
+            course_title_en: customTitle,
+            student_profile: mergedProfile || levelVal,
+            guidelines: architectGuidelines || guideInput?.value || 'Clear, structured, relatable, and adapted to the teacher workflow',
+            sections: currentBlueprintSections.map(s => ({ ...s }))
+          };
+        } else if (/\b(music|guitar|piano|violin|drums|נגינה|מוזיקה)\b/i.test(combinedLower)) {
           parsed = {
             assistant_reply: "Great! I structured a Music & Performance blueprint with Warmup Scales, Technique Drill, Repertoire Piece, and Audio Studio recordings. How long are your sessions, and what skill level are your students?",
-            course_title_en: titleInput?.value || 'Music & Instrument Mastery',
-            student_profile: 'Beginner to intermediate music students',
+            course_title_en: titleInput?.value?.trim() || 'Music & Instrument Mastery',
+            student_profile: mergedProfile || 'Beginner to intermediate music students',
             guidelines: 'Hands-on practice flow, clear rhythm cues, short daily drills',
             suggested_color: 'purple',
             suggested_icon: '🎵',
@@ -14752,11 +14897,11 @@ Return STRICT JSON ONLY:
               { type: 'homework', name: 'Weekly Practice Log', ai_rule: '10-minute daily home practice goal' }
             ]
           };
-        } else if (lower.includes('math') || lower.includes('algebra') || lower.includes('geometry') || lower.includes('calculus') || lower.includes('מתמטיקה')) {
+        } else if (/\b(math|algebra|geometry|calculus|מתמטיקה)\b/i.test(combinedLower)) {
           parsed = {
             assistant_reply: "I built a Math blueprint with Core Formula, Worked Example, Common Traps, and Practice Drills. What grade level are your students, and how many practice problems do you want per class?",
-            course_title_en: titleInput?.value || 'Mathematics Mastery',
-            student_profile: 'Middle / High School Math students',
+            course_title_en: titleInput?.value?.trim() || 'Mathematics Mastery',
+            student_profile: mergedProfile || 'Middle / High School Math students',
             guidelines: 'Step-by-step clarity, visual intuition before formal rules',
             suggested_color: 'blue',
             suggested_icon: '📐',
@@ -14768,21 +14913,38 @@ Return STRICT JSON ONLY:
               { type: 'homework', name: 'Homework Set', ai_rule: '3 independent practice problems' }
             ]
           };
-        } else if (lower.includes('read') || lower.includes('קריאה') || lower.includes('alef') || lower.includes('hebrew')) {
+        } else if (/\b(jewish|judaism|concepts|mitzvah|mitzvot|non-religious|secular)\b/i.test(combinedLower)) {
+          const nonReligious = /non-religious|secular|unaffiliated/i.test(combinedLower);
           parsed = {
-            assistant_reply: "I designed a Reading & Fluency structure with Vowel/Rule Focus, Word Practice Ladder, Pronunciation Audio, and Speed Challenge. What age are the learners?",
-            course_title_en: titleInput?.value || 'Hebrew Reading & Fluency',
-            student_profile: 'Developing Hebrew readers',
+            assistant_reply: `Here is a tailored structure for "${customTitle}"${mergedProfile ? ` designed for ${mergedProfile}` : ''}. Since ${nonReligious ? 'he comes from a non-religious background, we should open with an everyday relatable scenario before introducing any Hebrew terminology' : 'clarity and relevance come first'}, I included an Opening Dilemma, Core Connected Ideas, Real-World Analogy, Teen Takeaway, and Discussion Spark. How many minutes is each class, and do you want short optional sources included?`,
+            course_title_en: customTitle,
+            student_profile: mergedProfile || (nonReligious ? '12-13 year old boy from a non-religious background' : 'Teen learner'),
+            guidelines: 'Plain relatable language, zero unexplained jargon, start from real-world curiosity and connect concepts step by step',
+            suggested_color: 'amber',
+            suggested_icon: '✦',
+            sections: [
+              { type: 'text', name: 'Relatable Opening Dilemma', ai_rule: 'Start with a concrete modern teen scenario with zero jargon' },
+              { type: 'list', name: 'Connected Core Ideas', ai_rule: '4-5 crisp, connected ideas that build logically on each other' },
+              { type: 'example', name: 'Analogy or Story', ai_rule: 'One vivid everyday story or analogy that makes the concept click' },
+              { type: 'reflection', name: 'Why It Matters Today', ai_rule: 'Honest real-life relevance for a modern teen without lecturing' },
+              { type: 'discussion', name: 'Open Discussion Question', ai_rule: 'One thought provoking debate question with no preachy answer' }
+            ]
+          };
+        } else if (/\b(reading|phonics|fluency|קריאה|alef|hebrew reading)\b/i.test(combinedLower)) {
+          parsed = {
+            assistant_reply: "I designed a Reading & Fluency structure with Vowel/Rule Focus, Word Practice Ladder, Pronunciation Audio, and Speed Challenge. How long is each session, and what reading stage is your learner at?",
+            course_title_en: titleInput?.value?.trim() || 'Hebrew Reading & Fluency',
+            student_profile: mergedProfile || 'Developing Hebrew readers',
             guidelines: 'Phonetic clarity, progressive syllable drills',
             suggested_color: 'emerald',
             suggested_icon: '📖',
             sections: BLUEPRINT_PRESETS.reading_fluency.map(s => ({ ...s, ai_rule: 'Clear phonetic reading focus' }))
           };
-        } else if (lower.includes('chumash') || lower.includes('torah') || lower.includes('parsha') || lower.includes('חומש')) {
+        } else if (/\b(chumash|torah|parsha|חומש)\b/i.test(combinedLower)) {
           parsed = {
             assistant_reply: "I put together a Chumash blueprint featuring Story Flow, Core Ideas, Rashi / Midrash Insight, and Real-Life Lesson. How many minutes do you want to spend reviewing before teaching?",
-            course_title_en: titleInput?.value || 'Chumash & Parsha Insights',
-            student_profile: '12-13 year old students',
+            course_title_en: titleInput?.value?.trim() || 'Chumash & Parsha Insights',
+            student_profile: mergedProfile || '12-13 year old students',
             guidelines: '5-minute review, 15-minute lecture, plain everyday English',
             suggested_color: 'amber',
             suggested_icon: '📜',
@@ -14794,12 +14956,10 @@ Return STRICT JSON ONLY:
             ]
           };
         } else {
-          const levelVal = document.getElementById('ai-builder-level-unified')?.value || 'Standard / All Levels';
-          const customTitle = titleInput?.value?.trim() || 'Custom Course';
           parsed = {
-            assistant_reply: `Got it. Let us shape the architecture for "${customTitle}". What specific sections do you want inside every class, how long is each teaching session, and what tone or level fits your students best?`,
+            assistant_reply: `Got it. Let us shape the architecture for "${customTitle}"${mergedProfile ? ` (${mergedProfile})` : ''}. What specific sections do you want inside every class, how long is each teaching session, and what tone fits your students best?`,
             course_title_en: customTitle,
-            student_profile: architectStudentProfile || levelVal,
+            student_profile: mergedProfile || levelVal,
             guidelines: architectGuidelines || 'Clear, structured, and adapted to the teacher workflow',
             suggested_color: 'amber',
             suggested_icon: '✦',

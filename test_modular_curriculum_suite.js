@@ -94,7 +94,8 @@ const sandbox = {
   },
   location: { href: 'https://bar-mitzvah-tutor.pages.dev' },
   showToast: () => {},
-  escapeHtml: s => String(s || '')
+  escapeHtml: s => String(s || ''),
+  atob: b64 => Buffer.from(b64, 'base64').toString('utf8')
 };
 
 vm.createContext(sandbox);
@@ -2987,6 +2988,141 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(tpLabHtml.includes('<table'), 'Teleprompter renders comparison matrix table');
   assert(tpLabHtml.includes('(Teacher Only)'), 'Teleprompter highlights Private Teacher Cue box');
   sandbox.closeTutorTeleprompter();
+
+  // --- GATE 33: Canonical callGeminiApi, Multi-Model Fallback & Intelligent Multi-Turn Architect ---
+  console.log('\n--- Running Gate 33: callGeminiApi & Multi-Turn AI Course Architect Verification ---');
+  assert(typeof sandbox.callGeminiApi === 'function', 'callGeminiApi global function is defined');
+
+  const prevFetch = sandbox.fetch;
+  const geminiRequests = [];
+  sandbox.fetch = async (url, opts) => {
+    const bodyObj = opts && opts.body ? JSON.parse(opts.body) : {};
+    geminiRequests.push({ url, body: bodyObj });
+    if (url.includes('gemini-3.5-flash:')) {
+      return {
+        ok: false,
+        status: 503,
+        json: async () => ({ error: { message: 'This model is currently experiencing high demand.' } })
+      };
+    }
+    const lastTurnText = bodyObj.contents && bodyObj.contents.length
+      ? bodyObj.contents[bodyObj.contents.length - 1].parts.map(p => p.text).join(' ')
+      : '';
+    if (lastTurnText.includes('Between 12 to 13')) {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          candidates: [{
+            content: {
+              parts: [{
+                text: JSON.stringify({
+                  assistant_reply: 'Thanks! Knowing he is 12 to 13 from a non-religious background helps keep our opening dilemma super relatable. How many minutes is each session?',
+                  course_title_en: 'Key Jewish Concepts Explained',
+                  student_profile: '12-13 year old boy, non-religious background',
+                  guidelines: 'Relatable everyday stories, zero unexplained jargon',
+                  sections: [
+                    { type: 'text', name: 'Relatable Opening Hook', ai_rule: 'Modern teen dilemma before Hebrew terms' },
+                    { type: 'list', name: 'Connected Core Ideas', ai_rule: '4 connected ideas step by step' },
+                    { type: 'discussion', name: 'Open Teen Debate', ai_rule: 'One real-world question to spark discussion' }
+                  ]
+                })
+              }]
+            }
+          }]
+        })
+      };
+    }
+    if (lastTurnText.includes('Key Jewish concepts')) {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          candidates: [{
+            content: {
+              parts: [{
+                text: JSON.stringify({
+                  assistant_reply: 'Love this direction! For a non-religious boy, starting from everyday relatable curiosity works best. Are there specific concepts you want first, and how long is each class?',
+                  course_title_en: 'Key Jewish Concepts Explained',
+                  student_profile: 'Boy from a non-religious background',
+                  guidelines: 'Plain English, vivid modern analogies, interactive',
+                  sections: [
+                    { type: 'text', name: 'Relatable Opening Hook', ai_rule: 'Modern teen dilemma before Hebrew terms' },
+                    { type: 'list', name: 'Connected Core Ideas', ai_rule: '4 connected ideas step by step' },
+                    { type: 'discussion', name: 'Open Teen Debate', ai_rule: 'One real-world question to spark discussion' }
+                  ]
+                })
+              }]
+            }
+          }]
+        })
+      };
+    }
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        candidates: [{
+          content: {
+            parts: [{ text: 'AI drafted custom block content via managed key' }]
+          }
+        }]
+      })
+    };
+  };
+
+  // Clear local custom key to verify built-in SYSTEM_DEFAULT_GEMINI_KEY via getEffectiveGeminiApiKey()
+  sandbox.APP_STATE.geminiApiKey = '';
+  sandbox.APP_STATE.geminiModel = '';
+  sandbox.localStorage.removeItem('gemini_api_key');
+  sandbox.localStorage.removeItem('tutor_gemini_key');
+  sandbox.localStorage.removeItem('tutor_gemini_model');
+
+  const directReply = await sandbox.callGeminiApi('Ping test');
+  assert(directReply === 'AI drafted custom block content via managed key', 'callGeminiApi skips 503 model and returns response using built-in managed key');
+  assert(sandbox.APP_STATE.geminiModel === 'gemini-3.1-flash-lite', 'callGeminiApi caches working fallback model on APP_STATE.geminiModel');
+
+  // Test Multi-turn Architect conversation
+  geminiRequests.length = 0;
+  sandbox.openCreateCourseModal('ai');
+  getOrCreateElem('input-ai-blueprint-prompt').value = 'Key Jewish concepts in an interesting way for a boy from a non-religious background';
+  await sandbox.handleAiSuggestBlueprint();
+  assert(geminiRequests.length >= 1, 'Architect Turn 1 called Gemini API via callGeminiApi');
+  const turn1Contents = geminiRequests[geminiRequests.length - 1].body.contents || [];
+  assert(turn1Contents.length === 1 && turn1Contents[0].role === 'user', 'Architect Turn 1 strips initial greeting so Gemini contents begins cleanly with user turn');
+  assert(!sandbox.architectChatHistory[sandbox.architectChatHistory.length - 1].text.includes('Reading & Fluency'), 'Architect Turn 1 did NOT trigger false Reading & Fluency template');
+
+  // Turn 2 clarifying reply
+  getOrCreateElem('input-ai-blueprint-prompt').value = 'Between 12 to 13';
+  await sandbox.handleAiSuggestBlueprint();
+  const turn2Body = geminiRequests[geminiRequests.length - 1].body;
+  assert(turn2Body.contents.length === 3 && turn2Body.contents[1].role === 'model' && turn2Body.contents[2].role === 'user', 'Architect Turn 2 forwards full alternating multi-turn conversation history to Gemini');
+  const lastArchReply = sandbox.architectChatHistory[sandbox.architectChatHistory.length - 1].text;
+  assert(lastArchReply.includes('12 to 13') && !lastArchReply.includes('What specific sections do you want inside every class'), 'Architect Turn 2 remembers student age and does not reset to canned prompt');
+  assert(getOrCreateElem('input-architect-student-profile').value.includes('12-13'), 'Architect Turn 2 updates student profile in blueprint');
+
+  // Test offline incremental preservation fallback (when fetch rejects)
+  sandbox.fetch = async () => { throw new Error('Network offline'); };
+  getOrCreateElem('input-ai-blueprint-prompt').value = 'For age 14-15';
+  const prevSectionsCount = sandbox.currentBlueprintSections.length;
+  await sandbox.handleAiSuggestBlueprint();
+  assert(sandbox.currentBlueprintSections.length === prevSectionsCount, 'Offline fallback preserves existing blueprint sections on clarifying reply instead of wiping them');
+  assert(sandbox.architectChatHistory[sandbox.architectChatHistory.length - 1].text.includes('14-15'), 'Offline fallback merges clarifying age into conversation response cleanly');
+
+  // Restore fetch for Custom Block AI check with mock response
+  sandbox.fetch = async () => ({
+    ok: true,
+    status: 200,
+    json: async () => ({
+      candidates: [{ content: { parts: [{ text: JSON.stringify('Smart Gemini block content') }] } }]
+    })
+  });
+  await sandbox.handleStudioMiniBlockCustomAi(labCourse.id, labLessonId, tableSecId);
+  const refreshedCourse = sandbox.APP_STATE.customCourses.find(c => c.id === labCourse.id);
+  const secVal = refreshedCourse.lessons[0].sections[tableSecId];
+  assert(String(secVal).length > 0, 'handleStudioMiniBlockCustomAi invokes callGeminiApi with built-in key cleanly');
+
+  sandbox.fetch = prevFetch;
 
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
