@@ -3591,6 +3591,99 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
 
   sandbox.fetch = prevFetch37;
 
+  // --- GATE 38: Guided AI Tab Student Onboarding & Complete Student Profile Makeover ---
+  console.log('\n--- Running Gate 38: Guided AI Student Onboarding & Student Profile Makeover ---');
+  assert(typeof sandbox.startAiAddStudentOnboarding === 'function', 'startAiAddStudentOnboarding is a function');
+  assert(typeof sandbox.createStudentFromAiPendingProfile === 'function', 'createStudentFromAiPendingProfile is a function');
+  assert(typeof sandbox.toggleStudentDrawerCrmEdit === 'function', 'toggleStudentDrawerCrmEdit is a function');
+  assert(typeof sandbox.toggleStudentDrawerAi === 'function', 'toggleStudentDrawerAi is a function');
+  assert(typeof sandbox.sendStudentProfileAiMessage === 'function', 'sendStudentProfileAiMessage is a function');
+  assert(typeof sandbox.undoStudentProfileAiChange === 'function', 'undoStudentProfileAiChange is a function');
+
+  sandbox.APP_STATE.aiMessages = [];
+  sandbox.applyAiQuickPrompt('add_student');
+  assert(sandbox.APP_STATE.aiPendingStudent && sandbox.APP_STATE.aiPendingStudent.active === true, 'Clicking Add student in AI tab initiates guided student onboarding flow');
+  const aiGuideHtml = getOrCreateElem('ai-chat-messages').innerHTML;
+  assert(aiGuideHtml.includes('What is the student') && aiGuideHtml.includes('Create Profile'), 'AI onboarding asks simple 4-5 skip-optional questions upfront');
+
+  // Mock Gemini response merging partial answers cleanly across onboarding
+  const prevFetch38 = sandbox.fetch;
+  let aiMode = 'onboarding';
+  sandbox.fetch = async () => ({
+    ok: true,
+    status: 200,
+    json: async () => ({
+      candidates: [{
+        content: {
+          parts: [{
+            text: aiMode === 'onboarding'
+              ? JSON.stringify({
+                  assistant_reply: 'Great! I prepared Ethan Levi\'s profile card below. Click Create Profile whenever ready.',
+                  draft: {
+                    name: 'Ethan Levi',
+                    subject: 'Jewish Foundations',
+                    gradeLevel: 'Middle School (6th - 8th)',
+                    teachingDuration: '6 months',
+                    notes: 'Loves basketball analogies, strong Hebrew decoding.',
+                    customGoals: ['Master weekly Shabbat concept']
+                  }
+                })
+              : JSON.stringify({
+                  assistant_reply: 'Updated Ethan\'s homework, added mother Sarah contact, and added fluency goal.',
+                  updates: {
+                    guardianName: 'Sarah Levi',
+                    guardianPhone: '+1 555-7788',
+                    homeworkTask: 'Read page 4 twice aloud',
+                    addGoals: ['Read fluidly without vowel hesitations']
+                  }
+                })
+          }]
+        }
+      }]
+    })
+  });
+
+  getOrCreateElem('ai-chat-input').value = 'His name is Ethan Levi, age 12, learning Jewish Foundations for 6 months, loves basketball';
+  await sandbox.handleSendAiMessage();
+  const draftChatHtml = getOrCreateElem('ai-chat-messages').innerHTML;
+  assert(draftChatHtml.includes('Ethan Levi') && draftChatHtml.includes('btn-ai-create-student-profile'), 'AI onboarding renders live student preview card with Create Profile button');
+
+  const createdEthan = sandbox.createStudentFromAiPendingProfile();
+  assert(!!createdEthan && createdEthan.name === 'Ethan Levi', 'createStudentFromAiPendingProfile creates Ethan Levi in APP_STATE.students');
+  assert(sandbox.APP_STATE.aiPendingStudent === null, 'Onboarding state clears cleanly after Create Profile');
+  assert(!getOrCreateElem('drawer-student-detail').classList.contains('hidden'), 'Creating student from AI automatically opens clean redesigned Student Profile Drawer');
+
+  // Verify Clean Student Profile Layout: no blank CRM input wall at rest, no double ++, structured numbered lesson list
+  const ethanBodyHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(!ethanBodyHtml.includes('drawer-crm-edit-card'), 'Redesigned Student Profile hides blank CRM form inputs at rest for calm readability');
+  assert(!ethanBodyHtml.includes('+ +'), 'Redesigned Student Profile eliminates duplicate ++ icons on buttons');
+  assert(ethanBodyHtml.includes('drawer-student-notes-input') && ethanBodyHtml.includes('studio-autogrow'), 'Tutor Notes renders full-width auto-growing dir="auto" textarea');
+  assert(ethanBodyHtml.includes('Time vs Space: The Architecture of Shabbat') && ethanBodyHtml.includes('1'), 'Enrolled Courses render clean vertical numbered Lesson List');
+
+  // Verify Edit Info toggles inline CRM fields cleanly when clicked
+  sandbox.toggleStudentDrawerCrmEdit(createdEthan.id);
+  assert(getOrCreateElem('drawer-body-content').innerHTML.includes('drawer-crm-edit-card'), 'Clicking Edit Info expands inline CRM & Guardian editor cleanly');
+  sandbox.toggleStudentDrawerCrmEdit(createdEthan.id);
+
+  // Verify post-creation AI profile updates & 1-click Undo
+  aiMode = 'profile_update';
+  sandbox.toggleStudentDrawerAi(createdEthan.id);
+  assert(getOrCreateElem('drawer-body-content').innerHTML.includes('drawer-student-ai-panel'), 'In-drawer AI Student Assistant opens cleanly');
+  getOrCreateElem('input-student-drawer-ai-prompt').value = 'Add mom Sarah 555-7788, assign reading homework, add fluency goal';
+  await sandbox.sendStudentProfileAiMessage(createdEthan.id);
+  assert(createdEthan.parentContact.name === 'Sarah Levi' && createdEthan.skills.homework.task.includes('Read page 4'), 'In-drawer AI Assistant enriches student profile after creation');
+  assert(getOrCreateElem('drawer-body-content').innerHTML.includes('btn-undo-student-ai'), 'In-drawer AI Assistant displays Undo AI rollback button');
+
+  sandbox.undoStudentProfileAiChange(createdEthan.id);
+  assert(!createdEthan.parentContact.name && !createdEthan.skills.homework.task, 'undoStudentProfileAiChange accurately restores student snapshot');
+
+  // Verify clicking a lesson inside Student Profile opens M99 Clean Lesson Reader
+  sandbox.navigateToLesson('course_g37_makeover', 'les_g37_1');
+  assert(getOrCreateElem('drawer-student-detail').classList.contains('hidden'), 'navigateToLesson closes student drawer smoothly');
+  assert(getOrCreateElem('tutor-hub-lessons-container').innerHTML.includes('studio-lesson-reader'), 'navigateToLesson lands directly in Screen 3 Clean Lesson Reader');
+
+  sandbox.fetch = prevFetch38;
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);

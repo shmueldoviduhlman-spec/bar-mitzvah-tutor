@@ -1498,10 +1498,11 @@
           <div class="relative flex-1">
             <textarea
               id="ai-chat-input"
+              dir="auto"
               rows="1"
               placeholder="Ask anything or give a command (Hebrew or English)..."
               class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 pl-3 pr-10 rtl:pr-3 rtl:pl-10 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none max-h-32"
-              onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); handleSendAiMessage(event); }"
+              onkeydown="if(event.key==='Enter' && !event.shiftKey && !event.isComposing && event.keyCode !== 229){ event.preventDefault(); handleSendAiMessage(event); }"
             ></textarea>
             
             <!-- Voice Dictation Button -->
@@ -3103,10 +3104,16 @@
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <h3 id="modal-student-title" class="text-lg font-bold text-white flex items-center gap-2 mb-4">
-        <i data-lucide="user-plus" class="w-5 h-5 text-brand-400"></i>
-        <span id="txt-modal-student-title">Add New Student</span>
-      </h3>
+      <div class="flex items-center justify-between gap-2 pr-8 rtl:pr-0 rtl:pl-8 mb-4">
+        <h3 id="modal-student-title" class="text-lg font-bold text-white flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-5 h-5 text-brand-400"></i>
+          <span id="txt-modal-student-title">Add New Student</span>
+        </h3>
+        <button type="button" onclick="startAiStudentOnboardingFromModal()" class="px-2.5 py-1 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-400/35 text-[11px] font-bold flex items-center gap-1 transition">
+          <i data-lucide="sparkles" class="w-3 h-3"></i>
+          <span>AI Guided Setup</span>
+        </button>
+      </div>
 
       <form id="add-student-form" onsubmit="handleCreateStudent(event)" autocomplete="off" class="space-y-4">
 
@@ -3846,12 +3853,20 @@
           <!-- Populated by renderStudentDrawer -->
         </div>
 
-        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <button onclick="switchTab('study'); closeStudentDrawer();" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-lg font-medium transition">
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0" id="drawer-header-actions">
+          <button type="button" id="btn-drawer-toggle-ai" onclick="toggleStudentDrawerAi()" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-200 border border-indigo-400/35 text-xs rounded-xl font-bold transition">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-300"></i>
+            <span>AI Update</span>
+          </button>
+          <button type="button" id="btn-drawer-toggle-edit" onclick="toggleStudentDrawerCrmEdit()" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs rounded-xl font-semibold transition">
+            <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-300"></i>
+            <span class="hidden sm:inline">Edit Info</span>
+          </button>
+          <button type="button" onclick="switchTab('study'); closeStudentDrawer();" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-xl font-medium border border-slate-700/70 transition">
             <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400"></i>
             <span id="drawer-btn-curriculum-label">Curriculum</span>
           </button>
-          <button onclick="closeStudentDrawer()" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition active:scale-95" title="Close">
+          <button type="button" onclick="closeStudentDrawer()" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition active:scale-95" title="Close">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
@@ -20605,6 +20620,265 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       showToast(t.toastStudentMoved);
     }
 
+    var drawerCrmEditingMap = {};
+    var drawerAiOpenMap = {};
+    var drawerCourseExpandedMap = {};
+    var drawerAiThinkingMap = {};
+    var studentProfileUndoMap = {};
+
+    function stripLeadingPlusSymbol(label) {
+      return String(label || '').replace(/^\+\s*/, '').trim();
+    }
+
+    function toggleStudentDrawerCrmEdit(studentId) {
+      const id = studentId || APP_STATE.activeStudentDrawerId;
+      if (!id) return;
+      drawerCrmEditingMap[id] = !drawerCrmEditingMap[id];
+      renderStudentDrawer(id, true);
+    }
+
+    function toggleStudentDrawerAi(studentId) {
+      const id = studentId || APP_STATE.activeStudentDrawerId;
+      if (!id) return;
+      drawerAiOpenMap[id] = !drawerAiOpenMap[id];
+      renderStudentDrawer(id, true);
+      if (drawerAiOpenMap[id]) {
+        setTimeout(() => document.getElementById('input-student-drawer-ai-prompt')?.focus(), 70);
+      }
+    }
+
+    function toggleStudentDrawerCourseExpand(courseId) {
+      if (!courseId) return;
+      const cur = drawerCourseExpandedMap[courseId];
+      drawerCourseExpandedMap[courseId] = (cur === false);
+      if (APP_STATE.activeStudentDrawerId) {
+        renderStudentDrawer(APP_STATE.activeStudentDrawerId, true);
+      }
+    }
+
+    function addQuickStudentGoalFromDrawer(studentId) {
+      const inp = document.getElementById('input-drawer-quick-goal');
+      const title = (inp?.value || '').trim();
+      const student = APP_STATE.students.find(s => s.id === studentId);
+      if (!student) return;
+      if (!title) {
+        if (typeof promptAddStudentCustomGoal === 'function') promptAddStudentCustomGoal(studentId);
+        return;
+      }
+      ensureStudentSkills(student);
+      if (!Array.isArray(student.skills.customGoals)) student.skills.customGoals = [];
+      student.skills.customGoals.push({ id: 'goal_' + Date.now(), title, completed: false });
+      inp.value = '';
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderStudentDrawer(studentId, true);
+      renderStudents();
+    }
+
+    function captureStudentProfileSnapshot(student) {
+      if (!student || !student.id) return;
+      ensureStudentSkills(student);
+      studentProfileUndoMap[student.id] = {
+        name: student.name || '',
+        subject: student.subject || '',
+        parsha: student.parsha || '',
+        gradeOrDate: student.gradeOrDate || '',
+        barMitzvahDate: student.barMitzvahDate || '',
+        gradeLevel: student.gradeLevel || 'Standard / All Levels',
+        status: student.status || 'active',
+        hourlyRate: student.hourlyRate || '',
+        notes: student.notes || '',
+        parentContact: JSON.parse(JSON.stringify(student.parentContact || { name: '', phone: '', email: '' })),
+        customGoals: JSON.parse(JSON.stringify(student.skills.customGoals || [])),
+        homework: JSON.parse(JSON.stringify(student.skills.homework || { task: '', completed: false, assignedDate: '' }))
+      };
+    }
+
+    function undoStudentProfileAiChange(studentId) {
+      const id = studentId || APP_STATE.activeStudentDrawerId;
+      const student = APP_STATE.students.find(s => s.id === id);
+      const snap = student && studentProfileUndoMap[student.id];
+      if (!student || !snap) return;
+      ensureStudentSkills(student);
+      student.name = snap.name;
+      student.subject = snap.subject;
+      student.parsha = snap.parsha;
+      student.gradeOrDate = snap.gradeOrDate;
+      student.barMitzvahDate = snap.barMitzvahDate;
+      student.gradeLevel = snap.gradeLevel;
+      student.status = snap.status;
+      student.hourlyRate = snap.hourlyRate;
+      student.notes = snap.notes;
+      student.parentContact = JSON.parse(JSON.stringify(snap.parentContact));
+      student.skills.customGoals = JSON.parse(JSON.stringify(snap.customGoals));
+      student.skills.homework = JSON.parse(JSON.stringify(snap.homework));
+      delete studentProfileUndoMap[student.id];
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderStudentDrawer(student.id, true);
+      renderStudents();
+      showToast('Reverted last AI profile update');
+    }
+
+    async function sendStudentProfileAiMessage(studentId, overrideText) {
+      const id = studentId || APP_STATE.activeStudentDrawerId;
+      const student = APP_STATE.students.find(s => s.id === id);
+      if (!student) return;
+      const inp = document.getElementById('input-student-drawer-ai-prompt');
+      const userMsg = (overrideText !== undefined ? overrideText : (inp?.value || '')).trim();
+      if (!userMsg) {
+        if (inp) inp.focus();
+        return;
+      }
+      if (!Array.isArray(student.ai_chat_history)) student.ai_chat_history = [];
+      student.ai_chat_history.push({ role: 'user', text: userMsg });
+      if (inp && overrideText === undefined) inp.value = '';
+      drawerAiOpenMap[student.id] = true;
+      drawerAiThinkingMap[student.id] = true;
+      renderStudentDrawer(student.id, true);
+
+      ensureStudentSkills(student);
+      let parsed = null;
+      try {
+        if (typeof callGeminiApi === 'function' && getEffectiveGeminiApiKey()) {
+          const sysPrompt = `You are a thoughtful Tutoring Profile Assistant helping update an existing student's profile.
+Respond ONLY with strict JSON (no markdown fences):
+{
+  "assistant_reply": "Friendly concise confirmation or helpful follow-up question matching the tutor's language (English or Hebrew)",
+  "updates": {
+    "subject": null,
+    "gradeLevel": null,
+    "gradeOrDate": null,
+    "status": null,
+    "hourlyRate": null,
+    "guardianName": null,
+    "guardianPhone": null,
+    "guardianEmail": null,
+    "appendNotes": null,
+    "replaceNotes": null,
+    "addGoals": [],
+    "homeworkTask": null
+  }
+}
+Set fields to null/empty array unless the tutor asked to set or add them. Preserve existing notes cleanly via appendNotes unless asked to rewrite them.`;
+
+          const currentSnapshot = {
+            name: student.name,
+            subject: student.subject || student.parsha || '',
+            gradeLevel: student.gradeLevel || '',
+            gradeOrDate: student.gradeOrDate || student.barMitzvahDate || '',
+            status: student.status || 'active',
+            hourlyRate: student.hourlyRate || '',
+            parentContact: student.parentContact || {},
+            notes: student.notes || '',
+            customGoals: (student.skills.customGoals || []).map(g => g.title),
+            homework: student.skills.homework?.task || ''
+          };
+
+          const contents = student.ai_chat_history.slice(-10).map((m, idx, arr) => ({
+            role: m.role === 'user' ? 'user' : 'model',
+            parts: [{ text: idx === arr.length - 1 ? `CURRENT STUDENT PROFILE:\n${JSON.stringify(currentSnapshot)}\n\nTUTOR REQUEST:\n${m.text}` : m.text }]
+          }));
+          if (contents.length > 0 && contents[0].role !== 'user') contents.shift();
+
+          const rawText = await callGeminiApi({
+            systemInstruction: { parts: [{ text: sysPrompt }] },
+            contents,
+            generationConfig: { temperature: 0.3, responseMimeType: 'application/json' }
+          });
+          const cleaned = String(rawText || '').replace(/```json/gi, '').replace(/```/g, '').trim();
+          const fIdx = cleaned.indexOf('{');
+          const lIdx = cleaned.lastIndexOf('}');
+          parsed = fIdx !== -1 && lIdx > fIdx ? JSON.parse(cleaned.slice(fIdx, lIdx + 1)) : JSON.parse(cleaned);
+        }
+      } catch (err) {
+        console.warn('Student profile AI fallback activated:', err);
+      }
+
+      if (!parsed || typeof parsed !== 'object') {
+        // Smart offline heuristic fallback for tests & offline work
+        const updates = { addGoals: [] };
+        const rateMatch = userMsg.match(/(?:\$\s*\d+(?:\s*\/\s*hr|\s*per\s*hour)?|\d+\s*(?:₪|nis|ils))/i);
+        if (rateMatch) updates.hourlyRate = rateMatch[0].trim();
+        const emailMatch = userMsg.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+        if (emailMatch) updates.guardianEmail = emailMatch[0];
+        const phoneMatch = userMsg.match(/(?:\+?\d[\d\s-]{6,}\d)/);
+        if (phoneMatch) updates.guardianPhone = phoneMatch[0].trim();
+        const goalMatch = userMsg.match(/(?:add goal|goal)\s*[:\-]?\s*([^.,\n]+)/i);
+        if (goalMatch && goalMatch[1]) updates.addGoals.push(goalMatch[1].trim());
+        const hwMatch = userMsg.match(/(?:homework|hw)\s*[:\-]?\s*([^.\n]+)/i);
+        if (hwMatch && hwMatch[1]) updates.homeworkTask = hwMatch[1].trim();
+        if (!updates.addGoals.length && !updates.homeworkTask && !updates.hourlyRate && !updates.guardianPhone && !updates.guardianEmail) {
+          updates.appendNotes = userMsg;
+        } else if (/note|strength|struggl|interest|focus/i.test(userMsg)) {
+          updates.appendNotes = userMsg;
+        }
+        parsed = {
+          assistant_reply: `Updated ${student.name}'s profile based on your note.`,
+          updates
+        };
+      }
+
+      const u = parsed.updates || {};
+      const hasMutation = Boolean(
+        u.subject || u.gradeLevel || u.gradeOrDate || u.status || u.hourlyRate ||
+        u.guardianName || u.guardianPhone || u.guardianEmail ||
+        u.appendNotes || u.replaceNotes || u.homeworkTask || (Array.isArray(u.addGoals) && u.addGoals.length > 0)
+      );
+
+      if (hasMutation) {
+        captureStudentProfileSnapshot(student);
+        if (u.subject) {
+          student.subject = String(u.subject).trim();
+          student.parsha = student.subject;
+        }
+        if (u.gradeLevel) student.gradeLevel = String(u.gradeLevel).trim();
+        if (u.gradeOrDate) {
+          student.gradeOrDate = String(u.gradeOrDate).trim();
+          student.barMitzvahDate = student.gradeOrDate;
+        }
+        if (u.status && ['active', 'paused', 'completed'].includes(String(u.status).toLowerCase())) {
+          student.status = String(u.status).toLowerCase();
+        }
+        if (u.hourlyRate) student.hourlyRate = String(u.hourlyRate).trim();
+        if (u.guardianName || u.guardianPhone || u.guardianEmail) {
+          student.parentContact = student.parentContact || { name: '', phone: '', email: '' };
+          if (u.guardianName) student.parentContact.name = String(u.guardianName).trim();
+          if (u.guardianPhone) student.parentContact.phone = String(u.guardianPhone).trim();
+          if (u.guardianEmail) student.parentContact.email = String(u.guardianEmail).trim();
+        }
+        if (u.replaceNotes) {
+          student.notes = String(u.replaceNotes).trim();
+        } else if (u.appendNotes) {
+          const piece = String(u.appendNotes).trim();
+          student.notes = student.notes ? `${student.notes.trim()}\n${piece}` : piece;
+        }
+        if (Array.isArray(u.addGoals) && u.addGoals.length > 0) {
+          if (!Array.isArray(student.skills.customGoals)) student.skills.customGoals = [];
+          u.addGoals.forEach(gt => {
+            const cleanGoal = String(gt || '').trim();
+            if (cleanGoal && !student.skills.customGoals.some(existing => existing.title.toLowerCase() === cleanGoal.toLowerCase())) {
+              student.skills.customGoals.push({ id: 'goal_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4), title: cleanGoal, completed: false });
+            }
+          });
+        }
+        if (u.homeworkTask) {
+          student.skills.homework = {
+            task: String(u.homeworkTask).trim(),
+            completed: false,
+            assignedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          };
+        }
+        saveStudentsToStorage(true);
+        if (APP_STATE.cloud.client) pushStudentToCloud(student);
+        renderStudents();
+      }
+
+      drawerAiThinkingMap[student.id] = false;
+      student.ai_chat_history.push({ role: 'model', text: parsed.assistant_reply || 'Profile updated.' });
+      renderStudentDrawer(student.id, true);
+    }
+
     function openStudentDrawer(studentId) {
       APP_STATE.activeStudentDrawerId = studentId;
       APP_STATE.activeStudentId = studentId;
@@ -20649,8 +20923,6 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
         saveStudentsToStorage(true);
         if (APP_STATE.cloud.client) pushStudentToCloud(student);
         renderStudents();
-        const t = I18N[APP_STATE.lang];
-        showToast(t.toastNoteSaved(student.name));
       }
     }
 
@@ -20691,48 +20963,68 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       const t = I18N[APP_STATE.lang];
       const { activeCourses, totalClasses, completedClasses, overallPct } = getStudentCourseProgress(student);
       const { date: studentDate } = getStudentParshaAndDate(student);
+      const currentStatus = student.status || 'active';
+      const currentGradeLevel = student.gradeLevel || 'Standard / All Levels';
+      const currentHourlyRate = student.hourlyRate || '';
+      const guardian = student.parentContact || { name: '', phone: '', email: '' };
+      const cleanPhone = (guardian.phone || '').replace(/[^0-9]/g, '');
+      const statusBadgeCls = currentStatus === 'paused'
+        ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+        : (currentStatus === 'completed' ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30' : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30');
+      const statusLabel = currentStatus === 'paused' ? (t.statusPaused || 'Paused') : (currentStatus === 'completed' ? (t.statusCompleted || 'Completed') : (t.statusActive || 'Active'));
 
-      // Render Header
+      // Update top sticky header button states
+      const aiToggleBtn = document.getElementById('btn-drawer-toggle-ai');
+      if (aiToggleBtn) {
+        aiToggleBtn.className = drawerAiOpenMap[student.id]
+          ? 'flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-indigo-500 text-white text-xs rounded-xl font-bold shadow transition'
+          : 'flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-200 border border-indigo-400/35 text-xs rounded-xl font-bold transition';
+      }
+      const editToggleBtn = document.getElementById('btn-drawer-toggle-edit');
+      if (editToggleBtn) {
+        editToggleBtn.className = drawerCrmEditingMap[student.id]
+          ? 'flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-amber-500 text-slate-950 text-xs rounded-xl font-bold shadow transition'
+          : 'flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs rounded-xl font-semibold transition';
+      }
+
+      // Render Calm Hero Header
       const header = document.getElementById('drawer-header-content');
       if (header) {
         const avatarHtml = student.avatar
-          ? `<img src="${student.avatar}" class="w-12 h-12 rounded-full object-cover border-2 border-brand-500 shadow-sm shrink-0">`
-          : `<div class="w-12 h-12 rounded-full bg-brand-600/20 text-brand-400 border border-brand-500/30 flex items-center justify-center font-bold text-base shrink-0">
-              ${student.name.charAt(0).toUpperCase()}
+          ? `<img src="${student.avatar}" class="w-12 h-12 rounded-2xl object-cover border border-brand-500/60 shadow-sm shrink-0">`
+          : `<div class="w-12 h-12 rounded-2xl bg-brand-600/20 text-brand-300 border border-brand-500/30 flex items-center justify-center font-extrabold text-lg shrink-0">
+              ${escapeHtml((student.name || 'S').charAt(0).toUpperCase())}
             </div>`;
 
         header.innerHTML = `
-          <div class="relative group cursor-pointer" onclick="triggerPhotoUpload('${student.id}', event)" title="${t.photoUploadHint}">
+          <div class="relative group cursor-pointer shrink-0" onclick="triggerPhotoUpload('${student.id}', event)" title="${t.photoUploadHint}">
             ${avatarHtml}
-            <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+            <div class="absolute inset-0 bg-black/45 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
               <i data-lucide="camera" class="w-4 h-4 text-white"></i>
             </div>
           </div>
           <div class="min-w-0 space-y-1">
             <div class="flex items-center gap-2 flex-wrap">
-              <h3 class="text-base sm:text-lg font-bold text-white tracking-tight">${student.name}</h3>
-              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded-md ${overallPct > 50 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
+              <h3 dir="auto" class="text-base sm:text-lg font-extrabold text-white tracking-tight truncate">${escapeHtml(student.name)}</h3>
+              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg border ${statusBadgeCls}">${escapeHtml(statusLabel)}</span>
+              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg ${overallPct > 50 ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-800 text-slate-300'}">
                 ${overallPct}%
               </span>
             </div>
-            <div class="flex items-center gap-2 flex-wrap text-xs text-slate-400">
-              <span id="drawer-header-courses-badge" class="flex items-center gap-1.5 text-brand-300 font-medium">
+            <div class="flex items-center gap-2.5 flex-wrap text-xs text-slate-400">
+              <span id="drawer-header-courses-badge" class="flex items-center gap-1 text-brand-300 font-medium">
                 <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400"></i>
                 <span id="drawer-header-courses-badge-text">${activeCourses.length} ${isHe ? (activeCourses.length === 1 ? 'קורס' : 'קורסים') : (activeCourses.length === 1 ? 'Course' : 'Courses')}</span>
               </span>
+              ${currentGradeLevel && currentGradeLevel !== 'Standard / All Levels' ? `<span class="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[11px] text-slate-300">${escapeHtml(currentGradeLevel)}</span>` : ''}
               ${studentDate ? `
-                <span class="text-slate-600 font-bold">•</span>
-                <span class="flex items-center gap-1.5 text-slate-300 font-mono text-[11px]">
-                  <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
-                  <span>${studentDate}</span>
+                <span class="flex items-center gap-1 text-slate-300 font-mono text-[11px]">
+                  <i data-lucide="calendar" class="w-3 h-3 text-slate-400 shrink-0"></i>
+                  <span>${escapeHtml(studentDate)}</span>
                 </span>
               ` : ''}
-              <span class="text-slate-600 font-bold">•</span>
-              <button onclick="triggerPhotoUpload('${student.id}', event)" class="hover:text-brand-300 underline font-medium text-[11px] text-slate-400">
-                ${student.avatar ? t.changePhoto : t.uploadPhoto}
-              </button>
               ${student.avatar ? `
-                <button onclick="removeStudentPhoto('${student.id}', event)" class="hover:text-red-400 underline font-medium text-[11px] text-slate-500">
+                <button type="button" onclick="removeStudentPhoto('${student.id}', event)" class="hover:text-red-400 text-[11px] text-slate-500 transition">
                   ${t.removePhoto}
                 </button>
               ` : ''}
@@ -20741,69 +21033,224 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
         `;
       }
 
-      // Render Body
+      // Render Structured Body
       const body = document.getElementById('drawer-body-content');
       if (body) {
         ensureStudentSkills(student);
         const sk = student.skills;
         const hw = sk.homework || {};
         const goals = Array.isArray(sk.customGoals) ? sk.customGoals : [];
+        const isCrmEditOpen = !!drawerCrmEditingMap[student.id];
+        const isAiOpen = !!drawerAiOpenMap[student.id];
+        const isAiThinking = !!drawerAiThinkingMap[student.id];
+        const aiHistory = Array.isArray(student.ai_chat_history) ? student.ai_chat_history : [];
+        const hasUndoSnap = !!studentProfileUndoMap[student.id];
+        const assignHwLabel = stripLeadingPlusSymbol(t.assignHomeworkBtn);
+        const addGoalLabel = stripLeadingPlusSymbol(t.addCustomGoalBtn);
 
-        // Active Homework Card (Universal Permanent)
-        const homeworkBannerHtml = (hw.task && hw.task.trim())
-          ? `
-          <div class="p-3.5 rounded-xl border ${hw.completed ? 'bg-emerald-950/40 border-emerald-500/40' : 'bg-amber-950/30 border-amber-500/40'} space-y-2">
-            <div class="flex items-center justify-between gap-2 flex-wrap">
+        // Optional Expandable Student AI Co-Pilot Card
+        const studentAiCardHtml = isAiOpen ? `
+          <div id="drawer-student-ai-panel" class="p-4 rounded-2xl bg-slate-950/90 border border-indigo-500/40 shadow-lg space-y-3">
+            <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-2">
-                <i data-lucide="clipboard-list" class="w-4 h-4 ${hw.completed ? 'text-emerald-400' : 'text-amber-400'}"></i>
-                <span class="text-xs font-bold text-white">${t.activeHomeworkTitle}</span>
-                ${hw.assignedDate ? `<span class="text-[10px] text-slate-400 font-mono">(${hw.assignedDate})</span>` : ''}
+                <span class="w-6 h-6 rounded-lg bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                </span>
+                <div>
+                  <div class="text-xs font-bold text-white">AI Profile Assistant · ${escapeHtml(student.name)}</div>
+                  <div class="text-[11px] text-slate-400">Speak or type additions to goals, homework, guardian details, or notes</div>
+                </div>
               </div>
               <div class="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onclick="toggleStudentHomework('${student.id}')"
-                  class="px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition ${hw.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30' : 'bg-amber-500 hover:bg-amber-400 text-slate-950'}"
-                >
-                  <i data-lucide="${hw.completed ? 'check' : 'circle'}" class="w-3.5 h-3.5"></i>
-                  <span>${hw.completed ? t.homeworkCompletedBadge : t.markHomeworkDone}</span>
-                </button>
-                <button
-                  type="button"
-                  onclick="clearStudentHomework('${student.id}')"
-                  title="${isHe ? 'מחק שיעורי בית' : 'Clear homework'}"
-                  class="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-slate-800 transition"
-                >
+                ${hasUndoSnap ? `
+                  <button type="button" id="btn-undo-student-ai" onclick="undoStudentProfileAiChange('${student.id}')" class="px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/35 text-[11px] font-bold flex items-center gap-1 transition">
+                    <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                    <span>Undo AI</span>
+                  </button>
+                ` : ''}
+                <button type="button" onclick="toggleStudentDrawerAi('${student.id}')" class="text-slate-500 hover:text-white p-1 rounded-lg">
                   <i data-lucide="x" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
             </div>
-            <p class="text-xs ${hw.completed ? 'line-through text-slate-400' : 'text-amber-200 font-medium'} leading-relaxed pl-6 rtl:pl-0 rtl:pr-6">
+
+            ${aiHistory.length > 0 ? `
+              <div class="space-y-2 max-h-40 overflow-y-auto pr-1">
+                ${aiHistory.slice(-6).map(m => `
+                  <div dir="auto" class="p-2.5 rounded-xl text-xs leading-relaxed ${m.role === 'user' ? 'bg-brand-600/20 border border-brand-500/30 text-white ml-6' : 'bg-slate-900 border border-slate-800 text-slate-200 mr-6'}">
+                    ${escapeHtml(m.text)}
+                  </div>
+                `).join('')}
+                ${isAiThinking ? `<div class="text-[11px] text-amber-400 font-mono animate-pulse">Updating ${escapeHtml(student.name)}'s profile...</div>` : ''}
+              </div>
+            ` : ''}
+
+            <div class="flex items-end gap-2">
+              <textarea
+                id="input-student-drawer-ai-prompt"
+                dir="auto"
+                rows="2"
+                placeholder="e.g. Add goal to practice Kriah daily, assign homework p.12, or add guardian Rachel 555-0192..."
+                onkeydown="if(event.key==='Enter' && !event.shiftKey && !event.isComposing && event.keyCode !== 229){ event.preventDefault(); sendStudentProfileAiMessage('${student.id}'); }"
+                class="flex-1 bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400 resize-none leading-relaxed"
+              ></textarea>
+              <button type="button" onclick="sendStudentProfileAiMessage('${student.id}')" class="px-3.5 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs shrink-0 transition active:scale-95 flex items-center gap-1">
+                <span>Apply</span>
+                <i data-lucide="send" class="w-3 h-3"></i>
+              </button>
+            </div>
+          </div>
+        ` : '';
+
+        // 1. Clean Summary Strip / Collapsible Profile & Guardian Info (No giant wall of blank textboxes!)
+        const hasPopulatedCrm = Boolean(
+          guardian.name || guardian.phone || guardian.email || currentHourlyRate ||
+          (currentGradeLevel && currentGradeLevel !== 'Standard / All Levels') ||
+          student.subject || student.parsha
+        );
+
+        const cardCrmGuardianHtml = isCrmEditOpen ? `
+          <div id="drawer-crm-edit-card" class="p-4 rounded-2xl bg-slate-950/80 border border-amber-500/35 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>Edit Student Details & Guardian</span>
+              </span>
+              <button type="button" onclick="toggleStudentDrawerCrmEdit('${student.id}')" class="px-3 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/35 text-[11px] font-bold transition">
+                Done
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+              <div>
+                <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Status</label>
+                <select id="drawer-student-status-select" onchange="updateStudentDrawerField('${student.id}', 'status', this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400">
+                  <option value="active" ${currentStatus === 'active' ? 'selected' : ''}>${t.statusActive || 'Active'}</option>
+                  <option value="paused" ${currentStatus === 'paused' ? 'selected' : ''}>${t.statusPaused || 'Paused'}</option>
+                  <option value="completed" ${currentStatus === 'completed' ? 'selected' : ''}>${t.statusCompleted || 'Completed'}</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">${t.gradeLevelLabel || 'Academic Stage'}</label>
+                <input type="text" id="drawer-student-grade-input" value="${escapeHtml(currentGradeLevel)}" onchange="updateStudentDrawerField('${student.id}', 'gradeLevel', this.value)" placeholder="e.g. Middle School (7th)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400" />
+              </div>
+              <div>
+                <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">${t.hourlyRateLabel || 'Lesson Fee / Rate'}</label>
+                <input type="text" id="drawer-student-hourly-rate-input" value="${escapeHtml(currentHourlyRate)}" onchange="updateStudentDrawerField('${student.id}', 'hourlyRate', this.value)" placeholder="e.g. $60/hr" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+              <div>
+                <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">${t.guardianNameLabel || 'Guardian Name'}</label>
+                <input type="text" id="drawer-student-guardian-name-input" value="${escapeHtml(guardian.name || '')}" onchange="updateStudentDrawerGuardianField('${student.id}', 'name', this.value)" placeholder="e.g. Rachel Cohen" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400" />
+              </div>
+              <div>
+                <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">${t.guardianPhoneLabel || 'Phone / WhatsApp'}</label>
+                <input type="tel" id="drawer-student-guardian-phone-input" value="${escapeHtml(guardian.phone || '')}" onchange="updateStudentDrawerGuardianField('${student.id}', 'phone', this.value)" placeholder="e.g. +1 555-0192" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400" />
+              </div>
+              <div>
+                <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">${t.guardianEmailLabel || 'Guardian Email'}</label>
+                <input type="email" id="drawer-student-guardian-email-input" value="${escapeHtml(guardian.email || '')}" onchange="updateStudentDrawerGuardianField('${student.id}', 'email', this.value)" placeholder="e.g. parent@example.com" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400" />
+              </div>
+            </div>
+          </div>
+        ` : (hasPopulatedCrm ? `
+          <div id="drawer-profile-summary-card" class="px-4 py-3 rounded-2xl bg-slate-950/65 border border-slate-800/90 flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-x-4 gap-y-1.5 flex-wrap text-xs">
+              ${(student.subject || student.parsha) ? `
+                <div class="flex items-center gap-1.5 text-slate-300">
+                  <span class="text-slate-500">Focus:</span>
+                  <span dir="auto" class="font-semibold text-white">${escapeHtml(student.subject || student.parsha)}</span>
+                </div>
+              ` : ''}
+              ${currentHourlyRate ? `
+                <div class="flex items-center gap-1.5 text-slate-300">
+                  <span class="text-slate-500">Rate:</span>
+                  <span class="font-mono font-semibold text-amber-300">${escapeHtml(currentHourlyRate)}</span>
+                </div>
+              ` : ''}
+              ${guardian.name ? `
+                <div class="flex items-center gap-1.5 text-slate-300">
+                  <span class="text-slate-500">Guardian:</span>
+                  <span dir="auto" class="font-semibold text-white">${escapeHtml(guardian.name)}</span>
+                </div>
+              ` : ''}
+              ${guardian.phone ? `<span class="text-[11px] font-mono text-slate-400">${escapeHtml(guardian.phone)}</span>` : ''}
+              ${guardian.email ? `<span class="text-[11px] font-mono text-slate-400">${escapeHtml(guardian.email)}</span>` : ''}
+            </div>
+            <div class="flex items-center gap-1.5 flex-wrap shrink-0">
+              ${guardian.phone ? `
+                <a href="https://wa.me/${cleanPhone}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-lg bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600/30 text-[11px] font-semibold flex items-center gap-1 transition">
+                  <i data-lucide="message-circle" class="w-3 h-3 text-emerald-400"></i>
+                  <span>WhatsApp</span>
+                </a>
+                <a href="tel:${guardian.phone}" class="px-2.5 py-1 rounded-lg bg-sky-600/20 text-sky-300 border border-sky-500/30 hover:bg-sky-600/30 text-[11px] font-semibold flex items-center gap-1 transition">
+                  <i data-lucide="phone-call" class="w-3 h-3 text-sky-400"></i>
+                  <span>${isHe ? 'חייג' : 'Call'}</span>
+                </a>
+              ` : ''}
+              ${guardian.email ? `
+                <a href="mailto:${guardian.email}?subject=${encodeURIComponent((isHe ? 'עדכון לימודי: ' : 'Tutoring Update: ') + student.name)}" class="px-2.5 py-1 rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30 text-[11px] font-semibold flex items-center gap-1 transition">
+                  <i data-lucide="mail" class="w-3 h-3 text-indigo-400"></i>
+                  <span>${isHe ? 'אימייל' : 'Email'}</span>
+                </a>
+              ` : ''}
+              <button type="button" onclick="toggleStudentDrawerCrmEdit('${student.id}')" class="px-2 py-1 rounded-lg text-[11px] text-slate-400 hover:text-white hover:bg-slate-800 transition">Edit</button>
+            </div>
+          </div>
+        ` : `
+          <div id="drawer-profile-summary-card" class="px-4 py-2.5 rounded-2xl bg-slate-950/45 border border-dashed border-slate-800 flex items-center justify-between gap-2 text-xs">
+            <span class="text-slate-500">Stage, guardian contact &amp; fee details are empty</span>
+            <button type="button" onclick="toggleStudentDrawerCrmEdit('${student.id}')" class="text-amber-400 hover:text-amber-300 font-semibold text-[11px] flex items-center gap-1 transition">
+              <i data-lucide="plus" class="w-3 h-3"></i>
+              <span>Add Guardian &amp; Fee Info</span>
+            </button>
+          </div>
+        `);
+
+        // 2. Clean Active Homework Card (No double ++)
+        const homeworkBannerHtml = (hw.task && hw.task.trim())
+          ? `
+          <div class="p-3.5 rounded-2xl border ${hw.completed ? 'bg-emerald-950/35 border-emerald-500/35' : 'bg-amber-950/25 border-amber-500/35'} space-y-2">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="flex items-center gap-2">
+                <i data-lucide="clipboard-list" class="w-4 h-4 ${hw.completed ? 'text-emerald-400' : 'text-amber-400'}"></i>
+                <span class="text-xs font-bold text-white">${t.activeHomeworkTitle}</span>
+                ${hw.assignedDate ? `<span class="text-[10px] text-slate-400 font-mono">(${escapeHtml(hw.assignedDate)})</span>` : ''}
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="toggleStudentHomework('${student.id}')" class="px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition ${hw.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30' : 'bg-amber-500 hover:bg-amber-400 text-slate-950'}">
+                  <i data-lucide="${hw.completed ? 'check' : 'circle'}" class="w-3.5 h-3.5"></i>
+                  <span>${hw.completed ? t.homeworkCompletedBadge : t.markHomeworkDone}</span>
+                </button>
+                <button type="button" onclick="clearStudentHomework('${student.id}')" title="${isHe ? 'מחק שיעורי בית' : 'Clear homework'}" class="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-slate-800 transition">
+                  <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+            <p dir="auto" class="text-xs sm:text-sm ${hw.completed ? 'line-through text-slate-400' : 'text-amber-100 font-medium'} leading-relaxed pl-6 rtl:pl-0 rtl:pr-6">
               ${escapeHtml(hw.task)}
             </p>
           </div>
           `
           : `
-          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/50 border border-dashed border-slate-800 text-xs">
-            <span class="text-slate-400 flex items-center gap-1.5">
+          <div class="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-slate-950/45 border border-slate-800/80 text-xs">
+            <span class="text-slate-400 flex items-center gap-2">
               <i data-lucide="clipboard-list" class="w-3.5 h-3.5 text-slate-500"></i>
               <span>${isHe ? 'אין שיעורי בית פעילים כרגע' : 'No active homework'}</span>
             </span>
-            <button
-              type="button"
-              onclick="promptAddStudentHomework('${student.id}')"
-              class="text-amber-400 hover:text-amber-300 font-medium hover:underline text-[11px] flex items-center gap-1"
-            >
+            <button type="button" onclick="promptAddStudentHomework('${student.id}')" class="text-amber-400 hover:text-amber-300 font-semibold text-[11px] flex items-center gap-1 transition">
               <i data-lucide="plus" class="w-3 h-3"></i>
-              <span>${t.assignHomeworkBtn}</span>
+              <span>${escapeHtml(assignHwLabel)}</span>
             </button>
           </div>
           `;
 
-        // Custom Goals Checklist (Universal Permanent)
+        // 3. Clean Custom Goals Checklist (No double ++, inline quick add)
         const cardCustomGoalsHtml = `
-          <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
-            <div class="flex items-center justify-between">
+          <div class="p-4 rounded-2xl bg-slate-950/65 border border-slate-800/90 space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
               <span class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
                 <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
                 <span>${t.customGoalsTitle}</span>
@@ -20811,44 +21258,35 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
                   ${goals.filter(g => g.completed).length}/${goals.length}
                 </span>
               </span>
-              <button
-                type="button"
-                onclick="promptAddStudentCustomGoal('${student.id}')"
-                class="text-emerald-400 hover:text-emerald-300 text-[11px] font-semibold flex items-center gap-1"
-              >
+              <button type="button" onclick="addQuickStudentGoalFromDrawer('${student.id}')" class="text-emerald-400 hover:text-emerald-300 text-[11px] font-semibold flex items-center gap-1 transition">
                 <i data-lucide="plus" class="w-3 h-3"></i>
-                <span>${t.addCustomGoalBtn}</span>
+                <span>${escapeHtml(addGoalLabel)}</span>
               </button>
             </div>
 
-            <div class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+            <div class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
               ${goals.length === 0 ? `
-                <p class="text-[11px] text-slate-500 italic py-2">${isHe ? 'אין יעדים מיוחדים עדיין. לחץ + להוספה.' : 'No custom goals yet. Click + to add.'}</p>
+                <p class="text-[11px] text-slate-500 italic py-1">${isHe ? 'אין יעדים אישיים עדיין.' : 'No learning goals added yet.'}</p>
               ` : goals.map(g => `
-                <div class="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-slate-900/60 border border-slate-800/80 text-xs">
-                  <label class="flex items-center gap-2 cursor-pointer min-w-0 select-none">
-                    <input
-                      type="checkbox"
-                      ${g.completed ? 'checked' : ''}
-                      onchange="toggleStudentCustomGoal('${student.id}', '${g.id}')"
-                      class="rounded border-slate-700 text-emerald-600 focus:ring-emerald-500 bg-slate-950 w-3.5 h-3.5"
-                    />
-                    <span class="truncate ${g.completed ? 'line-through text-slate-500' : 'text-slate-200'}">${escapeHtml(g.title)}</span>
+                <div class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-slate-900/65 border border-slate-800/80 text-xs">
+                  <label class="flex items-center gap-2 cursor-pointer min-w-0 select-none flex-1">
+                    <input type="checkbox" ${g.completed ? 'checked' : ''} onchange="toggleStudentCustomGoal('${student.id}', '${g.id}')" class="rounded border-slate-700 text-emerald-600 focus:ring-emerald-500 bg-slate-950 w-3.5 h-3.5 shrink-0" />
+                    <span dir="auto" class="truncate ${g.completed ? 'line-through text-slate-500' : 'text-slate-200'}">${escapeHtml(g.title)}</span>
                   </label>
-                  <button
-                    type="button"
-                    onclick="deleteStudentCustomGoal('${student.id}', '${g.id}')"
-                    class="text-slate-500 hover:text-red-400 p-0.5"
-                  >
+                  <button type="button" onclick="deleteStudentCustomGoal('${student.id}', '${g.id}')" class="text-slate-500 hover:text-red-400 p-0.5 shrink-0">
                     <i data-lucide="trash-2" class="w-3 h-3"></i>
                   </button>
                 </div>
               `).join('')}
             </div>
+
+            <div class="flex items-center gap-2 pt-1">
+              <input id="input-drawer-quick-goal" dir="auto" type="text" placeholder="${isHe ? '+ הוסף יעד מהיר ולחץ Enter...' : 'Type a new learning goal & press Enter...'}" onkeydown="if(event.key==='Enter'){ event.preventDefault(); addQuickStudentGoalFromDrawer('${student.id}'); }" class="flex-1 bg-slate-900/80 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400" />
+            </div>
           </div>
         `;
 
-        // Preserved ceremony definitions for backwards compatibility with tests
+        // Preserved ceremony definitions for backwards compatibility with existing audio tests
         const cardParshaReadingHtml = `
           <div class="hidden" aria-hidden="true">
             <button onclick="startVoiceRecording('student_parsha', '${student.id}')"></button>
@@ -20857,147 +21295,104 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
           </div>
         `;
 
-        // Unified Curriculum Courses Progress & Checklist for Student
+        // 4. Clean Structured Vertical Course & Lesson List (Zero cramped truncated 3-column boxes!)
         let coursesCurriculumHtml = '';
         if (activeCourses.length === 0) {
           coursesCurriculumHtml = `
             <div class="text-center py-8 px-5 bg-slate-950/60 border border-dashed border-slate-800 rounded-2xl space-y-3">
-              <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 mx-auto">
-                <i data-lucide="book-open" class="w-6 h-6"></i>
+              <div class="w-11 h-11 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 mx-auto">
+                <i data-lucide="book-open" class="w-5 h-5"></i>
               </div>
               <div class="space-y-1">
-                <h4 class="text-sm font-bold text-white">${isHe ? 'אין עדיין קורסים או שיעורים' : 'No courses or classes created yet'}</h4>
-                <p class="text-xs text-slate-400 max-w-sm mx-auto">${isHe ? 'בנה את הקורסים והשיעורים שלך בלשונית לימוד, והם יופיעו כאן באופן מיידי עבור כל תלמיד.' : 'Build your curriculum courses and classes in the Study tab, and they will automatically appear here for this student.'}</p>
+                <h4 class="text-sm font-bold text-white">${isHe ? 'אין עדיין קורסים או שיעורים' : 'No courses or lessons created yet'}</h4>
+                <p class="text-xs text-slate-400 max-w-sm mx-auto">${isHe ? 'בנה את הקורסים והשיעורים שלך בלשונית השיעורים, והם יופיעו כאן בצורה מסודרת.' : 'Create your courses and lessons in the Classes tab, and each lesson will appear here in a clean checklist.'}</p>
               </div>
-              <button
-                type="button"
-                onclick="switchTab('study'); closeStudentDrawer();"
-                class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition shadow"
-              >
-                ${isHe ? 'עבור ללשונית לימוד' : 'Go to Study Tab'}
+              <button type="button" onclick="switchTab('study'); closeStudentDrawer();" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition shadow">
+                ${isHe ? 'עבור ללשונית השיעורים' : 'Go to Classes Tab'}
               </button>
             </div>
           `;
         } else {
           coursesCurriculumHtml = `
-            <div class="space-y-4">
-              <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-amber-400">
+            <div class="space-y-3.5">
+              <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-amber-400 px-0.5">
                 <span class="flex items-center gap-1.5">
                   <i data-lucide="layers" class="w-3.5 h-3.5 text-amber-400"></i>
-                  <span>${isHe ? 'מסלולי לימוד ושיעורים לתלמיד' : 'Student Curriculum & Classes'}</span>
+                  <span>${isHe ? 'קורסים ושיעורים' : 'Enrolled Courses & Lessons'}</span>
                 </span>
-                <span class="text-[10px] text-slate-500 font-mono font-normal">${completedClasses} / ${totalClasses} ${isHe ? 'הושלמו' : 'Completed'}</span>
+                <span class="text-[11px] text-slate-400 font-mono font-normal">${completedClasses} / ${totalClasses} ${isHe ? 'הושלמו' : 'Completed'}</span>
               </div>
 
               ${activeCourses.map(course => {
                 const cTitle = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
                 const lessons = course.lessons || [];
-                let lastCompletedLesson = null;
                 let nextLessonToTeach = null;
-
                 const completedCount = lessons.filter(l => {
                   const key = course.id + '_' + l.id;
                   const isDone = !!(student.completedTopics && (student.completedTopics[key] || student.completedTopics[l.id]));
-                  if (isDone) {
-                    lastCompletedLesson = l;
-                  } else if (!nextLessonToTeach) {
-                    nextLessonToTeach = l;
-                  }
+                  if (!isDone && !nextLessonToTeach) nextLessonToTeach = l;
                   return isDone;
                 }).length;
                 const pct = lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0;
+                const isExpanded = drawerCourseExpandedMap[course.id] !== false;
 
                 return `
-                  <div class="space-y-2.5 p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
-                    <div class="flex items-center justify-between gap-2 flex-wrap">
-                      <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                        <span class="font-mono">${escapeHtml(course.icon || '✦')}</span>
-                        <span>${escapeHtml(cTitle)}</span>
-                      </h4>
-                      <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${pct === 100 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-300'} border border-slate-700">
-                        ${completedCount} / ${lessons.length} (${pct}%)
-                      </span>
-                    </div>
-
-                    <!-- Next Lesson Guidance Bar -->
-                    <div class="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-xs flex-wrap">
-                      <div class="flex items-center gap-3 flex-wrap text-[11px]">
-                        <div>
-                          <span class="text-slate-400">${isHe ? 'שיעור אחרון שלמד:' : 'Last Finished:'}</span>
-                          <span class="text-white font-semibold">
-                            ${lastCompletedLesson ? escapeHtml(cleanCurriculumName(isHe ? (lastCompletedLesson.title_he || lastCompletedLesson.title_en) : (lastCompletedLesson.title_en || lastCompletedLesson.title_he))) : (isHe ? 'טרם התחיל' : 'Not started yet')}
-                          </span>
+                  <div class="rounded-2xl bg-slate-950/70 border border-slate-800/90 overflow-hidden">
+                    <div class="px-4 py-3 flex items-center justify-between gap-2 flex-wrap bg-slate-900/50 border-b border-slate-800/70">
+                      <button type="button" onclick="toggleStudentDrawerCourseExpand('${course.id}')" class="flex items-center gap-2.5 min-w-0 text-left rtl:text-right group">
+                        <span class="text-base shrink-0">${escapeHtml(course.icon || '✦')}</span>
+                        <div class="min-w-0">
+                          <div dir="auto" class="text-xs sm:text-sm font-bold text-white group-hover:text-amber-300 transition truncate">${escapeHtml(cTitle)}</div>
                         </div>
-                        ${nextLessonToTeach ? `
-                          <span class="text-slate-600 font-bold">•</span>
-                          <div>
-                            <span class="text-amber-400 font-semibold">${isHe ? 'מומלץ לשיעור הבא:' : 'Next to Teach:'}</span>
-                            <span class="text-amber-200 font-bold">
-                              ${escapeHtml(cleanCurriculumName(isHe ? (nextLessonToTeach.title_he || nextLessonToTeach.title_en) : (nextLessonToTeach.title_en || nextLessonToTeach.title_he)))}
-                            </span>
-                          </div>
-                        ` : ''}
-                      </div>
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${pct === 100 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-300 border border-slate-700'} shrink-0">
+                          ${completedCount}/${lessons.length} (${pct}%)
+                        </span>
+                      </button>
 
                       <div class="flex items-center gap-1.5 shrink-0">
                         ${nextLessonToTeach ? `
-                          <button
-                            type="button"
-                            onclick="navigateToLesson('${course.id}', '${nextLessonToTeach.id}')"
-                            class="px-2.5 py-1 rounded-md bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] transition active:scale-95 flex items-center gap-1 shadow-sm"
-                            title="${isHe ? 'פתח שיעור מומלץ בלשונית לימוד' : 'Open next lesson in Study hub'}"
-                          >
+                          <button type="button" onclick="navigateToLesson('${course.id}', '${nextLessonToTeach.id}')" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[11px] transition active:scale-95 flex items-center gap-1 shadow-sm">
                             <i data-lucide="play" class="w-3 h-3 fill-current"></i>
-                            <span>${isHe ? 'למד שיעור הבא' : 'Teach Next'}</span>
+                            <span>${isHe ? 'פתח שיעור הבא' : 'Teach Next'}</span>
                           </button>
                         ` : ''}
-                        <button
-                          type="button"
-                          onclick="openBreakdownPlannerModal('${student.id}', '${course.id}')"
-                          class="px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-semibold transition active:scale-95 flex items-center gap-1 border border-slate-700"
-                          title="${isHe ? 'תכנן חלוקת שיעורים ביומן' : 'Plan schedule breakdown'}"
-                        >
+                        <button type="button" onclick="openBreakdownPlannerModal('${student.id}', '${course.id}')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-semibold transition flex items-center gap-1 border border-slate-700/70">
                           <i data-lucide="calendar-range" class="w-3 h-3 text-indigo-400"></i>
-                          <span>${isHe ? 'חלוקה לשיעורים' : 'Plan Breakdown'}</span>
+                          <span>${isHe ? 'חלוקה ליומן' : 'Plan'}</span>
                         </button>
                       </div>
                     </div>
 
-                    <!-- Classes Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                      ${lessons.map(lesson => {
-                        const key = course.id + '_' + lesson.id;
-                        const checked = !!(student.completedTopics && (student.completedTopics[key] || student.completedTopics[lesson.id]));
-                        const lTitle = cleanCurriculumName(isHe ? (lesson.title_he || lesson.title_en) : (lesson.title_en || lesson.title_he));
-                        return `
-                          <div
-                            class="group px-3 py-2 rounded-xl border text-xs flex items-center justify-between gap-2 transition ${
-                              checked
-                                ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200 shadow-sm'
-                                : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
-                            }"
-                          >
-                            <button
-                              type="button"
-                              onclick="navigateToLesson('${course.id}', '${lesson.id}')"
-                              class="flex items-center gap-2 min-w-0 flex-1 text-left rtl:text-right hover:text-amber-300 transition cursor-pointer select-none py-0.5"
-                              title="${isHe ? 'צפה בשיעור זה בלשונית לימוד' : 'View this lesson in Study hub'}"
-                            >
-                              <i data-lucide="book-open" class="w-3.5 h-3.5 shrink-0 text-amber-400/80 group-hover:text-amber-400 transition"></i>
-                              <span class="truncate font-medium">${escapeHtml(lTitle)}</span>
-                            </button>
-                            <button
-                              type="button"
-                              onclick="toggleTopicForStudent('${student.id}', '${key}', '${lesson.id}', event)"
-                              class="p-1 rounded-lg hover:bg-slate-800/80 transition shrink-0 active:scale-95"
-                              title="${checked ? (isHe ? 'סמן כלא הושלם' : 'Mark incomplete') : (isHe ? 'סמן כהושלם' : 'Mark completed')}"
-                            >
-                              <i data-lucide="${checked ? 'check-circle-2' : 'circle'}" class="w-4 h-4 ${checked ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'}"></i>
-                            </button>
-                          </div>
-                        `;
-                      }).join('')}
-                    </div>
+                    ${isExpanded ? `
+                      <div class="divide-y divide-slate-800/60">
+                        ${lessons.length === 0 ? `
+                          <div class="px-4 py-4 text-xs text-slate-500 italic">No lessons inside this course yet.</div>
+                        ` : lessons.map((lesson, lIdx) => {
+                          const key = course.id + '_' + lesson.id;
+                          const checked = !!(student.completedTopics && (student.completedTopics[key] || student.completedTopics[lesson.id]));
+                          const lTitle = cleanCurriculumName(isHe ? (lesson.title_he || lesson.title_en) : (lesson.title_en || lesson.title_he));
+                          const lNum = lesson.lesson_num || (lIdx + 1);
+                          return `
+                            <div class="px-4 py-2.5 flex items-center justify-between gap-3 transition ${checked ? 'bg-emerald-950/20' : 'hover:bg-slate-900/45'}">
+                              <button type="button" onclick="navigateToLesson('${course.id}', '${lesson.id}')" class="flex items-center gap-3 min-w-0 flex-1 text-left rtl:text-right group">
+                                <span class="w-6 h-6 rounded-lg text-[11px] font-mono font-bold flex items-center justify-center shrink-0 ${checked ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-900 text-slate-400 border border-slate-800'}">
+                                  ${lNum}
+                                </span>
+                                <span dir="auto" class="text-xs sm:text-sm font-medium ${checked ? 'text-emerald-200' : 'text-slate-200 group-hover:text-amber-300'} leading-snug transition">
+                                  ${escapeHtml(lTitle || 'Untitled Lesson')}
+                                </span>
+                              </button>
+                              <div class="flex items-center gap-2 shrink-0">
+                                ${lesson.duration ? `<span class="text-[10px] font-mono text-slate-500 hidden sm:inline">${escapeHtml(lesson.duration)}</span>` : ''}
+                                <button type="button" onclick="toggleTopicForStudent('${student.id}', '${key}', '${lesson.id}', event)" class="p-1 rounded-lg hover:bg-slate-800 transition active:scale-95" title="${checked ? 'Mark incomplete' : 'Mark completed'}">
+                                  <i data-lucide="${checked ? 'check-circle-2' : 'circle'}" class="w-4 h-4 ${checked ? 'text-emerald-400' : 'text-slate-600 hover:text-slate-300'}"></i>
+                                </button>
+                              </div>
+                            </div>
+                          `;
+                        }).join('')}
+                      </div>
+                    ` : ''}
                   </div>
                 `;
               }).join('')}
@@ -21005,170 +21400,43 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
           `;
         }
 
-        // Student CRM & Guardian Contact Card
-        const guardian = student.parentContact || { name: '', phone: '', email: '' };
-        const cleanPhone = (guardian.phone || '').replace(/[^0-9]/g, '');
-        const currentStatus = student.status || 'active';
-        const currentGradeLevel = student.gradeLevel || 'Standard / All Levels';
-        const currentHourlyRate = student.hourlyRate || '';
-
-        const cardCrmGuardianHtml = `
-          <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
-            <div class="flex items-center justify-between gap-2 flex-wrap">
-              <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i>
-                <span>${t.guardianSectionTitle || 'Student CRM & Guardian'}</span>
-              </span>
-              <div class="flex items-center gap-1.5">
-                <select
-                  id="drawer-student-status-select"
-                  onchange="updateStudentDrawerField('${student.id}', 'status', this.value)"
-                  class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] font-semibold text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
-                >
-                  <option value="active" ${currentStatus === 'active' ? 'selected' : ''}>${t.statusActive || 'Active'}</option>
-                  <option value="paused" ${currentStatus === 'paused' ? 'selected' : ''}>${t.statusPaused || 'Paused'}</option>
-                  <option value="completed" ${currentStatus === 'completed' ? 'selected' : ''}>${t.statusCompleted || 'Completed'}</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Grade Level & Hourly Rate Row -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              <div class="p-2 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
-                <label class="text-[10px] uppercase font-bold text-slate-400 block">${t.gradeLevelLabel || 'Academic Stage'}</label>
-                <input
-                  type="text"
-                  id="drawer-student-grade-input"
-                  value="${escapeHtml(currentGradeLevel)}"
-                  onchange="updateStudentDrawerField('${student.id}', 'gradeLevel', this.value)"
-                  placeholder="${t.gradeLevelPlaceholder || 'e.g. High School (10th)'}"
-                  class="w-full bg-slate-950 border border-slate-700/80 rounded px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
-                />
-              </div>
-              <div class="p-2 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
-                <label class="text-[10px] uppercase font-bold text-slate-400 block">${t.hourlyRateLabel || 'Lesson Fee / Hourly Rate'}</label>
-                <input
-                  type="text"
-                  id="drawer-student-hourly-rate-input"
-                  value="${escapeHtml(currentHourlyRate)}"
-                  onchange="updateStudentDrawerField('${student.id}', 'hourlyRate', this.value)"
-                  placeholder="${t.hourlyRatePlaceholder || 'e.g. $60/hr or 200 ₪'}"
-                  class="w-full bg-slate-950 border border-slate-700/80 rounded px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
-                />
-              </div>
-            </div>
-
-            <!-- Parent / Guardian Contact Details with 1-Click Actions -->
-            <div class="p-2.5 rounded-lg bg-slate-900/40 border border-slate-800/80 space-y-2">
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-                <div>
-                  <label class="text-[10px] text-slate-400 block mb-0.5">${t.guardianNameLabel || 'Guardian Name'}</label>
-                  <input
-                    type="text"
-                    id="drawer-student-guardian-name-input"
-                    value="${escapeHtml(guardian.name || '')}"
-                    onchange="updateStudentDrawerGuardianField('${student.id}', 'name', this.value)"
-                    placeholder="e.g. Rachel Cohen"
-                    class="w-full bg-slate-950 border border-slate-700/80 rounded px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
-                  />
-                </div>
-                <div>
-                  <label class="text-[10px] text-slate-400 block mb-0.5">${t.guardianPhoneLabel || 'Phone / WhatsApp'}</label>
-                  <input
-                    type="tel"
-                    id="drawer-student-guardian-phone-input"
-                    value="${escapeHtml(guardian.phone || '')}"
-                    onchange="updateStudentDrawerGuardianField('${student.id}', 'phone', this.value)"
-                    placeholder="e.g. +1 555-0192"
-                    class="w-full bg-slate-950 border border-slate-700/80 rounded px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
-                  />
-                </div>
-                <div>
-                  <label class="text-[10px] text-slate-400 block mb-0.5">${t.guardianEmailLabel || 'Email'}</label>
-                  <input
-                    type="email"
-                    id="drawer-student-guardian-email-input"
-                    value="${escapeHtml(guardian.email || '')}"
-                    onchange="updateStudentDrawerGuardianField('${student.id}', 'email', this.value)"
-                    placeholder="e.g. parent@example.com"
-                    class="w-full bg-slate-950 border border-slate-700/80 rounded px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
-                  />
-                </div>
-              </div>
-
-              <!-- Quick Communication Action Bar -->
-              <div class="flex items-center gap-2 pt-1 flex-wrap">
-                ${guardian.phone ? `
-                  <a
-                    href="https://wa.me/${cleanPhone}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="px-2.5 py-1 rounded-lg bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600/30 text-[11px] font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-2xs"
-                  >
-                    <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
-                    <span>WhatsApp</span>
-                  </a>
-                  <a
-                    href="tel:${guardian.phone}"
-                    class="px-2.5 py-1 rounded-lg bg-sky-600/20 text-sky-300 border border-sky-500/30 hover:bg-sky-600/30 text-[11px] font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-2xs"
-                  >
-                    <i data-lucide="phone-call" class="w-3.5 h-3.5 text-sky-400"></i>
-                    <span>${isHe ? 'חייג' : 'Call'}</span>
-                  </a>
-                ` : ''}
-                ${guardian.email ? `
-                  <a
-                    href="mailto:${guardian.email}?subject=${encodeURIComponent((isHe ? 'עדכון לימודי: ' : 'Tutoring Update: ') + student.name)}"
-                    class="px-2.5 py-1 rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30 text-[11px] font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-2xs"
-                  >
-                    <i data-lucide="mail" class="w-3.5 h-3.5 text-indigo-400"></i>
-                    <span>${isHe ? 'שלח אימייל' : 'Email'}</span>
-                  </a>
-                ` : ''}
-                ${!guardian.phone && !guardian.email ? `
-                  <span class="text-[11px] text-slate-500 italic">${isHe ? 'הזן טלפון או אימייל להפעלת לחצני חיוג ווואטסאפ מהירים' : 'Add phone or email above for 1-click WhatsApp, Call, and Email shortcuts'}</span>
-                ` : ''}
-              </div>
-            </div>
-          </div>
-        `;
+        // 5. Full-Width Auto-Growing Tutor Notes (Zero squished side Save button!)
+        const noteRows = typeof estimateTextareaRows === 'function' ? estimateTextareaRows(student.notes || '', 3, 12) : 3;
 
         body.innerHTML = `
+          ${studentAiCardHtml}
+          ${cardCrmGuardianHtml}
           ${homeworkBannerHtml}
           ${cardCustomGoalsHtml}
-          ${cardCrmGuardianHtml}
 
-          <!-- Collaborative Notes Editor -->
-          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2">
-            <label class="block text-xs font-semibold text-slate-300 flex items-center justify-between">
-              <span class="flex items-center gap-1.5">
+          <!-- Full-Width Tutor Notes (Auto-Grows & Cloud Auto-Saves) -->
+          <div class="bg-slate-950/65 border border-slate-800/90 rounded-2xl p-4 space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-slate-200 flex items-center gap-1.5">
                 <i data-lucide="file-text" class="w-3.5 h-3.5 text-amber-400"></i>
-                ${t.collaborativeNotesTitle}
+                <span>${t.collaborativeNotesTitle}</span>
               </span>
-              <span class="text-[10px] text-slate-500 font-normal">Auto-saves to cloud</span>
-            </label>
-            <div class="flex gap-2">
-              <textarea
-                id="drawer-student-notes-input" oninput="handleDrawerNotesInput('${student.id}', this.value)"
-                rows="2"
-                placeholder="${t.notesPlaceholder}"
-                class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-              >${student.notes || ''}</textarea>
-              <button
-                onclick="saveDrawerStudentNotes('${student.id}')"
-                class="px-3.5 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-lg self-end active:scale-95 transition whitespace-nowrap"
-              >
-                ${t.saveNotes}
-              </button>
+              <span class="text-[10px] font-mono text-emerald-400/90">✓ Auto-saves</span>
             </div>
+            <textarea
+              id="drawer-student-notes-input"
+              dir="auto"
+              rows="${noteRows}"
+              oninput="handleDrawerNotesInput('${student.id}', this.value); if(typeof autoGrowStudioTextarea==='function'){ autoGrowStudioTextarea(this); }"
+              onblur="saveDrawerStudentNotes('${student.id}')"
+              placeholder="${t.notesPlaceholder}"
+              class="studio-autogrow w-full bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 leading-relaxed resize-none"
+            >${escapeHtml(student.notes || '')}</textarea>
           </div>
 
-          <!-- Courses & Classes Track for this Student -->
           ${coursesCurriculumHtml}
           ${cardParshaReadingHtml}
         `;
       }
 
+      if (typeof body?.querySelectorAll === 'function' && typeof autoGrowStudioTextarea === 'function') {
+        body.querySelectorAll('textarea.studio-autogrow').forEach(autoGrowStudioTextarea);
+      }
       if (window.lucide && typeof lucide.createIcons === 'function') {
         lucide.createIcons();
       }
@@ -21637,6 +21905,12 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       } catch (e) {
         console.error("Failed to save storage:", e);
       }
+    }
+
+    function startAiStudentOnboardingFromModal() {
+      if (typeof closeAddStudentModal === 'function') closeAddStudentModal();
+      if (typeof switchTab === 'function') switchTab('ai');
+      if (typeof applyAiQuickPrompt === 'function') applyAiQuickPrompt('add_student');
     }
 
     function openAddStudentModal() {
@@ -23890,6 +24164,39 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
                   </button>
                 </div>
               ` : ''}
+              ${msg.pendingStudentDraft ? `
+                <div class="mt-2.5 p-3 rounded-xl bg-slate-900/95 border border-emerald-500/40 space-y-2.5 shadow-sm">
+                  <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0">
+                        <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+                      </span>
+                      <div class="min-w-0">
+                        <div class="text-xs font-bold text-white truncate">${escapeHtml(msg.pendingStudentDraft.name || 'New Student Draft')}</div>
+                        <div class="text-[10px] text-emerald-300/80">Ready to build profile</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-slate-300">
+                    ${msg.pendingStudentDraft.subject ? `<div><span class="text-slate-500">Focus:</span> <strong class="text-white">${escapeHtml(msg.pendingStudentDraft.subject)}</strong></div>` : ''}
+                    ${msg.pendingStudentDraft.gradeLevel && msg.pendingStudentDraft.gradeLevel !== 'Standard / All Levels' ? `<div><span class="text-slate-500">Stage:</span> ${escapeHtml(msg.pendingStudentDraft.gradeLevel)}</div>` : ''}
+                    ${(msg.pendingStudentDraft.gradeOrDate || msg.pendingStudentDraft.teachingDuration) ? `<div><span class="text-slate-500">Timeline:</span> ${escapeHtml([msg.pendingStudentDraft.teachingDuration, msg.pendingStudentDraft.gradeOrDate].filter(Boolean).join(' · '))}</div>` : ''}
+                    ${msg.pendingStudentDraft.hourlyRate ? `<div><span class="text-slate-500">Fee:</span> ${escapeHtml(msg.pendingStudentDraft.hourlyRate)}</div>` : ''}
+                    ${msg.pendingStudentDraft.guardianName ? `<div><span class="text-slate-500">Guardian:</span> ${escapeHtml(msg.pendingStudentDraft.guardianName)}</div>` : ''}
+                    ${msg.pendingStudentDraft.guardianPhone ? `<div><span class="text-slate-500">Phone:</span> ${escapeHtml(msg.pendingStudentDraft.guardianPhone)}</div>` : ''}
+                    ${msg.pendingStudentDraft.homeworkTask ? `<div class="sm:col-span-2"><span class="text-slate-500">First Homework:</span> ${escapeHtml(msg.pendingStudentDraft.homeworkTask)}</div>` : ''}
+                    ${(Array.isArray(msg.pendingStudentDraft.customGoals) && msg.pendingStudentDraft.customGoals.length > 0) ? `<div class="sm:col-span-2"><span class="text-slate-500">Goals:</span> ${escapeHtml(msg.pendingStudentDraft.customGoals.join(', '))}</div>` : ''}
+                    ${msg.pendingStudentDraft.notes ? `<div class="sm:col-span-2 text-slate-400" dir="auto"><span class="text-slate-500">Notes:</span> ${escapeHtml(msg.pendingStudentDraft.notes)}</div>` : ''}
+                  </div>
+                  <div class="flex items-center justify-end gap-2 pt-1 border-t border-slate-800/80">
+                    <button type="button" onclick="cancelAiPendingStudent()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold transition">Cancel</button>
+                    <button type="button" id="btn-ai-create-student-profile" onclick="createStudentFromAiPendingProfile()" class="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-[11px] transition active:scale-95 flex items-center gap-1 shadow">
+                      <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                      <span>${isHe ? 'צור פרופיל תלמיד' : 'Create Profile'}</span>
+                    </button>
+                  </div>
+                </div>
+              ` : ''}
               ${msg.createdCourse ? `
                 <div class="mt-2.5 p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-between gap-3 shadow-sm">
                   <div class="flex items-center gap-2.5 min-w-0">
@@ -23979,22 +24286,75 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       if (typeof closeStudentDrawer === 'function') {
         closeStudentDrawer();
       }
-      navigateToCourse(courseId);
-      if (!APP_STATE.expandedCustomLessonIds) APP_STATE.expandedCustomLessonIds = {};
-      APP_STATE.expandedCustomLessonIds[lessonId] = true;
-      renderLessonsCategoryView();
-      setTimeout(() => {
-        const el = document.getElementById('custom-lesson-card-' + lessonId);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (typeof openCourseClassesView === 'function' && courseId) {
+        switchTab('study');
+        switchStudyCategory('lessons');
+        openCourseClassesView(courseId);
+        if (typeof selectStudioClass === 'function' && lessonId) {
+          selectStudioClass(lessonId);
         }
-      }, 250);
+      } else {
+        navigateToCourse(courseId);
+      }
+      if (!APP_STATE.expandedCustomLessonIds) APP_STATE.expandedCustomLessonIds = {};
+      if (lessonId) APP_STATE.expandedCustomLessonIds[lessonId] = true;
     }
 
     window.navigateToCourse = navigateToCourse;
     window.navigateToLesson = navigateToLesson;
 
+    function startAiAddStudentOnboarding() {
+      const isHe = APP_STATE.lang === 'he';
+      if (!Array.isArray(APP_STATE.aiMessages)) APP_STATE.aiMessages = [];
+      APP_STATE.aiPendingStudent = {
+        active: true,
+        draft: {
+          name: '',
+          subject: '',
+          gradeLevel: 'Standard / All Levels',
+          gradeOrDate: '',
+          teachingDuration: '',
+          status: 'active',
+          guardianName: '',
+          guardianPhone: '',
+          guardianEmail: '',
+          hourlyRate: '',
+          notes: '',
+          customGoals: [],
+          homeworkTask: ''
+        }
+      };
+
+      const guideText = isHe
+        ? `בוא נבנה יחד פרופיל תלמיד חדש! ענה על השאלות שחשובות לך (אפשר לדלג על מה שלא רלוונטי):\n\n1. מה **שם התלמיד** (וגיל / כיתה)?\n2. איזה **מקצוע או קורס** תלמדו וכמה זמן (או תאריך יעד)?\n3. איך הוא לומד הכי טוב (חוזקות, אתגרים, תחומי עניין)?\n4. פרטי **הורה ותעריף שיעור** (אופציונלי)?\n5. **מטרה ראשונה או שיעורי בית** להתחיל איתם?`
+        : `Let's build a new student profile together! Answer whichever questions you'd like (skip anything optional), and click **Create Profile** whenever you're ready:\n\n1. What is the student's **name** (and optional age or grade level)?\n2. What **subjects or courses** are you teaching, and **how long** are you teaching them (or target date)?\n3. How do they learn best (strengths, pace, challenges, or hobbies/interests)?\n4. Optional **parent / guardian contact & lesson fee**?\n5. Any **initial goal or first homework**?`;
+
+      APP_STATE.aiMessages.push({
+        role: 'model',
+        content: guideText
+      });
+      renderAiMessages();
+      const input = document.getElementById('ai-chat-input');
+      if (input) {
+        input.value = '';
+        input.placeholder = isHe ? 'ענה כאן בחופשיות (לדוגמה: שמו דניאל, בן 12, לומד מתמטיקה לחצי שנה...)' : 'Reply naturally (e.g. His name is Daniel, age 12, learning Algebra for 6 months...)';
+        input.focus();
+      }
+    }
+
+    function cancelAiPendingStudent() {
+      APP_STATE.aiPendingStudent = null;
+      const input = document.getElementById('ai-chat-input');
+      if (input) input.placeholder = 'Ask anything or give a command (Hebrew or English)...';
+      renderAiMessages();
+      showToast('Student setup cancelled');
+    }
+
     function applyAiQuickPrompt(promptKey) {
+      if (promptKey === 'add_student') {
+        startAiAddStudentOnboarding();
+        return;
+      }
       const input = document.getElementById('ai-chat-input');
       if (!input) return;
       const isHe = APP_STATE.lang === 'he';
@@ -24009,7 +24369,6 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
         connect_lesson: isHe
           ? 'יש לי רעיון לשיעור על התגברות על לחץ חברתי. איך אפשר לחבר את זה לשיעורים הקיימים שלי?'
           : 'I have an idea for a lesson on overcoming peer pressure. How can I connect it to my currently existing lessons?',
-        add_student: isHe ? 'הוסף תלמיד חדש בשם אריאל כהן לפרשת נח' : 'Add a new student named Ariel Cohen learning Parshat Noach',
         schedule_lesson: isHe ? 'קבע שיעור לאריאל כהן ליום חמישי הקרוב בשעה 4:30 אחה״צ בנושא תפילין' : 'Schedule a lesson for Ariel Cohen on Thursday at 4:30 PM reviewing Tefillin',
         add_note: isHe ? 'הוסף לכרטיס לימוד תפילין סיפור על חייל בכותל המערבי במלחמת ששת הימים' : 'Add this story to the Tefillin lesson: The story of the soldier putting on Tefillin at the Western Wall in 1967',
         summarize_roster: isHe ? 'סכם לי את כל התלמידים והשיעורים הקרובים שלהם' : 'Summarize all current students and their upcoming scheduled lessons'
@@ -24111,11 +24470,15 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
                 notes: { type: "STRING", description: "Updated tutor notes" },
                 subject: { type: "STRING", description: "Updated primary course or subject" },
                 gradeLevel: { type: "STRING", description: "Updated academic stage" },
+                gradeOrDate: { type: "STRING", description: "Updated target date, timeline, or teaching duration" },
                 status: { type: "STRING", description: "Updated status (active, paused, completed)" },
                 guardianName: { type: "STRING", description: "Updated parent / guardian name" },
                 guardianPhone: { type: "STRING", description: "Updated guardian phone / WhatsApp" },
                 guardianEmail: { type: "STRING", description: "Updated guardian email" },
                 hourlyRate: { type: "STRING", description: "Updated lesson fee / rate" },
+                addGoal: { type: "STRING", description: "Optional new learning goal to add to student checklist" },
+                homeworkTask: { type: "STRING", description: "Optional active homework assignment text" },
+                appendNotes: { type: "STRING", description: "Optional new note line to append without overwriting existing notes" },
                 parsha: { type: "STRING", description: "Updated subject or parsha alias" }
               },
               required: ["studentNameOrId"]
@@ -24315,6 +24678,189 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       }];
     }
 
+    async function processAiPendingStudentTurn(userText) {
+      const pending = APP_STATE.aiPendingStudent;
+      if (!pending || !pending.active) return;
+      const draft = pending.draft;
+      let parsed = null;
+
+      try {
+        if (typeof callGeminiApi === 'function' && getEffectiveGeminiApiKey()) {
+          const courseTitles = (APP_STATE.customCourses || []).map(c => c.title_en || c.title_he).filter(Boolean).slice(0, 12).join(', ');
+          const sysPrompt = `You are a friendly Tutoring Onboarding Assistant helping a tutor create a new student profile through 4 to 5 simple questions.
+Available courses in TutorPilot: ${courseTitles || 'General Tutoring'}.
+Current collected draft:
+${JSON.stringify(draft)}
+
+Merge whatever details the tutor provided in this reply into the draft (keep existing draft values when not overridden; set only fields actually mentioned).
+Respond ONLY with strict JSON (no markdown fences):
+{
+  "assistant_reply": "Warm reply acknowledging what was saved. If name is missing, ask cleanly for the name. Otherwise summarize briefly and either ask 1 helpful optional follow-up or tell the tutor they can click Create Profile right below.",
+  "draft": {
+    "name": "",
+    "subject": "",
+    "gradeLevel": "",
+    "gradeOrDate": "",
+    "teachingDuration": "",
+    "guardianName": "",
+    "guardianPhone": "",
+    "guardianEmail": "",
+    "hourlyRate": "",
+    "notes": "",
+    "customGoals": [],
+    "homeworkTask": ""
+  }
+}`;
+
+          const recentTurns = (APP_STATE.aiMessages || []).slice(-8).map(m => ({
+            role: m.role === 'user' ? 'user' : 'model',
+            parts: [{ text: m.content || '' }]
+          }));
+          if (recentTurns.length > 0 && recentTurns[0].role !== 'user') recentTurns.shift();
+
+          const rawResp = await callGeminiApi({
+            systemInstruction: { parts: [{ text: sysPrompt }] },
+            contents: recentTurns,
+            generationConfig: { temperature: 0.3, responseMimeType: 'application/json' }
+          });
+          const cleaned = String(rawResp || '').replace(/```json/gi, '').replace(/```/g, '').trim();
+          const fIdx = cleaned.indexOf('{');
+          const lIdx = cleaned.lastIndexOf('}');
+          parsed = fIdx !== -1 && lIdx > fIdx ? JSON.parse(cleaned.slice(fIdx, lIdx + 1)) : JSON.parse(cleaned);
+        }
+      } catch (err) {
+        console.warn('AI student onboarding fallback:', err);
+      }
+
+      if (!parsed || typeof parsed !== 'object') {
+        const d = { ...draft };
+        const nameMatch = userText.match(/(?:his name is|her name is|name is|student(?:'s)? name is|called|named|שמו|שמה|קוראים לו|קוראים לה)\s+([A-Z\u0590-\u05FF][A-Za-z\u0590-\u05FF'\- ]{1,30})/i);
+        if (nameMatch && nameMatch[1]) d.name = nameMatch[1].trim().split(/[,.;\n]/)[0].trim();
+        else if (!d.name && userText.trim().split(/\s+/).length <= 3) d.name = userText.trim();
+
+        const durMatch = userText.match(/(?:for\s+)?(\d+\s+(?:weeks?|months?|years?|sessions?|classes)|ל(?:משך\s+)?\d+\s+(?:שבועות|חודשים|שנה|שנים|שיעורים))/i);
+        if (durMatch) d.teachingDuration = durMatch[0].trim();
+
+        const ageMatch = userText.match(/(?:age|is|בן|בת|grade|כיתה)\s+(\d{1,2})/i);
+        if (ageMatch) {
+          const num = parseInt(ageMatch[1], 10);
+          if (num >= 5 && num <= 11) d.gradeLevel = 'Elementary (K - 5th)';
+          else if (num >= 12 && num <= 14) d.gradeLevel = 'Middle School (6th - 8th)';
+          else if (num >= 15 && num <= 18) d.gradeLevel = 'High School (9th - 12th)';
+        }
+
+        const subMatch = userText.match(/(?:learning|studying|teaching|subject|course|לומד|לומדת)\s+([^,.\n]+)/i);
+        if (subMatch && subMatch[1]) d.subject = subMatch[1].trim();
+
+        const rateMatch = userText.match(/(?:\$\s*\d+(?:\s*\/\s*hr)?|\d+\s*(?:₪|nis|ils))/i);
+        if (rateMatch) d.hourlyRate = rateMatch[0].trim();
+
+        const emailMatch = userText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+        if (emailMatch) d.guardianEmail = emailMatch[0];
+
+        const phoneMatch = userText.match(/(?:\+?\d[\d\s-]{6,}\d)/);
+        if (phoneMatch) d.guardianPhone = phoneMatch[0].trim();
+
+        d.notes = d.notes ? `${d.notes}\n${userText}` : userText;
+        parsed = {
+          assistant_reply: d.name
+            ? `Got it! I prepared ${d.name}'s draft profile below. Answer any other details or click **Create Profile** whenever you're ready.`
+            : 'Thanks! What is the student\'s name so I can prepare their profile card?',
+          draft: d
+        };
+      }
+
+      const next = parsed.draft || {};
+      ['name', 'subject', 'gradeLevel', 'gradeOrDate', 'teachingDuration', 'guardianName', 'guardianPhone', 'guardianEmail', 'hourlyRate', 'homeworkTask'].forEach(k => {
+        if (next[k] && String(next[k]).trim()) {
+          draft[k] = String(next[k]).trim();
+        }
+      });
+      if (next.notes && String(next.notes).trim()) {
+        draft.notes = String(next.notes).trim();
+      }
+      if (Array.isArray(next.customGoals) && next.customGoals.length > 0) {
+        draft.customGoals = Array.from(new Set([...(draft.customGoals || []), ...next.customGoals.map(g => String(g).trim()).filter(Boolean)]));
+      }
+
+      APP_STATE.aiIsThinking = false;
+      APP_STATE.aiMessages.push({
+        role: 'model',
+        content: parsed.assistant_reply || 'Profile preview updated below — click **Create Profile** when ready!',
+        pendingStudentDraft: draft.name ? JSON.parse(JSON.stringify(draft)) : null
+      });
+      renderAiMessages();
+    }
+
+    function createStudentFromAiPendingProfile() {
+      const pending = APP_STATE.aiPendingStudent;
+      if (!pending || !pending.draft || !pending.draft.name) {
+        showToast('Please tell the AI the student\'s name first');
+        const input = document.getElementById('ai-chat-input');
+        if (input) input.focus();
+        return null;
+      }
+      const d = pending.draft;
+      const timelineStr = [d.teachingDuration, d.gradeOrDate].filter(Boolean).join(' · ');
+      const newStudent = {
+        id: 'stu_' + Date.now(),
+        name: d.name.trim(),
+        subject: (d.subject || '').trim(),
+        gradeOrDate: timelineStr,
+        parsha: (d.subject || '').trim(),
+        barMitzvahDate: timelineStr,
+        parshaOrDate: [(d.subject || '').trim(), timelineStr].filter(Boolean).join(' · '),
+        gradeLevel: d.gradeLevel || 'Standard / All Levels',
+        status: 'active',
+        parentContact: {
+          name: d.guardianName || '',
+          phone: d.guardianPhone || '',
+          email: d.guardianEmail || ''
+        },
+        hourlyRate: d.hourlyRate || '',
+        avatar: '',
+        orderIndex: (APP_STATE.students || []).length,
+        notes: (d.notes || '').trim(),
+        skills: typeof getDefaultStudentSkills === 'function' ? getDefaultStudentSkills() : { customGoals: [], homework: { task: '', completed: false } },
+        schedule: [],
+        completedTopics: {},
+        completedParshiot: {}
+      };
+      if (typeof ensureStudentSkills === 'function') ensureStudentSkills(newStudent);
+      if (Array.isArray(d.customGoals) && d.customGoals.length > 0) {
+        newStudent.skills.customGoals = d.customGoals.map((gt, gi) => ({
+          id: 'goal_' + Date.now() + '_' + gi,
+          title: gt,
+          completed: false
+        }));
+      }
+      if (d.homeworkTask) {
+        newStudent.skills.homework = {
+          task: d.homeworkTask,
+          completed: false,
+          assignedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        };
+      }
+
+      APP_STATE.students.push(newStudent);
+      APP_STATE.activeStudentId = newStudent.id;
+      APP_STATE.aiPendingStudent = null;
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(newStudent);
+      renderStudents();
+
+      APP_STATE.aiMessages.push({
+        role: 'model',
+        content: `Created **${newStudent.name}**'s student profile! You can open it anytime to add notes, goals, lessons, or ask AI for updates.`,
+        actionCards: [{ type: 'student', title: 'Student Profile Ready', studentId: newStudent.id, studentName: newStudent.name }]
+      });
+      renderAiMessages();
+      const input = document.getElementById('ai-chat-input');
+      if (input) input.placeholder = 'Ask anything or give a command (Hebrew or English)...';
+      if (typeof openStudentDrawer === 'function') openStudentDrawer(newStudent.id);
+      return newStudent;
+    }
+
     async function handleSendAiMessage(e) {
       if (e) e.preventDefault();
       const input = document.getElementById('ai-chat-input');
@@ -24322,6 +24868,15 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
 
       const userText = input.value.trim();
       if (!userText) return;
+
+      if (APP_STATE.aiPendingStudent && APP_STATE.aiPendingStudent.active) {
+        input.value = '';
+        APP_STATE.aiMessages.push({ role: 'user', content: userText });
+        APP_STATE.aiIsThinking = true;
+        renderAiMessages();
+        await processAiPendingStudentTurn(userText);
+        return;
+      }
 
       const effectiveKey = getEffectiveGeminiApiKey();
       if (!effectiveKey) {
@@ -24689,6 +25244,10 @@ Guidelines:
 
         if (args.newName) student.name = args.newName.trim();
         if (args.notes !== undefined) student.notes = args.notes.trim();
+        if (args.appendNotes) {
+          const piece = String(args.appendNotes).trim();
+          student.notes = student.notes ? `${student.notes.trim()}\n${piece}` : piece;
+        }
         if (args.subject || args.parsha) {
           const subjectTrimmed = (args.subject || args.parsha).trim();
           student.subject = subjectTrimmed;
@@ -24715,11 +25274,27 @@ Guidelines:
           if (args.guardianPhone !== undefined) student.parentContact.phone = args.guardianPhone.trim();
           if (args.guardianEmail !== undefined) student.parentContact.email = args.guardianEmail.trim();
         }
+        if (typeof ensureStudentSkills === 'function') ensureStudentSkills(student);
+        if (args.addGoal && student.skills) {
+          if (!Array.isArray(student.skills.customGoals)) student.skills.customGoals = [];
+          const cleanGoal = String(args.addGoal).trim();
+          if (cleanGoal) student.skills.customGoals.push({ id: 'goal_' + Date.now(), title: cleanGoal, completed: false });
+        }
+        if (args.homeworkTask && student.skills) {
+          student.skills.homework = {
+            task: String(args.homeworkTask).trim(),
+            completed: false,
+            assignedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          };
+        }
 
         saveStudentsToStorage(true);
         if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
         renderStudents();
         renderCalendar();
+        if (APP_STATE.activeStudentDrawerId === student.id && typeof renderStudentDrawer === 'function') {
+          renderStudentDrawer(student.id, true);
+        }
 
         return {
           success: true,
