@@ -4529,7 +4529,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   const targetStu47 = sandbox.APP_STATE.students[0];
   sandbox.openStudentDrawer(targetStu47.id);
   const g47ProfileHtml = getOrCreateElem('drawer-body-content').innerHTML;
-  assert(g47ProfileHtml.includes('id="student-profile-tabs-bar"') && g47ProfileHtml.includes('id="student-profile-panel-progress"') && g47ProfileHtml.includes('id="student-profile-panel-portal"'), 'Student Profile renders 2-tab layout separating Teacher Progress & Private Notes from Student Portal & Shared items');
+  assert(g47ProfileHtml.includes('id="student-profile-tabs-bar"') && g47ProfileHtml.includes('id="student-profile-panel-progress"') && g47ProfileHtml.includes('id="student-profile-panel-portal"') && g47ProfileHtml.includes('id="drawer-teaching-continuity-card"'), 'Student Profile renders 2-tab layout with Teaching Continuity (Last Taught & Next to Teach) card');
   sandbox.switchStudentProfileTab(targetStu47.id, 'portal');
   assert(sandbox.studentProfileTabMap[targetStu47.id] === 'portal', 'switchStudentProfileTab switches to Student Portal & Shared tab');
 
@@ -4546,8 +4546,13 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(sandbox.APP_STATE.calendar.isDayViewOpen === false, 'Back to Calendar closes Date Detail view cleanly');
   sandbox.APP_STATE.students = g47CalStudentsBackup;
 
-  // Tab 4: Dedicated AI Studio Generator Cards
-  assert(indexHtml.includes('id="ai-studio-generator-cards"') && indexHtml.includes('Worksheet & Handout') && indexHtml.includes('Speech & Dvar Torah'), 'Dedicated AI Studio tab displays 4 visual Teaching Generator & Assistant cards');
+  // Tab 4: Focused My Agent Workspace (End-of-Class Debrief, Schedule, Website Guide)
+  assert(!indexHtml.includes('id="ai-studio-generator-cards"') && indexHtml.includes('id="tab-ai-label" class="truncate">My Agent<') && indexHtml.includes('id="lbl-ai-view-title" class="text-base sm:text-lg font-bold text-white tracking-tight">My Agent<'), 'AI tab is cleanly rebranded to My Agent without cluttered generator cards');
+  sandbox.clearAiChat();
+  sandbox.renderAiView();
+  const g47AiChipsHtml = getOrCreateElem('ai-quick-action-chips').innerHTML;
+  const g47AiMsgHtml = getOrCreateElem('ai-chat-messages').innerHTML;
+  assert(g47AiChipsHtml.includes('Log End of Class') && g47AiChipsHtml.includes('Add to Schedule') && g47AiChipsHtml.includes('How to Use TutorPilot') && g47AiMsgHtml.includes('After every class'), 'My Agent renders focused end-of-class, scheduling, and website help interface');
 
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);

@@ -975,7 +975,7 @@
         </button>
         <button type="button" onclick="switchTab('ai')" id="tab-ai" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-400 hover:bg-slate-800/70 hover:text-white transition">
           <i data-lucide="sparkles" class="w-4 h-4 text-amber-400 shrink-0"></i>
-          <span id="tab-ai-label" class="truncate">AI Studio</span>
+          <span id="tab-ai-label" class="truncate">My Agent</span>
         </button>
       </nav>
 
@@ -1838,25 +1838,25 @@
     </section>
 
     <!-- ============================================== -->
-    <!-- VIEW 4: DEDICATED AI TEACHING STUDIO & HUB     -->
+    <!-- VIEW 4: MY AGENT (POST-CLASS, SCHEDULE & HELP) -->
     <!-- ============================================== -->
-    <section id="view-ai" class="space-y-5 max-w-4xl mx-auto hidden pb-16">
+    <section id="view-ai" class="space-y-4 max-w-4xl mx-auto hidden pb-16">
 
-      <!-- Clean Claude-Style AI Studio Header -->
+      <!-- Clean My Agent Header -->
       <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-5 shadow-sm flex items-center justify-between gap-3">
         <div class="flex items-center gap-3.5 min-w-0">
-          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-amber-500 flex items-center justify-center text-white shadow-md shrink-0">
-            <i data-lucide="sparkles" class="w-5 h-5 text-amber-100"></i>
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-amber-500 flex items-center justify-center text-white shadow-md shrink-0 keep-white">
+            <i data-lucide="bot" class="w-5 h-5 text-white"></i>
           </div>
           <div class="min-w-0">
             <div class="flex items-center gap-2">
-              <h2 id="lbl-ai-view-title" class="text-base sm:text-lg font-bold text-white tracking-tight">AI Teaching Studio</h2>
+              <h2 id="lbl-ai-view-title" class="text-base sm:text-lg font-bold text-white tracking-tight">My Agent</h2>
               <span id="ai-status-pill" class="hidden px-2 py-0.5 rounded-full text-[10px] font-mono border font-semibold items-center gap-1 bg-amber-500/10 text-amber-300 border-amber-500/30">
                 <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
                 <span id="lbl-ai-status-text">Active</span>
               </span>
             </div>
-            <p id="lbl-ai-view-subtitle" class="text-xs sm:text-sm text-slate-400">Generate worksheets, speeches, and review quizzes, or manage your students and schedule by voice or text</p>
+            <p id="lbl-ai-view-subtitle" class="text-xs sm:text-sm text-slate-400">Tell me what you taught after class, manage your schedule, or ask how TutorPilot works</p>
           </div>
         </div>
 
@@ -1874,45 +1874,6 @@
             <span class="hidden sm:inline">New Chat</span>
           </button>
         </div>
-      </div>
-
-      <!-- Dedicated Teaching Generators & Practice Tools Grid (Distinct from Contextual Lesson/Student AI) -->
-      <div id="ai-studio-generator-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <button type="button" onclick="openPedagogicalAiModal('worksheet')" class="text-left p-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-amber-500/50 transition shadow-sm group space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center font-bold">📄</span>
-            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 transition"></i>
-          </div>
-          <div class="text-xs sm:text-sm font-bold text-white">Worksheet & Handout</div>
-          <p class="text-[11px] text-slate-400 leading-snug">Generate a printable source sheet or review worksheet</p>
-        </button>
-
-        <button type="button" onclick="openPedagogicalAiModal('speech')" class="text-left p-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-indigo-500/50 transition shadow-sm group space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="w-8 h-8 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center font-bold">🎙️</span>
-            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 transition"></i>
-          </div>
-          <div class="text-xs sm:text-sm font-bold text-white">Speech & Dvar Torah</div>
-          <p class="text-[11px] text-slate-400 leading-snug">Draft or polish a student speech with pacing timer</p>
-        </button>
-
-        <button type="button" onclick="openPedagogicalAiModal('quiz')" class="text-left p-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/50 transition shadow-sm group space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-bold">❓</span>
-            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 transition"></i>
-          </div>
-          <div class="text-xs sm:text-sm font-bold text-white">Quiz & Review Game</div>
-          <p class="text-[11px] text-slate-400 leading-snug">Create custom trivia or comprehension questions</p>
-        </button>
-
-        <button type="button" onclick="applyAiQuickPrompt('add_student')" class="text-left p-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-brand-500/50 transition shadow-sm group space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="w-8 h-8 rounded-xl bg-brand-500/15 text-brand-400 flex items-center justify-center font-bold">⚡</span>
-            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-brand-400 transition"></i>
-          </div>
-          <div class="text-xs sm:text-sm font-bold text-white">Guided Student Setup</div>
-          <p class="text-[11px] text-slate-400 leading-snug">Add a new student or update schedules conversationally</p>
-        </button>
       </div>
 
       <!-- API Key Setup Banner (Collapsed by default; expandable for custom BYOK key) -->
@@ -1973,32 +1934,9 @@
           <!-- Rendered dynamically -->
         </div>
 
-        <!-- Quick Prompt Chips -->
-        <div class="pt-3 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          <button onclick="applyAiQuickPrompt('create_lesson')" class="px-3 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-[11px] text-amber-300 font-bold whitespace-nowrap transition active:scale-95 flex items-center gap-1.5 shadow-sm">
-            <span>⚡</span>
-            <span>Create a Lesson</span>
-          </button>
-          <button onclick="applyAiQuickPrompt('create_course')" class="px-3 py-1.5 rounded-full bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-[11px] text-indigo-300 font-bold whitespace-nowrap transition active:scale-95 flex items-center gap-1.5 shadow-sm">
-            <span>📚</span>
-            <span>Create Full Class</span>
-          </button>
-          <button onclick="applyAiQuickPrompt('connect_lesson')" class="px-3 py-1.5 rounded-full bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-cyan-300 font-semibold whitespace-nowrap transition active:scale-95 flex items-center gap-1.5">
-            <span>🔗</span>
-            <span>Connect Idea to Lessons</span>
-          </button>
-          <button onclick="applyAiQuickPrompt('add_student')" class="px-3 py-1.5 rounded-full bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-semibold whitespace-nowrap transition active:scale-95 flex items-center gap-1.5">
-            <span>👤</span>
-            <span id="lbl-ai-chip-add-student">Add student</span>
-          </button>
-          <button onclick="applyAiQuickPrompt('schedule_lesson')" class="px-3 py-1.5 rounded-full bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-semibold whitespace-nowrap transition active:scale-95 flex items-center gap-1.5">
-            <span>📅</span>
-            <span id="lbl-ai-chip-schedule">Schedule lesson</span>
-          </button>
-          <button onclick="applyAiQuickPrompt('summarize_roster')" class="px-3 py-1.5 rounded-full bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-semibold whitespace-nowrap transition active:scale-95 flex items-center gap-1.5">
-            <span>📊</span>
-            <span id="lbl-ai-chip-summarize">Summarize roster</span>
-          </button>
+        <!-- Quick Starter Chips (After-Class Debrief, Schedule, Website Help) -->
+        <div id="ai-quick-action-chips" class="pt-3 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <!-- Populated dynamically via renderAiQuickActionChips() -->
         </div>
 
         <!-- Floating Rounded-3xl Chat Composer -->
@@ -5826,10 +5764,10 @@
         toastMaterialDeleted: "Material removed",
         toastMaterialsCopied: "Materials copied to clipboard for AI!",
         confirmDeleteMaterial: "Are you sure you want to remove this item?",
-        tabAi: "AI",
-        mobAi: "AI",
-        aiViewTitle: "AI Tutor Assistant",
-        aiViewSubtitle: "Manage students, schedule lessons, add study notes, or ask curriculum questions",
+        tabAi: "My Agent",
+        mobAi: "My Agent",
+        aiViewTitle: "My Agent",
+        aiViewSubtitle: "Tell me what you taught after class, add classes to your calendar, or ask how TutorPilot works",
         aiStatusConnected: "TutorPilot AI Active",
         aiStatusCustom: "Custom Key (BYOK)",
         aiStatusNeedsKey: "Needs API Key",
@@ -6195,10 +6133,10 @@
         toastMaterialDeleted: "הפריט הוסר",
         toastMaterialsCopied: "החומרים הועתקו ללוח בהצלחה!",
         confirmDeleteMaterial: "האם אתה בטוח שברצונך להסיר פריט זה?",
-        tabAi: "AI",
-        mobAi: "עוזר AI",
-        aiViewTitle: "עוזר הוראה AI",
-        aiViewSubtitle: "ניהול תלמידים, קביעת שיעורים, הוספת חומרי לימוד ומענה על שאלות",
+        tabAi: "הסוכן שלי",
+        mobAi: "הסוכן שלי",
+        aiViewTitle: "הסוכן שלי",
+        aiViewSubtitle: "ספר לי מה לימדת בסיום השיעור, קבע שיעורים ביומן או שאל איך להשתמש באתר",
         aiStatusConnected: "בינה מלאכותית פעילה",
         aiStatusCustom: "מפתח אישי (BYOK)",
         aiStatusNeedsKey: "נדרש מפתח API",
@@ -9996,6 +9934,9 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       const mobAi = document.getElementById('mob-lbl-ai');
       if (mobAi) mobAi.textContent = t.mobAi;
+
+      const tabAiLabel = document.getElementById('tab-ai-label');
+      if (tabAiLabel) tabAiLabel.textContent = t.tabAi;
 
       // Study Top 4 Category Tabs
       const lblCatLessons = document.getElementById('lbl-study-cat-lessons');
@@ -23752,6 +23693,30 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
 
           <!-- TAB 1: PROGRESS & PRIVATE TUTOR NOTES (Teacher Only) -->
           <div id="student-profile-panel-progress" class="${activeProfileTab === 'progress' ? 'space-y-4' : 'hidden space-y-4'}">
+            <!-- Teaching Continuity: Last Taught & Next to Teach -->
+            <div id="drawer-teaching-continuity-card" class="p-4 rounded-2xl bg-slate-950/65 border border-indigo-500/25 space-y-3">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                  <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>${isHe ? 'רצף הוראה (נלמד לאחרונה והשיעור הבא)' : 'Teaching Continuity'}</span>
+                </span>
+                <button type="button" onclick="closeStudentDrawer(); openAfterClassAiDebrief('${student.id}');" class="text-[11px] font-bold text-indigo-400 hover:underline flex items-center gap-1">
+                  <i data-lucide="sparkles" class="w-3 h-3"></i>
+                  <span>${isHe ? 'עדכן עם הסוכן שלי' : 'Update with My Agent'}</span>
+                </button>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                <div>
+                  <label class="text-[10px] uppercase font-bold text-emerald-400 block mb-1">${isHe ? 'השיעור האחרון שנלמד' : 'Last Taught'}${sk.lastTaughtAt ? ` (${escapeHtml(sk.lastTaughtAt)})` : ''}</label>
+                  <input type="text" id="drawer-student-last-taught-input" dir="auto" value="${escapeHtml(sk.lastTaught || '')}" onchange="updateStudentContinuityField('${student.id}', 'lastTaught', this.value)" placeholder="${isHe ? 'מה סיימנו ללמוד בשיעור האחרון...' : 'What we finished last class...'}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400" />
+                </div>
+                <div>
+                  <label class="text-[10px] uppercase font-bold text-amber-400 block mb-1">${isHe ? 'מה ללמד בשיעור הבא' : 'Next to Teach'}</label>
+                  <input type="text" id="drawer-student-next-teach-input" dir="auto" value="${escapeHtml(sk.nextToTeach || '')}" onchange="updateStudentContinuityField('${student.id}', 'nextToTeach', this.value)" placeholder="${isHe ? 'הנושא או השיעור לשיעור הבא...' : 'What to teach next class...'}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400" />
+                </div>
+              </div>
+            </div>
+
             ${coursesCurriculumHtml}
 
             <!-- Full-Width Private Tutor Notes (Hidden from Student) -->
@@ -23811,6 +23776,24 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       saveStudentsToStorage(true);
       if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
       renderStudents();
+    }
+
+    function updateStudentContinuityField(studentId, field, value) {
+      const student = (APP_STATE.students || []).find(s => s.id === studentId);
+      if (!student) return;
+      if (typeof ensureStudentSkills === 'function') ensureStudentSkills(student);
+      const cleanVal = String(value || '').trim();
+      if (field === 'lastTaught') {
+        student.skills.lastTaught = cleanVal;
+        student.skills.lastTaughtAt = cleanVal ? new Date().toISOString().split('T')[0] : '';
+      } else if (field === 'nextToTeach') {
+        student.skills.nextToTeach = cleanVal;
+      }
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
+      if (typeof renderSidebarDailyOverview === 'function') renderSidebarDailyOverview();
+      if (typeof renderCalendar === 'function') renderCalendar();
+      showToast(APP_STATE.lang === 'he' ? 'תיעוד הלימוד עודכן' : 'Teaching progress saved');
     }
 
     function updateStudentDrawerGuardianField(studentId, field, value) {
@@ -26624,8 +26607,47 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       if (banner) banner.classList.add('hidden');
     }
 
+    function renderAiQuickActionChips() {
+      const container = document.getElementById('ai-quick-action-chips');
+      if (!container) return;
+      const isHe = APP_STATE.lang === 'he';
+      const todaySessions = typeof getScheduledSessionsForDate === 'function' ? (getScheduledSessionsForDate(new Date()) || []) : [];
+      const seenStudentIds = new Set();
+      const todayStudents = [];
+      todaySessions.forEach(s => {
+        if (s && s.studentId && !seenStudentIds.has(s.studentId)) {
+          seenStudentIds.add(s.studentId);
+          todayStudents.push({ id: s.studentId, name: s.studentName || 'Student' });
+        }
+      });
+
+      const studentChips = todayStudents.slice(0, 3).map(st => `
+        <button type="button" onclick="applyAiQuickPrompt('after_class_student:${escapeHtml(st.id)}')" class="px-3 py-1.5 rounded-full bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-400/35 text-[11px] text-indigo-300 font-bold whitespace-nowrap transition active:scale-95 flex items-center gap-1.5 shadow-sm">
+          <span>✨</span>
+          <span>${isHe ? `סיום שיעור: ${escapeHtml(st.name)}` : `After Class: ${escapeHtml(st.name)}`}</span>
+        </button>
+      `).join('');
+
+      container.innerHTML = `
+        ${studentChips}
+        <button type="button" id="btn-agent-chip-debrief" onclick="applyAiQuickPrompt('after_class')" class="px-3 py-1.5 rounded-full bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/35 text-[11px] text-amber-300 font-bold whitespace-nowrap transition active:scale-95 flex items-center gap-1.5 shadow-sm">
+          <span>📝</span>
+          <span>${isHe ? 'עדכן מה לימדתי' : 'Log End of Class'}</span>
+        </button>
+        <button type="button" id="btn-agent-chip-schedule" onclick="applyAiQuickPrompt('schedule_lesson')" class="px-3 py-1.5 rounded-full bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-semibold whitespace-nowrap transition active:scale-95 flex items-center gap-1.5">
+          <span>📅</span>
+          <span id="lbl-ai-chip-schedule">${isHe ? 'קבע שיעור' : 'Add to Schedule'}</span>
+        </button>
+        <button type="button" id="btn-agent-chip-help" onclick="applyAiQuickPrompt('how_to_use')" class="px-3 py-1.5 rounded-full bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 font-semibold whitespace-nowrap transition active:scale-95 flex items-center gap-1.5">
+          <span>❓</span>
+          <span>${isHe ? 'איך משתמשים באתר?' : 'How to Use TutorPilot'}</span>
+        </button>
+      `;
+    }
+
     function renderAiView() {
       updateAiStatusPill();
+      renderAiQuickActionChips();
       renderAiMessages();
       populateBase44PromptTextarea();
     }
@@ -26639,19 +26661,19 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       if (!APP_STATE.aiMessages || APP_STATE.aiMessages.length === 0) {
         container.innerHTML = `
           <div class="py-10 text-center space-y-3">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-amber-500 flex items-center justify-center text-white mx-auto shadow-lg shadow-brand-500/20">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-amber-500 flex items-center justify-center text-white mx-auto shadow-lg shadow-brand-500/20 keep-white">
               <i data-lucide="bot" class="w-6 h-6"></i>
             </div>
-            <div class="space-y-1">
-              <h3 class="text-sm font-bold text-white">${isHe ? 'שלום! אני עוזר ה-AI שלך ב-TutorPilot' : 'Welcome to your TutorPilot AI Assistant'}</h3>
-              <p class="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
+            <div class="space-y-1.5">
+              <h3 class="text-sm font-bold text-white">${isHe ? 'הסוכן שלי ב-TutorPilot' : 'My Agent'}</h3>
+              <p class="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
                 ${isHe
-                  ? 'אני יכול להוסיף תלמידים, לשנות שמות, לקבוע שיעורים ביומן, לסמן התקדמות ולהוסיף הערות וסיפורים לכרטיסי הלימוד.'
-                  : 'I can add students, update names, schedule lessons on the calendar, track mastery, and add custom notes and stories to any lesson card.'}
+                  ? 'בסיום כל שיעור פשוט ספר לי בקול או בכתב מה לימדת היום. אעדכן מיד את פרופיל התלמיד, מה ללמד בשיעור הבא, אקבע שיעורים ביומן ואעזור לך בכל שאלה על האתר.'
+                  : 'After every class, speak or type what you just taught. I automatically update the student profile, set what to teach next class, add lessons to your calendar, and explain how anything in TutorPilot works.'}
               </p>
             </div>
             <div class="text-[11px] text-amber-300/80 font-mono">
-              ${isHe ? 'בחר הצעה למטה או הקלד פקודה חופשית בעברית או באנגלית' : 'Tap a suggestion below or type any command in English or Hebrew'}
+              ${isHe ? 'לחץ על תלמיד למטה, הקש על המיקרופון או הקלד בחופשיות' : 'Tap a shortcut below, press the mic to speak, or type a message'}
             </div>
           </div>
         `;
@@ -26701,7 +26723,7 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
                             </span>
                             <div class="min-w-0">
                               <div class="text-xs font-bold text-white truncate">${escapeHtml(card.title || card.studentName)}</div>
-                              <div class="text-[10px] text-indigo-300/80 truncate">${escapeHtml(card.studentName)}</div>
+                              <div class="text-[10px] text-indigo-300/80 truncate">${escapeHtml(card.detail || card.studentName)}</div>
                             </div>
                           </div>
                           <button type="button" onclick="openStudentDrawer('${card.studentId}')" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[10px] transition active:scale-95 shrink-0 flex items-center gap-1 shadow">
@@ -26944,19 +26966,28 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       if (!input) return;
       const isHe = APP_STATE.lang === 'he';
 
+      if (String(promptKey || '').startsWith('after_class_student:')) {
+        const sid = String(promptKey).slice('after_class_student:'.length);
+        const student = (APP_STATE.students || []).find(s => s.id === sid);
+        const sName = student ? student.name : '';
+        input.value = isHe
+          ? `סיימתי שיעור עם ${sName}. היום לימדתי: `
+          : `After class with ${sName}: today we finished teaching `;
+        input.focus();
+        return;
+      }
+
       const prompts = {
-        create_lesson: isHe
-          ? 'צור שיעור שלם בנושא הכרת הטוב ומודה אני, וחבר אותו לקורס מושגי יסוד'
-          : 'Create a complete lesson on Modeh Ani and Daily Gratitude, and connect it to my Bar Mitzvah Concepts course',
-        create_course: isHe
-          ? 'צור קורס שלם בן 6 שיעורים על מסכת אבות לנערים בני 13'
-          : 'Create a complete 6-lesson course on Pirkei Avot Ethics for 13-year-olds',
-        connect_lesson: isHe
-          ? 'יש לי רעיון לשיעור על התגברות על לחץ חברתי. איך אפשר לחבר את זה לשיעורים הקיימים שלי?'
-          : 'I have an idea for a lesson on overcoming peer pressure. How can I connect it to my currently existing lessons?',
-        schedule_lesson: isHe ? 'קבע שיעור לאריאל כהן ליום חמישי הקרוב בשעה 4:30 אחה״צ בנושא תפילין' : 'Schedule a lesson for Ariel Cohen on Thursday at 4:30 PM reviewing Tefillin',
-        add_note: isHe ? 'הוסף לכרטיס לימוד תפילין סיפור על חייל בכותל המערבי במלחמת ששת הימים' : 'Add this story to the Tefillin lesson: The story of the soldier putting on Tefillin at the Western Wall in 1967',
-        summarize_roster: isHe ? 'סכם לי את כל התלמידים והשיעורים הקרובים שלהם' : 'Summarize all current students and their upcoming scheduled lessons'
+        after_class: isHe
+          ? 'סיימתי שיעור עם [שם התלמיד]. היום לימדנו: '
+          : 'After class with [Student Name]: today we finished teaching ',
+        how_to_use: isHe
+          ? 'איך אני משנה תאריך עברי או עורך שיעורים וקורסים ב-TutorPilot?'
+          : 'How do I use Courses, Schedule, Today\'s Overview, and Settings in TutorPilot?',
+        schedule_lesson: isHe
+          ? 'קבע שיעור לתלמיד [שם] ביום חמישי הקרוב בשעה 4:30 אחה״צ'
+          : 'Schedule a class for [Student Name] this Thursday at 4:30 PM on ',
+        summarize_roster: isHe ? 'סכם לי את כל התלמידים והשיעורים הקרובים שלהם' : 'Summarize all current students and their next lessons to teach'
       };
 
       input.value = prompts[promptKey] || '';
@@ -27536,8 +27567,18 @@ Respond ONLY with strict JSON (no markdown fences):
       const todayStr = now.toISOString().split('T')[0];
       const weekdayStr = now.toLocaleDateString('en-US', { weekday: 'long' });
 
-      const systemInstruction = `You are TutorPilot AI, the intelligent assistant for the TutorPilot web portal.
-The portal is used by tutors and educators to manage students, courses, schedules, and learning progress.
+      const systemInstruction = `You are "My Agent", the personal teaching assistant inside TutorPilot.
+Your 3 primary jobs are:
+1. AFTER-CLASS UPDATES (Most Important): At the end of any class, the tutor tells you (by voice or text) what they just taught a student. You IMMEDIATELY update that student's profile using update_student (saving both lastTaught and nextToTeach), log progress, and infer what lesson comes next from their course syllabus or notes.
+2. SCHEDULE & CALENDAR: Add, schedule, or cancel lessons on any date when asked.
+3. WEBSITE HELP GUIDE: Clearly explain how to use any feature in TutorPilot using the exact current UI below.
+
+Current Website Layout & How To Guide (Accurate Reference):
+- Left Sidebar Navigation: Circular parchment scroll logo at top-left collapses or unrolls the sidebar like a scroll. Below it are 4 main sections: Courses, Students, Schedule, and My Agent. Right below Workspace is Today's Overview, listing the students scheduled today and what to teach each one.
+- Profile & Settings: Click the circular profile letter avatar (S) at top-right of the sidebar to open School Workspace, Master Directory, or Settings (Light Warm Daylight vs Dark Mode toggle, English/Hebrew language toggle, and Hebrew Date toggle for the Schedule).
+- Courses: Shows visual course cards. Click a course to view its clean numbered vertical lesson list, add a lesson (+ New Lesson), or click Edit Course with AI (which also contains the double-confirmed Delete Course button). Click any lesson to read it cleanly or click Edit with AI to refine sections.
+- Students: Lists enrolled students. Click a student to open their profile (Tab 1: Teaching Continuity Last Taught & Next to Teach + Courses checklist + Private Tutor Notes; Tab 2: Student Portal access code, Homework, Goals & Shared Notes).
+- Schedule: Full-width Month or Week calendar. When Hebrew Date is turned on in Settings, the Hebrew month/year fits neatly in the Schedule header and Hebrew dates appear on each day. Click any date to go into that date's clean view showing scheduled students and times, then click a student to view/edit what to teach him or jump to AI After Class.
 
 Current Reference Date:
 Today is ${weekdayStr}, ${todayStr}.
@@ -27834,6 +27875,17 @@ Guidelines:
         if (args.lastTaught !== undefined && student.skills) {
           student.skills.lastTaught = String(args.lastTaught).trim();
           student.skills.lastTaughtAt = new Date().toISOString().split('T')[0];
+          // Auto-mark today's session completed when logging what was just taught today
+          if (Array.isArray(student.schedule)) {
+            const nowObj = new Date();
+            const todayYMD = typeof formatDateToYMD === 'function' ? formatDateToYMD(nowObj) : student.skills.lastTaughtAt;
+            const todayDow = nowObj.getDay();
+            const todaySess = student.schedule.find(sess => sess && (sess.dateStr === todayYMD || (sess.repeatWeekly && sess.dayOfWeek === todayDow)));
+            if (todaySess && todaySess.status !== 'cancelled') {
+              todaySess.status = 'completed';
+              todaySess.completedAt = nowObj.toISOString();
+            }
+          }
         }
         if (args.nextToTeach !== undefined && student.skills) {
           student.skills.nextToTeach = String(args.nextToTeach).trim();
@@ -27843,14 +27895,28 @@ Guidelines:
         if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
         renderStudents();
         renderCalendar();
+        if (typeof renderSidebarDailyOverview === 'function') renderSidebarDailyOverview();
         if (APP_STATE.activeStudentDrawerId === student.id && typeof renderStudentDrawer === 'function') {
           renderStudentDrawer(student.id, true);
         }
+
+        const continuityParts = [];
+        if (student.skills?.lastTaught) continuityParts.push(`${isHe ? 'נלמד' : 'Last'}: ${student.skills.lastTaught}`);
+        if (student.skills?.nextToTeach) continuityParts.push(`${isHe ? 'לשיעור הבא' : 'Next'}: ${student.skills.nextToTeach}`);
 
         return {
           success: true,
           studentId: student.id,
           name: student.name,
+          actionCards: (args.lastTaught !== undefined || args.nextToTeach !== undefined) ? [
+            {
+              type: 'student',
+              title: isHe ? `עודכן פרופיל: ${student.name}` : `Updated: ${student.name}`,
+              studentId: student.id,
+              studentName: student.name,
+              detail: continuityParts.join(' · ')
+            }
+          ] : undefined,
           message: isHe ? `תלמיד עודכן: ${student.name}` : `Student updated: ${student.name}`
         };
       }
@@ -29828,8 +29894,8 @@ ${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output 
       </button>
 
       <button onclick="switchTab('ai')" id="mob-tab-ai" class="flex flex-col items-center justify-center gap-0.5 py-1 px-1 rounded-xl transition text-slate-400 hover:text-slate-200 w-full">
-        <i data-lucide="sparkles" class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400"></i>
-        <span class="text-[11px] tracking-tight truncate w-full text-center" id="mob-lbl-ai">AI</span>
+        <i data-lucide="bot" class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400"></i>
+        <span class="text-[11px] tracking-tight truncate w-full text-center" id="mob-lbl-ai">My Agent</span>
       </button>
 
     </div>
