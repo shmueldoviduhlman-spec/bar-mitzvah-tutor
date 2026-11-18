@@ -117,6 +117,159 @@
       box-shadow: 4px 0 24px rgba(15, 23, 42, 0.03);
     }
 
+    /* Interactive Parchment Scroll Unfurl / Roll-Up Desktop Sidebar */
+    @keyframes sidebarScrollRollUp {
+      0% {
+        opacity: 1;
+        transform: scale(1);
+        clip-path: inset(0 0 0 0 round 0px);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(0.9);
+        clip-path: inset(0 calc(100% - 62px) calc(100% - 62px) 0 round 999px);
+      }
+    }
+
+    @keyframes sidebarScrollRollUpRtl {
+      0% {
+        opacity: 1;
+        transform: scale(1);
+        clip-path: inset(0 0 0 0 round 0px);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(0.9);
+        clip-path: inset(0 0 calc(100% - 62px) calc(100% - 62px) round 999px);
+      }
+    }
+
+    @keyframes sidebarScrollUnroll {
+      0% {
+        opacity: 0.25;
+        transform: scaleY(0.86) scaleX(0.92);
+        clip-path: inset(0 calc(100% - 62px) calc(100% - 62px) 0 round 999px);
+      }
+      40% {
+        opacity: 1;
+        transform: scaleY(1.015) scaleX(1);
+        clip-path: inset(0 0% 42% 0 round 20px);
+      }
+      100% {
+        opacity: 1;
+        transform: scaleY(1) scaleX(1);
+        clip-path: inset(0 0 0 0 round 0px);
+      }
+    }
+
+    @keyframes sidebarScrollUnrollRtl {
+      0% {
+        opacity: 0.25;
+        transform: scaleY(0.86) scaleX(0.92);
+        clip-path: inset(0 0 calc(100% - 62px) calc(100% - 62px) round 999px);
+      }
+      40% {
+        opacity: 1;
+        transform: scaleY(1.015) scaleX(1);
+        clip-path: inset(0 0 42% 0% round 20px);
+      }
+      100% {
+        opacity: 1;
+        transform: scaleY(1) scaleX(1);
+        clip-path: inset(0 0 0 0 round 0px);
+      }
+    }
+
+    @keyframes scrollParchmentSheen {
+      0% {
+        opacity: 0.85;
+        transform: translateY(-15%);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(115%);
+      }
+    }
+
+    @keyframes sidebarScrollCascade {
+      0% {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (min-width: 768px) {
+      #app-sidebar-shell {
+        transform-origin: top left;
+        overflow: visible;
+      }
+
+      html[dir="rtl"] #app-sidebar-shell {
+        transform-origin: top right;
+      }
+
+      #app-main-canvas {
+        transition: padding 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      html.sidebar-scroll-collapsed #app-main-canvas {
+        padding-left: 5.75rem !important;
+      }
+
+      html[dir="rtl"].sidebar-scroll-collapsed #app-main-canvas {
+        padding-left: 1.5rem !important;
+        padding-right: 5.75rem !important;
+      }
+
+      html.sidebar-scroll-collapsed #app-sidebar-shell {
+        animation: sidebarScrollRollUp 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        pointer-events: none;
+      }
+
+      html[dir="rtl"].sidebar-scroll-collapsed #app-sidebar-shell {
+        animation: sidebarScrollRollUpRtl 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      html.sidebar-scroll-unrolling #app-sidebar-shell {
+        animation: sidebarScrollUnroll 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        overflow: hidden;
+      }
+
+      html[dir="rtl"].sidebar-scroll-unrolling #app-sidebar-shell {
+        animation: sidebarScrollUnrollRtl 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+
+      html.sidebar-scroll-unrolling #app-sidebar-shell::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(180deg, transparent 0%, rgba(245, 158, 11, 0.26) 45%, rgba(99, 102, 241, 0.18) 65%, transparent 100%);
+        animation: scrollParchmentSheen 0.62s ease-out forwards;
+      }
+
+      html.sidebar-scroll-unrolling .sidebar-scroll-item {
+        animation: sidebarScrollCascade 0.46s cubic-bezier(0.22, 1, 0.36, 1) both;
+        animation-delay: 0.14s;
+      }
+
+      html.sidebar-scroll-collapsed #btn-sidebar-scroll-toggle {
+        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.28), 0 12px 28px -6px rgba(99, 102, 241, 0.5);
+      }
+
+      html.sidebar-scroll-collapsed #btn-sidebar-scroll-toggle .sidebar-logo-parchment-icon {
+        transform: rotate(-14deg) scale(1.06);
+      }
+
+      html[dir="rtl"].sidebar-scroll-collapsed #btn-sidebar-scroll-toggle .sidebar-logo-parchment-icon {
+        transform: rotate(14deg) scale(1.06);
+      }
+    }
+
     html.theme-daylight .glass-nav {
       background: rgba(255, 255, 255, 0.92) !important;
       border-color: #E2E8F0 !important;
@@ -705,18 +858,26 @@
     </div>
   </div>
 
+  <!-- Interactive Circular Parchment Logo Button (Desktop Scroll Toggle) -->
+  <button type="button" onclick="toggleSidebarScrollCollapse()" id="btn-sidebar-scroll-toggle" aria-expanded="true" aria-controls="app-sidebar-shell" title="Toggle Menu Scroll" class="hidden md:flex fixed top-5 left-5 rtl:left-auto rtl:right-5 z-50 w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 via-brand-500 to-amber-500 items-center justify-center text-white shadow-lg shadow-indigo-500/25 keep-white transition-all duration-300 hover:scale-105 hover:ring-2 hover:ring-amber-400/50 active:scale-95 cursor-pointer">
+    <i data-lucide="scroll" class="w-5 h-5 sidebar-logo-parchment-icon transition-transform duration-500"></i>
+  </button>
+
   <!-- Modern Left Sidebar App Shell (Desktop Fixed Left Rail / Mobile Slim Top Bar) -->
   <aside id="app-sidebar-shell" class="sticky top-0 md:fixed md:inset-y-0 md:left-0 rtl:md:left-auto rtl:md:right-0 z-40 w-full md:w-64 glass-nav border-b md:border-b-0 md:border-r border-slate-800/80 px-3.5 py-2.5 md:p-5 flex items-center md:items-stretch justify-between md:flex-col gap-3 select-none">
 
-    <!-- Top Brand + Primary CTA + Vertical Nav + Course Tree -->
+    <!-- Top Brand + Primary CTA + Vertical Nav + Daily Overview -->
     <div class="flex items-center md:flex-col md:items-stretch gap-3 md:gap-5 min-w-0 flex-1">
 
       <!-- Brand Logo & Top-Right Circular User Profile Avatar -->
       <div class="flex items-center justify-between gap-2.5 min-w-0">
         <div class="flex items-center gap-3 min-w-0">
-          <div class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-full bg-gradient-to-tr from-indigo-600 via-brand-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 keep-white">
-            <i data-lucide="scroll" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+          <!-- Mobile Logo Circle -->
+          <div class="md:hidden w-9 h-9 shrink-0 rounded-full bg-gradient-to-tr from-indigo-600 via-brand-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 keep-white">
+            <i data-lucide="scroll" class="w-4 h-4"></i>
           </div>
+          <!-- Desktop Logo Circle Slot (filled by fixed #btn-sidebar-scroll-toggle) -->
+          <div class="hidden md:block w-10 h-10 shrink-0" aria-hidden="true"></div>
           <div class="min-w-0">
             <span id="app-title" class="text-base sm:text-lg font-extrabold text-white tracking-tight block leading-none">TutorPilot</span>
             <span class="hidden md:block text-[10px] font-bold uppercase tracking-widest text-indigo-400 mt-1">Teaching Studio</span>
@@ -773,7 +934,7 @@
       </div>
 
       <!-- Desktop Vertical Sidebar Navigation Rail -->
-      <nav id="desktop-sidebar-nav" class="hidden md:flex flex-col gap-1.5">
+      <nav id="desktop-sidebar-nav" class="hidden md:flex flex-col gap-1.5 sidebar-scroll-item">
         <div class="px-2.5 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Workspace</div>
         <button type="button" onclick="switchTab('study')" id="tab-study" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition bg-brand-600 text-white shadow-md shadow-brand-500/20">
           <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i>
@@ -791,11 +952,16 @@
           <i data-lucide="sparkles" class="w-4 h-4 text-amber-400 shrink-0"></i>
           <span id="tab-ai-label" class="truncate">AI Studio</span>
         </button>
-        <button type="button" onclick="toggleCommandCenterCollapse()" id="btn-header-command-center" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-semibold text-slate-400 hover:bg-slate-800/70 hover:text-white transition" title="Today Overview & Quick Actions">
-          <i data-lucide="sun" class="w-4 h-4 text-amber-400 shrink-0"></i>
-          <span id="lbl-header-today-btn" class="truncate">Today's Overview</span>
-        </button>
       </nav>
+
+      <!-- Basic Live Daily Overview Section under Workspace -->
+      <div id="sidebar-daily-overview-section" class="hidden md:flex flex-col gap-2.5 pt-3.5 border-t border-slate-800/70 sidebar-scroll-item">
+        <div class="flex items-center justify-between px-2.5">
+          <span id="lbl-sidebar-daily-overview" class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Today's Overview</span>
+          <span id="sidebar-daily-date-label" class="text-[10px] font-semibold text-indigo-400"></span>
+        </div>
+        <div id="sidebar-daily-overview-body" class="space-y-2 px-1"></div>
+      </div>
 
     </div>
 
@@ -7773,6 +7939,9 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (teacherHeader) teacherHeader.classList.add('hidden');
       const desktopNav = document.getElementById('desktop-sidebar-nav');
       if (desktopNav) desktopNav.classList.add('hidden');
+      const sidebarDaily = document.getElementById('sidebar-daily-overview-section');
+      if (sidebarDaily) sidebarDaily.classList.add('hidden');
+      if (typeof applySidebarScrollState === 'function') applySidebarScrollState(false, { animate: false });
       const studentHeader = document.getElementById('student-header-controls');
       if (studentHeader) studentHeader.classList.remove('hidden');
       const bottomDock = document.getElementById('main-bottom-dock');
@@ -7841,6 +8010,8 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (teacherHeader) teacherHeader.classList.remove('hidden');
       const desktopNav = document.getElementById('desktop-sidebar-nav');
       if (desktopNav) desktopNav.classList.remove('hidden');
+      const sidebarDaily = document.getElementById('sidebar-daily-overview-section');
+      if (sidebarDaily) sidebarDaily.classList.remove('hidden');
       const bottomDock = document.getElementById('main-bottom-dock');
       if (bottomDock) bottomDock.classList.remove('hidden');
 
@@ -9615,11 +9786,77 @@ alter publication supabase_realtime add table public.students_sync;`;
       return next;
     }
 
-    try { applyThemeMode(); } catch (e) {}
+    function isSidebarScrollCollapsed() {
+      if (APP_STATE.sidebarScrollCollapsed !== undefined) {
+        return APP_STATE.sidebarScrollCollapsed === true;
+      }
+      try {
+        if (typeof localStorage !== 'undefined') {
+          return localStorage.getItem('tutor_sidebar_collapsed') === 'true';
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    var sidebarScrollAnimTimer = null;
+
+    function applySidebarScrollState(collapsed, opts) {
+      const targetCollapsed = Boolean(collapsed);
+      const animate = Boolean(opts && opts.animate);
+      APP_STATE.sidebarScrollCollapsed = targetCollapsed;
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('tutor_sidebar_collapsed', targetCollapsed ? 'true' : 'false');
+        }
+      } catch (e) {}
+
+      const htmlEl = typeof document !== 'undefined' ? document.documentElement : null;
+      if (htmlEl && htmlEl.classList) {
+        if (sidebarScrollAnimTimer) {
+          clearTimeout(sidebarScrollAnimTimer);
+          sidebarScrollAnimTimer = null;
+        }
+        if (targetCollapsed) {
+          htmlEl.classList.remove('sidebar-scroll-unrolling');
+          htmlEl.classList.add('sidebar-scroll-collapsed');
+          const userDropdown = document.getElementById('user-dropdown-menu');
+          if (userDropdown && userDropdown.classList) userDropdown.classList.add('hidden');
+        } else {
+          htmlEl.classList.remove('sidebar-scroll-collapsed');
+          if (animate) {
+            htmlEl.classList.remove('sidebar-scroll-unrolling');
+            void htmlEl.offsetWidth;
+            htmlEl.classList.add('sidebar-scroll-unrolling');
+            sidebarScrollAnimTimer = setTimeout(() => {
+              if (htmlEl.classList) htmlEl.classList.remove('sidebar-scroll-unrolling');
+              sidebarScrollAnimTimer = null;
+            }, 660);
+          }
+        }
+      }
+
+      const toggleBtn = typeof document !== 'undefined' ? document.getElementById('btn-sidebar-scroll-toggle') : null;
+      if (toggleBtn && typeof toggleBtn.setAttribute === 'function') {
+        const isHe = APP_STATE.lang === 'he';
+        toggleBtn.setAttribute('aria-expanded', targetCollapsed ? 'false' : 'true');
+        toggleBtn.setAttribute('title', targetCollapsed
+          ? (isHe ? 'פתח תפריט' : 'Unroll Menu')
+          : (isHe ? 'סגור תפריט' : 'Roll Up Menu'));
+      }
+      return targetCollapsed;
+    }
+
+    function toggleSidebarScrollCollapse() {
+      const next = !isSidebarScrollCollapsed();
+      return applySidebarScrollState(next, { animate: true });
+    }
+
+    try { applyThemeMode(); applySidebarScrollState(isSidebarScrollCollapsed(), { animate: false }); } catch (e) {}
 
     // Initialize App
     document.addEventListener('DOMContentLoaded', async () => {
       applyThemeMode();
+      applySidebarScrollState(isSidebarScrollCollapsed(), { animate: false });
       // Outside click listener for User Profile Menu
       document.addEventListener('click', (e) => {
         const userDropdown = document.getElementById('user-dropdown-menu');
@@ -23949,6 +24186,7 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       try {
         const storageKey = getStudentStorageKey();
         localStorage.setItem(storageKey, JSON.stringify(APP_STATE.students));
+        if (typeof renderSidebarDailyOverview === 'function') renderSidebarDailyOverview();
         if (pushToCloud && APP_STATE.cloud.client && APP_STATE.activeStudentId) {
           const student = APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId);
           if (student) pushStudentToCloud(student);
@@ -28566,8 +28804,66 @@ Base44, please confirm receipt of this protocol and let us know that you are rea
 
       renderCommandCenterKPIs();
       renderCommandCenterTodaySessions();
+      renderSidebarDailyOverview();
       initCommandCenterGestures();
       if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function renderSidebarDailyOverview() {
+      const container = document.getElementById('sidebar-daily-overview-body');
+      const titleEl = document.getElementById('lbl-sidebar-daily-overview');
+      const dateEl = document.getElementById('sidebar-daily-date-label');
+      if (!container) return;
+
+      const isHe = APP_STATE.lang === 'he';
+      const today = new Date();
+      const todayYMD = formatDateToYMD(today);
+
+      if (titleEl) {
+        titleEl.textContent = isHe ? 'סקירה יומית' : "Today's Overview";
+      }
+      if (dateEl) {
+        try {
+          dateEl.textContent = today.toLocaleDateString(isHe ? 'he-IL' : 'en-US', { month: 'short', day: 'numeric' });
+        } catch (e) {
+          dateEl.textContent = todayYMD;
+        }
+      }
+
+      const students = Array.isArray(APP_STATE.students) ? APP_STATE.students : [];
+      const activeStudentsCount = students.filter(s => s && s.status !== 'completed' && s.status !== 'paused').length;
+      const todaySessions = typeof getScheduledSessionsForDate === 'function' ? (getScheduledSessionsForDate(today) || []) : [];
+
+      const classesListHtml = todaySessions.length === 0
+        ? `<div class="px-2.5 py-2 rounded-xl bg-slate-800/45 border border-slate-800/70 text-[11px] text-slate-400 text-center">${isHe ? 'אין שיעורים מתוכננים להיום' : 'No classes today'}</div>`
+        : `<div class="space-y-1 max-h-40 overflow-y-auto no-scrollbar">${todaySessions.slice(0, 4).map(sess => {
+            const isDone = sess.status === 'completed';
+            const studentName = sess.studentName || (isHe ? 'תלמיד' : 'Student');
+            const timeLabel = sess.time || '';
+            return `
+              <button type="button" onclick="switchTab('calendar'); if (typeof selectCalendarDayAgenda === 'function') selectCalendarDayAgenda('${escapeHtml(todayYMD)}');" class="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-slate-800/55 hover:bg-slate-800 border border-slate-800/70 text-left rtl:text-right transition">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="w-1.5 h-1.5 rounded-full shrink-0 ${isDone ? 'bg-emerald-400' : 'bg-indigo-400'}"></span>
+                  <span class="text-[11px] font-semibold text-white truncate">${escapeHtml(studentName)}</span>
+                </div>
+                <span class="text-[10px] font-mono text-slate-400 shrink-0">${escapeHtml(timeLabel)}</span>
+              </button>
+            `;
+          }).join('')}${todaySessions.length > 4 ? `<button type="button" onclick="switchTab('calendar');" class="w-full text-center text-[10px] font-semibold text-indigo-400 hover:text-indigo-300 py-1">+${todaySessions.length - 4} ${isHe ? 'נוספים' : 'more'}</button>` : ''}</div>`;
+
+      container.innerHTML = `
+        <div class="grid grid-cols-2 gap-1.5">
+          <div class="px-2.5 py-2 rounded-xl bg-slate-800/60 border border-slate-800/80">
+            <div id="sidebar-daily-classes-count" class="text-base font-extrabold text-indigo-400 leading-tight">${todaySessions.length}</div>
+            <div class="text-[10px] font-semibold text-slate-400 mt-0.5 truncate">${isHe ? 'שיעורים היום' : 'Classes Today'}</div>
+          </div>
+          <div class="px-2.5 py-2 rounded-xl bg-slate-800/60 border border-slate-800/80">
+            <div id="sidebar-daily-students-count" class="text-base font-extrabold text-white leading-tight">${activeStudentsCount}</div>
+            <div class="text-[10px] font-semibold text-slate-400 mt-0.5 truncate">${isHe ? 'תלמידים' : 'Active'}</div>
+          </div>
+        </div>
+        ${classesListHtml}
+      `;
     }
 
     function renderCommandCenterKPIs() {

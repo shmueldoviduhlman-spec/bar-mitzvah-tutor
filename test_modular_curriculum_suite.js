@@ -4434,8 +4434,21 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(sandbox.toggleThemeMode() === 'dark' && sandbox.localStorage.getItem('tutor_theme_mode') === 'dark', 'toggleThemeMode switches to Dark Mode and persists preference');
   assert(sandbox.toggleThemeMode() === 'light' && sandbox.localStorage.getItem('tutor_theme_mode') === 'light', 'toggleThemeMode switches back to Warm Daylight cleanly');
 
-  // Desktop Left Sidebar App Shell (clean nav without redundant Your Courses tree)
-  assert(indexHtml.includes('id="app-sidebar-shell"') && indexHtml.includes('id="desktop-sidebar-nav"') && !indexHtml.includes('id="sidebar-courses-quick-list"') && indexHtml.includes('id="main-bottom-dock" class="md:hidden'), 'Desktop uses fixed Left Sidebar App Shell without redundant Your Courses tree while hiding mobile bottom dock on md+ screens');
+  // Desktop Left Sidebar App Shell + Parchment Scroll Toggle + Live Daily Overview Section
+  assert(indexHtml.includes('id="app-sidebar-shell"') && indexHtml.includes('id="desktop-sidebar-nav"') && indexHtml.includes('id="btn-sidebar-scroll-toggle"') && indexHtml.includes('id="sidebar-daily-overview-section"') && !indexHtml.includes('id="btn-header-command-center"') && !indexHtml.includes('id="sidebar-courses-quick-list"') && indexHtml.includes('id="main-bottom-dock" class="md:hidden'), 'Desktop sidebar exposes parchment scroll toggle and inline Daily Overview section without nav Today button or Your Courses tree');
+  assert(typeof sandbox.toggleSidebarScrollCollapse === 'function' && typeof sandbox.renderSidebarDailyOverview === 'function', 'toggleSidebarScrollCollapse and renderSidebarDailyOverview helpers are defined');
+  assert(sandbox.toggleSidebarScrollCollapse() === true && sandbox.localStorage.getItem('tutor_sidebar_collapsed') === 'true', 'Clicking parchment scroll logo rolls sidebar closed cleanly');
+  assert(sandbox.toggleSidebarScrollCollapse() === false && sandbox.localStorage.getItem('tutor_sidebar_collapsed') === 'false', 'Clicking parchment scroll logo again unrolls sidebar open cleanly');
+  const g47PrevStudents = sandbox.APP_STATE.students;
+  const g47TodayYMD = sandbox.formatDateToYMD(new Date());
+  sandbox.APP_STATE.students = [
+    { id: 'stu_daily_1', name: 'David Levi', status: 'active', schedule: [{ id: 'sd1', dateStr: g47TodayYMD, time: '4:30 PM', topic: 'Parashat Chayei Sarah' }] },
+    { id: 'stu_daily_2', name: 'Paused Kid', status: 'paused', schedule: [] }
+  ];
+  sandbox.renderSidebarDailyOverview();
+  const g47DailyHtml = getOrCreateElem('sidebar-daily-overview-body').innerHTML;
+  assert(g47DailyHtml.includes('David Levi') && g47DailyHtml.includes('4:30 PM') && g47DailyHtml.includes('id="sidebar-daily-classes-count"') && g47DailyHtml.includes('>1</div>') && g47DailyHtml.includes('id="sidebar-daily-students-count"'), 'Live Daily Overview updates with today classes count, active student count, and scheduled student rows');
+  sandbox.APP_STATE.students = g47PrevStudents;
 
   // Tab 1: 1-Click Continue Last Lesson, Top Lesson Switcher, Click-to-Rename Title, Quick Section Jump List & 3-Tab Course Architect
   const g47Course = {
