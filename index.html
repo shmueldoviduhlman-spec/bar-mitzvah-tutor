@@ -1755,7 +1755,7 @@
     <section id="view-calendar" class="space-y-4 hidden">
 
       <!-- Clean Decluttered Calendar Header -->
-      <div class="flex items-center justify-between px-4 py-3 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-sm flex-wrap gap-3">
+      <div id="calendar-toolbar-header" class="flex items-center justify-between px-4 py-3 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-sm flex-wrap gap-3">
         <div class="flex items-center gap-2 flex-wrap">
           <button onclick="changeCalendarMonth(-1)" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition active:scale-95" title="Previous Month">
             <i data-lucide="chevron-left" class="w-4 h-4 rtl:rotate-180"></i>
@@ -1802,71 +1802,37 @@
               <span id="lbl-calendar-view-week">Week</span>
             </button>
           </div>
-
-          <button
-            type="button"
-            onclick="toggleHebrewCalendarOverlay()"
-            id="btn-toggle-hebrew-calendar"
-            class="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700/60 text-xs font-medium transition active:scale-95 flex items-center gap-1.5"
-            title="Toggle Hebrew Lunar Calendar Overlay"
-          >
-            <span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="dot-hebrew-calendar-toggle"></span>
-            <span id="lbl-hebrew-calendar-toggle">Hebrew: Off</span>
-          </button>
-
-          <button
-            onclick="openBreakdownPlannerModal()"
-            id="btn-calendar-plan-breakdown"
-            class="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-indigo-300 border border-slate-700/60 text-xs font-semibold transition active:scale-95 flex items-center gap-1.5"
-            title="Plan Curriculum Breakdown"
-          >
-            <i data-lucide="calendar-range" class="w-3.5 h-3.5 text-indigo-400"></i>
-            <span id="calendar-breakdown-btn-label">Plan Classes</span>
-          </button>
-
-          <button
-            type="button"
-            id="btn-export-calendar-ics"
-            onclick="exportCalendarToIcs()"
-            class="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-cyan-300 border border-slate-700/60 text-xs font-semibold transition active:scale-95 flex items-center gap-1.5"
-            title="Export schedule as .ics"
-          >
-            <i data-lucide="download" class="w-3.5 h-3.5 text-cyan-400"></i>
-            <span id="lbl-calendar-export-ics">Sync (.ics)</span>
-          </button>
         </div>
       </div>
 
-      <!-- SPLIT DESKTOP WORKSPACE: CALENDAR GRID (LEFT) + LIVE SELECTED DAY AGENDA (RIGHT) -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        <div class="lg:col-span-8 space-y-3 min-w-0">
-          <!-- MONTH VIEW CONTAINER -->
-          <div id="calendar-month-view-container" class="space-y-3">
-            <!-- 7-Day Weekdays Header (Sun to Sat) -->
-            <div id="calendar-weekdays-header" class="grid grid-cols-7 gap-1.5 sm:gap-2 text-center text-[11px] font-bold text-slate-400 uppercase tracking-wider w-full min-w-0 overflow-hidden">
-              <!-- Populated via JS -->
-            </div>
-
-            <!-- Calendar 7-Day Month Grid (Sun to Sat) -->
-            <div id="calendar-days-grid" class="grid grid-cols-7 gap-1.5 sm:gap-2 w-full min-w-0 overflow-hidden">
-              <!-- Populated dynamically via JS -->
-            </div>
+      <!-- FULL-WIDTH CALENDAR WORKSPACE -->
+      <div id="calendar-grid-workspace" class="space-y-3 w-full">
+        <!-- MONTH VIEW CONTAINER -->
+        <div id="calendar-month-view-container" class="space-y-3">
+          <!-- 7-Day Weekdays Header (Sun to Sat) -->
+          <div id="calendar-weekdays-header" class="grid grid-cols-7 gap-1.5 sm:gap-2 text-center text-[11px] font-bold text-slate-400 uppercase tracking-wider w-full min-w-0 overflow-hidden">
+            <!-- Populated via JS -->
           </div>
 
-          <!-- WEEK TIMETABLE VIEW CONTAINER -->
-          <div id="calendar-week-view-container" class="hidden space-y-3">
-            <div id="calendar-week-timetable-scroll" class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/80 shadow-lg backdrop-blur">
-              <div id="calendar-week-timetable" class="min-w-[720px]">
-                <!-- Populated dynamically via renderWeekTimetable -->
-              </div>
-            </div>
+          <!-- Calendar 7-Day Month Grid (Sun to Sat) -->
+          <div id="calendar-days-grid" class="grid grid-cols-7 gap-1.5 sm:gap-2 w-full min-w-0 overflow-hidden">
+            <!-- Populated dynamically via JS -->
           </div>
         </div>
 
-        <!-- LIVE SELECTED DAY AGENDA & QUICK BOOKING PANEL -->
-        <aside id="calendar-side-agenda-panel" class="lg:col-span-4 rounded-3xl bg-slate-900/90 border border-slate-800 p-4 sm:p-5 shadow-lg space-y-4">
-          <!-- Populated dynamically via renderCalendarSideAgendaPanel() -->
-        </aside>
+        <!-- WEEK TIMETABLE VIEW CONTAINER -->
+        <div id="calendar-week-view-container" class="hidden space-y-3">
+          <div id="calendar-week-timetable-scroll" class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/80 shadow-lg backdrop-blur">
+            <div id="calendar-week-timetable" class="min-w-[720px]">
+              <!-- Populated dynamically via renderWeekTimetable -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOCUSED DATE DETAIL VIEW (Shown when clicking any date on the calendar) -->
+      <div id="calendar-day-detail-view" class="hidden max-w-3xl mx-auto space-y-5">
+        <!-- Populated dynamically via renderCalendarDayDetailView() -->
       </div>
 
     </section>
@@ -4662,6 +4628,21 @@
             </div>
           </div>
           <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+        </button>
+
+        <!-- Hebrew Date Display Tile -->
+        <button type="button" id="btn-toggle-hebrew-calendar" onclick="toggleHebrewCalendarOverlay()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-amber-500/50 transition active:scale-98 text-left">
+          <div class="flex items-center gap-3">
+            <i data-lucide="calendar-days" class="w-4 h-4 text-amber-400"></i>
+            <div>
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span id="settings-hebrew-date-title">Hebrew Date</span>
+                <span id="lbl-hebrew-calendar-toggle" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold">Off</span>
+              </div>
+              <p id="settings-hebrew-date-desc" class="text-[11px] text-slate-400 mt-0.5">Show Hebrew date in the Schedule header & day grid</p>
+            </div>
+          </div>
+          <span class="w-2.5 h-2.5 rounded-full bg-slate-500 shrink-0" id="dot-hebrew-calendar-toggle"></span>
         </button>
 
         <!-- School & Team Workspace Tile -->
@@ -10607,6 +10588,7 @@ alter publication supabase_realtime add table public.students_sync;`;
         renderLessonsCategoryView();
       }
       if (tabId === 'calendar') {
+        APP_STATE.calendar.isDayViewOpen = false;
         renderCalendar();
       }
       if (tabId === 'ai') {
@@ -24705,13 +24687,66 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
 
     function selectCalendarDayAgenda(dateStr) {
       if (!dateStr) return;
-      APP_STATE.calendar.selectedDateStr = dateStr;
-      renderCalendarSideAgendaPanel(dateStr);
+      openCalendarDateView(dateStr);
     }
 
-    function renderCalendarSideAgendaPanel(targetDateStr) {
-      const panel = document.getElementById('calendar-side-agenda-panel');
-      if (!panel) return;
+    function openCalendarDateView(dateStr, focusSessionId) {
+      if (!dateStr) return;
+      APP_STATE.calendar.selectedDateStr = dateStr;
+      APP_STATE.calendar.isDayViewOpen = true;
+      if (focusSessionId) {
+        APP_STATE.calendar.selectedSessionId = focusSessionId;
+      } else {
+        const parts = String(dateStr).split('-');
+        const dateObj = parts.length === 3 ? new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)) : new Date();
+        const sessions = getScheduledSessionsForDate(dateObj);
+        APP_STATE.calendar.selectedSessionId = sessions.length === 1 ? sessions[0].id : null;
+      }
+      renderCalendar();
+    }
+
+    function closeCalendarDateView() {
+      APP_STATE.calendar.isDayViewOpen = false;
+      APP_STATE.calendar.selectedSessionId = null;
+      renderCalendar();
+    }
+
+    function toggleCalendarDayDetailStudent(sessionId) {
+      APP_STATE.calendar.selectedSessionId = (APP_STATE.calendar.selectedSessionId === sessionId) ? null : sessionId;
+      renderCalendarDayDetailView(APP_STATE.calendar.selectedDateStr);
+    }
+
+    function startEditDayDetailTopic(sessionId) {
+      const displayEl = document.getElementById(`day-detail-topic-display-${sessionId}`);
+      const editBox = document.getElementById(`day-detail-topic-edit-${sessionId}`);
+      const input = document.getElementById(`day-detail-topic-input-${sessionId}`);
+      if (displayEl) displayEl.classList.add('hidden');
+      if (editBox) editBox.classList.remove('hidden');
+      if (input) input.focus();
+    }
+
+    function cancelEditDayDetailTopic(sessionId) {
+      const displayEl = document.getElementById(`day-detail-topic-display-${sessionId}`);
+      const editBox = document.getElementById(`day-detail-topic-edit-${sessionId}`);
+      if (displayEl) displayEl.classList.remove('hidden');
+      if (editBox) editBox.classList.add('hidden');
+    }
+
+    function saveDayDetailTopic(studentId, sessionId) {
+      const student = (APP_STATE.students || []).find(s => s.id === studentId);
+      if (!student || !Array.isArray(student.schedule)) return;
+      const sess = student.schedule.find(item => item.id === sessionId);
+      if (!sess) return;
+      const input = document.getElementById(`day-detail-topic-input-${sessionId}`);
+      sess.topic = input ? input.value.trim() : '';
+      saveStudentsToStorage(true);
+      renderCalendar();
+      showToast(APP_STATE.lang === 'he' ? 'תוכן השיעור עודכן בהצלחה' : 'Lesson plan updated');
+    }
+
+    function renderCalendarDayDetailView(targetDateStr) {
+      const view = document.getElementById('calendar-day-detail-view');
+      if (!view) return;
       const isHe = APP_STATE.lang === 'he';
       const t = I18N[APP_STATE.lang] || I18N.en;
       const now = new Date();
@@ -24721,65 +24756,174 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
 
       const parts = String(dateStr).split('-');
       const dateObj = parts.length === 3 ? new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)) : now;
-      const dayOfWeekName = (t.daysOfWeekFull && t.daysOfWeekFull[dateObj.getDay()]) || 'Selected Day';
+      const dayOfWeekName = (t.daysOfWeekFull && t.daysOfWeekFull[dateObj.getDay()]) || '';
+      const niceDate = dateObj.toLocaleDateString(isHe ? 'he-IL' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' });
       const showHebrew = !!APP_STATE.enableHebrewCalendar;
       const hebrewInfo = showHebrew && typeof getHebrewDateInfo === 'function' ? getHebrewDateInfo(dateObj) : null;
       const sessions = getScheduledSessionsForDate(dateObj);
 
-      panel.innerHTML = `
-        <div class="flex items-start justify-between gap-2 border-b border-slate-800 pb-3">
-          <div>
-            <span class="text-[10px] font-mono uppercase tracking-wider text-amber-400 font-bold block">${dateStr === todayStr ? (isHe ? 'היום ביומן' : 'Today\'s Schedule') : (isHe ? 'סדר יום נבחר' : 'Selected Day Agenda')}</span>
-            <h3 class="text-base font-extrabold text-white mt-0.5">${escapeHtml(dayOfWeekName)} · ${escapeHtml(dateStr)}</h3>
-            ${hebrewInfo ? `<p class="text-xs font-mono text-brand-300 mt-0.5">${escapeHtml(hebrewInfo.dayHebrewNumeral)} ${escapeHtml(hebrewInfo.monthName)} ${escapeHtml(hebrewInfo.yearHebrewNumeral)}</p>` : ''}
+      view.innerHTML = `
+        <div class="flex items-center justify-between gap-3 flex-wrap pb-4 border-b border-slate-800/80">
+          <div class="flex items-center gap-3 flex-wrap">
+            <button type="button" id="btn-back-to-calendar" onclick="closeCalendarDateView()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition">
+              <i data-lucide="arrow-left" class="w-3.5 h-3.5 rtl:rotate-180"></i>
+              <span>${isHe ? 'לוח שנה' : 'Calendar'}</span>
+            </button>
+            <div>
+              <div class="flex items-center gap-2.5 flex-wrap">
+                <h2 id="day-detail-date-heading" class="text-lg sm:text-xl font-extrabold text-white tracking-tight">${escapeHtml(dayOfWeekName)} · ${escapeHtml(niceDate)}</h2>
+                ${hebrewInfo ? `<span id="day-detail-hebrew-badge" class="text-xs font-semibold text-brand-400 font-mono px-2 py-0.5 rounded-lg bg-brand-500/10 border border-brand-500/20">${escapeHtml(hebrewInfo.dayHebrewNumeral)} ${escapeHtml(hebrewInfo.monthName)} ${escapeHtml(hebrewInfo.yearHebrewNumeral)}</span>` : ''}
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5">${sessions.length} ${isHe ? (sessions.length === 1 ? 'שיעור מתוכנן' : 'שיעורים מתוכננים') : (sessions.length === 1 ? 'class scheduled' : 'classes scheduled')}</p>
+            </div>
           </div>
-          <span class="px-2.5 py-1 rounded-full bg-slate-950 border border-slate-800 text-xs font-mono text-slate-300 shrink-0">${sessions.length} ${isHe ? 'שיעורים' : (sessions.length === 1 ? 'session' : 'sessions')}</span>
+          <button type="button" id="btn-day-detail-add-lesson" onclick="openScheduleLessonModal('${escapeHtml(dateStr)}', null, '4:30 PM')" class="px-4 py-2 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition active:scale-95 shadow-sm">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>${isHe ? 'קבע שיעור' : 'Schedule Lesson'}</span>
+          </button>
         </div>
 
         ${sessions.length === 0 ? `
-          <div class="py-8 px-4 text-center rounded-2xl bg-slate-950/60 border border-dashed border-slate-800 space-y-2">
-            <i data-lucide="calendar-plus" class="w-7 h-7 text-slate-500 mx-auto"></i>
-            <p class="text-xs text-slate-400">${isHe ? 'אין שיעורים קבועים ליום זה עדיין.' : 'No sessions scheduled for this day yet.'}</p>
+          <div class="py-12 px-6 text-center rounded-3xl bg-slate-900/60 border border-dashed border-slate-800 space-y-3">
+            <i data-lucide="calendar-plus" class="w-8 h-8 text-slate-500 mx-auto"></i>
+            <p class="text-sm font-medium text-slate-300">${isHe ? 'אין שיעורים קבועים לתאריך זה.' : 'No students scheduled for this date yet.'}</p>
+            <button type="button" onclick="openScheduleLessonModal('${escapeHtml(dateStr)}', null, '4:30 PM')" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition shadow">
+              ${isHe ? '+ קבע שיעור ראשון' : '+ Schedule Lesson'}
+            </button>
           </div>
         ` : `
-          <div class="space-y-2.5 max-h-[48vh] overflow-y-auto pr-1">
+          <div class="space-y-3">
             ${sessions.map(s => {
-              const isDone = s.status === 'completed';
+              const isExpanded = (APP_STATE.calendar.selectedSessionId === s.id);
+              const sessionStatus = s.status || 'scheduled';
+              const avatar = s.studentAvatar
+                ? `<img src="${escapeHtml(s.studentAvatar)}" class="w-9 h-9 rounded-full object-cover shrink-0 ring-1 ring-brand-500/40">`
+                : `<span class="w-9 h-9 rounded-full bg-brand-500/20 text-brand-300 font-bold text-sm flex items-center justify-center shrink-0 border border-brand-500/30">${escapeHtml((s.studentName || '?').charAt(0))}</span>`;
+
+              const statusPill = sessionStatus === 'completed'
+                ? `<span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">✓ ${t.sessionStatusCompleted || 'Completed'}</span>`
+                : sessionStatus === 'cancelled'
+                  ? `<span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-bold line-through">✗ ${t.sessionStatusCancelled || 'Cancelled'}</span>`
+                  : sessionStatus === 'no_show'
+                    ? `<span class="px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30 text-[10px] font-bold">⚠ ${t.sessionStatusNoShow || 'No-Show'}</span>`
+                    : '';
+
+              const hasTopic = !!(s.topic && s.topic.trim());
+              const teachingText = hasTopic
+                ? s.topic.trim()
+                : (s.studentNotes || s.studentParsha || (isHe ? 'לא הוגדרו הערות לימוד ספציפיות לשיעור זה. לחץ ערוך כדי להוסיף מה ללמד.' : 'No specific lesson notes yet. Click Edit to write what to teach in this session.'));
+
+              const studentObj = (APP_STATE.students || []).find(st => st.id === s.studentId);
+              const activeHw = (studentObj && studentObj.skills && studentObj.skills.homework && studentObj.skills.homework.task && !studentObj.skills.homework.completed)
+                ? studentObj.skills.homework.task
+                : null;
+              const hr = (studentObj && studentObj.skills && studentObj.skills.hebrewReading) || {};
+              const pr = (studentObj && studentObj.skills && studentObj.skills.parshaReading) || {};
+              const dtQuick = (studentObj && studentObj.skills && studentObj.skills.dvarTorah) || {};
+              const quickStatusPills = [];
+              if (hr.booklet || hr.currentPage) quickStatusPills.push(`📖 ${escapeHtml(hr.booklet || 'Hebrew')} ${hr.currentPage ? ('p. ' + escapeHtml(hr.currentPage)) : ''}`);
+              if (pr.aliyah || pr.currentLine) quickStatusPills.push(`📜 ${escapeHtml(pr.aliyah || 'Parsha')} ${pr.currentLine ? (isHe ? 'שורה ' : 'line ') + escapeHtml(pr.currentLine) : ''}`);
+              if (dtQuick.topic || dtQuick.stage) quickStatusPills.push(`✍️ ${escapeHtml(dtQuick.topic || (isHe ? 'דבר תורה' : 'Dvar Torah'))}`);
+
               return `
-                <div class="p-3.5 rounded-2xl bg-slate-950/80 border ${isDone ? 'border-emerald-500/40' : 'border-slate-800'} space-y-2">
-                  <div class="flex items-center justify-between gap-2">
-                    <button type="button" onclick="openStudentDrawer('${s.studentId}')" class="text-sm font-bold text-white hover:text-amber-300 transition text-left truncate">
-                      ${escapeHtml(s.studentName)}
-                    </button>
-                    <span class="px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold shrink-0">${escapeHtml(s.time || '')}</span>
-                  </div>
-                  ${s.topic ? `<p dir="auto" class="text-xs text-slate-300 leading-snug">${escapeHtml(s.topic)}</p>` : ''}
-                  <div class="flex items-center justify-between gap-2 pt-1">
-                    <button type="button" onclick="openStudentDrawer('${s.studentId}')" class="text-[11px] font-semibold text-brand-400 hover:underline">${isHe ? 'פרופיל תלמיד' : 'Student Profile'}</button>
-                    <button type="button" onclick="openScheduleLessonModal('${dateStr}', '${s.id}')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] font-semibold text-slate-300 transition">${isHe ? 'ערוך שיעור' : 'Manage'}</button>
-                  </div>
+                <div class="rounded-2xl border ${isExpanded ? 'border-brand-500/60 bg-slate-900/95 shadow-md ring-1 ring-brand-500/20' : 'border-slate-800 bg-slate-900/75 hover:border-slate-700'} overflow-hidden transition">
+                  <button type="button" onclick="toggleCalendarDayDetailStudent('${s.id}')" class="w-full p-4 flex items-center justify-between gap-3 text-left rtl:text-right cursor-pointer">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <span class="px-2.5 py-1 rounded-xl bg-amber-500/15 text-amber-300 border border-amber-500/30 font-mono font-bold text-xs shrink-0">${escapeHtml(s.time || '')}</span>
+                      ${avatar}
+                      <div class="min-w-0">
+                        <span class="text-sm sm:text-base font-bold text-white block truncate">${escapeHtml(s.studentName)}</span>
+                        ${statusPill ? `<div class="mt-0.5">${statusPill}</div>` : ''}
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                      <span class="text-xs font-semibold text-indigo-300 flex items-center gap-1">
+                        <span>${isHe ? 'מה ללמד' : 'What to teach'}</span>
+                        <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4"></i>
+                      </span>
+                    </div>
+                  </button>
+
+                  ${isExpanded ? `
+                    <div class="px-4 pb-4 pt-3 border-t border-slate-800/80 bg-slate-950/60 space-y-3 text-xs">
+                      <div class="p-3.5 rounded-xl bg-brand-950/35 border border-brand-500/25 space-y-2">
+                        <div class="flex items-center justify-between gap-2">
+                          <span class="text-brand-300 font-bold flex items-center gap-1.5">
+                            <i data-lucide="book-open" class="w-3.5 h-3.5 text-amber-400"></i>
+                            <span>${isHe ? 'מה ללמד בשיעור זה' : 'What to teach in this class'}</span>
+                          </span>
+                          <button type="button" onclick="event.stopPropagation(); startEditDayDetailTopic('${s.id}')" class="text-amber-400 hover:underline font-semibold text-[11px]">
+                            ${isHe ? 'ערוך' : 'Edit'}
+                          </button>
+                        </div>
+                        <div id="day-detail-topic-display-${s.id}" dir="auto" class="text-sm text-slate-100 leading-relaxed whitespace-pre-wrap">${escapeHtml(teachingText)}</div>
+                        ${quickStatusPills.length > 0 ? `
+                          <div class="flex items-center gap-1.5 flex-wrap pt-1">
+                            ${quickStatusPills.map(p => `<span class="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-slate-300 text-[11px] font-mono">${p}</span>`).join('')}
+                          </div>
+                        ` : ''}
+                        <div id="day-detail-topic-edit-${s.id}" class="hidden space-y-2 pt-1">
+                          <textarea id="day-detail-topic-input-${s.id}" rows="2" dir="auto" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none" placeholder="${isHe ? 'הקלד מה ללמד היום...' : 'Write what to teach in this session...'}">${escapeHtml(s.topic || '')}</textarea>
+                          <div class="flex items-center justify-end gap-2">
+                            <button type="button" onclick="cancelEditDayDetailTopic('${s.id}')" class="px-2.5 py-1 text-[11px] text-slate-400 hover:text-white">${isHe ? 'ביטול' : 'Cancel'}</button>
+                            <button type="button" onclick="saveDayDetailTopic('${s.studentId}', '${s.id}')" class="px-3.5 py-1 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-[11px] font-bold shadow">${isHe ? 'שמור' : 'Save'}</button>
+                          </div>
+                        </div>
+                      </div>
+
+                      ${activeHw ? `
+                        <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 flex items-center justify-between gap-2">
+                          <span class="truncate"><strong class="font-bold">${isHe ? 'שיעורי בית:' : 'Homework:'}</strong> ${escapeHtml(activeHw)}</span>
+                          <button type="button" onclick="toggleStudentHomework('${s.studentId}'); renderCalendarDayDetailView('${escapeHtml(dateStr)}');" class="px-2 py-0.5 rounded bg-amber-500 text-slate-950 font-bold text-[10px] shrink-0">${isHe ? 'נבדק ✓' : 'Checked ✓'}</button>
+                        </div>
+                      ` : ''}
+
+                      <div class="flex items-center justify-between gap-2 flex-wrap pt-1">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                          <button type="button" onclick="updateSessionAttendance('${s.studentId}', '${s.id}', 'completed')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${sessionStatus === 'completed' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'}">${t.markSessionCompletedBtn || 'Completed ✓'}</button>
+                          <button type="button" onclick="updateSessionAttendance('${s.studentId}', '${s.id}', 'scheduled')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${sessionStatus === 'scheduled' ? 'bg-brand-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'}">${t.markSessionScheduledBtn || 'Scheduled'}</button>
+                          <button type="button" onclick="updateSessionAttendance('${s.studentId}', '${s.id}', 'cancelled')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${sessionStatus === 'cancelled' ? 'bg-rose-700 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'}">${t.markSessionCancelledBtn || 'Cancelled'}</button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <button type="button" onclick="openStudentDrawer('${s.studentId}')" class="text-xs font-semibold text-indigo-400 hover:underline flex items-center gap-1">
+                            <span>${isHe ? 'פרופיל תלמיד' : 'Student Profile'}</span>
+                            <i data-lucide="arrow-right" class="w-3 h-3 rtl:rotate-180"></i>
+                          </button>
+                          <button type="button" onclick="deleteScheduledLesson('${s.studentId}', '${s.id}', event)" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition" title="${isHe ? 'הסר שיעור' : 'Remove Lesson'}">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ` : ''}
                 </div>
               `;
             }).join('')}
           </div>
         `}
-
-        <button
-          type="button"
-          id="btn-side-agenda-add-lesson"
-          onclick="openScheduleLessonModal('${dateStr}')"
-          class="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition active:scale-95 shadow flex items-center justify-center gap-1.5"
-        >
-          <i data-lucide="plus" class="w-4 h-4"></i>
-          <span>${isHe ? 'קבע שיעור ליום זה' : 'Schedule Lesson for This Date'}</span>
-        </button>
       `;
       if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
     }
 
     function renderCalendar() {
+      const toolbarHeader = document.getElementById('calendar-toolbar-header');
+      const gridWorkspace = document.getElementById('calendar-grid-workspace');
+      const dayDetailView = document.getElementById('calendar-day-detail-view');
       const monthContainer = document.getElementById('calendar-month-view-container');
       const weekContainer = document.getElementById('calendar-week-view-container');
+
+      if (APP_STATE.calendar.isDayViewOpen && dayDetailView) {
+        if (toolbarHeader) toolbarHeader.classList.add('hidden');
+        if (gridWorkspace) gridWorkspace.classList.add('hidden');
+        dayDetailView.classList.remove('hidden');
+        renderCalendarDayDetailView(APP_STATE.calendar.selectedDateStr);
+        return;
+      }
+
+      if (toolbarHeader) toolbarHeader.classList.remove('hidden');
+      if (gridWorkspace) gridWorkspace.classList.remove('hidden');
+      if (dayDetailView) dayDetailView.classList.add('hidden');
+
       const isWeek = APP_STATE.calendar.viewMode === 'week';
 
       // Update button toggle states
@@ -24794,8 +24938,6 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
           btnWeek.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-400 hover:text-white';
         }
       }
-
-      renderCalendarSideAgendaPanel(APP_STATE.calendar.selectedDateStr);
 
       if (isWeek) {
         if (monthContainer) monthContainer.classList.add('hidden');
@@ -24998,7 +25140,7 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
         const hebInfo = showHebrew ? getHebrewDateInfo(d) : null;
 
         html += `
-          <div class="p-2 border-r border-slate-800/80 last:border-r-0 ${isToday ? 'bg-amber-500/10' : ''} ${isShabbat ? 'bg-amber-950/20' : ''}">
+          <div onclick="openCalendarDateView('${ymd}')" class="p-2 border-r border-slate-800/80 last:border-r-0 cursor-pointer hover:bg-slate-800/40 transition ${isToday ? 'bg-amber-500/10' : ''} ${isShabbat ? 'bg-amber-950/20' : ''}">
             <div class="text-[11px] font-bold ${isToday ? 'text-amber-400' : isShabbat ? 'text-amber-300' : 'text-slate-300'}">
               ${dayShort}
             </div>
@@ -25197,20 +25339,21 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       const btn = document.getElementById('btn-toggle-hebrew-calendar');
       const lbl = document.getElementById('lbl-hebrew-calendar-toggle');
       const dot = document.getElementById('dot-hebrew-calendar-toggle');
-      if (!lbl) return;
+      const titleEl = document.getElementById('settings-hebrew-date-title');
+      const descEl = document.getElementById('settings-hebrew-date-desc');
       const isHe = APP_STATE.lang === 'he';
       const on = !!APP_STATE.enableHebrewCalendar;
-      lbl.textContent = isHe ? (on ? 'תאריכים עבריים: פעיל' : 'תאריכים עבריים: כבוי') : (on ? 'Hebrew: On' : 'Hebrew: Off');
+      if (titleEl) titleEl.textContent = isHe ? 'תאריך עברי' : 'Hebrew Date';
+      if (descEl) descEl.textContent = isHe ? 'הצג תאריכים עבריים בכותרת היומן ובימים' : 'Show Hebrew date in the Schedule header & day grid';
+      if (lbl) lbl.textContent = isHe ? (on ? 'פעיל' : 'כבוי') : (on ? 'On' : 'Off');
       if (dot) {
-        dot.className = on ? 'w-1.5 h-1.5 rounded-full bg-amber-400' : 'w-1.5 h-1.5 rounded-full bg-slate-500';
+        dot.className = on ? 'w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0 shadow-[0_0_8px_rgba(251,191,36,0.75)]' : 'w-2.5 h-2.5 rounded-full bg-slate-500 shrink-0';
       }
       if (btn) {
         if (on) {
-          btn.classList.add('border-amber-500/40', 'text-amber-300', 'bg-amber-950/20');
-          btn.classList.remove('text-slate-400');
+          btn.classList.add('border-amber-500/50');
         } else {
-          btn.classList.remove('border-amber-500/40', 'text-amber-300', 'bg-amber-950/20');
-          btn.classList.add('text-slate-400');
+          btn.classList.remove('border-amber-500/50');
         }
       }
     }
@@ -25256,7 +25399,7 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
 
         return `
           <div
-            onclick="event.stopPropagation(); openScheduleLessonModal('${dateStr}', '${s.id}')"
+            onclick="event.stopPropagation(); openCalendarDateView('${dateStr}', '${s.id}')"
             title="${s.studentName} (${s.time}) [${sessStatus}]"
             class="cursor-pointer group flex items-center justify-center sm:justify-between gap-0.5 sm:gap-1 px-1 py-0.5 rounded border transition text-[9px] sm:text-[10px] leading-tight overflow-hidden w-full max-w-full shadow-2xs ${badgeStyle}"
           >
@@ -25277,7 +25420,7 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
 
       return `
         <div
-          onclick="openScheduleLessonModal('${dateStr}')"
+          onclick="openCalendarDateView('${dateStr}')"
           class="group relative min-h-[70px] sm:min-h-[96px] p-1 sm:p-2 rounded-xl border flex flex-col justify-between transition cursor-pointer select-none active:scale-[0.99] min-w-0 overflow-hidden w-full ${
             isToday
               ? 'bg-slate-900/90 border-amber-400 ring-1 ring-amber-400/50 shadow-md shadow-amber-500/5'
@@ -25326,7 +25469,6 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       APP_STATE.calendar.selectedDateStr = dateStr;
       APP_STATE.calendar.selectedSessionId = targetSessionId || null;
       APP_STATE.calendar.isAddFormVisible = !targetSessionId || !!defaultTimeStr;
-      renderCalendarSideAgendaPanel(dateStr);
       const modal = document.getElementById('modal-schedule-lesson');
       if (!modal) return;
 
@@ -28866,7 +29008,7 @@ Base44, please confirm receipt of this protocol and let us know that you are rea
             const studentName = sess.studentName || (isHe ? 'תלמיד' : 'Student');
             const timeLabel = sess.time || '';
             return `
-              <button type="button" onclick="switchTab('calendar'); if (typeof selectCalendarDayAgenda === 'function') selectCalendarDayAgenda('${escapeHtml(todayYMD)}');" class="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-slate-800/55 hover:bg-slate-800 border border-slate-800/70 text-left rtl:text-right transition">
+              <button type="button" onclick="switchTab('calendar'); openCalendarDateView('${escapeHtml(todayYMD)}', '${escapeHtml(sess.id)}');" class="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-slate-800/55 hover:bg-slate-800 border border-slate-800/70 text-left rtl:text-right transition">
                 <div class="flex items-center gap-2 min-w-0">
                   <span class="w-1.5 h-1.5 rounded-full shrink-0 ${isDone ? 'bg-emerald-400' : 'bg-indigo-400'}"></span>
                   <span class="text-[11px] font-semibold text-white truncate">${escapeHtml(studentName)}</span>

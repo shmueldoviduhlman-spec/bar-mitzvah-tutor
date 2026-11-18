@@ -1069,7 +1069,7 @@ assert(indexHtml.includes('id="planner-start-date"'), 'HTML contains planner-sta
 assert(indexHtml.includes('id="planner-cadence-select"'), 'HTML contains planner-cadence-select');
 assert(indexHtml.includes('id="planner-time-slot"'), 'HTML contains planner-time-slot');
 assert(indexHtml.includes('id="planner-preview-container"'), 'HTML contains planner-preview-container');
-assert(indexHtml.includes('btn-calendar-plan-breakdown'), 'HTML contains Calendar toolbar breakdown planner trigger');
+assert(!indexHtml.includes('id="btn-calendar-plan-breakdown"'), 'Schedule header removes cluttered Plan Classes trigger while retaining Breakdown Planner modal');
 
 // 4. Modal lifecycle
 sandbox.openBreakdownPlannerModal();
@@ -2057,7 +2057,7 @@ console.log('\n--- Gate 24: Calendar Week Timetable, Quick Slot Booking & .ics S
 // 1. HTML Verification of Week View & Sync Controls
 assert(indexHtml.includes('id="btn-calendar-view-month"'), 'HTML contains btn-calendar-view-month');
 assert(indexHtml.includes('id="btn-calendar-view-week"'), 'HTML contains btn-calendar-view-week');
-assert(indexHtml.includes('id="btn-export-calendar-ics"'), 'HTML contains btn-export-calendar-ics');
+assert(!indexHtml.includes('id="btn-export-calendar-ics"'), 'Schedule header removes Sync (.ics) button per clean UI redesign');
 assert(indexHtml.includes('id="calendar-month-view-container"'), 'HTML contains calendar-month-view-container');
 assert(indexHtml.includes('id="calendar-week-view-container"'), 'HTML contains calendar-week-view-container');
 assert(indexHtml.includes('id="calendar-week-timetable"'), 'HTML contains calendar-week-timetable');
@@ -4526,10 +4526,18 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   sandbox.switchStudentProfileTab(targetStu47.id, 'portal');
   assert(sandbox.studentProfileTabMap[targetStu47.id] === 'portal', 'switchStudentProfileTab switches to Student Portal & Shared tab');
 
-  // Tab 3: Split Calendar Grid + Live Side Day Agenda Panel
-  assert(indexHtml.includes('id="calendar-side-agenda-panel"') && typeof sandbox.renderCalendarSideAgendaPanel === 'function', 'Calendar tab includes Live Side Day Agenda Panel');
-  sandbox.selectCalendarDayAgenda('2026-11-18');
-  assert(getOrCreateElem('calendar-side-agenda-panel').innerHTML.includes('2026-11-18') && getOrCreateElem('calendar-side-agenda-panel').innerHTML.includes('btn-side-agenda-add-lesson'), 'selectCalendarDayAgenda updates Live Side Day Agenda Panel for clicked date');
+  // Tab 3: Clean Full-Width Calendar + Click-Date Drilldown into Students & Teaching Plan + Hebrew Date in Settings
+  assert(!indexHtml.includes('id="calendar-side-agenda-panel"') && indexHtml.includes('id="calendar-day-detail-view"') && typeof sandbox.openCalendarDateView === 'function' && typeof sandbox.closeCalendarDateView === 'function', 'Calendar removes permanent right side panel and adds clean click-date Drilldown Day View');
+  const g47CalStudentsBackup = sandbox.APP_STATE.students;
+  sandbox.APP_STATE.students = [
+    { id: 'stu_cal_1', name: 'Ari Cohen', status: 'active', schedule: [{ id: 'sess_cal_1', dateStr: '2026-11-18', time: '4:00 PM', topic: 'Practice Maftir & Haftara blessings' }] }
+  ];
+  sandbox.openCalendarDateView('2026-11-18');
+  const g47DayViewHtml = getOrCreateElem('calendar-day-detail-view').innerHTML;
+  assert(sandbox.APP_STATE.calendar.isDayViewOpen === true && g47DayViewHtml.includes('Ari Cohen') && g47DayViewHtml.includes('4:00 PM') && g47DayViewHtml.includes('Practice Maftir &amp; Haftara blessings'), 'Clicking a calendar date enters that date showing students, times, and what to teach');
+  sandbox.closeCalendarDateView();
+  assert(sandbox.APP_STATE.calendar.isDayViewOpen === false, 'Back to Calendar closes Date Detail view cleanly');
+  sandbox.APP_STATE.students = g47CalStudentsBackup;
 
   // Tab 4: Dedicated AI Studio Generator Cards
   assert(indexHtml.includes('id="ai-studio-generator-cards"') && indexHtml.includes('Worksheet & Handout') && indexHtml.includes('Speech & Dvar Torah'), 'Dedicated AI Studio tab displays 4 visual Teaching Generator & Assistant cards');
