@@ -3484,6 +3484,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(!getOrCreateElem('inside-course-header-card').classList.contains('hidden'), 'Screen 2 Lesson List displays Inside Course header card');
   const screen2Html = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
   assert(screen2Html.includes('studio-lesson-list-screen'), 'Screen 2 renders dedicated clean Lesson List view');
+  assert(screen2Html.includes('id="studio-rapid-add-box" class="hidden"'), 'Screen 2 hides redundant quick lesson input bar below lesson list');
   assert(screen2Html.includes('Time vs Space: The Architecture of Shabbat'), 'Screen 2 displays lesson title cleanly');
   assert(!screen2Html.includes('studio-class-ai-partner') && !screen2Html.includes('studio-lesson-reader') && !screen2Html.includes('studio-inline-syllabus-drawer'), 'Screen 2 omits raw editor forms, reader body, and stacked Topic focus syllabus clutter');
 

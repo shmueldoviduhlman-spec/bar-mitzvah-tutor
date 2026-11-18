@@ -13265,21 +13265,9 @@ ${forceSchemaLines}`;
               }).join('')}
             </div>
 
-            <!-- Single Clean Quick-Add Bar Below Lesson List -->
-            <div id="studio-rapid-add-box" class="p-3 rounded-2xl bg-slate-900/45 border border-slate-800/80">
-              <form onsubmit="handleStudioQuickAddClass(event, '${activeCourse.id}'); return false;" class="flex items-center gap-2">
-                <input
-                  id="input-studio-quick-class"
-                  type="text"
-                  dir="auto"
-                  placeholder="${isHe ? '+ הקלד שם שיעור להוספה מהירה...' : '+ Type a lesson name to add quickly...'}"
-                  class="flex-1 min-w-0 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:border-amber-400 transition"
-                  autocomplete="off"
-                />
-                <button type="submit" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs shrink-0 transition border border-slate-700">
-                  ${isHe ? 'הוסף' : 'Add'}
-                </button>
-              </form>
+            <!-- Hidden backward-compatibility hook (redundant quick-add bar hidden; top '+ New Lesson' CTA is the single clean entry) -->
+            <div id="studio-rapid-add-box" class="hidden" aria-hidden="true">
+              <input id="input-studio-quick-class" type="hidden" value="" />
             </div>
           </div>
         `;
