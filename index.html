@@ -2475,15 +2475,24 @@
               </div>
 
               <!-- TAB 1 PANEL: LESSON SECTIONS & STRUCTURE (Active by Default) -->
-              <div id="architect-tab-panel-sections" class="flex-1 flex flex-col min-h-0 space-y-3">
+              <div id="architect-tab-panel-sections" class="flex-1 flex flex-col min-h-0 space-y-2.5">
+                <!-- 1-Tap Course Quick Templates -->
+                <div class="flex items-center gap-1.5 flex-wrap shrink-0 pb-1 border-b border-slate-800/70">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mr-0.5">Quick Setup:</span>
+                  <button type="button" onclick="applyBlueprintPreset('workbook_booklets')" class="px-2.5 py-1 rounded-lg bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 border border-teal-500/35 text-[11px] font-bold transition">Workbook / Sub-Subjects</button>
+                  <button type="button" onclick="applyBlueprintPreset('concepts_ethics')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-[11px] font-semibold transition">Standard Lessons</button>
+                  <button type="button" onclick="applyBlueprintPreset('blank')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-[11px] font-semibold transition">Simple Notes</button>
+                </div>
+
                 <!-- Live Custom Sections List -->
-                <div id="architect-sections-list" class="flex-1 overflow-y-auto space-y-3.5 pr-1"></div>
+                <div id="architect-sections-list" class="flex-1 overflow-y-auto space-y-3 pr-1"></div>
 
                 <!-- Quick Manual Add Section Bar -->
                 <div class="pt-2 border-t border-slate-800/80 flex items-center gap-1.5 flex-wrap shrink-0">
                   <span class="text-[10px] text-slate-400 font-semibold">+ Add Section:</span>
                   <select id="architect-add-block-type" class="bg-slate-900 border border-slate-700 rounded-lg py-1 px-2 text-[11px] text-slate-200 focus:outline-none focus:border-amber-400">
                     <optgroup label="Core Teaching">
+                      <option value="booklet_pages">📚 Sub-Subjects / Pages Checklist</option>
                       <option value="text">📝 Text / Explanation</option>
                       <option value="list">📌 Bullet Points List</option>
                       <option value="steps">🔢 Step-by-Step Flow</option>
@@ -2506,7 +2515,6 @@
                       <option value="homework">🏠 Homework Challenge</option>
                     </optgroup>
                     <optgroup label="Media &amp; Teacher Only">
-                      <option value="booklet_pages">📚 Workbook / PDF Pages</option>
                       <option value="audio">🎙️ Audio Studio / Recording</option>
                       <option value="image">🖼️ Visual / Diagram / Image</option>
                       <option value="video_links">🎬 Video &amp; Resource Links</option>
@@ -2515,6 +2523,21 @@
                   </select>
                   <input type="text" id="architect-add-block-name" placeholder="Section name..." class="flex-1 min-w-[110px] bg-slate-900 border border-slate-700 rounded-lg py-1 px-2 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-amber-400" onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleQuickAddArchitectSection(); }">
                   <button type="button" onclick="handleQuickAddArchitectSection()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-[11px] font-bold transition">+ Add</button>
+                </div>
+
+                <!-- Optional Quick Lessons List (Creates All Lessons Immediately) -->
+                <div id="create-course-lessons-quick-box" class="pt-2 border-t border-slate-800/80 space-y-1 shrink-0">
+                  <div class="flex items-center justify-between gap-2">
+                    <label for="input-create-course-lessons-list" class="text-[10px] font-bold uppercase tracking-wider text-amber-300">Optional: List Your Lessons Now (1 per line)</label>
+                    <span class="text-[10px] text-slate-400">Tip: Add <code>| https://.../file.pdf</code> after any name</span>
+                  </div>
+                  <textarea
+                    id="input-create-course-lessons-list"
+                    dir="auto"
+                    rows="2"
+                    placeholder="Lesson 1: Booklet 1&#10;Lesson 2: Booklet 2&#10;(or leave blank to add lessons later)"
+                    class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-1.5 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 leading-snug resize-y"
+                  ></textarea>
                 </div>
               </div>
 
@@ -4805,6 +4828,7 @@
         <canvas id="booklet-viewer-canvas" class="max-w-full rounded-xl shadow-2xl border border-slate-800 bg-white hidden"></canvas>
         <img id="booklet-viewer-img" src="" alt="Page Image" class="max-w-full max-h-[76vh] rounded-xl shadow-2xl border border-slate-800 object-contain hidden" />
         <iframe id="booklet-viewer-iframe" src="" class="w-full h-[74vh] rounded-xl border border-slate-800 bg-white hidden" title="Workbook PDF Page"></iframe>
+        <div id="booklet-viewer-text" dir="auto" class="hidden w-full max-w-2xl p-5 rounded-2xl bg-slate-900 border border-slate-700 text-sm sm:text-base text-slate-100 whitespace-pre-wrap leading-relaxed"></div>
       </div>
     </div>
   </div>
@@ -8500,24 +8524,27 @@ alter publication supabase_realtime add table public.students_sync;`;
                 ? `<p dir="auto" class="text-sm sm:text-base leading-relaxed ${hw.completed ? 'line-through text-slate-400' : 'text-slate-100'}">${escapeHtml(hw.task)}</p>`
                 : `<p class="text-xs text-slate-500 italic">${isHe ? 'אין שיעורי בית כרגע.' : 'No active homework assigned right now.'}</p>`}
 
-              ${(hw.task && (hw.imageUrl || (hw.pdfUrl && hw.pageNum))) ? `
+              ${(hw.task && (hw.imageUrl || hw.pageText || (hw.pdfUrl && hw.pageNum))) ? `
                 <div id="student-hw-page-viewer-box" class="p-3.5 rounded-2xl bg-slate-950/90 border border-teal-500/35 space-y-2.5">
                   <div class="flex items-center justify-between gap-2 flex-wrap">
                     <span class="text-xs font-bold text-teal-300 flex items-center gap-1.5">
                       <i data-lucide="book-open" class="w-3.5 h-3.5 text-teal-400"></i>
                       <span>${isHe ? `עמוד תרגול (${hw.pageNum || 1})` : `Assigned Page${hw.pageNum ? ' · Page ' + hw.pageNum : ''}`}</span>
                     </span>
-                    <button type="button" onclick="openBookletPageViewerModal('${escapeHtml(hw.pdfUrl || '')}', ${Number(hw.pageNum) || 1}, '${escapeHtml(hw.pageLabel || hw.task || 'Practice Page')}', '${escapeHtml(stu.name || '')}', '${escapeHtml(hw.imageUrl || '')}')" class="px-2.5 py-1 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/35 text-[11px] font-bold transition">Full View</button>
+                    <button type="button" onclick="openBookletPageViewerModal('${escapeHtml(hw.pdfUrl || '')}', ${Number(hw.pageNum) || 1}, '${escapeHtml(hw.pageLabel || hw.task || 'Practice Page')}', '${escapeHtml(stu.name || '')}', '${escapeHtml(hw.imageUrl || '')}', 0, [], '${escapeHtml(hw.pageText || '')}')" class="px-2.5 py-1 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/35 text-[11px] font-bold transition">Full View</button>
                   </div>
+                  ${hw.pageText ? `
+                    <div dir="auto" class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-xs sm:text-sm text-slate-100 whitespace-pre-wrap leading-relaxed">${escapeHtml(hw.pageText)}</div>
+                  ` : ''}
                   ${hw.imageUrl ? `
                     <div class="flex justify-center"><img src="${escapeHtml(hw.imageUrl)}" alt="Practice Page" class="max-h-72 rounded-xl border border-slate-800 object-contain" /></div>
-                  ` : `
+                  ` : (hw.pdfUrl ? `
                     <div class="flex flex-col items-center space-y-2">
                       <div id="student-hw-pdf-status" class="text-[11px] font-mono text-teal-300">Loading practice page...</div>
                       <canvas id="student-hw-pdf-canvas" class="max-w-full rounded-xl border border-slate-800 bg-white hidden"></canvas>
                       <iframe id="student-hw-pdf-iframe" src="" class="w-full h-72 rounded-xl border border-slate-800 bg-white hidden" title="Assigned Practice Page"></iframe>
                     </div>
-                  `}
+                  ` : '')}
                 </div>
               ` : ''}
 
@@ -12300,9 +12327,9 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
-    var bookletViewerState = { pdfUrl: '', pageNum: 1, totalPages: 0, title: '', subtitle: '', imageUrl: '', pagesList: [] };
+    var bookletViewerState = { pdfUrl: '', pageNum: 1, totalPages: 0, title: '', subtitle: '', imageUrl: '', pageText: '', pagesList: [] };
 
-    function openBookletPageViewerModal(pdfUrl, pageNum, title, subtitle, imageUrl = '', totalPages = 0, pagesList = []) {
+    function openBookletPageViewerModal(pdfUrl, pageNum, title, subtitle, imageUrl = '', totalPages = 0, pagesList = [], pageText = '') {
       const modal = document.getElementById('modal-booklet-page-viewer');
       if (!modal) return;
       const pNum = Math.max(1, parseInt(pageNum, 10) || 1);
@@ -12313,6 +12340,7 @@ alter publication supabase_realtime add table public.students_sync;`;
         title: String(title || `Page ${pNum}`),
         subtitle: String(subtitle || ''),
         imageUrl: String(imageUrl || '').trim(),
+        pageText: String(pageText || ''),
         pagesList: Array.isArray(pagesList) ? pagesList : []
       };
       renderBookletViewerModalContent();
@@ -12330,12 +12358,16 @@ alter publication supabase_realtime add table public.students_sync;`;
       const canvasEl = document.getElementById('booklet-viewer-canvas');
       const imgEl = document.getElementById('booklet-viewer-img');
       const iframeEl = document.getElementById('booklet-viewer-iframe');
+      const textEl = document.getElementById('booklet-viewer-text');
       const statusEl = document.getElementById('booklet-viewer-status');
       const matchedRow = (st.pagesList || []).find(p => Number(p.pageNum) === st.pageNum);
-      if (titleEl) titleEl.textContent = matchedRow && matchedRow.title ? `Page ${st.pageNum}: ${matchedRow.title}` : st.title;
+      const effectiveTitle = matchedRow && matchedRow.title ? `Page ${st.pageNum}: ${matchedRow.title}` : st.title;
+      const effectiveImage = (matchedRow && matchedRow.imageUrl) || st.imageUrl;
+      const effectiveText = (matchedRow && matchedRow.pageText) || (st.pageNum === bookletViewerState.pageNum ? st.pageText : '');
+      if (titleEl) titleEl.textContent = effectiveTitle;
       if (subEl) subEl.textContent = st.subtitle || (st.pdfUrl ? st.pdfUrl.split('/').pop() : '');
       if (pillEl) pillEl.textContent = st.totalPages > 0 ? `Page ${st.pageNum} / ${st.totalPages}` : `Page ${st.pageNum}`;
-      const extHref = st.imageUrl || (st.pdfUrl ? `${st.pdfUrl}#page=${st.pageNum}` : '#');
+      const extHref = effectiveImage || (st.pdfUrl ? `${st.pdfUrl}#page=${st.pageNum}` : '#');
       if (extLink) {
         extLink.href = extHref;
         extLink.classList.toggle('hidden', extHref === '#');
@@ -12343,9 +12375,19 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (canvasEl) canvasEl.classList.add('hidden');
       if (imgEl) imgEl.classList.add('hidden');
       if (iframeEl) iframeEl.classList.add('hidden');
-      if (st.imageUrl) {
+      if (textEl) textEl.classList.add('hidden');
+
+      if (effectiveText && !effectiveImage && !st.pdfUrl) {
+        if (textEl) {
+          textEl.textContent = effectiveText;
+          textEl.classList.remove('hidden');
+        }
+        if (statusEl) statusEl.classList.add('hidden');
+        return;
+      }
+      if (effectiveImage) {
         if (imgEl) {
-          imgEl.src = st.imageUrl;
+          imgEl.src = effectiveImage;
           imgEl.classList.remove('hidden');
         }
         if (statusEl) statusEl.classList.add('hidden');
@@ -12360,8 +12402,12 @@ alter publication supabase_realtime add table public.students_sync;`;
           }).catch(() => {});
         }
       } else if (statusEl) {
-        statusEl.textContent = 'No PDF URL or page image attached yet.';
+        statusEl.textContent = 'No PDF URL, image, or pasted content added to this sub-subject yet.';
         statusEl.classList.remove('hidden');
+      }
+      if (effectiveText && textEl && (effectiveImage || st.pdfUrl)) {
+        textEl.textContent = effectiveText;
+        textEl.classList.remove('hidden');
       }
     }
 
@@ -12404,6 +12450,7 @@ alter publication supabase_realtime add table public.students_sync;`;
               title: pg.title || `Page ${pNum}`,
               note: pg.note || '',
               imageUrl: pg.imageUrl || '',
+              pageText: pg.pageText || '',
               pdfUrl: parsed.pdfUrl || '',
               pageKey: pKey,
               done
@@ -12485,6 +12532,7 @@ alter publication supabase_realtime add table public.students_sync;`;
         completed: false,
         pdfUrl: String(data.pdfUrl || '').trim(),
         imageUrl: String((pageRow && pageRow.imageUrl) || '').trim(),
+        pageText: String((pageRow && pageRow.pageText) || '').trim(),
         pageNum: Number(pageNum) || 1,
         pageLabel: pLabel,
         timerMinutes: mins,
@@ -12499,29 +12547,127 @@ alter publication supabase_realtime add table public.students_sync;`;
       showToast(`Assigned Page ${pageNum}${mins ? ` (${mins}m timer)` : ''} to ${student.name}!`);
     }
 
-    async function handleBookletPdfDetectPages(courseId, lessonId, secId) {
+    var bookletRowExtraOpenMap = {};
+
+    function toggleBookletRowExtra(secId, idx) {
+      const k = `${secId}_${idx}`;
+      bookletRowExtraOpenMap[k] = !bookletRowExtraOpenMap[k];
+      const box = document.getElementById(`bp-pg-extra-${secId}-${idx}`);
+      if (box) box.classList.toggle('hidden', !bookletRowExtraOpenMap[k]);
+    }
+
+    function toggleBookletPasteDrawer(secId) {
+      const box = document.getElementById(`booklet-paste-drawer-${secId}`);
+      if (box) box.classList.toggle('hidden');
+    }
+
+    function applyBookletPasteList(courseId, lessonId, secId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course && (course.lessons || []).find(l => l.id === lessonId);
+      const ta = document.getElementById(`inp-booklet-paste-list-${secId}`);
+      if (!lesson || !ta) return;
+      const lines = String(ta.value || '').split(/\n+/).map(l => l.trim()).filter(Boolean);
+      if (lines.length === 0) {
+        showToast('Paste 1 sub-subject per line first');
+        return;
+      }
+      const data = parseStructuredSectionData(lesson.sections && lesson.sections[secId], 'booklet_pages');
+      const existingByNum = {};
+      (Array.isArray(data.pages) ? data.pages : []).forEach(p => {
+        if (p && p.pageNum) existingByNum[Number(p.pageNum)] = p;
+      });
+      const parsedPages = lines.map((line, i) => {
+        const pipeParts = line.split('|');
+        const mainPart = (pipeParts[0] || '').trim();
+        const extraText = pipeParts.slice(1).join('|').trim();
+        const numMatch = mainPart.match(/^(?:pg\.?|page)?\s*(\d+)\s*[:.\-–]?\s*(.*)$/i);
+        const pNum = numMatch ? (parseInt(numMatch[1], 10) || (i + 1)) : (i + 1);
+        const cleanTitle = (numMatch ? numMatch[2] : mainPart).trim() || `Page ${pNum}`;
+        const prev = existingByNum[pNum] || {};
+        return {
+          id: prev.id || `pg_${pNum}`,
+          pageNum: pNum,
+          title: cleanTitle,
+          note: prev.note || '',
+          imageUrl: prev.imageUrl || '',
+          pageText: extraText || prev.pageText || ''
+        };
+      });
+      data.pages = parsedPages;
+      data.totalPages = parsedPages.length;
+      ta.value = '';
+      saveStructuredSectionObject(courseId, lessonId, secId, data, true);
+      showToast(`Added ${parsedPages.length} sub-subjects!`);
+    }
+
+    async function loadBookletFromPdfUrl(courseId, lessonId, secId) {
       const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
       const lesson = course && (course.lessons || []).find(l => l.id === lessonId);
       if (!lesson) return;
       const data = parseStructuredSectionData(lesson.sections && lesson.sections[secId], 'booklet_pages');
       const pdfUrl = String(data.pdfUrl || '').trim();
       if (!pdfUrl) {
-        showToast('Paste a PDF URL first');
+        showToast('Paste a PDF link first');
         return;
       }
-      showToast('Checking PDF page count...');
+      showToast('Loading PDF pages...');
       try {
-        const cnt = await getPdfPageCount(pdfUrl);
-        if (cnt > 0) {
-          data.totalPages = cnt;
-          saveStructuredSectionObject(courseId, lessonId, secId, data, true);
-          showToast(`Detected ${cnt} pages! Click Generate 1..${cnt} to scaffold rows.`);
-        } else {
-          showToast('Could not detect page count automatically — enter Total Pages manually');
+        const doc = await loadPdfDocumentCached(pdfUrl);
+        const cnt = Number(doc && doc.numPages) || 0;
+        if (!cnt) {
+          showToast('Could not read PDF page count — use Paste List or Total Pages');
+          return;
         }
+        // Try reading PDF outline / bookmarks for automatic page titles
+        const outlineTitleByPage = {};
+        try {
+          const outline = await doc.getOutline();
+          if (Array.isArray(outline) && outline.length > 0) {
+            for (const item of outline) {
+              if (!item || !item.title || !item.dest) continue;
+              let dest = item.dest;
+              if (typeof dest === 'string') dest = await doc.getDestination(dest);
+              if (Array.isArray(dest) && dest[0]) {
+                const idx = await doc.getPageIndex(dest[0]).catch(() => -1);
+                if (idx >= 0 && !outlineTitleByPage[idx + 1]) {
+                  outlineTitleByPage[idx + 1] = String(item.title).trim();
+                }
+              }
+            }
+          }
+        } catch (_) {}
+
+        const existingByNum = {};
+        (Array.isArray(data.pages) ? data.pages : []).forEach(p => {
+          if (p && p.pageNum) existingByNum[Number(p.pageNum)] = p;
+        });
+
+        const nextPages = [];
+        for (let n = 1; n <= Math.min(cnt, 250); n++) {
+          const prev = existingByNum[n];
+          const smartTitle = outlineTitleByPage[n] || (prev && prev.title && prev.title !== `Page ${n}` ? prev.title : `Page ${n}`);
+          nextPages.push({
+            id: (prev && prev.id) || `pg_${n}`,
+            pageNum: n,
+            title: smartTitle,
+            note: (prev && prev.note) || '',
+            imageUrl: (prev && prev.imageUrl) || '',
+            pageText: (prev && prev.pageText) || ''
+          });
+        }
+        data.totalPages = cnt;
+        data.pages = nextPages;
+        saveStructuredSectionObject(courseId, lessonId, secId, data, true);
+        showToast(`Loaded ${cnt} PDF pages! Tap any row name to customize it.`);
       } catch (_) {
-        showToast('Site restricts auto-detect — enter Total Pages manually and click Generate');
+        showToast('Website blocks automatic PDF loading — use Paste List or enter Total Pages');
+        const manualBox = document.getElementById(`booklet-paste-drawer-${secId}`);
+        if (manualBox) manualBox.classList.remove('hidden');
       }
+    }
+
+    async function handleBookletPdfDetectPages(courseId, lessonId, secId) {
+      return loadBookletFromPdfUrl(courseId, lessonId, secId);
     }
 
     function generateBookletPageRows(courseId, lessonId, secId, countOverride) {
@@ -13342,7 +13488,7 @@ Return ONLY the updated value matching the Format Requirement cleanly. Write nat
         `;
       }
 
-      // 14B. UNIVERSAL WORKBOOK / PDF PAGES TRACKER
+      // 14B. UNIVERSAL SUB-SUBJECTS / WORKBOOK PAGES CHECKLIST
       if (sec.type === 'booklet_pages') {
         const pages = Array.isArray(d.pages) ? d.pages : [];
         const pdfUrl = String(d.pdfUrl || '');
@@ -13351,47 +13497,59 @@ Return ONLY the updated value matching the Format Requirement cleanly. Write nat
           <div id="studio-custom-block-${sec.id}" class="${cardCls}">
             ${headerHtml}
             <div class="p-3 rounded-xl bg-slate-950/85 border border-teal-500/25 space-y-2.5">
-              <div class="space-y-1">
-                <label class="block text-[10px] font-mono uppercase tracking-wider text-teal-300 font-bold">Workbook PDF URL (Optional · Renders Live Pages Directly)</label>
-                <div class="flex items-center gap-2 flex-wrap">
-                  <input type="url" value="${escapeHtml(pdfUrl)}" placeholder="https://example.com/workbook.pdf" oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'booklet_pages', 'pdfUrl', this.value)" class="flex-1 min-w-[180px] bg-slate-900 border border-slate-700 rounded-xl py-1.5 px-3 text-xs text-teal-100 placeholder-slate-500 focus:outline-none focus:border-teal-400 font-mono">
-                  <button type="button" onclick="handleBookletPdfDetectPages('${cId}', '${lId}', '${sec.id}')" class="px-3 py-1.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-200 border border-teal-500/35 text-xs font-bold shrink-0 transition">Detect Pages</button>
-                </div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <input type="url" value="${escapeHtml(pdfUrl)}" placeholder="Paste PDF link (optional) — or paste page text/names below..." oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'booklet_pages', 'pdfUrl', this.value)" class="flex-1 min-w-[180px] bg-slate-900 border border-slate-700 rounded-xl py-1.5 px-3 text-xs text-teal-100 placeholder-slate-500 focus:outline-none focus:border-teal-400 font-mono">
+                <button type="button" onclick="loadBookletFromPdfUrl('${cId}', '${lId}', '${sec.id}')" class="px-3 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-bold shrink-0 shadow-sm transition">Load PDF Pages</button>
+                <button type="button" onclick="toggleBookletPasteDrawer('${sec.id}')" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold shrink-0 transition">Paste List / Count</button>
               </div>
-              <div class="flex items-center justify-between gap-2 flex-wrap pt-1 border-t border-slate-800/80">
-                <div class="flex items-center gap-2">
-                  <span class="text-[11px] text-slate-400 font-semibold">Total Pages:</span>
-                  <input id="inp-booklet-total-${sec.id}" type="number" min="1" max="250" value="${totalPagesVal}" placeholder="e.g. 24" oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'booklet_pages', 'totalPages', parseInt(this.value, 10) || 0)" class="w-20 bg-slate-900 border border-slate-700 rounded-lg py-1 px-2 text-xs text-white font-mono text-center focus:outline-none focus:border-teal-400">
-                  <button type="button" onclick="generateBookletPageRows('${cId}', '${lId}', '${sec.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/35 text-xs font-bold transition">Generate Pages 1..N</button>
+
+              <div id="booklet-paste-drawer-${sec.id}" class="hidden p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2.5">
+                <div class="space-y-1">
+                  <label class="block text-[10px] font-bold text-teal-300 uppercase">Option A: Paste Sub-Subjects List (1 per line — add <code>| page text</code> if no PDF)</label>
+                  <textarea id="inp-booklet-paste-list-${sec.id}" dir="auto" rows="3" placeholder="1. First Topic / Page 1&#10;2. Second Topic / Page 2&#10;3. Third Topic | Optional pasted content..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-400"></textarea>
+                  <button type="button" onclick="applyBookletPasteList('${cId}', '${lId}', '${sec.id}')" class="px-3 py-1 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-200 border border-teal-500/35 text-xs font-bold">Apply List</button>
                 </div>
-                <span class="text-[10px] font-mono text-slate-400">${pages.length} row(s)</span>
+                <div class="flex items-center gap-2 pt-2 border-t border-slate-800 flex-wrap">
+                  <span class="text-[11px] text-slate-400 font-semibold">Option B · Number of Pages:</span>
+                  <input id="inp-booklet-total-${sec.id}" type="number" min="1" max="250" value="${totalPagesVal}" placeholder="e.g. 24" oninput="handleStudioUpdateStructuredField('${cId}', '${lId}', '${sec.id}', 'booklet_pages', 'totalPages', parseInt(this.value, 10) || 0)" class="w-20 bg-slate-950 border border-slate-700 rounded-lg py-1 px-2 text-xs text-white font-mono text-center focus:outline-none focus:border-teal-400">
+                  <button type="button" onclick="generateBookletPageRows('${cId}', '${lId}', '${sec.id}')" class="px-3 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/35 text-xs font-bold transition">Generate Pages 1..N</button>
+                </div>
               </div>
             </div>
 
             ${pages.length > 0 ? `
-              <div class="space-y-2 max-h-[380px] overflow-y-auto pr-1">
-                ${pages.map((pg, idx) => `
-                  <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5">
-                    <div class="flex items-center gap-2">
+              <div class="space-y-1.5 max-h-[380px] overflow-y-auto pr-1">
+                ${pages.map((pg, idx) => {
+                  const hasExtra = !!(pg.pageText || pg.imageUrl || pg.note);
+                  const isExtraOpen = !!bookletRowExtraOpenMap[`${sec.id}_${idx}`];
+                  return `
+                  <div class="p-2 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5">
+                    <div class="flex items-center gap-1.5">
                       <span class="text-[10px] font-mono text-teal-300 font-bold shrink-0">Pg</span>
-                      <input type="number" min="1" value="${Number(pg.pageNum) || (idx + 1)}" oninput="updateBookletPageRowField('${cId}', '${lId}', '${sec.id}', ${idx}, 'pageNum', this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg py-1 px-1.5 text-xs text-teal-200 font-mono text-center shrink-0">
-                      <input type="text" dir="auto" value="${cleanEditField(pg.title || '')}" placeholder="Topic / concept covered on this page..." oninput="updateBookletPageRowField('${cId}', '${lId}', '${sec.id}', ${idx}, 'title', this.value)" class="flex-1 min-w-0 bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 px-2.5 text-xs text-white font-semibold focus:outline-none focus:border-teal-400">
-                      ${(pdfUrl || pg.imageUrl) ? `
-                        <button type="button" onclick="openBookletPageViewerModal('${escapeHtml(pdfUrl)}', ${Number(pg.pageNum) || (idx + 1)}, 'Page ${Number(pg.pageNum) || (idx + 1)}', '${escapeHtml(pg.title || '')}', '${escapeHtml(pg.imageUrl || '')}', ${parseInt(d.totalPages || pages.length, 10) || 0})" class="px-2 py-1 rounded-lg bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 border border-teal-500/30 text-[10px] font-bold shrink-0">View</button>
+                      <input type="number" min="1" value="${Number(pg.pageNum) || (idx + 1)}" oninput="updateBookletPageRowField('${cId}', '${lId}', '${sec.id}', ${idx}, 'pageNum', this.value)" class="w-12 bg-slate-900 border border-slate-700 rounded-lg py-1 px-1 text-xs text-teal-200 font-mono text-center shrink-0">
+                      <input type="text" dir="auto" value="${cleanEditField(pg.title || '')}" placeholder="Sub-subject / page name..." oninput="updateBookletPageRowField('${cId}', '${lId}', '${sec.id}', ${idx}, 'title', this.value)" class="flex-1 min-w-0 bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 px-2.5 text-xs text-white font-semibold focus:outline-none focus:border-teal-400">
+                      ${(pdfUrl || pg.imageUrl || pg.pageText) ? `
+                        <button type="button" onclick="openBookletPageViewerModal('${escapeHtml(pdfUrl)}', ${Number(pg.pageNum) || (idx + 1)}, 'Page ${Number(pg.pageNum) || (idx + 1)}', '${escapeHtml(pg.title || '')}', '${escapeHtml(pg.imageUrl || '')}', ${parseInt(d.totalPages || pages.length, 10) || 0}, [], '${escapeHtml(pg.pageText || '')}')" class="px-2 py-1 rounded-lg bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 border border-teal-500/30 text-[10px] font-bold shrink-0">View</button>
                       ` : ''}
-                      <button type="button" onclick="deleteBookletPageRow('${cId}', '${lId}', '${sec.id}', ${idx})" class="text-slate-500 hover:text-rose-400 p-1 shrink-0" title="Remove Page"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                      <button type="button" onclick="toggleBookletRowExtra('${sec.id}', ${idx})" class="px-2 py-1 rounded-lg ${hasExtra ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/35' : 'bg-slate-900 text-slate-400 border-slate-800'} border text-[10px] font-semibold shrink-0" title="Paste Page Text, Image, or Note">Content</button>
+                      <button type="button" onclick="deleteBookletPageRow('${cId}', '${lId}', '${sec.id}', ${idx})" class="text-slate-500 hover:text-rose-400 p-1 shrink-0" title="Remove"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                      <input type="text" dir="auto" value="${cleanEditField(pg.note || '')}" placeholder="Optional tutor cue or skill note..." oninput="updateBookletPageRowField('${cId}', '${lId}', '${sec.id}', ${idx}, 'note', this.value)" class="bg-slate-900/70 border border-slate-800 rounded-lg py-1 px-2 text-[11px] text-slate-300">
-                      <input type="url" value="${escapeHtml(pg.imageUrl || '')}" placeholder="Optional standalone page image URL..." oninput="updateBookletPageRowField('${cId}', '${lId}', '${sec.id}', ${idx}, 'imageUrl', this.value)" class="bg-slate-900/70 border border-slate-800 rounded-lg py-1 px-2 text-[11px] text-slate-400 font-mono">
+                    <div id="bp-pg-extra-${sec.id}-${idx}" class="${isExtraOpen ? '' : 'hidden'} pt-1.5 border-t border-slate-800/80 space-y-1.5">
+                      <textarea dir="auto" rows="2" placeholder="Optional: Paste page text/content directly here (if no PDF link)..." oninput="updateBookletPageRowField('${cId}', '${lId}', '${sec.id}', ${idx}, 'pageText', this.value)" class="w-full bg-slate-900/80 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-teal-400">${cleanEditField(pg.pageText || '')}</textarea>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        <input type="text" dir="auto" value="${cleanEditField(pg.note || '')}" placeholder="Optional tutor cue..." oninput="updateBookletPageRowField('${cId}', '${lId}', '${sec.id}', ${idx}, 'note', this.value)" class="bg-slate-900/70 border border-slate-800 rounded-lg py-1 px-2 text-[11px] text-slate-300">
+                        <input type="url" value="${escapeHtml(pg.imageUrl || '')}" placeholder="Optional image URL..." oninput="updateBookletPageRowField('${cId}', '${lId}', '${sec.id}', ${idx}, 'imageUrl', this.value)" class="bg-slate-900/70 border border-slate-800 rounded-lg py-1 px-2 text-[11px] text-slate-400 font-mono">
+                      </div>
                     </div>
                   </div>
-                `).join('')}
+                `;
+                }).join('')}
               </div>
-            ` : `<p class="text-xs text-slate-500 italic">No pages added yet. Paste a PDF URL above to detect page count or click + Add Page.</p>`}
+            ` : `<p class="text-xs text-slate-500 italic">Paste a PDF link and click <strong>Load PDF Pages</strong>, or tap <strong>+ Add Page</strong> below.</p>`}
 
             <div class="flex items-center justify-between gap-2 pt-1 flex-wrap">
-              <button type="button" onclick="addBookletPageRow('${cId}', '${lId}', '${sec.id}')" class="text-xs px-3 py-1.5 rounded-xl bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 border border-teal-500/30 font-semibold">+ Add Page</button>
+              <button type="button" onclick="addBookletPageRow('${cId}', '${lId}', '${sec.id}')" class="text-xs px-3 py-1.5 rounded-xl bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 border border-teal-500/30 font-semibold">+ Add Sub-Subject / Page</button>
+              <span class="text-[10px] font-mono text-slate-400">${pages.length} item(s)</span>
             </div>
           </div>
         `;
@@ -14951,7 +15109,7 @@ ${forceSchemaLines}`;
                         </button>
                       </div>
                       <div class="flex items-center gap-1.5 shrink-0">
-                        ${(pdfUrl || pg.imageUrl) ? `
+                        ${(pdfUrl || pg.imageUrl || pg.pageText) ? `
                           <button type="button" onclick="toggleReaderBookletInlinePage('${cId}', '${lId}', '${sec.id}', ${pNum}, '${escapeHtml(pdfUrl)}', '${escapeHtml(pg.imageUrl || '')}')" class="px-2.5 py-1 rounded-lg bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 border border-teal-500/30 text-[11px] font-bold transition">View Page</button>
                         ` : ''}
                         <button type="button" onclick="toggleReaderBookletHwPicker('${sec.id}', ${pNum})" class="px-2.5 py-1 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/35 text-[11px] font-bold transition">Send HW</button>
@@ -14971,20 +15129,23 @@ ${forceSchemaLines}`;
                       </div>
                     </div>
 
-                    <div id="reader-inline-page-box-${sec.id}-${pNum}" class="${isInlineOpen ? '' : 'hidden'} p-3 bg-slate-950 border-t border-slate-800/80 space-y-2">
+                    <div id="reader-inline-page-box-${sec.id}-${pNum}" class="${isInlineOpen ? '' : 'hidden'} p-3 bg-slate-950 border-t border-slate-800/80 space-y-2.5">
                       <div class="flex items-center justify-between gap-2">
-                        <span class="text-[11px] font-mono text-teal-300">Page ${pNum} Preview</span>
-                        <button type="button" onclick="openBookletPageViewerModal('${escapeHtml(pdfUrl)}', ${pNum}, 'Page ${pNum}', '${escapeHtml(pTitle)}', '${escapeHtml(pg.imageUrl || '')}', ${parseInt(d.totalPages || pages.length, 10) || 0})" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 text-[10px] font-bold border border-slate-700">Fullscreen / Flip Pages</button>
+                        <span class="text-[11px] font-mono text-teal-300">Page ${pNum} · ${escapeHtml(pTitle)}</span>
+                        <button type="button" onclick="openBookletPageViewerModal('${escapeHtml(pdfUrl)}', ${pNum}, 'Page ${pNum}', '${escapeHtml(pTitle)}', '${escapeHtml(pg.imageUrl || '')}', ${parseInt(d.totalPages || pages.length, 10) || 0}, [], '${escapeHtml(pg.pageText || '')}')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 text-[10px] font-bold border border-slate-700">Fullscreen / Flip Pages</button>
                       </div>
+                      ${pg.pageText ? `
+                        <div dir="auto" class="p-4 rounded-xl bg-slate-900 border border-slate-800 text-sm sm:text-base text-slate-100 whitespace-pre-wrap leading-relaxed">${escapeHtml(pg.pageText)}</div>
+                      ` : ''}
                       ${pg.imageUrl ? `
                         <div class="flex justify-center"><img src="${escapeHtml(pg.imageUrl)}" alt="Page ${pNum}" class="max-h-96 rounded-xl border border-slate-800 object-contain" /></div>
-                      ` : `
+                      ` : (pdfUrl ? `
                         <div class="flex flex-col items-center space-y-2">
                           <div id="reader-inline-status-${sec.id}-${pNum}" class="text-[11px] font-mono text-teal-300">Click View Page to render...</div>
                           <canvas id="reader-inline-canvas-${sec.id}-${pNum}" class="max-w-full rounded-xl border border-slate-800 bg-white hidden"></canvas>
                           <iframe id="reader-inline-iframe-${sec.id}-${pNum}" src="" class="w-full h-80 rounded-xl border border-slate-800 bg-white hidden" title="Workbook Page ${pNum}"></iframe>
                         </div>
-                      `}
+                      ` : (!pg.pageText ? `<p class="text-xs text-slate-500 italic">No PDF link, image, or copied text attached to this sub-subject yet.</p>` : ''))}
                     </div>
                   </div>
                 `;
@@ -19371,7 +19532,7 @@ IV. Conclusion
       audio: { label: 'Audio Studio / Recording', icon: 'mic', color: 'emerald', placeholder: 'Audio notes & recording cues...', default_rule: 'Audio recordings & listening guidance' },
       image: { label: 'Visual / Diagram / Image', icon: 'image', color: 'sky', placeholder: 'Image upload or URL & caption...', default_rule: 'Visual diagram/sheet music cue & teacher caption' },
       video_links: { label: 'Video & Resource Links', icon: 'youtube', color: 'rose', placeholder: 'YouTube or study reference links...', default_rule: 'Curated video embeds or primary study links' },
-      booklet_pages: { label: 'Workbook / PDF Pages', icon: 'book-copy', color: 'teal', placeholder: 'Workbook PDF URL and numbered pages list...', default_rule: 'Index of workbook/book pages (Page 1, Page 2...) showing the skill/topic covered on each page' },
+      booklet_pages: { label: 'Sub-Subjects / Pages Checklist', icon: 'book-copy', color: 'teal', placeholder: 'Sub-subjects or workbook pages list (click to open page)...', default_rule: 'Checklist of sub-subjects or booklet pages (Page 1, Page 2...) with page topic and optional PDF/text' },
       teacher_cue: { label: 'Private Teacher Cue Box', icon: 'eye-off', color: 'slate', placeholder: 'Private reminders visible only to teacher...', default_rule: 'Private pacing notes, answers, and delivery tips' }
     };
     if (typeof window !== 'undefined') window.COURSE_BLOCK_CATALOG = COURSE_BLOCK_CATALOG;
@@ -19580,10 +19741,10 @@ ${resourcesRaw}`;
       if (!container) return;
       if (!Array.isArray(currentBlueprintSections) || currentBlueprintSections.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-7 px-4 rounded-2xl border-2 border-dashed border-slate-800 bg-slate-900/40 space-y-2">
-            <div class="text-xs font-bold text-slate-200">No sections in Course Preview yet</div>
+          <div class="text-center py-6 px-4 rounded-2xl border-2 border-dashed border-slate-800 bg-slate-900/40 space-y-2">
+            <div class="text-xs font-bold text-slate-200">Pick a Quick Setup above, or add sections below</div>
             <p class="text-[11px] text-slate-400 leading-relaxed">
-              Chat with <strong>AI Co-Builder</strong> to generate your class sections automatically, or tap <strong>+ Add</strong> below to add a section manually.
+              Tap <strong>Workbook / Sub-Subjects</strong> above for checklists &amp; PDFs, pick another template, or ask <strong>AI Co-Builder</strong> to design it for you.
             </p>
           </div>
         `;
@@ -19698,6 +19859,11 @@ ${resourcesRaw}`;
     }
 
     const BLUEPRINT_PRESETS = {
+      workbook_booklets: [
+        { id: 'sec_pages', type: 'booklet_pages', name: 'Sub-Subjects / Pages Checklist' },
+        { id: 'sec_tutor_cue', type: 'teacher_cue', name: 'Tutor Pre-Class Overview' },
+        { id: 'sec_end_test', type: 'quiz', name: 'End of Unit Test' }
+      ],
       torah_audio: [
         { id: 'sec_verses', type: 'text', name: 'Parsha Verses / Text' },
         { id: 'sec_recordings', type: 'audio', name: 'Chumash Audio Recordings' },
@@ -19824,14 +19990,60 @@ ${resourcesRaw}`;
       if (typeof window !== 'undefined') window.currentBlueprintSections = currentBlueprintSections;
     }
 
+    function parseCourseLessonsQuickList(sectionsList, levelStr) {
+      const el = document.getElementById('input-create-course-lessons-list');
+      const raw = String((el && el.value) || '').trim();
+      if (!raw) return [];
+      const bookletSec = (Array.isArray(sectionsList) ? sectionsList : []).find(s => s && s.type === 'booklet_pages');
+      const now = new Date().toISOString();
+      return raw.split(/\n+/).map(l => l.trim()).filter(Boolean).map((line, i) => {
+        const pipeParts = line.split('|');
+        const cleanTitle = (pipeParts[0] || '').trim() || `Lesson ${i + 1}`;
+        const maybeUrl = (pipeParts.slice(1).join('|') || '').trim();
+        const sectionsObj = {};
+        if (bookletSec && /^https?:\/\//i.test(maybeUrl)) {
+          sectionsObj[bookletSec.id] = JSON.stringify({ _structured: true, pdfUrl: maybeUrl, totalPages: 0, pages: [] });
+        }
+        return {
+          id: 'lesson_' + Date.now() + '_' + (i + 1) + '_' + Math.random().toString(36).substr(2, 5),
+          lesson_num: i + 1,
+          title_en: cleanTitle,
+          title_he: cleanTitle,
+          duration: '45m',
+          level: levelStr || 'Standard / All Levels',
+          status: 'draft',
+          hook_en: '',
+          hook_he: '',
+          anchors_en: [],
+          anchors_he: [],
+          sources_text: '',
+          steps_text: '',
+          pitfalls_text: '',
+          cheat_sheet_text: '',
+          homework_text: '',
+          discussion_en: '',
+          discussion_he: '',
+          recordings: [],
+          sections: sectionsObj,
+          created_at: now,
+          updated_at: now
+        };
+      });
+    }
+
     function applyBlueprintPreset(presetKey) {
       const preset = BLUEPRINT_PRESETS[presetKey];
       if (!preset) return;
-      currentBlueprintSections = preset.map(s => ({
-        id: 'sec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-        type: s.type,
-        name: s.name
-      }));
+      currentBlueprintSections = preset.map(s => {
+        const meta = (typeof COURSE_BLOCK_CATALOG !== 'undefined' && COURSE_BLOCK_CATALOG[s.type]) ? COURSE_BLOCK_CATALOG[s.type] : {};
+        return {
+          id: 'sec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+          type: s.type,
+          name: s.name,
+          ai_rule: meta.default_rule || '',
+          teacher_only: s.type === 'teacher_cue'
+        };
+      });
       if (typeof window !== 'undefined') window.currentBlueprintSections = currentBlueprintSections;
       renderBlueprintSectionsList();
     }
@@ -20287,6 +20499,7 @@ Return STRICT JSON ONLY:
           const color = currentSelectedColor || 'amber';
           const icon = normalizeCourseIcon(document.getElementById('input-create-course-icon')?.value || '✦');
 
+          const quickLessonsList = parseCourseLessonsQuickList(currentBlueprintSections, level);
           const newCourse = {
             id: 'course_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
             title_en: titleEn,
@@ -20313,7 +20526,7 @@ Return STRICT JSON ONLY:
               architect_history: (architectChatHistory || []).slice(-12),
               sections: (currentBlueprintSections || []).map(s => ({ ...s }))
             },
-            lessons: [],
+            lessons: quickLessonsList,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           };
@@ -20322,6 +20535,7 @@ Return STRICT JSON ONLY:
           APP_STATE.customCourses.push(newCourse);
           APP_STATE.activeCourseId = newCourse.id;
           APP_STATE.insideCourseId = newCourse.id;
+          APP_STATE.studioSelectedLessonId = quickLessonsList.length > 0 ? quickLessonsList[0].id : null;
           saveCustomCoursesToStorage(true);
           closeCreateCourseModal();
           renderCourseClassesView(newCourse.id);
@@ -20399,6 +20613,10 @@ Return STRICT JSON ONLY:
 
       const delCourseBtn = document.getElementById('btn-modal-delete-course');
       if (delCourseBtn) delCourseBtn.classList.add('hidden');
+      const quickLessonsEl = document.getElementById('input-create-course-lessons-list');
+      if (quickLessonsEl) quickLessonsEl.value = '';
+      const quickLessonsBox = document.getElementById('create-course-lessons-quick-box');
+      if (quickLessonsBox) quickLessonsBox.classList.remove('hidden');
 
       if (typeof setCourseBuilderMobilePane === 'function') setCourseBuilderMobilePane('ai');
       switchCourseBuilderMode(initialMode || 'ai');
@@ -20458,6 +20676,8 @@ Return STRICT JSON ONLY:
       editingCourseId = courseId;
       const delCourseBtn = document.getElementById('btn-modal-delete-course');
       if (delCourseBtn) delCourseBtn.classList.remove('hidden');
+      const quickLessonsBox = document.getElementById('create-course-lessons-quick-box');
+      if (quickLessonsBox) quickLessonsBox.classList.add('hidden');
       const modal = document.getElementById('modal-create-course');
       const titleEl = document.getElementById('modal-create-course-title');
       if (titleEl) titleEl.textContent = APP_STATE.lang === 'he' ? 'ערוך ושוחח על מבנה הקורס' : 'Edit & Discuss Course Architecture';
@@ -20632,9 +20852,10 @@ Return STRICT JSON ONLY:
       }
 
       const lessonCountChoice = document.getElementById('ai-builder-lessons-count-unified')?.value;
-      const initialLessons = [];
+      const quickLessonsList = parseCourseLessonsQuickList(blueprint.sections, level);
+      const initialLessons = quickLessonsList.length > 0 ? quickLessonsList : [];
       const numLessons = parseInt(lessonCountChoice, 10);
-      if (!isNaN(numLessons) && numLessons > 0) {
+      if (initialLessons.length === 0 && !isNaN(numLessons) && numLessons > 0) {
         const now = new Date().toISOString();
         for (let i = 1; i <= numLessons; i++) {
           initialLessons.push({

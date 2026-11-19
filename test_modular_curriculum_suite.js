@@ -5102,6 +5102,25 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   sandbox.APP_STATE.studentPortalSession = null;
   sandbox.APP_STATE.studentPortalStudent = null;
 
+  // 5. Simple 1-click Workbook Preset + Quick Lessons List + Paste Sub-Subjects List + Copy-Pasted Page Text
+  sandbox.openCreateCourseModal('ai');
+  sandbox.applyBlueprintPreset('workbook_booklets');
+  assert(sandbox.currentBlueprintSections.length === 3 && sandbox.currentBlueprintSections[0].type === 'booklet_pages', 'Workbook / Sub-Subjects 1-click preset sets up Pages Checklist + Tutor Notes + End Test');
+  getOrCreateElem('input-create-course-title-en').value = 'Quick 7-Book Course';
+  getOrCreateElem('input-create-course-lessons-list').value = 'Booklet 1 | https://example.org/b1.pdf\nBooklet 2 | https://example.org/b2.pdf';
+  sandbox.handleSaveCustomCourse({ preventDefault() {} });
+  const quickCourse = sandbox.APP_STATE.customCourses.find(c => c.title_en === 'Quick 7-Book Course');
+  assert(quickCourse && quickCourse.lessons.length === 2, 'Listing lessons inside Create Course builds all lessons automatically in 1 step');
+  const b1Pages = sandbox.parseStructuredSectionData(quickCourse.lessons[0].sections[quickCourse.blueprint.sections[0].id], 'booklet_pages');
+  assert(b1Pages.pdfUrl === 'https://example.org/b1.pdf', 'Quick lessons list attaches piped PDF URL directly into each booklet lesson');
+
+  // Paste List & copy-pasted page text support
+  const pSecId = quickCourse.blueprint.sections[0].id;
+  getOrCreateElem(`inp-booklet-paste-list-${pSecId}`).value = '1. Opening Concept | Copy-pasted page 1 text here\n2. Second Concept';
+  sandbox.applyBookletPasteList(quickCourse.id, quickCourse.lessons[0].id, pSecId);
+  const pastedReaderHtml = sandbox.renderSectionReadOnlyHtml(quickCourse, quickCourse.lessons[0], quickCourse.blueprint.sections[0], secPagesMeta);
+  assert(pastedReaderHtml.includes('Opening Concept') && pastedReaderHtml.includes('Copy-pasted page 1 text here'), 'Clicking sub-subject displays copy-pasted page content when no PDF image is present');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
