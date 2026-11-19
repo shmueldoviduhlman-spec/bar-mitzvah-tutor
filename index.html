@@ -5211,17 +5211,19 @@
               };
               if (controller) fetchOpts.signal = controller.signal;
               resp = await fetch('/api/ai', fetchOpts);
-              if (resp.status === 404 || resp.status === 405 || resp.status === 501 || resp.status === 503) {
+              if (!resp.ok) {
                 const pData = await resp.clone().json().catch(() => ({}));
                 const hasProxyHeader = !!(resp.headers && typeof resp.headers.get === 'function' && resp.headers.get('X-TutorPilot-Proxy'));
-                if (resp.status === 404 || resp.status === 405 || resp.status === 501 || pData.fallbackDirect || !hasProxyHeader) {
+                if (resp.status === 404 || resp.status === 405 || resp.status === 501 || pData.fallbackDirect || (!hasProxyHeader && !!key)) {
                   aiProxyFallbackDisabledForSession = true;
                   resp = null;
                 }
               }
             }
 
+            let usedDirectEndpoint = false;
             if (!resp) {
+              usedDirectEndpoint = true;
               if (!key) {
                 throw new Error('No Gemini API key configured');
               }
@@ -5255,7 +5257,7 @@
             }
 
             const errData = await resp.json().catch(() => ({}));
-            const errMsg = errData?.error?.message || errData?.error || `API error ${resp.status}`;
+            const errMsg = errData?.error?.message || errData?.error || `API error ${resp.status} (${usedDirectEndpoint ? 'direct' : 'proxy'} · v113b)`;
             lastError = new Error(errMsg);
             if (resp.status === 400 || resp.status === 404 || resp.status === 500 || resp.status === 502 || resp.status === 503 || resp.status === 504 || resp.status === 429 ||
                 errMsg.includes('not found') || errMsg.includes('not supported') ||
