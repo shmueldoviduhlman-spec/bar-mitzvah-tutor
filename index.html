@@ -5143,7 +5143,11 @@
       if (typeof isStudentPortalActive === 'function' && isStudentPortalActive()) return false;
       if (typeof window === 'undefined' || !window.location) return false;
       const proto = String(window.location.protocol || '');
-      return proto === 'http:' || proto === 'https:';
+      if (proto !== 'http:' && proto !== 'https:') return false;
+      const host = String(window.location.hostname || '').toLowerCase();
+      // Static hosts (e.g. GitHub Pages) do not execute Cloudflare Pages Functions and return 405 on POST /api/ai
+      if (host === 'github.io' || host.endsWith('.github.io')) return false;
+      return true;
     }
 
     async function callGeminiApi(contentsOrPrompt, apiKeyOverride, options = {}) {
@@ -5207,9 +5211,10 @@
               };
               if (controller) fetchOpts.signal = controller.signal;
               resp = await fetch('/api/ai', fetchOpts);
-              if (resp.status === 404 || resp.status === 503) {
+              if (resp.status === 404 || resp.status === 405 || resp.status === 501 || resp.status === 503) {
                 const pData = await resp.clone().json().catch(() => ({}));
-                if (resp.status === 404 || pData.fallbackDirect) {
+                const hasProxyHeader = !!(resp.headers && typeof resp.headers.get === 'function' && resp.headers.get('X-TutorPilot-Proxy'));
+                if (resp.status === 404 || resp.status === 405 || resp.status === 501 || pData.fallbackDirect || !hasProxyHeader) {
                   aiProxyFallbackDisabledForSession = true;
                   resp = null;
                 }

@@ -4864,6 +4864,53 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(studioPreviewHtml.includes('id="studio-class-ai-partner" class="hidden lg:block'), 'AI Co-Builder hides on mobile while Lesson Preview tab is active');
   assert(studioPreviewHtml.includes('id="studio-modular-blocks-container" class=" lg:col-span-7'), 'Lesson Preview shows on mobile while Lesson Preview tab is active');
 
+  // --- Gate 51: Mobile / Static Host HTTP 405 Proxy Fallback Resilience ---
+  console.log('\n--- Running Gate 51: Mobile / Static Host HTTP 405 Proxy Fallback Resilience ---');
+  const prevLoc51 = sandbox.window.location;
+  const prevFetch51 = sandbox.fetch;
+  const prevKey51 = mockLocalStorage.getItem('tutor_gemini_key');
+  mockLocalStorage.removeItem('tutor_gemini_key');
+  sandbox.APP_STATE.geminiApiKey = '';
+  sandbox.aiProxyFallbackDisabledForSession = false;
+
+  // 1. Static github.io host skips /api/ai proxy automatically
+  sandbox.window.location = { protocol: 'https:', hostname: 'shmueldoviduhlman-spec.github.io', href: 'https://shmueldoviduhlman-spec.github.io/bar-mitzvah-tutor/' };
+  assert(sandbox.shouldUseAiProxy() === false, 'shouldUseAiProxy skips /api/ai on static github.io hosts');
+
+  // 2. Any host returning HTTP 405 from POST /api/ai falls back cleanly to direct Gemini API
+  sandbox.window.location = { protocol: 'https:', hostname: 'tutorpilot.pages.dev', href: 'https://tutorpilot.pages.dev/' };
+  assert(sandbox.shouldUseAiProxy() === true, 'shouldUseAiProxy enables proxy on Cloudflare Pages host');
+  let fetchUrlsHit = [];
+  sandbox.fetch = async (url) => {
+    fetchUrlsHit.push(String(url));
+    if (String(url) === '/api/ai') {
+      return {
+        ok: false,
+        status: 405,
+        headers: { get: () => null },
+        clone() { return this; },
+        async json() { throw new Error('HTML 405 page'); }
+      };
+    }
+    return {
+      ok: true,
+      status: 200,
+      headers: { get: () => 'application/json' },
+      async json() {
+        return { candidates: [{ content: { parts: [{ text: 'Fallback Gemini reply succeeded' }] } }] };
+      }
+    };
+  };
+  const fallbackReply = await sandbox.callGeminiApi('Hello My Agent');
+  assert(fallbackReply === 'Fallback Gemini reply succeeded', 'callGeminiApi transparently falls back to direct Gemini when /api/ai returns HTTP 405');
+  assert(fetchUrlsHit[0] === '/api/ai' && fetchUrlsHit[1].includes('generativelanguage.googleapis.com'), 'callGeminiApi attempted /api/ai then immediately fell back to direct Gemini endpoint');
+  assert(sandbox.shouldUseAiProxy() === false, 'HTTP 405 disables failing /api/ai proxy for remainder of session');
+
+  // Restore sandbox globals
+  sandbox.window.location = prevLoc51;
+  sandbox.fetch = prevFetch51;
+  if (prevKey51) mockLocalStorage.setItem('tutor_gemini_key', prevKey51);
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
