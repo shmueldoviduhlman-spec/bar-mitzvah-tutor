@@ -5073,9 +5073,9 @@
       return !!custom && custom.trim() !== '' && custom.trim() !== SYSTEM_DEFAULT_GEMINI_KEY;
     }
 
-    const GEMINI_PRO_MODELS = ['gemini-3.1-pro-preview', 'gemini-pro-latest', 'gemini-3-flash-preview', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-flash-latest'];
-    const GEMINI_STANDARD_MODELS = ['gemini-3-flash-preview', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-flash-latest'];
-    const GEMINI_FAST_MODELS = ['gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3-flash-preview'];
+    const GEMINI_PRO_MODELS = ['gemini-3.1-pro-preview', 'gemini-pro-latest', 'gemini-3-flash-preview', 'gemini-flash-lite-latest', 'gemini-3.5-flash-lite', 'gemini-flash-latest'];
+    const GEMINI_STANDARD_MODELS = ['gemini-3-flash-preview', 'gemini-flash-lite-latest', 'gemini-3.5-flash-lite', 'gemini-flash-latest'];
+    const GEMINI_FAST_MODELS = ['gemini-flash-lite-latest', 'gemini-3-flash-preview', 'gemini-3.5-flash-lite'];
     let aiProxyFallbackDisabledForSession = false;
 
     function getAiQualityTier() {
@@ -5182,7 +5182,7 @@
       const candidateQueue = getGeminiCandidateModelsForTier(taskTier);
 
       let lastError = null;
-      const defaultTimeout = taskTier === 'pro' ? 30000 : 24000;
+      const defaultTimeout = taskTier === 'pro' ? 70000 : 55000;
       const perAttemptTimeoutMs = (options && typeof options.timeoutMs === 'number') ? options.timeoutMs : defaultTimeout;
       const attemptModels = async (modelsToTry) => {
         for (const model of modelsToTry) {
@@ -5296,11 +5296,11 @@
       const firstPass = await attemptModels(candidateQueue);
       if (firstPass !== null) return firstPass;
 
-      // Brief resilience retry on working Flash/Lite models if transient 503 overload occurred
+      // Brief resilience retry on working Flash/Lite models if transient 503 overload or 429 burst occurred
       const lastMsg = String(lastError?.message || '').toLowerCase();
-      if (perAttemptTimeoutMs >= 1000 && (lastMsg.includes('high demand') || lastMsg.includes('503') || lastMsg.includes('timed out'))) {
+      if (perAttemptTimeoutMs >= 1000 && (lastMsg.includes('high demand') || lastMsg.includes('503') || lastMsg.includes('429') || lastMsg.includes('quota') || lastMsg.includes('timed out'))) {
         if (typeof setTimeout === 'function' && String(setTimeout).includes('[native code]')) {
-          await new Promise(r => setTimeout(r, 550));
+          await new Promise(r => setTimeout(r, 1500));
           const retryPass = await attemptModels(['gemini-3-flash-preview', 'gemini-flash-lite-latest', 'gemini-3.5-flash-lite']);
           if (retryPass !== null) return retryPass;
         }
@@ -13606,7 +13606,8 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
               systemInstruction,
               responseMimeType: 'application/json',
               temperature: 0.5,
-              taskTier: getAiQualityTier()
+              taskTier: getAiQualityTier(),
+              timeoutMs: getAiQualityTier() === 'pro' ? 75000 : 60000
             });
             parsed = stripMarkdownFromAiPayload(parseClassAiJson(raw));
           } catch (err) {
@@ -13618,9 +13619,16 @@ ${hasCustomBp ? `Return STRICT JSON ONLY:
         if (!parsed || typeof parsed !== 'object') {
           if (aiCallError) {
             const rawReason = String(aiCallError.message || 'temporary connection issue');
-            const friendlyReason = rawReason.includes('aborted') ? 'request timed out under heavy load' : rawReason;
+            const lowerReason = rawReason.toLowerCase();
+            const friendlyReason = lowerReason.includes('aborted')
+              ? 'request timed out under heavy load'
+              : (lowerReason.includes('quota') || lowerReason.includes('429')
+                ? 'Google Gemini per-minute rate limit reached — wait about 30 to 60 seconds and tap Retry'
+                : (lowerReason.includes('high demand') || lowerReason.includes('503')
+                  ? 'Google Gemini servers had a brief traffic spike — wait 15 to 30 seconds and tap Retry'
+                  : rawReason));
             parsed = {
-              assistant_reply: `AI did not finish (${friendlyReason}). Your lesson sections were NOT modified so nothing was overwritten. Click Retry below to run your request again, or switch between Standard / Deep Pro above.`,
+              assistant_reply: `AI did not finish (${friendlyReason}). Your lesson sections were NOT modified so nothing was overwritten. Click Retry below to run your request again.`,
               sections: {},
               _aiFailedError: true,
               retryPrompt: userMsg
@@ -27751,8 +27759,8 @@ Respond ONLY with strict JSON (no markdown fences):
 
     var GEMINI_CANDIDATE_MODELS = [
       'gemini-3-flash-preview',
-      'gemini-3.5-flash-lite',
       'gemini-flash-lite-latest',
+      'gemini-3.5-flash-lite',
       'gemini-flash-latest'
     ];
     if (typeof window !== 'undefined') window.GEMINI_CANDIDATE_MODELS = GEMINI_CANDIDATE_MODELS;
