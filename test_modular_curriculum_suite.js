@@ -4911,6 +4911,75 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   sandbox.fetch = prevFetch51;
   if (prevKey51) mockLocalStorage.setItem('tutor_gemini_key', prevKey51);
 
+  // --- Gate 52: Supabase Egress Protection (Delta Sync & Compact Course Payloads) ---
+  console.log('\n--- Running Gate 52: Supabase Egress Protection (Delta Sync & Compact Course Payloads) ---');
+  assert(!indexHtml.includes('fetchCloudStudents();\n      }\n    }, 15000);'), 'Legacy 15-second full-table polling loop is removed');
+  assert(indexHtml.includes('}, 300000);') && indexHtml.includes("select('id, updated_at')"), '5-minute lightweight delta sync using (id, updated_at) metadata is active');
+  assert(typeof sandbox.sanitizeCoursesForCloudPayload === 'function', 'sanitizeCoursesForCloudPayload helper is defined');
+
+  const giantBlob = 'A'.repeat(50000);
+  const bloatedCourses = [{
+    id: 'c_egress_1',
+    title_en: 'Shabbat',
+    lessons: [{
+      id: 'l_egress_1',
+      title_en: 'Candles',
+      sections: { sec1: 'Keep all real lesson text intact' },
+      ai_sources: [
+        { id: 's1', kind: 'image', label: 'photo.jpg', base64Data: giantBlob, dataUrl: 'data:image/jpeg;base64,' + giantBlob, extractedText: 'Preserved OCR text' },
+        { id: 's2', kind: 'link', label: 'sefaria.org', url: 'https://sefaria.org', extractedText: 'Torah source text' }
+      ]
+    }]
+  }];
+  const compacted = sandbox.sanitizeCoursesForCloudPayload(bloatedCourses);
+  assert(!compacted[0].lessons[0].ai_sources[0].base64Data && !compacted[0].lessons[0].ai_sources[0].dataUrl, 'sanitizeCoursesForCloudPayload strips oversized base64Data and dataUrl blobs (>32 KB)');
+  assert(compacted[0].lessons[0].ai_sources[0].extractedText === 'Preserved OCR text' && compacted[0].lessons[0].sections.sec1 === 'Keep all real lesson text intact', 'sanitizeCoursesForCloudPayload preserves extractedText and all lesson sections untouched');
+  assert(bloatedCourses[0].lessons[0].ai_sources[0].base64Data.length === 50000, 'sanitizeCoursesForCloudPayload does not mutate local in-memory course object');
+
+  // Test delta-only Supabase fetch behavior
+  const prevCloudClient52 = sandbox.APP_STATE.cloud.client;
+  const prevUser52 = sandbox.APP_STATE.currentUser;
+  sandbox.APP_STATE.currentUser = { id: 'u_master', email: 'shmueldoviduhlman@gmail.com', role: 'super_admin' };
+  const queryLog52 = [];
+  let mockRemoteRows52 = [
+    { id: '__custom_courses__', name: 'SYSTEM_CUSTOM_COURSES', updated_at: '2026-11-19T10:00:00Z', completed_topics: { courses: [] } },
+    { id: 'stu_delta_1', name: 'David', updated_at: '2026-11-19T10:00:00Z', completed_topics: { _meta: { school_id: 'school_main_770' } } }
+  ];
+  sandbox.APP_STATE.cloud.client = {
+    from(tbl) {
+      return {
+        select(cols) {
+          queryLog52.push({ tbl, cols, mode: 'select' });
+          return {
+            async order() {
+              queryLog52[queryLog52.length - 1].mode = 'full';
+              return { data: mockRemoteRows52.map(r => ({ ...r })), error: null };
+            },
+            async in(col, ids) {
+              queryLog52[queryLog52.length - 1].mode = 'delta:' + ids.join(',');
+              return { data: mockRemoteRows52.filter(r => ids.includes(r.id)).map(r => ({ ...r })), error: null };
+            },
+            then(resolve) {
+              queryLog52[queryLog52.length - 1].mode = 'meta';
+              resolve({ data: mockRemoteRows52.map(r => ({ id: r.id, updated_at: r.updated_at })), error: null });
+            }
+          };
+        }
+      };
+    }
+  };
+  await sandbox.fetchCloudStudents(true);
+  assert(queryLog52.length === 1 && queryLog52[0].mode === 'full', 'Initial sync performs one full fetch');
+  queryLog52.length = 0;
+  await sandbox.fetchCloudStudents(false);
+  assert(queryLog52.length === 1 && queryLog52[0].cols === 'id, updated_at' && queryLog52[0].mode === 'meta', 'Unchanged delta sync downloads ONLY tiny (id, updated_at) metadata and 0 full rows');
+  queryLog52.length = 0;
+  mockRemoteRows52[1].updated_at = '2026-11-19T10:05:00Z';
+  await sandbox.fetchCloudStudents(false);
+  assert(queryLog52.length === 2 && queryLog52[1].mode === 'delta:stu_delta_1', 'Changed student delta sync downloads ONLY the modified student row and skips unchanged __custom_courses__');
+  sandbox.APP_STATE.cloud.client = prevCloudClient52;
+  sandbox.APP_STATE.currentUser = prevUser52;
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);

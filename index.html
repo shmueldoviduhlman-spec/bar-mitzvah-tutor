@@ -7158,10 +7158,13 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       try {
         updateCloudStatusPill('syncing');
+        cloudRowsCache = {};
+        cloudRowVersionMap = {};
+        hasCompletedInitialCloudSync = false;
         APP_STATE.cloud.client = window.supabase.createClient(url, key);
 
         // Fetch current cloud students and merge with local
-        await fetchCloudStudents();
+        await fetchCloudStudents(true);
 
         // Subscribe to Realtime Postgres changes
         if (APP_STATE.cloud.channel) {
@@ -7213,7 +7216,12 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
-    async function fetchCloudStudents() {
+    var cloudRowsCache = {};
+    var cloudRowVersionMap = {};
+    var hasCompletedInitialCloudSync = false;
+    var lastCloudDeltaCheckTs = 0;
+
+    async function fetchCloudStudents(forceFull = false) {
       if (typeof isStudentPortalActive === 'function' && isStudentPortalActive()) {
         if (typeof refreshStudentPortalRecord === 'function') {
           return refreshStudentPortalRecord();
@@ -7222,12 +7230,76 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
       if (!APP_STATE.currentUser || !APP_STATE.cloud.client) return;
       try {
-        const { data, error } = await APP_STATE.cloud.client
-          .from('students_sync')
-          .select('*')
-          .order('name');
+        let data = null;
+        const client = APP_STATE.cloud.client;
 
-        if (error) throw error;
+        // Bandwidth-saving delta sync: after initial full load, check only tiny (id, updated_at) metadata (~600 bytes)
+        // and download full payloads ONLY for rows whose updated_at changed (prevents burning Supabase egress quota).
+        if (!forceFull && hasCompletedInitialCloudSync && Object.keys(cloudRowsCache).length > 0) {
+          const metaRes = await client
+            .from('students_sync')
+            .select('id, updated_at');
+          if (!metaRes.error && Array.isArray(metaRes.data)) {
+            const remoteIds = new Set();
+            const changedIds = [];
+            metaRes.data.forEach(m => {
+              if (!m || !m.id) return;
+              remoteIds.add(m.id);
+              const prevVer = cloudRowVersionMap[m.id];
+              const nextVer = String(m.updated_at || '');
+              if (!cloudRowsCache[m.id] || prevVer !== nextVer) {
+                changedIds.push(m.id);
+              }
+            });
+            const removedIds = Object.keys(cloudRowsCache).filter(id => !remoteIds.has(id));
+            if (changedIds.length === 0 && removedIds.length === 0) {
+              lastCloudDeltaCheckTs = Date.now();
+              updateCloudStatusPill('connected');
+              return;
+            }
+            removedIds.forEach(id => {
+              delete cloudRowsCache[id];
+              delete cloudRowVersionMap[id];
+            });
+            if (changedIds.length > 0) {
+              const deltaQuery = client.from('students_sync').select('*');
+              if (deltaQuery && typeof deltaQuery.in === 'function') {
+                const deltaRes = await deltaQuery.in('id', changedIds);
+                if (deltaRes.error) throw deltaRes.error;
+                (deltaRes.data || []).forEach(row => {
+                  if (row && row.id) {
+                    cloudRowsCache[row.id] = row;
+                    cloudRowVersionMap[row.id] = String(row.updated_at || '');
+                  }
+                });
+                data = Object.values(cloudRowsCache).sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+              }
+            } else {
+              data = Object.values(cloudRowsCache).sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+            }
+          }
+        }
+
+        if (!data) {
+          const fullRes = await client
+            .from('students_sync')
+            .select('*')
+            .order('name');
+          if (fullRes.error) throw fullRes.error;
+          data = fullRes.data;
+          if (Array.isArray(data)) {
+            cloudRowsCache = {};
+            cloudRowVersionMap = {};
+            data.forEach(row => {
+              if (row && row.id) {
+                cloudRowsCache[row.id] = row;
+                cloudRowVersionMap[row.id] = String(row.updated_at || '');
+              }
+            });
+            hasCompletedInitialCloudSync = true;
+          }
+        }
+        lastCloudDeltaCheckTs = Date.now();
 
         if (data && Array.isArray(data)) {
           // Check for portal settings system record (API keys & model config)
@@ -7415,6 +7487,15 @@ alter publication supabase_realtime add table public.students_sync;`;
     function handleRealtimeEvent(payload) {
       const { eventType, new: newRecord, old: oldRecord } = payload;
       const isHe = APP_STATE.lang === 'he';
+
+      // Keep local delta cache synchronized with Realtime events so we never re-download unchanged rows
+      if (eventType === 'DELETE' && oldRecord && oldRecord.id) {
+        delete cloudRowsCache[oldRecord.id];
+        delete cloudRowVersionMap[oldRecord.id];
+      } else if (newRecord && newRecord.id) {
+        cloudRowsCache[newRecord.id] = newRecord;
+        cloudRowVersionMap[newRecord.id] = String(newRecord.updated_at || '');
+      }
 
       // Intercept portal settings cloud synchronization
       if (newRecord && newRecord.id === '__portal_settings__') {
@@ -16821,6 +16902,38 @@ Write natural, clean plain text inside all fields with ZERO Markdown symbols (no
       }
     }
 
+    function sanitizeCoursesForCloudPayload(courses) {
+      if (!Array.isArray(courses)) return [];
+      const MAX_INLINE_SOURCE_CHARS = 32768; // Avoid multi-MB raw base64 media duplicating into Postgres JSON egress
+      return courses.map(course => {
+        if (!course || typeof course !== 'object') return course;
+        if (!Array.isArray(course.lessons) || course.lessons.length === 0) return course;
+        return {
+          ...course,
+          lessons: course.lessons.map(lesson => {
+            if (!lesson || typeof lesson !== 'object' || !Array.isArray(lesson.ai_sources) || lesson.ai_sources.length === 0) {
+              return lesson;
+            }
+            const compactSources = lesson.ai_sources.map(src => {
+              if (!src || typeof src !== 'object') return src;
+              const copy = { ...src };
+              // Never store duplicate base64Data + dataUrl blobs exceeding 32 KB inside Postgres JSON
+              if (typeof copy.base64Data === 'string' && copy.base64Data.length > MAX_INLINE_SOURCE_CHARS) {
+                delete copy.base64Data;
+                copy.mediaStrippedForCloud = true;
+              }
+              if (typeof copy.dataUrl === 'string' && copy.dataUrl.length > MAX_INLINE_SOURCE_CHARS) {
+                delete copy.dataUrl;
+                copy.mediaStrippedForCloud = true;
+              }
+              return copy;
+            });
+            return { ...lesson, ai_sources: compactSources };
+          })
+        };
+      });
+    }
+
     async function pushCustomCoursesToCloud() {
       if (!APP_STATE.cloud.client) return;
       try {
@@ -16833,6 +16946,7 @@ Write natural, clean plain text inside all fields with ZERO Markdown symbols (no
 
         const deletedKey = 'tutor_deleted_course_ids_' + email;
         const deletedIds = JSON.parse(localStorage.getItem(deletedKey) || '[]');
+        const cloudSafeCourses = sanitizeCoursesForCloudPayload(APP_STATE.customCourses || []);
 
         const payload = {
           id: recordId,
@@ -16840,7 +16954,7 @@ Write natural, clean plain text inside all fields with ZERO Markdown symbols (no
           parsha_or_date: 'system',
           notes: 'Custom Curricula for ' + (email || activeSchoolId),
           completed_topics: {
-            courses: APP_STATE.customCourses || [],
+            courses: cloudSafeCourses,
             deleted_course_ids: deletedIds,
             _meta: { school_id: activeSchoolId, owner_email: email, user_id: userId }
           },
@@ -16850,6 +16964,8 @@ Write natural, clean plain text inside all fields with ZERO Markdown symbols (no
         await APP_STATE.cloud.client
           .from('students_sync')
           .upsert(payload);
+        cloudRowsCache[recordId] = payload;
+        cloudRowVersionMap[recordId] = String(payload.updated_at || '');
       } catch (err) {
         console.error('Failed to push custom courses to cloud:', err);
       }
@@ -30192,24 +30308,28 @@ ${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output 
     }
 
     // Auto-resync whenever the tutor or co-teacher switches back to the app or unlocks their phone
+    function triggerThrottledCloudDeltaSync() {
+      if (!APP_STATE.cloud.client || document.visibilityState !== 'visible') return;
+      if (Date.now() - (lastCloudDeltaCheckTs || 0) < 60000) return;
+      fetchCloudStudents(false);
+    }
+
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && APP_STATE.cloud.client) {
-        fetchCloudStudents();
+      if (document.visibilityState === 'visible') {
+        triggerThrottledCloudDeltaSync();
       }
     });
 
     window.addEventListener('focus', () => {
-      if (APP_STATE.cloud.client) {
-        fetchCloudStudents();
-      }
+      triggerThrottledCloudDeltaSync();
     });
 
-    // 15-second background sync interval to guarantee both tutors always see identical state
+    // 5-minute lightweight delta safety-net (Realtime WebSockets already push live changes instantly)
     setInterval(() => {
       if (APP_STATE.cloud.client && document.visibilityState === 'visible') {
-        fetchCloudStudents();
+        fetchCloudStudents(false);
       }
-    }, 15000);
+    }, 300000);
 
     // =========================================================================
     // UNIVERSAL DESKTOP & MOBILE BACK NAVIGATION ENGINE (History API / popstate)
