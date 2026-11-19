@@ -5121,6 +5121,141 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   const pastedReaderHtml = sandbox.renderSectionReadOnlyHtml(quickCourse, quickCourse.lessons[0], quickCourse.blueprint.sections[0], secPagesMeta);
   assert(pastedReaderHtml.includes('Opening Concept') && pastedReaderHtml.includes('Copy-pasted page 1 text here'), 'Clicking sub-subject displays copy-pasted page content when no PDF image is present');
 
+  // --- Gate 54: M118 Conversational AI Co-Builder URL/PDF Discovery, Planned Lessons, Uncluttered Preview & Resilient Gemini Fallback ---
+  console.log('\n--- Running Gate 54: Conversational AI URL/PDF Discovery & Uncluttered Course Preview ---');
+  assert(
+    indexHtml.includes('id="architect-manual-tools-drawer"') &&
+    indexHtml.includes('id="btn-toggle-architect-manual-tools"') &&
+    indexHtml.includes('id="btn-ai-name-pages-'),
+    'Create Course Preview collapses optional manual controls into drawer and exposes AI Page Naming action inside booklets'
+  );
+
+  // 1. Clean modal open state: manual drawer collapsed, planned lessons cleared
+  sandbox.openCreateCourseModal('ai');
+  assert(getOrCreateElem('architect-manual-tools-drawer').classList.contains('hidden'), 'Optional Manual Tools drawer stays collapsed by default for uncluttered AI Co-Builder preview');
+  sandbox.toggleArchitectManualToolsDrawer(true);
+  assert(!getOrCreateElem('architect-manual-tools-drawer').classList.contains('hidden'), 'Optional Manual Tools drawer expands cleanly when requested');
+  assert(Array.isArray(sandbox.architectPlannedLessons) && sandbox.architectPlannedLessons.length === 0, 'openCreateCourseModal resets architectPlannedLessons cleanly');
+
+  // 2. Conversational link + PDF discovery & Gemini AI Co-Builder planned_lessons synthesis
+  let g54CapturedSys = '';
+  let g54CapturedUser = '';
+  const origFetchG54 = sandbox.fetch;
+  sandbox.fetch = async (url, opts) => {
+    const uStr = String(url || '');
+    if (uStr === 'https://curriculum.example.org/workbooks/') {
+      return {
+        ok: true,
+        status: 200,
+        headers: { get: () => 'text/html' },
+        text: async () => `
+          <html><body>
+            <a href="/pdf/level-1.pdf" aria-label="Level One Workbook, 18 pages">Level 1: Basics</a>
+            <a href="https://curriculum.example.org/pdf/level-2.pdf" aria-label="Level Two Workbook, 22 pages">Level 2: Practice</a>
+          </body></html>`
+      };
+    }
+    if (uStr.startsWith('https://r.jina.ai/https://curriculum.example.org/workbooks/')) {
+      return { ok: true, status: 200, text: async () => 'Title: Workbooks Hub\nLevel 1 and Level 2 booklets.' };
+    }
+    if (uStr.includes('generativelanguage.googleapis.com') && opts && opts.body) {
+      const body = JSON.parse(opts.body);
+      g54CapturedSys = body?.systemInstruction?.parts?.[0]?.text || '';
+      g54CapturedUser = body?.contents?.slice(-1)?.[0]?.parts?.[0]?.text || '';
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          candidates: [{
+            content: {
+              parts: [{
+                text: JSON.stringify({
+                  assistant_reply: 'I scanned your site and loaded both workbook lessons and PDF page checklists into Course Preview.',
+                  course_title_en: 'Universal Workbook Track',
+                  suggested_color: 'teal',
+                  suggested_icon: '📚',
+                  planned_lessons: [
+                    { title: 'Level 1: Basics', pdf_url: 'https://curriculum.example.org/pdf/level-1.pdf', pages_count: 18 },
+                    { title: 'Level 2: Practice', pdf_url: 'https://curriculum.example.org/pdf/level-2.pdf', pages_count: 22 }
+                  ],
+                  sections: [
+                    { type: 'booklet_pages', name: 'Sub-Subjects & PDF Pages', ai_rule: 'Click any sub-subject row to open that exact page' },
+                    { type: 'quiz', name: 'End-of-Booklet Check', ai_rule: 'Short mastery quiz' }
+                  ]
+                })
+              }]
+            }
+          }]
+        })
+      };
+    }
+    return origFetchG54 ? origFetchG54(url, opts) : { ok: false, status: 404, json: async () => ({}) };
+  };
+
+  getOrCreateElem('input-create-course-title-en').value = 'Universal Workbook Track';
+  getOrCreateElem('input-ai-blueprint-prompt').value = 'Build my course from https://curriculum.example.org/workbooks/ with clickable page checklists and an end test.';
+  await sandbox.handleAiSuggestBlueprint();
+
+  assert(
+    g54CapturedUser.includes('https://curriculum.example.org/pdf/level-1.pdf') &&
+    g54CapturedUser.includes('Pages: 18') &&
+    g54CapturedUser.includes('https://curriculum.example.org/pdf/level-2.pdf'),
+    'AI Co-Builder automatically discovers relative and absolute PDF links plus page counts from pasted webpage URLs'
+  );
+  assert(
+    sandbox.architectPlannedLessons.length === 2 &&
+    sandbox.architectPlannedLessons[0].pdfUrl === 'https://curriculum.example.org/pdf/level-1.pdf' &&
+    sandbox.architectPlannedLessons[0].pagesCount === 18,
+    'applyArchitectBlueprintUpdate stores AI-planned lessons with discovered PDF URLs and page counts'
+  );
+  assert(
+    getOrCreateElem('architect-sections-list').innerHTML.includes('Lessons AI Will Create (2)') &&
+    getOrCreateElem('architect-sections-count-badge').textContent.includes('2 lessons'),
+    'Course Preview cleanly surfaces AI-planned lessons alongside lesson sections without modal clutter'
+  );
+
+  // 3. Create Course & Open Studio creates all AI-planned lessons with pre-wired PDF links and page rows automatically
+  getOrCreateElem('ai-builder-lessons-count-unified').value = 'blueprint';
+  await sandbox.handleGenerateFullCourseFromAi();
+  const g54Course = sandbox.APP_STATE.customCourses.find(c => c.title_en === 'Universal Workbook Track');
+  assert(g54Course && g54Course.lessons.length === 2, 'Create Course automatically creates all AI-planned lessons even when Quick Lessons input is empty');
+  const g54L1Pages = sandbox.parseStructuredSectionData(g54Course.lessons[0].sections[g54Course.blueprint.sections[0].id], 'booklet_pages');
+  assert(
+    g54L1Pages.pdfUrl === 'https://curriculum.example.org/pdf/level-1.pdf' &&
+    g54L1Pages.pages.length === 18 &&
+    g54L1Pages.pages[0].pageNum === 1,
+    'Auto-created workbook lessons pre-populate pdfUrl and clickable sub-subject rows (1..18)'
+  );
+
+  // 4. Smart offline fallback when AI is unavailable still captures discovered PDFs into planned_lessons
+  sandbox.openCreateCourseModal('ai');
+  sandbox.fetch = async (url) => {
+    const uStr = String(url || '');
+    if (uStr === 'https://fallback.example.org/books') {
+      return {
+        ok: true,
+        status: 200,
+        headers: { get: () => 'text/html' },
+        text: async () => '<a href="/unit-a.pdf" aria-label="Unit Alpha, 12 pages">Unit Alpha</a>'
+      };
+    }
+    return { ok: false, status: 503, json: async () => ({ error: { message: 'This model is currently experiencing high demand.' } }) };
+  };
+  getOrCreateElem('input-create-course-title-en').value = 'Fallback Booklet Course';
+  getOrCreateElem('input-ai-blueprint-prompt').value = 'Use https://fallback.example.org/books for my booklet course';
+  await sandbox.handleAiSuggestBlueprint();
+  assert(
+    sandbox.architectPlannedLessons.length === 1 &&
+    sandbox.architectPlannedLessons[0].pdfUrl === 'https://fallback.example.org/unit-a.pdf' &&
+    sandbox.architectPlannedLessons[0].pagesCount === 12,
+    'Smart fallback builds booklet_pages + planned_lessons cleanly from discovered PDFs even if Gemini API is unavailable'
+  );
+  sandbox.fetch = origFetchG54;
+
+  // 5. Gemini model lists include fast healthy Flash Lite Preview fallback ahead of high-demand models
+  const stdIdx31 = indexHtml.indexOf("GEMINI_STANDARD_MODELS = ['gemini-3-flash-preview', 'gemini-3.1-flash-lite-preview'");
+  assert(stdIdx31 !== -1, 'GEMINI_STANDARD_MODELS prioritizes fast healthy fallback models cleanly');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
