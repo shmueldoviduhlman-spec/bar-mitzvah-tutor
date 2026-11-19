@@ -4980,6 +4980,128 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   sandbox.APP_STATE.cloud.client = prevCloudClient52;
   sandbox.APP_STATE.currentUser = prevUser52;
 
+  // --- Gate 53: Universal Workbook / PDF Pages, Per-Page Student Progress, Timed Homework & Assignable Quizzes ---
+  console.log('\n--- Running Gate 53: Universal Workbook / PDF Pages, Per-Page Checklists, Timed Homework & Assignable Quizzes ---');
+  assert(!!sandbox.COURSE_BLOCK_CATALOG.booklet_pages, 'COURSE_BLOCK_CATALOG registers universal booklet_pages block');
+  assert(indexHtml.includes('<option value="booklet_pages">'), 'Course Builder block selector includes Workbook / PDF Pages option');
+  assert(indexHtml.includes('id="modal-booklet-page-viewer"'), 'Page preview lightbox modal exists in HTML');
+
+  // 1. Universal course + lesson with booklet_pages + quiz
+  const g53Course = {
+    id: 'course_g53_universal',
+    title_en: 'Universal Workbook Curriculum',
+    title_he: 'Universal Workbook Curriculum',
+    blueprint: {
+      sections: [
+        { id: 'sec_g53_cue', type: 'teacher_cue', name: 'Pre-Class Overview', teacher_only: true },
+        { id: 'sec_g53_pages', type: 'booklet_pages', name: 'Workbook Pages' },
+        { id: 'sec_g53_quiz', type: 'quiz', name: 'End of Unit Check' }
+      ]
+    },
+    lessons: [
+      {
+        id: 'lesson_g53_unit1',
+        title_en: 'Unit 1 Workbook',
+        title_he: 'Unit 1 Workbook',
+        sections: {
+          sec_g53_cue: JSON.stringify({ _structured: true, cue: 'Review foundational concepts first.' }),
+          sec_g53_pages: JSON.stringify({
+            _structured: true,
+            pdfUrl: 'https://example.org/workbooks/unit1.pdf',
+            totalPages: 2,
+            pages: [
+              { id: 'pg_1', pageNum: 1, title: 'Foundations Intro', note: 'Warmup skill', imageUrl: '' },
+              { id: 'pg_2', pageNum: 2, title: 'Guided Practice', note: '', imageUrl: 'https://example.org/workbooks/p2.png' }
+            ]
+          }),
+          sec_g53_quiz: JSON.stringify({
+            _structured: true,
+            items: [
+              { q: 'Question 1 check?', options: ['Wrong', 'Right Choice', 'Wrong 2', 'Wrong 3'], correct: 1 },
+              { q: 'Question 2 check?', options: ['Correct First', 'B', 'C', 'D'], correct: 0 }
+            ]
+          })
+        }
+      }
+    ]
+  };
+  sandbox.APP_STATE.customCourses.push(g53Course);
+
+  // Test generateBookletPageRows preserves existing page labels while expanding totalPages
+  sandbox.generateBookletPageRows(g53Course.id, g53Course.lessons[0].id, 'sec_g53_pages', 4);
+  const expandedPagesObj = sandbox.parseStructuredSectionData(g53Course.lessons[0].sections.sec_g53_pages, 'booklet_pages');
+  assert(expandedPagesObj.pages.length === 4, 'generateBookletPageRows expanded booklet to 4 numbered rows');
+  assert(expandedPagesObj.pages[0].title === 'Foundations Intro' && expandedPagesObj.pages[3].pageNum === 4, 'generateBookletPageRows preserved existing labels while scaffolding new rows');
+
+  // Test stripMarkdownFromAiPayload leaves pdfUrl and imageUrl untouched
+  const strippedSample = sandbox.stripMarkdownFromAiPayload({ pdfUrl: 'https://site.com/a_b.pdf', imageUrl: 'https://site.com/p_1.png', title: '**Bold** Title' });
+  assert(strippedSample.pdfUrl === 'https://site.com/a_b.pdf' && strippedSample.imageUrl === 'https://site.com/p_1.png' && strippedSample.title === 'Bold Title', 'stripMarkdownFromAiPayload preserves pdfUrl/imageUrl underscores untouched');
+
+  // 2. Per-page student accomplishment tracking & Drawer expandable checklist
+  const g53Student = {
+    id: 'stu_g53_1',
+    name: 'Noah Learner',
+    studentAccessCode: 'NOAH99',
+    skills: sandbox.getDefaultStudentSkills(),
+    completedTopics: {},
+    completedParshiot: {},
+    schedule: []
+  };
+  sandbox.APP_STATE.students.push(g53Student);
+  sandbox.APP_STATE.activeStudentId = g53Student.id;
+
+  sandbox.toggleStudentBookletPage(g53Student.id, g53Course.id, g53Course.lessons[0].id, 1, 'Foundations Intro');
+  const pgStatsAfterToggle = sandbox.getLessonBookletPageStats(g53Student, g53Course, g53Course.lessons[0]);
+  assert(pgStatsAfterToggle.totalPages === 4 && pgStatsAfterToggle.completedPages === 1, 'toggleStudentBookletPage updates per-page completion count cleanly (1/4 pages)');
+
+  // Open drawer and expand lesson page checklist
+  getOrCreateElem('drawer-student-detail').classList.remove('hidden');
+  sandbox.APP_STATE.activeStudentDrawerId = g53Student.id;
+  sandbox.toggleStudentDrawerLessonPagesExpand(g53Course.lessons[0].id);
+  const drawerBodyHtml53 = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(drawerBodyHtml53.includes('1/4 pages') && drawerBodyHtml53.includes('Foundations Intro') && drawerBodyHtml53.includes('Pg 2'), 'Student Profile Drawer renders per-lesson page progress pill and expandable per-page checklist');
+  getOrCreateElem('drawer-student-detail').classList.add('hidden');
+
+  // 3. Reader renders View Page + Send HW + Send Test to Student
+  const secPagesMeta = sandbox.COURSE_BLOCK_CATALOG.booklet_pages;
+  const readerPagesHtml = sandbox.renderSectionReadOnlyHtml(g53Course, g53Course.lessons[0], g53Course.blueprint.sections[1], secPagesMeta);
+  assert(readerPagesHtml.includes('Page 1') && readerPagesHtml.includes('Foundations Intro') && readerPagesHtml.includes('View Page') && readerPagesHtml.includes('Send HW'), 'Lesson Reader renders clickable pages, View Page preview trigger, and Send HW button');
+  const readerQuizHtml = sandbox.renderSectionReadOnlyHtml(g53Course, g53Course.lessons[0], g53Course.blueprint.sections[2], sandbox.COURSE_BLOCK_CATALOG.quiz);
+  assert(readerQuizHtml.includes('Send Test to Student'), 'Quiz section renders Send Test to Student control');
+
+  // 4. Send specific page as timed homework + Send Test to Student -> verify inside Student Portal
+  sandbox.assignBookletPageHomework(g53Student.id, g53Course.id, g53Course.lessons[0].id, 'sec_g53_pages', 2, 5);
+  assert(g53Student.skills.homework.pageNum === 2 && g53Student.skills.homework.timerMinutes === 5 && g53Student.skills.homework.imageUrl === 'https://example.org/workbooks/p2.png', 'assignBookletPageHomework saves exact page metadata, image/PDF link, and practice timer duration');
+
+  sandbox.assignSectionTaskToStudent(g53Course.id, g53Course.lessons[0].id, 'sec_g53_quiz', 'quiz');
+  assert(g53Student.skills.assignedTest && g53Student.skills.assignedTest.total === 2 && g53Student.skills.assignedTest.completed === false, 'assignSectionTaskToStudent packages quiz test onto student profile');
+
+  // Render Student Portal as g53Student -> verify Practice Timer, Page Preview & My Assigned Test submission
+  sandbox.APP_STATE.studentPortalSession = { studentId: g53Student.id, accessCode: 'NOAH99' };
+  sandbox.APP_STATE.studentPortalStudent = g53Student;
+  sandbox.renderStudentPortalView();
+  const portalHtml53 = getOrCreateElem('view-student-portal').innerHTML;
+  assert(portalHtml53.includes('id="student-hw-page-viewer-box"') && portalHtml53.includes('https://example.org/workbooks/p2.png'), 'Student Portal renders assigned page image viewer inside My Homework');
+  assert(portalHtml53.includes('id="student-hw-timer-box"') && portalHtml53.includes('05:00') && portalHtml53.includes('Start Timer'), 'Student Portal renders 5-minute countdown Practice Timer');
+  assert(portalHtml53.includes('id="student-portal-test-card"') && portalHtml53.includes('End of Unit Check'), 'Student Portal renders My Assigned Test card');
+
+  sandbox.selectStudentPortalTestAnswer(0, 1); // Correct
+  sandbox.selectStudentPortalTestAnswer(1, 0); // Correct
+  sandbox.submitStudentPortalTest();
+  assert(g53Student.skills.assignedTest.completed === true && g53Student.skills.assignedTest.score === 2 && g53Student.skills.assignedTest.total === 2, 'Student Portal auto-grades submitted quiz accurately (2/2)');
+  const portalAfterTest = getOrCreateElem('view-student-portal').innerHTML;
+  assert(portalAfterTest.includes('Score: 2 / 2 (100%)'), 'Student Portal displays graded percentage badge after submission');
+
+  // Verify score surfaces inside Teacher's Student Profile Drawer
+  getOrCreateElem('drawer-student-detail').classList.remove('hidden');
+  sandbox.renderStudentDrawer(g53Student.id, true);
+  assert(getOrCreateElem('drawer-body-content').innerHTML.includes('Score: 2/2 (100%)'), 'Teacher Student Profile Drawer surfaces student submitted test score');
+  getOrCreateElem('drawer-student-detail').classList.add('hidden');
+
+  // Clean up portal session so subsequent state stays clean
+  sandbox.APP_STATE.studentPortalSession = null;
+  sandbox.APP_STATE.studentPortalStudent = null;
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
