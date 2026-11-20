@@ -5608,6 +5608,133 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   );
   sandbox.fetch = prevFetchG58;
 
+  // =========================================================================
+  // GATE 59: Direct Student Lesson/Sub-Lesson/Quiz Sending & Student View
+  // =========================================================================
+  console.log('\n--- Running Gate 59: Student View Delivery for Sent Lessons, Sub-Lessons & Quizzes ---');
+  const g59StudentA = g53Student;
+  const g59StudentB = {
+    id: 'stu_g59_b',
+    name: 'Eli Receiver',
+    studentAccessCode: 'ELI59B',
+    skills: sandbox.getDefaultStudentSkills(),
+    completedTopics: {},
+    completedParshiot: {},
+    schedule: []
+  };
+  sandbox.APP_STATE.students.push(g59StudentB);
+
+  // 1. Reader Send HW box includes student selector & delivers directly to chosen student
+  sandbox.studioScreenMode = 'read';
+  sandbox.renderCourseStudio(g53Course.id, g53Course.lessons[0].id);
+  const g59ReaderHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(
+    g59ReaderHtml.includes(`sel-hw-stu-${'sec_g53_pages'}-1`) &&
+    g59ReaderHtml.includes('btn-reader-send-lesson'),
+    'Lesson Reader renders explicit student picker inside Send HW box and Send Lesson button in header'
+  );
+
+  // Choose Student B explicitly via reader select element & assign Page 2 to Student B
+  getOrCreateElem('sel-hw-stu-sec_g53_pages-2').value = g59StudentB.id;
+  sandbox.assignBookletPageHomework('sel-hw-stu-sec_g53_pages-2', g53Course.id, g53Course.lessons[0].id, 'sec_g53_pages', 2, 10);
+  assert(
+    g59StudentB.skills.homework.pageNum === 2 &&
+    g59StudentB.skills.homework.pageLabel === 'Guided Practice' &&
+    g59StudentB.skills.homework.lessonId === g53Course.lessons[0].id &&
+    g59StudentB.skills.homework.timerMinutes === 10,
+    'Sending booklet page targets chosen Student B accurately with full page content & timer'
+  );
+
+  // 2. Sending a whole Lesson attaches all student-visible sections (strictly omitting teacher_cue) + quiz
+  const g59Course = {
+    id: 'course_g59_lesson',
+    title_en: 'Living Lessons Course',
+    blueprint: {
+      sections: [
+        { id: 'sec_g59_cue', type: 'teacher_cue', name: 'Private Tutor Notes', teacher_only: true },
+        { id: 'sec_g59_story', type: 'list', name: 'Main Stories' },
+        { id: 'sec_g59_quiz', type: 'quiz', name: 'Check Quiz' }
+      ]
+    },
+    lessons: [{
+      id: 'les_g59_1',
+      lesson_num: 1,
+      title_en: 'Parshat Noach Overview',
+      sections: {
+        sec_g59_cue: JSON.stringify({ _structured: true, cue: 'TOP SECRET TUTOR CUE DO NOT LEAK' }),
+        sec_g59_story: JSON.stringify({ _structured: true, items: ['Noah builds the Ark', 'The Rainbow Covenant'] }),
+        sec_g59_quiz: JSON.stringify({ _structured: true, items: [{ q: 'What sign ended the Flood?', options: ['Rainbow', 'Star', 'Dove', 'Cloud'], correct: 0 }] })
+      }
+    }]
+  };
+  sandbox.APP_STATE.customCourses.push(g59Course);
+  sandbox.assignLessonToStudent(g59Course.id, 'les_g59_1', '', g59StudentB.id);
+
+  assert(
+    Array.isArray(g59StudentB.skills.assignedLessons) &&
+    g59StudentB.skills.assignedLessons.length === 1 &&
+    g59StudentB.skills.assignedLessons[0].title === 'Parshat Noach Overview' &&
+    !JSON.stringify(g59StudentB.skills.assignedLessons[0]).includes('TOP SECRET TUTOR CUE DO NOT LEAK') &&
+    g59StudentB.skills.assignedTest &&
+    g59StudentB.skills.assignedTest.title === 'Check Quiz',
+    'assignLessonToStudent delivers student-safe lesson sections & quiz while strictly stripping private teacher_cue notes'
+  );
+
+  // 3. Sending a second quiz keeps BOTH quizzes accessible inside Student View (assignedTests[])
+  sandbox.assignSectionTaskToStudent(g53Course.id, g53Course.lessons[0].id, 'sec_g53_quiz', 'quiz', null);
+  // assignSectionTaskToStudent defaulted to activeStudentId; explicitly switch activeStudentId to Student B and assign quiz 2
+  sandbox.APP_STATE.activeStudentId = g59StudentB.id;
+  sandbox.assignSectionTaskToStudent(g53Course.id, g53Course.lessons[0].id, 'sec_g53_quiz', 'quiz', null);
+  assert(
+    Array.isArray(g59StudentB.skills.assignedTests) && g59StudentB.skills.assignedTests.length === 2,
+    'Student B preserves multiple sent quizzes cleanly without overwriting earlier quizzes'
+  );
+
+  // 4. Tutor Preview ("Student View") renders exact Student View (lessons, homework page, quizzes, interactive grading) safely without altering teacher session
+  sandbox.APP_STATE.currentUser = { email: 'teacher@example.com' };
+  sandbox.openStudentViewPreviewModal(g59StudentB.id);
+  const g59PreviewHtml = getOrCreateElem('student-preview-modal-body').innerHTML;
+  assert(
+    g59PreviewHtml.includes('Lessons Sent to Me') &&
+    g59PreviewHtml.includes('Parshat Noach Overview') &&
+    g59PreviewHtml.includes('My Assigned Test') &&
+    g59PreviewHtml.includes('Guided Practice') &&
+    !!sandbox.APP_STATE.currentUser,
+    'openStudentViewPreviewModal renders sent lessons, sub-lessons, homework page, and quizzes in Student View while preserving teacher session'
+  );
+
+  // Expanding assigned lesson inside Student View shows content while excluding teacher notes
+  sandbox.toggleStudentPortalAssignedLesson('les_g59_1');
+  const g59ExpandedLessonHtml = getOrCreateElem('student-preview-modal-body').innerHTML;
+  assert(
+    g59ExpandedLessonHtml.includes('Noah builds the Ark') && !g59ExpandedLessonHtml.includes('TOP SECRET TUTOR CUE DO NOT LEAK'),
+    'Student View renders assigned lesson content cleanly while keeping private tutor cues hidden'
+  );
+
+  // Clicking into & submitting Quiz #1 ('Check Quiz') inside Student View (preview & real student portal) grades accurately
+  const previewQuizObj = sandbox.APP_STATE.previewPortalStudent.skills.assignedTests.find(t => t.title === 'Check Quiz');
+  sandbox.selectStudentPortalQuiz(previewQuizObj.id);
+  sandbox.selectStudentPortalTestAnswer(0, 0, previewQuizObj.id);
+  sandbox.submitStudentPortalTest(previewQuizObj.id);
+  assert(
+    previewQuizObj.completed === true && previewQuizObj.score === 1 && previewQuizObj.total === 1 &&
+    getOrCreateElem('student-preview-modal-body').innerHTML.includes('Score: 1 / 1'),
+    'Tutor Student View preview can open any assigned quiz and test interactive grading live'
+  );
+  sandbox.closeStudentViewPreviewModal();
+
+  // Verify real Student Portal session also receives & submits Quiz #1 persistently
+  sandbox.APP_STATE.studentPortalStudent = g59StudentB;
+  const realQuizObj = g59StudentB.skills.assignedTests.find(t => t.title === 'Check Quiz');
+  sandbox.selectStudentPortalQuiz(realQuizObj.id);
+  sandbox.selectStudentPortalTestAnswer(0, 0, realQuizObj.id);
+  sandbox.submitStudentPortalTest(realQuizObj.id);
+  assert(
+    realQuizObj.completed === true && realQuizObj.score === 1 && realQuizObj.total === 1,
+    'Real Student Portal opens any assigned quiz in Student View, submits answers, and saves graded score'
+  );
+  sandbox.APP_STATE.studentPortalStudent = null;
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);

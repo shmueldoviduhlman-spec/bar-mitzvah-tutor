@@ -999,6 +999,9 @@
     <!-- Student Portal Header Controls (Shown only when logged in as Student) -->
     <div id="student-header-controls" class="hidden flex items-center gap-2 shrink-0">
       <span class="px-2.5 py-1 rounded-xl bg-indigo-500/15 border border-indigo-400/35 text-indigo-200 text-xs font-bold">Student Portal</span>
+      <button type="button" id="btn-student-portal-refresh" onclick="refreshStudentPortalRecord(true)" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800/90 hover:bg-slate-700 text-teal-300 border border-slate-700/80 transition" title="Sync Latest Lessons, Homework & Quizzes">
+        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+      </button>
       <button type="button" onclick="toggleThemeMode()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition" title="Switch Theme">
         <i data-lucide="moon" class="w-3.5 h-3.5"></i>
       </button>
@@ -4862,6 +4865,27 @@
   </div>
 
   <!-- ============================================== -->
+  <!-- MODAL: TUTOR STUDENT VIEW PREVIEW              -->
+  <!-- ============================================== -->
+  <div id="modal-student-view-preview" class="fixed inset-0 z-[65] flex items-center justify-center bg-black/85 p-2 sm:p-5 hidden backdrop-blur-sm" onclick="if(event.target === this) closeStudentViewPreviewModal();">
+    <div class="bg-slate-950 border border-indigo-500/40 rounded-2xl sm:rounded-3xl max-w-5xl w-full max-h-[94vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-4 py-3 border-b border-slate-800 flex items-center justify-between gap-2 bg-slate-900/90 flex-wrap">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span class="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-400/40 text-indigo-300 flex items-center justify-center shrink-0">
+            <i data-lucide="eye" class="w-4 h-4"></i>
+          </span>
+          <div class="min-w-0">
+            <h3 id="student-preview-modal-title" class="text-sm sm:text-base font-extrabold text-white truncate">Student View Preview</h3>
+            <p class="text-[11px] text-indigo-300">Exact view your student sees when opening sent lessons, pages, and quizzes</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeStudentViewPreviewModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold border border-slate-700 transition">Close Preview</button>
+      </div>
+      <div id="student-preview-modal-body" class="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-5"></div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
   <!-- MODAL: SCHOOL & TEAM WORKSPACE                 -->
   <!-- ============================================== -->
   <div id="modal-school-workspace" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-5 hidden backdrop-blur-sm">
@@ -8106,33 +8130,39 @@ alter publication supabase_realtime add table public.students_sync;`;
         console.warn('Student login cloud lookup error:', err);
       }
 
-      if (!matchedStudent) {
-        const localCandidates = collectLocalStudentsForPortalVerification();
-        const localHit = localCandidates.find(s => {
-          const sName = String(s.name || '').trim().replace(/\s+/g, ' ').toLowerCase();
-          const sCode = String(s.studentAccessCode || '').trim().toUpperCase();
-          return sName === enteredName.toLowerCase() && sCode && sCode === enteredCode;
-        });
-        if (localHit) {
-          matchedStudent = {
-            id: localHit.id,
-            name: localHit.name,
-            subject: localHit.subject || '',
-            gradeOrDate: localHit.gradeOrDate || localHit.barMitzvahDate || '',
-            gradeLevel: localHit.gradeLevel || 'Standard / All Levels',
-            avatar: localHit.avatar || '',
-            studentAccessCode: String(localHit.studentAccessCode || '').toUpperCase().trim(),
-            sharedNotes: Array.isArray(localHit.sharedNotes) ? localHit.sharedNotes : [],
-            skills: JSON.parse(JSON.stringify(localHit.skills || getDefaultStudentSkills())),
-            schedule: Array.isArray(localHit.schedule) ? localHit.schedule.map(l => ({
-              id: l.id || '',
-              dateStr: l.dateStr || '',
-              time: l.time || '',
-              status: l.status || 'scheduled',
-              repeatWeekly: !!l.repeatWeekly
-            })) : []
-          };
+      const localCandidates = collectLocalStudentsForPortalVerification();
+      const localHit = localCandidates.find(s => {
+        const sName = String(s.name || '').trim().replace(/\s+/g, ' ').toLowerCase();
+        const sCode = String(s.studentAccessCode || '').trim().toUpperCase();
+        return sName === enteredName.toLowerCase() && sCode && sCode === enteredCode;
+      });
+      const localRecord = localHit ? {
+        id: localHit.id,
+        name: localHit.name,
+        subject: localHit.subject || '',
+        gradeOrDate: localHit.gradeOrDate || localHit.barMitzvahDate || '',
+        gradeLevel: localHit.gradeLevel || 'Standard / All Levels',
+        avatar: localHit.avatar || '',
+        studentAccessCode: String(localHit.studentAccessCode || '').toUpperCase().trim(),
+        sharedNotes: Array.isArray(localHit.sharedNotes) ? localHit.sharedNotes : [],
+        skills: JSON.parse(JSON.stringify(localHit.skills || getDefaultStudentSkills())),
+        schedule: Array.isArray(localHit.schedule) ? localHit.schedule.map(l => ({
+          id: l.id || '',
+          dateStr: l.dateStr || '',
+          time: l.time || '',
+          status: l.status || 'scheduled',
+          repeatWeekly: !!l.repeatWeekly
+        })) : []
+      } : null;
+
+      if (matchedStudent && localRecord) {
+        const cloudTs = Number(matchedStudent.skills && matchedStudent.skills._updatedAt) || 0;
+        const localTs = Number(localRecord.skills && localRecord.skills._updatedAt) || 0;
+        if (localTs > cloudTs) {
+          matchedStudent = localRecord;
         }
+      } else if (!matchedStudent && localRecord) {
+        matchedStudent = localRecord;
       }
 
       if (submitBtn) submitBtn.disabled = false;
@@ -8204,7 +8234,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
     }
 
-    async function refreshStudentPortalRecord() {
+    async function refreshStudentPortalRecord(showSyncToast = false) {
       const sess = APP_STATE.studentPortalSession;
       if (!sess || !sess.studentId) return;
       try {
@@ -8227,12 +8257,32 @@ alter publication supabase_realtime add table public.students_sync;`;
             APP_STATE.studentPortalStudent = fresh;
             localStorage.setItem('tutor_student_portal_snapshot', JSON.stringify(fresh));
             renderStudentPortalView();
+            if (showSyncToast) showToast(APP_STATE.lang === 'he' ? 'הנתונים עודכנו!' : 'Synced latest lessons & quizzes!');
             return;
           }
+        }
+        const localCandidates = collectLocalStudentsForPortalVerification();
+        const localHit = localCandidates.find(s => s && s.id === sess.studentId);
+        if (localHit) {
+          APP_STATE.studentPortalStudent = {
+            ...APP_STATE.studentPortalStudent,
+            sharedNotes: Array.isArray(localHit.sharedNotes) ? localHit.sharedNotes : (APP_STATE.studentPortalStudent?.sharedNotes || []),
+            skills: JSON.parse(JSON.stringify(localHit.skills || getDefaultStudentSkills()))
+          };
+          renderStudentPortalView();
+          if (showSyncToast) showToast(APP_STATE.lang === 'he' ? 'הנתונים עודכנו!' : 'Synced latest lessons & quizzes!');
         }
       } catch (e) {
         console.warn('Student portal cloud refresh skipped:', e);
       }
+    }
+
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && APP_STATE.studentPortalSession && APP_STATE.studentPortalSession.studentId) {
+          refreshStudentPortalRecord(false);
+        }
+      });
     }
 
     function logoutStudentPortal(reasonMsg) {
@@ -8273,6 +8323,8 @@ alter publication supabase_realtime add table public.students_sync;`;
     async function pushStudentPortalProgress() {
       const stu = APP_STATE.studentPortalStudent;
       if (!stu || !stu.id) return;
+      if (!stu.skills) stu.skills = getDefaultStudentSkills();
+      stu.skills._updatedAt = Date.now();
       try {
         localStorage.setItem('tutor_student_portal_snapshot', JSON.stringify(stu));
       } catch (e) {}
@@ -8288,8 +8340,12 @@ alter publication supabase_realtime add table public.students_sync;`;
                 hit.skills = hit.skills || {};
                 hit.skills.homework = stu.skills.homework;
                 hit.skills.customGoals = stu.skills.customGoals;
+                hit.skills._updatedAt = stu.skills._updatedAt;
                 if (stu.skills.assignedTest !== undefined) {
                   hit.skills.assignedTest = stu.skills.assignedTest;
+                }
+                if (Array.isArray(stu.skills.assignedTests)) {
+                  hit.skills.assignedTests = stu.skills.assignedTests;
                 }
                 localStorage.setItem(k, JSON.stringify(list));
               }
@@ -8311,10 +8367,14 @@ alter publication supabase_realtime add table public.students_sync;`;
           const mergedSkills = {
             ...(existingMeta.skills || {}),
             homework: stu.skills.homework,
-            customGoals: stu.skills.customGoals
+            customGoals: stu.skills.customGoals,
+            _updatedAt: stu.skills._updatedAt
           };
           if (stu.skills.assignedTest !== undefined) {
             mergedSkills.assignedTest = stu.skills.assignedTest;
+          }
+          if (Array.isArray(stu.skills.assignedTests)) {
+            mergedSkills.assignedTests = stu.skills.assignedTests;
           }
           const updatedCt = {
             ...existingCt,
@@ -8378,8 +8438,94 @@ alter publication supabase_realtime add table public.students_sync;`;
       }
     }
 
+    var portalExpandedLessonMap = {};
+    var portalActiveQuizId = '';
+
+    function getStudentPortalActiveContext() {
+      if (APP_STATE.previewPortalStudent) {
+        return {
+          stu: APP_STATE.previewPortalStudent,
+          isPreview: true,
+          container: document.getElementById('student-preview-modal-body')
+        };
+      }
+      return {
+        stu: APP_STATE.studentPortalStudent,
+        isPreview: false,
+        container: document.getElementById('view-student-portal')
+      };
+    }
+
+    function openStudentViewPreviewModal(studentId, focusQuizId) {
+      const student = (APP_STATE.students || []).find(s => s.id === (studentId || APP_STATE.activeStudentDrawerId));
+      if (!student) return;
+      ensureStudentSkills(student);
+      APP_STATE.previewPortalStudent = JSON.parse(JSON.stringify(student));
+      if (focusQuizId && focusQuizId !== 'test') portalActiveQuizId = focusQuizId;
+      else if (focusQuizId === 'test' && student.skills?.assignedTest?.id) portalActiveQuizId = student.skills.assignedTest.id;
+      const modal = document.getElementById('modal-student-view-preview');
+      const titleEl = document.getElementById('student-preview-modal-title');
+      if (titleEl) titleEl.textContent = `Student View Preview · ${student.name || 'Student'}`;
+      renderStudentPortalView();
+      if (modal) modal.classList.remove('hidden');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function closeStudentViewPreviewModal() {
+      APP_STATE.previewPortalStudent = null;
+      const modal = document.getElementById('modal-student-view-preview');
+      if (modal) modal.classList.add('hidden');
+      const bodyEl = document.getElementById('student-preview-modal-body');
+      if (bodyEl) bodyEl.innerHTML = '';
+    }
+
+    function getStudentAllAssignedTests(skills) {
+      if (!skills || typeof skills !== 'object') return [];
+      const out = [];
+      const seen = new Set();
+      const pushIfValid = (t) => {
+        if (!t || !Array.isArray(t.questions) || t.questions.length === 0) return;
+        const tid = String(t.id || t.lessonId || 'assigned_test_default');
+        if (seen.has(tid)) return;
+        seen.add(tid);
+        out.push({ ...t, id: tid });
+      };
+      if (skills.assignedTest) pushIfValid(skills.assignedTest);
+      if (Array.isArray(skills.assignedTests)) skills.assignedTests.forEach(pushIfValid);
+      return out;
+    }
+
+    function selectStudentPortalQuiz(testId) {
+      portalActiveQuizId = String(testId || '');
+      renderStudentPortalView();
+    }
+
+    function toggleStudentPortalAssignedLesson(lessonKey) {
+      if (!lessonKey) return;
+      portalExpandedLessonMap[lessonKey] = !portalExpandedLessonMap[lessonKey];
+      renderStudentPortalView();
+    }
+
+    function openStudentPortalAssignedHomeworkPage(stuName) {
+      const ctx = getStudentPortalActiveContext();
+      const hw = ctx.stu && ctx.stu.skills && ctx.stu.skills.homework;
+      if (!hw) return;
+      if (hw.imageUrl || hw.pageText || hw.pdfUrl) {
+        if (typeof openBookletPageViewerModal === 'function') {
+          openBookletPageViewerModal(hw.pdfUrl || '', Number(hw.pageNum) || 1, hw.pageLabel || hw.task || 'Practice Page', stuName || '', hw.imageUrl || '', 0, [], hw.pageText || '');
+        }
+        return;
+      }
+      if (hw.lessonId) {
+        portalExpandedLessonMap[hw.lessonId] = true;
+        renderStudentPortalView();
+        const el = document.getElementById('student-portal-lessons-card');
+        if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
     function toggleStudentHwTimer() {
-      const stu = APP_STATE.studentPortalStudent;
+      const stu = getStudentPortalActiveContext().stu;
       const hw = stu && stu.skills && stu.skills.homework;
       const st = ensureStudentHwTimerState(hw);
       if (!st) return;
@@ -8411,7 +8557,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     function resetStudentHwTimer() {
-      const stu = APP_STATE.studentPortalStudent;
+      const stu = getStudentPortalActiveContext().stu;
       const hw = stu && stu.skills && stu.skills.homework;
       if (studentHwTimerState.intervalId) clearInterval(studentHwTimerState.intervalId);
       const mins = Math.max(0, parseInt((hw && hw.timerMinutes) || 0, 10) || 0);
@@ -8426,18 +8572,39 @@ alter publication supabase_realtime add table public.students_sync;`;
       updateStudentHwTimerDom();
     }
 
-    function selectStudentPortalTestAnswer(qIdx, optIdx) {
-      const stu = APP_STATE.studentPortalStudent;
-      const test = stu && stu.skills && stu.skills.assignedTest;
+    function selectStudentPortalTestAnswer(qIdx, optIdx, testId) {
+      const { stu } = getStudentPortalActiveContext();
+      if (!stu || !stu.skills) return;
+      const allTests = getStudentAllAssignedTests(stu.skills);
+      const targetId = testId || (stu.skills.assignedTest && stu.skills.assignedTest.id) || (allTests[0] && allTests[0].id);
+      const findRealTest = () => {
+        if (stu.skills.assignedTest && (!targetId || String(stu.skills.assignedTest.id || 'assigned_test_default') === String(targetId))) {
+          return stu.skills.assignedTest;
+        }
+        return Array.isArray(stu.skills.assignedTests) ? stu.skills.assignedTests.find(t => t && String(t.id) === String(targetId)) : null;
+      };
+      const test = findRealTest();
       if (!test || test.completed) return;
       if (!Array.isArray(test.answers)) test.answers = [];
       test.answers[qIdx] = optIdx;
+      if (Array.isArray(stu.skills.assignedTests)) {
+        const matchInList = stu.skills.assignedTests.find(t => t && String(t.id) === String(test.id));
+        if (matchInList && matchInList !== test) {
+          if (!Array.isArray(matchInList.answers)) matchInList.answers = [];
+          matchInList.answers[qIdx] = optIdx;
+        }
+      }
       renderStudentPortalView();
     }
 
-    function submitStudentPortalTest() {
-      const stu = APP_STATE.studentPortalStudent;
-      const test = stu && stu.skills && stu.skills.assignedTest;
+    function submitStudentPortalTest(testId) {
+      const { stu, isPreview } = getStudentPortalActiveContext();
+      if (!stu || !stu.skills) return;
+      const allTests = getStudentAllAssignedTests(stu.skills);
+      const targetId = testId || (stu.skills.assignedTest && stu.skills.assignedTest.id) || (allTests[0] && allTests[0].id);
+      const test = (stu.skills.assignedTest && (!targetId || String(stu.skills.assignedTest.id || 'assigned_test_default') === String(targetId)))
+        ? stu.skills.assignedTest
+        : (Array.isArray(stu.skills.assignedTests) ? stu.skills.assignedTests.find(t => t && String(t.id) === String(targetId)) : null);
       if (!test || !Array.isArray(test.questions) || test.questions.length === 0) return;
       const answers = Array.isArray(test.answers) ? test.answers : [];
       let score = 0;
@@ -8449,40 +8616,83 @@ alter publication supabase_realtime add table public.students_sync;`;
       test.total = test.questions.length;
       test.completed = true;
       test.completedAt = new Date().toISOString();
-      pushStudentPortalProgress();
+      if (Array.isArray(stu.skills.assignedTests)) {
+        const matchInList = stu.skills.assignedTests.find(t => t && String(t.id) === String(test.id));
+        if (matchInList && matchInList !== test) {
+          Object.assign(matchInList, { answers: [...answers], score, total: test.total, completed: true, completedAt: test.completedAt });
+        }
+      }
+      if (!isPreview) pushStudentPortalProgress();
       renderStudentPortalView();
-      showToast(`Test submitted! Score: ${score} / ${test.total}`);
+      showToast(`${isPreview ? '[Preview] ' : ''}Test submitted! Score: ${score} / ${test.total}`);
     }
 
     function toggleStudentPortalHomework() {
-      const stu = APP_STATE.studentPortalStudent;
+      const { stu, isPreview } = getStudentPortalActiveContext();
       if (!stu) return;
       if (!stu.skills) stu.skills = getDefaultStudentSkills();
       if (!stu.skills.homework) stu.skills.homework = { task: '', assignedDate: '', completed: false };
       stu.skills.homework.completed = !stu.skills.homework.completed;
-      pushStudentPortalProgress();
+      if (!isPreview) pushStudentPortalProgress();
       renderStudentPortalView();
       showToast(stu.skills.homework.completed ? 'Homework marked complete!' : 'Homework marked incomplete');
     }
 
     function toggleStudentPortalGoal(goalId) {
-      const stu = APP_STATE.studentPortalStudent;
+      const { stu, isPreview } = getStudentPortalActiveContext();
       if (!stu || !stu.skills || !Array.isArray(stu.skills.customGoals)) return;
       const g = stu.skills.customGoals.find(x => x.id === goalId);
       if (!g) return;
       g.completed = !g.completed;
-      pushStudentPortalProgress();
+      if (!isPreview) pushStudentPortalProgress();
       renderStudentPortalView();
     }
 
+    function renderAssignedStudentLessonSectionsHtml(les, stuName) {
+      const secs = Array.isArray(les && les.sections) ? les.sections : [];
+      if (secs.length === 0) return `<p class="text-xs text-slate-400 italic">Lesson ready to review with your teacher.</p>`;
+      return secs.map(sec => {
+        if (!sec || sec.teacher_only || sec.type === 'teacher_cue') return '';
+        const d = sec.data || {};
+        let inner = '';
+        if (sec.type === 'list' && Array.isArray(d.items)) {
+          inner = `<ul class="space-y-1.5 text-xs sm:text-sm text-slate-200">${d.items.map(it => `<li dir="auto" class="flex items-start gap-2"><span class="text-emerald-400 font-bold">✦</span><span>${formatSectionInlineText(it)}</span></li>`).join('')}</ul>`;
+        } else if (sec.type === 'steps' && Array.isArray(d.steps)) {
+          inner = `<ol class="space-y-1.5 text-xs sm:text-sm text-slate-200">${d.steps.map((st, idx) => `<li dir="auto"><strong class="text-emerald-300 font-mono mr-1.5">${idx + 1}.</strong>${formatSectionInlineText(st.text || st)}</li>`).join('')}</ol>`;
+        } else if (sec.type === 'quote') {
+          inner = `${d.quote ? `<blockquote dir="${d.rtl ? 'rtl' : 'auto'}" class="p-3 rounded-xl bg-slate-900 border-l-4 border-sky-400 text-sm text-sky-100 whitespace-pre-wrap">${escapeHtml(d.quote)}</blockquote>` : ''}${d.meaning ? `<p dir="auto" class="text-xs sm:text-sm text-slate-200 mt-1.5">${formatSectionInlineText(d.meaning)}</p>` : ''}`;
+        } else if (sec.type === 'example') {
+          inner = `${d.setup ? `<p dir="auto" class="text-xs sm:text-sm text-slate-200">${formatSectionInlineText(d.setup)}</p>` : ''}${d.takeaway ? `<div dir="auto" class="mt-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-100">${formatSectionInlineText(d.takeaway)}</div>` : ''}`;
+        } else if (sec.type === 'bilingual_split' && Array.isArray(d.rows)) {
+          inner = d.rows.map(r => `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs"><div dir="rtl" class="text-teal-100 font-serif">${escapeHtml(r.orig || '')}</div><div dir="auto" class="text-slate-200">${formatSectionInlineText(r.trans || '')}</div></div>`).join('');
+        } else if (sec.type === 'reflection') {
+          inner = `${d.mindset ? `<p dir="auto" class="text-xs sm:text-sm text-slate-200">${formatSectionInlineText(d.mindset)}</p>` : ''}${d.action ? `<p dir="auto" class="mt-1 text-xs text-emerald-300 font-medium">${formatSectionInlineText(d.action)}</p>` : ''}`;
+        } else if (sec.type === 'booklet_pages' && Array.isArray(d.pages)) {
+          const pUrl = String(d.pdfUrl || '').trim();
+          inner = `<div class="space-y-1.5">${d.pages.map((pg, idx) => {
+            const pNum = Number(pg.pageNum) || (idx + 1);
+            return `<div class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs"><span dir="auto" class="text-slate-200 truncate"><strong class="text-teal-300 font-mono mr-1.5">Pg ${pNum}</strong>${escapeHtml(pg.title || `Page ${pNum}`)}</span>${(pUrl || pg.imageUrl || pg.pageText) ? `<button type="button" onclick="openBookletPageViewerModal('${escapeHtml(pUrl)}', ${pNum}, 'Page ${pNum}', '${escapeHtml(pg.title || '')}', '${escapeHtml(pg.imageUrl || '')}', ${d.pages.length}, [], '${escapeHtml(pg.pageText || '')}')" class="px-2 py-0.5 rounded-lg bg-teal-500/20 text-teal-300 text-[10px] font-bold shrink-0">View</button>` : ''}</div>`;
+          }).join('')}</div>`;
+        } else {
+          const txt = d.body || d.summary || d.task || d.prompt || sec.rawText || '';
+          if (txt) inner = `<p dir="auto" class="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">${formatSectionInlineText(txt)}</p>`;
+        }
+        if (!inner) return '';
+        return `<div class="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-1.5"><div class="text-[11px] font-bold text-indigo-300 uppercase tracking-wider">${escapeHtml(sec.name || 'Section')}</div>${inner}</div>`;
+      }).filter(Boolean).join('');
+    }
+
     function renderStudentPortalView() {
-      const container = document.getElementById('view-student-portal');
-      const stu = APP_STATE.studentPortalStudent;
+      const ctx = getStudentPortalActiveContext();
+      const container = ctx.container;
+      const stu = ctx.stu;
       if (!container || !stu) return;
       const isHe = APP_STATE.lang === 'he';
       const skills = stu.skills || {};
       const hw = skills.homework || {};
-      const assignedTest = skills.assignedTest && Array.isArray(skills.assignedTest.questions) && skills.assignedTest.questions.length > 0 ? skills.assignedTest : null;
+      const allTests = getStudentAllAssignedTests(skills);
+      const assignedTest = (portalActiveQuizId && allTests.find(t => t.id === portalActiveQuizId)) || allTests[0] || null;
+      const assignedLessons = Array.isArray(skills.assignedLessons) ? skills.assignedLessons : [];
       const timerSt = ensureStudentHwTimerState(hw);
       const goals = Array.isArray(skills.customGoals) ? skills.customGoals : [];
       const sharedNotes = Array.isArray(stu.sharedNotes) ? stu.sharedNotes : [];
@@ -8552,14 +8762,14 @@ alter publication supabase_realtime add table public.students_sync;`;
                 ? `<p dir="auto" class="text-sm sm:text-base leading-relaxed ${hw.completed ? 'line-through text-slate-400' : 'text-slate-100'}">${escapeHtml(hw.task)}</p>`
                 : `<p class="text-xs text-slate-500 italic">${isHe ? 'אין שיעורי בית כרגע.' : 'No active homework assigned right now.'}</p>`}
 
-              ${(hw.task && (hw.imageUrl || hw.pageText || (hw.pdfUrl && hw.pageNum))) ? `
+              ${(hw.task && (hw.imageUrl || hw.pageText || hw.pdfUrl || hw.lessonId)) ? `
                 <div id="student-hw-page-viewer-box" class="p-3.5 rounded-2xl bg-slate-950/90 border border-teal-500/35 space-y-2.5">
                   <div class="flex items-center justify-between gap-2 flex-wrap">
                     <span class="text-xs font-bold text-teal-300 flex items-center gap-1.5">
                       <i data-lucide="book-open" class="w-3.5 h-3.5 text-teal-400"></i>
-                      <span>${isHe ? `עמוד תרגול (${hw.pageNum || 1})` : `Assigned Page${hw.pageNum ? ' · Page ' + hw.pageNum : ''}`}</span>
+                      <span>${isHe ? `חומר תרגול (${hw.pageNum ? 'עמוד ' + hw.pageNum : hw.pageLabel || hw.lessonTitle || 'שיעור'})` : `${hw.pageNum ? 'Assigned Page · Page ' + hw.pageNum : (hw.pageLabel || hw.lessonTitle || 'Assigned Material')}`}</span>
                     </span>
-                    <button type="button" onclick="openBookletPageViewerModal('${escapeHtml(hw.pdfUrl || '')}', ${Number(hw.pageNum) || 1}, '${escapeHtml(hw.pageLabel || hw.task || 'Practice Page')}', '${escapeHtml(stu.name || '')}', '${escapeHtml(hw.imageUrl || '')}', 0, [], '${escapeHtml(hw.pageText || '')}')" class="px-2.5 py-1 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/35 text-[11px] font-bold transition">Full View</button>
+                    <button type="button" onclick="openStudentPortalAssignedHomeworkPage('${escapeHtml(stu.name || '')}')" class="px-2.5 py-1 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/35 text-[11px] font-bold transition">${(hw.imageUrl || hw.pageText || hw.pdfUrl) ? 'Full View' : 'Open Lesson'}</button>
                   </div>
                   ${hw.pageText ? `
                     <div dir="auto" class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-xs sm:text-sm text-slate-100 whitespace-pre-wrap leading-relaxed">${escapeHtml(hw.pageText)}</div>
@@ -8599,9 +8809,55 @@ alter publication supabase_realtime add table public.students_sync;`;
               ` : ''}
             </div>
 
+            ${assignedLessons.length > 0 ? `
+              <!-- 1A. Assigned Lessons / Sub-Lessons Card -->
+              <div id="student-portal-lessons-card" class="p-5 rounded-3xl bg-slate-900/85 border border-teal-500/35 space-y-3 shadow-md">
+                <div class="flex items-center justify-between gap-2">
+                  <h2 class="text-sm font-bold text-teal-300 flex items-center gap-2">
+                    <i data-lucide="book-open" class="w-4 h-4 text-teal-400"></i>
+                    <span>${isHe ? 'שיעורים שנשלחו אליך' : 'Lessons Sent to Me'}</span>
+                  </h2>
+                  <span class="text-xs font-mono px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-teal-300">${assignedLessons.length}</span>
+                </div>
+                <div class="space-y-2.5">
+                  ${assignedLessons.map(les => {
+                    const lKey = String(les.id || les.lessonId || '');
+                    const isOpen = !!portalExpandedLessonMap[lKey];
+                    return `
+                      <div class="rounded-2xl bg-slate-950/80 border border-slate-800 overflow-hidden">
+                        <button type="button" onclick="toggleStudentPortalAssignedLesson('${escapeHtml(lKey)}')" class="w-full px-3.5 py-2.5 flex items-center justify-between gap-2 text-left rtl:text-right hover:bg-slate-900/70 transition">
+                          <div class="min-w-0">
+                            ${les.courseTitle ? `<div class="text-[10px] font-mono text-teal-400 truncate">${escapeHtml(les.courseTitle)}</div>` : ''}
+                            <div dir="auto" class="text-xs sm:text-sm font-bold text-white truncate">${escapeHtml(les.title || 'Assigned Lesson')}</div>
+                          </div>
+                          <span class="px-2.5 py-1 rounded-lg bg-teal-500/15 text-teal-300 border border-teal-500/30 text-[11px] font-bold shrink-0">
+                            ${isOpen ? (isHe ? 'סגור' : 'Hide') : (isHe ? 'פתח שיעור' : 'Open Lesson')}
+                          </span>
+                        </button>
+                        ${isOpen ? `
+                          <div class="p-3 border-t border-slate-800 space-y-2.5">
+                            ${renderAssignedStudentLessonSectionsHtml(les, stu.name || '')}
+                          </div>
+                        ` : ''}
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            ` : ''}
+
             ${assignedTest ? `
               <!-- 1B. Assigned Test / Quiz Card -->
               <div id="student-portal-test-card" class="p-5 rounded-3xl bg-slate-900/85 border ${assignedTest.completed ? 'border-emerald-500/40' : 'border-indigo-500/45'} space-y-3.5 shadow-md">
+                ${allTests.length > 1 ? `
+                  <div class="flex items-center gap-1.5 flex-wrap pb-2 border-b border-slate-800/80">
+                    ${allTests.map(tItem => `
+                      <button type="button" onclick="selectStudentPortalQuiz('${escapeHtml(tItem.id)}')" class="px-2.5 py-1 rounded-xl text-[11px] font-bold border transition ${tItem.id === assignedTest.id ? 'bg-indigo-500 text-white border-indigo-400' : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-indigo-500/40'}">
+                        ${escapeHtml(tItem.title || tItem.lessonTitle || 'Quiz')}${tItem.completed ? ` (${tItem.score}/${tItem.total})` : ''}
+                      </button>
+                    `).join('')}
+                  </div>
+                ` : ''}
                 <div class="flex items-center justify-between gap-2 flex-wrap">
                   <div>
                     <h2 class="text-sm font-bold text-indigo-300 flex items-center gap-2">
@@ -8633,7 +8889,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                               cls = 'bg-indigo-500/25 border-indigo-400 text-white font-bold';
                             }
                             return `
-                              <button type="button" ${assignedTest.completed ? 'disabled' : ''} onclick="selectStudentPortalTestAnswer(${qIdx}, ${optIdx})" dir="auto" class="w-full text-left px-3 py-2 rounded-xl border text-xs transition ${cls}">
+                              <button type="button" ${assignedTest.completed ? 'disabled' : ''} onclick="selectStudentPortalTestAnswer(${qIdx}, ${optIdx}, '${escapeHtml(assignedTest.id)}')" dir="auto" class="w-full text-left px-3 py-2 rounded-xl border text-xs transition ${cls}">
                                 <strong class="font-mono mr-1.5 text-indigo-300">${String.fromCharCode(65 + optIdx)}.</strong>${escapeHtml(opt || '')}
                               </button>
                             `;
@@ -8645,7 +8901,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                 </div>
                 ${!assignedTest.completed ? `
                   <div class="flex justify-end">
-                    <button type="button" id="btn-submit-student-portal-test" onclick="submitStudentPortalTest()" class="px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold shadow transition">Submit Test</button>
+                    <button type="button" id="btn-submit-student-portal-test" onclick="submitStudentPortalTest('${escapeHtml(assignedTest.id)}')" class="px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold shadow transition">Submit Test</button>
                   </div>
                 ` : ''}
               </div>
@@ -12611,7 +12867,9 @@ alter publication supabase_realtime add table public.students_sync;`;
 
     function assignBookletPageHomework(studentId, courseId, lessonId, secId, pageNum, timerMinutes) {
       const students = APP_STATE.students || [];
-      const student = students.find(s => s.id === (studentId || APP_STATE.activeStudentId || (students[0] && students[0].id)));
+      const selectEl = (typeof studentId === 'string' && studentId.startsWith('sel-')) ? document.getElementById(studentId) : null;
+      const chosenId = (selectEl && selectEl.value) || (!studentId || (typeof studentId === 'string' && studentId.startsWith('sel-')) ? (APP_STATE.activeStudentId || (students[0] && students[0].id)) : studentId);
+      const student = students.find(s => s.id === chosenId) || students[0];
       if (!student) {
         showToast('Add a student first in the Students tab to assign homework');
         return;
@@ -12636,14 +12894,120 @@ alter publication supabase_realtime add table public.students_sync;`;
         pageLabel: pLabel,
         timerMinutes: mins,
         courseId,
-        lessonId
+        lessonId,
+        secId,
+        lessonTitle
       };
+      student.skills._updatedAt = Date.now();
       saveStudentsToStorage(true);
       if (APP_STATE.cloud.client) pushStudentToCloud(student);
       if (APP_STATE.activeStudentDrawerId === student.id) renderStudentDrawer(student.id, true);
       const hwBox = document.getElementById(`reader-inline-hw-box-${secId}-${pageNum}`);
       if (hwBox) hwBox.classList.add('hidden');
-      showToast(`Assigned Page ${pageNum}${mins ? ` (${mins}m timer)` : ''} to ${student.name}!`);
+      showToast(`Sent Page ${pageNum}${mins ? ` (${mins}m timer)` : ''} to ${student.name}'s Student Portal!`);
+    }
+
+    function assignLessonToStudent(courseId, lessonId, selectElId, explicitStudentId) {
+      const students = APP_STATE.students || [];
+      if (students.length === 0) {
+        showToast('Add a student first in the Students tab');
+        return;
+      }
+      const selectEl = selectElId ? document.getElementById(selectElId) : null;
+      const targetId = explicitStudentId || (selectEl && selectEl.value) || APP_STATE.activeStudentId || students[0].id;
+      const student = students.find(s => s.id === targetId) || students[0];
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      const lesson = course && (course.lessons || []).find(l => l.id === lessonId);
+      if (!student || !lesson) return;
+
+      ensureStudentSkills(student);
+      const bpSections = Array.isArray(course.blueprint && course.blueprint.sections) ? course.blueprint.sections : [];
+      const studentSections = [];
+      let attachedQuizTest = null;
+
+      if (bpSections.length > 0) {
+        bpSections.forEach(sec => {
+          if (!sec || sec.teacher_only || sec.type === 'teacher_cue') return;
+          const raw = lesson.sections && lesson.sections[sec.id];
+          if (!raw) return;
+          const parsed = typeof parseStructuredSectionData === 'function' ? parseStructuredSectionData(raw, sec.type) : {};
+          if (sec.type === 'quiz') {
+            const qItems = (Array.isArray(parsed.items) ? parsed.items : []).filter(it => it && String(it.q || '').trim());
+            if (qItems.length > 0 && !attachedQuizTest) {
+              attachedQuizTest = { secId: sec.id, name: sec.name || 'Lesson Quiz', items: qItems };
+            }
+            return;
+          }
+          studentSections.push({
+            id: sec.id,
+            type: sec.type,
+            name: sec.name || 'Section',
+            data: parsed
+          });
+        });
+      } else {
+        if (lesson.hook_en || lesson.hook_he) studentSections.push({ id: 'hook', type: 'text', name: 'Overview', data: { body: lesson.hook_en || lesson.hook_he } });
+        const anchors = (lesson.anchors_en && lesson.anchors_en.length) ? lesson.anchors_en : (lesson.anchors_he || []);
+        if (anchors.length) studentSections.push({ id: 'anchors', type: 'list', name: 'Key Ideas', data: { items: anchors.map(a => typeof a === 'string' ? a : (a.point || a.title || '')) } });
+        if (lesson.sources_text) studentSections.push({ id: 'sources', type: 'text', name: 'Primary Sources', data: { body: lesson.sources_text } });
+        if (lesson.homework_text) studentSections.push({ id: 'hw', type: 'text', name: 'Practice', data: { body: lesson.homework_text } });
+      }
+
+      if (!Array.isArray(student.skills.assignedLessons)) student.skills.assignedLessons = [];
+      const lessonSnap = {
+        id: lesson.id,
+        lessonId: lesson.id,
+        courseId: course.id,
+        courseTitle: course.title_en || course.title_he || '',
+        title: lesson.title_en || lesson.title_he || 'Assigned Lesson',
+        assignedDate: new Date().toISOString().split('T')[0],
+        sections: studentSections
+      };
+      student.skills.assignedLessons = [
+        lessonSnap,
+        ...student.skills.assignedLessons.filter(l => l && l.lessonId !== lesson.id)
+      ].slice(0, 15);
+
+      if (!student.skills.homework || !student.skills.homework.task) {
+        student.skills.homework = {
+          task: `Review lesson: ${lessonSnap.title}`,
+          assignedDate: lessonSnap.assignedDate,
+          completed: false,
+          courseId: course.id,
+          lessonId: lesson.id,
+          lessonTitle: lessonSnap.title
+        };
+      }
+      if (attachedQuizTest) {
+        const testObj = {
+          id: 'test_' + lesson.id + '_' + attachedQuizTest.secId,
+          courseId: course.id,
+          lessonId: lesson.id,
+          lessonTitle: lessonSnap.title,
+          secId: attachedQuizTest.secId,
+          title: attachedQuizTest.name,
+          questions: attachedQuizTest.items.map(it => ({
+            q: String(it.q || ''),
+            options: Array.isArray(it.options) ? [...it.options] : ['', '', '', ''],
+            correct: typeof it.correct === 'number' ? it.correct : 0
+          })),
+          answers: [],
+          score: null,
+          total: attachedQuizTest.items.length,
+          assignedDate: lessonSnap.assignedDate,
+          completed: false,
+          completedAt: null
+        };
+        student.skills.assignedTest = testObj;
+        if (!Array.isArray(student.skills.assignedTests)) student.skills.assignedTests = [];
+        student.skills.assignedTests = [testObj, ...student.skills.assignedTests.filter(t => t && t.id !== testObj.id)].slice(0, 15);
+      }
+
+      student.skills._updatedAt = Date.now();
+      saveStudentsToStorage(true);
+      if (APP_STATE.cloud.client) pushStudentToCloud(student);
+      if (APP_STATE.activeStudentDrawerId === student.id) renderStudentDrawer(student.id, true);
+      showToast(`Sent lesson "${lessonSnap.title}"${attachedQuizTest ? ' + Quiz' : ''} to ${student.name}'s Student Portal!`);
     }
 
     var bookletRowExtraOpenMap = {};
@@ -13016,8 +13380,8 @@ Return STRICT JSON ONLY: {"pages":[{"pageNum":${start},"title":"..."}]}`
           return;
         }
         const secMeta = (course.blueprint && Array.isArray(course.blueprint.sections) ? course.blueprint.sections : []).find(s => s.id === secId);
-        student.skills.assignedTest = {
-          id: 'test_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        const testPayload = {
+          id: 'test_' + lesson.id + '_' + secId + '_' + Date.now(),
           courseId,
           lessonId,
           lessonTitle: lesson.title_en || lesson.title_he || 'Lesson',
@@ -13035,6 +13399,13 @@ Return STRICT JSON ONLY: {"pages":[{"pageNum":${start},"title":"..."}]}`
           completed: false,
           completedAt: null
         };
+        student.skills.assignedTest = testPayload;
+        if (!Array.isArray(student.skills.assignedTests)) student.skills.assignedTests = [];
+        student.skills.assignedTests = [
+          testPayload,
+          ...student.skills.assignedTests.filter(t => t && !(t.lessonId === lessonId && t.secId === secId && !t.completed))
+        ].slice(0, 15);
+        student.skills._updatedAt = Date.now();
         saveStudentsToStorage(true);
         if (APP_STATE.cloud.client) pushStudentToCloud(student);
         if (APP_STATE.activeStudentDrawerId === student.id) renderStudentDrawer(student.id, true);
@@ -15733,10 +16104,13 @@ ${forceSchemaLines}`;
                     ${pg.note ? `<div dir="auto" class="px-3 pb-2 text-[11px] text-slate-400">${escapeHtml(pg.note)}</div>` : ''}
 
                     <div id="reader-inline-hw-box-${sec.id}-${pNum}" class="hidden px-3 py-2 bg-slate-900/95 border-t border-orange-500/25 flex items-center justify-between gap-2 flex-wrap">
-                      <span class="text-[11px] font-bold text-orange-300">Assign Page ${pNum} as Homework + Timer:</span>
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[11px] font-bold text-orange-300">Send Page ${pNum} to:</span>
+                        ${renderStudentQuickPickerHtml(`sel-hw-stu-${sec.id}-${pNum}`)}
+                      </div>
                       <div class="flex items-center gap-1.5 flex-wrap">
                         ${[0, 3, 5, 10, 15, 20].map(m => `
-                          <button type="button" onclick="assignBookletPageHomework('${activeStu ? activeStu.id : ''}', '${cId}', '${lId}', '${sec.id}', ${pNum}, ${m})" class="px-2.5 py-1 rounded-lg bg-orange-500/20 hover:bg-orange-500 text-orange-200 hover:text-slate-950 border border-orange-500/40 text-[11px] font-bold transition">
+                          <button type="button" onclick="assignBookletPageHomework('sel-hw-stu-${sec.id}-${pNum}', '${cId}', '${lId}', '${sec.id}', ${pNum}, ${m})" class="px-2.5 py-1 rounded-lg bg-orange-500/20 hover:bg-orange-500 text-orange-200 hover:text-slate-950 border border-orange-500/40 text-[11px] font-bold transition">
                             ${m === 0 ? 'No Timer' : `${m}m`}
                           </button>
                         `).join('')}
@@ -15988,7 +16362,15 @@ ${forceSchemaLines}`;
               <i data-lucide="arrow-left" class="w-3.5 h-3.5 rtl:rotate-180"></i>
               <span>${isHe ? 'חזרה לרשימת השיעורים' : 'Lessons'}</span>
             </button>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
+              ${(APP_STATE.students && APP_STATE.students.length > 0) ? `
+                <div class="flex items-center gap-1.5 px-2 py-1 rounded-2xl bg-slate-900 border border-slate-700/80">
+                  ${renderStudentQuickPickerHtml('sel-reader-lesson-stu')}
+                  <button type="button" id="btn-reader-send-lesson" onclick="assignLessonToStudent('${activeCourse.id}', '${selectedLesson.id}', 'sel-reader-lesson-stu')" class="px-2.5 py-1 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-200 border border-teal-500/35 font-bold text-[11px] transition shrink-0">
+                    ${isHe ? 'שלח שיעור לתלמיד' : 'Send Lesson'}
+                  </button>
+                </div>
+              ` : ''}
               ${hasCustomSections && blueprintSections.length > 0 ? (() => {
                 const allReadOpen = blueprintSections.every(s => isLessonSectionExpanded('read', selectedLesson.id, s.id));
                 return `
@@ -26644,6 +27026,14 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
             <p dir="auto" class="text-xs sm:text-sm ${hw.completed ? 'line-through text-slate-400' : 'text-amber-100 font-medium'} leading-relaxed pl-6 rtl:pl-0 rtl:pr-6">
               ${escapeHtml(hw.task)}
             </p>
+            ${(hw.pdfUrl || hw.imageUrl || hw.pageText || hw.lessonId) ? `
+              <div class="pl-6 rtl:pl-0 rtl:pr-6 flex items-center gap-2 flex-wrap">
+                ${(hw.pdfUrl || hw.imageUrl || hw.pageText) ? `
+                  <button type="button" onclick="openBookletPageViewerModal('${escapeHtml(hw.pdfUrl || '')}', ${Number(hw.pageNum) || 1}, '${escapeHtml(hw.pageLabel || hw.task || 'Practice Page')}', '${escapeHtml(student.name || '')}', '${escapeHtml(hw.imageUrl || '')}', 0, [], '${escapeHtml(hw.pageText || '')}')" class="px-2.5 py-1 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/35 text-[11px] font-bold transition">View Practice Page</button>
+                ` : ''}
+                <button type="button" onclick="openStudentViewPreviewModal('${student.id}')" class="px-2.5 py-1 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/35 text-[11px] font-bold transition">See in Student View</button>
+              </div>
+            ` : ''}
           </div>
           `
           : `
@@ -26659,21 +27049,29 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
           </div>
           `;
 
-        const assignedTestSummaryHtml = (sk.assignedTest && Array.isArray(sk.assignedTest.questions) && sk.assignedTest.questions.length > 0) ? `
-          <div id="drawer-assigned-test-card" class="px-4 py-2.5 rounded-2xl border ${sk.assignedTest.completed ? 'bg-emerald-950/30 border-emerald-500/35' : 'bg-indigo-950/30 border-indigo-500/35'} flex items-center justify-between gap-2 flex-wrap text-xs">
-            <div class="flex items-center gap-2 min-w-0">
-              <i data-lucide="check-circle-2" class="w-4 h-4 ${sk.assignedTest.completed ? 'text-emerald-400' : 'text-indigo-400'} shrink-0"></i>
-              <span class="font-bold text-white truncate">${escapeHtml(sk.assignedTest.title || sk.assignedTest.lessonTitle || 'Assigned Test')}</span>
-            </div>
-            ${sk.assignedTest.completed ? `
-              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono font-bold text-[11px]">
-                Score: ${sk.assignedTest.score}/${sk.assignedTest.total} (${sk.assignedTest.total > 0 ? Math.round((sk.assignedTest.score / sk.assignedTest.total) * 100) : 0}%)
-              </span>
-            ` : `
-              <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/35 font-mono text-[10px] font-bold">
-                Pending Student Submission
-              </span>
-            `}
+        const allStudentTests = typeof getStudentAllAssignedTests === 'function' ? getStudentAllAssignedTests(sk) : [];
+        const assignedTestSummaryHtml = allStudentTests.length > 0 ? `
+          <div id="drawer-assigned-test-card" class="space-y-2">
+            ${allStudentTests.map(testObj => `
+              <div class="px-4 py-2.5 rounded-2xl border ${testObj.completed ? 'bg-emerald-950/30 border-emerald-500/35' : 'bg-indigo-950/30 border-indigo-500/35'} flex items-center justify-between gap-2 flex-wrap text-xs">
+                <div class="flex items-center gap-2 min-w-0">
+                  <i data-lucide="check-circle-2" class="w-4 h-4 ${testObj.completed ? 'text-emerald-400' : 'text-indigo-400'} shrink-0"></i>
+                  <span class="font-bold text-white truncate">${escapeHtml(testObj.title || testObj.lessonTitle || 'Assigned Test')}</span>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  ${testObj.completed ? `
+                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono font-bold text-[11px]">
+                      Score: ${testObj.score}/${testObj.total} (${testObj.total > 0 ? Math.round((testObj.score / testObj.total) * 100) : 0}%)
+                    </span>
+                  ` : `
+                    <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/35 font-mono text-[10px] font-bold">
+                      Pending Student Submission
+                    </span>
+                  `}
+                  <button type="button" onclick="openStudentViewPreviewModal('${student.id}', '${escapeHtml(testObj.id)}')" class="px-2.5 py-1 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/35 text-[10px] font-bold transition">See in Student View</button>
+                </div>
+              </div>
+            `).join('')}
           </div>
         ` : '';
 
@@ -26922,6 +27320,7 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
                                       <i data-lucide="${pagesExpanded ? 'chevron-up' : 'chevron-down'}" class="w-3 h-3"></i>
                                     </button>
                                   ` : ''}
+                                  <button type="button" onclick="assignLessonToStudent('${course.id}', '${lesson.id}', '', '${student.id}'); event.stopPropagation();" class="px-2 py-0.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-200 border border-indigo-500/30 text-[10px] font-bold transition" title="${isHe ? 'שלח שיעור לתלמיד' : 'Send Lesson to Student'}">Send</button>
                                   ${lesson.duration ? `<span class="text-[10px] font-mono text-slate-500 hidden sm:inline">${escapeHtml(lesson.duration)}</span>` : ''}
                                   <button type="button" onclick="toggleTopicForStudent('${student.id}', '${key}', '${lesson.id}', event)" class="p-1 rounded-lg hover:bg-slate-800 transition active:scale-95" title="${checked ? 'Mark incomplete' : 'Mark completed'}">
                                     <i data-lucide="${checked ? 'check-circle-2' : 'circle'}" class="w-4 h-4 ${checked ? 'text-emerald-400' : 'text-slate-600 hover:text-slate-300'}"></i>
@@ -26944,9 +27343,12 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
                                         <span class="font-mono font-bold text-teal-300 shrink-0">Pg ${pg.pageNum}</span>
                                         <span dir="auto" class="truncate ${pg.done ? 'line-through text-slate-400' : 'text-slate-200'}">${escapeHtml(pg.title)}</span>
                                       </label>
-                                      ${(pg.pdfUrl || pg.imageUrl) ? `
-                                        <button type="button" onclick="openBookletPageViewerModal('${escapeHtml(pg.pdfUrl)}', ${pg.pageNum}, 'Page ${pg.pageNum}', '${escapeHtml(pg.title)}', '${escapeHtml(pg.imageUrl)}', ${pageStats.totalPages})" class="px-2 py-0.5 rounded bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 text-[10px] font-bold shrink-0">View</button>
-                                      ` : ''}
+                                      <div class="flex items-center gap-1 shrink-0">
+                                        ${(pg.pdfUrl || pg.imageUrl) ? `
+                                          <button type="button" onclick="openBookletPageViewerModal('${escapeHtml(pg.pdfUrl)}', ${pg.pageNum}, 'Page ${pg.pageNum}', '${escapeHtml(pg.title)}', '${escapeHtml(pg.imageUrl)}', ${pageStats.totalPages})" class="px-2 py-0.5 rounded bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 text-[10px] font-bold">View</button>
+                                        ` : ''}
+                                        <button type="button" onclick="assignBookletPageHomework('${student.id}', '${course.id}', '${lesson.id}', '${pg.secId}', ${pg.pageNum}, 5)" class="px-2 py-0.5 rounded bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/35 text-[10px] font-bold" title="Send this page as homework">Send HW</button>
+                                      </div>
                                     </div>
                                   `).join('')}
                                 </div>
@@ -26983,7 +27385,11 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
                 </div>
               </div>
             </div>
-            <div class="flex items-center gap-1.5 shrink-0">
+            <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
+              <button type="button" id="btn-preview-student-portal" onclick="openStudentViewPreviewModal('${student.id}')" class="px-3 py-1.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-200 border border-teal-500/35 font-bold text-[11px] transition active:scale-95 flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-3 h-3"></i>
+                <span>${isHe ? 'תצוגת תלמיד' : 'Student View'}</span>
+              </button>
               <button type="button" id="btn-copy-student-invite" onclick="copyStudentPortalInvite('${student.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-[11px] transition active:scale-95 flex items-center gap-1.5 shadow">
                 <i data-lucide="copy" class="w-3 h-3"></i>
                 <span>${isHe ? 'העתק קישור וקוד' : 'Copy Link & Code'}</span>
