@@ -1338,7 +1338,7 @@ sandbox.renderStudents();
 const studentListHtml = getOrCreateElem('students-list').innerHTML;
 assert(!studentListHtml.includes('13 / 13') && !studentListHtml.includes('23 / 23'), 'Student card does NOT render hardcoded 13 or 23 totals');
 assert(!studentListHtml.includes('No Parsha') && !studentListHtml.includes('ללא פרשה'), 'Student card does NOT render hardcoded No Parsha badge');
-assert(studentListHtml.includes('0 Courses') || studentListHtml.includes('0 קורסים'), 'Student card displays active course count');
+assert(studentListHtml.includes('Dynamic Student') && !studentListHtml.includes('0 Courses') && !studentListHtml.includes('0%'), 'Student card shows only name logo and name without extra clutter');
 
 // 3. Dynamic Course Creation and Student Profile Binding
 const testCustomCourse = {
@@ -1365,10 +1365,10 @@ const updatedProgress = sandbox.getStudentCourseProgress(testDynamicStudent);
 assert(updatedProgress.completedClasses === 1, 'Completed classes increments to 1');
 assert(updatedProgress.overallPct === 50, 'Overall progress updates dynamically to 50%');
 
-// Test renderStudents updates progress bar dynamically
+// Verify minimal Student Card keeps dynamic progress calculation cleanly in drawer/stats
 sandbox.renderStudents();
 const updatedListHtml = getOrCreateElem('students-list').innerHTML;
-assert(updatedListHtml.includes('1 / 2') || updatedListHtml.includes('50%'), 'Student card renders dynamic 1 / 2 classes or 50%');
+assert(updatedListHtml.includes('Dynamic Student') && !updatedListHtml.includes('50%') && !updatedListHtml.includes('>Active<') && !updatedListHtml.includes('Courses'), 'Student card preserves minimal name and initial logo layout');
 
 // 4. Test Student Drawer Rendering
 const drawerDetailEl = getOrCreateElem('drawer-student-detail');
@@ -6241,8 +6241,11 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     !g65CardsHtml.includes('Course Progress') &&
     !g65CardsHtml.includes('Open Profile') &&
     !g65CardsHtml.includes('copyStudentPortalInvite') &&
+    !g65CardsHtml.includes('Courses') &&
+    !g65CardsHtml.includes('>Active<') &&
+    !g65CardsHtml.includes('0%') &&
     indexHtml.includes('id="btn-drawer-delete-student"'),
-    'Student Cards remove Course Progress bars, code/trash/Open Profile footer clutter, while moving Delete Student into Profile Drawer'
+    'Student Cards show only name & logo without progress bars, status badges, course counts, or footer clutter'
   );
 
   delete sandbox.drawerCourseExpandedMap[g65Course.id];

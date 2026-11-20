@@ -29340,31 +29340,14 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       }
 
       // Render Cards for filtered students
-      container.innerHTML = filteredStudents.map((student, idx) => {
+      container.innerHTML = filteredStudents.map((student) => {
         const isActive = student.id === APP_STATE.activeStudentId;
-        const { activeCourses, totalClasses, completedClasses, overallPct } = getStudentCourseProgress(student);
 
         const avatarHtml = student.avatar
-          ? `<img src="${student.avatar}" class="w-10 h-10 rounded-full object-cover border border-brand-500/40 shrink-0 shadow-sm">`
-          : `<div class="w-10 h-10 rounded-full bg-brand-600/20 text-brand-400 border border-brand-500/30 flex items-center justify-center font-bold text-sm shrink-0">
-              ${student.name.charAt(0).toUpperCase()}
+          ? `<img src="${student.avatar}" class="w-12 h-12 rounded-full object-cover border border-brand-500/40 shrink-0 shadow-sm">`
+          : `<div class="w-12 h-12 rounded-full bg-brand-600/20 text-brand-400 border border-brand-500/30 flex items-center justify-center font-extrabold text-base shrink-0">
+              ${escapeHtml((student.name || 'S').charAt(0).toUpperCase())}
             </div>`;
-
-        const { date: cardDate } = getStudentParshaAndDate(student);
-
-        const statusVal = student.status || 'active';
-        let statusBadgeHtml = '';
-        if (statusVal === 'active') {
-          statusBadgeHtml = `<span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>${t.statusActive}</span>`;
-        } else if (statusVal === 'paused') {
-          statusBadgeHtml = `<span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20"><span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>${t.statusPaused}</span>`;
-        } else if (statusVal === 'completed') {
-          statusBadgeHtml = `<span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20"><span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>${t.statusCompleted}</span>`;
-        }
-
-        const stageVal = student.gradeLevel || '';
-        const guardianInfo = student.parentContact || {};
-        const hasGuardian = guardianInfo.name || guardianInfo.phone;
 
         return `
           <div
@@ -29378,46 +29361,14 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
             <!-- Top Gradient Accent Strip -->
             <div class="modern-gradient-cover keep-white h-2 bg-gradient-to-r from-indigo-500 via-violet-500 to-amber-500"></div>
 
-            <div class="p-5 flex-1 flex flex-col justify-center">
-              <!-- Header: Avatar, Name & Percentage -->
-              <div class="flex items-start justify-between gap-2">
-                <div class="flex items-center gap-3.5 min-w-0">
-                  <div onclick="triggerPhotoUpload('${student.id}', event)" title="${t.changePhoto}" class="relative group/avatar shrink-0">
-                    ${avatarHtml}
-                    <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition">
-                      <i data-lucide="camera" class="w-3.5 h-3.5 text-white"></i>
-                    </div>
-                  </div>
-                  <div class="min-w-0 space-y-1">
-                    <div class="flex items-center gap-2">
-                      <h4 class="text-base sm:text-lg font-extrabold text-white truncate group-hover:text-indigo-400 transition">${student.name}</h4>
-                      ${statusBadgeHtml}
-                    </div>
-                    <div class="flex items-center gap-2 flex-wrap text-xs text-slate-400">
-                      <span class="inline-flex items-center gap-1 text-indigo-300 font-semibold">
-                        <i data-lucide="book-open" class="w-3.5 h-3.5 text-indigo-400 shrink-0"></i>
-                        <span class="truncate">${activeCourses.length} ${isHe ? (activeCourses.length === 1 ? 'קורס' : 'קורסים') : (activeCourses.length === 1 ? 'Course' : 'Courses')}</span>
-                      </span>
-                      ${cardDate ? `
-                        <span class="text-slate-600 font-bold">•</span>
-                        <span class="inline-flex items-center gap-1 text-slate-300 font-mono text-[11px]">
-                          <i data-lucide="calendar" class="w-3 h-3 text-slate-400 shrink-0"></i>
-                          <span class="truncate">${cardDate}</span>
-                        </span>
-                      ` : ''}
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Clean Progress Badge -->
-                <div class="flex items-center gap-1.5 shrink-0" onclick="event.stopPropagation()">
-                  <span class="text-xs font-mono font-extrabold px-3 py-1 rounded-full ${
-                    overallPct > 50 ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
-                  }">
-                    ${overallPct}%
-                  </span>
+            <div class="p-5 flex-1 flex items-center gap-4 min-w-0">
+              <div onclick="triggerPhotoUpload('${student.id}', event)" title="${t.changePhoto}" class="relative group/avatar shrink-0">
+                ${avatarHtml}
+                <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition">
+                  <i data-lucide="camera" class="w-3.5 h-3.5 text-white"></i>
                 </div>
               </div>
+              <h4 dir="auto" class="text-lg sm:text-xl font-extrabold text-white truncate group-hover:text-indigo-400 transition flex-1 min-w-0">${escapeHtml(student.name)}</h4>
             </div>
           </div>
         `;
