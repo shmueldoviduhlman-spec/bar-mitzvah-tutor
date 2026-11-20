@@ -6178,9 +6178,9 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     g64PortalDefaultHtml.includes('id="btn-student-tab-homework"') &&
     g64PortalDefaultHtml.includes('id="btn-student-tab-goals"') &&
     g64PortalDefaultHtml.includes('id="btn-student-tab-notes"') &&
-    g64PortalDefaultHtml.includes('id="student-portal-panel-homework" class="space-y-4"') &&
-    g64PortalDefaultHtml.includes('id="student-portal-panel-goals" class="hidden space-y-4"') &&
-    g64PortalDefaultHtml.includes('id="student-portal-panel-notes" class="hidden space-y-4"'),
+    g64PortalDefaultHtml.includes('id="student-portal-panel-homework" class="space-y-5 min-h-[440px] sm:min-h-[480px]"') &&
+    g64PortalDefaultHtml.includes('id="student-portal-panel-goals" class="hidden space-y-5 min-h-[440px] sm:min-h-[480px]"') &&
+    g64PortalDefaultHtml.includes('id="student-portal-panel-notes" class="hidden space-y-5 min-h-[440px] sm:min-h-[480px]"'),
     'Student Portal renders all 3 category tabs with My Homework active and Goals/Notes panels tucked cleanly behind tabs'
   );
 
@@ -6188,8 +6188,8 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   sandbox.switchStudentPortalTab('goals');
   const g64GoalsTabHtml = getOrCreateElem('view-student-portal').innerHTML;
   assert(
-    g64GoalsTabHtml.includes('id="student-portal-panel-homework" class="hidden space-y-4"') &&
-    g64GoalsTabHtml.includes('id="student-portal-panel-goals" class="space-y-4"') &&
+    g64GoalsTabHtml.includes('id="student-portal-panel-homework" class="hidden space-y-5 min-h-[440px] sm:min-h-[480px]"') &&
+    g64GoalsTabHtml.includes('id="student-portal-panel-goals" class="space-y-5 min-h-[440px] sm:min-h-[480px]"') &&
     g64GoalsTabHtml.includes('Kiddush Melody'),
     'Clicking My Assignments & Goals switches view strictly into the Goals workspace'
   );
@@ -6198,8 +6198,8 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   sandbox.switchStudentPortalTab('notes');
   const g64NotesTabHtml = getOrCreateElem('view-student-portal').innerHTML;
   assert(
-    g64NotesTabHtml.includes('id="student-portal-panel-goals" class="hidden space-y-4"') &&
-    g64NotesTabHtml.includes('id="student-portal-panel-notes" class="space-y-4"') &&
+    g64NotesTabHtml.includes('id="student-portal-panel-goals" class="hidden space-y-5 min-h-[440px] sm:min-h-[480px]"') &&
+    g64NotesTabHtml.includes('id="student-portal-panel-notes" class="space-y-5 min-h-[440px] sm:min-h-[480px]"') &&
     g64NotesTabHtml.includes('Practice Maftir with steady rhythm!'),
     'Clicking Teacher Notes switches view strictly into shared notes and upcoming sessions'
   );
@@ -6486,6 +6486,71 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     'Confirming both verification prompts permanently deletes the student'
   );
   sandbox.confirm = prevConfirm68;
+
+  sandbox.APP_STATE.studentPortalMode = false;
+  sandbox.APP_STATE.studentPortalStudent = null;
+  sandbox.APP_STATE.activeStudentDrawerId = null;
+
+  // ============================================================================
+  // GATE 69: Student Portal Neat Spacing/Typography & Stable Profile Panel Size
+  // ============================================================================
+  console.log('\n[Gate 69] Student Portal Spacious Neat Layout & Fixed-Size Profile/Portal Frames...');
+  assert(
+    indexHtml.includes('id="drawer-student-detail"') &&
+    indexHtml.includes('h-[90vh] sm:h-[88vh] max-h-[92vh] sm:max-h-[90vh]') &&
+    indexHtml.includes('id="drawer-body-content" style="scrollbar-gutter: stable;"') &&
+    indexHtml.includes('h-[90vh] sm:h-[88vh] max-h-[94vh]') &&
+    indexHtml.includes('id="view-student-portal" class="hidden w-full max-w-4xl mx-auto space-y-6"') &&
+    indexHtml.includes('html.student-portal-active {\n      scrollbar-gutter: stable;'),
+    'Student Profile Drawer, Student View Preview Modal, and Student Portal enforce fixed non-jumping heights and full stable widths'
+  );
+
+  const g69Stu = {
+    id: 'stu_g69_neat',
+    name: 'Noam Neat Portal',
+    subject: 'Jewish Foundations',
+    studentAccessCode: 'NOAM69',
+    sharedNotes: [{ id: 'sn_69', text: 'Practice Mode Ani every morning.', dateLabel: 'Nov 19' }],
+    skills: {
+      ...sandbox.getDefaultStudentSkills(),
+      homework: { task: 'Review Shema Verse 1 carefully.', assignedDate: '2026-11-19', completed: false, timerMinutes: 10 },
+      customGoals: [
+        {
+          id: 'cg_69',
+          title: 'Mode Ani Recitation',
+          completed: false,
+          recordings: [{ id: 'rec_69', title: 'Mode Ani Recitation', url: 'data:audio/mp3;base64,SUQz', type: 'audio' }],
+          images: [{ id: 'img_69', title: 'Siddur Page', url: 'data:image/png;base64,iVBORw==' }],
+          pdfs: [{ id: 'pdf_69', title: 'Morning Prayers', url: 'https://example.com/p.pdf', pageNum: 3 }]
+        }
+      ]
+    }
+  };
+  sandbox.APP_STATE.studentPortalMode = true;
+  sandbox.APP_STATE.studentPortalStudent = g69Stu;
+  sandbox.switchStudentPortalTab('homework');
+  const hwPortalHtml = getOrCreateElem('view-student-portal').innerHTML;
+  sandbox.switchStudentPortalTab('goals');
+  const goalsPortalHtml = getOrCreateElem('view-student-portal').innerHTML;
+  sandbox.switchStudentPortalTab('notes');
+  const notesPortalHtml = getOrCreateElem('view-student-portal').innerHTML;
+
+  assert(
+    hwPortalHtml.includes('id="student-portal-shell" class="w-full space-y-6"') &&
+    hwPortalHtml.includes('min-h-[440px] sm:min-h-[480px]') &&
+    goalsPortalHtml.includes('min-h-[440px] sm:min-h-[480px]') &&
+    notesPortalHtml.includes('min-h-[440px] sm:min-h-[480px]'),
+    'All 3 Student Portal tab panels maintain uniform stage minimum height and stable width'
+  );
+
+  assert(
+    hwPortalHtml.includes('text-2xl sm:text-3xl font-black text-white tracking-tight') &&
+    hwPortalHtml.includes('p-6 sm:p-8 rounded-3xl') &&
+    goalsPortalHtml.includes('text-base sm:text-[17px] font-bold leading-snug') &&
+    goalsPortalHtml.includes('h-8 sm:h-9') &&
+    goalsPortalHtml.includes('w-24 h-24'),
+    'Student Portal uses larger comfortable typography and spacious card/media geometry'
+  );
 
   sandbox.APP_STATE.studentPortalMode = false;
   sandbox.APP_STATE.studentPortalStudent = null;
