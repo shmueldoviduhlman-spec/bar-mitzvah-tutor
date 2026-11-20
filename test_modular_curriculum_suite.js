@@ -5513,6 +5513,101 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   sandbox.APP_STATE.studentPortalStudent = null;
   getOrCreateElem('drawer-student-detail').classList.add('hidden');
 
+  // =========================================================================
+  // GATE 58: 23-Parsha Chumash Builder, Sefaria Auto-Source & Batch Fill
+  // =========================================================================
+  console.log('\n--- Running Gate 58: 23-Parsha Chumash Course Builder, Sefaria Resolver & Batch AI Fill ---');
+  sandbox.openCreateCourseModal();
+  getOrCreateElem('input-create-course-title-en').value = 'Chumash Bereishit & Shemot G58';
+  getOrCreateElem('input-ai-blueprint-prompt').value = 'Create Chumash Bereishit and Shemot only, 23 parshiot one lesson per parasha, no Aliyot, strictly from https://www.sefaria.org and https://www.chabad.org for pre-class review for 12-13 year old students';
+
+  const prevFetchG58 = sandbox.fetch;
+  sandbox.fetch = async (url) => {
+    const u = String(url || '');
+    if (u.includes('sefaria.org/api/texts/Rashi_on_')) {
+      return { ok: true, json: async () => ({ text: ['Rashi explains why the Torah starts with Creation.'] }) };
+    }
+    if (u.includes('sefaria.org/api/texts/')) {
+      return { ok: true, json: async () => ({ text: [['In the beginning God created heaven and earth.']] }) };
+    }
+    if (u.includes('generateContent') && !u.includes('architect_fail')) {
+      const secs = (sandbox.APP_STATE.customCourses.find(c => c.id === sandbox.APP_STATE.activeCourseId)?.blueprint?.sections) || [];
+      if (secs.length >= 4 && sandbox.studioBatchFillState.active) {
+        const out = {};
+        out[secs[0].id] = { items: ['Creation of the world in six days', 'Shabbat rest and sanctity'] };
+        out[secs[1].id] = { setup: 'Rashi asks why Torah begins with Bereishit.', takeaway: 'Shows Hashem owns the whole world.' };
+        out[secs[2].id] = { items: ['Q: Why did God create light before the sun? A: To teach light comes from Hashem.'] };
+        out[secs[3].id] = { mindset: 'Respect your time and the week leading to Shabbat.', action: 'Unplug cleanly on Friday evening.' };
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ candidates: [{ content: { parts: [{ text: JSON.stringify({ assistant_reply: 'Populated lesson sections!', sections: out }) }] } }] })
+        };
+      }
+    }
+    throw new Error('Network unavailable in sandbox');
+  };
+
+  await sandbox.handleAiSuggestBlueprint();
+  assert(
+    Array.isArray(sandbox.architectPlannedLessons) &&
+    sandbox.architectPlannedLessons.length === 23 &&
+    sandbox.architectPlannedLessons[0].title === 'Parshat Bereshit' &&
+    sandbox.architectPlannedLessons[22].title === 'Parshat Pekudei',
+    'Course AI CoBuilder loads all 23 Parshiot of Bereishit & Shemot cleanly with zero 20-lesson clipping'
+  );
+  assert(
+    !sandbox.currentBlueprintSections.some(s => s.type === 'booklet_pages') &&
+    sandbox.currentBlueprintSections.length === 4 &&
+    sandbox.architectStrictResourcesOnly === true,
+    'Chumash blueprint keeps strictly 4 teacher-prep sections with zero Aliyot sub-pages and strict source whitelist active'
+  );
+
+  // Save & verify 23-lesson course creation
+  sandbox.handleSaveCustomCourse({ preventDefault() {} });
+  const g58Course = sandbox.APP_STATE.customCourses.find(c => c.id === sandbox.APP_STATE.activeCourseId);
+  assert(g58Course && g58Course.title_en === 'Chumash Bereishit & Shemot G58' && Array.isArray(g58Course.lessons) && g58Course.lessons.length === 23, 'Saved Chumash course contains all 23 Parshiot lessons');
+
+  // Verify Sefaria Parsha matcher & live Sefaria API resolver
+  assert(
+    sandbox.matchSefariaParshaFromTitle('Parashat Lech-Lecha')?.ref === 'Genesis 12:1-17:27' &&
+    sandbox.matchSefariaParshaFromTitle('Parshat Chayei Sarah')?.ref === 'Genesis 23:1-25:18' &&
+    sandbox.matchSefariaParshaFromTitle('Parshat Pekudei')?.ref === 'Exodus 38:21-40:38',
+    'matchSefariaParshaFromTitle resolves transliteration variants across Bereishit & Shemot accurately'
+  );
+  const g58SefariaCtx = await sandbox.resolveSefariaParshaContextForLesson(g58Course.blueprint, g58Course.lessons[0]);
+  assert(
+    g58SefariaCtx.includes('Genesis 1:1-6:8') && g58SefariaCtx.includes('In the beginning God created') && g58SefariaCtx.includes('Rashi explains'),
+    'resolveSefariaParshaContextForLesson fetches Torah verses & Rashi context directly from Sefaria API'
+  );
+
+  // Verify Screen 2 Batch AI Fill banner renders & autoPopulateDraftLessonsWithAi fills drafts skipping populated ones
+  sandbox.APP_STATE.insideCourseId = g58Course.id;
+  sandbox.studioScreenMode = 'list';
+  sandbox.renderCourseStudio(g58Course.id);
+  const g58ListHtml = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(
+    g58ListHtml.includes('autoPopulateDraftLessonsWithAi') && g58ListHtml.includes('23 draft lessons ready to build'),
+    'Screen 2 syllabus list displays 1-click AI Fill Draft Lessons bar when draft lessons exist'
+  );
+
+  // Mark 21 lessons already populated to test batch skip + sequential populate of the remaining 2
+  const sec0 = g58Course.blueprint.sections[0].id;
+  for (let i = 2; i < g58Course.lessons.length; i++) {
+    g58Course.lessons[i].sections[sec0] = JSON.stringify({ _structured: true, items: ['Pre-filled summary item'] });
+  }
+  assert(!sandbox.isStudioLessonPopulated(g58Course, g58Course.lessons[0]) && sandbox.isStudioLessonPopulated(g58Course, g58Course.lessons[2]), 'isStudioLessonPopulated accurately distinguishes draft vs populated lessons');
+
+  const batchSummary = await sandbox.autoPopulateDraftLessonsWithAi(g58Course.id, { delayMs: 0 });
+  assert(
+    batchSummary.processed === 2 &&
+    sandbox.isStudioLessonPopulated(g58Course, g58Course.lessons[0]) &&
+    sandbox.isStudioLessonPopulated(g58Course, g58Course.lessons[1]) &&
+    sandbox.studioScreenMode === 'list',
+    'autoPopulateDraftLessonsWithAi populates the 2 remaining drafts sequentially without disturbing list mode or pre-filled lessons'
+  );
+  sandbox.fetch = prevFetchG58;
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);

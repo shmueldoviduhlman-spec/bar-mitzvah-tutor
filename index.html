@@ -14407,18 +14407,23 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
         }
 
         if (!sefariaExtracted) {
-          const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-          const timer = ctrl ? setTimeout(() => ctrl.abort(), 5000) : null;
-          const cleanFetchUrl = `https://r.jina.ai/${rawUrl}`;
-          const resp = await fetch(cleanFetchUrl, ctrl ? { signal: ctrl.signal } : {}).catch(() => null);
-          if (timer) clearTimeout(timer);
-          if (resp && resp.ok) {
-            const txt = await resp.text();
-            const isBotGate = /Title:\s*Just a moment|Enable JavaScript and cookies|cf-browser-verification|Attention Required! \| Cloudflare/i.test(txt || '');
-            if (isBotGate) {
-              blockedReason = 'cloudflare_or_anti_bot';
-            } else if (txt && txt.trim().length > 20) {
-              extracted += (extracted ? '\n\n' : '') + txt.trim().slice(0, 12000);
+          const isBareRefHomepage = /^https?:\/\/(?:www\.)?(?:sefaria\.org|chabad\.org)(?:\/(?:parshah\/?)?)?$/i.test(rawUrl.trim());
+          if (isBareRefHomepage) {
+            if (/chabad\.org/i.test(rawUrl)) blockedReason = 'cloudflare_or_anti_bot';
+          } else {
+            const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+            const timer = ctrl ? setTimeout(() => ctrl.abort(), 5000) : null;
+            const cleanFetchUrl = `https://r.jina.ai/${rawUrl}`;
+            const resp = await fetch(cleanFetchUrl, ctrl ? { signal: ctrl.signal } : {}).catch(() => null);
+            if (timer) clearTimeout(timer);
+            if (resp && resp.ok) {
+              const txt = await resp.text();
+              const isBotGate = /Title:\s*Just a moment|Enable JavaScript and cookies|cf-browser-verification|Attention Required! \| Cloudflare/i.test(txt || '');
+              if (isBotGate) {
+                blockedReason = 'cloudflare_or_anti_bot';
+              } else if (txt && txt.trim().length > 20) {
+                extracted += (extracted ? '\n\n' : '') + txt.trim().slice(0, 12000);
+              }
             }
           }
         }
@@ -14719,6 +14724,90 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       return sendStudioClassAiMessage(courseId, lessonId, promptText);
     }
 
+    var studioSefariaParshaExtractCache = {};
+    var SEFARIA_TORAH_PARSHA_REFS = [
+      { keys: ['bereshit', 'bereishit', 'bereishis', 'bereshis', 'בראשית'], title: 'Bereshit', ref: 'Genesis 1:1-6:8', firstChapter: 'Genesis.1' },
+      { keys: ['noach', 'noah', 'נח'], title: 'Noach', ref: 'Genesis 6:9-11:32', firstChapter: 'Genesis.6' },
+      { keys: ['lech lecha', 'lech-lecha', 'lekh lekha', 'לך לך'], title: 'Lech Lecha', ref: 'Genesis 12:1-17:27', firstChapter: 'Genesis.12' },
+      { keys: ['vayera', 'vayeira', 'וירא'], title: 'Vayera', ref: 'Genesis 18:1-22:24', firstChapter: 'Genesis.18' },
+      { keys: ['chayei sara', 'chayei sarah', 'chaye sarah', 'חיי שרה'], title: 'Chayei Sara', ref: 'Genesis 23:1-25:18', firstChapter: 'Genesis.23' },
+      { keys: ['toldot', 'toldos', 'toledot', 'תולדות'], title: 'Toldot', ref: 'Genesis 25:19-28:9', firstChapter: 'Genesis.25' },
+      { keys: ['vayetzei', 'vayetze', 'vayeitzei', 'ויצא'], title: 'Vayetzei', ref: 'Genesis 28:10-32:3', firstChapter: 'Genesis.28' },
+      { keys: ['vayishlach', 'vayishlah', 'וישלח'], title: 'Vayishlach', ref: 'Genesis 32:4-36:43', firstChapter: 'Genesis.32' },
+      { keys: ['vayeshev', 'vayeishev', 'וישב'], title: 'Vayeshev', ref: 'Genesis 37:1-40:23', firstChapter: 'Genesis.37' },
+      { keys: ['miketz', 'mikeitz', 'miqqetz', 'מקץ'], title: 'Miketz', ref: 'Genesis 41:1-44:17', firstChapter: 'Genesis.41' },
+      { keys: ['vayigash', 'ויגש'], title: 'Vayigash', ref: 'Genesis 44:18-47:27', firstChapter: 'Genesis.44' },
+      { keys: ['vayechi', 'ויחי'], title: 'Vayechi', ref: 'Genesis 47:28-50:26', firstChapter: 'Genesis.47' },
+      { keys: ['shemot', 'shemos', 'shmot', 'שמות'], title: 'Shemot', ref: 'Exodus 1:1-6:1', firstChapter: 'Exodus.1' },
+      { keys: ['vaera', 'vaeira', 'va-eira', 'וארא'], title: 'Vaera', ref: 'Exodus 6:2-9:35', firstChapter: 'Exodus.6' },
+      { keys: ['bo', 'בוא', 'בא'], title: 'Bo', ref: 'Exodus 10:1-13:16', firstChapter: 'Exodus.10' },
+      { keys: ['beshalach', 'beshallach', 'bshalach', 'בשלח'], title: 'Beshalach', ref: 'Exodus 13:17-17:16', firstChapter: 'Exodus.13' },
+      { keys: ['yitro', 'yisro', 'jethro', 'יתרו'], title: 'Yitro', ref: 'Exodus 18:1-20:23', firstChapter: 'Exodus.18' },
+      { keys: ['mishpatim', 'משפטים'], title: 'Mishpatim', ref: 'Exodus 21:1-24:18', firstChapter: 'Exodus.21' },
+      { keys: ['terumah', 'teruma', 'trumah', 'תרומה'], title: 'Terumah', ref: 'Exodus 25:1-27:19', firstChapter: 'Exodus.25' },
+      { keys: ['tetzaveh', 'tetzave', 'tzaveh', 'תצוה'], title: 'Tetzaveh', ref: 'Exodus 27:20-30:10', firstChapter: 'Exodus.27' },
+      { keys: ['ki tisa', 'ki tissa', 'ki sisa', 'כי תשא'], title: 'Ki Tisa', ref: 'Exodus 30:11-34:35', firstChapter: 'Exodus.30' },
+      { keys: ['vayakhel', 'vayakheil', 'ויקהל'], title: 'Vayakhel', ref: 'Exodus 35:1-38:20', firstChapter: 'Exodus.35' },
+      { keys: ['pekudei', 'pekude', 'pkudei', 'פקודי'], title: 'Pekudei', ref: 'Exodus 38:21-40:38', firstChapter: 'Exodus.38' }
+    ];
+
+    function matchSefariaParshaFromTitle(rawTitle) {
+      const clean = String(rawTitle || '')
+        .replace(/^(?:parshat|parashat|parsha|parashah|פרשת|lesson\s*\d+[:.\-\s]*)\s*/i, '')
+        .replace(/[’'`"]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+      if (!clean) return null;
+      for (const entry of SEFARIA_TORAH_PARSHA_REFS) {
+        if (entry.keys.some(k => clean === k || clean.startsWith(k + ' ') || clean.includes(' ' + k))) {
+          return entry;
+        }
+      }
+      return null;
+    }
+
+    async function resolveSefariaParshaContextForLesson(bp, lesson) {
+      const resources = String((bp && bp.allowed_resources) || '').toLowerCase();
+      if (!resources.includes('sefaria')) return '';
+      const rawTitle = (lesson && (lesson.title_en || lesson.title_he)) || '';
+      const match = matchSefariaParshaFromTitle(rawTitle);
+      if (!match) return '';
+      if (studioSefariaParshaExtractCache[match.ref]) return studioSefariaParshaExtractCache[match.ref];
+      if (typeof fetch !== 'function') return `SEFARIA REFERENCE: ${match.title} (${match.ref}) · https://www.sefaria.org/${match.ref.replace(/ /g, '.')}`;
+
+      let summary = `[SEFARIA.ORG PRIMARY SOURCE: Parshat ${match.title} (${match.ref})]\nReference URL: https://www.sefaria.org/${match.ref.replace(/ /g, '.')}\n`;
+      try {
+        const flattenText = (val) => Array.isArray(val) ? val.map(flattenText).filter(Boolean).join('\n') : String(val || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        const fetchJsonTimed = async (url) => {
+          const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+          const timer = ctrl ? setTimeout(() => ctrl.abort(), 4500) : null;
+          const resp = await fetch(url, ctrl ? { signal: ctrl.signal } : {}).catch(() => null);
+          if (timer) clearTimeout(timer);
+          if (resp && resp.ok) return await resp.json().catch(() => null);
+          return null;
+        };
+        const [torahJson, rashiJson] = await Promise.all([
+          fetchJsonTimed(`https://www.sefaria.org/api/texts/${encodeURIComponent(match.ref.replace(/ /g, '.'))}?context=0`),
+          fetchJsonTimed(`https://www.sefaria.org/api/texts/Rashi_on_${encodeURIComponent(match.firstChapter)}?context=0`)
+        ]);
+        if (torahJson && torahJson.text) {
+          const chapters = Array.isArray(torahJson.text[0]) ? torahJson.text : [torahJson.text];
+          const excerptLines = chapters.slice(0, 6).map((chArr, chIdx) => {
+            const verses = Array.isArray(chArr) ? chArr.slice(0, 8) : [chArr];
+            return `Chapter Section ${chIdx + 1}: ` + verses.map(v => flattenText(v)).filter(Boolean).join(' ');
+          }).join('\n');
+          if (excerptLines) summary += `\nTorah Text Excerpt:\n${excerptLines.slice(0, 5000)}\n`;
+        }
+        if (rashiJson && rashiJson.text) {
+          const rashiText = flattenText(rashiJson.text).slice(0, 2400);
+          if (rashiText) summary += `\nRashi Commentary Highlights (${match.firstChapter}):\n${rashiText}\n`;
+        }
+      } catch (_) {}
+      studioSefariaParshaExtractCache[match.ref] = summary;
+      return summary;
+    }
+
     async function resolveCourseAndMessageUrlsForAi(bp, userMsg, lesson) {
       const urlRegex = /https?:\/\/[^\s"'<>)\]]+/gi;
       const seen = new Set();
@@ -14734,7 +14823,8 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       const lessonSources = Array.isArray(lesson && lesson.ai_sources) ? lesson.ai_sources : [];
       lessonSources.forEach(s => { if (s && s.kind === 'link' && s.url) addUrl(s.url); });
 
-      if (urlsToResolve.length === 0) return { extraSourceText: '', blockedSites: [] };
+      const sefariaAutoContext = await resolveSefariaParshaContextForLesson(bp, lesson);
+      if (urlsToResolve.length === 0 && !sefariaAutoContext) return { extraSourceText: '', blockedSites: [] };
 
       const alreadyExtractedByUrl = {};
       lessonSources.forEach(s => {
@@ -14743,18 +14833,23 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
         }
       });
 
-      const fetchedEntries = await Promise.all(urlsToResolve.slice(0, 6).map(async (url) => {
-        if (alreadyExtractedByUrl[url]) return { url, ...alreadyExtractedByUrl[url], fromLessonSource: true };
-        const info = await fetchReadableUrlExtract(url);
-        return { url, ...info, fromLessonSource: false };
-      }));
+      const fetchedEntries = urlsToResolve.length > 0
+        ? await Promise.all(urlsToResolve.slice(0, 6).map(async (url) => {
+            if (alreadyExtractedByUrl[url]) return { url, ...alreadyExtractedByUrl[url], fromLessonSource: true };
+            const info = await fetchReadableUrlExtract(url);
+            return { url, ...info, fromLessonSource: false };
+          }))
+        : [];
 
       const extraChunks = [];
+      if (sefariaAutoContext) extraChunks.push(sefariaAutoContext);
       const blockedSites = [];
       fetchedEntries.forEach(entry => {
         if (entry.text && !entry.fromLessonSource) {
           extraChunks.push(`[Course / Prompt Link: ${entry.url}]\n${entry.text.slice(0, 7000)}`);
-        } else if (!entry.text && entry.blockedReason) {
+        } else if (!entry.text && entry.blockedReason && entry.blockedReason !== 'homepage_reference_only') {
+          blockedSites.push(entry.url);
+        } else if (!entry.text && entry.blockedReason === 'cloudflare_or_anti_bot') {
           blockedSites.push(entry.url);
         }
       });
@@ -14781,8 +14876,11 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       }
 
       const targetLessonId = lesson.id;
-      studioWorkspaceTabMap[targetLessonId] = 'ai';
-      studioClassAiOpenMap[targetLessonId] = true;
+      const isBatchMode = !!(metaOpts && metaOpts.batchMode);
+      if (!isBatchMode) {
+        studioWorkspaceTabMap[targetLessonId] = 'ai';
+        studioClassAiOpenMap[targetLessonId] = true;
+      }
       ensureStudioClassAiHistory(course, lesson);
       lesson.ai_chat_history.push({ role: 'user', text: userMsg });
       course.updated_at = new Date().toISOString();
@@ -14791,7 +14889,7 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
       if (overridePrompt === undefined) delete studioAiDraftMap[targetLessonId];
       studioClassAiThinkingMap[targetLessonId] = true;
       beginCourseAiLock(cId);
-      renderCourseStudio(cId, targetLessonId);
+      if (!isBatchMode) renderCourseStudio(cId, targetLessonId);
 
       const bp = course.blueprint || {};
       const bpSections = Array.isArray(bp.sections) ? bp.sections : [];
@@ -15189,17 +15287,129 @@ ${forceSchemaLines}`;
 
         liveLesson.updated_at = new Date().toISOString();
         liveCourse.updated_at = liveLesson.updated_at;
-        showToast(parsed._aiFailedError
-          ? 'AI busy or timed out — click Retry in chat'
-          : (updatedCount > 0 ? `Updated ${updatedCount} lesson section${updatedCount === 1 ? '' : 's'}!` : 'AI replied (no section changes requested)'));
+        if (!isBatchMode) {
+          showToast(parsed._aiFailedError
+            ? 'AI busy or timed out — click Retry in chat'
+            : (updatedCount > 0 ? `Updated ${updatedCount} lesson section${updatedCount === 1 ? '' : 's'}!` : 'AI replied (no section changes requested)'));
+        }
+        return {
+          ok: !parsed._aiFailedError && updatedCount > 0,
+          updatedCount,
+          rateLimited: !!(aiCallError && /quota|429|rate limit/i.test(String(aiCallError.message || '')))
+        };
       } finally {
         studioClassAiThinkingMap[targetLessonId] = false;
         endCourseAiLock(cId);
         lastLocalCourseEditTs = Date.now();
         saveCustomCoursesToStorage(true);
-        renderCourseStudio(cId, targetLessonId);
+        renderCourseStudio(cId, isBatchMode ? null : targetLessonId);
         renderCommandCenter();
       }
+    }
+
+    var studioBatchFillState = { active: false, courseId: '', total: 0, done: 0, failed: 0, currentLessonId: '', currentTitle: '', cancelled: false };
+
+    function isStudioLessonPopulated(course, lesson) {
+      if (!lesson || typeof lesson !== 'object') return false;
+      const bpSections = Array.isArray(course?.blueprint?.sections) ? course.blueprint.sections : [];
+      if (bpSections.length > 0) {
+        const secs = lesson.sections || {};
+        return bpSections.some(s => {
+          if (!s || s.type === 'booklet_pages') return false;
+          const raw = secs[s.id];
+          if (!raw) return false;
+          if (typeof parseStructuredSectionData === 'function') {
+            const d = parseStructuredSectionData(raw, s.type);
+            if (!d || typeof d !== 'object') return false;
+            if (Array.isArray(d.items) && d.items.length > 0) return true;
+            if (Array.isArray(d.steps) && d.steps.length > 0) return true;
+            if (Array.isArray(d.rows) && d.rows.length > 0) return true;
+            if (String(d.body || d.summary || d.setup || d.takeaway || d.quote || d.meaning || d.mindset || d.action || d.prompt || d.task || d.cue || d.notes || '').trim().length > 0) return true;
+            return false;
+          }
+          return String(raw).trim().length > 2;
+        });
+      }
+      return Boolean(
+        (lesson.hook_en && lesson.hook_en.trim()) ||
+        (Array.isArray(lesson.anchors_en) && lesson.anchors_en.length > 0)
+      );
+    }
+
+    function stopStudioBatchPopulate() {
+      if (studioBatchFillState.active) {
+        studioBatchFillState.cancelled = true;
+        showToast(APP_STATE.lang === 'he' ? 'עוצר לאחר השיעור הנוכחי...' : 'Stopping after current lesson finishes...');
+        renderCourseStudio(studioBatchFillState.courseId, null);
+      }
+    }
+
+    async function autoPopulateDraftLessonsWithAi(courseId, options = {}) {
+      const cId = courseId || APP_STATE.insideCourseId || APP_STATE.activeCourseId;
+      const course = (APP_STATE.customCourses || []).find(c => c.id === cId);
+      if (!course || !Array.isArray(course.lessons) || course.lessons.length === 0) return { processed: 0, failed: 0 };
+      if (studioBatchFillState.active) return { processed: 0, failed: 0 };
+
+      const draftLessons = course.lessons.filter(l => !isStudioLessonPopulated(course, l));
+      if (draftLessons.length === 0) {
+        showToast(APP_STATE.lang === 'he' ? 'כל השיעורים בקורס כבר מלאים!' : 'All lessons in this course are already populated!');
+        return { processed: 0, failed: 0 };
+      }
+
+      studioBatchFillState = {
+        active: true,
+        courseId: cId,
+        total: draftLessons.length,
+        done: 0,
+        failed: 0,
+        currentLessonId: '',
+        currentTitle: '',
+        cancelled: false
+      };
+      renderCourseStudio(cId, null);
+
+      const bp = course.blueprint || {};
+      const delayMs = typeof options.delayMs === 'number' ? options.delayMs : 700;
+      const batchPrompt = String(options.prompt || '').trim() ||
+        `Populate all sections completely and thoroughly for this exact lesson strictly following the course guidelines and approved resources. Provide rich, clear plain-text content for every section.`;
+
+      let processed = 0;
+      let failed = 0;
+      try {
+        for (const les of draftLessons) {
+          if (studioBatchFillState.cancelled) break;
+          studioBatchFillState.currentLessonId = les.id;
+          studioBatchFillState.currentTitle = les.title_en || les.title_he || `Lesson ${les.lesson_num || ''}`;
+          renderCourseStudio(cId, null);
+
+          const res = await sendStudioClassAiMessage(cId, les.id, batchPrompt, { batchMode: true });
+          if (res && res.ok) {
+            processed += 1;
+            studioBatchFillState.done = processed;
+          } else {
+            failed += 1;
+            studioBatchFillState.failed = failed;
+            if (res && res.rateLimited) {
+              showToast('Gemini rate limit reached — pausing cleanly. Click AI Fill Draft Lessons again in 30s to resume remaining lessons.');
+              break;
+            }
+          }
+
+          if (!studioBatchFillState.cancelled && delayMs > 0 && processed + failed < draftLessons.length) {
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+          }
+        }
+      } finally {
+        const stoppedEarly = studioBatchFillState.cancelled;
+        studioBatchFillState = { active: false, courseId: '', total: 0, done: 0, failed: 0, currentLessonId: '', currentTitle: '', cancelled: false };
+        renderCourseStudio(cId, null);
+        showToast(
+          stoppedEarly
+            ? `Stopped cleanly after populating ${processed} lesson(s).`
+            : `Populated ${processed} lesson(s)${failed ? ` (${failed} skipped/retry needed)` : ' successfully!'}`
+        );
+      }
+      return { processed, failed };
     }
 
     function toggleReaderElement(elId) {
@@ -15953,18 +16163,46 @@ ${forceSchemaLines}`;
       // ================================================================
       if (mode === 'list') {
         if (outerCourseHeader) outerCourseHeader.classList.remove('hidden');
+        const draftCount = lessons.filter(l => !isStudioLessonPopulated(activeCourse, l)).length;
+        const isBatchHere = !!(studioBatchFillState.active && studioBatchFillState.courseId === activeCourse.id);
+        const batchBarHtml = (isBatchHere || draftCount > 0) ? `
+          <div id="studio-batch-populate-bar" class="px-4 py-2.5 rounded-2xl border ${isBatchHere ? 'bg-indigo-950/60 border-indigo-400/50' : 'bg-slate-900/90 border-slate-800'} flex items-center justify-between gap-3 flex-wrap">
+            ${isBatchHere ? `
+              <div class="flex items-center gap-2.5 text-xs text-indigo-200 min-w-0">
+                <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-ping shrink-0"></span>
+                <span class="font-bold truncate">${isHe ? `ממלא שיעור ${studioBatchFillState.done + 1}/${studioBatchFillState.total}:` : `AI Filling ${studioBatchFillState.done + 1}/${studioBatchFillState.total}:`} ${escapeHtml(studioBatchFillState.currentTitle || '')}</span>
+              </div>
+              <button type="button" onclick="stopStudioBatchPopulate()" class="px-3 py-1 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-500/40 text-xs font-bold transition shrink-0">
+                ${isHe ? 'עצור' : 'Stop'}
+              </button>
+            ` : `
+              <div class="text-xs text-slate-300 flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
+                <span>${isHe ? `${draftCount} שיעורים עדיין ריקים` : `${draftCount} draft lesson${draftCount === 1 ? '' : 's'} ready to build`}</span>
+              </div>
+              <button type="button" id="btn-studio-batch-ai-fill" onclick="autoPopulateDraftLessonsWithAi('${activeCourse.id}')" class="px-3.5 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold transition shadow-sm flex items-center gap-1.5 shrink-0">
+                <i data-lucide="wand-2" class="w-3.5 h-3.5"></i>
+                <span>${isHe ? `מלא הכל עם AI (${draftCount})` : `✨ AI Fill Draft Lessons (${draftCount})`}</span>
+              </button>
+            `}
+          </div>
+        ` : '';
+
         container.innerHTML = `
           <div id="studio-lesson-list-screen" class="max-w-3xl mx-auto space-y-3">
-            <!-- Clean Vertical Syllabus List: Strictly Lesson Number + Large Lesson Name -->
+            ${batchBarHtml}
+            <!-- Clean Vertical Syllabus List: Lesson Number + Large Lesson Name -->
             <div id="studio-syllabus-list" class="space-y-2.5">
               ${lessons.map((les, idx) => {
                 const lTitle = isHe ? (les.title_he || les.title_en || 'Untitled Lesson') : (les.title_en || les.title_he || 'Untitled Lesson');
                 const lNum = les.lesson_num || (idx + 1);
+                const isPopulated = isStudioLessonPopulated(activeCourse, les);
+                const isRunningHere = isBatchHere && studioBatchFillState.currentLessonId === les.id;
                 return `
                   <div
                     id="studio-syllabus-item-${les.id}"
                     onclick="selectStudioClass('${les.id}')"
-                    class="px-5 py-4 rounded-2xl border border-slate-800/90 bg-slate-900/85 hover:border-indigo-500/50 hover:shadow-md transition cursor-pointer select-none group flex items-center justify-between gap-4 shadow-sm"
+                    class="px-5 py-4 rounded-2xl border ${isRunningHere ? 'border-indigo-400 bg-indigo-950/35' : 'border-slate-800/90 bg-slate-900/85'} hover:border-indigo-500/50 hover:shadow-md transition cursor-pointer select-none group flex items-center justify-between gap-4 shadow-sm"
                   >
                     <div class="flex items-center gap-4 min-w-0 flex-1">
                       <span class="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 font-mono text-sm font-extrabold flex items-center justify-center shrink-0">
@@ -15973,7 +16211,8 @@ ${forceSchemaLines}`;
                       <h5 id="studio-syllabus-title-${les.id}" dir="auto" class="text-base sm:text-xl font-extrabold text-white group-hover:text-indigo-400 transition leading-snug break-words">${escapeHtml(lTitle)}</h5>
                     </div>
 
-                    <div class="flex items-center gap-1 shrink-0">
+                    <div class="flex items-center gap-1.5 shrink-0">
+                      ${isRunningHere ? `<span class="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/40 text-[10px] font-bold animate-pulse">Building...</span>` : (isPopulated ? `<span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">✓ Ready</span>` : '')}
                       <button type="button" onclick="event.stopPropagation(); handleStudioMoveClass('${activeCourse.id}', '${les.id}', -1)" class="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 sm:opacity-0 sm:group-hover:opacity-100 transition" title="Move Up">
                         <i data-lucide="chevron-up" class="w-4 h-4"></i>
                       </button>
@@ -20961,7 +21200,7 @@ ${resourcesRaw}`;
             theme_style: document.getElementById('input-course-theme-style')?.value || 'glass_dark',
             density: document.getElementById('input-course-density')?.value || 'balanced',
             planned_lessons_count: Array.isArray(architectPlannedLessons) ? architectPlannedLessons.length : 0,
-            planned_lessons: Array.isArray(architectPlannedLessons) ? architectPlannedLessons.slice(0, 20) : [],
+            planned_lessons: Array.isArray(architectPlannedLessons) ? architectPlannedLessons.slice(0, 60).map(pl => ({ title: pl.title, pdf_url: pl.pdfUrl || '', pages_count: pl.pagesCount || 0 })) : [],
             sections: currentBlueprintSections
           });
 
@@ -20998,12 +21237,11 @@ Current Live Blueprint State:
 ${currentStateJson}
 
 Critical Mentoring & Conversation Rules:
-1. READ THE ENTIRE CONVERSATION CAREFULLY: Remember every detail the educator already gave you (age, student background, subject, session duration, booklets, tests, tutor notes, URLs). NEVER re-ask a question the educator already answered!
-2. PROACTIVE LINK & PDF WORKBOOK DISCOVERY:
-   - Whenever the educator wants a course based on existing booklets, chapters, web pages, worksheets, or PDFs:
-     * Use the "booklet_pages" block type for interactive sub-subject / page-by-page checklists where clicking any row opens that exact page. Keep section count lean and matching ONLY what the teacher wants (e.g., "booklet_pages", plus "teacher_cue" if they want private tutor notes before class, plus "quiz" if they want an end-of-lesson/booklet test).
-     * If DISCOVERED PDF BOOKLETS or lesson items appear in the scanned context above, AUTOMATICALLY populate "planned_lessons" with every discovered booklet/lesson, setting exact "title", exact "pdf_url", and exact "pages_count" (so when they click Create Course & Open Studio, every lesson and its page rows are created automatically!).
-     * If the educator mentions booklets, books, or website material WITHOUT having shared links yet, warmly ask them right in "assistant_reply" to paste the website link or PDF links so you can load everything for them automatically!
+1. READ THE ENTIRE CONVERSATION CAREFULLY: Remember every detail the educator already gave you (age, student background, subject, session duration, booklets, tests, tutor notes, URLs, explicit opt-outs like "no Aliyot" or "no quiz"). NEVER re-ask a question the educator already answered!
+2. PROACTIVE LINK, PDF & FULL SYLLABUS DISCOVERY:
+   - ONLY use the "booklet_pages" block type when the educator wants interactive page-by-page checklists or sub-subjects per lesson. If the educator explicitly says each unit is 1 standalone lesson without sub-subjects (such as "no Aliyot" or "single lesson per Parasha"), do NOT add "booklet_pages" — strictly honor their exact requested sections!
+   - When the educator names a standard finite book/syllabus range (for example, all 23 Parshiot of Bereishit & Shemot, or all discovered PDF booklets from scanned links), AUTOMATICALLY populate ALL items in order inside "planned_lessons" (with clean concise titles; include "pdf_url" and "pages_count" only when PDFs apply) so clicking Create Course builds the entire syllabus immediately.
+   - If the educator mentions PDFs or workbooks WITHOUT having shared links yet, warmly ask them right in "assistant_reply" to paste the links so you can load them automatically!
 3. ENGAGE LIKE A WORLD-CLASS EDUCATOR: In "assistant_reply", respond clearly and concisely. Explain what you updated in Course Preview (including any lessons & PDF links you loaded!), and ask only 1 or 2 genuinely helpful questions if anything is missing. Write cleanly without markdown clutter.
 4. INCREMENTAL UPDATES & STRICT NAMING:
    - STRICT COURSE TITLE RULE: Keep whatever course name the educator entered verbatim! NEVER invent fancy subtitles, colons, marketing phrases, or extra words (such as "Journey Through...", "Foundations:", "Roots & Relevance", "Mastery", or "Insights"). If "course_title" in Current Live Blueprint State is non-empty, return that exact string unchanged in "course_title_en". If empty, use the teacher's exact short subject name verbatim.
@@ -21154,19 +21392,35 @@ Return STRICT JSON ONLY:
             suggested_icon: '📖',
             sections: BLUEPRINT_PRESETS.reading_fluency.map(s => ({ ...s, ai_rule: 'Clear phonetic reading focus' }))
           };
-        } else if (/\b(chumash|torah|parsha|חומש)\b/i.test(combinedLower)) {
+        } else if (/\b(chumash|torah|parsha|parashot|parshiot|bereshit|bereishit|shemot|חומש|פרשיות)\b/i.test(combinedLower)) {
+          const wantsBereshit = /\b(bereshit|bereishit|bereishis|genesis|בראשית)\b/i.test(combinedLower);
+          const wantsShemot = /\b(shemot|shemos|exodus|שמות)\b/i.test(combinedLower);
+          const matchingParshiot = [];
+          if ((wantsBereshit || (!wantsBereshit && !wantsShemot)) && Array.isArray(SEFARIA_TORAH_PARSHA_REFS)) {
+            SEFARIA_TORAH_PARSHA_REFS.slice(0, 12).forEach(p => matchingParshiot.push({ title: `Parshat ${p.title}` }));
+          }
+          if ((wantsShemot || (!wantsBereshit && !wantsShemot)) && Array.isArray(SEFARIA_TORAH_PARSHA_REFS)) {
+            SEFARIA_TORAH_PARSHA_REFS.slice(12, 23).forEach(p => matchingParshiot.push({ title: `Parshat ${p.title}` }));
+          }
+          const plannedLessonsOut = (Array.isArray(architectPlannedLessons) && architectPlannedLessons.length > 0)
+            ? architectPlannedLessons
+            : matchingParshiot;
+          const strictRes = /\b(only|strict|exclusively|just)\b/i.test(combinedLower) || /sefaria\.org|chabad\.org/i.test(combinedLower);
           parsed = {
-            assistant_reply: "I put together a Chumash blueprint featuring Story Flow, Core Ideas, Rashi / Midrash Insight, and Real-Life Lesson. How many minutes do you want to spend reviewing before teaching?",
+            assistant_reply: `I set up your ${plannedLessonsOut.length || 23} Parasha lessons across ${wantsBereshit && !wantsShemot ? 'Bereishit' : (!wantsBereshit && wantsShemot ? 'Shemot' : 'Bereishit & Shemot')} with your 4 collapsible sections: Parasha Stories & Key Ideas, Important Commentary & Lesson, Questions & Answers, and Practical Takeaways for Ages 12-13. Click Create Course & Open Studio to launch all ${plannedLessonsOut.length || 23} lessons!`,
             course_title_en: customTitle,
-            student_profile: mergedProfile || '12-13 year old students',
-            guidelines: '5-minute review, 15-minute lecture, plain everyday English',
+            student_profile: mergedProfile || '12-13 year old students (pre-class tutor prep)',
+            guidelines: 'Thorough pre-class teacher review covering every important story and core idea, practical age 12-13 lessons, plain clear English',
+            allowed_resources: architectAllowedResources || (/sefaria|chabad/i.test(combinedLower) ? 'https://www.sefaria.org\nhttps://www.chabad.org' : ''),
+            strict_resources_only: strictRes,
             suggested_color: 'amber',
             suggested_icon: '📜',
+            planned_lessons: plannedLessonsOut,
             sections: [
-              { type: 'text', name: 'Parsha Story Flow', ai_rule: 'Clear summary of key plot events' },
-              { type: 'list', name: 'Main Ideas & Bullet Points', ai_rule: '5-7 crisp talking points for a 15-min lecture' },
-              { type: 'example', name: 'Interesting Rashi or Midrash Gem', ai_rule: '1 memorable commentary explained simply' },
-              { type: 'reflection', name: 'Day-to-Day Life Lesson', ai_rule: 'Practical takeaway for a teen today' }
+              { type: 'list', name: 'Parasha Stories & Core Ideas', ai_rule: 'Chronological walkthrough of EVERY important story, event, mitzvah, and core idea in the Parasha for thorough pre-class tutor review' },
+              { type: 'example', name: 'Important Commentary & Lesson', ai_rule: 'Highlight 1 to 2 interesting, relevant commentaries (Rashi / Chabad insight) that teach a clear meaningful lesson' },
+              { type: 'list', name: 'Questions & Answers', ai_rule: '4 to 6 interesting questions and clear answers right underneath, including questions a curious 12-13 year old student would ask' },
+              { type: 'reflection', name: 'Practical Lessons (Ages 12-13)', ai_rule: 'Concrete, practical day-to-day lessons a 12-13 year old student can apply in real life' }
             ]
           };
         } else {
