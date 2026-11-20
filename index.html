@@ -4912,6 +4912,40 @@
   </div>
 
   <!-- ============================================== -->
+  <!-- MODAL: COPY CUSTOM GOALS TO OTHER STUDENTS     -->
+  <!-- ============================================== -->
+  <div id="modal-copy-goals-to-students" class="fixed inset-0 z-[85] flex items-center justify-center bg-black/80 p-3 sm:p-5 hidden backdrop-blur-sm" onclick="if(event.target === this) closeCopyGoalsToStudentsModal();">
+    <div class="bg-slate-950 border border-indigo-500/40 rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-900/80">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-400/35 text-indigo-300 flex items-center justify-center shrink-0">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <h3 id="modal-copy-goals-title" class="text-sm sm:text-base font-extrabold text-white truncate">Copy Custom Goals to Students</h3>
+            <p id="modal-copy-goals-subtitle" class="text-[11px] text-slate-400 truncate">Copies PDFs, audio recordings, pictures &amp; goal titles to selected students</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCopyGoalsToStudentsModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition">✕</button>
+      </div>
+      <div id="modal-copy-goals-body" class="flex-1 min-h-0 overflow-y-auto p-5 space-y-5"></div>
+      <div class="px-5 py-3.5 border-t border-slate-800 bg-slate-900/70 flex items-center justify-between gap-3 flex-wrap">
+        <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer select-none">
+          <input type="checkbox" id="chk-copy-goals-skip-dups" checked onchange="toggleCopyGoalSkipDups(this.checked)" class="rounded border-slate-700 text-indigo-500 bg-slate-950 w-3.5 h-3.5" />
+          <span id="lbl-copy-goals-skip-dups">Skip goals already on target student</span>
+        </label>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeCopyGoalsToStudentsModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition">Cancel</button>
+          <button type="button" id="btn-submit-copy-goals" onclick="submitCopyGoalsToStudentsModal()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow flex items-center gap-1.5 transition">
+            <i data-lucide="copy-check" class="w-3.5 h-3.5"></i>
+            <span id="btn-submit-copy-goals-label">Copy Goals</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
   <!-- MODAL: SCHOOL & TEAM WORKSPACE                 -->
   <!-- ============================================== -->
   <div id="modal-school-workspace" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-5 hidden backdrop-blur-sm">
@@ -6976,6 +7010,336 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
       if (APP_STATE.activeStudentDrawerId === studentId) renderStudentDrawer(studentId, true);
       showToast(APP_STATE.lang === 'he' ? 'שם היעד עודכן' : 'Goal renamed');
+      return true;
+    }
+
+    function cloneCustomGoalForStudent(sourceGoal) {
+      if (!sourceGoal || typeof sourceGoal !== 'object') return null;
+      const stamp = Date.now();
+      const mkSuffix = () => Math.random().toString(36).substr(2, 5);
+      const cloneMediaList = (arr, prefix) => (Array.isArray(arr) ? arr : []).map(item => ({
+        ...JSON.parse(JSON.stringify(item)),
+        id: `${prefix}_${stamp}_${mkSuffix()}`
+      }));
+      return {
+        id: `goal_${stamp}_${mkSuffix()}`,
+        title: String(sourceGoal.title || 'Custom Learning Goal'),
+        completed: false,
+        images: cloneMediaList(sourceGoal.images, 'img'),
+        pdfs: cloneMediaList(sourceGoal.pdfs, 'pdf'),
+        recordings: cloneMediaList(sourceGoal.recordings, 'rec')
+      };
+    }
+
+    function matchStudentByIdOrName(query) {
+      const q = String(query || '').trim();
+      if (!q) return null;
+      const list = APP_STATE.students || [];
+      const qLower = q.toLowerCase();
+      return (
+        list.find(s => s.id === q) ||
+        list.find(s => String(s.name || '').trim().toLowerCase() === qLower) ||
+        list.find(s => String(s.name || '').trim().toLowerCase().includes(qLower)) ||
+        null
+      );
+    }
+
+    function matchGoalByIdOrTitle(goalList, query) {
+      const q = String(query || '').trim().toLowerCase();
+      if (!q || !Array.isArray(goalList)) return null;
+      return (
+        goalList.find(g => String(g.id || '').toLowerCase() === q) ||
+        goalList.find(g => String(g.title || '').trim().toLowerCase() === q) ||
+        goalList.find(g => {
+          const gTitle = String(g.title || '').trim().toLowerCase();
+          if (gTitle && gTitle.includes(q)) return true;
+          const mediaNames = [
+            ...(g.pdfs || []).map(x => String(x.title || '').toLowerCase()),
+            ...(g.recordings || []).map(x => String(x.title || '').toLowerCase()),
+            ...(g.images || []).map(x => String(x.title || '').toLowerCase())
+          ];
+          return mediaNames.some(m => m && m.includes(q));
+        }) ||
+        null
+      );
+    }
+
+    function copyCustomGoalsBetweenStudents(options = {}) {
+      const isHe = APP_STATE.lang === 'he';
+      const sourceStu = matchStudentByIdOrName(options.sourceStudentIdOrName || options.sourceStudent);
+      if (!sourceStu) {
+        return { success: false, error: isHe ? 'תלמיד המקור לא נמצא' : 'Source student not found' };
+      }
+      ensureStudentSkills(sourceStu);
+      const sourceGoals = Array.isArray(sourceStu.skills.customGoals) ? sourceStu.skills.customGoals : [];
+      if (!sourceGoals.length) {
+        return { success: false, error: isHe ? `לתלמיד ${sourceStu.name} אין יעדים אישיים להעתקה.` : `${sourceStu.name} has no custom goals to copy.` };
+      }
+
+      const includeRefs = Array.isArray(options.includeGoalIdsOrTitles) ? options.includeGoalIdsOrTitles.filter(Boolean) : [];
+      const excludeRefs = Array.isArray(options.excludeGoalIdsOrTitles) ? options.excludeGoalIdsOrTitles.filter(Boolean) : [];
+
+      let selectedGoals = includeRefs.length > 0
+        ? sourceGoals.filter(g => includeRefs.some(ref => matchGoalByIdOrTitle([g], ref)))
+        : sourceGoals.slice();
+
+      if (excludeRefs.length > 0) {
+        selectedGoals = selectedGoals.filter(g => !excludeRefs.some(ref => matchGoalByIdOrTitle([g], ref)));
+      }
+      if (!selectedGoals.length) {
+        return { success: false, error: isHe ? 'לא נבחרו יעדים להעתקה.' : 'No matching goals selected to copy.' };
+      }
+
+      const excludeStuRefs = Array.isArray(options.excludeStudentIdsOrNames) ? options.excludeStudentIdsOrNames.filter(Boolean) : [];
+      const excludedIds = new Set([sourceStu.id]);
+      excludeStuRefs.forEach(ref => {
+        const hit = matchStudentByIdOrName(ref);
+        if (hit) excludedIds.add(hit.id);
+      });
+
+      const targetRefs = Array.isArray(options.targetStudentIdsOrNames) ? options.targetStudentIdsOrNames.filter(Boolean) : [];
+      const wantsAll = targetRefs.length === 0 || targetRefs.some(r => /^(all|\*|everyone|all other students)$/i.test(String(r).trim()));
+      let targetStudents = [];
+      if (wantsAll) {
+        targetStudents = (APP_STATE.students || []).filter(s => s && !excludedIds.has(s.id));
+      } else {
+        const seenIds = new Set();
+        targetRefs.forEach(ref => {
+          const hit = matchStudentByIdOrName(ref);
+          if (hit && !excludedIds.has(hit.id) && !seenIds.has(hit.id)) {
+            seenIds.add(hit.id);
+            targetStudents.push(hit);
+          }
+        });
+      }
+
+      if (!targetStudents.length) {
+        return { success: false, error: isHe ? 'לא נבחרו תלמידי יעד.' : 'No target students selected.' };
+      }
+
+      const skipDuplicates = options.skipDuplicates !== false;
+      let totalGoalsAdded = 0;
+      let skippedDuplicatesCount = 0;
+      const updatedStudentNames = [];
+
+      targetStudents.forEach(targetStu => {
+        ensureStudentSkills(targetStu);
+        if (!Array.isArray(targetStu.skills.customGoals)) targetStu.skills.customGoals = [];
+        let addedForThisStu = 0;
+        selectedGoals.forEach(srcGoal => {
+          const srcTitleLower = String(srcGoal.title || '').trim().toLowerCase();
+          if (skipDuplicates && srcTitleLower) {
+            const exists = targetStu.skills.customGoals.some(ex => String(ex.title || '').trim().toLowerCase() === srcTitleLower);
+            if (exists) {
+              skippedDuplicatesCount += 1;
+              return;
+            }
+          }
+          const cloned = cloneCustomGoalForStudent(srcGoal);
+          if (cloned) {
+            targetStu.skills.customGoals.push(cloned);
+            totalGoalsAdded += 1;
+            addedForThisStu += 1;
+          }
+        });
+        if (addedForThisStu > 0) {
+          updatedStudentNames.push(targetStu.name);
+          if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(targetStu);
+        }
+      });
+
+      saveStudentsToStorage(true);
+      if (typeof renderStudents === 'function') renderStudents();
+      if (APP_STATE.activeStudentDrawerId && typeof renderStudentDrawer === 'function') {
+        renderStudentDrawer(APP_STATE.activeStudentDrawerId, true);
+      }
+
+      const msg = isHe
+        ? `הועתקו ${selectedGoals.length} יעדים (כולל קבצים והקלטות) אל ${updatedStudentNames.length} תלמידים.`
+        : `Copied ${selectedGoals.length} goal(s) (with attached PDFs, recordings & photos) to ${updatedStudentNames.length} student(s).`;
+      return {
+        success: true,
+        sourceStudentName: sourceStu.name,
+        copiedGoalsCount: selectedGoals.length,
+        totalGoalsAdded,
+        skippedDuplicatesCount,
+        targetStudentsUpdated: updatedStudentNames,
+        message: msg
+      };
+    }
+
+    let copyGoalsModalState = { sourceStudentId: '', selectedGoalIds: [], selectedStudentIds: [], skipDuplicates: true };
+
+    function openCopyGoalsToStudentsModal(sourceStudentId) {
+      const sourceStu = (APP_STATE.students || []).find(s => s.id === sourceStudentId);
+      if (!sourceStu) return false;
+      ensureStudentSkills(sourceStu);
+      const sourceGoals = Array.isArray(sourceStu.skills.customGoals) ? sourceStu.skills.customGoals : [];
+      const otherStudents = (APP_STATE.students || []).filter(s => s && s.id !== sourceStudentId);
+      const isHe = APP_STATE.lang === 'he';
+      if (!sourceGoals.length) {
+        showToast(isHe ? 'אין יעדים להעתקה עדיין' : 'Add at least one goal first before copying');
+        return false;
+      }
+      if (!otherStudents.length) {
+        showToast(isHe ? 'אין תלמידים נוספים ברשימה עדיין' : 'Add at least one other student first');
+        return false;
+      }
+      copyGoalsModalState = {
+        sourceStudentId,
+        selectedGoalIds: sourceGoals.map(g => g.id),
+        selectedStudentIds: [],
+        skipDuplicates: true
+      };
+      renderCopyGoalsModalContent();
+      const modal = document.getElementById('modal-copy-goals-to-students');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+      return true;
+    }
+
+    function closeCopyGoalsToStudentsModal() {
+      const modal = document.getElementById('modal-copy-goals-to-students');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function toggleCopyGoalSelection(goalId) {
+      const set = new Set(copyGoalsModalState.selectedGoalIds || []);
+      if (set.has(goalId)) set.delete(goalId);
+      else set.add(goalId);
+      copyGoalsModalState.selectedGoalIds = Array.from(set);
+      renderCopyGoalsModalContent();
+    }
+
+    function toggleCopyGoalAllGoals(selectAll) {
+      const sourceStu = (APP_STATE.students || []).find(s => s.id === copyGoalsModalState.sourceStudentId);
+      const goals = sourceStu && sourceStu.skills && Array.isArray(sourceStu.skills.customGoals) ? sourceStu.skills.customGoals : [];
+      copyGoalsModalState.selectedGoalIds = selectAll ? goals.map(g => g.id) : [];
+      renderCopyGoalsModalContent();
+    }
+
+    function toggleCopyGoalStudentSelection(studentId) {
+      const set = new Set(copyGoalsModalState.selectedStudentIds || []);
+      if (set.has(studentId)) set.delete(studentId);
+      else set.add(studentId);
+      copyGoalsModalState.selectedStudentIds = Array.from(set);
+      renderCopyGoalsModalContent();
+    }
+
+    function toggleCopyGoalAllStudents(selectAll) {
+      const others = (APP_STATE.students || []).filter(s => s && s.id !== copyGoalsModalState.sourceStudentId);
+      copyGoalsModalState.selectedStudentIds = selectAll ? others.map(s => s.id) : [];
+      renderCopyGoalsModalContent();
+    }
+
+    function toggleCopyGoalSkipDups(checked) {
+      copyGoalsModalState.skipDuplicates = !!checked;
+    }
+
+    function renderCopyGoalsModalContent() {
+      const sourceStu = (APP_STATE.students || []).find(s => s.id === copyGoalsModalState.sourceStudentId);
+      if (!sourceStu) return;
+      ensureStudentSkills(sourceStu);
+      const isHe = APP_STATE.lang === 'he';
+      const goals = Array.isArray(sourceStu.skills.customGoals) ? sourceStu.skills.customGoals : [];
+      const otherStudents = (APP_STATE.students || []).filter(s => s && s.id !== sourceStu.id);
+      const selGoalSet = new Set(copyGoalsModalState.selectedGoalIds || []);
+      const selStuSet = new Set(copyGoalsModalState.selectedStudentIds || []);
+
+      const titleEl = document.getElementById('modal-copy-goals-title');
+      const subEl = document.getElementById('modal-copy-goals-subtitle');
+      const skipLbl = document.getElementById('lbl-copy-goals-skip-dups');
+      const submitBtnLabel = document.getElementById('btn-submit-copy-goals-label');
+      if (titleEl) titleEl.textContent = isHe ? `העתק יעדים של ${sourceStu.name}` : `Copy Goals from ${sourceStu.name}`;
+      if (subEl) subEl.textContent = isHe ? 'מעתיק כותרות, קבצי PDF, הקלטות ותמונות לתלמידים שתבחר' : 'Copies goals with attached PDFs, recordings & photos to selected students';
+      if (skipLbl) skipLbl.textContent = isHe ? 'דלג על יעדים שכבר קיימים אצל התלמיד' : 'Skip goals with the same name already on a student';
+      if (submitBtnLabel) {
+        submitBtnLabel.textContent = isHe
+          ? `העתק ${selGoalSet.size} יעדים ל-${selStuSet.size} תלמידים`
+          : `Copy ${selGoalSet.size} Goal${selGoalSet.size === 1 ? '' : 's'} to ${selStuSet.size} Student${selStuSet.size === 1 ? '' : 's'}`;
+      }
+
+      const bodyEl = document.getElementById('modal-copy-goals-body');
+      if (!bodyEl) return;
+      bodyEl.innerHTML = `
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-emerald-300">${isHe ? `1. בחר יעדים להעתקה (${selGoalSet.size}/${goals.length})` : `1. Choose Goals to Copy (${selGoalSet.size}/${goals.length})`}</span>
+            <div class="flex items-center gap-1.5 text-[11px]">
+              <button type="button" onclick="toggleCopyGoalAllGoals(true)" class="px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-emerald-300 border border-slate-700 font-semibold">${isHe ? 'בחר הכל' : 'Select All'}</button>
+              <button type="button" onclick="toggleCopyGoalAllGoals(false)" class="px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700">${isHe ? 'נקה' : 'Clear'}</button>
+            </div>
+          </div>
+          <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+            ${goals.map(g => {
+              const checked = selGoalSet.has(g.id);
+              const pdfCount = (g.pdfs || []).length;
+              const recCount = (g.recordings || []).length;
+              const imgCount = (g.images || []).length;
+              const displayTitle = String(g.title || '').trim() || (g.pdfs?.[0]?.title) || (g.recordings?.[0]?.title) || (g.images?.[0]?.title) || 'Custom Goal';
+              return `
+                <label class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl border cursor-pointer transition text-xs ${checked ? 'bg-emerald-500/10 border-emerald-500/40 text-white' : 'bg-slate-900/70 border-slate-800 text-slate-400'}">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleCopyGoalSelection('${escapeHtml(g.id)}')" class="rounded border-slate-700 text-emerald-500 bg-slate-950 w-3.5 h-3.5 shrink-0" />
+                    <span dir="auto" class="truncate font-medium">${escapeHtml(displayTitle)}</span>
+                  </div>
+                  <div class="flex items-center gap-1 shrink-0 text-[10px]">
+                    ${pdfCount ? `<span class="px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/30">${pdfCount} PDF</span>` : ''}
+                    ${recCount ? `<span class="px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 border border-violet-500/30">${recCount} Audio</span>` : ''}
+                    ${imgCount ? `<span class="px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">${imgCount} Pic</span>` : ''}
+                  </div>
+                </label>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <div class="space-y-2.5 pt-2 border-t border-slate-800/80">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-300">${isHe ? `2. בחר תלמידים (${selStuSet.size}/${otherStudents.length})` : `2. Choose Students (${selStuSet.size}/${otherStudents.length})`}</span>
+            <div class="flex items-center gap-1.5 text-[11px]">
+              <button type="button" id="btn-copy-goals-select-all-students" onclick="toggleCopyGoalAllStudents(true)" class="px-2 py-0.5 rounded bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/35 font-semibold">${isHe ? 'בחר את כל התלמידים' : 'Select All Students'}</button>
+              <button type="button" onclick="toggleCopyGoalAllStudents(false)" class="px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700">${isHe ? 'נקה' : 'Clear'}</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-1">
+            ${otherStudents.map(st => {
+              const checked = selStuSet.has(st.id);
+              return `
+                <label class="flex items-center gap-2.5 px-3 py-2 rounded-xl border cursor-pointer transition text-xs ${checked ? 'bg-indigo-500/15 border-indigo-400/45 text-white' : 'bg-slate-900/70 border-slate-800 text-slate-300'}">
+                  <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleCopyGoalStudentSelection('${escapeHtml(st.id)}')" class="rounded border-slate-700 text-indigo-500 bg-slate-950 w-3.5 h-3.5 shrink-0" />
+                  <span dir="auto" class="truncate font-semibold">${escapeHtml(st.name || 'Student')}</span>
+                </label>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    }
+
+    function submitCopyGoalsToStudentsModal() {
+      const isHe = APP_STATE.lang === 'he';
+      if (!(copyGoalsModalState.selectedGoalIds || []).length) {
+        showToast(isHe ? 'בחר לפחות יעד אחד להעתקה' : 'Please select at least one goal to copy');
+        return false;
+      }
+      if (!(copyGoalsModalState.selectedStudentIds || []).length) {
+        showToast(isHe ? 'בחר לפחות תלמיד אחד' : 'Please select at least one student');
+        return false;
+      }
+      const res = copyCustomGoalsBetweenStudents({
+        sourceStudentIdOrName: copyGoalsModalState.sourceStudentId,
+        targetStudentIdsOrNames: copyGoalsModalState.selectedStudentIds,
+        includeGoalIdsOrTitles: copyGoalsModalState.selectedGoalIds,
+        skipDuplicates: copyGoalsModalState.skipDuplicates
+      });
+      if (!res || !res.success) {
+        showToast((res && res.error) || 'Could not copy goals');
+        return false;
+      }
+      closeCopyGoalsToStudentsModal();
+      showToast(res.message);
       return true;
     }
 
@@ -27707,7 +28071,7 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
 
         const cardCustomGoalsHtml = `
           <div id="drawer-custom-goals-card" ondragover="handleCustomGoalDragOver(event, this)" ondragleave="handleCustomGoalDragLeave(event, this)" ondrop="handleCustomGoalDrop(event, '${student.id}', '__draft__', this)" class="p-4 rounded-2xl bg-slate-950/65 border border-slate-800/90 space-y-3 transition">
-            <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
               <span class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
                 <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
                 <span>${t.customGoalsTitle}</span>
@@ -27715,6 +28079,12 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
                   ${goals.filter(g => g.completed).length}/${goals.length}
                 </span>
               </span>
+              ${(goals.length > 0 && (APP_STATE.students || []).length > 1) ? `
+                <button type="button" id="btn-copy-goals-to-students" onclick="openCopyGoalsToStudentsModal('${student.id}')" class="px-2.5 py-1 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 hover:text-white border border-indigo-400/35 text-[11px] font-bold flex items-center gap-1.5 transition" title="${isHe ? 'העתק יעדים לתלמידים נוספים' : 'Copy goals to other students'}">
+                  <i data-lucide="copy" class="w-3 h-3"></i>
+                  <span>${isHe ? 'העתק לתלמידים' : 'Copy to Students'}</span>
+                </button>
+              ` : ''}
             </div>
 
             <div class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
@@ -31667,6 +32037,38 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
               },
               required: ["studentNameOrId"]
             }
+          },
+          {
+            name: "copy_student_goals",
+            description: "Copy custom student goals INCLUDING all attached PDFs, voice recordings, and pictures directly from one source student to specific students or all other students (supports excluding specific goals or specific students).",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                sourceStudent: { type: "STRING", description: "Source student name or ID whose custom goals should be copied" },
+                targetStudents: {
+                  type: "ARRAY",
+                  items: { type: "STRING" },
+                  description: "Array of target student names or IDs, or ['ALL'] / omit to copy to all other students"
+                },
+                excludeStudents: {
+                  type: "ARRAY",
+                  items: { type: "STRING" },
+                  description: "Optional list of student names or IDs to skip when copying to all students"
+                },
+                includeGoals: {
+                  type: "ARRAY",
+                  items: { type: "STRING" },
+                  description: "Optional list of goal titles or IDs to copy (omit to copy all goals except excluded ones)"
+                },
+                excludeGoals: {
+                  type: "ARRAY",
+                  items: { type: "STRING" },
+                  description: "Optional list of goal titles or IDs to exclude (e.g. skip one specific goal while copying the rest)"
+                },
+                skipDuplicates: { type: "BOOLEAN", description: "Default true; skip copying a goal onto a student who already has one with the same title" }
+              },
+              required: ["sourceStudent"]
+            }
           }
         ]
       }];
@@ -31973,6 +32375,7 @@ Portal Capabilities & Your Authorized Tools:
 9. create_lesson: Create a full pedagogical lesson matching the visual studio (engaging hook, structured knowledge anchors with bold keywords, deep insight nugget, real-world application, discussion spark) and add it to an existing or new course.
 10. create_course: Create a new class/course subject container in the Study Hub.
 11. create_full_class: Create an entire new course with a complete multi-lesson curriculum in one go.
+12. copy_student_goals: Copy a student's custom goals (INCLUDING all attached PDFs, recordings, and pictures) to one, multiple, or all other students in one step, optionally excluding specific goals or students. NEVER ask the user to paste binary files or copy PDFs/recordings manually — just call copy_student_goals directly!
 
 Current Database State:
 ${JSON.stringify(portalContext)}
@@ -32576,6 +32979,17 @@ Guidelines:
         return getPortalContextData();
       }
 
+      if (name === 'copy_student_goals') {
+        return copyCustomGoalsBetweenStudents({
+          sourceStudentIdOrName: args.sourceStudent || args.sourceStudentNameOrId,
+          targetStudentIdsOrNames: Array.isArray(args.targetStudents) ? args.targetStudents : [],
+          excludeStudentIdsOrNames: Array.isArray(args.excludeStudents) ? args.excludeStudents : [],
+          includeGoalIdsOrTitles: Array.isArray(args.includeGoals) ? args.includeGoals : [],
+          excludeGoalIdsOrTitles: Array.isArray(args.excludeGoals) ? args.excludeGoals : [],
+          skipDuplicates: args.skipDuplicates !== false
+        });
+      }
+
       if (name === 'create_course') {
         const courseId = 'course_' + Date.now();
         const titleEn = (args.title_en || 'New Course').trim();
@@ -32987,6 +33401,14 @@ Guidelines:
           notes: cleanNotes,
           completedTopicsCount: topicsCompleted.length,
           completedParshiotCount: parshiotCompleted.length,
+          customGoals: ((s.skills && Array.isArray(s.skills.customGoals)) ? s.skills.customGoals : []).map(g => ({
+            id: g.id,
+            title: g.title || '',
+            completed: !!g.completed,
+            pdfsCount: (g.pdfs || []).length,
+            recordingsCount: (g.recordings || []).length,
+            imagesCount: (g.images || []).length
+          })),
           scheduledLessons: combinedLessons
         };
       });

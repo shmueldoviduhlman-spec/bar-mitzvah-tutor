@@ -6014,6 +6014,115 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   );
   sandbox.pendingGoalDraftMap[g59StudentB.id] = { title: '', images: [], pdfs: [], recordings: [] };
 
+  // =========================================================================
+  // GATE 63: Copy Custom Goals (with PDFs, Recordings, Photos) + AI Tool Support
+  // =========================================================================
+  console.log('\n[Gate 63] Copy Custom Goals to Students Modal & AI copy_student_goals Tool...');
+  const g63SourceStu = {
+    id: 'stu_g63_src',
+    name: 'Eliyahu Source',
+    skills: {
+      customGoals: [
+        {
+          id: 'goal_g63_share_1',
+          title: 'Shabbat Kiddush Practice',
+          completed: true,
+          pdfs: [{ id: 'pdf_s1', title: 'Kiddush Sheet', url: 'idb://pdf_shared_demo', pageNum: 1 }],
+          recordings: [{ id: 'rec_s1', title: 'Kiddush Recording', url: 'data:audio/webm;base64,GkXf', type: 'audio' }],
+          images: [{ id: 'img_s1', title: 'Siddur Page Pic', url: 'data:image/png;base64,iVBORw==' }]
+        },
+        {
+          id: 'goal_g63_exclude_one',
+          title: 'Eliyahu Personal Speech Draft',
+          completed: false,
+          pdfs: [{ id: 'pdf_s2', title: 'Personal Speech', url: 'https://example.com/speech.pdf', pageNum: 2 }],
+          recordings: [],
+          images: []
+        }
+      ]
+    }
+  };
+  const g63TargetA = { id: 'stu_g63_tgt_a', name: 'Daniel Target A', skills: { customGoals: [] } };
+  const g63TargetB = { id: 'stu_g63_tgt_b', name: 'Noam Target B', skills: { customGoals: [] } };
+  const g63SkippedC = { id: 'stu_g63_skip_c', name: 'Yosef Skipped C', skills: { customGoals: [] } };
+  sandbox.APP_STATE.students.push(g63SourceStu, g63TargetA, g63TargetB, g63SkippedC);
+
+  sandbox.APP_STATE.activeStudentDrawerId = g63SourceStu.id;
+  sandbox.renderStudentDrawer(g63SourceStu.id, true);
+  const g63DrawerHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(
+    g63DrawerHtml.includes('id="btn-copy-goals-to-students"') &&
+    g63DrawerHtml.includes(`openCopyGoalsToStudentsModal('${g63SourceStu.id}')`),
+    'Custom Student Goals header shows Copy to Students button when goals and multiple students exist'
+  );
+
+  // Open Copy Modal, uncheck 1 goal (Eliyahu Personal Speech Draft), select all students, uncheck Skipped C, and submit
+  sandbox.openCopyGoalsToStudentsModal(g63SourceStu.id);
+  const copyModalEl = getOrCreateElem('modal-copy-goals-to-students');
+  assert(!copyModalEl.classList.contains('hidden'), 'openCopyGoalsToStudentsModal opens modal cleanly');
+  sandbox.toggleCopyGoalSelection('goal_g63_exclude_one');
+  sandbox.toggleCopyGoalAllStudents(true);
+  sandbox.toggleCopyGoalStudentSelection(g63SkippedC.id);
+  const didCopyModalSubmit = sandbox.submitCopyGoalsToStudentsModal();
+  assert(
+    didCopyModalSubmit &&
+    copyModalEl.classList.contains('hidden') &&
+    g63TargetA.skills.customGoals.length === 1 &&
+    g63TargetA.skills.customGoals[0].title === 'Shabbat Kiddush Practice' &&
+    g63TargetA.skills.customGoals[0].completed === false &&
+    g63TargetA.skills.customGoals[0].pdfs[0].url === 'idb://pdf_shared_demo' &&
+    g63TargetA.skills.customGoals[0].recordings[0].title === 'Kiddush Recording' &&
+    g63TargetA.skills.customGoals[0].images[0].title === 'Siddur Page Pic' &&
+    g63TargetA.skills.customGoals[0].id !== 'goal_g63_share_1' &&
+    g63TargetB.skills.customGoals.length === 1 &&
+    g63SkippedC.skills.customGoals.length === 0,
+    'Modal copies selected goal with full PDF/recording/photo attachments (resetting completion & fresh IDs) while skipping unchecked goal & student'
+  );
+
+  // Verify AI agent tool declaration, portal context customGoals metadata, and copy_student_goals execution
+  const aiDecls = sandbox.buildGeminiToolsDeclaration()[0].functionDeclarations;
+  const copyToolDecl = aiDecls.find(d => d.name === 'copy_student_goals');
+  const portalCtx63 = sandbox.getPortalContextData();
+  const srcSummary = portalCtx63.students.find(s => s.id === g63SourceStu.id);
+  assert(
+    !!copyToolDecl &&
+    srcSummary && Array.isArray(srcSummary.customGoals) &&
+    srcSummary.customGoals.length === 2 &&
+    srcSummary.customGoals[0].pdfsCount === 1 &&
+    srcSummary.customGoals[0].recordingsCount === 1,
+    'AI agent declares copy_student_goals tool and getPortalContextData exposes customGoals metadata'
+  );
+
+  const aiCopyRes = sandbox.executeAiToolCall({
+    name: 'copy_student_goals',
+    args: {
+      sourceStudent: 'Eliyahu Source',
+      targetStudents: ['ALL'],
+      excludeStudents: ['Yosef Skipped C'],
+      excludeGoals: ['Personal Speech'],
+      skipDuplicates: true
+    }
+  });
+  // Daniel Target A & Noam Target B already received Shabbat Kiddush Practice, so duplicates are skipped; now test with Target B cleared
+  g63TargetB.skills.customGoals = [];
+  const aiCopyRes2 = sandbox.executeAiToolCall({
+    name: 'copy_student_goals',
+    args: {
+      sourceStudent: 'Eliyahu Source',
+      targetStudents: ['Noam Target B'],
+      excludeGoals: ['Personal Speech']
+    }
+  });
+  assert(
+    aiCopyRes.success === true &&
+    aiCopyRes.skippedDuplicatesCount >= 1 &&
+    aiCopyRes2.success === true &&
+    g63TargetB.skills.customGoals.length === 1 &&
+    g63TargetB.skills.customGoals[0].pdfs[0].url === 'idb://pdf_shared_demo' &&
+    g63TargetB.skills.customGoals[0].recordings[0].url.startsWith('data:audio/'),
+    'AI agent copy_student_goals tool copies goals with PDFs/recordings/photos and honors exclusions & duplicate skipping'
+  );
+
   sandbox.APP_STATE.studentPortalMode = false;
   sandbox.APP_STATE.studentPortalStudent = null;
   sandbox.APP_STATE.activeStudentDrawerId = null;
