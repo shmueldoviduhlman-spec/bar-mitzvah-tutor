@@ -6559,6 +6559,64 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   sandbox.APP_STATE.studentPortalStudent = null;
   sandbox.APP_STATE.activeStudentDrawerId = null;
 
+  // ============================================================================
+  // GATE 70: Full-Bar Smooth Click Toggle Across All Lesson Sections (Read & Edit)
+  // ============================================================================
+  console.log('\n[Gate 70] Full-Bar Smooth Toggle for Lesson Sections Without Arrow-Only Aiming...');
+  const g70BookletSec = { id: 'sec_g70_booklet', name: 'Booklet Pages Checklist', type: 'booklet_pages', color: 'teal' };
+  const g70ConceptSec = { id: 'sec_g70_concept', name: 'Overview', type: 'overview', color: 'amber' };
+  const g70Course = {
+    id: 'course_g70',
+    title_en: 'Tefillin Workshop',
+    blueprint: { sections: [g70ConceptSec, g70BookletSec] },
+    lessons: [
+      {
+        id: 'les_g70_1',
+        lesson_num: 1,
+        title_en: 'Putting on Tefillin',
+        sections: {
+          sec_g70_concept: JSON.stringify({ summary: 'Daily mitzvah summary', body: 'Complete teaching walkthrough.' }),
+          sec_g70_booklet: JSON.stringify({ pdfUrl: 'https://example.com/workbook.pdf', totalPages: 36, pages: [{ pageNum: 1, title: 'Intro Page' }] })
+        }
+      }
+    ]
+  };
+  const g70ReadBookletHtml = sandbox.renderSectionReadOnlyHtml(g70Course, g70Course.lessons[0], g70BookletSec, sandbox.COURSE_BLOCK_CATALOG.booklet_pages);
+  const g70Meta = sandbox.COURSE_BLOCK_CATALOG.concept || sandbox.COURSE_BLOCK_CATALOG.summary || { label: 'Overview', icon: 'sparkles', color: 'amber' };
+  const g70ReadConceptHtml = sandbox.renderSectionReadOnlyHtml(g70Course, g70Course.lessons[0], g70ConceptSec, g70Meta);
+  const g70EditConceptHtml = sandbox.renderCustomBlueprintSectionCard(g70Course, g70Course.lessons[0], g70ConceptSec, g70Meta, 1);
+
+  assert(
+    g70ReadBookletHtml.includes('id="sec-header-read-sec_g70_booklet" role="button"') &&
+    g70ReadBookletHtml.includes('cursor-pointer select-none') &&
+    g70ReadBookletHtml.includes('event.stopPropagation(); openBookletPageViewerModal(') &&
+    g70ReadConceptHtml.includes('id="sec-header-read-sec_g70_concept" role="button"') &&
+    g70EditConceptHtml.includes('id="sec-header-edit-sec_g70_concept" role="button"') &&
+    g70EditConceptHtml.includes('event.stopPropagation(); toggleLessonSectionCollapse(') &&
+    indexHtml.includes('@keyframes secBodyReveal'),
+    'Entire section header bar is clickable in Read and Edit modes, action buttons stopPropagation, and smooth reveal CSS is present'
+  );
+
+  // Test in-place DOM sync on toggleLessonSectionCollapse
+  const hdrEl70 = getOrCreateElem('sec-header-read-sec_g70_booklet');
+  const bodyEl70 = getOrCreateElem('sec-body-read-sec_g70_booklet');
+  const chevEl70 = getOrCreateElem('sec-chev-read-sec_g70_booklet');
+  bodyEl70.classList.add('hidden');
+  sandbox.toggleLessonSectionCollapse('read', 'les_g70_1', 'sec_g70_booklet');
+  assert(
+    !bodyEl70.classList.contains('hidden') &&
+    hdrEl70.classList.contains('border-b') &&
+    chevEl70.style.transform === 'rotate(180deg)',
+    'Clicking section header opens body smoothly, adds header border divider, and rotates chevron in-place'
+  );
+  sandbox.toggleLessonSectionCollapse('read', 'les_g70_1', 'sec_g70_booklet');
+  assert(
+    bodyEl70.classList.contains('hidden') &&
+    !hdrEl70.classList.contains('border-b') &&
+    chevEl70.style.transform === '',
+    'Clicking section header again collapses body cleanly, clears border divider, and resets chevron in-place'
+  );
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);

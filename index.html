@@ -276,6 +276,21 @@
       }
     }
 
+    /* Smooth lightweight reveal animation when opening lesson sections */
+    @keyframes secBodyReveal {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .sec-body-animate:not(.hidden) {
+      animation: secBodyReveal 140ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
     /* Isolated Student Portal: remove teacher sidebar rail & scroll button completely */
     html.student-portal-active {
       scrollbar-gutter: stable;
@@ -14681,19 +14696,44 @@ Return ONLY the updated value matching the Format Requirement cleanly. Write nat
       return !!lessonSectionOpenMap[getLessonSectionOpenKey(mode, lessonId, secId)];
     }
 
+    function applySectionOpenDomState(mode, secId, isOpen) {
+      let updatedDom = false;
+      const bodyEl = document.getElementById(`sec-body-${mode}-${secId}`);
+      if (bodyEl) {
+        updatedDom = true;
+        if (isOpen) {
+          bodyEl.classList.remove('hidden');
+          if (typeof bodyEl.querySelectorAll === 'function' && typeof autoGrowStudioTextarea === 'function') {
+            bodyEl.querySelectorAll('textarea.studio-autogrow').forEach(autoGrowStudioTextarea);
+          }
+        } else {
+          bodyEl.classList.add('hidden');
+        }
+      }
+      const chevEl = document.getElementById(`sec-chev-${mode}-${secId}`);
+      if (chevEl && chevEl.style) {
+        chevEl.style.transform = isOpen ? 'rotate(180deg)' : '';
+      }
+      const hdrEl = document.getElementById(`sec-header-${mode}-${secId}`);
+      if (hdrEl) {
+        if (typeof hdrEl.setAttribute === 'function') {
+          hdrEl.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+        if (hdrEl.classList) {
+          ['border-b', 'border-slate-800/70', 'mb-1'].forEach(cls => {
+            if (isOpen) hdrEl.classList.add(cls);
+            else hdrEl.classList.remove(cls);
+          });
+        }
+      }
+      return updatedDom;
+    }
+
     function toggleLessonSectionCollapse(mode, lessonId, secId, forceState) {
       const key = getLessonSectionOpenKey(mode, lessonId, secId);
       const nextOpen = typeof forceState === 'boolean' ? forceState : !lessonSectionOpenMap[key];
       lessonSectionOpenMap[key] = nextOpen;
-      const bodyEl = document.getElementById(`sec-body-${mode}-${secId}`);
-      if (bodyEl) {
-        if (nextOpen) bodyEl.classList.remove('hidden');
-        else bodyEl.classList.add('hidden');
-      }
-      const chevEl = document.getElementById(`sec-chev-${mode}-${secId}`);
-      if (chevEl && chevEl.style) {
-        chevEl.style.transform = nextOpen ? 'rotate(180deg)' : '';
-      }
+      applySectionOpenDomState(mode, secId, nextOpen);
     }
 
     function toggleAllLessonSections(mode, courseId, lessonId) {
@@ -14707,16 +14747,7 @@ Return ONLY the updated value matching the Format Requirement cleanly. Write nat
       let updatedDom = false;
       ids.forEach(id => {
         lessonSectionOpenMap[getLessonSectionOpenKey(mode, lessonId, id)] = targetState;
-        const bodyEl = document.getElementById(`sec-body-${mode}-${id}`);
-        if (bodyEl) {
-          updatedDom = true;
-          if (targetState) bodyEl.classList.remove('hidden');
-          else bodyEl.classList.add('hidden');
-        }
-        const chevEl = document.getElementById(`sec-chev-${mode}-${id}`);
-        if (chevEl && chevEl.style) {
-          chevEl.style.transform = targetState ? 'rotate(180deg)' : '';
-        }
+        if (applySectionOpenDomState(mode, id, targetState)) updatedDom = true;
       });
       const lblId = mode === 'read' ? 'lbl-reader-toggle-all-sections' : 'lbl-studio-toggle-all-sections';
       const lblEl = document.getElementById(lblId);
@@ -14734,7 +14765,7 @@ Return ONLY the updated value matching the Format Requirement cleanly. Write nat
       if (!cardHtml || typeof cardHtml !== 'string') return cardHtml;
       const marker = '<!--SEC_BODY_START-->';
       if (!cardHtml.includes(marker)) return cardHtml;
-      const openDiv = `<div id="sec-body-${mode}-${secId}" class="${isExpanded ? '' : 'hidden'} space-y-3 pt-1">`;
+      const openDiv = `<div id="sec-body-${mode}-${secId}" class="${isExpanded ? '' : 'hidden'} space-y-3 pt-2 sec-body-animate">`;
       let wrapped = cardHtml.replace(marker, openDiv);
       const lastCloseIdx = wrapped.lastIndexOf('</div>');
       if (lastCloseIdx !== -1) {
@@ -14765,8 +14796,8 @@ Return ONLY the updated value matching the Format Requirement cleanly. Write nat
           : '<span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800/90 text-slate-400 border border-slate-700/80 shrink-0">Empty · Type or Ask AI</span>');
 
       const headerHtml = `
-        <div class="flex items-center justify-between gap-2 ${isExpanded ? 'pb-2.5 border-b border-slate-800/80' : ''} flex-wrap">
-          <button type="button" onclick="toggleLessonSectionCollapse('edit', '${lId}', '${sec.id}')" class="flex items-center gap-2 min-w-0 flex-wrap text-left flex-1 group">
+        <div id="sec-header-edit-${sec.id}" role="button" tabindex="0" aria-expanded="${isExpanded ? 'true' : 'false'}" onclick="toggleLessonSectionCollapse('edit', '${lId}', '${sec.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){ event.preventDefault(); toggleLessonSectionCollapse('edit', '${lId}', '${sec.id}'); }" class="flex items-center justify-between gap-2 -mx-3.5 -my-2.5 sm:-mx-4 sm:-my-3 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl cursor-pointer select-none hover:bg-white/[0.04] transition-colors ${isExpanded ? 'border-b border-slate-800/70 mb-1' : ''} flex-wrap group">
+          <div class="flex items-center gap-2 min-w-0 flex-wrap text-left flex-1">
             ${sectionNumPill}
             <span class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-${effColor}-300 group-hover:text-white flex items-center gap-1.5 transition">
               <i data-lucide="${meta.icon}" class="w-4 h-4 text-${effColor}-400 shrink-0"></i>
@@ -14774,14 +14805,14 @@ Return ONLY the updated value matching the Format Requirement cleanly. Write nat
             </span>
             ${isTeacherOnly ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Teacher Only</span>' : ''}
             ${statusBadgeHtml}
-          </button>
+          </div>
           <div class="flex items-center gap-1.5 shrink-0">
-            <button type="button" onclick="toggleLessonSectionCollapse('edit', '${lId}', '${sec.id}', true); toggleSectionTweakBar('${sec.id}', true);" class="text-[11px] px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-indigo-500/20 text-indigo-300 border border-slate-700 hover:border-indigo-400/50 flex items-center gap-1 font-semibold transition">
+            <button type="button" onclick="event.stopPropagation(); toggleLessonSectionCollapse('edit', '${lId}', '${sec.id}', true); toggleSectionTweakBar('${sec.id}', true);" class="text-[11px] px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-indigo-500/20 text-indigo-300 border border-slate-700 hover:border-indigo-400/50 flex items-center gap-1 font-semibold transition">
               <i data-lucide="wand-2" class="w-3 h-3"></i> AI Refine
             </button>
-            <button type="button" onclick="toggleLessonSectionCollapse('edit', '${lId}', '${sec.id}')" class="p-1.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 text-slate-300 border border-slate-700/80 transition" title="${isExpanded ? 'Collapse section' : 'Expand section'}">
-              <i id="sec-chev-edit-${sec.id}" data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform" style="${isExpanded ? 'transform:rotate(180deg);' : ''}"></i>
-            </button>
+            <span class="p-1.5 rounded-xl bg-slate-950/80 group-hover:bg-slate-800 text-slate-300 border border-slate-700/80 transition inline-flex items-center justify-center" title="${isExpanded ? 'Collapse section' : 'Expand section'}">
+              <i id="sec-chev-edit-${sec.id}" data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform duration-150" style="${isExpanded ? 'transform:rotate(180deg);' : ''}"></i>
+            </span>
           </div>
         </div>
         <!--SEC_BODY_START-->
@@ -16800,18 +16831,18 @@ ${forceSchemaLines}`;
       const d = parseStructuredSectionData(rawVal, sec.type);
       const isExpanded = isLessonSectionExpanded('read', lId, sec.id);
       const headerHtml = `
-        <div class="flex items-center justify-between gap-2 ${isExpanded ? 'pb-2 border-b border-slate-800/70' : ''}">
-          <button type="button" onclick="toggleLessonSectionCollapse('read', '${lId}', '${sec.id}')" class="flex items-center gap-2 text-left flex-1 min-w-0 group">
+        <div id="sec-header-read-${sec.id}" role="button" tabindex="0" aria-expanded="${isExpanded ? 'true' : 'false'}" onclick="toggleLessonSectionCollapse('read', '${lId}', '${sec.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){ event.preventDefault(); toggleLessonSectionCollapse('read', '${lId}', '${sec.id}'); }" class="flex items-center justify-between gap-2 -mx-3.5 -my-2.5 sm:-mx-4 sm:-my-3 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl cursor-pointer select-none hover:bg-white/[0.04] transition-colors ${isExpanded ? 'border-b border-slate-800/70 mb-1' : ''} group">
+          <div class="flex items-center gap-2 text-left flex-1 min-w-0">
             <span class="text-xs font-bold uppercase tracking-wider text-${effColor}-300 group-hover:text-white flex items-center gap-2 transition">
               <i data-lucide="${meta.icon}" class="w-4 h-4 text-${effColor}-400 shrink-0"></i>
               <span>${escapeHtml(sec.name)}</span>
             </span>
-          </button>
+          </div>
           <div class="flex items-center gap-1.5 shrink-0">
             ${(sec.teacher_only || sec.type === 'teacher_cue') ? '<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Teacher Cue</span>' : ''}
-            <button type="button" onclick="toggleLessonSectionCollapse('read', '${lId}', '${sec.id}')" class="p-1 rounded-lg bg-slate-950/75 hover:bg-slate-800 text-slate-300 border border-slate-700/80 transition" title="${isExpanded ? 'Collapse section' : 'Expand section'}">
-              <i id="sec-chev-read-${sec.id}" data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform" style="${isExpanded ? 'transform:rotate(180deg);' : ''}"></i>
-            </button>
+            <span class="p-1 rounded-lg bg-slate-950/75 group-hover:bg-slate-800 text-slate-300 border border-slate-700/80 transition inline-flex items-center justify-center" title="${isExpanded ? 'Collapse section' : 'Expand section'}">
+              <i id="sec-chev-read-${sec.id}" data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform duration-150" style="${isExpanded ? 'transform:rotate(180deg);' : ''}"></i>
+            </span>
           </div>
         </div>
         <!--SEC_BODY_START-->
@@ -17060,21 +17091,21 @@ ${forceSchemaLines}`;
         const activeStu = studentsList.find(s => s.id === APP_STATE.activeStudentId) || studentsList[0] || null;
         return `
           <div class="${cardCls}">
-            <div class="flex items-center justify-between gap-2 ${isExpanded ? 'pb-2 border-b border-slate-800/80' : ''} flex-wrap">
-              <button type="button" onclick="toggleLessonSectionCollapse('read', '${lId}', '${sec.id}')" class="text-xs font-bold uppercase tracking-wider text-teal-300 hover:text-white flex items-center gap-2 text-left transition">
+            <div id="sec-header-read-${sec.id}" role="button" tabindex="0" aria-expanded="${isExpanded ? 'true' : 'false'}" onclick="toggleLessonSectionCollapse('read', '${lId}', '${sec.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){ event.preventDefault(); toggleLessonSectionCollapse('read', '${lId}', '${sec.id}'); }" class="flex items-center justify-between gap-2 -mx-3.5 -my-2.5 sm:-mx-4 sm:-my-3 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl cursor-pointer select-none hover:bg-white/[0.04] transition-colors ${isExpanded ? 'border-b border-slate-800/80 mb-1' : ''} flex-wrap group">
+              <div class="text-xs font-bold uppercase tracking-wider text-teal-300 group-hover:text-white flex items-center gap-2 text-left flex-1 min-w-0 transition">
                 <i data-lucide="book-copy" class="w-4 h-4 text-teal-400 shrink-0"></i>
-                <span>${escapeHtml(sec.name)}</span>
-                <span class="px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-200 border border-teal-500/30 text-[10px] font-mono">
+                <span class="truncate">${escapeHtml(sec.name)}</span>
+                <span class="px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-200 border border-teal-500/30 text-[10px] font-mono shrink-0">
                   ${pages.length} ${pages.length === 1 ? 'page' : 'pages'}
                 </span>
-              </button>
-              <div class="flex items-center gap-2 flex-wrap">
+              </div>
+              <div class="flex items-center gap-2 flex-wrap shrink-0">
                 ${pdfUrl ? `
-                  <button type="button" onclick="openBookletPageViewerModal('${escapeHtml(pdfUrl)}', ${Number(pages[0] && pages[0].pageNum) || 1}, '${escapeHtml(sec.name)}', '${escapeHtml(lesson.title_en || lesson.title_he || '')}', '', ${parseInt(d.totalPages || pages.length, 10) || 0})" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 text-[11px] font-bold transition">Open Workbook PDF</button>
+                  <button type="button" onclick="event.stopPropagation(); openBookletPageViewerModal('${escapeHtml(pdfUrl)}', ${Number(pages[0] && pages[0].pageNum) || 1}, '${escapeHtml(sec.name)}', '${escapeHtml(lesson.title_en || lesson.title_he || '')}', '', ${parseInt(d.totalPages || pages.length, 10) || 0})" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 text-[11px] font-bold transition">Open Workbook PDF</button>
                 ` : ''}
-                <button type="button" onclick="toggleLessonSectionCollapse('read', '${lId}', '${sec.id}')" class="p-1 rounded-lg bg-slate-950/75 hover:bg-slate-800 text-slate-300 border border-slate-700/80 transition" title="${isExpanded ? 'Collapse section' : 'Expand section'}">
-                  <i id="sec-chev-read-${sec.id}" data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform" style="${isExpanded ? 'transform:rotate(180deg);' : ''}"></i>
-                </button>
+                <span class="p-1 rounded-lg bg-slate-950/75 group-hover:bg-slate-800 text-slate-300 border border-slate-700/80 transition inline-flex items-center justify-center" title="${isExpanded ? 'Collapse section' : 'Expand section'}">
+                  <i id="sec-chev-read-${sec.id}" data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform duration-150" style="${isExpanded ? 'transform:rotate(180deg);' : ''}"></i>
+                </span>
               </div>
             </div>
             <!--SEC_BODY_START-->
