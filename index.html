@@ -15164,11 +15164,23 @@ Return a STRICT JSON array of 6 clear, engaging class titles (strings only, no n
         ]);
         if (torahJson && torahJson.text) {
           const chapters = Array.isArray(torahJson.text[0]) ? torahJson.text : [torahJson.text];
-          const excerptLines = chapters.slice(0, 6).map((chArr, chIdx) => {
-            const verses = Array.isArray(chArr) ? chArr.slice(0, 8) : [chArr];
-            return `Chapter Section ${chIdx + 1}: ` + verses.map(v => flattenText(v)).filter(Boolean).join(' ');
+          const excerptLines = chapters.slice(0, 8).map((chArr, chIdx) => {
+            const allV = Array.isArray(chArr) ? chArr : [chArr];
+            const picked = [];
+            if (allV.length <= 18) {
+              allV.forEach((v, vi) => picked.push(`(${vi + 1}) ${flattenText(v)}`));
+            } else {
+              const step = Math.max(1, Math.floor(allV.length / 16));
+              for (let vi = 0; vi < allV.length; vi += step) {
+                picked.push(`(${vi + 1}) ${flattenText(allV[vi])}`);
+              }
+              if ((allV.length - 1) % step !== 0) {
+                picked.push(`(${allV.length}) ${flattenText(allV[allV.length - 1])}`);
+              }
+            }
+            return `Chapter Section ${chIdx + 1}: ` + picked.filter(Boolean).join(' ');
           }).join('\n');
-          if (excerptLines) summary += `\nTorah Text Excerpt:\n${excerptLines.slice(0, 5000)}\n`;
+          if (excerptLines) summary += `\nTorah Text Excerpt:\n${excerptLines.slice(0, 8500)}\n`;
         }
         if (rashiJson && rashiJson.text) {
           const rashiText = flattenText(rashiJson.text).slice(0, 2400);
@@ -15425,6 +15437,7 @@ Collaboration & Action Rules:
 3. Maintain warm, intelligent, concise mentoring dialogue in "assistant_reply" summarizing the exact sections you updated.
 4. Respond in Hebrew if the teacher writes in Hebrew, or English if they write in English.
 5. CLEAN PLAIN TEXT ONLY: Never use Markdown formatting symbols (no **, *, _, #, or backticks) inside any lesson text or "assistant_reply". Write natural, clean prose without asterisks.
+6. THOROUGHNESS & CHRONOLOGICAL DEPTH WHEN REQUESTED: When a section guideline or teacher prompt asks for thorough, detailed, complete, or chronological coverage (for example, walking through all major stories and ideas of a chapter or Parasha), do NOT compress it into 4 brief one-liners. Generate rich, well-organized multi-sentence entries (8 to 15+ complete chronological entries for comprehensive "list" sections, each shaped cleanly as "Clear Topic Heading (Source/Chapter): Detailed 2 to 4 sentence explanation covering concrete names, events, mitzvot, and core meaning.") so the teacher has complete review depth.
 
 ${hasCustomBp ? `Return STRICT JSON ONLY:
 {
@@ -15862,12 +15875,30 @@ ${forceSchemaLines}`;
           <div class="${cardCls}">
             ${headerHtml}
             <ul class="space-y-2.5">
-              ${d.items.map(item => `
-                <li dir="auto" class="flex items-start gap-2.5 text-sm sm:text-base text-slate-100 leading-relaxed">
-                  <span class="text-${effColor}-400 font-bold shrink-0 mt-0.5">✦</span>
-                  <div class="flex-1">${formatSectionInlineText(item)}</div>
-                </li>
-              `).join('')}
+              ${d.items.map(item => {
+                const rawStr = String(item || '').trim();
+                const colonIdx = rawStr.indexOf(':');
+                const hasCleanLeadHeading = colonIdx > 2 && colonIdx <= 95 && !/^https?:$/i.test(rawStr.slice(0, colonIdx).trim());
+                if (hasCleanLeadHeading && rawStr.length > colonIdx + 24) {
+                  const headPart = rawStr.slice(0, colonIdx).trim();
+                  const bodyPart = rawStr.slice(colonIdx + 1).trim();
+                  return `
+                    <li dir="auto" class="p-3.5 rounded-xl bg-slate-950/65 border border-slate-800/80 space-y-1">
+                      <div class="flex items-start gap-2 text-sm sm:text-base font-bold text-white leading-snug">
+                        <span class="text-${effColor}-400 font-bold shrink-0">✦</span>
+                        <span>${formatSectionInlineText(headPart)}</span>
+                      </div>
+                      <div class="text-sm text-slate-200 leading-relaxed pl-5 rtl:pl-0 rtl:pr-5 whitespace-pre-wrap">${formatSectionInlineText(bodyPart)}</div>
+                    </li>
+                  `;
+                }
+                return `
+                  <li dir="auto" class="flex items-start gap-2.5 text-sm sm:text-base text-slate-100 leading-relaxed">
+                    <span class="text-${effColor}-400 font-bold shrink-0 mt-0.5">✦</span>
+                    <div class="flex-1">${formatSectionInlineText(rawStr)}</div>
+                  </li>
+                `;
+              }).join('')}
             </ul>
           </div>
         `;
@@ -17696,7 +17727,7 @@ ${forceSchemaLines}`;
     function getSectionAiFormatRule(secType) {
       const rules = {
         text: 'Return JSON: { "summary": "1-sentence core takeaway", "body": "Rich, clear natural plain-text explanation with zero Markdown symbols (no **, *, _, #, or backticks)" }',
-        list: 'Return JSON: { "items": ["Key Idea 1: plain-text explanation", "Key Idea 2: plain-text explanation"] }',
+        list: 'Return JSON: { "items": ["Part Title (Context/Chapter): Rich, clear multi-sentence explanation with full concrete details.", "..."] }',
         steps: 'Return JSON: { "steps": [{ "text": "Step description", "mins": "4m" }] }',
         quote: 'Return JSON: { "citation": "Source/Formula title", "quote": "Exact text/formula", "meaning": "Plain explanation", "rtl": false }',
         bilingual_split: 'Return JSON: { "rtl": true, "leftLabel": "Original Text", "rightLabel": "Plain Meaning", "rows": [{ "orig": "Phrase 1", "trans": "Meaning 1" }] }',
