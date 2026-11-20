@@ -5735,6 +5735,74 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   );
   sandbox.APP_STATE.studentPortalStudent = null;
 
+  // =========================================================================
+  // GATE 60: Custom Student Goal Local PDF Upload (>5MB) + Drag & Drop
+  // =========================================================================
+  console.log('\n--- Running Gate 60: Local Downloaded PDF Upload (>5MB IndexedDB) & Drag-and-Drop ---');
+  getOrCreateElem('drawer-student-detail').classList.remove('hidden');
+  sandbox.APP_STATE.activeStudentDrawerId = g59StudentB.id;
+  sandbox.toggleCustomGoalPanel(g59StudentB.id, '__draft__', 'pdf');
+  const g60PanelHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(
+    g60PanelHtml.includes('goal-pdf-dropzone-draft') &&
+    g60PanelHtml.includes('handleCustomGoalDrop'),
+    'Connect PDF panel exposes interactive drag-and-drop PDF dropzone alongside drawer drop handlers'
+  );
+
+  // Drop a large 6.2MB downloaded PDF directly onto composer draft
+  const fakeLargePdfBytes = new Uint8Array(6200000);
+  fakeLargePdfBytes[0] = 0x25; fakeLargePdfBytes[1] = 0x50; fakeLargePdfBytes[2] = 0x44; fakeLargePdfBytes[3] = 0x46; // %PDF
+  const fakeLargePdfFile = {
+    name: 'Aleph_Champ_White_Booklet.pdf',
+    type: 'application/pdf',
+    size: fakeLargePdfBytes.byteLength,
+    arrayBuffer: async () => fakeLargePdfBytes.buffer
+  };
+  await sandbox.handleCustomGoalDrop(
+    { preventDefault() {}, stopPropagation() {}, dataTransfer: { files: [fakeLargePdfFile] } },
+    g59StudentB.id,
+    '__draft__'
+  );
+  const g60Draft = sandbox.getPendingGoalDraft(g59StudentB.id);
+  assert(
+    g60Draft.pdfs.length === 1 &&
+    g60Draft.pdfs[0].url.startsWith('idb://') &&
+    g60Draft.pdfs[0].title === 'Aleph Champ White Booklet' &&
+    g60Draft.title === 'Aleph Champ White Booklet',
+    'Dropping >5MB downloaded PDF attaches via idb:// IndexedDB pointer without hitting localStorage quota and suggests goal title'
+  );
+
+  sandbox.addQuickStudentGoalFromDrawer(g59StudentB.id);
+  const g60SavedGoal = g59StudentB.skills.customGoals.find(g => g.title === 'Aleph Champ White Booklet');
+  assert(
+    g60SavedGoal && g60SavedGoal.pdfs.length === 1 && g60SavedGoal.pdfs[0].url.startsWith('idb://'),
+    'Saved goal preserves large local PDF connection cleanly'
+  );
+
+  // Drop a second smaller PDF directly onto the existing saved goal card
+  const fakeSmallPdfBytes = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2D, 0x31, 0x2E, 0x34]);
+  const fakeSmallPdfFile = {
+    name: 'Practice_Sheet_2.pdf',
+    type: 'application/pdf',
+    size: fakeSmallPdfBytes.byteLength,
+    arrayBuffer: async () => fakeSmallPdfBytes.buffer
+  };
+  await sandbox.handleCustomGoalDrop(
+    { preventDefault() {}, stopPropagation() {}, dataTransfer: { files: [fakeSmallPdfFile] } },
+    g59StudentB.id,
+    g60SavedGoal.id
+  );
+  assert(
+    g60SavedGoal.pdfs.length === 2 && g60SavedGoal.pdfs[1].title === 'Practice Sheet 2',
+    'Dropping a downloaded PDF directly onto an existing saved goal attaches it cleanly'
+  );
+  const loadedFromCache = await sandbox.loadGoalBytesFromIndexedDb(g60SavedGoal.pdfs[0].url);
+  assert(
+    loadedFromCache && loadedFromCache.bytes && loadedFromCache.bytes.length === 6200000,
+    'loadGoalBytesFromIndexedDb retrieves stored local PDF bytes cleanly for modal rendering'
+  );
+  sandbox.APP_STATE.activeStudentDrawerId = null;
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
