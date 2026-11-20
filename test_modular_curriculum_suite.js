@@ -95,7 +95,8 @@ const sandbox = {
   location: { href: 'https://bar-mitzvah-tutor.pages.dev' },
   showToast: () => {},
   escapeHtml: s => String(s || ''),
-  atob: b64 => Buffer.from(b64, 'base64').toString('utf8')
+  atob: b64 => Buffer.from(b64, 'base64').toString('utf8'),
+  btoa: str => Buffer.from(String(str || ''), 'latin1').toString('base64')
 };
 
 vm.createContext(sandbox);
@@ -5935,6 +5936,84 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     portalGoalsCardHtml.includes(`openCustomGoalAttachmentViewer('${g59StudentB.id}', '${g60SavedGoal.id}', 'pdf', '${g61PdfId}')`),
     'Student Portal displays custom goal with playable voice recording, clickable named picture, and clickable named PDF'
   );
+  // =========================================================================
+  // GATE 62: Drag-and-Drop Photos & Audio Recordings (Panel Dropzones + Composer)
+  // =========================================================================
+  console.log('\n[Gate 62] Drag-and-Drop Photos & Audio Recordings...');
+  sandbox.APP_STATE.activeStudentDrawerId = g59StudentB.id;
+  sandbox.toggleCustomGoalPanel(g59StudentB.id, '__draft__', 'picture');
+  const picPanelHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(
+    picPanelHtml.includes('id="goal-image-dropzone-draft"') &&
+    picPanelHtml.includes('handleCustomGoalDrop'),
+    'Add Picture panel exposes interactive drag-and-drop photo dropzone'
+  );
+
+  const fakePngBytes = new Uint8Array([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+  const fakePhotoFile = {
+    name: 'Shabbat_Siddur_Page.png',
+    type: 'image/png',
+    size: fakePngBytes.byteLength,
+    arrayBuffer: async () => fakePngBytes.buffer
+  };
+  await sandbox.handleCustomGoalDrop(
+    { preventDefault() {}, stopPropagation() {}, dataTransfer: { files: [fakePhotoFile] } },
+    g59StudentB.id,
+    '__draft__'
+  );
+  const g62DraftAfterPhoto = sandbox.getPendingGoalDraft(g59StudentB.id);
+  assert(
+    g62DraftAfterPhoto.images.length === 1 &&
+    g62DraftAfterPhoto.images[0].title === 'Shabbat Siddur Page' &&
+    g62DraftAfterPhoto.images[0].url.startsWith('data:image/png'),
+    'Dropping photo file attaches cleanly to draft goal with formatted photo name'
+  );
+
+  sandbox.toggleCustomGoalPanel(g59StudentB.id, '__draft__', 'insert_audio');
+  const audPanelHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(
+    audPanelHtml.includes('id="goal-audio-dropzone-draft"') &&
+    audPanelHtml.includes('handleCustomGoalDrop'),
+    'Insert Recording panel exposes interactive drag-and-drop audio dropzone'
+  );
+
+  // Drop a Voice Memo (.m4a with empty MIME, small) and a large >1.5MB .mp3 recording
+  const smallAudioBytes = new Uint8Array([0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70]);
+  const fakeVoiceMemoFile = {
+    name: 'Maftir_Trope_Sample.m4a',
+    type: '',
+    size: smallAudioBytes.byteLength,
+    arrayBuffer: async () => smallAudioBytes.buffer
+  };
+  const largeAudioBytes = new Uint8Array(2100000);
+  largeAudioBytes[0] = 0x49; largeAudioBytes[1] = 0x44; largeAudioBytes[2] = 0x33;
+  const fakeLargeMp3File = {
+    name: 'Full_Haftarah_Practice.mp3',
+    type: 'audio/mpeg',
+    size: largeAudioBytes.byteLength,
+    arrayBuffer: async () => largeAudioBytes.buffer
+  };
+  await sandbox.handleCustomGoalDrop(
+    { preventDefault() {}, stopPropagation() {}, dataTransfer: { files: [fakeVoiceMemoFile, fakeLargeMp3File] } },
+    g59StudentB.id,
+    '__draft__'
+  );
+  const g62DraftAfterAudio = sandbox.getPendingGoalDraft(g59StudentB.id);
+  assert(
+    g62DraftAfterAudio.recordings.length === 2 &&
+    g62DraftAfterAudio.recordings[0].title === 'Maftir Trope Sample' &&
+    g62DraftAfterAudio.recordings[0].url.startsWith('data:') &&
+    g62DraftAfterAudio.recordings[1].title === 'Full Haftarah Practice' &&
+    g62DraftAfterAudio.recordings[1].url.startsWith('idb://'),
+    'Dropping small Voice Memo (.m4a) & large (>1.5MB) .mp3 audio attaches both cleanly (inline + idb://)'
+  );
+  const g62DrawerAfterDrop = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(
+    g62DrawerAfterDrop.includes(`data-idb-audio="${sandbox.escapeHtml(g62DraftAfterAudio.recordings[1].url)}"`),
+    'Large dropped audio recording renders with data-idb-audio attribute for IndexedDB hydration'
+  );
+  sandbox.pendingGoalDraftMap[g59StudentB.id] = { title: '', images: [], pdfs: [], recordings: [] };
+
   sandbox.APP_STATE.studentPortalMode = false;
   sandbox.APP_STATE.studentPortalStudent = null;
   sandbox.APP_STATE.activeStudentDrawerId = null;

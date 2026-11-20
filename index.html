@@ -4512,9 +4512,9 @@
   <!-- Hidden Dvar Torah File Input -->
   <input type="file" id="dvar-torah-file-input" accept=".txt,.md,.pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" class="hidden" onchange="handleDvarTorahFileSelected(event)">
   <!-- Hidden Custom Student Goal Media Inputs -->
-  <input type="file" id="goal-image-file-input" accept="image/*" multiple class="hidden" onchange="handleGoalImageFilesSelected(event)">
+  <input type="file" id="goal-image-file-input" accept="image/*,.png,.jpg,.jpeg,.webp,.gif,.heic,.bmp" multiple class="hidden" onchange="handleGoalImageFilesSelected(event)">
   <input type="file" id="goal-pdf-file-input" accept=".pdf,application/pdf" class="hidden" onchange="handleGoalPdfFileSelected(event)">
-  <input type="file" id="goal-audio-file-input" accept="audio/*" class="hidden" onchange="handleGoalAudioFileSelected(event)">
+  <input type="file" id="goal-audio-file-input" accept="audio/*,.mp3,.m4a,.wav,.ogg,.webm,.aac,.flac,.opus,.caf,.aif,.aiff" multiple class="hidden" onchange="handleGoalAudioFileSelected(event)">
 
   <!-- ============================================== -->
   <!-- MODAL: SHARE WORKSPACE (Instant Sync)          -->
@@ -9093,6 +9093,9 @@ alter publication supabase_realtime add table public.students_sync;`;
         </div>
       `;
       if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+      if (typeof hydrateGoalAudioElements === 'function') {
+        hydrateGoalAudioElements(document.getElementById('view-student-portal'));
+      }
       if (hw && hw.pdfUrl && hw.pageNum && !hw.imageUrl && typeof renderPdfPageToCanvas === 'function') {
         renderPdfPageToCanvas(hw.pdfUrl, hw.pageNum, 'student-hw-pdf-canvas', 'student-hw-pdf-status', 'student-hw-pdf-iframe');
       }
@@ -26183,46 +26186,95 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       }
     }
 
-    function compressGoalImageFile(file) {
-      return new Promise((resolve, reject) => {
-        if (typeof FileReader === 'undefined') {
-          reject(new Error('FileReader unavailable'));
-          return;
+    function bytesToBase64Chunks(bytes) {
+      if (!bytes || !bytes.length || typeof btoa !== 'function') return '';
+      let bin = '';
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+      }
+      return btoa(bin);
+    }
+
+    async function readGoalFileAsDataUrl(file, fallbackMime = 'application/octet-stream') {
+      if (!file) return '';
+      if (typeof FileReader !== 'undefined') {
+        try {
+          const url = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onerror = () => reject(new Error('Failed to read file'));
+            reader.onload = ev => resolve(String((ev && ev.target && ev.target.result) || ''));
+            reader.readAsDataURL(file);
+          });
+          if (url) return url;
+        } catch (_) {}
+      }
+      if (typeof file.arrayBuffer === 'function') {
+        const buf = await file.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+        const b64 = bytesToBase64Chunks(bytes);
+        if (b64) {
+          const mime = String(file.type || fallbackMime || 'application/octet-stream');
+          return `data:${mime};base64,${b64}`;
         }
-        const reader = new FileReader();
-        reader.onerror = () => reject(new Error('Failed to read image file'));
-        reader.onload = ev => {
-          const rawUrl = String((ev && ev.target && ev.target.result) || '');
-          if (typeof Image === 'undefined' || typeof document === 'undefined') {
-            resolve(rawUrl);
-            return;
-          }
-          const img = new Image();
-          img.onerror = () => resolve(rawUrl);
-          img.onload = () => {
-            try {
-              const maxEdge = 1200;
-              let w = img.width || maxEdge;
-              let h = img.height || maxEdge;
-              if (w > maxEdge || h > maxEdge) {
-                const ratio = Math.min(maxEdge / w, maxEdge / h);
-                w = Math.max(1, Math.round(w * ratio));
-                h = Math.max(1, Math.round(h * ratio));
-              }
-              const canvas = document.createElement('canvas');
-              canvas.width = w;
-              canvas.height = h;
-              const ctx = canvas.getContext('2d');
-              ctx.drawImage(img, 0, 0, w, h);
-              resolve(canvas.toDataURL('image/jpeg', 0.8));
-            } catch (e) {
-              resolve(rawUrl);
+      }
+      return '';
+    }
+
+    async function compressGoalImageFile(file) {
+      const rawUrl = await readGoalFileAsDataUrl(file, 'image/jpeg');
+      if (!rawUrl) throw new Error('Failed to read image file');
+      if (typeof Image === 'undefined' || typeof document === 'undefined') {
+        return rawUrl;
+      }
+      return await new Promise(resolve => {
+        const img = new Image();
+        img.onerror = () => resolve(rawUrl);
+        img.onload = () => {
+          try {
+            const maxEdge = 1200;
+            let w = img.width || maxEdge;
+            let h = img.height || maxEdge;
+            if (w > maxEdge || h > maxEdge) {
+              const ratio = Math.min(maxEdge / w, maxEdge / h);
+              w = Math.max(1, Math.round(w * ratio));
+              h = Math.max(1, Math.round(h * ratio));
             }
-          };
-          img.src = rawUrl;
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              resolve(rawUrl);
+              return;
+            }
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.8));
+          } catch (e) {
+            resolve(rawUrl);
+          }
         };
-        reader.readAsDataURL(file);
+        img.src = rawUrl;
       });
+    }
+
+    async function attachGoalImageFileObject(file, studentId, goalId) {
+      if (!file || !studentId) return false;
+      const isHe = APP_STATE.lang === 'he';
+      if (file.size > 20 * 1024 * 1024) {
+        showToast(isHe ? `התמונה "${file.name}" גדולה מדי (מעל 20MB)` : `"${file.name}" exceeds 20MB limit`);
+        return false;
+      }
+      try {
+        const dataUrl = await compressGoalImageFile(file);
+        if (!dataUrl) return false;
+        const cleanName = String(file.name || 'Picture').replace(/\.[^/.]+$/, '').replace(/[_-]+/g, ' ').trim() || 'Picture';
+        const targetGoalId = goalId || '__draft__';
+        return !!addCustomGoalMediaItem(studentId, targetGoalId, 'images', { title: cleanName, url: dataUrl });
+      } catch (err) {
+        console.warn('Goal image attach error:', err);
+        return false;
+      }
     }
 
     function triggerGoalImageUpload(studentId, goalId) {
@@ -26241,18 +26293,8 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       const { studentId, goalId } = currentGoalMediaTarget;
       let added = 0;
       for (const file of files) {
-        if (file.size > 20 * 1024 * 1024) {
-          showToast(APP_STATE.lang === 'he' ? `התמונה "${file.name}" גדולה מדי (מעל 20MB)` : `"${file.name}" exceeds 20MB limit`);
-          continue;
-        }
-        try {
-          const dataUrl = await compressGoalImageFile(file);
-          const cleanName = String(file.name || 'Picture').replace(/\.[^/.]+$/, '') || 'Picture';
-          if (addCustomGoalMediaItem(studentId, goalId, 'images', { title: cleanName, url: dataUrl })) {
-            added += 1;
-          }
-        } catch (err) {
-          console.warn('Goal image attach error:', err);
+        if (await attachGoalImageFileObject(file, studentId, goalId)) {
+          added += 1;
         }
       }
       if (added > 0) {
@@ -26374,6 +26416,62 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       }
     }
 
+    async function attachGoalAudioFileObject(file, studentId, goalId, explicitTitle = '') {
+      if (!file || !studentId) return false;
+      const isHe = APP_STATE.lang === 'he';
+      const fSize = typeof file.size === 'number' ? file.size : 0;
+      if (fSize > 50 * 1024 * 1024) {
+        showToast(isHe ? 'קובץ השמע גדול מ-50MB. הדבק קישור שמע במקום.' : 'Audio file exceeds 50MB max. Paste an audio URL instead.');
+        return false;
+      }
+
+      const defaultName = String(file.name || 'Audio Clip').replace(/\.[^/.]+$/, '').replace(/[_-]+/g, ' ').trim() || 'Audio Clip';
+      const title = String(explicitTitle || '').trim() || defaultName;
+      let audioRefUrl = '';
+
+      try {
+        if (fSize <= 1.5 * 1024 * 1024) {
+          audioRefUrl = await readGoalFileAsDataUrl(file, file.type || 'audio/mpeg');
+        }
+        if (!audioRefUrl && typeof file.arrayBuffer === 'function') {
+          const mediaId = 'aud_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+          const buf = await file.arrayBuffer();
+          const bytes = new Uint8Array(buf);
+          const mime = String(file.type || 'audio/mpeg');
+          await saveGoalBytesToIndexedDb(mediaId, bytes, mime);
+          audioRefUrl = `idb://${mediaId}`;
+        }
+        if (!audioRefUrl) {
+          audioRefUrl = await readGoalFileAsDataUrl(file, file.type || 'audio/mpeg');
+        }
+      } catch (err) {
+        console.warn('Goal audio attach error:', err);
+      }
+
+      if (!audioRefUrl) {
+        showToast(isHe ? 'לא ניתן היה לקרוא את קובץ השמע' : 'Could not read that audio file');
+        return false;
+      }
+
+      const targetGoalId = goalId || '__draft__';
+      return !!addCustomGoalMediaItem(studentId, targetGoalId, 'recordings', { title, url: audioRefUrl, type: 'audio' });
+    }
+
+    async function hydrateGoalAudioElements(rootEl) {
+      if (!rootEl || typeof rootEl.querySelectorAll !== 'function') return;
+      const audioEls = Array.from(rootEl.querySelectorAll('audio[data-idb-audio]'));
+      for (const el of audioEls) {
+        const ref = el.getAttribute('data-idb-audio') || '';
+        if (!ref.startsWith('idb://') || el.dataset.idbHydrated === ref) continue;
+        el.dataset.idbHydrated = ref;
+        const cached = await loadGoalBytesFromIndexedDb(ref);
+        if (cached && cached.bytes && typeof URL !== 'undefined' && typeof Blob !== 'undefined') {
+          const blobUrl = URL.createObjectURL(new Blob([cached.bytes], { type: cached.mimeType || 'audio/mpeg' }));
+          el.src = blobUrl;
+        }
+      }
+    }
+
     async function ingestCustomGoalFiles(studentId, goalId, fileList) {
       const files = fileList ? Array.from(fileList) : [];
       if (!files.length || !studentId) return 0;
@@ -26381,41 +26479,44 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       const safeId = `${targetGoalId === '__draft__' ? 'draft' : targetGoalId}`;
       const pageInp = document.getElementById(`goal-pdf-page-input-${safeId}`);
       const pageNum = Math.max(1, parseInt(pageInp?.value || '1', 10) || 1);
+      const audioTitleInp = document.getElementById(`goal-audio-title-input-${safeId}`);
+      const explicitAudioTitle = String(audioTitleInp?.value || '').trim();
       let count = 0;
+      let addedImgs = 0;
+      let addedAuds = 0;
 
       for (const file of files) {
         if (!file) continue;
         const fName = String(file.name || '');
         const fType = String(file.type || '').toLowerCase();
         const isPdf = fType === 'application/pdf' || fType.includes('pdf') || /\.pdf$/i.test(fName);
-        const isImg = fType.startsWith('image/') || /\.(png|jpe?g|webp|gif|heic|bmp)$/i.test(fName);
-        const isAud = fType.startsWith('audio/') || /\.(mp3|m4a|wav|ogg|webm|aac)$/i.test(fName);
+        const isImg = fType.startsWith('image/') || /\.(png|jpe?g|webp|gif|heic|bmp|avif|svg)$/i.test(fName);
+        const isAud = fType.startsWith('audio/') || /\.(mp3|m4a|wav|ogg|webm|aac|flac|opus|aiff?|caf)$/i.test(fName);
 
         if (isPdf) {
           const ok = await attachGoalPdfFileObject(file, studentId, targetGoalId, pageNum);
           if (ok) count += 1;
         } else if (isImg) {
-          try {
-            const dataUrl = await compressGoalImageFile(file);
-            const title = fName.replace(/\.[^/.]+$/, '') || 'Picture';
-            if (addCustomGoalMediaItem(studentId, targetGoalId, 'images', { title, url: dataUrl })) count += 1;
-          } catch (_) {}
-        } else if (isAud && typeof FileReader !== 'undefined') {
-          if (file.size > 15 * 1024 * 1024) continue;
-          const dataUrl = await new Promise(resolve => {
-            const r = new FileReader();
-            r.onload = ev => resolve(String((ev && ev.target && ev.target.result) || ''));
-            r.onerror = () => resolve('');
-            r.readAsDataURL(file);
-          });
-          if (dataUrl) {
-            const title = fName.replace(/\.[^/.]+$/, '') || 'Audio Clip';
-            if (addCustomGoalMediaItem(studentId, targetGoalId, 'recordings', { title, url: dataUrl, type: 'audio' })) count += 1;
+          if (await attachGoalImageFileObject(file, studentId, targetGoalId)) {
+            count += 1;
+            addedImgs += 1;
+          }
+        } else if (isAud) {
+          if (await attachGoalAudioFileObject(file, studentId, targetGoalId, explicitAudioTitle)) {
+            count += 1;
+            addedAuds += 1;
           }
         }
       }
-      if (count > 0 && APP_STATE.activeStudentDrawerId === studentId) {
-        renderStudentDrawer(studentId, true);
+      if (count > 0) {
+        if (customGoalPanelMap[studentId]) delete customGoalPanelMap[studentId];
+        if (APP_STATE.activeStudentDrawerId === studentId) renderStudentDrawer(studentId, true);
+        const isHe = APP_STATE.lang === 'he';
+        if (addedAuds > 0 && addedImgs === 0) {
+          showToast(isHe ? 'ההקלטה הוכנסה ליעד!' : 'Recording inserted into goal!');
+        } else if (addedImgs > 0 && addedAuds === 0) {
+          showToast(isHe ? `נוספו ${addedImgs} תמונות ליעד` : `${addedImgs} picture(s) added to goal!`);
+        }
       }
       return count;
     }
@@ -26452,10 +26553,19 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       const droppedText = typeof dt.getData === 'function' ? (dt.getData('text/uri-list') || dt.getData('text/plain') || '').trim() : '';
       if (droppedText && /^https?:\/\//i.test(droppedText)) {
         const cleanUrl = droppedText.split(/\s+/)[0];
+        const targetId = goalId || '__draft__';
         if (/\.pdf(?:$|[?#])/i.test(cleanUrl)) {
           const title = decodeURIComponent(cleanUrl.split('/').pop().split('?')[0].replace(/\.pdf$/i, '') || 'Connected PDF');
-          addCustomGoalMediaItem(studentId, goalId || '__draft__', 'pdfs', { title, url: cleanUrl, pageNum: 1, source: 'url' });
+          addCustomGoalMediaItem(studentId, targetId, 'pdfs', { title, url: cleanUrl, pageNum: 1, source: 'url' });
           showToast('PDF link connected!');
+        } else if (/\.(mp3|m4a|wav|ogg|webm|aac|flac|opus)(?:$|[?#])/i.test(cleanUrl)) {
+          const title = decodeURIComponent(cleanUrl.split('/').pop().split('?')[0].replace(/\.[^/.]+$/, '') || 'Audio Recording');
+          addCustomGoalMediaItem(studentId, targetId, 'recordings', { title, url: cleanUrl, type: 'link' });
+          showToast('Audio link inserted!');
+        } else if (/\.(png|jpe?g|webp|gif|avif|svg)(?:$|[?#])/i.test(cleanUrl)) {
+          const title = decodeURIComponent(cleanUrl.split('/').pop().split('?')[0].replace(/\.[^/.]+$/, '') || 'Picture');
+          addCustomGoalMediaItem(studentId, targetId, 'images', { title, url: cleanUrl });
+          showToast('Picture added!');
         }
       }
     }
@@ -26510,29 +26620,25 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       }
     }
 
-    function handleGoalAudioFileSelected(event) {
-      const file = event && event.target && event.target.files && event.target.files[0];
-      if (!file || !currentGoalMediaTarget.studentId) return;
+    async function handleGoalAudioFileSelected(event) {
+      const files = event && event.target && event.target.files ? Array.from(event.target.files) : [];
+      if (!files.length || !currentGoalMediaTarget.studentId) return;
       const { studentId, goalId } = currentGoalMediaTarget;
       const isHe = APP_STATE.lang === 'he';
-      if (file.size > 15 * 1024 * 1024) {
-        showToast(isHe ? 'קובץ השמע גדול מדי (מקסימום 15MB). הדבק קישור שמע במקום.' : 'Audio file exceeds 15MB max. Paste an audio URL instead.');
-        return;
-      }
       const safeId = `${goalId === '__draft__' ? 'draft' : goalId}`;
       const titleInp = document.getElementById(`goal-audio-title-input-${safeId}`);
-      const defaultName = String(file.name || 'Audio Clip').replace(/\.[^/.]+$/, '') || 'Audio Clip';
-      const title = String(titleInp?.value || '').trim() || defaultName;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        const dataUrl = String((ev && ev.target && ev.target.result) || '');
-        if (addCustomGoalMediaItem(studentId, goalId, 'recordings', { title, url: dataUrl, type: 'audio' })) {
-          delete customGoalPanelMap[studentId];
-          if (APP_STATE.activeStudentDrawerId === studentId) renderStudentDrawer(studentId, true);
-          showToast(isHe ? 'קובץ השמע נוסף ליעד!' : 'Recording inserted into goal!');
+      const explicitTitle = String(titleInp?.value || '').trim();
+      let added = 0;
+      for (const file of files) {
+        if (await attachGoalAudioFileObject(file, studentId, goalId, explicitTitle)) {
+          added += 1;
         }
-      };
-      reader.readAsDataURL(file);
+      }
+      if (added > 0) {
+        delete customGoalPanelMap[studentId];
+        if (APP_STATE.activeStudentDrawerId === studentId) renderStudentDrawer(studentId, true);
+        showToast(isHe ? 'קובץ השמע נוסף ליעד!' : 'Recording inserted into goal!');
+      }
     }
 
     function applyCustomGoalAudioUrl(studentId, goalId) {
@@ -26766,7 +26872,7 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
                   <input type="text" dir="auto" value="${escapeHtml(rec.title || 'Recording')}" placeholder="${isHe ? 'שם הקלטה' : 'Name recording'}" onchange="renameCustomGoalAttachment('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'recordings', '${escapeHtml(rec.id)}', this.value)" onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }" onclick="event.stopPropagation()" class="bg-transparent border border-transparent hover:border-violet-500/40 focus:border-violet-400 focus:bg-slate-900 rounded px-1.5 py-0.5 text-[11px] font-semibold text-violet-100 placeholder-slate-500 focus:outline-none w-32 sm:w-40" title="${isHe ? 'לחץ לתת שם להקלטה' : 'Click to name recording'}" />
                 `}
               </div>
-              <audio controls preload="metadata" src="${escapeHtml(rec.url || '')}" class="h-7 flex-1 min-w-[150px] max-w-full"></audio>
+              <audio controls preload="metadata" ${String(rec.url || '').startsWith('idb://') ? `data-idb-audio="${escapeHtml(rec.url)}"` : `src="${escapeHtml(rec.url || '')}"`} class="h-7 flex-1 min-w-[150px] max-w-full"></audio>
               ${renderDeleteOrDetachBtn(
                 'recordings',
                 rec.id,
@@ -26804,6 +26910,19 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
                   ${isHe ? 'בחר תמונה מהמכשיר' : 'Upload Picture(s)'}
                 </button>
                 <button type="button" onclick="toggleCustomGoalPanel('${escSid}', '${escGid}', 'picture')" class="text-slate-400 hover:text-white px-1 text-xs">✕</button>
+              </div>
+            </div>
+            <div
+              id="goal-image-dropzone-${escapeHtml(safeId)}"
+              onclick="triggerGoalImageUpload('${escSid}', '${escGid}')"
+              ondragover="handleCustomGoalDragOver(event, this)"
+              ondragleave="handleCustomGoalDragLeave(event, this)"
+              ondrop="handleCustomGoalDrop(event, '${escSid}', '${escGid}', this)"
+              class="p-3 rounded-xl border-2 border-dashed border-sky-500/35 bg-sky-950/15 hover:bg-sky-950/25 hover:border-sky-400/60 transition cursor-pointer text-center space-y-1"
+            >
+              <div class="text-[11px] font-bold text-sky-200 flex items-center justify-center gap-1.5">
+                <i data-lucide="upload-cloud" class="w-3.5 h-3.5 text-sky-400"></i>
+                <span>${isHe ? 'גרור תמונה לכאן או לחץ לבחירה מהמחשב' : 'Drag & drop photo(s) here, or click to choose file'}</span>
               </div>
             </div>
             <div class="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
@@ -26882,6 +27001,19 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
                   ${isHe ? 'בחר קובץ שמע' : 'Upload Audio File'}
                 </button>
                 <button type="button" onclick="toggleCustomGoalPanel('${escSid}', '${escGid}', 'insert_audio')" class="text-slate-400 hover:text-white px-1 text-xs">✕</button>
+              </div>
+            </div>
+            <div
+              id="goal-audio-dropzone-${escapeHtml(safeId)}"
+              onclick="triggerGoalAudioUpload('${escSid}', '${escGid}')"
+              ondragover="handleCustomGoalDragOver(event, this)"
+              ondragleave="handleCustomGoalDragLeave(event, this)"
+              ondrop="handleCustomGoalDrop(event, '${escSid}', '${escGid}', this)"
+              class="p-3 rounded-xl border-2 border-dashed border-violet-500/35 bg-violet-950/15 hover:bg-violet-950/25 hover:border-violet-400/60 transition cursor-pointer text-center space-y-1"
+            >
+              <div class="text-[11px] font-bold text-violet-200 flex items-center justify-center gap-1.5">
+                <i data-lucide="upload-cloud" class="w-3.5 h-3.5 text-violet-400"></i>
+                <span>${isHe ? 'גרור הקלטה / קובץ שמע לכאן או לחץ לבחירה מהמחשב' : 'Drag & drop recording/audio file here, or click to choose file'}</span>
               </div>
             </div>
             <div class="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
@@ -27985,6 +28117,9 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       }
       if (window.lucide && typeof lucide.createIcons === 'function') {
         lucide.createIcons();
+      }
+      if (typeof hydrateGoalAudioElements === 'function') {
+        hydrateGoalAudioElements(body);
       }
     }
 
