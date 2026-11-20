@@ -4508,6 +4508,10 @@
   <input type="file" id="parsha-audio-file-input" accept="audio/*" class="hidden" onchange="handleParshaAudioSelected(event)">
   <!-- Hidden Dvar Torah File Input -->
   <input type="file" id="dvar-torah-file-input" accept=".txt,.md,.pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" class="hidden" onchange="handleDvarTorahFileSelected(event)">
+  <!-- Hidden Custom Student Goal Media Inputs -->
+  <input type="file" id="goal-image-file-input" accept="image/*" multiple class="hidden" onchange="handleGoalImageFilesSelected(event)">
+  <input type="file" id="goal-pdf-file-input" accept=".pdf,application/pdf" class="hidden" onchange="handleGoalPdfFileSelected(event)">
+  <input type="file" id="goal-audio-file-input" accept="audio/*" class="hidden" onchange="handleGoalAudioFileSelected(event)">
 
   <!-- ============================================== -->
   <!-- MODAL: SHARE WORKSPACE (Instant Sync)          -->
@@ -8659,12 +8663,15 @@ alter publication supabase_realtime add table public.students_sync;`;
               ${goals.length === 0 ? `
                 <p class="text-xs text-slate-500 italic">${isHe ? 'המורה טרם הוסיף יעדים אישיים.' : 'Your teacher has not added individual goals yet.'}</p>
               ` : `
-                <div class="space-y-2">
+                <div class="space-y-2.5">
                   ${goals.map(g => `
-                    <label class="flex items-center gap-3 p-3 rounded-2xl bg-slate-950/75 border ${g.completed ? 'border-emerald-500/30' : 'border-slate-800 hover:border-slate-700'} cursor-pointer transition select-none">
-                      <input type="checkbox" ${g.completed ? 'checked' : ''} onchange="toggleStudentPortalGoal('${g.id}')" class="rounded border-slate-700 text-emerald-500 focus:ring-emerald-500 bg-slate-900 w-4 h-4 shrink-0" />
-                      <span dir="auto" class="text-xs sm:text-sm ${g.completed ? 'line-through text-slate-500' : 'text-slate-100 font-medium'}">${escapeHtml(g.title)}</span>
-                    </label>
+                    <div class="p-3 rounded-2xl bg-slate-950/75 border ${g.completed ? 'border-emerald-500/30' : 'border-slate-800 hover:border-slate-700'} space-y-2 transition">
+                      <label class="flex items-center gap-3 cursor-pointer select-none">
+                        <input type="checkbox" ${g.completed ? 'checked' : ''} onchange="toggleStudentPortalGoal('${g.id}')" class="rounded border-slate-700 text-emerald-500 focus:ring-emerald-500 bg-slate-900 w-4 h-4 shrink-0" />
+                        <span dir="auto" class="text-xs sm:text-sm ${g.completed ? 'line-through text-slate-500' : 'text-slate-100 font-medium'}">${escapeHtml(g.title)}</span>
+                      </label>
+                      ${typeof renderCustomGoalMediaStripHtml === 'function' ? renderCustomGoalMediaStripHtml(stu.id, g, g.id, { readonly: true }) : ''}
+                    </div>
                   `).join('')}
                 </div>
               `}
@@ -12288,16 +12295,26 @@ alter publication supabase_realtime add table public.students_sync;`;
     async function loadPdfDocumentCached(pdfUrl) {
       const cleanUrl = String(pdfUrl || '').trim();
       if (!cleanUrl) throw new Error('Missing PDF URL');
-      if (window.__pdfDocCache[cleanUrl]) return window.__pdfDocCache[cleanUrl];
-      if (!window.__pdfPromiseCache[cleanUrl]) {
-        window.__pdfPromiseCache[cleanUrl] = (async () => {
+      const cacheKey = cleanUrl.startsWith('data:') ? ('data_' + cleanUrl.length + '_' + cleanUrl.slice(0, 64) + '_' + cleanUrl.slice(-24)) : cleanUrl;
+      if (window.__pdfDocCache[cacheKey]) return window.__pdfDocCache[cacheKey];
+      if (!window.__pdfPromiseCache[cacheKey]) {
+        window.__pdfPromiseCache[cacheKey] = (async () => {
           const lib = await ensurePdfJsLoaded();
+          if (cleanUrl.startsWith('data:application/pdf;base64,')) {
+            const b64 = cleanUrl.split(',')[1] || '';
+            const bin = atob(b64);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            const doc = await lib.getDocument({ data: bytes }).promise;
+            window.__pdfDocCache[cacheKey] = doc;
+            return doc;
+          }
           const doc = await lib.getDocument({ url: cleanUrl, withCredentials: false }).promise;
-          window.__pdfDocCache[cleanUrl] = doc;
+          window.__pdfDocCache[cacheKey] = doc;
           return doc;
         })();
       }
-      return window.__pdfPromiseCache[cleanUrl];
+      return window.__pdfPromiseCache[cacheKey];
     }
 
     async function getPdfPageCount(pdfUrl) {
@@ -12387,9 +12404,18 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (titleEl) titleEl.textContent = effectiveTitle;
       if (subEl) subEl.textContent = st.subtitle || (st.pdfUrl ? st.pdfUrl.split('/').pop() : '');
       if (pillEl) pillEl.textContent = st.totalPages > 0 ? `Page ${st.pageNum} / ${st.totalPages}` : `Page ${st.pageNum}`;
-      const extHref = effectiveImage || (st.pdfUrl ? `${st.pdfUrl}#page=${st.pageNum}` : '#');
+      const extHref = effectiveImage || (st.pdfUrl ? (st.pdfUrl.startsWith('data:') ? st.pdfUrl : `${st.pdfUrl}#page=${st.pageNum}`) : '#');
       if (extLink) {
         extLink.href = extHref;
+        if (extHref.startsWith('data:')) {
+          const safeExt = effectiveImage ? 'jpg' : 'pdf';
+          const safeSlug = String(effectiveTitle || 'attachment').replace(/[^a-zA-Z0-9_-]+/g, '_').slice(0, 48) || 'attachment';
+          extLink.setAttribute('download', `${safeSlug}.${safeExt}`);
+          extLink.removeAttribute('target');
+        } else {
+          extLink.removeAttribute('download');
+          extLink.setAttribute('target', '_blank');
+        }
         extLink.classList.toggle('hidden', extHref === '#');
       }
       if (canvasEl) canvasEl.classList.add('hidden');
@@ -25102,23 +25128,685 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       }
     }
 
+    var pendingGoalDraftMap = {};
+    var customGoalPanelMap = {};
+    var currentGoalMediaTarget = { studentId: '', goalId: '__draft__' };
+    var goalAudioRecordingState = { active: false, studentId: '', goalId: '', recorder: null, stream: null, chunks: [], seconds: 0, timerId: null };
+
+    function ensureCustomGoalMediaShape(goal) {
+      if (!goal || typeof goal !== 'object') return goal;
+      if (!Array.isArray(goal.images)) goal.images = [];
+      if (!Array.isArray(goal.pdfs)) goal.pdfs = [];
+      if (!Array.isArray(goal.recordings)) goal.recordings = [];
+      return goal;
+    }
+
+    function getPendingGoalDraft(studentId) {
+      if (!studentId) return { title: '', images: [], pdfs: [], recordings: [] };
+      if (!pendingGoalDraftMap[studentId]) {
+        pendingGoalDraftMap[studentId] = { title: '', images: [], pdfs: [], recordings: [] };
+      }
+      return ensureCustomGoalMediaShape(pendingGoalDraftMap[studentId]);
+    }
+
+    function syncPendingGoalTitleFromInput(studentId) {
+      const inp = document.getElementById('input-drawer-quick-goal');
+      if (inp && studentId) {
+        const draft = getPendingGoalDraft(studentId);
+        draft.title = inp.value || '';
+      }
+    }
+
+    function findStudentAndGoalForMedia(studentId, goalId) {
+      const stu = (APP_STATE.students || []).find(s => s.id === studentId) ||
+        (APP_STATE.studentPortalStudent && APP_STATE.studentPortalStudent.id === studentId ? APP_STATE.studentPortalStudent : null);
+      if (goalId === '__draft__') {
+        return { student: stu, goal: getPendingGoalDraft(studentId), isDraft: true };
+      }
+      const goals = stu && stu.skills && Array.isArray(stu.skills.customGoals) ? stu.skills.customGoals : [];
+      const goal = goals.find(g => g.id === goalId) || null;
+      return { student: stu, goal: goal ? ensureCustomGoalMediaShape(goal) : null, isDraft: false };
+    }
+
+    function getCoursePdfCatalogForGoals() {
+      const out = [];
+      const seen = new Set();
+      (Array.isArray(APP_STATE.customCourses) ? APP_STATE.customCourses : []).forEach(course => {
+        const lessonsList = Array.isArray(course && course.lessons)
+          ? course.lessons
+          : (course && course.lessons && typeof course.lessons === 'object' ? Object.values(course.lessons) : []);
+        lessonsList.forEach(lesson => {
+          if (!lesson || typeof lesson !== 'object') return;
+          const sectionsList = Array.isArray(lesson.sections)
+            ? lesson.sections
+            : (lesson.sections && typeof lesson.sections === 'object' ? Object.values(lesson.sections) : []);
+          const sectionDataList = lesson.sectionData && typeof lesson.sectionData === 'object'
+            ? Object.values(lesson.sectionData)
+            : [];
+          const candidates = [...sectionsList, ...sectionDataList];
+          candidates.forEach(rawSec => {
+            if (!rawSec) return;
+            let parsed = rawSec;
+            if (typeof rawSec === 'string') {
+              if (typeof parseStructuredSectionData === 'function') {
+                parsed = parseStructuredSectionData(rawSec, 'booklet_pages');
+              } else {
+                try { parsed = JSON.parse(rawSec); } catch (e) { parsed = null; }
+              }
+            }
+            if (!parsed || typeof parsed !== 'object') return;
+            const pdfUrl = String((parsed.data && parsed.data.pdfUrl) || parsed.pdfUrl || '').trim();
+            if (pdfUrl && !seen.has(pdfUrl)) {
+              seen.add(pdfUrl);
+              const pagesArr = (parsed.data && Array.isArray(parsed.data.pages)) ? parsed.data.pages : (Array.isArray(parsed.pages) ? parsed.pages : []);
+              const totalPages = (parsed.data && Number(parsed.data.totalPages)) || Number(parsed.totalPages) || pagesArr.length || 0;
+              out.push({
+                pdfUrl,
+                title: `${course.title || 'Course'} — ${lesson.title || 'Lesson'}`,
+                totalPages
+              });
+            }
+          });
+        });
+      });
+      return out;
+    }
+
+    function addCustomGoalMediaItem(studentId, goalId, kind, item) {
+      if (!studentId || !goalId || !item) return false;
+      syncPendingGoalTitleFromInput(studentId);
+      const found = findStudentAndGoalForMedia(studentId, goalId);
+      if (!found.goal) return false;
+      if (kind !== 'images' && kind !== 'pdfs' && kind !== 'recordings') return false;
+      found.goal[kind].push({
+        id: (kind.slice(0, 3)) + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        date: new Date().toISOString().split('T')[0],
+        ...item
+      });
+      if (!found.isDraft && found.student) {
+        saveStudentsToStorage(true);
+        if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(found.student);
+      }
+      if (APP_STATE.activeStudentDrawerId === studentId) {
+        renderStudentDrawer(studentId, true);
+      }
+      return true;
+    }
+
+    function removeCustomGoalAttachment(studentId, goalId, kind, itemId) {
+      if (!studentId || !goalId || !itemId) return;
+      syncPendingGoalTitleFromInput(studentId);
+      const found = findStudentAndGoalForMedia(studentId, goalId);
+      if (!found.goal || !Array.isArray(found.goal[kind])) return;
+      found.goal[kind] = found.goal[kind].filter(x => x.id !== itemId);
+      if (!found.isDraft && found.student) {
+        saveStudentsToStorage(true);
+        if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(found.student);
+      }
+      if (APP_STATE.activeStudentDrawerId === studentId) {
+        renderStudentDrawer(studentId, true);
+      }
+    }
+
+    function toggleCustomGoalPanel(studentId, goalId, mode) {
+      if (!studentId) return;
+      syncPendingGoalTitleFromInput(studentId);
+      const cur = customGoalPanelMap[studentId];
+      if (cur && cur.goalId === goalId && cur.mode === mode) {
+        delete customGoalPanelMap[studentId];
+      } else {
+        customGoalPanelMap[studentId] = { goalId: goalId || '__draft__', mode };
+      }
+      if (APP_STATE.activeStudentDrawerId === studentId) {
+        renderStudentDrawer(studentId, true);
+      }
+    }
+
+    function compressGoalImageFile(file) {
+      return new Promise((resolve, reject) => {
+        if (typeof FileReader === 'undefined') {
+          reject(new Error('FileReader unavailable'));
+          return;
+        }
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Failed to read image file'));
+        reader.onload = ev => {
+          const rawUrl = String((ev && ev.target && ev.target.result) || '');
+          if (typeof Image === 'undefined' || typeof document === 'undefined') {
+            resolve(rawUrl);
+            return;
+          }
+          const img = new Image();
+          img.onerror = () => resolve(rawUrl);
+          img.onload = () => {
+            try {
+              const maxEdge = 1200;
+              let w = img.width || maxEdge;
+              let h = img.height || maxEdge;
+              if (w > maxEdge || h > maxEdge) {
+                const ratio = Math.min(maxEdge / w, maxEdge / h);
+                w = Math.max(1, Math.round(w * ratio));
+                h = Math.max(1, Math.round(h * ratio));
+              }
+              const canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, w, h);
+              resolve(canvas.toDataURL('image/jpeg', 0.8));
+            } catch (e) {
+              resolve(rawUrl);
+            }
+          };
+          img.src = rawUrl;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function triggerGoalImageUpload(studentId, goalId) {
+      syncPendingGoalTitleFromInput(studentId);
+      currentGoalMediaTarget = { studentId, goalId: goalId || '__draft__' };
+      const inp = document.getElementById('goal-image-file-input');
+      if (inp) {
+        inp.value = '';
+        inp.click();
+      }
+    }
+
+    async function handleGoalImageFilesSelected(event) {
+      const files = event && event.target && event.target.files ? Array.from(event.target.files) : [];
+      if (!files.length || !currentGoalMediaTarget.studentId) return;
+      const { studentId, goalId } = currentGoalMediaTarget;
+      let added = 0;
+      for (const file of files) {
+        if (file.size > 20 * 1024 * 1024) {
+          showToast(APP_STATE.lang === 'he' ? `התמונה "${file.name}" גדולה מדי (מעל 20MB)` : `"${file.name}" exceeds 20MB limit`);
+          continue;
+        }
+        try {
+          const dataUrl = await compressGoalImageFile(file);
+          const cleanName = String(file.name || 'Picture').replace(/\.[^/.]+$/, '') || 'Picture';
+          if (addCustomGoalMediaItem(studentId, goalId, 'images', { title: cleanName, url: dataUrl })) {
+            added += 1;
+          }
+        } catch (err) {
+          console.warn('Goal image attach error:', err);
+        }
+      }
+      if (added > 0) {
+        if (customGoalPanelMap[studentId]?.mode === 'picture') delete customGoalPanelMap[studentId];
+        if (APP_STATE.activeStudentDrawerId === studentId) renderStudentDrawer(studentId, true);
+        showToast(APP_STATE.lang === 'he' ? `נוספו ${added} תמונות ליעד` : `${added} picture(s) added`);
+      }
+    }
+
+    function applyCustomGoalImageUrl(studentId, goalId) {
+      const safeId = `${goalId === '__draft__' ? 'draft' : goalId}`;
+      const urlInp = document.getElementById(`goal-img-url-input-${safeId}`);
+      const titleInp = document.getElementById(`goal-img-title-input-${safeId}`);
+      const cleanUrl = String(urlInp?.value || '').trim();
+      if (!cleanUrl) {
+        showToast(APP_STATE.lang === 'he' ? 'הדבק קישור לתמונה תחילה' : 'Please paste an image URL first');
+        return;
+      }
+      const title = String(titleInp?.value || '').trim() || cleanUrl.split('/').pop().split('?')[0] || 'Picture';
+      if (addCustomGoalMediaItem(studentId, goalId, 'images', { title, url: cleanUrl })) {
+        delete customGoalPanelMap[studentId];
+        renderStudentDrawer(studentId, true);
+        showToast(APP_STATE.lang === 'he' ? 'התמונה נוספה ליעד!' : 'Picture added to goal!');
+      }
+    }
+
+    function triggerGoalPdfUpload(studentId, goalId) {
+      syncPendingGoalTitleFromInput(studentId);
+      currentGoalMediaTarget = { studentId, goalId: goalId || '__draft__' };
+      const inp = document.getElementById('goal-pdf-file-input');
+      if (inp) {
+        inp.value = '';
+        inp.click();
+      }
+    }
+
+    function handleGoalPdfFileSelected(event) {
+      const file = event && event.target && event.target.files && event.target.files[0];
+      if (!file || !currentGoalMediaTarget.studentId) return;
+      const { studentId, goalId } = currentGoalMediaTarget;
+      const isHe = APP_STATE.lang === 'he';
+      if (file.size > 5 * 1024 * 1024) {
+        showToast(isHe ? 'קובץ PDF מקומי מוגבל ל-5MB. מומלץ לחבר קישור PDF ישיר.' : 'Local PDF upload max is 5MB. Connect a PDF link URL for larger files.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const dataUrl = String((ev && ev.target && ev.target.result) || '');
+        const safeId = `${goalId === '__draft__' ? 'draft' : goalId}`;
+        const pageInp = document.getElementById(`goal-pdf-page-input-${safeId}`);
+        const pageNum = Math.max(1, parseInt(pageInp?.value || '1', 10) || 1);
+        const cleanTitle = String(file.name || 'PDF Booklet').replace(/\.[^/.]+$/, '') || 'PDF Booklet';
+        if (addCustomGoalMediaItem(studentId, goalId, 'pdfs', { title: cleanTitle, url: dataUrl, pageNum, source: 'file' })) {
+          delete customGoalPanelMap[studentId];
+          if (APP_STATE.activeStudentDrawerId === studentId) renderStudentDrawer(studentId, true);
+          showToast(isHe ? 'קובץ ה-PDF חובר ליעד!' : 'PDF connected to goal!');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function applyCustomGoalPdfUrl(studentId, goalId) {
+      const safeId = `${goalId === '__draft__' ? 'draft' : goalId}`;
+      const urlInp = document.getElementById(`goal-pdf-url-input-${safeId}`);
+      const pageInp = document.getElementById(`goal-pdf-page-input-${safeId}`);
+      const titleInp = document.getElementById(`goal-pdf-title-input-${safeId}`);
+      const cleanUrl = String(urlInp?.value || '').trim();
+      const isHe = APP_STATE.lang === 'he';
+      if (!cleanUrl) {
+        showToast(isHe ? 'הזן קישור לקובץ PDF או בחר מקורס' : 'Enter a PDF link URL or pick one from Courses');
+        return;
+      }
+      const pageNum = Math.max(1, parseInt(pageInp?.value || '1', 10) || 1);
+      const fallbackName = cleanUrl.split('/').pop().split('?')[0].replace(/\.pdf$/i, '') || 'Connected PDF';
+      const title = String(titleInp?.value || '').trim() || decodeURIComponent(fallbackName);
+      if (addCustomGoalMediaItem(studentId, goalId, 'pdfs', { title, url: cleanUrl, pageNum, source: 'url' })) {
+        delete customGoalPanelMap[studentId];
+        renderStudentDrawer(studentId, true);
+        showToast(isHe ? 'ה-PDF חובר ליעד!' : 'PDF connected to goal!');
+      }
+    }
+
+    function applySelectedCoursePdfToGoal(studentId, goalId) {
+      const safeId = `${goalId === '__draft__' ? 'draft' : goalId}`;
+      const sel = document.getElementById(`goal-course-pdf-select-${safeId}`);
+      const pageInp = document.getElementById(`goal-pdf-page-input-${safeId}`);
+      const cleanUrl = String(sel?.value || '').trim();
+      if (!cleanUrl) {
+        showToast(APP_STATE.lang === 'he' ? 'בחר קובץ PDF מהרשימה' : 'Select a Course PDF from the dropdown');
+        return;
+      }
+      const chosenOpt = sel.options && sel.options[sel.selectedIndex];
+      const label = (chosenOpt && chosenOpt.getAttribute('data-label')) || 'Course Booklet PDF';
+      const pageNum = Math.max(1, parseInt(pageInp?.value || '1', 10) || 1);
+      if (addCustomGoalMediaItem(studentId, goalId, 'pdfs', { title: label, url: cleanUrl, pageNum, source: 'course' })) {
+        delete customGoalPanelMap[studentId];
+        renderStudentDrawer(studentId, true);
+        showToast(APP_STATE.lang === 'he' ? 'קובץ הקורס חובר ליעד!' : 'Course PDF connected to goal!');
+      }
+    }
+
+    function triggerGoalAudioUpload(studentId, goalId) {
+      syncPendingGoalTitleFromInput(studentId);
+      currentGoalMediaTarget = { studentId, goalId: goalId || '__draft__' };
+      const inp = document.getElementById('goal-audio-file-input');
+      if (inp) {
+        inp.value = '';
+        inp.click();
+      }
+    }
+
+    function handleGoalAudioFileSelected(event) {
+      const file = event && event.target && event.target.files && event.target.files[0];
+      if (!file || !currentGoalMediaTarget.studentId) return;
+      const { studentId, goalId } = currentGoalMediaTarget;
+      const isHe = APP_STATE.lang === 'he';
+      if (file.size > 15 * 1024 * 1024) {
+        showToast(isHe ? 'קובץ השמע גדול מדי (מקסימום 15MB). הדבק קישור שמע במקום.' : 'Audio file exceeds 15MB max. Paste an audio URL instead.');
+        return;
+      }
+      const safeId = `${goalId === '__draft__' ? 'draft' : goalId}`;
+      const titleInp = document.getElementById(`goal-audio-title-input-${safeId}`);
+      const defaultName = String(file.name || 'Audio Clip').replace(/\.[^/.]+$/, '') || 'Audio Clip';
+      const title = String(titleInp?.value || '').trim() || defaultName;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const dataUrl = String((ev && ev.target && ev.target.result) || '');
+        if (addCustomGoalMediaItem(studentId, goalId, 'recordings', { title, url: dataUrl, type: 'audio' })) {
+          delete customGoalPanelMap[studentId];
+          if (APP_STATE.activeStudentDrawerId === studentId) renderStudentDrawer(studentId, true);
+          showToast(isHe ? 'קובץ השמע נוסף ליעד!' : 'Recording inserted into goal!');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function applyCustomGoalAudioUrl(studentId, goalId) {
+      const safeId = `${goalId === '__draft__' ? 'draft' : goalId}`;
+      const urlInp = document.getElementById(`goal-audio-url-input-${safeId}`);
+      const titleInp = document.getElementById(`goal-audio-title-input-${safeId}`);
+      const cleanUrl = String(urlInp?.value || '').trim();
+      const isHe = APP_STATE.lang === 'he';
+      if (!cleanUrl) {
+        showToast(isHe ? 'הזן קישור שמע או העלה קובץ' : 'Enter an audio URL or upload a recording file');
+        return;
+      }
+      const title = String(titleInp?.value || '').trim() || cleanUrl.split('/').pop().split('?')[0] || 'Audio Link';
+      if (addCustomGoalMediaItem(studentId, goalId, 'recordings', { title, url: cleanUrl, type: 'link' })) {
+        delete customGoalPanelMap[studentId];
+        renderStudentDrawer(studentId, true);
+        showToast(isHe ? 'קישור השמע נוסף ליעד!' : 'Audio link inserted into goal!');
+      }
+    }
+
+    async function startGoalVoiceRecording(studentId, goalId) {
+      const isHe = APP_STATE.lang === 'he';
+      syncPendingGoalTitleFromInput(studentId);
+      if (goalAudioRecordingState.active) {
+        stopGoalVoiceRecording();
+        return;
+      }
+      if (typeof navigator === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
+        showToast(isHe ? 'הקלטת מיקרופון אינה נתמכת בדפדפן זה; ניתן להכניס קובץ שמע.' : 'Microphone recording unavailable here; use Insert Recording to upload audio.');
+        return;
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        let options = {};
+        if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) options = { mimeType: 'audio/webm;codecs=opus' };
+        else if (MediaRecorder.isTypeSupported('audio/webm')) options = { mimeType: 'audio/webm' };
+        else if (MediaRecorder.isTypeSupported('audio/mp4')) options = { mimeType: 'audio/mp4' };
+
+        const recorder = new MediaRecorder(stream, options);
+        goalAudioRecordingState = {
+          active: true,
+          studentId,
+          goalId: goalId || '__draft__',
+          recorder,
+          stream,
+          chunks: [],
+          seconds: 0,
+          timerId: null
+        };
+
+        recorder.ondataavailable = ev => {
+          if (ev.data && ev.data.size > 0) goalAudioRecordingState.chunks.push(ev.data);
+        };
+
+        recorder.onstop = () => {
+          const st = { ...goalAudioRecordingState };
+          if (st.timerId) clearInterval(st.timerId);
+          if (st.stream) st.stream.getTracks().forEach(t => t.stop());
+          const savedChunks = st.chunks || [];
+          const cancelled = st.cancelled;
+          goalAudioRecordingState = { active: false, studentId: '', goalId: '', recorder: null, stream: null, chunks: [], seconds: 0, timerId: null };
+          if (cancelled || savedChunks.length === 0) {
+            if (APP_STATE.activeStudentDrawerId === st.studentId) renderStudentDrawer(st.studentId, true);
+            return;
+          }
+          const mimeType = recorder.mimeType || 'audio/webm';
+          const blob = new Blob(savedChunks, { type: mimeType });
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const dataUrl = String(reader.result || '');
+            const now = new Date();
+            const stamp = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const label = (APP_STATE.lang === 'he' ? 'הקלטה ' : 'Recording ') + stamp;
+            addCustomGoalMediaItem(st.studentId, st.goalId, 'recordings', { title: label, url: dataUrl, type: 'audio' });
+            showToast(APP_STATE.lang === 'he' ? 'ההקלטה נשמרה בתוך היעד!' : 'Recording created & saved to goal!');
+          };
+          reader.readAsDataURL(blob);
+        };
+
+        recorder.start(250);
+        goalAudioRecordingState.timerId = setInterval(() => {
+          goalAudioRecordingState.seconds += 1;
+          const m = String(Math.floor(goalAudioRecordingState.seconds / 60)).padStart(2, '0');
+          const s = String(goalAudioRecordingState.seconds % 60).padStart(2, '0');
+          const lbl = document.getElementById('goal-rec-timer-label');
+          if (lbl) lbl.textContent = `${m}:${s}`;
+        }, 1000);
+
+        if (APP_STATE.activeStudentDrawerId === studentId) renderStudentDrawer(studentId, true);
+      } catch (err) {
+        console.warn('Goal microphone recording error:', err);
+        goalAudioRecordingState = { active: false, studentId: '', goalId: '', recorder: null, stream: null, chunks: [], seconds: 0, timerId: null };
+        showToast(isHe ? 'לא ניתנה הרשאה למיקרופון' : 'Microphone permission denied or unavailable');
+      }
+    }
+
+    function stopGoalVoiceRecording() {
+      if (goalAudioRecordingState.timerId) {
+        clearInterval(goalAudioRecordingState.timerId);
+        goalAudioRecordingState.timerId = null;
+      }
+      if (goalAudioRecordingState.recorder && goalAudioRecordingState.recorder.state !== 'inactive') {
+        goalAudioRecordingState.recorder.stop();
+      } else {
+        if (goalAudioRecordingState.stream) goalAudioRecordingState.stream.getTracks().forEach(t => t.stop());
+        const sid = goalAudioRecordingState.studentId;
+        goalAudioRecordingState = { active: false, studentId: '', goalId: '', recorder: null, stream: null, chunks: [], seconds: 0, timerId: null };
+        if (sid && APP_STATE.activeStudentDrawerId === sid) renderStudentDrawer(sid, true);
+      }
+    }
+
+    function cancelGoalVoiceRecording() {
+      if (!goalAudioRecordingState.active && !goalAudioRecordingState.stream) return;
+      if (goalAudioRecordingState.timerId) {
+        clearInterval(goalAudioRecordingState.timerId);
+        goalAudioRecordingState.timerId = null;
+      }
+      goalAudioRecordingState.cancelled = true;
+      if (goalAudioRecordingState.recorder && goalAudioRecordingState.recorder.state !== 'inactive') {
+        goalAudioRecordingState.recorder.stop();
+      } else {
+        if (goalAudioRecordingState.stream) goalAudioRecordingState.stream.getTracks().forEach(t => t.stop());
+        const sid = goalAudioRecordingState.studentId;
+        goalAudioRecordingState = { active: false, studentId: '', goalId: '', recorder: null, stream: null, chunks: [], seconds: 0, timerId: null };
+        if (sid && APP_STATE.activeStudentDrawerId === sid) renderStudentDrawer(sid, true);
+      }
+    }
+
+    function openCustomGoalAttachmentViewer(studentId, goalId, kind, itemId) {
+      const found = findStudentAndGoalForMedia(studentId, goalId);
+      if (!found.goal || typeof openBookletPageViewerModal !== 'function') return;
+      const stuName = (found.student && found.student.name) || '';
+      if (kind === 'image') {
+        const img = (found.goal.images || []).find(i => i.id === itemId);
+        if (img && img.url) {
+          openBookletPageViewerModal('', 1, img.title || found.goal.title || 'Goal Picture', stuName, img.url);
+        }
+      } else if (kind === 'pdf') {
+        const pdf = (found.goal.pdfs || []).find(p => p.id === itemId);
+        if (pdf && pdf.url) {
+          openBookletPageViewerModal(pdf.url, pdf.pageNum || 1, pdf.title || found.goal.title || 'Connected PDF', stuName);
+        }
+      }
+    }
+
+    function renderCustomGoalMediaStripHtml(studentId, goalObj, goalId, options = {}) {
+      const g = ensureCustomGoalMediaShape(goalObj || {});
+      const readonly = !!options.readonly;
+      const isHe = APP_STATE.lang === 'he';
+      const imgs = g.images || [];
+      const pdfs = g.pdfs || [];
+      const recs = g.recordings || [];
+      if (!imgs.length && !pdfs.length && !recs.length) return '';
+
+      const imgsHtml = imgs.length ? `
+        <div class="flex flex-wrap gap-2">
+          ${imgs.map(img => `
+            <div class="relative group rounded-xl overflow-hidden border border-slate-700/90 bg-slate-950 w-16 h-16 shrink-0">
+              <img src="${escapeHtml(img.url || '')}" alt="${escapeHtml(img.title || 'Goal picture')}" onclick="openCustomGoalAttachmentViewer('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'image', '${escapeHtml(img.id)}')" class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition" title="${escapeHtml(img.title || 'View picture')}" />
+              ${readonly ? '' : `
+                <button type="button" onclick="event.stopPropagation(); removeCustomGoalAttachment('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'images', '${escapeHtml(img.id)}')" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/80 text-slate-200 hover:text-red-400 text-[10px] leading-none flex items-center justify-center" title="${isHe ? 'הסר תמונה' : 'Remove picture'}">✕</button>
+              `}
+            </div>
+          `).join('')}
+        </div>
+      ` : '';
+
+      const pdfsHtml = pdfs.length ? `
+        <div class="flex flex-wrap gap-1.5">
+          ${pdfs.map(pdf => `
+            <div class="inline-flex items-center gap-1 rounded-xl bg-teal-500/12 border border-teal-500/35 px-2 py-1 text-[11px] text-teal-200 max-w-full">
+              <button type="button" onclick="openCustomGoalAttachmentViewer('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'pdf', '${escapeHtml(pdf.id)}')" class="inline-flex items-center gap-1.5 hover:text-white transition min-w-0">
+                <i data-lucide="file-text" class="w-3 h-3 text-teal-400 shrink-0"></i>
+                <span dir="auto" class="truncate max-w-[180px] font-semibold">${escapeHtml(pdf.title || 'PDF')}</span>
+                <span class="px-1.5 py-0.2 rounded bg-teal-950/90 text-teal-300 font-mono text-[10px] shrink-0">Pg ${Number(pdf.pageNum) || 1}</span>
+              </button>
+              ${readonly ? '' : `
+                <button type="button" onclick="removeCustomGoalAttachment('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'pdfs', '${escapeHtml(pdf.id)}')" class="text-slate-400 hover:text-red-400 px-0.5 text-[11px] leading-none" title="${isHe ? 'נתק PDF' : 'Remove PDF'}">✕</button>
+              `}
+            </div>
+          `).join('')}
+        </div>
+      ` : '';
+
+      const recsHtml = recs.length ? `
+        <div class="space-y-1.5">
+          ${recs.map(rec => `
+            <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-950/85 border border-violet-500/30 flex-wrap sm:flex-nowrap">
+              <div class="flex items-center gap-1.5 min-w-0 shrink-0 max-w-[160px]">
+                <i data-lucide="volume-2" class="w-3.5 h-3.5 text-violet-400 shrink-0"></i>
+                <span dir="auto" class="text-[11px] font-semibold text-violet-200 truncate" title="${escapeHtml(rec.title || 'Recording')}">${escapeHtml(rec.title || 'Recording')}</span>
+              </div>
+              <audio controls preload="metadata" src="${escapeHtml(rec.url || '')}" class="h-7 flex-1 min-w-[150px] max-w-full"></audio>
+              ${readonly ? '' : `
+                <button type="button" onclick="removeCustomGoalAttachment('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'recordings', '${escapeHtml(rec.id)}')" class="text-slate-500 hover:text-red-400 px-1 text-xs leading-none shrink-0" title="${isHe ? 'מחק הקלטה' : 'Delete recording'}">✕</button>
+              `}
+            </div>
+          `).join('')}
+        </div>
+      ` : '';
+
+      return `<div class="space-y-2 pt-2 border-t border-slate-800/70">${imgsHtml}${pdfsHtml}${recsHtml}</div>`;
+    }
+
+    function renderCustomGoalActionPanelHtml(studentId, goalId, isHe) {
+      const panel = customGoalPanelMap[studentId];
+      if (!panel || panel.goalId !== goalId) return '';
+      const safeId = `${goalId === '__draft__' ? 'draft' : goalId}`;
+      const escSid = escapeHtml(studentId);
+      const escGid = escapeHtml(goalId);
+
+      if (panel.mode === 'picture') {
+        return `
+          <div class="p-2.5 rounded-xl bg-slate-950/95 border border-sky-500/35 space-y-2 text-xs">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-bold text-sky-300 flex items-center gap-1.5">
+                <i data-lucide="image" class="w-3.5 h-3.5"></i>
+                <span>${isHe ? 'הוסף תמונה ליעד' : 'Add Picture to Goal'}</span>
+              </span>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="triggerGoalImageUpload('${escSid}', '${escGid}')" class="px-2.5 py-1 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-200 border border-sky-400/40 font-bold text-[11px] transition">
+                  ${isHe ? 'בחר תמונה מהמכשיר' : 'Upload Picture(s)'}
+                </button>
+                <button type="button" onclick="toggleCustomGoalPanel('${escSid}', '${escGid}', 'picture')" class="text-slate-400 hover:text-white px-1 text-xs">✕</button>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
+              <input id="goal-img-url-input-${escapeHtml(safeId)}" type="url" placeholder="${isHe ? 'או הדבק קישור לתמונה (https://...)' : 'Or paste picture URL (https://...)'}" class="flex-1 min-w-[160px] bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-sky-400" />
+              <input id="goal-img-title-input-${escapeHtml(safeId)}" type="text" placeholder="${isHe ? 'כותרת (רשות)' : 'Title (optional)'}" class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-sky-400" />
+              <button type="button" onclick="applyCustomGoalImageUrl('${escSid}', '${escGid}')" class="px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-[11px] transition shrink-0">
+                ${isHe ? 'הוסף' : 'Add'}
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      if (panel.mode === 'pdf') {
+        const catalog = getCoursePdfCatalogForGoals();
+        return `
+          <div class="p-2.5 rounded-xl bg-slate-950/95 border border-teal-500/35 space-y-2 text-xs">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-bold text-teal-300 flex items-center gap-1.5">
+                <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                <span>${isHe ? 'חבר קובץ PDF ליעד' : 'Connect PDF to Goal'}</span>
+              </span>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="triggerGoalPdfUpload('${escSid}', '${escGid}')" class="px-2.5 py-1 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-200 border border-teal-400/40 font-bold text-[11px] transition">
+                  ${isHe ? 'העלה PDF מהמכשיר' : 'Upload PDF File'}
+                </button>
+                <button type="button" onclick="toggleCustomGoalPanel('${escSid}', '${escGid}', 'pdf')" class="text-slate-400 hover:text-white px-1 text-xs">✕</button>
+              </div>
+            </div>
+            ${catalog.length > 0 ? `
+              <div class="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
+                <select id="goal-course-pdf-select-${escapeHtml(safeId)}" class="flex-1 min-w-[160px] bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none focus:border-teal-400">
+                  <option value="">${isHe ? 'בחר PDF מתוך הקורסים שלך...' : 'Pick PDF from a Course Lesson...'}</option>
+                  ${catalog.map(c => `<option value="${escapeHtml(c.pdfUrl)}" data-label="${escapeHtml(c.title)}">${escapeHtml(c.title)}${c.totalPages ? ` (${c.totalPages}p)` : ''}</option>`).join('')}
+                </select>
+                <button type="button" onclick="applySelectedCoursePdfToGoal('${escSid}', '${escGid}')" class="px-2.5 py-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-bold text-[11px] transition shrink-0">
+                  ${isHe ? 'חבר קורס' : 'Link'}
+                </button>
+              </div>
+            ` : ''}
+            <div class="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
+              <input id="goal-pdf-url-input-${escapeHtml(safeId)}" type="url" placeholder="${isHe ? 'או הדבק קישור PDF (https://.../booklet.pdf)' : 'Or paste PDF URL (https://.../booklet.pdf)'}" class="flex-1 min-w-[150px] bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-teal-400" />
+              <input id="goal-pdf-page-input-${escapeHtml(safeId)}" type="number" min="1" value="1" title="Start Page #" class="w-16 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white text-center focus:outline-none focus:border-teal-400" />
+              <input id="goal-pdf-title-input-${escapeHtml(safeId)}" type="text" placeholder="${isHe ? 'שם תצוגה' : 'Label'}" class="w-24 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-teal-400" />
+              <button type="button" onclick="applyCustomGoalPdfUrl('${escSid}', '${escGid}')" class="px-2.5 py-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-bold text-[11px] transition shrink-0">
+                ${isHe ? 'חבר' : 'Connect'}
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      if (panel.mode === 'insert_audio') {
+        return `
+          <div class="p-2.5 rounded-xl bg-slate-950/95 border border-violet-500/35 space-y-2 text-xs">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-bold text-violet-300 flex items-center gap-1.5">
+                <i data-lucide="music" class="w-3.5 h-3.5"></i>
+                <span>${isHe ? 'הכנס הקלטה / קובץ שמע' : 'Insert Audio Recording'}</span>
+              </span>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="triggerGoalAudioUpload('${escSid}', '${escGid}')" class="px-2.5 py-1 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 text-violet-200 border border-violet-400/40 font-bold text-[11px] transition">
+                  ${isHe ? 'בחר קובץ שמע' : 'Upload Audio File'}
+                </button>
+                <button type="button" onclick="toggleCustomGoalPanel('${escSid}', '${escGid}', 'insert_audio')" class="text-slate-400 hover:text-white px-1 text-xs">✕</button>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
+              <input id="goal-audio-title-input-${escapeHtml(safeId)}" type="text" placeholder="${isHe ? 'שם ההקלטה' : 'Recording title'}" class="w-32 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-violet-400" />
+              <input id="goal-audio-url-input-${escapeHtml(safeId)}" type="url" placeholder="${isHe ? 'או הדבק קישור לקובץ שמע (https://...mp3)' : 'Or paste audio URL (https://...mp3)'}" class="flex-1 min-w-[150px] bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-violet-400" />
+              <button type="button" onclick="applyCustomGoalAudioUrl('${escSid}', '${escGid}')" class="px-2.5 py-1 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-bold text-[11px] transition shrink-0">
+                ${isHe ? 'הכנס' : 'Insert'}
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      return '';
+    }
+
     function addQuickStudentGoalFromDrawer(studentId) {
       const inp = document.getElementById('input-drawer-quick-goal');
-      const title = (inp?.value || '').trim();
+      const draft = getPendingGoalDraft(studentId);
+      const rawTitle = (inp && typeof inp.value === 'string' ? inp.value : draft.title || '').trim();
+      const hasMedia = (draft.images.length + draft.pdfs.length + draft.recordings.length) > 0;
       const student = APP_STATE.students.find(s => s.id === studentId);
       if (!student) return;
-      if (!title) {
+      if (!rawTitle && !hasMedia) {
+        if (inp && typeof inp.focus === 'function') {
+          inp.focus();
+          return;
+        }
         if (typeof promptAddStudentCustomGoal === 'function') promptAddStudentCustomGoal(studentId);
         return;
       }
+      const fallbackTitle = (draft.pdfs[0] && draft.pdfs[0].title) || (draft.recordings[0] && draft.recordings[0].title) || (draft.images[0] && draft.images[0].title) || 'Custom Learning Goal';
+      const title = rawTitle || fallbackTitle;
       ensureStudentSkills(student);
       if (!Array.isArray(student.skills.customGoals)) student.skills.customGoals = [];
-      student.skills.customGoals.push({ id: 'goal_' + Date.now(), title, completed: false });
-      inp.value = '';
+      student.skills.customGoals.push({
+        id: 'goal_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        title,
+        completed: false,
+        images: draft.images.slice(),
+        pdfs: draft.pdfs.slice(),
+        recordings: draft.recordings.slice()
+      });
+      pendingGoalDraftMap[studentId] = { title: '', images: [], pdfs: [], recordings: [] };
+      if (customGoalPanelMap[studentId] && customGoalPanelMap[studentId].goalId === '__draft__') {
+        delete customGoalPanelMap[studentId];
+      }
+      if (inp) inp.value = '';
       saveStudentsToStorage(true);
       if (APP_STATE.cloud.client) pushStudentToCloud(student);
       renderStudentDrawer(studentId, true);
-      renderStudents();
+      if (typeof renderStudents === 'function') renderStudents();
     }
 
     function captureStudentProfileSnapshot(student) {
@@ -25396,6 +26084,7 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
     }
 
     function closeStudentDrawer() {
+      if (typeof cancelGoalVoiceRecording === 'function') cancelGoalVoiceRecording();
       APP_STATE.activeStudentDrawerId = null;
       const drawer = document.getElementById('drawer-student-detail');
       if (drawer) drawer.classList.add('hidden');
@@ -25734,9 +26423,15 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
           </div>
         ` : '';
 
-        // 3. Clean Custom Goals Checklist (No double ++, inline quick add)
+        // 3. Rich Custom Goals Checklist (Pictures, Connected PDFs, Uploaded & In-App Recorded Audio)
+        const pendingDraft = getPendingGoalDraft(student.id);
+        const pendingCount = (pendingDraft.images.length || 0) + (pendingDraft.pdfs.length || 0) + (pendingDraft.recordings.length || 0);
+        const isRecActiveForDraft = !!(goalAudioRecordingState.active && goalAudioRecordingState.studentId === student.id && goalAudioRecordingState.goalId === '__draft__');
+        const activePanelOnDraft = customGoalPanelMap[student.id] && customGoalPanelMap[student.id].goalId === '__draft__' ? customGoalPanelMap[student.id].mode : '';
+        const recTimerText = `${String(Math.floor((goalAudioRecordingState.seconds || 0) / 60)).padStart(2, '0')}:${String((goalAudioRecordingState.seconds || 0) % 60).padStart(2, '0')}`;
+
         const cardCustomGoalsHtml = `
-          <div class="p-4 rounded-2xl bg-slate-950/65 border border-slate-800/90 space-y-2.5">
+          <div id="drawer-custom-goals-card" class="p-4 rounded-2xl bg-slate-950/65 border border-slate-800/90 space-y-3">
             <div class="flex items-center justify-between gap-2">
               <span class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
                 <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
@@ -25751,24 +26446,117 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
               </button>
             </div>
 
-            <div class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+            <div class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
               ${goals.length === 0 ? `
                 <p class="text-[11px] text-slate-500 italic py-1">${isHe ? 'אין יעדים אישיים עדיין.' : 'No learning goals added yet.'}</p>
-              ` : goals.map(g => `
-                <div class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-slate-900/65 border border-slate-800/80 text-xs">
-                  <label class="flex items-center gap-2 cursor-pointer min-w-0 select-none flex-1">
-                    <input type="checkbox" ${g.completed ? 'checked' : ''} onchange="toggleStudentCustomGoal('${student.id}', '${g.id}')" class="rounded border-slate-700 text-emerald-600 focus:ring-emerald-500 bg-slate-950 w-3.5 h-3.5 shrink-0" />
-                    <span dir="auto" class="truncate ${g.completed ? 'line-through text-slate-500' : 'text-slate-200'}">${escapeHtml(g.title)}</span>
-                  </label>
-                  <button type="button" onclick="deleteStudentCustomGoal('${student.id}', '${g.id}')" class="text-slate-500 hover:text-red-400 p-0.5 shrink-0">
-                    <i data-lucide="trash-2" class="w-3 h-3"></i>
-                  </button>
-                </div>
-              `).join('')}
+              ` : goals.map(g => {
+                const isRecHere = !!(goalAudioRecordingState.active && goalAudioRecordingState.studentId === student.id && goalAudioRecordingState.goalId === g.id);
+                const activePanelMode = customGoalPanelMap[student.id] && customGoalPanelMap[student.id].goalId === g.id ? customGoalPanelMap[student.id].mode : '';
+                const mediaHtml = renderCustomGoalMediaStripHtml(student.id, g, g.id, { readonly: false });
+                const actionPanelHtml = renderCustomGoalActionPanelHtml(student.id, g.id, isHe);
+                return `
+                  <div id="goal-card-${escapeHtml(g.id)}" class="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800/85 space-y-2 text-xs">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                      <label class="flex items-center gap-2 cursor-pointer min-w-0 select-none flex-1">
+                        <input type="checkbox" ${g.completed ? 'checked' : ''} onchange="toggleStudentCustomGoal('${student.id}', '${g.id}')" class="rounded border-slate-700 text-emerald-600 focus:ring-emerald-500 bg-slate-950 w-3.5 h-3.5 shrink-0" />
+                        <span dir="auto" class="truncate font-medium ${g.completed ? 'line-through text-slate-500' : 'text-slate-100'}">${escapeHtml(g.title)}</span>
+                      </label>
+                      <div class="flex items-center gap-1 shrink-0 flex-wrap">
+                        <button type="button" onclick="toggleCustomGoalPanel('${student.id}', '${g.id}', 'picture')" class="px-1.5 py-0.5 rounded-md border text-[10px] font-semibold flex items-center gap-1 transition ${activePanelMode === 'picture' ? 'bg-sky-500/25 border-sky-400/50 text-sky-200' : 'bg-slate-950/80 border-slate-800 text-slate-400 hover:text-sky-300 hover:border-sky-500/40'}" title="${isHe ? 'הוסף תמונה' : 'Add Picture'}">
+                          <i data-lucide="image" class="w-3 h-3"></i>
+                          <span class="hidden sm:inline">${isHe ? 'תמונה' : 'Pic'}</span>
+                        </button>
+                        <button type="button" onclick="toggleCustomGoalPanel('${student.id}', '${g.id}', 'pdf')" class="px-1.5 py-0.5 rounded-md border text-[10px] font-semibold flex items-center gap-1 transition ${activePanelMode === 'pdf' ? 'bg-teal-500/25 border-teal-400/50 text-teal-200' : 'bg-slate-950/80 border-slate-800 text-slate-400 hover:text-teal-300 hover:border-teal-500/40'}" title="${isHe ? 'חבר PDF' : 'Connect PDF'}">
+                          <i data-lucide="file-text" class="w-3 h-3"></i>
+                          <span class="hidden sm:inline">PDF</span>
+                        </button>
+                        <button type="button" onclick="toggleCustomGoalPanel('${student.id}', '${g.id}', 'insert_audio')" class="px-1.5 py-0.5 rounded-md border text-[10px] font-semibold flex items-center gap-1 transition ${activePanelMode === 'insert_audio' ? 'bg-violet-500/25 border-violet-400/50 text-violet-200' : 'bg-slate-950/80 border-slate-800 text-slate-400 hover:text-violet-300 hover:border-violet-500/40'}" title="${isHe ? 'הכנס הקלטה' : 'Insert Recording'}">
+                          <i data-lucide="upload" class="w-3 h-3"></i>
+                          <span class="hidden sm:inline">${isHe ? 'הכנס' : 'Audio'}</span>
+                        </button>
+                        <button type="button" onclick="startGoalVoiceRecording('${student.id}', '${g.id}')" class="px-1.5 py-0.5 rounded-md border text-[10px] font-semibold flex items-center gap-1 transition ${isRecHere ? 'bg-red-500/25 border-red-400 text-red-200 animate-pulse' : 'bg-slate-950/80 border-slate-800 text-slate-400 hover:text-rose-300 hover:border-rose-500/40'}" title="${isHe ? (isRecHere ? 'עצור הקלטה' : 'הקלט קול') : (isRecHere ? 'Stop Recording' : 'Create Recording')}">
+                          <i data-lucide="${isRecHere ? 'square' : 'mic'}" class="w-3 h-3"></i>
+                          <span class="hidden sm:inline">${isRecHere ? (isHe ? 'עצור' : 'Stop') : (isHe ? 'הקלט' : 'Rec')}</span>
+                        </button>
+                        <button type="button" onclick="deleteStudentCustomGoal('${student.id}', '${g.id}')" class="text-slate-500 hover:text-red-400 p-0.5 shrink-0" title="${isHe ? 'מחק יעד' : 'Delete Goal'}">
+                          <i data-lucide="trash-2" class="w-3 h-3"></i>
+                        </button>
+                      </div>
+                    </div>
+                    ${isRecHere ? `
+                      <div class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-red-950/50 border border-red-500/50 text-[11px]">
+                        <span class="text-red-200 font-semibold flex items-center gap-1.5">
+                          <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                          <span>${isHe ? 'מקליט...' : 'Recording'}</span>
+                          <span id="goal-rec-timer-label" class="font-mono text-red-300 font-bold">${recTimerText}</span>
+                        </span>
+                        <div class="flex items-center gap-1.5">
+                          <button type="button" onclick="stopGoalVoiceRecording()" class="px-2 py-0.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px]">${isHe ? 'שמור' : 'Stop & Save'}</button>
+                          <button type="button" onclick="cancelGoalVoiceRecording()" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]">${isHe ? 'ביטול' : 'Cancel'}</button>
+                        </div>
+                      </div>
+                    ` : ''}
+                    ${actionPanelHtml}
+                    ${mediaHtml}
+                  </div>
+                `;
+              }).join('')}
             </div>
 
-            <div class="flex items-center gap-2 pt-1">
-              <input id="input-drawer-quick-goal" dir="auto" type="text" placeholder="${isHe ? '+ הוסף יעד מהיר ולחץ Enter...' : 'Type a new learning goal & press Enter...'}" onkeydown="if(event.key==='Enter'){ event.preventDefault(); addQuickStudentGoalFromDrawer('${student.id}'); }" class="flex-1 bg-slate-900/80 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400" />
+            <div id="custom-goal-composer" class="space-y-2 pt-1.5 border-t border-slate-800/70">
+              ${isRecActiveForDraft ? `
+                <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-red-950/55 border border-red-500/50 text-xs">
+                  <span class="text-red-200 font-semibold flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+                    <span>${isHe ? 'מקליט הקלטה חדשה...' : 'Creating Voice Recording...'}</span>
+                    <span id="goal-rec-timer-label" class="font-mono text-red-300 font-bold">${recTimerText}</span>
+                  </span>
+                  <div class="flex items-center gap-1.5">
+                    <button type="button" onclick="stopGoalVoiceRecording()" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] transition">${isHe ? 'עצור ושמור' : 'Stop & Save'}</button>
+                    <button type="button" onclick="cancelGoalVoiceRecording()" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] transition">${isHe ? 'ביטול' : 'Cancel'}</button>
+                  </div>
+                </div>
+              ` : ''}
+
+              ${pendingCount > 0 ? `
+                <div class="p-2.5 rounded-xl bg-slate-900/80 border border-emerald-500/35 space-y-1.5">
+                  <div class="flex items-center justify-between text-[11px]">
+                    <span class="font-bold text-emerald-300">${isHe ? `קבצים מוכנים ליעד החדש (${pendingCount}):` : `Ready to attach (${pendingCount}):`}</span>
+                    <button type="button" onclick="addQuickStudentGoalFromDrawer('${student.id}')" class="px-2 py-0.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px]">
+                      ${isHe ? 'שמור כיעד' : 'Save as Goal'}
+                    </button>
+                  </div>
+                  ${renderCustomGoalMediaStripHtml(student.id, pendingDraft, '__draft__', { readonly: false })}
+                </div>
+              ` : ''}
+
+              <div class="flex items-center gap-2">
+                <input id="input-drawer-quick-goal" dir="auto" type="text" value="${escapeHtml(pendingDraft.title || '')}" oninput="syncPendingGoalTitleFromInput('${student.id}')" placeholder="${isHe ? '+ הוסף יעד מהיר ולחץ Enter...' : 'Type a new learning goal & press Enter...'}" onkeydown="if(event.key==='Enter'){ event.preventDefault(); addQuickStudentGoalFromDrawer('${student.id}'); }" class="flex-1 bg-slate-900/80 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400" />
+                <button type="button" onclick="addQuickStudentGoalFromDrawer('${student.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shrink-0">
+                  ${isHe ? 'שמור' : 'Save Goal'}
+                </button>
+              </div>
+
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <button type="button" id="btn-goal-add-picture" onclick="toggleCustomGoalPanel('${student.id}', '__draft__', 'picture')" class="px-2.5 py-1 rounded-lg border text-[11px] font-semibold flex items-center gap-1.5 transition ${activePanelOnDraft === 'picture' ? 'bg-sky-500/20 border-sky-400/50 text-sky-200' : 'bg-slate-900/90 border-slate-800 text-slate-300 hover:text-sky-300 hover:border-sky-500/40'}">
+                  <i data-lucide="image" class="w-3.5 h-3.5 text-sky-400"></i>
+                  <span>${isHe ? 'הוסף תמונה' : 'Add Picture'}</span>
+                </button>
+                <button type="button" id="btn-goal-connect-pdf" onclick="toggleCustomGoalPanel('${student.id}', '__draft__', 'pdf')" class="px-2.5 py-1 rounded-lg border text-[11px] font-semibold flex items-center gap-1.5 transition ${activePanelOnDraft === 'pdf' ? 'bg-teal-500/20 border-teal-400/50 text-teal-200' : 'bg-slate-900/90 border-slate-800 text-slate-300 hover:text-teal-300 hover:border-teal-500/40'}">
+                  <i data-lucide="file-text" class="w-3.5 h-3.5 text-teal-400"></i>
+                  <span>${isHe ? 'חבר PDF' : 'Connect PDF'}</span>
+                </button>
+                <button type="button" id="btn-goal-insert-recording" onclick="toggleCustomGoalPanel('${student.id}', '__draft__', 'insert_audio')" class="px-2.5 py-1 rounded-lg border text-[11px] font-semibold flex items-center gap-1.5 transition ${activePanelOnDraft === 'insert_audio' ? 'bg-violet-500/20 border-violet-400/50 text-violet-200' : 'bg-slate-900/90 border-slate-800 text-slate-300 hover:text-violet-300 hover:border-violet-500/40'}">
+                  <i data-lucide="upload" class="w-3.5 h-3.5 text-violet-400"></i>
+                  <span>${isHe ? 'הכנס הקלטה' : 'Insert Recording'}</span>
+                </button>
+                <button type="button" id="btn-goal-create-recording" onclick="startGoalVoiceRecording('${student.id}', '__draft__')" class="px-2.5 py-1 rounded-lg border text-[11px] font-semibold flex items-center gap-1.5 transition ${isRecActiveForDraft ? 'bg-red-500/25 border-red-400 text-red-200 animate-pulse' : 'bg-slate-900/90 border-slate-800 text-slate-300 hover:text-rose-300 hover:border-rose-500/40'}">
+                  <i data-lucide="${isRecActiveForDraft ? 'square' : 'mic'}" class="w-3.5 h-3.5 ${isRecActiveForDraft ? 'text-red-300' : 'text-rose-400'}"></i>
+                  <span>${isRecActiveForDraft ? (isHe ? 'עצור והקלט' : 'Stop Recording') : (isHe ? 'צור הקלטה' : 'Create Recording')}</span>
+                </button>
+              </div>
+
+              ${renderCustomGoalActionPanelHtml(student.id, '__draft__', isHe)}
             </div>
           </div>
         `;

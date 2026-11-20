@@ -5412,6 +5412,107 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   sandbox.toggleAllLessonSections('edit', g55Course.id, g55Lesson.id);
   assert(!g56BodyEl.classList.contains('hidden'), 'toggleAllLessonSections opens sections directly via classList with zero DOM rebuild lag');
 
+  // =========================================================================
+  // GATE 57: Rich Custom Student Goals (Pictures, PDFs, Insert & Create Audio)
+  // =========================================================================
+  console.log('\n--- Running Gate 57: Rich Custom Student Goals (Pictures, PDFs & Audio) ---');
+  getOrCreateElem('drawer-student-detail').classList.remove('hidden');
+  sandbox.APP_STATE.activeStudentDrawerId = g53Student.id;
+  sandbox.APP_STATE.lang = 'en';
+  sandbox.renderStudentDrawer(g53Student.id, true);
+  const g57InitialDrawerHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(
+    g57InitialDrawerHtml.includes('Add Picture') &&
+    g57InitialDrawerHtml.includes('Connect PDF') &&
+    g57InitialDrawerHtml.includes('Insert Recording') &&
+    g57InitialDrawerHtml.includes('Create Recording'),
+    'Custom Student Goals composer renders Add Picture, Connect PDF, Insert Recording, and Create Recording buttons'
+  );
+
+  // 1. Toggle Picture, PDF (with course catalog), and Insert Audio inline panels on composer draft
+  sandbox.toggleCustomGoalPanel(g53Student.id, '__draft__', 'pdf');
+  const g57PdfPanelHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(
+    g57PdfPanelHtml.includes('Pick PDF from a Course Lesson') &&
+    g57PdfPanelHtml.includes('Upload PDF File'),
+    'Connect PDF panel exposes Course PDF picker, PDF URL + page number, and local PDF file upload'
+  );
+
+  // 2. Stage picture, connected PDF, and inserted audio on draft & save as a Custom Goal
+  getOrCreateElem('input-drawer-quick-goal').value = 'Practice Page 3 & Pronunciation';
+  sandbox.addCustomGoalMediaItem(g53Student.id, '__draft__', 'images', {
+    title: 'Worksheet Snap',
+    url: 'data:image/jpeg;base64,ZmFrZUltYWdl'
+  });
+  sandbox.addCustomGoalMediaItem(g53Student.id, '__draft__', 'pdfs', {
+    title: 'White Booklet',
+    url: 'https://example.org/white.pdf',
+    pageNum: 3,
+    source: 'url'
+  });
+  sandbox.addCustomGoalMediaItem(g53Student.id, '__draft__', 'recordings', {
+    title: 'Teacher Demo Clip',
+    url: 'data:audio/webm;base64,ZmFrZUF1ZGlv',
+    type: 'audio'
+  });
+  sandbox.addQuickStudentGoalFromDrawer(g53Student.id);
+
+  const g57SavedGoal = g53Student.skills.customGoals.find(g => g.title === 'Practice Page 3 & Pronunciation');
+  assert(
+    g57SavedGoal &&
+    g57SavedGoal.images.length === 1 &&
+    g57SavedGoal.pdfs.length === 1 &&
+    g57SavedGoal.pdfs[0].pageNum === 3 &&
+    g57SavedGoal.recordings.length === 1,
+    'Saving draft goal preserves attached picture, connected PDF + page number, and audio recording'
+  );
+
+  // 3. Attach another recording directly onto existing saved goal & inspect rendered drawer
+  sandbox.addCustomGoalMediaItem(g53Student.id, g57SavedGoal.id, 'recordings', {
+    title: 'Student Attempt 1',
+    url: 'https://cdn.example.org/attempt1.mp3',
+    type: 'link'
+  });
+  assert(g57SavedGoal.recordings.length === 2, 'Media items can also be attached directly onto any existing saved custom goal');
+
+  const g57UpdatedDrawerHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(
+    g57UpdatedDrawerHtml.includes('Worksheet Snap') &&
+    g57UpdatedDrawerHtml.includes('Pg 3') &&
+    g57UpdatedDrawerHtml.includes('<audio controls') &&
+    g57UpdatedDrawerHtml.includes('Student Attempt 1'),
+    'Student Drawer renders picture thumbnail, clickable PDF badge, and playable HTML5 audio controls on custom goal'
+  );
+
+  // 4. Clicking attached picture or PDF opens modal preview with exact page/image
+  sandbox.openCustomGoalAttachmentViewer(g53Student.id, g57SavedGoal.id, 'pdf', g57SavedGoal.pdfs[0].id);
+  assert(
+    sandbox.bookletViewerState.pdfUrl === 'https://example.org/white.pdf' &&
+    sandbox.bookletViewerState.pageNum === 3,
+    'openCustomGoalAttachmentViewer opens connected PDF inside Booklet/Page Viewer at exact target page'
+  );
+  sandbox.openCustomGoalAttachmentViewer(g53Student.id, g57SavedGoal.id, 'image', g57SavedGoal.images[0].id);
+  assert(
+    sandbox.bookletViewerState.imageUrl === 'data:image/jpeg;base64,ZmFrZUltYWdl',
+    'openCustomGoalAttachmentViewer opens attached picture in full modal view'
+  );
+
+  // 5. Removing attachment works cleanly and Student Portal renders remaining goal media outside checkbox <label>
+  sandbox.removeCustomGoalAttachment(g53Student.id, g57SavedGoal.id, 'recordings', g57SavedGoal.recordings[1].id);
+  assert(g57SavedGoal.recordings.length === 1, 'removeCustomGoalAttachment deletes recording cleanly');
+
+  sandbox.APP_STATE.studentPortalStudent = g53Student;
+  sandbox.renderStudentPortalView();
+  const g57PortalGoalsHtml = getOrCreateElem('view-student-portal').innerHTML;
+  assert(
+    g57PortalGoalsHtml.includes('Worksheet Snap') &&
+    g57PortalGoalsHtml.includes('White Booklet') &&
+    g57PortalGoalsHtml.includes('<audio controls'),
+    'Student Portal renders Custom Goal pictures, PDFs, and audio recordings cleanly for students'
+  );
+  sandbox.APP_STATE.studentPortalStudent = null;
+  getOrCreateElem('drawer-student-detail').classList.add('hidden');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
