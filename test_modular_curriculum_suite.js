@@ -81,7 +81,15 @@ const sandbox = {
     scrollTo: () => {}
   },
   document: {
-    documentElement: { setAttribute() {} },
+    documentElement: {
+      setAttribute() {},
+      classList: {
+        classes: new Set(),
+        add(c) { this.classes.add(c); },
+        remove(c) { this.classes.delete(c); },
+        contains(c) { return this.classes.has(c); }
+      }
+    },
     getElementById: getOrCreateElem,
     querySelector() { return null; },
     querySelectorAll() { return []; },
@@ -6121,6 +6129,82 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     g63TargetB.skills.customGoals[0].pdfs[0].url === 'idb://pdf_shared_demo' &&
     g63TargetB.skills.customGoals[0].recordings[0].url.startsWith('data:audio/'),
     'AI agent copy_student_goals tool copies goals with PDFs/recordings/photos and honors exclusions & duplicate skipping'
+  );
+
+  // =========================================================================
+  // GATE 64: Student Portal Sidebar Removal, Settings Menu & 3-Tab Layout
+  // =========================================================================
+  console.log('\n[Gate 64] Student Portal Sidebar Removal, Top Settings Menu & 3-Tab Workspace...');
+  const g64Stu = {
+    id: 'stu_g64_portal',
+    name: 'Yonatan Portal',
+    subject: 'Parashat Shemot',
+    gradeOrDate: '14 Adar',
+    studentAccessCode: 'YONA64',
+    sharedNotes: [{ id: 'sn1', dateLabel: 'Nov 19', text: 'Practice Maftir with steady rhythm!' }],
+    skills: {
+      homework: { task: 'Read Shemot Perek Alef twice', completed: false, timerMinutes: 10 },
+      assignedLessons: [{ id: 'l_g64', title: 'Shemot Highlights', sections: [] }],
+      customGoals: [{ id: 'g_g64_1', title: 'Kiddush Melody', completed: false, images: [], pdfs: [], recordings: [] }]
+    },
+    schedule: [{ id: 's_g64', dateStr: '2099-12-20', time: '4:00 PM', status: 'scheduled' }]
+  };
+  sandbox.activateStudentPortalSession(g64Stu, 'YONA64');
+
+  assert(
+    sandbox.document.documentElement.classList.contains('student-portal-active') &&
+    getOrCreateElem('app-sidebar-shell').classList.contains('hidden') &&
+    getOrCreateElem('student-header-controls').classList.contains('hidden'),
+    'Entering Student Portal sets student-portal-active and hides TutorPilot left sidebar shell completely'
+  );
+
+  const g64PortalDefaultHtml = getOrCreateElem('view-student-portal').innerHTML;
+  assert(
+    g64PortalDefaultHtml.includes('id="btn-student-portal-settings"') &&
+    g64PortalDefaultHtml.includes('id="student-portal-settings-menu"') &&
+    g64PortalDefaultHtml.includes('toggleLanguage()') &&
+    g64PortalDefaultHtml.includes('toggleThemeMode()') &&
+    g64PortalDefaultHtml.includes('id="btn-student-portal-logout"'),
+    'Top Student Dashboard renders Settings gear button with Language, Light/Dark Theme, and Log Out controls'
+  );
+
+  // Verify 3 interactive tabs & default active Homework panel
+  assert(
+    g64PortalDefaultHtml.includes('id="btn-student-tab-homework"') &&
+    g64PortalDefaultHtml.includes('id="btn-student-tab-goals"') &&
+    g64PortalDefaultHtml.includes('id="btn-student-tab-notes"') &&
+    g64PortalDefaultHtml.includes('id="student-portal-panel-homework" class="space-y-4"') &&
+    g64PortalDefaultHtml.includes('id="student-portal-panel-goals" class="hidden space-y-4"') &&
+    g64PortalDefaultHtml.includes('id="student-portal-panel-notes" class="hidden space-y-4"'),
+    'Student Portal renders all 3 category tabs with My Homework active and Goals/Notes panels tucked cleanly behind tabs'
+  );
+
+  // Switch to Assignments & Goals tab
+  sandbox.switchStudentPortalTab('goals');
+  const g64GoalsTabHtml = getOrCreateElem('view-student-portal').innerHTML;
+  assert(
+    g64GoalsTabHtml.includes('id="student-portal-panel-homework" class="hidden space-y-4"') &&
+    g64GoalsTabHtml.includes('id="student-portal-panel-goals" class="space-y-4"') &&
+    g64GoalsTabHtml.includes('Kiddush Melody'),
+    'Clicking My Assignments & Goals switches view strictly into the Goals workspace'
+  );
+
+  // Switch to Teacher's Notes tab
+  sandbox.switchStudentPortalTab('notes');
+  const g64NotesTabHtml = getOrCreateElem('view-student-portal').innerHTML;
+  assert(
+    g64NotesTabHtml.includes('id="student-portal-panel-goals" class="hidden space-y-4"') &&
+    g64NotesTabHtml.includes('id="student-portal-panel-notes" class="space-y-4"') &&
+    g64NotesTabHtml.includes('Practice Maftir with steady rhythm!'),
+    'Clicking Teacher Notes switches view strictly into shared notes and upcoming sessions'
+  );
+
+  // Verify logout restores sidebar visibility and clears student-portal-active class
+  sandbox.logoutStudentPortal();
+  assert(
+    !sandbox.document.documentElement.classList.contains('student-portal-active') &&
+    !getOrCreateElem('app-sidebar-shell').classList.contains('hidden'),
+    'Logging out of Student Portal restores teacher sidebar shell cleanly'
   );
 
   sandbox.APP_STATE.studentPortalMode = false;

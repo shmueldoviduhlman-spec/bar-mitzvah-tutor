@@ -276,6 +276,18 @@
       }
     }
 
+    /* Isolated Student Portal: remove teacher sidebar rail & scroll button completely */
+    html.student-portal-active #app-sidebar-shell,
+    html.student-portal-active #btn-sidebar-scroll-toggle {
+      display: none !important;
+    }
+
+    html.student-portal-active #app-main-canvas {
+      padding-left: 1.25rem !important;
+      padding-right: 1.25rem !important;
+      max-width: 1080px !important;
+    }
+
     html.theme-daylight .glass-nav {
       background: rgba(255, 255, 255, 0.92) !important;
       border-color: #E2E8F0 !important;
@@ -1989,7 +2001,7 @@
     <!-- ============================================== -->
     <!-- ISOLATED STUDENT PORTAL VIEW (STUDENT ACCESS)  -->
     <!-- ============================================== -->
-    <section id="view-student-portal" class="hidden max-w-3xl mx-auto space-y-5"></section>
+    <section id="view-student-portal" class="hidden max-w-4xl mx-auto space-y-5"></section>
 
   </main>
 
@@ -8687,9 +8699,14 @@ alter publication supabase_realtime add table public.students_sync;`;
         localStorage.setItem('tutor_student_portal_snapshot', JSON.stringify(APP_STATE.studentPortalStudent));
       } catch (e) {}
 
-      // Strict UI Isolation: hide teacher lock screen, teacher chrome, tabs, bottom dock & views
+      // Strict UI Isolation: hide teacher lock screen, teacher sidebar shell, nav & bottom dock
+      if (typeof document !== 'undefined' && document.documentElement && document.documentElement.classList) {
+        document.documentElement.classList.add('student-portal-active');
+      }
       const lockScreen = document.getElementById('lock-screen');
       if (lockScreen) lockScreen.classList.add('hidden');
+      const sidebarShell = document.getElementById('app-sidebar-shell');
+      if (sidebarShell) sidebarShell.classList.add('hidden');
       const teacherHeader = document.getElementById('teacher-header-controls');
       if (teacherHeader) teacherHeader.classList.add('hidden');
       const desktopNav = document.getElementById('desktop-sidebar-nav');
@@ -8698,11 +8715,14 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (sidebarDaily) sidebarDaily.classList.add('hidden');
       if (typeof applySidebarScrollState === 'function') applySidebarScrollState(false, { animate: false });
       const studentHeader = document.getElementById('student-header-controls');
-      if (studentHeader) studentHeader.classList.remove('hidden');
+      if (studentHeader) studentHeader.classList.add('hidden');
       const bottomDock = document.getElementById('main-bottom-dock');
       if (bottomDock) bottomDock.classList.add('hidden');
       const cmdTrigger = document.getElementById('container-top-command-center-trigger');
       if (cmdTrigger) cmdTrigger.classList.add('hidden');
+
+      studentPortalActiveTab = 'homework';
+      studentPortalSettingsOpen = false;
 
       ['view-study', 'view-students', 'view-calendar', 'view-ai'].forEach(vId => {
         const el = document.getElementById(vId);
@@ -8767,13 +8787,19 @@ alter publication supabase_realtime add table public.students_sync;`;
     }
 
     function logoutStudentPortal(reasonMsg) {
+      APP_STATE.studentPortalMode = false;
       APP_STATE.studentPortalSession = null;
       APP_STATE.studentPortalStudent = null;
+      studentPortalActiveTab = 'homework';
+      studentPortalSettingsOpen = false;
       try {
         localStorage.removeItem('tutor_student_portal_session');
         localStorage.removeItem('tutor_student_portal_snapshot');
       } catch (e) {}
 
+      if (typeof document !== 'undefined' && document.documentElement && document.documentElement.classList) {
+        document.documentElement.classList.remove('student-portal-active');
+      }
       const portalEl = document.getElementById('view-student-portal');
       if (portalEl) {
         portalEl.innerHTML = '';
@@ -8784,6 +8810,8 @@ alter publication supabase_realtime add table public.students_sync;`;
         studentHwTimerState.intervalId = null;
         studentHwTimerState.running = false;
       }
+      const sidebarShell = document.getElementById('app-sidebar-shell');
+      if (sidebarShell) sidebarShell.classList.remove('hidden');
       const studentHeader = document.getElementById('student-header-controls');
       if (studentHeader) studentHeader.classList.add('hidden');
       const teacherHeader = document.getElementById('teacher-header-controls');
@@ -8921,6 +8949,26 @@ alter publication supabase_realtime add table public.students_sync;`;
 
     var portalExpandedLessonMap = {};
     var portalActiveQuizId = '';
+    var studentPortalActiveTab = 'homework';
+    var studentPortalSettingsOpen = false;
+
+    function switchStudentPortalTab(tabName) {
+      studentPortalActiveTab = (tabName === 'goals' || tabName === 'notes') ? tabName : 'homework';
+      studentPortalSettingsOpen = false;
+      renderStudentPortalView();
+    }
+
+    function toggleStudentPortalSettingsMenu(forceClose) {
+      if (forceClose === true) studentPortalSettingsOpen = false;
+      else studentPortalSettingsOpen = !studentPortalSettingsOpen;
+      const menu = document.getElementById('student-portal-settings-menu');
+      if (menu) {
+        menu.classList.toggle('hidden', !studentPortalSettingsOpen);
+        if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+      } else {
+        renderStudentPortalView();
+      }
+    }
 
     function getStudentPortalActiveContext() {
       if (APP_STATE.previewPortalStudent) {
@@ -9169,6 +9217,8 @@ alter publication supabase_realtime add table public.students_sync;`;
       const stu = ctx.stu;
       if (!container || !stu) return;
       const isHe = APP_STATE.lang === 'he';
+      const isDark = typeof getThemeMode === 'function' ? getThemeMode() === 'dark' : false;
+      const activeTab = (studentPortalActiveTab === 'goals' || studentPortalActiveTab === 'notes') ? studentPortalActiveTab : 'homework';
       const skills = stu.skills || {};
       const hw = skills.homework || {};
       const allTests = getStudentAllAssignedTests(skills);
@@ -9184,281 +9234,389 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       const initial = (stu.name || 'S').charAt(0).toUpperCase();
       const avatarHtml = stu.avatar
-        ? `<img src="${stu.avatar}" class="w-14 h-14 rounded-2xl object-cover border border-indigo-400/50 shadow shrink-0">`
-        : `<div class="w-14 h-14 rounded-2xl bg-indigo-500/20 text-indigo-200 border border-indigo-400/40 flex items-center justify-center font-extrabold text-xl shrink-0">${escapeHtml(initial)}</div>`;
+        ? `<img src="${stu.avatar}" class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover border-2 border-white/40 shadow-lg shrink-0">`
+        : `<div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/20 backdrop-blur-sm text-white border-2 border-white/35 flex items-center justify-center font-extrabold text-2xl shadow-lg shrink-0 keep-white">${escapeHtml(initial)}</div>`;
 
       const doneGoalsCount = goals.filter(g => g.completed).length;
       const hasHw = !!(hw.task && hw.task.trim());
       const hasTest = !!assignedTest;
+      const pendingTestsCount = allTests.filter(t => !t.completed).length;
+      const hwPendingCount = (hasHw && !hw.completed ? 1 : 0) + pendingTestsCount;
+      const hwTotalItems = (hasHw ? 1 : 0) + assignedLessons.length + allTests.length;
       const totalTasksCount = goals.length + (hasHw ? 1 : 0) + (hasTest ? 1 : 0);
       const doneTasksCount = doneGoalsCount + (hasHw && hw.completed ? 1 : 0) + (hasTest && assignedTest.completed ? 1 : 0);
       const completionPct = totalTasksCount > 0 ? Math.round((doneTasksCount / totalTasksCount) * 100) : 0;
+      const nextSession = upcomingSessions[0] || null;
 
       container.innerHTML = `
-        <!-- Minimal & Motivating Student Portal Welcome Banner -->
-        <div class="p-5 sm:p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-lg space-y-4">
-          <div class="flex items-center justify-between gap-4 flex-wrap">
-            <div class="flex items-center gap-4 min-w-0">
+        <!-- Top Vibrant Student Hero Dashboard + Top-Right Settings Gear -->
+        <div class="relative rounded-3xl modern-gradient-cover bg-gradient-to-br from-indigo-600 via-violet-600 to-amber-500 p-5 sm:p-6 shadow-xl overflow-visible">
+          <div class="flex items-start justify-between gap-4 flex-wrap">
+            <div class="flex items-center gap-4 min-w-0 flex-1 keep-white">
               ${avatarHtml}
-              <div class="min-w-0 space-y-1">
-                <div class="text-[11px] font-mono uppercase tracking-wider text-indigo-300 font-bold">${isHe ? 'אזור אישי לתלמיד' : 'My Student Dashboard'}</div>
-                <h1 dir="auto" class="text-xl sm:text-2xl font-extrabold text-white truncate">${escapeHtml(stu.name)}</h1>
-                <div class="flex items-center gap-2 flex-wrap text-xs text-slate-400">
-                  ${stu.subject ? `<span class="px-2.5 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-amber-300 font-semibold">${escapeHtml(stu.subject)}</span>` : ''}
-                  ${stu.gradeOrDate ? `<span class="font-mono text-slate-300">${escapeHtml(stu.gradeOrDate)}</span>` : ''}
+              <div class="min-w-0 space-y-1.5">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/15 border border-white/25 text-[11px] font-bold tracking-wide uppercase">
+                  <span>✨</span>
+                  <span>${isHe ? 'אזור הלמידה שלי' : 'My Learning Space'}</span>
+                </div>
+                <h1 dir="auto" class="text-xl sm:text-2xl font-black text-white truncate">${isHe ? `שלום, ${escapeHtml(stu.name)}!` : `Welcome back, ${escapeHtml(stu.name)}!`}</h1>
+                <div class="flex items-center gap-2 flex-wrap text-xs">
+                  ${stu.subject ? `<span class="px-2.5 py-0.5 rounded-xl bg-white/20 border border-white/25 font-bold">${escapeHtml(stu.subject)}</span>` : ''}
+                  ${stu.gradeOrDate ? `<span class="px-2.5 py-0.5 rounded-xl bg-black/20 border border-white/15 font-mono font-semibold">${escapeHtml(stu.gradeOrDate)}</span>` : ''}
+                  ${nextSession ? `
+                    <span class="px-2.5 py-0.5 rounded-xl bg-emerald-400/25 border border-emerald-200/40 font-semibold flex items-center gap-1">
+                      <i data-lucide="calendar" class="w-3 h-3"></i>
+                      <span>${isHe ? 'שיעור הבא:' : 'Next:'} ${escapeHtml(nextSession.dateStr || 'Weekly')}${nextSession.time ? ` · ${escapeHtml(nextSession.time)}` : ''}</span>
+                    </span>
+                  ` : ''}
                 </div>
               </div>
             </div>
-            ${totalTasksCount > 0 ? `
-              <div class="text-right rtl:text-left">
-                <span class="text-xs font-bold ${completionPct === 100 ? 'text-emerald-400' : 'text-amber-400'}">${doneTasksCount} / ${totalTasksCount} ${isHe ? 'הושלמו' : 'Completed'} (${completionPct}%)</span>
+
+            <!-- Top-Right Sync & Settings Controls -->
+            <div class="relative flex items-center gap-2 shrink-0">
+              ${!ctx.isPreview ? `
+                <button type="button" id="btn-student-portal-refresh" onclick="refreshStudentPortalRecord(true)" class="h-10 px-3 flex items-center justify-center gap-1.5 rounded-2xl bg-white/15 hover:bg-white/25 text-white border border-white/25 backdrop-blur-sm text-xs font-bold transition shadow-sm keep-white" title="${isHe ? 'סנכרן עדכונים מהמורה' : 'Sync Latest Updates'}">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                  <span class="hidden sm:inline">${isHe ? 'רענן' : 'Sync'}</span>
+                </button>
+              ` : ''}
+              <button type="button" id="btn-student-portal-settings" onclick="toggleStudentPortalSettingsMenu()" class="h-10 px-3.5 flex items-center justify-center gap-2 rounded-2xl bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm text-xs font-bold transition shadow-sm keep-white" title="${isHe ? 'הגדרות' : 'Settings'}">
+                <i data-lucide="settings" class="w-4 h-4"></i>
+                <span>${isHe ? 'הגדרות' : 'Settings'}</span>
+              </button>
+
+              <!-- Student Portal Settings Popover (Language, Light/Dark Theme, Log Out) -->
+              <div id="student-portal-settings-menu" class="${studentPortalSettingsOpen ? '' : 'hidden'} absolute right-0 rtl:right-auto rtl:left-0 top-full mt-2 w-60 rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-2 z-50 text-xs space-y-1">
+                <button type="button" id="btn-student-settings-lang" onclick="toggleStudentPortalSettingsMenu(true); toggleLanguage()" class="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-slate-200 hover:bg-slate-800 transition font-semibold">
+                  <span class="flex items-center gap-2">
+                    <i data-lucide="languages" class="w-4 h-4 text-indigo-400"></i>
+                    <span>${isHe ? 'שפה (עברית / English)' : 'Language'}</span>
+                  </span>
+                  <span class="px-2 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold text-[10px]">${isHe ? 'עברית' : 'English'}</span>
+                </button>
+                <button type="button" id="btn-student-settings-theme" onclick="toggleStudentPortalSettingsMenu(true); toggleThemeMode()" class="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-slate-200 hover:bg-slate-800 transition font-semibold">
+                  <span class="flex items-center gap-2">
+                    <i data-lucide="${isDark ? 'sun' : 'moon'}" class="w-4 h-4 text-amber-400"></i>
+                    <span>${isHe ? 'מראה (בהיר / כהה)' : 'Theme'}</span>
+                  </span>
+                  <span class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 font-bold text-[10px]">${isDark ? (isHe ? 'כהה' : 'Dark Mode') : (isHe ? 'בהיר' : 'Light Mode')}</span>
+                </button>
+                <div class="border-t border-slate-800 my-1"></div>
+                ${ctx.isPreview ? `
+                  <button type="button" id="btn-student-portal-logout" onclick="closeStudentViewPreviewModal()" class="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-rose-400 hover:bg-rose-950/30 transition font-bold">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                    <span>${isHe ? 'סגור תצוגה מקדימה' : 'Close Preview'}</span>
+                  </button>
+                ` : `
+                  <button type="button" id="btn-student-portal-logout" onclick="logoutStudentPortal()" class="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-rose-400 hover:bg-rose-950/30 transition font-bold">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    <span>${isHe ? 'התנתק' : 'Log Out'}</span>
+                  </button>
+                `}
               </div>
-            ` : ''}
+            </div>
           </div>
+
           ${totalTasksCount > 0 ? `
-            <div id="student-portal-progress-bar" class="w-full h-2 rounded-full bg-slate-950 overflow-hidden">
-              <div class="h-2 rounded-full bg-gradient-to-r from-indigo-500 via-amber-500 to-emerald-500 transition-all duration-300" style="width: ${completionPct}%"></div>
+            <div class="mt-4 pt-3.5 border-t border-white/20 space-y-1.5 keep-white">
+              <div class="flex items-center justify-between text-xs font-bold">
+                <span>${isHe ? 'ההתקדמות שלי השבוע' : 'Overall Progress'}</span>
+                <span class="font-mono">${doneTasksCount} / ${totalTasksCount} ${isHe ? 'הושלמו' : 'Completed'} (${completionPct}%)</span>
+              </div>
+              <div id="student-portal-progress-bar" class="w-full h-2.5 rounded-full bg-black/25 overflow-hidden">
+                <div class="h-2.5 rounded-full bg-gradient-to-r from-emerald-300 via-teal-200 to-amber-300 transition-all duration-300" style="width: ${completionPct}%"></div>
+              </div>
             </div>
           ` : ''}
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-          <div class="space-y-4">
-            <!-- 1. Homework Card -->
-            <div id="student-portal-homework-card" class="p-5 rounded-3xl bg-slate-900/80 border ${hw.task ? (hw.completed ? 'border-emerald-500/40' : 'border-amber-500/40') : 'border-slate-800'} space-y-3 shadow-md">
-              <div class="flex items-center justify-between gap-2 flex-wrap">
-                <h2 class="text-sm font-bold text-amber-300 flex items-center gap-2">
-                  <i data-lucide="clipboard-list" class="w-4 h-4 text-amber-400"></i>
-                  <span>${isHe ? 'שיעורי בית ומשימות' : 'My Homework'}</span>
-                  ${hw.assignedDate ? `<span class="text-[11px] font-mono text-slate-500">(${escapeHtml(hw.assignedDate)})</span>` : ''}
-                </h2>
-                ${(hw.task && hw.task.trim()) ? `
-                  <button type="button" id="btn-student-portal-toggle-hw" onclick="toggleStudentPortalHomework()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${hw.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow'}">
-                    <i data-lucide="${hw.completed ? 'check-circle-2' : 'circle'}" class="w-3.5 h-3.5"></i>
-                    <span>${hw.completed ? (isHe ? 'הושלם' : 'Completed') : (isHe ? 'סמן כהושלם' : 'Mark Completed')}</span>
-                  </button>
-                ` : ''}
-              </div>
-              ${(hw.task && hw.task.trim())
-                ? `<p dir="auto" class="text-sm sm:text-base leading-relaxed ${hw.completed ? 'line-through text-slate-400' : 'text-slate-100'}">${escapeHtml(hw.task)}</p>`
-                : `<p class="text-xs text-slate-500 italic">${isHe ? 'אין שיעורי בית כרגע.' : 'No active homework assigned right now.'}</p>`}
-
-              ${(hw.task && (hw.imageUrl || hw.pageText || hw.pdfUrl || hw.lessonId)) ? `
-                <div id="student-hw-page-viewer-box" class="p-3.5 rounded-2xl bg-slate-950/90 border border-teal-500/35 space-y-2.5">
-                  <div class="flex items-center justify-between gap-2 flex-wrap">
-                    <span class="text-xs font-bold text-teal-300 flex items-center gap-1.5">
-                      <i data-lucide="book-open" class="w-3.5 h-3.5 text-teal-400"></i>
-                      <span>${isHe ? `חומר תרגול (${hw.pageNum ? 'עמוד ' + hw.pageNum : hw.pageLabel || hw.lessonTitle || 'שיעור'})` : `${hw.pageNum ? 'Assigned Page · Page ' + hw.pageNum : (hw.pageLabel || hw.lessonTitle || 'Assigned Material')}`}</span>
-                    </span>
-                    <button type="button" onclick="openStudentPortalAssignedHomeworkPage('${escapeHtml(stu.name || '')}')" class="px-2.5 py-1 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/35 text-[11px] font-bold transition">${(hw.imageUrl || hw.pageText || hw.pdfUrl) ? 'Full View' : 'Open Lesson'}</button>
-                  </div>
-                  ${hw.pageText ? `
-                    <div dir="auto" class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-xs sm:text-sm text-slate-100 whitespace-pre-wrap leading-relaxed">${escapeHtml(hw.pageText)}</div>
-                  ` : ''}
-                  ${hw.imageUrl ? `
-                    <div class="flex justify-center"><img src="${escapeHtml(hw.imageUrl)}" alt="Practice Page" class="max-h-72 rounded-xl border border-slate-800 object-contain" /></div>
-                  ` : (hw.pdfUrl ? `
-                    <div class="flex flex-col items-center space-y-2">
-                      <div id="student-hw-pdf-status" class="text-[11px] font-mono text-teal-300">Loading practice page...</div>
-                      <canvas id="student-hw-pdf-canvas" class="max-w-full rounded-xl border border-slate-800 bg-white hidden"></canvas>
-                      <iframe id="student-hw-pdf-iframe" src="" class="w-full h-72 rounded-xl border border-slate-800 bg-white hidden" title="Assigned Practice Page"></iframe>
-                    </div>
-                  ` : '')}
-                </div>
-              ` : ''}
-
-              ${timerSt ? `
-                <div id="student-hw-timer-box" class="p-3.5 rounded-2xl bg-slate-950/90 border border-amber-500/35 space-y-2.5">
-                  <div class="flex items-center justify-between gap-2 flex-wrap">
-                    <div class="flex items-center gap-2">
-                      <i data-lucide="timer" class="w-4 h-4 text-amber-400"></i>
-                      <span class="text-xs font-bold text-amber-300">${isHe ? 'טיימר תרגול' : 'Practice Timer'}</span>
-                    </div>
-                    <span id="student-hw-timer-clock" class="text-xl sm:text-2xl font-mono font-extrabold text-white tracking-wider">${formatTimerClock(timerSt.remainingSec)}</span>
-                  </div>
-                  <div class="w-full h-2 rounded-full bg-slate-900 overflow-hidden">
-                    <div id="student-hw-timer-bar" class="h-2 rounded-full bg-gradient-to-r from-amber-400 to-emerald-400 transition-all duration-300" style="width: ${timerSt.totalSec > 0 ? Math.max(0, Math.min(100, Math.round(((timerSt.totalSec - timerSt.remainingSec) / timerSt.totalSec) * 100))) : 0}%"></div>
-                  </div>
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <button type="button" id="btn-student-hw-timer-toggle" onclick="toggleStudentHwTimer()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition">${timerSt.running ? 'Pause' : 'Start Timer'}</button>
-                    <button type="button" onclick="resetStudentHwTimer()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition">Reset</button>
-                  </div>
-                  <div id="student-hw-timer-done-banner" class="${timerSt.finished ? '' : 'hidden'} p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-xs font-bold text-emerald-300 text-center">
-                    Time is up! Great practice session!
-                  </div>
-                </div>
-              ` : ''}
+        <!-- Three Big Eye-Catching Interactive Tabs -->
+        <div id="student-portal-tabs-bar" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <button type="button" id="btn-student-tab-homework" onclick="switchStudentPortalTab('homework')" class="${activeTab === 'homework' ? 'modern-gradient-cover bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 text-white keep-white shadow-lg ring-2 ring-amber-300/60 border-transparent' : 'bg-slate-900/85 border-slate-800 hover:border-amber-400/60 text-slate-100'} p-4 rounded-3xl border text-left rtl:text-right flex items-center gap-3.5 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer">
+            <div class="${activeTab === 'homework' ? 'bg-white/20 text-white' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'} w-11 h-11 rounded-2xl flex items-center justify-center shrink-0">
+              <i data-lucide="clipboard-list" class="w-5 h-5"></i>
             </div>
-
-            ${assignedLessons.length > 0 ? `
-              <!-- 1A. Assigned Lessons / Sub-Lessons Card -->
-              <div id="student-portal-lessons-card" class="p-5 rounded-3xl bg-slate-900/85 border border-teal-500/35 space-y-3 shadow-md">
-                <div class="flex items-center justify-between gap-2">
-                  <h2 class="text-sm font-bold text-teal-300 flex items-center gap-2">
-                    <i data-lucide="book-open" class="w-4 h-4 text-teal-400"></i>
-                    <span>${isHe ? 'שיעורים שנשלחו אליך' : 'Lessons Sent to Me'}</span>
-                  </h2>
-                  <span class="text-xs font-mono px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-teal-300">${assignedLessons.length}</span>
-                </div>
-                <div class="space-y-2.5">
-                  ${assignedLessons.map(les => {
-                    const lKey = String(les.id || les.lessonId || '');
-                    const isOpen = !!portalExpandedLessonMap[lKey];
-                    return `
-                      <div class="rounded-2xl bg-slate-950/80 border border-slate-800 overflow-hidden">
-                        <button type="button" onclick="toggleStudentPortalAssignedLesson('${escapeHtml(lKey)}')" class="w-full px-3.5 py-2.5 flex items-center justify-between gap-2 text-left rtl:text-right hover:bg-slate-900/70 transition">
-                          <div class="min-w-0">
-                            ${les.courseTitle ? `<div class="text-[10px] font-mono text-teal-400 truncate">${escapeHtml(les.courseTitle)}</div>` : ''}
-                            <div dir="auto" class="text-xs sm:text-sm font-bold text-white truncate">${escapeHtml(les.title || 'Assigned Lesson')}</div>
-                          </div>
-                          <span class="px-2.5 py-1 rounded-lg bg-teal-500/15 text-teal-300 border border-teal-500/30 text-[11px] font-bold shrink-0">
-                            ${isOpen ? (isHe ? 'סגור' : 'Hide') : (isHe ? 'פתח שיעור' : 'Open Lesson')}
-                          </span>
-                        </button>
-                        ${isOpen ? `
-                          <div class="p-3 border-t border-slate-800 space-y-2.5">
-                            ${renderAssignedStudentLessonSectionsHtml(les, stu.name || '')}
-                          </div>
-                        ` : ''}
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
+            <div class="min-w-0 flex-1">
+              <div class="text-sm font-extrabold truncate">${isHe ? 'שיעורי בית' : 'My Homework'}</div>
+              <div class="${activeTab === 'homework' ? 'text-white/90' : 'text-slate-400'} text-[11px] font-semibold truncate">
+                ${hwPendingCount > 0 ? (isHe ? `${hwPendingCount} משימות פתוחות` : `${hwPendingCount} to do`) : (hwTotalItems > 0 ? (isHe ? `${hwTotalItems} פריטים` : `${hwTotalItems} item${hwTotalItems === 1 ? '' : 's'}`) : (isHe ? 'שיעורים ומבדקים' : 'Tasks, Lessons & Quizzes'))}
               </div>
-            ` : ''}
-
-            ${assignedTest ? `
-              <!-- 1B. Assigned Test / Quiz Card -->
-              <div id="student-portal-test-card" class="p-5 rounded-3xl bg-slate-900/85 border ${assignedTest.completed ? 'border-emerald-500/40' : 'border-indigo-500/45'} space-y-3.5 shadow-md">
-                ${allTests.length > 1 ? `
-                  <div class="flex items-center gap-1.5 flex-wrap pb-2 border-b border-slate-800/80">
-                    ${allTests.map(tItem => `
-                      <button type="button" onclick="selectStudentPortalQuiz('${escapeHtml(tItem.id)}')" class="px-2.5 py-1 rounded-xl text-[11px] font-bold border transition ${tItem.id === assignedTest.id ? 'bg-indigo-500 text-white border-indigo-400' : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-indigo-500/40'}">
-                        ${escapeHtml(tItem.title || tItem.lessonTitle || 'Quiz')}${tItem.completed ? ` (${tItem.score}/${tItem.total})` : ''}
-                      </button>
-                    `).join('')}
-                  </div>
-                ` : ''}
-                <div class="flex items-center justify-between gap-2 flex-wrap">
-                  <div>
-                    <h2 class="text-sm font-bold text-indigo-300 flex items-center gap-2">
-                      <i data-lucide="check-circle-2" class="w-4 h-4 text-indigo-400"></i>
-                      <span>${isHe ? 'מבדק אישי מהמורה' : 'My Assigned Test'}</span>
-                    </h2>
-                    <div dir="auto" class="text-xs text-slate-300 font-semibold mt-0.5">${escapeHtml(assignedTest.title || assignedTest.lessonTitle || 'Unit Check')} (${assignedTest.questions.length} questions)</div>
-                  </div>
-                  ${assignedTest.completed ? `
-                    <span id="student-portal-test-score-badge" class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-mono font-bold">
-                      Score: ${assignedTest.score} / ${assignedTest.total} (${assignedTest.total > 0 ? Math.round((assignedTest.score / assignedTest.total) * 100) : 0}%)
-                    </span>
-                  ` : ''}
-                </div>
-                <div class="space-y-3">
-                  ${assignedTest.questions.map((q, qIdx) => {
-                    const chosen = Array.isArray(assignedTest.answers) ? assignedTest.answers[qIdx] : undefined;
-                    const correctIdx = typeof q.correct === 'number' ? q.correct : 0;
-                    return `
-                      <div class="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
-                        <div dir="auto" class="text-xs sm:text-sm font-bold text-white">${qIdx + 1}. ${escapeHtml(q.q || '')}</div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                          ${(q.options || []).map((opt, optIdx) => {
-                            let cls = 'bg-slate-900 border-slate-800 text-slate-200 hover:bg-slate-800';
-                            if (assignedTest.completed) {
-                              if (optIdx === correctIdx) cls = 'bg-emerald-500/20 border-emerald-400 text-emerald-200 font-bold';
-                              else if (chosen === optIdx && chosen !== correctIdx) cls = 'bg-rose-500/20 border-rose-400 text-rose-200';
-                            } else if (chosen === optIdx) {
-                              cls = 'bg-indigo-500/25 border-indigo-400 text-white font-bold';
-                            }
-                            return `
-                              <button type="button" ${assignedTest.completed ? 'disabled' : ''} onclick="selectStudentPortalTestAnswer(${qIdx}, ${optIdx}, '${escapeHtml(assignedTest.id)}')" dir="auto" class="w-full text-left px-3 py-2 rounded-xl border text-xs transition ${cls}">
-                                <strong class="font-mono mr-1.5 text-indigo-300">${String.fromCharCode(65 + optIdx)}.</strong>${escapeHtml(opt || '')}
-                              </button>
-                            `;
-                          }).join('')}
-                        </div>
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-                ${!assignedTest.completed ? `
-                  <div class="flex justify-end">
-                    <button type="button" id="btn-submit-student-portal-test" onclick="submitStudentPortalTest('${escapeHtml(assignedTest.id)}')" class="px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold shadow transition">Submit Test</button>
-                  </div>
-                ` : ''}
-              </div>
-            ` : ''}
-
-            <!-- 2. Assignments & Learning Goals -->
-            <div id="student-portal-goals-card" class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 shadow-md">
-              <div class="flex items-center justify-between gap-2">
-                <h2 class="text-sm font-bold text-emerald-300 flex items-center gap-2">
-                  <i data-lucide="check-square" class="w-4 h-4 text-emerald-400"></i>
-                  <span>${isHe ? 'משימות ויעדים אישיים' : 'My Assignments & Goals'}</span>
-                </h2>
-                <span class="text-xs font-mono px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-300">${doneGoalsCount} / ${goals.length}</span>
-              </div>
-              ${goals.length === 0 ? `
-                <p class="text-xs text-slate-500 italic">${isHe ? 'המורה טרם הוסיף יעדים אישיים.' : 'Your teacher has not added individual goals yet.'}</p>
-              ` : `
-                <div class="space-y-2.5">
-                  ${goals.map(g => `
-                    <div class="p-3 rounded-2xl bg-slate-950/75 border ${g.completed ? 'border-emerald-500/30' : 'border-slate-800 hover:border-slate-700'} space-y-2 transition">
-                      <label class="flex items-center gap-3 cursor-pointer select-none">
-                        <input type="checkbox" ${g.completed ? 'checked' : ''} onchange="toggleStudentPortalGoal('${g.id}')" class="rounded border-slate-700 text-emerald-500 focus:ring-emerald-500 bg-slate-900 w-4 h-4 shrink-0" />
-                        <span dir="auto" class="text-xs sm:text-sm ${g.completed ? 'line-through text-slate-500' : 'text-slate-100 font-medium'}">${escapeHtml(g.title)}</span>
-                      </label>
-                      ${typeof renderCustomGoalMediaStripHtml === 'function' ? renderCustomGoalMediaStripHtml(stu.id, g, g.id, { readonly: true }) : ''}
-                    </div>
-                  `).join('')}
-                </div>
-              `}
             </div>
-          </div>
+          </button>
 
-          <div class="space-y-4">
-            <!-- 3. Custom Notes Shared by Teacher (Strictly separate from Private Teacher Notes) -->
-            <div id="student-portal-notes-card" class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 shadow-md">
-              <h2 class="text-sm font-bold text-indigo-300 flex items-center gap-2">
-                <i data-lucide="message-square-text" class="w-4 h-4 text-indigo-400"></i>
-                <span>${isHe ? 'הערות ודגשים מהמורה' : 'Notes from Teacher'}</span>
+          <button type="button" id="btn-student-tab-goals" onclick="switchStudentPortalTab('goals')" class="${activeTab === 'goals' ? 'modern-gradient-cover bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 text-white keep-white shadow-lg ring-2 ring-emerald-300/60 border-transparent' : 'bg-slate-900/85 border-slate-800 hover:border-emerald-400/60 text-slate-100'} p-4 rounded-3xl border text-left rtl:text-right flex items-center gap-3.5 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer">
+            <div class="${activeTab === 'goals' ? 'bg-white/20 text-white' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'} w-11 h-11 rounded-2xl flex items-center justify-center shrink-0">
+              <i data-lucide="target" class="w-5 h-5"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="text-sm font-extrabold truncate">${isHe ? 'משימות ויעדים' : 'My Assignments & Goals'}</div>
+              <div class="${activeTab === 'goals' ? 'text-white/90' : 'text-slate-400'} text-[11px] font-semibold truncate">
+                ${goals.length > 0 ? `${doneGoalsCount} / ${goals.length} ${isHe ? 'הושלמו' : 'completed'}` : (isHe ? 'היעדים והקבצים שלי' : 'Goals, Audio & PDFs')}
+              </div>
+            </div>
+          </button>
+
+          <button type="button" id="btn-student-tab-notes" onclick="switchStudentPortalTab('notes')" class="${activeTab === 'notes' ? 'modern-gradient-cover bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 text-white keep-white shadow-lg ring-2 ring-indigo-300/60 border-transparent' : 'bg-slate-900/85 border-slate-800 hover:border-indigo-400/60 text-slate-100'} p-4 rounded-3xl border text-left rtl:text-right flex items-center gap-3.5 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer">
+            <div class="${activeTab === 'notes' ? 'bg-white/20 text-white' : 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30'} w-11 h-11 rounded-2xl flex items-center justify-center shrink-0">
+              <i data-lucide="message-square-text" class="w-5 h-5"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="text-sm font-extrabold truncate">${isHe ? 'הערות מהמורה' : "Teacher's Notes"}</div>
+              <div class="${activeTab === 'notes' ? 'text-white/90' : 'text-slate-400'} text-[11px] font-semibold truncate">
+                ${sharedNotes.length > 0 ? (isHe ? `${sharedNotes.length} הערות מהמורה` : `${sharedNotes.length} note${sharedNotes.length === 1 ? '' : 's'} shared`) : (isHe ? 'דגשים וזמני שיעורים' : 'Reminders & Schedule')}
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <!-- TAB 1 PANEL: MY HOMEWORK (Homework Task, Timer, Practice Page, Sent Lessons & Quizzes) -->
+        <div id="student-portal-panel-homework" class="${activeTab === 'homework' ? 'space-y-4' : 'hidden space-y-4'}">
+          <!-- 1. Homework Card -->
+          <div id="student-portal-homework-card" class="p-5 sm:p-6 rounded-3xl bg-slate-900/85 border-2 ${hw.task ? (hw.completed ? 'border-emerald-500/45' : 'border-amber-500/45') : 'border-slate-800'} space-y-3.5 shadow-md">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <h2 class="text-base font-extrabold text-amber-300 flex items-center gap-2">
+                <i data-lucide="clipboard-list" class="w-5 h-5 text-amber-400"></i>
+                <span>${isHe ? 'שיעורי בית ומשימות' : 'My Homework'}</span>
+                ${hw.assignedDate ? `<span class="text-xs font-mono text-slate-400">(${escapeHtml(hw.assignedDate)})</span>` : ''}
               </h2>
-              ${sharedNotes.length === 0 ? `
-                <p class="text-xs text-slate-500 italic">${isHe ? 'אין הערות ששותפו איתך עדיין.' : 'No shared notes or reminders from your teacher yet.'}</p>
-              ` : `
-                <div class="space-y-2.5">
-                  ${sharedNotes.slice().reverse().map(n => `
-                    <div class="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-1">
-                      ${n.dateLabel ? `<div class="text-[10px] font-mono text-slate-500">${escapeHtml(n.dateLabel)}</div>` : ''}
-                      <div dir="auto" class="text-xs sm:text-sm text-slate-100 leading-relaxed whitespace-pre-wrap">${typeof formatSectionInlineText === 'function' ? formatSectionInlineText(n.text || '') : escapeHtml(n.text || '')}</div>
-                    </div>
-                  `).join('')}
-                </div>
-              `}
+              ${(hw.task && hw.task.trim()) ? `
+                <button type="button" id="btn-student-portal-toggle-hw" onclick="toggleStudentPortalHomework()" class="px-4 py-2 rounded-2xl text-xs font-extrabold flex items-center gap-1.5 transition ${hw.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md'}">
+                  <i data-lucide="${hw.completed ? 'check-circle-2' : 'circle'}" class="w-4 h-4"></i>
+                  <span>${hw.completed ? (isHe ? 'הושלם!' : 'Completed') : (isHe ? 'סמן כהושלם' : 'Mark Completed')}</span>
+                </button>
+              ` : ''}
             </div>
+            ${(hw.task && hw.task.trim())
+              ? `<p dir="auto" class="text-sm sm:text-base leading-relaxed font-medium ${hw.completed ? 'line-through text-slate-400' : 'text-slate-100'}">${escapeHtml(hw.task)}</p>`
+              : `<div class="py-4 text-center space-y-1"><div class="text-2xl">🎉</div><p class="text-xs sm:text-sm text-slate-400">${isHe ? 'אין שיעורי בית כרגע — כל הכבוד!' : 'No active homework assigned right now.'}</p></div>`}
 
-            <!-- 4. Upcoming Scheduled Sessions (Date & Time Only) -->
-            ${upcomingSessions.length > 0 ? `
-              <div id="student-portal-schedule-card" class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 shadow-md">
-                <h2 class="text-sm font-bold text-sky-300 flex items-center gap-2">
-                  <i data-lucide="calendar" class="w-4 h-4 text-sky-400"></i>
-                  <span>${isHe ? 'מפגשים קרובים' : 'Upcoming Sessions'}</span>
-                </h2>
-                <div class="flex flex-wrap gap-2">
-                  ${upcomingSessions.map(s => `
-                    <div class="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 flex items-center gap-2">
-                      <span class="font-mono font-bold text-sky-300">${escapeHtml(s.dateStr || 'Weekly')}</span>
-                      ${s.time ? `<span class="text-slate-400">${escapeHtml(s.time)}</span>` : ''}
-                    </div>
-                  `).join('')}
+            ${(hw.task && (hw.imageUrl || hw.pageText || hw.pdfUrl || hw.lessonId)) ? `
+              <div id="student-hw-page-viewer-box" class="p-4 rounded-2xl bg-slate-950/90 border border-teal-500/35 space-y-3">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                  <span class="text-xs font-bold text-teal-300 flex items-center gap-1.5">
+                    <i data-lucide="book-open" class="w-4 h-4 text-teal-400"></i>
+                    <span>${isHe ? `חומר תרגול (${hw.pageNum ? 'עמוד ' + hw.pageNum : hw.pageLabel || hw.lessonTitle || 'שיעור'})` : `${hw.pageNum ? 'Assigned Page · Page ' + hw.pageNum : (hw.pageLabel || hw.lessonTitle || 'Assigned Material')}`}</span>
+                  </span>
+                  <button type="button" onclick="openStudentPortalAssignedHomeworkPage('${escapeHtml(stu.name || '')}')" class="px-3 py-1.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/35 text-xs font-bold transition">${(hw.imageUrl || hw.pageText || hw.pdfUrl) ? 'Full View' : 'Open Lesson'}</button>
+                </div>
+                ${hw.pageText ? `
+                  <div dir="auto" class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-xs sm:text-sm text-slate-100 whitespace-pre-wrap leading-relaxed">${escapeHtml(hw.pageText)}</div>
+                ` : ''}
+                ${hw.imageUrl ? `
+                  <div class="flex justify-center"><img src="${escapeHtml(hw.imageUrl)}" alt="Practice Page" class="max-h-72 rounded-xl border border-slate-800 object-contain" /></div>
+                ` : (hw.pdfUrl ? `
+                  <div class="flex flex-col items-center space-y-2">
+                    <div id="student-hw-pdf-status" class="text-[11px] font-mono text-teal-300">Loading practice page...</div>
+                    <canvas id="student-hw-pdf-canvas" class="max-w-full rounded-xl border border-slate-800 bg-white hidden"></canvas>
+                    <iframe id="student-hw-pdf-iframe" src="" class="w-full h-72 rounded-xl border border-slate-800 bg-white hidden" title="Assigned Practice Page"></iframe>
+                  </div>
+                ` : '')}
+              </div>
+            ` : ''}
+
+            ${timerSt ? `
+              <div id="student-hw-timer-box" class="p-4 rounded-2xl bg-slate-950/90 border border-amber-500/35 space-y-2.5">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="timer" class="w-4 h-4 text-amber-400"></i>
+                    <span class="text-xs font-bold text-amber-300">${isHe ? 'טיימר תרגול' : 'Practice Timer'}</span>
+                  </div>
+                  <span id="student-hw-timer-clock" class="text-xl sm:text-2xl font-mono font-extrabold text-white tracking-wider">${formatTimerClock(timerSt.remainingSec)}</span>
+                </div>
+                <div class="w-full h-2.5 rounded-full bg-slate-900 overflow-hidden">
+                  <div id="student-hw-timer-bar" class="h-2.5 rounded-full bg-gradient-to-r from-amber-400 to-emerald-400 transition-all duration-300" style="width: ${timerSt.totalSec > 0 ? Math.max(0, Math.min(100, Math.round(((timerSt.totalSec - timerSt.remainingSec) / timerSt.totalSec) * 100))) : 0}%"></div>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <button type="button" id="btn-student-hw-timer-toggle" onclick="toggleStudentHwTimer()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition">${timerSt.running ? 'Pause' : 'Start Timer'}</button>
+                  <button type="button" onclick="resetStudentHwTimer()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition">Reset</button>
+                </div>
+                <div id="student-hw-timer-done-banner" class="${timerSt.finished ? '' : 'hidden'} p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-xs font-bold text-emerald-300 text-center">
+                  Time is up! Great practice session!
                 </div>
               </div>
             ` : ''}
           </div>
+
+          ${assignedLessons.length > 0 ? `
+            <!-- 1A. Assigned Lessons / Sub-Lessons Card -->
+            <div id="student-portal-lessons-card" class="p-5 sm:p-6 rounded-3xl bg-slate-900/85 border-2 border-teal-500/35 space-y-3 shadow-md">
+              <div class="flex items-center justify-between gap-2">
+                <h2 class="text-base font-extrabold text-teal-300 flex items-center gap-2">
+                  <i data-lucide="book-open" class="w-5 h-5 text-teal-400"></i>
+                  <span>${isHe ? 'שיעורים שנשלחו אליך' : 'Lessons Sent to Me'}</span>
+                </h2>
+                <span class="text-xs font-mono px-2.5 py-0.5 rounded-xl bg-slate-950 border border-slate-800 text-teal-300 font-bold">${assignedLessons.length}</span>
+              </div>
+              <div class="space-y-2.5">
+                ${assignedLessons.map(les => {
+                  const lKey = String(les.id || les.lessonId || '');
+                  const isOpen = !!portalExpandedLessonMap[lKey];
+                  return `
+                    <div class="rounded-2xl bg-slate-950/80 border border-slate-800 overflow-hidden">
+                      <button type="button" onclick="toggleStudentPortalAssignedLesson('${escapeHtml(lKey)}')" class="w-full px-4 py-3 flex items-center justify-between gap-2 text-left rtl:text-right hover:bg-slate-900/70 transition">
+                        <div class="min-w-0">
+                          ${les.courseTitle ? `<div class="text-[10px] font-mono text-teal-400 truncate">${escapeHtml(les.courseTitle)}</div>` : ''}
+                          <div dir="auto" class="text-xs sm:text-sm font-bold text-white truncate">${escapeHtml(les.title || 'Assigned Lesson')}</div>
+                        </div>
+                        <span class="px-3 py-1 rounded-xl bg-teal-500/15 text-teal-300 border border-teal-500/30 text-[11px] font-bold shrink-0">
+                          ${isOpen ? (isHe ? 'סגור' : 'Hide') : (isHe ? 'פתח שיעור' : 'Open Lesson')}
+                        </span>
+                      </button>
+                      ${isOpen ? `
+                        <div class="p-3.5 border-t border-slate-800 space-y-2.5">
+                          ${renderAssignedStudentLessonSectionsHtml(les, stu.name || '')}
+                        </div>
+                      ` : ''}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          ${assignedTest ? `
+            <!-- 1B. Assigned Test / Quiz Card -->
+            <div id="student-portal-test-card" class="p-5 sm:p-6 rounded-3xl bg-slate-900/85 border-2 ${assignedTest.completed ? 'border-emerald-500/45' : 'border-indigo-500/45'} space-y-3.5 shadow-md">
+              ${allTests.length > 1 ? `
+                <div class="flex items-center gap-1.5 flex-wrap pb-2.5 border-b border-slate-800/80">
+                  ${allTests.map(tItem => `
+                    <button type="button" onclick="selectStudentPortalQuiz('${escapeHtml(tItem.id)}')" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition ${tItem.id === assignedTest.id ? 'bg-indigo-500 text-white border-indigo-400' : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-indigo-500/40'}">
+                      ${escapeHtml(tItem.title || tItem.lessonTitle || 'Quiz')}${tItem.completed ? ` (${tItem.score}/${tItem.total})` : ''}
+                    </button>
+                  `).join('')}
+                </div>
+              ` : ''}
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <div>
+                  <h2 class="text-base font-extrabold text-indigo-300 flex items-center gap-2">
+                    <i data-lucide="check-circle-2" class="w-5 h-5 text-indigo-400"></i>
+                    <span>${isHe ? 'מבדק אישי מהמורה' : 'My Assigned Test'}</span>
+                  </h2>
+                  <div dir="auto" class="text-xs text-slate-300 font-semibold mt-0.5">${escapeHtml(assignedTest.title || assignedTest.lessonTitle || 'Unit Check')} (${assignedTest.questions.length} questions)</div>
+                </div>
+                ${assignedTest.completed ? `
+                  <span id="student-portal-test-score-badge" class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-mono font-bold">
+                    Score: ${assignedTest.score} / ${assignedTest.total} (${assignedTest.total > 0 ? Math.round((assignedTest.score / assignedTest.total) * 100) : 0}%)
+                  </span>
+                ` : ''}
+              </div>
+              <div class="space-y-3">
+                ${assignedTest.questions.map((q, qIdx) => {
+                  const chosen = Array.isArray(assignedTest.answers) ? assignedTest.answers[qIdx] : undefined;
+                  const correctIdx = typeof q.correct === 'number' ? q.correct : 0;
+                  return `
+                    <div class="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
+                      <div dir="auto" class="text-xs sm:text-sm font-bold text-white">${qIdx + 1}. ${escapeHtml(q.q || '')}</div>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        ${(q.options || []).map((opt, optIdx) => {
+                          let cls = 'bg-slate-900 border-slate-800 text-slate-200 hover:bg-slate-800';
+                          if (assignedTest.completed) {
+                            if (optIdx === correctIdx) cls = 'bg-emerald-500/20 border-emerald-400 text-emerald-200 font-bold';
+                            else if (chosen === optIdx && chosen !== correctIdx) cls = 'bg-rose-500/20 border-rose-400 text-rose-200';
+                          } else if (chosen === optIdx) {
+                            cls = 'bg-indigo-500/25 border-indigo-400 text-white font-bold';
+                          }
+                          return `
+                            <button type="button" ${assignedTest.completed ? 'disabled' : ''} onclick="selectStudentPortalTestAnswer(${qIdx}, ${optIdx}, '${escapeHtml(assignedTest.id)}')" dir="auto" class="w-full text-left rtl:text-right px-3.5 py-2.5 rounded-xl border text-xs transition ${cls}">
+                              <strong class="font-mono mr-1.5 text-indigo-300">${String.fromCharCode(65 + optIdx)}.</strong>${escapeHtml(opt || '')}
+                            </button>
+                          `;
+                        }).join('')}
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+              ${!assignedTest.completed ? `
+                <div class="flex justify-end">
+                  <button type="button" id="btn-submit-student-portal-test" onclick="submitStudentPortalTest('${escapeHtml(assignedTest.id)}')" class="px-5 py-2.5 rounded-2xl bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-extrabold shadow-md transition">Submit Test</button>
+                </div>
+              ` : ''}
+            </div>
+          ` : ''}
+        </div>
+
+        <!-- TAB 2 PANEL: MY ASSIGNMENTS & GOALS (Checklist + Audio Recordings, Photos & PDFs) -->
+        <div id="student-portal-panel-goals" class="${activeTab === 'goals' ? 'space-y-4' : 'hidden space-y-4'}">
+          <div id="student-portal-goals-card" class="p-5 sm:p-6 rounded-3xl bg-slate-900/85 border-2 border-emerald-500/35 space-y-4 shadow-md">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <h2 class="text-base font-extrabold text-emerald-300 flex items-center gap-2">
+                <i data-lucide="target" class="w-5 h-5 text-emerald-400"></i>
+                <span>${isHe ? 'משימות ויעדים אישיים' : 'My Assignments & Goals'}</span>
+              </h2>
+              <span class="text-xs font-mono px-3 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/35 text-emerald-300 font-bold">${doneGoalsCount} / ${goals.length} ${isHe ? 'הושלמו' : 'Done'}</span>
+            </div>
+            ${goals.length === 0 ? `
+              <div class="py-6 text-center space-y-1.5">
+                <div class="text-2xl">🎯</div>
+                <p class="text-xs sm:text-sm text-slate-400">${isHe ? 'המורה טרם הוסיף יעדים אישיים.' : 'Your teacher has not added individual goals yet.'}</p>
+              </div>
+            ` : `
+              <div class="space-y-3">
+                ${goals.map(g => `
+                  <div class="p-4 rounded-2xl bg-slate-950/75 border ${g.completed ? 'border-emerald-500/45 bg-emerald-950/15' : 'border-slate-800 hover:border-emerald-400/50'} space-y-2.5 transition">
+                    <label class="flex items-center gap-3 cursor-pointer select-none">
+                      <input type="checkbox" ${g.completed ? 'checked' : ''} onchange="toggleStudentPortalGoal('${g.id}')" class="rounded-md border-slate-700 text-emerald-500 focus:ring-emerald-500 bg-slate-900 w-5 h-5 shrink-0 cursor-pointer" />
+                      <span dir="auto" class="text-sm font-bold flex-1 ${g.completed ? 'line-through text-slate-400' : 'text-slate-100'}">${escapeHtml(g.title)}</span>
+                      ${g.completed ? `<span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold shrink-0">✓ ${isHe ? 'בוצע' : 'Done'}</span>` : ''}
+                    </label>
+                    ${typeof renderCustomGoalMediaStripHtml === 'function' ? renderCustomGoalMediaStripHtml(stu.id, g, g.id, { readonly: true }) : ''}
+                  </div>
+                `).join('')}
+              </div>
+            `}
+          </div>
+        </div>
+
+        <!-- TAB 3 PANEL: TEACHER'S NOTES & UPCOMING SESSIONS -->
+        <div id="student-portal-panel-notes" class="${activeTab === 'notes' ? 'space-y-4' : 'hidden space-y-4'}">
+          <div id="student-portal-notes-card" class="p-5 sm:p-6 rounded-3xl bg-slate-900/85 border-2 border-indigo-500/35 space-y-3.5 shadow-md">
+            <div class="flex items-center justify-between gap-2">
+              <h2 class="text-base font-extrabold text-indigo-300 flex items-center gap-2">
+                <i data-lucide="message-square-text" class="w-5 h-5 text-indigo-400"></i>
+                <span>${isHe ? 'הערות ודגשים מהמורה' : "Teacher's Notes"}</span>
+              </h2>
+              ${sharedNotes.length > 0 ? `<span class="text-xs font-mono px-2.5 py-0.5 rounded-xl bg-slate-950 border border-slate-800 text-indigo-300 font-bold">${sharedNotes.length}</span>` : ''}
+            </div>
+            ${sharedNotes.length === 0 ? `
+              <div class="py-6 text-center space-y-1.5">
+                <div class="text-2xl">💬</div>
+                <p class="text-xs sm:text-sm text-slate-400">${isHe ? 'אין הערות ששותפו איתך עדיין.' : 'No notes shared from your teacher yet.'}</p>
+              </div>
+            ` : `
+              <div class="space-y-3">
+                ${sharedNotes.slice().reverse().map(n => `
+                  <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-1.5">
+                    ${n.dateLabel ? `<div class="text-[11px] font-mono text-indigo-400 font-semibold">${escapeHtml(n.dateLabel)}</div>` : ''}
+                    <div dir="auto" class="text-xs sm:text-sm text-slate-100 leading-relaxed whitespace-pre-wrap">${typeof formatSectionInlineText === 'function' ? formatSectionInlineText(n.text || '') : escapeHtml(n.text || '')}</div>
+                  </div>
+                `).join('')}
+              </div>
+            `}
+          </div>
+
+          ${upcomingSessions.length > 0 ? `
+            <div id="student-portal-schedule-card" class="p-5 rounded-3xl bg-slate-900/85 border border-sky-500/35 space-y-3 shadow-md">
+              <h2 class="text-sm font-extrabold text-sky-300 flex items-center gap-2">
+                <i data-lucide="calendar" class="w-4 h-4 text-sky-400"></i>
+                <span>${isHe ? 'מפגשים קרובים' : 'Upcoming Sessions'}</span>
+              </h2>
+              <div class="flex flex-wrap gap-2">
+                ${upcomingSessions.map(s => `
+                  <div class="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 flex items-center gap-2">
+                    <span class="font-mono font-bold text-sky-300">${escapeHtml(s.dateStr || 'Weekly')}</span>
+                    ${s.time ? `<span class="text-slate-400">${escapeHtml(s.time)}</span>` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
         </div>
       `;
       if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
       if (typeof hydrateGoalAudioElements === 'function') {
-        hydrateGoalAudioElements(document.getElementById('view-student-portal'));
+        hydrateGoalAudioElements(container);
       }
       if (hw && hw.pdfUrl && hw.pageNum && !hw.imageUrl && typeof renderPdfPageToCanvas === 'function') {
         renderPdfPageToCanvas(hw.pdfUrl, hw.pageNum, 'student-hw-pdf-canvas', 'student-hw-pdf-status', 'student-hw-pdf-iframe');
@@ -11005,6 +11163,9 @@ alter publication supabase_realtime add table public.students_sync;`;
     function toggleThemeMode() {
       const next = getThemeMode() === 'dark' ? 'light' : 'dark';
       applyThemeMode(next);
+      if ((typeof isStudentPortalActive === 'function' && isStudentPortalActive()) || APP_STATE.previewPortalStudent) {
+        if (typeof renderStudentPortalView === 'function') renderStudentPortalView();
+      }
       const isHe = APP_STATE.lang === 'he';
       if (typeof showToast === 'function') {
         showToast(next === 'light'
