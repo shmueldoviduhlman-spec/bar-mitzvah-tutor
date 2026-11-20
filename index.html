@@ -450,12 +450,20 @@
       color: #BE123C !important;
     }
     html.theme-daylight .text-purple-100:not(.keep-white),
-    html.theme-daylight .text-purple-200:not(.keep-white) {
+    html.theme-daylight .text-purple-200:not(.keep-white),
+    html.theme-daylight .text-violet-100:not(.keep-white),
+    html.theme-daylight .text-violet-200:not(.keep-white) {
       color: #4C1D95 !important;
     }
     html.theme-daylight .text-purple-300,
-    html.theme-daylight .text-purple-400 {
+    html.theme-daylight .text-purple-400,
+    html.theme-daylight .text-violet-300,
+    html.theme-daylight .text-violet-400 {
       color: #6D28D9 !important;
+    }
+    html.theme-daylight .text-teal-300,
+    html.theme-daylight .text-teal-400 {
+      color: #0F766E !important;
     }
 
     /* Responsive 2-Column & 3-Column Visual Course Gallery Grid on Desktop */
@@ -7036,9 +7044,12 @@ alter publication supabase_realtime add table public.students_sync;`;
         ...JSON.parse(JSON.stringify(item)),
         id: `${prefix}_${stamp}_${mkSuffix()}`
       }));
+      const resolvedTitle = typeof resolveCustomGoalDisplayTitle === 'function'
+        ? resolveCustomGoalDisplayTitle(sourceGoal)
+        : String(sourceGoal.title || 'Custom Learning Goal');
       return {
         id: `goal_${stamp}_${mkSuffix()}`,
-        title: String(sourceGoal.title || 'Custom Learning Goal'),
+        title: resolvedTitle,
         completed: false,
         images: cloneMediaList(sourceGoal.images, 'img'),
         pdfs: cloneMediaList(sourceGoal.pdfs, 'pdf'),
@@ -9557,16 +9568,19 @@ alter publication supabase_realtime add table public.students_sync;`;
               </div>
             ` : `
               <div class="space-y-3">
-                ${goals.map(g => `
+                ${goals.map(g => {
+                  const displayGoalTitle = typeof resolveCustomGoalDisplayTitle === 'function' ? resolveCustomGoalDisplayTitle(g) : (g.title || '');
+                  return `
                   <div class="p-4 rounded-2xl bg-slate-950/75 border ${g.completed ? 'border-emerald-500/45 bg-emerald-950/15' : 'border-slate-800 hover:border-emerald-400/50'} space-y-2.5 transition">
                     <label class="flex items-center gap-3 cursor-pointer select-none">
                       <input type="checkbox" ${g.completed ? 'checked' : ''} onchange="toggleStudentPortalGoal('${g.id}')" class="rounded-md border-slate-700 text-emerald-500 focus:ring-emerald-500 bg-slate-900 w-5 h-5 shrink-0 cursor-pointer" />
-                      <span dir="auto" class="text-sm font-bold flex-1 ${g.completed ? 'line-through text-slate-400' : 'text-slate-100'}">${escapeHtml(g.title)}</span>
+                      <span dir="auto" class="text-sm font-bold flex-1 ${g.completed ? 'line-through text-slate-400' : 'text-slate-100'}">${escapeHtml(displayGoalTitle)}</span>
                       ${g.completed ? `<span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold shrink-0">✓ ${isHe ? 'בוצע' : 'Done'}</span>` : ''}
                     </label>
-                    ${typeof renderCustomGoalMediaStripHtml === 'function' ? renderCustomGoalMediaStripHtml(stu.id, g, g.id, { readonly: true }) : ''}
+                    ${typeof renderCustomGoalMediaStripHtml === 'function' ? renderCustomGoalMediaStripHtml(stu.id, g, g.id, { readonly: true, hideSingleRecTitle: true }) : ''}
                   </div>
-                `).join('')}
+                `;
+                }).join('')}
               </div>
             `}
           </div>
@@ -26664,6 +26678,57 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       }
     }
 
+    function resolveCustomGoalDisplayTitle(goalObj) {
+      if (!goalObj || typeof goalObj !== 'object') return '';
+      const imgs = Array.isArray(goalObj.images) ? goalObj.images : [];
+      const pdfs = Array.isArray(goalObj.pdfs) ? goalObj.pdfs : [];
+      const recs = Array.isArray(goalObj.recordings) ? goalObj.recordings : [];
+      const totalMediaCount = imgs.length + pdfs.length + recs.length;
+      const rawTitle = String(goalObj.title || '').trim();
+      if (totalMediaCount === 1) {
+        const single = recs[0] || pdfs[0] || imgs[0];
+        const singleTitle = single && String(single.title || '').trim();
+        if (singleTitle) {
+          const isAutoGoalStamp = !rawTitle || /^(Recording\s+\d|הקלטה\s+\d|Audio Clip$|Custom Learning Goal$)/i.test(rawTitle);
+          const isSingleCustom = !/^(Recording\s+\d|הקלטה\s+\d)/i.test(singleTitle);
+          if (isAutoGoalStamp || isSingleCustom) {
+            goalObj.title = singleTitle;
+            return singleTitle;
+          }
+        }
+      }
+      return rawTitle || (pdfs[0]?.title) || (recs[0]?.title) || (imgs[0]?.title) || 'Custom Goal';
+    }
+
+    var goalAttachmentRenameTimer = null;
+
+    function syncCustomGoalAttachmentNameLive(studentId, goalId, kind, itemId, newTitle) {
+      if (!studentId || !goalId || !itemId) return;
+      const cleanTitle = String(newTitle || '').trim();
+      if (!cleanTitle) return;
+      const found = findStudentAndGoalForMedia(studentId, goalId);
+      if (!found.goal || !Array.isArray(found.goal[kind])) return;
+      const target = found.goal[kind].find(x => x.id === itemId);
+      if (!target) return;
+      target.title = cleanTitle;
+      if (!found.isDraft && found.goal) {
+        const totalMediaCount =
+          (found.goal.images ? found.goal.images.length : 0) +
+          (found.goal.pdfs ? found.goal.pdfs.length : 0) +
+          (found.goal.recordings ? found.goal.recordings.length : 0);
+        if (totalMediaCount === 1 || !found.goal.title || /^(Recording\s+\d|הקלטה\s+\d)/i.test(found.goal.title)) {
+          found.goal.title = cleanTitle;
+        }
+      }
+      if (!found.isDraft && found.student) {
+        saveStudentsToStorage(true);
+        if (goalAttachmentRenameTimer) clearTimeout(goalAttachmentRenameTimer);
+        goalAttachmentRenameTimer = setTimeout(() => {
+          if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(found.student);
+        }, 500);
+      }
+    }
+
     function renameCustomGoalAttachment(studentId, goalId, kind, itemId, newTitle) {
       if (!studentId || !goalId || !itemId) return false;
       const cleanTitle = String(newTitle || '').trim();
@@ -26676,17 +26741,15 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
         if (APP_STATE.activeStudentDrawerId === studentId) renderStudentDrawer(studentId, true);
         return false;
       }
-      if (target.title === cleanTitle) return true;
+      const totalMediaCount =
+        (found.goal.images ? found.goal.images.length : 0) +
+        (found.goal.pdfs ? found.goal.pdfs.length : 0) +
+        (found.goal.recordings ? found.goal.recordings.length : 0);
       const prevTitle = target.title;
+      const goalWasSyncedOrAuto = totalMediaCount === 1 || !found.goal.title || found.goal.title === prevTitle || /^(Recording\s+\d|הקלטה\s+\d)/i.test(found.goal.title);
       target.title = cleanTitle;
-      if (!found.isDraft && found.goal) {
-        const totalMediaCount =
-          (found.goal.images ? found.goal.images.length : 0) +
-          (found.goal.pdfs ? found.goal.pdfs.length : 0) +
-          (found.goal.recordings ? found.goal.recordings.length : 0);
-        if (totalMediaCount === 1 || !found.goal.title || found.goal.title === prevTitle) {
-          found.goal.title = cleanTitle;
-        }
+      if (!found.isDraft && found.goal && goalWasSyncedOrAuto) {
+        found.goal.title = cleanTitle;
       }
       if (!found.isDraft && found.student) {
         saveStudentsToStorage(true);
@@ -26694,6 +26757,9 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
       }
       if (APP_STATE.activeStudentDrawerId === studentId) {
         renderStudentDrawer(studentId, true);
+      }
+      if (typeof isStudentPortalActive === 'function' && (isStudentPortalActive() || APP_STATE.previewPortalStudent)) {
+        if (typeof renderStudentPortalView === 'function') renderStudentPortalView();
       }
       showToast(APP_STATE.lang === 'he' ? 'שם הקובץ עודכן' : 'Attachment renamed');
       return true;
@@ -27347,7 +27413,7 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
                 )}
               </div>
               ${readonly ? (img.title ? `<button type="button" onclick="openCustomGoalAttachmentViewer('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'image', '${escapeHtml(img.id)}')" dir="auto" class="text-[10px] text-sky-300 hover:text-white truncate max-w-[84px] text-center">${escapeHtml(img.title)}</button>` : '') : `
-                <input type="text" dir="auto" value="${escapeHtml(img.title || '')}" placeholder="${isHe ? 'שם תמונה' : 'Name pic'}" onchange="renameCustomGoalAttachment('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'images', '${escapeHtml(img.id)}', this.value)" onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }" onclick="event.stopPropagation()" class="w-full bg-slate-950/90 border border-slate-800 hover:border-sky-500/40 focus:border-sky-400 rounded-md px-1.5 py-0.5 text-[10px] text-sky-200 placeholder-slate-500 text-center focus:outline-none" title="${isHe ? 'שנה שם תמונה' : 'Rename picture'}" />
+                <input type="text" dir="auto" value="${escapeHtml(img.title || '')}" placeholder="${isHe ? 'שם תמונה' : 'Name pic'}" oninput="syncCustomGoalAttachmentNameLive('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'images', '${escapeHtml(img.id)}', this.value)" onchange="renameCustomGoalAttachment('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'images', '${escapeHtml(img.id)}', this.value)" onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }" onclick="event.stopPropagation()" class="w-full bg-slate-950/90 border border-slate-800 hover:border-sky-500/40 focus:border-sky-400 rounded-md px-1.5 py-0.5 text-[10px] text-sky-200 placeholder-slate-500 text-center focus:outline-none" title="${isHe ? 'שנה שם תמונה' : 'Rename picture'}" />
               `}
             </div>
           `).join('')}
@@ -27369,7 +27435,7 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
                   <button type="button" onclick="openCustomGoalAttachmentViewer('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'pdf', '${escapeHtml(pdf.id)}')" class="inline-flex items-center gap-1 text-teal-400 hover:text-white transition shrink-0" title="${isHe ? 'פתח PDF' : 'Open PDF'}">
                     <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
                   </button>
-                  <input type="text" dir="auto" value="${escapeHtml(pdf.title || 'PDF')}" placeholder="${isHe ? 'שם קובץ PDF' : 'Name PDF'}" onchange="renameCustomGoalAttachment('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'pdfs', '${escapeHtml(pdf.id)}', this.value)" onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }" onclick="event.stopPropagation()" class="bg-transparent border border-transparent hover:border-teal-500/40 focus:border-teal-400 focus:bg-slate-950/80 rounded px-1.5 py-0.5 text-[11px] font-semibold text-teal-100 placeholder-slate-500 focus:outline-none ${isSavedGoal && topFlush ? 'flex-1 min-w-[110px]' : 'min-w-[90px] max-w-[190px]'}" title="${isHe ? 'לחץ לשינוי שם ה-PDF' : 'Click to rename PDF'}" />
+                  <input type="text" dir="auto" value="${escapeHtml(pdf.title || 'PDF')}" placeholder="${isHe ? 'שם קובץ PDF' : 'Name PDF'}" oninput="syncCustomGoalAttachmentNameLive('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'pdfs', '${escapeHtml(pdf.id)}', this.value)" onchange="renameCustomGoalAttachment('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'pdfs', '${escapeHtml(pdf.id)}', this.value)" onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }" onclick="event.stopPropagation()" class="bg-transparent border border-transparent hover:border-teal-500/40 focus:border-teal-400 focus:bg-slate-950/80 rounded px-1.5 py-0.5 text-[11px] font-semibold text-teal-100 placeholder-slate-500 focus:outline-none ${isSavedGoal && topFlush ? 'flex-1 min-w-[110px]' : 'min-w-[90px] max-w-[190px]'}" title="${isHe ? 'לחץ לשינוי שם ה-PDF' : 'Click to rename PDF'}" />
                   <button type="button" onclick="openCustomGoalAttachmentViewer('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'pdf', '${escapeHtml(pdf.id)}')" class="px-1.5 py-0.5 rounded bg-teal-950/90 hover:bg-teal-900 text-teal-300 font-mono text-[10px] shrink-0 transition" title="${isHe ? 'פתח עמוד PDF' : 'Open PDF Page'}">Pg ${Number(pdf.pageNum) || 1}</button>
                 </div>
                 ${renderDeleteOrDetachBtn(
@@ -27387,16 +27453,17 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
         </div>
       ` : '';
 
+      const hideSingleRecLabel = !!(readonly && options.hideSingleRecTitle && recs.length === 1 && pdfs.length === 0 && imgs.length === 0);
       const recsHtml = recs.length ? `
         <div class="space-y-1.5">
           ${recs.map(rec => `
             <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-950/85 border border-violet-500/30 flex-wrap sm:flex-nowrap">
               <div class="flex items-center gap-1.5 min-w-0 shrink-0 ${readonly ? 'max-w-[180px]' : 'max-w-[200px]'}">
                 <i data-lucide="volume-2" class="w-3.5 h-3.5 text-violet-400 shrink-0"></i>
-                ${readonly ? `
+                ${readonly ? (hideSingleRecLabel ? '' : `
                   <span dir="auto" class="text-[11px] font-semibold text-violet-200 truncate" title="${escapeHtml(rec.title || 'Recording')}">${escapeHtml(rec.title || 'Recording')}</span>
-                ` : `
-                  <input type="text" dir="auto" value="${escapeHtml(rec.title || 'Recording')}" placeholder="${isHe ? 'שם הקלטה' : 'Name recording'}" onchange="renameCustomGoalAttachment('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'recordings', '${escapeHtml(rec.id)}', this.value)" onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }" onclick="event.stopPropagation()" class="bg-transparent border border-transparent hover:border-violet-500/40 focus:border-violet-400 focus:bg-slate-900 rounded px-1.5 py-0.5 text-[11px] font-semibold text-violet-100 placeholder-slate-500 focus:outline-none w-32 sm:w-40" title="${isHe ? 'לחץ לתת שם להקלטה' : 'Click to name recording'}" />
+                `) : `
+                  <input type="text" dir="auto" value="${escapeHtml(rec.title || 'Recording')}" placeholder="${isHe ? 'שם הקלטה' : 'Name recording'}" oninput="syncCustomGoalAttachmentNameLive('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'recordings', '${escapeHtml(rec.id)}', this.value)" onchange="renameCustomGoalAttachment('${escapeHtml(studentId)}', '${escapeHtml(goalId)}', 'recordings', '${escapeHtml(rec.id)}', this.value)" onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }" onclick="event.stopPropagation()" class="bg-transparent border border-transparent hover:border-violet-500/40 focus:border-violet-400 focus:bg-slate-900 rounded px-1.5 py-0.5 text-[11px] font-semibold text-violet-100 placeholder-slate-500 focus:outline-none w-32 sm:w-40" title="${isHe ? 'לחץ לתת שם להקלטה' : 'Click to name recording'}" />
                 `}
               </div>
               <audio controls preload="metadata" ${String(rec.url || '').startsWith('idb://') ? `data-idb-audio="${escapeHtml(rec.url)}"` : `src="${escapeHtml(rec.url || '')}"`} class="h-7 flex-1 min-w-[150px] max-w-full"></audio>

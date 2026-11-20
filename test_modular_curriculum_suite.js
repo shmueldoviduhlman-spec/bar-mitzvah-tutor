@@ -6271,6 +6271,58 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     'Clicking expanded course again cleanly collapses lessons back down'
   );
 
+  // =========================================================================
+  // GATE 66: Goal Name Healing & Live Attachment Sync to Student Portal
+  // =========================================================================
+  console.log('\n[Gate 66] Single-Media Goal Name Sync & Legacy Stamp Healing in Student Portal...');
+  const g66Stu = {
+    id: 'stu_g66_heal',
+    name: 'Noach Sync Test',
+    studentAccessCode: 'NOAH66',
+    skills: {
+      customGoals: [
+        {
+          id: 'goal_g66_legacy',
+          title: 'Recording 08:53 PM',
+          completed: false,
+          images: [],
+          pdfs: [],
+          recordings: [{ id: 'rec_g66_1', title: 'Mode Ani', url: 'data:audio/webm;base64,GkXf', type: 'audio' }]
+        },
+        {
+          id: 'goal_g66_live',
+          title: 'Recording 08:54 PM',
+          completed: false,
+          images: [],
+          pdfs: [],
+          recordings: [{ id: 'rec_g66_2', title: 'Recording 08:54 PM', url: 'data:audio/webm;base64,GkXf', type: 'audio' }]
+        }
+      ]
+    }
+  };
+  sandbox.APP_STATE.students.push(g66Stu);
+  // Typing live without blur/Enter syncs both recording title & parent goal.title immediately
+  sandbox.syncCustomGoalAttachmentNameLive(g66Stu.id, 'goal_g66_live', 'recordings', 'rec_g66_2', 'Blessing after you wash hands');
+  assert(
+    g66Stu.skills.customGoals[1].recordings[0].title === 'Blessing after you wash hands' &&
+    g66Stu.skills.customGoals[1].title === 'Blessing after you wash hands',
+    'syncCustomGoalAttachmentNameLive immediately updates recording name and syncs goal.title cleanly'
+  );
+
+  // Student Portal heals stale "Recording 08:53 PM" stamp and renders single clean title without duplicate label
+  sandbox.APP_STATE.studentPortalMode = true;
+  sandbox.APP_STATE.studentPortalStudent = g66Stu;
+  sandbox.switchStudentPortalTab('goals');
+  const g66PortalHtml = getOrCreateElem('view-student-portal').innerHTML;
+  assert(
+    !g66PortalHtml.includes('Recording 08:53 PM') &&
+    !g66PortalHtml.includes('Recording 08:54 PM') &&
+    g66PortalHtml.includes('Mode Ani') &&
+    g66PortalHtml.includes('Blessing after you wash hands') &&
+    indexHtml.includes('.text-violet-200:not(.keep-white)'),
+    'Student Portal heals stale Recording HH:MM stamps, shows renamed titles cleanly, and fixes Light Mode violet contrast'
+  );
+
   sandbox.APP_STATE.studentPortalMode = false;
   sandbox.APP_STATE.studentPortalStudent = null;
   sandbox.APP_STATE.activeStudentDrawerId = null;
