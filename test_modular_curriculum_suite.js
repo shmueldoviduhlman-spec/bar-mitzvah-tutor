@@ -6378,6 +6378,115 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     'Clicking Shared Notes with Student reveals shared notes section cleanly inside Tab 2'
   );
 
+  // =========================================================================
+  // GATE 68: Archive System (Courses, Lessons, Students) + Double-Verify Student Delete
+  // =========================================================================
+  console.log('\n[Gate 68] Archive Courses/Lessons/Students, Settings Archive Viewer & Double-Confirmed Student Delete...');
+  const g68Course = {
+    id: 'course_g68_archive',
+    title_en: 'Tefillin Deep Dive',
+    lessons: [
+      { id: 'les_g68_1', lesson_num: 1, title_en: 'Shel Yad & Heart Alignment' },
+      { id: 'les_g68_2', lesson_num: 2, title_en: 'Shel Rosh & Mind Focus' }
+    ]
+  };
+  const g68Stu = {
+    id: 'stu_g68_arch',
+    name: 'Dov Archive Test',
+    studentAccessCode: 'DOV68A',
+    status: 'active',
+    completedTopics: {},
+    skills: sandbox.getDefaultStudentSkills()
+  };
+  sandbox.APP_STATE.customCourses.push(g68Course);
+  sandbox.APP_STATE.students.push(g68Stu);
+
+  assert(
+    indexHtml.includes('id="btn-modal-archive-course"') &&
+    indexHtml.includes('id="btn-drawer-archive-student"') &&
+    indexHtml.includes('id="btn-settings-open-archive"') &&
+    indexHtml.includes('id="modal-archived-items"'),
+    'Archive triggers added next to Delete Course, Student Drawer header, and inside Settings Archive Manager'
+  );
+
+  // Archive Lesson 1 in Studio -> disappears from Lesson List & Student progress, Edit mode shows Archive button beside Delete
+  sandbox.APP_STATE.insideCourseId = g68Course.id;
+  sandbox.handleStudioArchiveClass(g68Course.id, 'les_g68_1');
+  const studioListHtmlAfterArch = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  sandbox.enterStudioEditLessonMode(g68Course.id, 'les_g68_2');
+  const studioEditHtmlAfterArch = getOrCreateElem('tutor-hub-lessons-container').innerHTML;
+  assert(
+    g68Course.lessons[0].archived === true &&
+    !studioListHtmlAfterArch.includes('Shel Yad &amp; Heart Alignment') &&
+    studioEditHtmlAfterArch.includes('id="btn-studio-archive-lesson"') &&
+    sandbox.getStudentCourseProgress(g68Stu).totalClasses < (g68Course.lessons.length + (sandbox.APP_STATE.customCourses.length * 10)),
+    'Archiving a lesson hides it from active Studio Lesson List and renders Archive button beside Delete in Edit header'
+  );
+
+  // Archive whole Course via Course Edit modal helper
+  sandbox.openEditCustomCourseModal(g68Course.id);
+  sandbox.archiveEditingCourse();
+  assert(
+    g68Course.archived === true &&
+    !getOrCreateElem('courses-cards-grid').innerHTML.includes('Tefillin Deep Dive'),
+    'Archiving a course removes it from active Courses cards grid cleanly'
+  );
+
+  // Archive Student -> disappears from Roster & Quick Picker, then Restore works cleanly
+  sandbox.archiveStudent(g68Stu.id);
+  const pickerAfterArch = sandbox.renderStudentQuickPickerHtml('sel-test-68');
+  assert(
+    g68Stu.archived === true &&
+    !getOrCreateElem('students-list').innerHTML.includes('Dov Archive Test') &&
+    !pickerAfterArch.includes('Dov Archive Test'),
+    'Archiving a student hides them from active Students roster and Send pickers'
+  );
+
+  // Settings Archive Modal shows all 3 archived items (Student, Course, Lesson) and Restore restores cleanly
+  sandbox.openSettingsModal();
+  assert(getOrCreateElem('settings-archive-count-badge').textContent === '3', 'Settings badge counts all 3 archived items accurately');
+  sandbox.openArchiveModal();
+  const archiveHtml68 = getOrCreateElem('modal-archived-items-body').innerHTML;
+  assert(
+    archiveHtml68.includes('Dov Archive Test') &&
+    archiveHtml68.includes('Tefillin Deep Dive') &&
+    archiveHtml68.includes('Shel Yad &amp; Heart Alignment'),
+    'Settings Archive modal lists archived Students, Courses, and Lessons'
+  );
+
+  sandbox.unarchiveStudent(g68Stu.id);
+  sandbox.unarchiveCourseById(g68Course.id);
+  sandbox.unarchiveLessonById(g68Course.id, 'les_g68_1');
+  assert(
+    !g68Stu.archived && !g68Course.archived && !g68Course.lessons[0].archived &&
+    getOrCreateElem('students-list').innerHTML.includes('Dov Archive Test') &&
+    getOrCreateElem('courses-cards-grid').innerHTML.includes('Tefillin Deep Dive'),
+    'Restoring Student, Course, and Lesson from Archive restores them straight back to active views'
+  );
+
+  // Verify deleteStudent requires double confirmation (2 confirm calls)
+  const prevConfirm68 = sandbox.confirm;
+  let confirmCalls68 = 0;
+  sandbox.confirm = () => { confirmCalls68 += 1; return confirmCalls68 === 1; }; // pass step 1, cancel step 2
+  const abortedStep2 = sandbox.deleteStudent(g68Stu.id);
+  assert(
+    confirmCalls68 === 2 &&
+    abortedStep2 === false &&
+    sandbox.APP_STATE.students.some(s => s.id === g68Stu.id),
+    'Student delete enforces 2-step double verification and preserves student when step 2 is cancelled'
+  );
+
+  confirmCalls68 = 0;
+  sandbox.confirm = () => { confirmCalls68 += 1; return true; }; // pass both step 1 & step 2
+  const confirmedBoth = sandbox.deleteStudent(g68Stu.id);
+  assert(
+    confirmCalls68 === 2 &&
+    confirmedBoth === true &&
+    !sandbox.APP_STATE.students.some(s => s.id === g68Stu.id),
+    'Confirming both verification prompts permanently deletes the student'
+  );
+  sandbox.confirm = prevConfirm68;
+
   sandbox.APP_STATE.studentPortalMode = false;
   sandbox.APP_STATE.studentPortalStudent = null;
   sandbox.APP_STATE.activeStudentDrawerId = null;

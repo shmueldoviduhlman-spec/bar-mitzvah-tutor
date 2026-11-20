@@ -2802,6 +2802,16 @@
           <div class="flex items-center gap-2 flex-wrap">
             <button
               type="button"
+              id="btn-modal-archive-course"
+              onclick="archiveEditingCourse()"
+              class="hidden px-3 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/35 text-xs font-bold transition flex items-center gap-1.5"
+              title="Archive this course (find &amp; restore anytime in Settings)"
+            >
+              <i data-lucide="archive" class="w-3.5 h-3.5"></i>
+              <span>Archive Course</span>
+            </button>
+            <button
+              type="button"
               id="btn-modal-delete-course"
               onclick="handleDeleteEditingCourseDoubleConfirm()"
               class="hidden px-3 py-2 rounded-xl bg-rose-950/50 hover:bg-rose-900/70 text-rose-300 border border-rose-500/35 text-xs font-bold transition flex items-center gap-1.5"
@@ -4512,6 +4522,9 @@
           <button type="button" onclick="switchTab('study'); closeStudentDrawer();" class="hidden" aria-hidden="true">
             <span id="drawer-btn-curriculum-label">Curriculum</span>
           </button>
+          <button type="button" id="btn-drawer-archive-student" onclick="if(APP_STATE.activeStudentDrawerId) archiveStudent(APP_STATE.activeStudentDrawerId)" class="p-2 text-slate-400 hover:text-amber-300 rounded-xl hover:bg-slate-800 transition active:scale-95" title="Archive Student">
+            <i data-lucide="archive" class="w-4 h-4"></i>
+          </button>
           <button type="button" id="btn-drawer-delete-student" onclick="if(APP_STATE.activeStudentDrawerId) deleteStudent(APP_STATE.activeStudentDrawerId)" class="p-2 text-slate-400 hover:text-red-400 rounded-xl hover:bg-slate-800 transition active:scale-95" title="Delete Student">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
           </button>
@@ -4810,6 +4823,21 @@
           <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
         </button>
 
+        <!-- Archived Students, Courses & Lessons Tile -->
+        <button type="button" id="btn-settings-open-archive" onclick="closeSettingsModal(); openArchiveModal();" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-amber-500/50 transition active:scale-98 text-left">
+          <div class="flex items-center gap-3">
+            <i data-lucide="archive" class="w-4 h-4 text-amber-400"></i>
+            <div>
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span id="settings-archive-title">Archived</span>
+                <span id="settings-archive-count-badge" class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono font-bold">0</span>
+              </div>
+              <p id="settings-archive-desc" class="text-[11px] text-slate-400 mt-0.5">View &amp; restore archived students, courses, and lessons</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+        </button>
+
         <!-- Download Backup Tile -->
         <button onclick="exportDataJson()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition active:scale-98 text-left">
           <div class="flex items-center gap-3">
@@ -4847,6 +4875,27 @@
         </button>
 
       </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ARCHIVED ITEMS MANAGER                  -->
+  <!-- ============================================== -->
+  <div id="modal-archived-items" class="fixed inset-0 z-[75] flex items-center justify-center bg-black/80 p-3 sm:p-5 hidden backdrop-blur-sm" onclick="if(event.target === this) closeArchiveModal();">
+    <div class="bg-slate-950 border border-amber-500/35 rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-900/85">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-400/35 text-amber-300 flex items-center justify-center shrink-0">
+            <i data-lucide="archive" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <h3 id="modal-archive-title" class="text-sm sm:text-base font-extrabold text-white truncate">Archived Items</h3>
+            <p id="modal-archive-subtitle" class="text-[11px] text-slate-400 truncate">Restore or permanently delete archived students, courses &amp; lessons</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeArchiveModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition">✕</button>
+      </div>
+      <div id="modal-archived-items-body" class="flex-1 min-h-0 overflow-y-auto p-5 space-y-4"></div>
     </div>
   </div>
 
@@ -7127,7 +7176,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       const wantsAll = targetRefs.length === 0 || targetRefs.some(r => /^(all|\*|everyone|all other students)$/i.test(String(r).trim()));
       let targetStudents = [];
       if (wantsAll) {
-        targetStudents = (APP_STATE.students || []).filter(s => s && !excludedIds.has(s.id));
+        targetStudents = (APP_STATE.students || []).filter(s => s && !s.archived && !excludedIds.has(s.id));
       } else {
         const seenIds = new Set();
         targetRefs.forEach(ref => {
@@ -7201,7 +7250,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!sourceStu) return false;
       ensureStudentSkills(sourceStu);
       const sourceGoals = Array.isArray(sourceStu.skills.customGoals) ? sourceStu.skills.customGoals : [];
-      const otherStudents = (APP_STATE.students || []).filter(s => s && s.id !== sourceStudentId);
+      const otherStudents = (APP_STATE.students || []).filter(s => s && !s.archived && s.id !== sourceStudentId);
       const isHe = APP_STATE.lang === 'he';
       if (!sourceGoals.length) {
         showToast(isHe ? 'אין יעדים להעתקה עדיין' : 'Add at least one goal first before copying');
@@ -7680,8 +7729,151 @@ alter publication supabase_realtime add table public.students_sync;`;
       showToast(isHe ? 'הקובץ הוסר' : 'Attachment removed');
     }
 
+    function getArchivedItemsSummary() {
+      const students = (APP_STATE.students || []).filter(s => s && s.archived);
+      const courses = (APP_STATE.customCourses || []).filter(c => c && c.archived);
+      const lessons = [];
+      (APP_STATE.customCourses || []).forEach(c => {
+        if (!c || !Array.isArray(c.lessons)) return;
+        c.lessons.forEach(l => {
+          if (l && l.archived) lessons.push({ course: c, lesson: l });
+        });
+      });
+      return { students, courses, lessons, total: students.length + courses.length + lessons.length };
+    }
+
+    function updateSettingsArchiveBadge() {
+      const badge = document.getElementById('settings-archive-count-badge');
+      if (badge) {
+        badge.textContent = String(getArchivedItemsSummary().total);
+      }
+    }
+
     function openSettingsModal() {
+      updateSettingsArchiveBadge();
       document.getElementById('modal-settings').classList.remove('hidden');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function openArchiveModal() {
+      renderArchiveModalContent();
+      const modal = document.getElementById('modal-archived-items');
+      if (modal) modal.classList.remove('hidden');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function closeArchiveModal() {
+      const modal = document.getElementById('modal-archived-items');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function renderArchiveModalContent() {
+      const body = document.getElementById('modal-archived-items-body');
+      if (!body) return;
+      const isHe = APP_STATE.lang === 'he';
+      const titleEl = document.getElementById('modal-archive-title');
+      const subEl = document.getElementById('modal-archive-subtitle');
+      if (titleEl) titleEl.textContent = isHe ? 'פריטים בארכיון' : 'Archived Items';
+      if (subEl) subEl.textContent = isHe ? 'שחזר או מחק לצמיתות תלמידים, קורסים ושיעורים מהארכיון' : 'Restore or permanently delete archived students, courses & lessons';
+
+      const { students, courses, lessons, total } = getArchivedItemsSummary();
+      updateSettingsArchiveBadge();
+
+      if (total === 0) {
+        body.innerHTML = `
+          <div class="text-center py-10 space-y-2">
+            <div class="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 text-slate-500 flex items-center justify-center mx-auto">
+              <i data-lucide="archive" class="w-5 h-5"></i>
+            </div>
+            <p class="text-sm font-bold text-slate-300">${isHe ? 'הארכיון ריק כרגע' : 'Your Archive is Empty'}</p>
+            <p class="text-xs text-slate-500">${isHe ? 'תלמידים, קורסים או שיעורים שתעביר לארכיון יופיעו כאן לשחזור קל.' : 'Any student, course, or lesson you archive will appear here to restore anytime.'}</p>
+          </div>
+        `;
+        if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+        return;
+      }
+
+      body.innerHTML = `
+        ${students.length > 0 ? `
+          <div class="space-y-2">
+            <div class="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+              <i data-lucide="users" class="w-3.5 h-3.5"></i>
+              <span>${isHe ? `תלמידים בארכיון (${students.length})` : `Archived Students (${students.length})`}</span>
+            </div>
+            <div class="space-y-2">
+              ${students.map(s => `
+                <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between gap-3">
+                  <div class="min-w-0">
+                    <div dir="auto" class="text-xs sm:text-sm font-bold text-white truncate">${escapeHtml(s.name || 'Student')}</div>
+                    ${s.subject || s.gradeOrDate ? `<div class="text-[11px] text-slate-400 truncate">${escapeHtml([s.subject, s.gradeOrDate].filter(Boolean).join(' · '))}</div>` : ''}
+                  </div>
+                  <div class="flex items-center gap-1.5 shrink-0">
+                    <button type="button" onclick="unarchiveStudent('${escapeHtml(s.id)}')" class="px-2.5 py-1 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/35 text-xs font-bold transition">${isHe ? 'שחזר' : 'Restore'}</button>
+                    <button type="button" onclick="deleteStudent('${escapeHtml(s.id)}'); renderArchiveModalContent();" class="px-2.5 py-1 rounded-xl bg-rose-950/50 hover:bg-rose-900/70 text-rose-300 border border-rose-500/35 text-xs font-bold transition">${isHe ? 'מחק' : 'Delete'}</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        ${courses.length > 0 ? `
+          <div class="space-y-2">
+            <div class="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+              <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+              <span>${isHe ? `קורסים בארכיון (${courses.length})` : `Archived Courses (${courses.length})`}</span>
+            </div>
+            <div class="space-y-2">
+              ${courses.map(c => {
+                const cTitle = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
+                return `
+                  <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                      <span class="text-base shrink-0">${escapeHtml(normalizeCourseIcon(c.icon))}</span>
+                      <div class="min-w-0">
+                        <div dir="auto" class="text-xs sm:text-sm font-bold text-white truncate">${escapeHtml(cTitle || 'Course')}</div>
+                        <div class="text-[11px] text-slate-400">${(c.lessons || []).length} lessons</div>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                      <button type="button" onclick="unarchiveCourseById('${escapeHtml(c.id)}')" class="px-2.5 py-1 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/35 text-xs font-bold transition">${isHe ? 'שחזר' : 'Restore'}</button>
+                      <button type="button" onclick="permanentlyDeleteArchivedCourse('${escapeHtml(c.id)}')" class="px-2.5 py-1 rounded-xl bg-rose-950/50 hover:bg-rose-900/70 text-rose-300 border border-rose-500/35 text-xs font-bold transition">${isHe ? 'מחק' : 'Delete'}</button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        ${lessons.length > 0 ? `
+          <div class="space-y-2">
+            <div class="text-xs font-bold uppercase tracking-wider text-teal-300 flex items-center gap-1.5">
+              <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+              <span>${isHe ? `שיעורים בארכיון (${lessons.length})` : `Archived Lessons (${lessons.length})`}</span>
+            </div>
+            <div class="space-y-2">
+              ${lessons.map(({ course, lesson }) => {
+                const cTitle = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
+                const lTitle = isHe ? (lesson.title_he || lesson.title_en) : (lesson.title_en || lesson.title_he);
+                return `
+                  <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between gap-3">
+                    <div class="min-w-0">
+                      <div dir="auto" class="text-xs sm:text-sm font-bold text-white truncate">${escapeHtml(lTitle || 'Untitled Lesson')}</div>
+                      <div class="text-[11px] text-slate-400 truncate">${escapeHtml(cTitle || 'Course')}</div>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                      <button type="button" onclick="unarchiveLessonById('${escapeHtml(course.id)}', '${escapeHtml(lesson.id)}')" class="px-2.5 py-1 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/35 text-xs font-bold transition">${isHe ? 'שחזר' : 'Restore'}</button>
+                      <button type="button" onclick="handleDeleteCustomLesson('${escapeHtml(course.id)}', '${escapeHtml(lesson.id)}'); renderArchiveModalContent();" class="px-2.5 py-1 rounded-xl bg-rose-950/50 hover:bg-rose-900/70 text-rose-300 border border-rose-500/35 text-xs font-bold transition">${isHe ? 'מחק' : 'Delete'}</button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        ` : ''}
+      `;
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
     }
 
     function closeSettingsModal() {
@@ -8054,6 +8246,8 @@ alter publication supabase_realtime add table public.students_sync;`;
                 skills: meta.skills || getDefaultStudentSkills(),
                 gradeLevel: meta.gradeLevel || 'Standard / All Levels',
                 status: meta.status || 'active',
+                archived: !!meta.archived,
+                archivedAt: meta.archivedAt || '',
                 parentContact: meta.parentContact || { name: '', phone: '', email: '' },
                 hourlyRate: meta.hourlyRate || '',
                 studentAccessCode: meta.studentAccessCode || generateStudentAccessCode(APP_STATE.students),
@@ -8335,6 +8529,8 @@ alter publication supabase_realtime add table public.students_sync;`;
           gradeOrDate: student.gradeOrDate || '',
           gradeLevel: student.gradeLevel || 'Standard / All Levels',
           status: student.status || 'active',
+          archived: !!student.archived,
+          archivedAt: student.archivedAt || '',
           parentContact: student.parentContact || { name: '', phone: '', email: '' },
           hourlyRate: student.hourlyRate || '',
           studentAccessCode: student.studentAccessCode || generateStudentAccessCode(APP_STATE.students),
@@ -12376,7 +12572,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (!grid) return;
 
       const isHe = APP_STATE.lang === 'he';
-      const courses = (APP_STATE.customCourses || []).filter(c => c && c.id !== 'course_bar_mitzvah_concepts' && c.id !== 'course_bar_mitzvah_chumash' || APP_STATE.activeCourseId === c.id);
+      const courses = (APP_STATE.customCourses || []).filter(c => c && !c.archived && (c.id !== 'course_bar_mitzvah_concepts' && c.id !== 'course_bar_mitzvah_chumash' || APP_STATE.activeCourseId === c.id));
 
       if (countBadge) {
         countBadge.textContent = `${courses.length} ${isHe ? (courses.length === 1 ? 'קורס' : 'קורסים') : (courses.length === 1 ? 'Course' : 'Courses')}`;
@@ -14178,7 +14374,7 @@ Return STRICT JSON ONLY: {"pages":[{"pageNum":${start},"title":"..."}]}`
     }
 
     function renderStudentQuickPickerHtml(selectId) {
-      const students = APP_STATE.students || [];
+      const students = (APP_STATE.students || []).filter(s => s && !s.archived);
       if (students.length === 0) return '';
       const activeId = APP_STATE.activeStudentId || students[0].id;
       return `
@@ -17239,7 +17435,7 @@ ${forceSchemaLines}`;
         APP_STATE.activeCourseId = activeCourse.id;
       }
 
-      const lessons = Array.isArray(activeCourse.lessons) ? activeCourse.lessons : [];
+      const lessons = (Array.isArray(activeCourse.lessons) ? activeCourse.lessons : []).filter(l => l && !l.archived);
       const outerCourseHeader = document.getElementById('inside-course-header-card');
 
       // Update header metrics
@@ -17481,6 +17677,10 @@ ${forceSchemaLines}`;
                     <span>${studioBlueprintDetailsOpen ? 'Hide Rules' : 'View Rules'}</span>
                   </button>
                 ` : ''}
+                <button type="button" id="btn-studio-archive-lesson" onclick="handleStudioArchiveClass('${activeCourse.id}', '${selectedLesson.id}')" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-amber-950/60 hover:text-amber-300 text-slate-400 border border-slate-700/60 text-xs font-semibold flex items-center gap-1 transition" title="Archive Lesson">
+                  <i data-lucide="archive" class="w-3.5 h-3.5"></i>
+                  <span class="hidden sm:inline">Archive</span>
+                </button>
                 <button type="button" onclick="handleStudioDeleteClass('${activeCourse.id}', '${selectedLesson.id}')" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-950/60 hover:text-rose-400 text-slate-400 border border-slate-700/60 text-xs font-semibold flex items-center gap-1 transition" title="Delete Lesson">
                   <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                   <span class="hidden sm:inline">Delete</span>
@@ -18111,6 +18311,52 @@ ${forceSchemaLines}`;
       saveCustomCoursesToStorage(true);
       renderCourseStudio(course.id, clone.id);
       showToast(APP_STATE.lang === 'he' ? 'השיעור שוכפל בהצלחה!' : 'Class duplicated!');
+    }
+
+    function handleStudioArchiveClass(courseId, lessonId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      if (!course || !Array.isArray(course.lessons)) return false;
+      const lesson = course.lessons.find(l => l.id === lessonId);
+      if (!lesson) return false;
+      lesson.archived = true;
+      lesson.archivedAt = new Date().toISOString();
+      const remaining = course.lessons.filter(l => l && !l.archived);
+      remaining.forEach((l, idx) => { l.lesson_num = idx + 1; });
+      if (APP_STATE.studioSelectedLessonId === lessonId) {
+        APP_STATE.studioSelectedLessonId = remaining.length > 0 ? remaining[0].id : null;
+      }
+      course.updated_at = new Date().toISOString();
+      saveCustomCoursesToStorage(true);
+      updateSettingsArchiveBadge();
+      if (APP_STATE.insideCourseId === courseId) {
+        exitStudioToLessonList(courseId);
+      } else {
+        renderLessonsCategoryView();
+      }
+      const isHe = APP_STATE.lang === 'he';
+      showToast(isHe ? 'השיעור הועבר לארכיון' : 'Lesson moved to Archive');
+      return true;
+    }
+
+    function unarchiveLessonById(courseId, lessonId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      if (!course || !Array.isArray(course.lessons)) return false;
+      const lesson = course.lessons.find(l => l.id === lessonId);
+      if (!lesson) return false;
+      lesson.archived = false;
+      delete lesson.archivedAt;
+      const activeLessons = course.lessons.filter(l => l && !l.archived);
+      activeLessons.forEach((l, idx) => { l.lesson_num = idx + 1; });
+      course.updated_at = new Date().toISOString();
+      saveCustomCoursesToStorage(true);
+      renderArchiveModalContent();
+      renderLessonsCategoryView();
+      if (APP_STATE.insideCourseId === courseId) {
+        renderCourseStudio(course.id, APP_STATE.studioSelectedLessonId);
+      }
+      const isHe = APP_STATE.lang === 'he';
+      showToast(isHe ? 'השיעור שוחזר מהארכיון' : 'Lesson restored');
+      return true;
     }
 
     function handleStudioDeleteClass(courseId, lessonId) {
@@ -22851,6 +23097,8 @@ Return STRICT JSON ONLY:
       renderBlueprintSectionsList();
       resetArchitectConversation();
 
+      const archCourseBtn = document.getElementById('btn-modal-archive-course');
+      if (archCourseBtn) archCourseBtn.classList.add('hidden');
       const delCourseBtn = document.getElementById('btn-modal-delete-course');
       if (delCourseBtn) delCourseBtn.classList.add('hidden');
       const quickLessonsEl = document.getElementById('input-create-course-lessons-list');
@@ -22910,6 +23158,46 @@ Return STRICT JSON ONLY:
       showToast(isHe ? 'הקורס נמחק לצמיתות' : 'Course permanently deleted');
     }
 
+    function archiveEditingCourse(courseIdOverride) {
+      const targetId = courseIdOverride || editingCourseId;
+      if (!targetId) return false;
+      const course = (APP_STATE.customCourses || []).find(c => c.id === targetId);
+      if (!course) return false;
+      course.archived = true;
+      course.archivedAt = new Date().toISOString();
+      if (APP_STATE.insideCourseId === targetId) APP_STATE.insideCourseId = null;
+      if (APP_STATE.activeCourseId === targetId) APP_STATE.activeCourseId = null;
+      if (editingCourseId === targetId) {
+        editingCourseId = null;
+        closeCreateCourseModal();
+      }
+      saveCustomCoursesToStorage(true);
+      updateSettingsArchiveBadge();
+      showAllCoursesView();
+      const isHe = APP_STATE.lang === 'he';
+      showToast(isHe ? 'הקורס הועבר לארכיון' : 'Course moved to Archive');
+      return true;
+    }
+
+    function unarchiveCourseById(courseId) {
+      const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+      if (!course) return false;
+      course.archived = false;
+      delete course.archivedAt;
+      saveCustomCoursesToStorage(true);
+      renderArchiveModalContent();
+      renderLessonsCategoryView();
+      const isHe = APP_STATE.lang === 'he';
+      showToast(isHe ? 'הקורס שוחזר בהצלחה' : 'Course restored');
+      return true;
+    }
+
+    function permanentlyDeleteArchivedCourse(courseId) {
+      editingCourseId = courseId;
+      handleDeleteEditingCourseDoubleConfirm();
+      renderArchiveModalContent();
+    }
+
     function openEditCustomCourseModal(courseId) {
       const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
       if (!course) return;
@@ -22917,6 +23205,8 @@ Return STRICT JSON ONLY:
       architectPlannedLessons = [];
       if (typeof window !== 'undefined') window.architectPlannedLessons = architectPlannedLessons;
       if (typeof toggleArchitectManualToolsDrawer === 'function') toggleArchitectManualToolsDrawer(false);
+      const archCourseBtn = document.getElementById('btn-modal-archive-course');
+      if (archCourseBtn) archCourseBtn.classList.remove('hidden');
       const delCourseBtn = document.getElementById('btn-modal-delete-course');
       if (delCourseBtn) delCourseBtn.classList.remove('hidden');
       const quickLessonsBox = document.getElementById('create-course-lessons-quick-box');
@@ -27755,6 +28045,8 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
             gradeLevel: student.gradeLevel || '',
             gradeOrDate: student.gradeOrDate || student.barMitzvahDate || '',
             status: student.status || 'active',
+          archived: !!student.archived,
+          archivedAt: student.archivedAt || '',
             hourlyRate: student.hourlyRate || '',
             parentContact: student.parentContact || {},
             notes: student.notes || '',
@@ -27976,11 +28268,11 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
 
     function getStudentCourseProgress(student) {
       if (!student) return { activeCourses: [], totalClasses: 0, completedClasses: 0, overallPct: 0 };
-      const activeCourses = (APP_STATE.customCourses || []).filter(c => c && Array.isArray(c.lessons) && c.id !== 'course_bar_mitzvah_concepts' && c.id !== 'course_bar_mitzvah_chumash');
+      const activeCourses = (APP_STATE.customCourses || []).filter(c => c && !c.archived && Array.isArray(c.lessons) && c.id !== 'course_bar_mitzvah_concepts' && c.id !== 'course_bar_mitzvah_chumash');
       let totalClasses = 0;
       let completedClasses = 0;
       activeCourses.forEach(c => {
-        const lessons = c.lessons || [];
+        const lessons = (c.lessons || []).filter(l => l && !l.archived);
         totalClasses += lessons.length;
         lessons.forEach(l => {
           const key = c.id + '_' + l.id;
@@ -28439,7 +28731,7 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
 
               ${activeCourses.map(course => {
                 const cTitle = isHe ? (course.title_he || course.title_en) : (course.title_en || course.title_he);
-                const lessons = course.lessons || [];
+                const lessons = (course.lessons || []).filter(l => l && !l.archived);
                 let nextLessonToTeach = null;
                 const completedCount = lessons.filter(l => {
                   const key = course.id + '_' + l.id;
@@ -28962,16 +29254,17 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       const isHe = APP_STATE.lang === 'he';
 
       if (badge) badge.textContent = APP_STATE.students.length;
-      if (mobBadge) mobBadge.textContent = APP_STATE.students.length;
+      const visibleRosterStudents = (APP_STATE.students || []).filter(s => s && !s.archived);
+      if (mobBadge) mobBadge.textContent = visibleRosterStudents.length;
       if (headerCount) {
-        headerCount.textContent = ' (' + APP_STATE.students.length + ')';
+        headerCount.textContent = ' (' + visibleRosterStudents.length + ')';
       }
 
       // Update Roster Filter Counter Badges
-      const countAll = APP_STATE.students.length;
-      const countActive = APP_STATE.students.filter(s => (s.status || 'active') === 'active').length;
-      const countPaused = APP_STATE.students.filter(s => (s.status || 'active') === 'paused').length;
-      const countCompleted = APP_STATE.students.filter(s => (s.status || 'active') === 'completed').length;
+      const countAll = visibleRosterStudents.length;
+      const countActive = visibleRosterStudents.filter(s => (s.status || 'active') === 'active').length;
+      const countPaused = visibleRosterStudents.filter(s => (s.status || 'active') === 'paused').length;
+      const countCompleted = visibleRosterStudents.filter(s => (s.status || 'active') === 'completed').length;
 
       const fAll = document.getElementById('count-filter-all');
       const fActive = document.getElementById('count-filter-active');
@@ -29003,7 +29296,7 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
         }
       });
 
-      if (APP_STATE.students.length === 0) {
+      if (visibleRosterStudents.length === 0) {
         emptyState.classList.remove('hidden');
         container.innerHTML = '';
         return;
@@ -29014,13 +29307,13 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       // Keep orderIndex sorted
       APP_STATE.students.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
 
-      // Default active student to first if not selected
-      if (!APP_STATE.activeStudentId || !APP_STATE.students.find(s => s.id === APP_STATE.activeStudentId)) {
-        APP_STATE.activeStudentId = APP_STATE.students[0].id;
+      // Default active student to first non-archived if not selected
+      if (!APP_STATE.activeStudentId || !visibleRosterStudents.find(s => s.id === APP_STATE.activeStudentId)) {
+        APP_STATE.activeStudentId = visibleRosterStudents[0].id;
       }
 
       // Filter students by selected status tab
-      const filteredStudents = APP_STATE.students.filter(s => {
+      const filteredStudents = visibleRosterStudents.filter(s => {
         if (currentFilter === 'all') return true;
         return (s.status || 'active') === currentFilter;
       });
@@ -29366,15 +29659,62 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       showToast(t.toastStudentAdded(name));
     }
 
+    function archiveStudent(id) {
+      const student = (APP_STATE.students || []).find(s => s && s.id === id);
+      if (!student) return false;
+      student.archived = true;
+      student.archivedAt = new Date().toISOString();
+      if (APP_STATE.activeStudentId === id) {
+        const nextActive = (APP_STATE.students || []).find(s => s && !s.archived && s.id !== id);
+        APP_STATE.activeStudentId = nextActive ? nextActive.id : null;
+      }
+      if (APP_STATE.activeStudentDrawerId === id) {
+        closeStudentDrawer();
+      }
+      saveStudentsToStorage(false);
+      if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
+      updateSettingsArchiveBadge();
+      renderAllViews();
+      const isHe = APP_STATE.lang === 'he';
+      showToast(isHe ? `${student.name} הועבר לארכיון` : `${student.name} moved to Archive`);
+      return true;
+    }
+
+    function unarchiveStudent(id) {
+      const student = (APP_STATE.students || []).find(s => s && s.id === id);
+      if (!student) return false;
+      student.archived = false;
+      delete student.archivedAt;
+      saveStudentsToStorage(false);
+      if (APP_STATE.cloud && APP_STATE.cloud.client) pushStudentToCloud(student);
+      renderArchiveModalContent();
+      renderAllViews();
+      const isHe = APP_STATE.lang === 'he';
+      showToast(isHe ? `${student.name} שוחזר מהארכיון` : `${student.name} restored`);
+      return true;
+    }
+
     function deleteStudent(id) {
       const t = I18N[APP_STATE.lang];
+      const isHe = APP_STATE.lang === 'he';
       const student = APP_STATE.students.find(s => s.id === id);
+      if (!student) return false;
       const studentName = student ? student.name : '';
-      if (!confirm(t.toastConfirmDelete(studentName))) return;
+      const step1 = confirm(
+        t.toastConfirmDelete
+          ? `Step 1 of 2: ${t.toastConfirmDelete(studentName)}`
+          : (isHe ? `שלב 1 מתוך 2: האם למחוק את התלמיד "${studentName}"?` : `Step 1 of 2: Are you sure you want to delete "${studentName}"?`)
+      );
+      if (!step1) return false;
+      const step2 = confirm(isHe
+        ? `אישור סופי (שלב 2 מתוך 2): פעולה זו תמחק לצמיתות את "${studentName}" ואת כל הנתונים שלו. להמשיך?`
+        : `FINAL CONFIRMATION (Step 2 of 2): This will permanently delete "${studentName}" and all saved records. Delete permanently?`);
+      if (!step2) return false;
 
       APP_STATE.students = APP_STATE.students.filter(s => s.id !== id);
       if (APP_STATE.activeStudentId === id) {
-        APP_STATE.activeStudentId = APP_STATE.students.length > 0 ? APP_STATE.students[0].id : null;
+        const remaining = APP_STATE.students.filter(s => s && !s.archived);
+        APP_STATE.activeStudentId = remaining.length > 0 ? remaining[0].id : null;
       }
       if (APP_STATE.activeStudentDrawerId === id) {
         closeStudentDrawer();
@@ -29382,8 +29722,10 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       APP_STATE.students.forEach((s, idx) => { s.orderIndex = idx; });
       saveStudentsToStorage(false);
       if (APP_STATE.cloud.client) deleteStudentFromCloud(id);
+      updateSettingsArchiveBadge();
       renderAllViews();
       showToast(t.toastStudentDeleted);
+      return true;
     }
 
     // ==============================================
@@ -29643,6 +29985,7 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
 
       const sessions = [];
       (APP_STATE.students || []).forEach(student => {
+        if (!student || student.archived) return;
         const parshaInfo = getStudentParshaAndDate(student);
         (student.schedule || []).forEach(s => {
           if (s.repeatWeekly && s.dayOfWeek === dayOfWeek) {
@@ -34288,8 +34631,8 @@ STRICT BOUNDARIES (ENFORCED BY SERVER):
 
       const isHe = APP_STATE.lang === 'he';
       const students = APP_STATE.students || [];
-      const activeStudents = students.filter(s => s && s.status !== 'completed' && s.status !== 'paused');
-      const courses = (APP_STATE.customCourses || []).filter(c => c && !c.id.startsWith('course_bar_mitzvah'));
+      const activeStudents = students.filter(s => s && !s.archived && s.status !== 'completed' && s.status !== 'paused');
+      const courses = (APP_STATE.customCourses || []).filter(c => c && !c.archived && !c.id.startsWith('course_bar_mitzvah'));
 
       const today = new Date();
       const todaySessions = getScheduledSessionsForDate(today);
