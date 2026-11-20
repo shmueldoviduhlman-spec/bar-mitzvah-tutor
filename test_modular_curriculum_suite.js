@@ -5256,6 +5256,103 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   const stdIdx31 = indexHtml.indexOf("GEMINI_STANDARD_MODELS = ['gemini-3-flash-preview', 'gemini-3.1-flash-lite-preview'");
   assert(stdIdx31 !== -1, 'GEMINI_STANDARD_MODELS prioritizes fast healthy fallback models cleanly');
 
+  // --- Gate 55: Universal Expandable & Retractable Lesson Sections + Booklet Safe Merge in Studio AI ---
+  console.log('\n--- Running Gate 55: Universal Collapsible Lesson Sections & Booklet Merge Protection ---');
+  sandbox.lessonSectionOpenMap = {};
+  const g55Course = sandbox.APP_STATE.customCourses.find(c => c.title_en === 'Universal Workbook Track') || g54Course;
+  const g55Lesson = g55Course.lessons[0];
+  const g55BookletSec = g55Course.blueprint.sections[0];
+  const g55QuizSec = g55Course.blueprint.sections[1];
+
+  // Edit mode renders sections collapsed cleanly by default with expandable wrapper IDs & toggle button
+  const g55EditClosed = sandbox.renderCustomBlueprintSectionCard(g55Course, g55Lesson, g55BookletSec, sandbox.COURSE_BLOCK_CATALOG.booklet_pages, 1);
+  assert(
+    g55EditClosed.includes(`id="sec-body-edit-${g55BookletSec.id}" class="hidden`) &&
+    g55EditClosed.includes(`toggleLessonSectionCollapse('edit', '${g55Lesson.id}', '${g55BookletSec.id}')`),
+    'Edit mode renders lesson section cards cleanly retracted by default with expand trigger'
+  );
+
+  // Toggling expands that section cleanly without losing content
+  sandbox.toggleLessonSectionCollapse('edit', g55Lesson.id, g55BookletSec.id);
+  const g55EditOpen = sandbox.renderCustomBlueprintSectionCard(g55Course, g55Lesson, g55BookletSec, sandbox.COURSE_BLOCK_CATALOG.booklet_pages, 1);
+  assert(
+    g55EditOpen.includes(`id="sec-body-edit-${g55BookletSec.id}" class=" space-y-3`) ||
+    !g55EditOpen.includes(`id="sec-body-edit-${g55BookletSec.id}" class="hidden`),
+    'Clicking section header expands Edit section body smoothly'
+  );
+
+  // Teach / Read mode renders sections retracted by default + Expand All / Collapse All works across all sections
+  const g55ReadClosed = sandbox.renderSectionReadOnlyHtml(g55Course, g55Lesson, g55BookletSec, sandbox.COURSE_BLOCK_CATALOG.booklet_pages);
+  assert(
+    g55ReadClosed.includes(`id="sec-body-read-${g55BookletSec.id}" class="hidden`) &&
+    g55ReadClosed.includes(`toggleLessonSectionCollapse('read', '${g55Lesson.id}', '${g55BookletSec.id}')`),
+    'Teach / Read mode renders booklet and lesson sections retracted by default with expand trigger'
+  );
+  sandbox.toggleAllLessonSections('read', g55Course.id, g55Lesson.id);
+  const g55ReadAllOpen = sandbox.renderSectionReadOnlyHtml(g55Course, g55Lesson, g55BookletSec, sandbox.COURSE_BLOCK_CATALOG.booklet_pages);
+  assert(!g55ReadAllOpen.includes(`id="sec-body-read-${g55BookletSec.id}" class="hidden`), 'toggleAllLessonSections opens every section cleanly in 1 tap');
+  sandbox.toggleAllLessonSections('read', g55Course.id, g55Lesson.id);
+  const g55ReadAllClosed = sandbox.renderSectionReadOnlyHtml(g55Course, g55Lesson, g55BookletSec, sandbox.COURSE_BLOCK_CATALOG.booklet_pages);
+  assert(g55ReadAllClosed.includes(`id="sec-body-read-${g55BookletSec.id}" class="hidden`), 'toggleAllLessonSections collapses all sections cleanly in 1 tap');
+
+  // Render Studio header includes Expand All / Collapse All buttons in both Edit and Read modes
+  sandbox.APP_STATE.insideCourseId = g55Course.id;
+  sandbox.APP_STATE.activeCourseId = g55Course.id;
+  sandbox.APP_STATE.studioSelectedLessonId = g55Lesson.id;
+  sandbox.studioScreenMode = 'edit';
+  sandbox.renderCourseStudio(g55Course.id, g55Lesson.id);
+  assert(getOrCreateElem('tutor-hub-lessons-container').innerHTML.includes('btn-studio-toggle-all-sections'), 'Studio Edit mode exposes 1-click Expand All / Collapse All sections toggle');
+  sandbox.studioScreenMode = 'read';
+  sandbox.renderCourseStudio(g55Course.id, g55Lesson.id);
+  assert(getOrCreateElem('tutor-hub-lessons-container').innerHTML.includes('btn-reader-toggle-all-sections'), 'Studio Read/Teach mode exposes 1-click Expand All / Collapse All sections toggle');
+
+  // Studio Lesson AI preserves existing booklet PDF URL & existing page count while letting AI update quiz & page names
+  const origFetchG55 = sandbox.fetch;
+  let g55HadPdfInline = false;
+  sandbox.fetch = async (url, opts) => {
+    const uStr = String(url || '');
+    if (uStr === 'https://curriculum.example.org/pdf/level-1.pdf') {
+      return { ok: true, status: 200, arrayBuffer: async () => Buffer.from('%PDF-1.4 fake booklet binary content '.repeat(15)) };
+    }
+    if (uStr.includes('generativelanguage.googleapis.com') && opts && opts.body) {
+      const body = JSON.parse(opts.body);
+      const lastParts = body?.contents?.slice(-1)?.[0]?.parts || [];
+      g55HadPdfInline = lastParts.some(p => p && p.inlineData && p.inlineData.mimeType === 'application/pdf');
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          candidates: [{
+            content: {
+              parts: [{
+                text: JSON.stringify({
+                  assistant_reply: 'Finished building the quiz and named Page 1 while keeping all 18 booklet pages linked.',
+                  sections: {
+                    [g55BookletSec.id]: { pages: [{ pageNum: 1, title: 'First Letter Focus' }] },
+                    [g55QuizSec.id]: { items: [{ q: 'Which concept is introduced on page 1?', options: ['Letter A', 'Letter B', 'Letter C', 'Letter D'], correct: 0 }] }
+                  }
+                })
+              }]
+            }
+          }]
+        })
+      };
+    }
+    return { ok: false, status: 404, json: async () => ({}) };
+  };
+  await sandbox.sendStudioClassAiMessage(g55Course.id, g55Lesson.id, 'Finish building the rest of this booklet lesson and end test from the PDF');
+  sandbox.fetch = origFetchG55;
+  const g55MergedBooklet = sandbox.parseStructuredSectionData(g55Lesson.sections[g55BookletSec.id], 'booklet_pages');
+  const g55MergedQuiz = sandbox.parseStructuredSectionData(g55Lesson.sections[g55QuizSec.id], 'quiz');
+  assert(g55HadPdfInline === true, 'sendStudioClassAiMessage automatically attaches the lesson workbook PDF binary to Gemini');
+  assert(
+    g55MergedBooklet.pdfUrl === 'https://curriculum.example.org/pdf/level-1.pdf' &&
+    g55MergedBooklet.totalPages === 18 &&
+    g55MergedBooklet.pages[0].title === 'First Letter Focus',
+    'Studio AI preserves existing booklet pdfUrl & totalPages safely while updating page titles'
+  );
+  assert(g55MergedQuiz.items.length === 1 && g55MergedQuiz.items[0].q.includes('page 1'), 'Studio AI populates remaining quiz test cleanly');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
