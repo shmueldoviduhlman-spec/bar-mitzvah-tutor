@@ -5353,6 +5353,65 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   );
   assert(g55MergedQuiz.items.length === 1 && g55MergedQuiz.items[0].q.includes('page 1'), 'Studio AI populates remaining quiz test cleanly');
 
+  // --- Gate 56: M120 Student-Only Checklists, Check All / Individual Sub-Lessons & Courses Zero-Lag Toggles ---
+  console.log('\n--- Running Gate 56: Student-Only Checklists, All/Individual Toggles & Smooth Toggles ---');
+  // 1. Course Reader has NO student checklist dropdown or completion checkboxes (teaching-only in Courses)
+  const g56ReaderHtml = sandbox.renderSectionReadOnlyHtml(g53Course, g53Course.lessons[0], g53Course.blueprint.sections[1], secPagesMeta);
+  assert(
+    !g56ReaderHtml.includes('toggleStudentBookletPage') &&
+    !g56ReaderHtml.includes('setReaderBookletActiveStudent') &&
+    g56ReaderHtml.includes('4 pages'),
+    'Courses Lesson Reader keeps pages clean for teaching without student checklist checkboxes or student selector'
+  );
+
+  // 2. Student Profile Drawer renders Check All / Uncheck All alongside individual checkboxes
+  getOrCreateElem('drawer-student-detail').classList.remove('hidden');
+  sandbox.APP_STATE.activeStudentDrawerId = g53Student.id;
+  sandbox.studentDrawerExpandedPagesMap[g53Course.lessons[0].id] = true;
+  sandbox.renderStudentDrawer(g53Student.id, true);
+  const g56DrawerHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(
+    g56DrawerHtml.includes('Check All') &&
+    g56DrawerHtml.includes('Uncheck All') &&
+    g56DrawerHtml.includes('toggleStudentBookletPage'),
+    'Student Profile Drawer provides Check All, Uncheck All, and individual sub-lesson checkboxes'
+  );
+
+  // 3. Whole-lesson toggle (toggleTopicForStudent) checks ALL sub-lessons together and unchecks them together
+  const g56LessonKey = `${g53Course.id}_${g53Course.lessons[0].id}`;
+  sandbox.toggleTopicForStudent(g53Student.id, g56LessonKey, g53Course.lessons[0].id);
+  const g56StatsAllDone = sandbox.getLessonBookletPageStats(g53Student, g53Course, g53Course.lessons[0]);
+  assert(
+    g56StatsAllDone.completedPages === 4 && !!g53Student.completedTopics[g56LessonKey],
+    'Checking whole lesson in Student Profile marks lesson and all 4 sub-lesson pages complete altogether'
+  );
+
+  // 4. Unchecking one individual page keeps other pages checked while marking parent lesson incomplete
+  sandbox.toggleStudentBookletPage(g53Student.id, g53Course.id, g53Course.lessons[0].id, 2, 'Guided Practice');
+  const g56StatsPartial = sandbox.getLessonBookletPageStats(g53Student, g53Course, g53Course.lessons[0]);
+  assert(
+    g56StatsPartial.completedPages === 3 && !g53Student.completedTopics[g56LessonKey],
+    'Unchecking 1 individual sub-lesson updates count to 3/4 and clears whole-lesson completed circle cleanly'
+  );
+
+  // 5. setAllStudentBookletPages clears all sub-lessons + parent lesson cleanly
+  sandbox.setAllStudentBookletPages(g53Student.id, g53Course.id, g53Course.lessons[0].id, false);
+  const g56StatsCleared = sandbox.getLessonBookletPageStats(g53Student, g53Course, g53Course.lessons[0]);
+  assert(
+    g56StatsCleared.completedPages === 0 && !g53Student.completedTopics[g56LessonKey],
+    'setAllStudentBookletPages unchecks all sub-lessons and parent lesson together cleanly'
+  );
+  getOrCreateElem('drawer-student-detail').classList.add('hidden');
+
+  // 6. toggleAllLessonSections mutates DOM in-place cleanly without tearing down DOM
+  sandbox.studioScreenMode = 'edit';
+  sandbox.renderCourseStudio(g55Course.id, g55Lesson.id);
+  const g56BodyEl = getOrCreateElem(`sec-body-edit-${g55BookletSec.id}`);
+  g56BodyEl.classList.add('hidden');
+  sandbox.lessonSectionOpenMap[sandbox.getLessonSectionOpenKey('edit', g55Lesson.id, g55BookletSec.id)] = false;
+  sandbox.toggleAllLessonSections('edit', g55Course.id, g55Lesson.id);
+  assert(!g56BodyEl.classList.contains('hidden'), 'toggleAllLessonSections opens sections directly via classList with zero DOM rebuild lag');
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
