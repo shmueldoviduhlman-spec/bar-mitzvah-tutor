@@ -5768,15 +5768,15 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     g60Draft.pdfs.length === 1 &&
     g60Draft.pdfs[0].url.startsWith('idb://') &&
     g60Draft.pdfs[0].title === 'Aleph Champ White Booklet' &&
-    g60Draft.title === 'Aleph Champ White Booklet',
-    'Dropping >5MB downloaded PDF attaches via idb:// IndexedDB pointer without hitting localStorage quota and suggests goal title'
+    g60Draft.title === '',
+    'Dropping >5MB downloaded PDF attaches via idb:// IndexedDB pointer without overwriting custom goal name input'
   );
 
   sandbox.addQuickStudentGoalFromDrawer(g59StudentB.id);
   const g60SavedGoal = g59StudentB.skills.customGoals.find(g => g.title === 'Aleph Champ White Booklet');
   assert(
     g60SavedGoal && g60SavedGoal.pdfs.length === 1 && g60SavedGoal.pdfs[0].url.startsWith('idb://'),
-    'Saved goal preserves large local PDF connection cleanly'
+    'Saved goal falls back cleanly to attachment title and preserves large local PDF connection'
   );
 
   // Drop a second smaller PDF directly onto the existing saved goal card
@@ -5801,6 +5801,94 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     loadedFromCache && loadedFromCache.bytes && loadedFromCache.bytes.length === 6200000,
     'loadGoalBytesFromIndexedDb retrieves stored local PDF bytes cleanly for modal rendering'
   );
+
+  // =========================================================================
+  // GATE 61: Custom Goals Clean Header/Rows, Inline Goal & Attachment Naming & Student View
+  // =========================================================================
+  console.log('\n[Gate 61] Custom Goals Clean Layout, Inline Goal/Attachment Naming & Student View...');
+  sandbox.APP_STATE.activeStudentDrawerId = g59StudentB.id;
+  sandbox.renderStudentDrawer(g59StudentB.id, true);
+  const drawerGoalsHtml = getOrCreateElem('drawer-body-content').innerHTML;
+
+  // Verify top-right "+ Add Goal" header button removed & saved goal row has no Pic/PDF/Audio/Rec action clutter
+  const goalsHeaderStart = drawerGoalsHtml.indexOf('id="drawer-custom-goals-card"');
+  const firstGoalCardStart = drawerGoalsHtml.indexOf(`id="goal-card-${g60SavedGoal.id}"`);
+  const composerStart = drawerGoalsHtml.indexOf('id="custom-goal-composer"');
+  const goalsHeaderChunk = drawerGoalsHtml.slice(goalsHeaderStart, firstGoalCardStart);
+  const savedGoalRowChunk = drawerGoalsHtml.slice(firstGoalCardStart, composerStart);
+  assert(
+    goalsHeaderStart !== -1 &&
+    firstGoalCardStart > goalsHeaderStart &&
+    !goalsHeaderChunk.includes('addQuickStudentGoalFromDrawer'),
+    'Top-right Add Goal header button removed cleanly from Custom Student Goals card'
+  );
+  assert(
+    firstGoalCardStart !== -1 &&
+    composerStart > firstGoalCardStart &&
+    savedGoalRowChunk.includes(`renameStudentCustomGoal('${g59StudentB.id}', '${g60SavedGoal.id}'`) &&
+    savedGoalRowChunk.includes(`deleteStudentCustomGoal('${g59StudentB.id}', '${g60SavedGoal.id}'`) &&
+    !savedGoalRowChunk.includes('toggleCustomGoalPanel(') &&
+    !savedGoalRowChunk.includes('startGoalVoiceRecording('),
+    'Saved goal row keeps checkbox, inline rename input & delete button without Pic/PDF/Audio/Rec action clutter'
+  );
+
+  // Add recording + picture to a saved goal, then rename BOTH the goal and each attachment
+  sandbox.addCustomGoalMediaItem(g59StudentB.id, g60SavedGoal.id, 'recordings', {
+    title: 'Recording 08:54 PM',
+    url: 'data:audio/webm;base64,GkXfo59ChoEBQveBAULygQRC84EIQoKEd2VibUKHgQRChYECGFOAZw==',
+    type: 'audio'
+  });
+  sandbox.addCustomGoalMediaItem(g59StudentB.id, g60SavedGoal.id, 'images', {
+    title: 'Cantillation Chart',
+    url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII='
+  });
+  const g61RecId = g60SavedGoal.recordings[0].id;
+  const g61PdfId = g60SavedGoal.pdfs[0].id;
+  const g61ImgId = g60SavedGoal.images[0].id;
+
+  const didRenameGoal = sandbox.renameStudentCustomGoal(g59StudentB.id, g60SavedGoal.id, 'Maqam & Trope Week 3');
+  const didRenameRec = sandbox.renameCustomGoalAttachment(g59StudentB.id, g60SavedGoal.id, 'recordings', g61RecId, 'Kiddush Trope Model');
+  const didRenamePdf = sandbox.renameCustomGoalAttachment(g59StudentB.id, g60SavedGoal.id, 'pdfs', g61PdfId, 'Aleph Champ White Sheet');
+  const didRenameImg = sandbox.renameCustomGoalAttachment(g59StudentB.id, g60SavedGoal.id, 'images', g61ImgId, 'Highlighted Pasuk Photo');
+  assert(
+    didRenameGoal && g60SavedGoal.title === 'Maqam & Trope Week 3' &&
+    didRenameRec && g60SavedGoal.recordings[0].title === 'Kiddush Trope Model' &&
+    didRenamePdf && g60SavedGoal.pdfs[0].title === 'Aleph Champ White Sheet' &&
+    didRenameImg && g60SavedGoal.images[0].title === 'Highlighted Pasuk Photo',
+    'Both saved custom goal titles and individual attachment names (Recording, PDF, Picture) rename and persist cleanly'
+  );
+
+  // Verify draft composer shows attachment rename inputs & Student Portal shows named picture, PDF, and audio player
+  sandbox.addCustomGoalMediaItem(g59StudentB.id, '__draft__', 'recordings', {
+    title: 'Recording 08:55 PM',
+    url: 'data:audio/webm;base64,GkXfo59ChoEBQveBAULygQRC84EIQoKEd2VibUKHgQRChYECGFOAZw==',
+    type: 'audio'
+  });
+  const g61DraftHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  const g61DraftRecId = sandbox.getPendingGoalDraft(g59StudentB.id).recordings[0].id;
+  assert(
+    g61DraftHtml.includes(`renameCustomGoalAttachment('${sandbox.escapeHtml(g59StudentB.id)}', '__draft__', 'recordings', '${sandbox.escapeHtml(g61DraftRecId)}'`),
+    'Bottom draft composer exposes inline attachment naming input before saving goal'
+  );
+  sandbox.pendingGoalDraftMap[g59StudentB.id] = { title: '', images: [], pdfs: [], recordings: [] };
+
+  // Render Student Portal for g59StudentB and verify clickable Picture, clickable PDF, and playable Recording with custom names
+  sandbox.APP_STATE.studentPortalMode = true;
+  sandbox.APP_STATE.studentPortalStudent = g59StudentB;
+  sandbox.renderStudentPortalView();
+  const portalGoalsCardHtml = getOrCreateElem('view-student-portal').innerHTML;
+  assert(
+    portalGoalsCardHtml.includes('Maqam &amp; Trope Week 3') &&
+    portalGoalsCardHtml.includes('Kiddush Trope Model') &&
+    portalGoalsCardHtml.includes('<audio controls') &&
+    portalGoalsCardHtml.includes('Aleph Champ White Sheet') &&
+    portalGoalsCardHtml.includes('Highlighted Pasuk Photo') &&
+    portalGoalsCardHtml.includes(`openCustomGoalAttachmentViewer('${g59StudentB.id}', '${g60SavedGoal.id}', 'image', '${g61ImgId}')`) &&
+    portalGoalsCardHtml.includes(`openCustomGoalAttachmentViewer('${g59StudentB.id}', '${g60SavedGoal.id}', 'pdf', '${g61PdfId}')`),
+    'Student Portal displays custom goal with playable voice recording, clickable named picture, and clickable named PDF'
+  );
+  sandbox.APP_STATE.studentPortalMode = false;
+  sandbox.APP_STATE.studentPortalStudent = null;
   sandbox.APP_STATE.activeStudentDrawerId = null;
 
   console.log(`\n========================================`);
