@@ -4504,6 +4504,9 @@
           <button type="button" onclick="switchTab('study'); closeStudentDrawer();" class="hidden" aria-hidden="true">
             <span id="drawer-btn-curriculum-label">Curriculum</span>
           </button>
+          <button type="button" id="btn-drawer-delete-student" onclick="if(APP_STATE.activeStudentDrawerId) deleteStudent(APP_STATE.activeStudentDrawerId)" class="p-2 text-slate-400 hover:text-red-400 rounded-xl hover:bg-slate-800 transition active:scale-95" title="Delete Student">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
           <button type="button" onclick="closeStudentDrawer()" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition active:scale-95" title="Close">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
@@ -26535,8 +26538,7 @@ Specific Vision / Custom Guidance: ${guidance || 'Provide clear conceptual ancho
 
     function toggleStudentDrawerCourseExpand(courseId) {
       if (!courseId) return;
-      const cur = drawerCourseExpandedMap[courseId];
-      drawerCourseExpandedMap[courseId] = (cur === false);
+      drawerCourseExpandedMap[courseId] = !(drawerCourseExpandedMap[courseId] === true);
       if (APP_STATE.activeStudentDrawerId) {
         renderStudentDrawer(APP_STATE.activeStudentDrawerId, true);
       }
@@ -28379,12 +28381,14 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
                   return isDone;
                 }).length;
                 const pct = lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0;
-                const isExpanded = drawerCourseExpandedMap[course.id] !== false;
+                const hasExpandedChildPages = lessons.some(l => !!studentDrawerExpandedPagesMap[l.id]);
+                const isExpanded = drawerCourseExpandedMap[course.id] === true || (drawerCourseExpandedMap[course.id] !== false && hasExpandedChildPages);
 
                 return `
-                  <div class="rounded-2xl bg-slate-950/70 border border-slate-800/90 overflow-hidden">
-                    <div class="px-4 py-3 flex items-center justify-between gap-2 flex-wrap bg-slate-900/50 border-b border-slate-800/70">
-                      <button type="button" onclick="toggleStudentDrawerCourseExpand('${course.id}')" class="flex items-center gap-2.5 min-w-0 text-left rtl:text-right group">
+                  <div id="drawer-course-card-${escapeHtml(course.id)}" class="rounded-2xl bg-slate-950/70 border border-slate-800/90 overflow-hidden">
+                    <div class="px-4 py-3 flex items-center justify-between gap-2 flex-wrap bg-slate-900/50 ${isExpanded ? 'border-b border-slate-800/70' : ''}">
+                      <button type="button" id="btn-toggle-drawer-course-${escapeHtml(course.id)}" onclick="toggleStudentDrawerCourseExpand('${course.id}')" class="flex items-center gap-2.5 min-w-0 flex-1 text-left rtl:text-right group">
+                        <i data-lucide="${isExpanded ? 'chevron-down' : (isHe ? 'chevron-left' : 'chevron-right')}" class="w-4 h-4 text-slate-400 group-hover:text-amber-300 transition shrink-0"></i>
                         <span class="text-base shrink-0 leading-none select-none">${escapeHtml(normalizeCourseIcon(course.icon))}</span>
                         <div class="min-w-0">
                           <div dir="auto" class="text-xs sm:text-sm font-bold text-white group-hover:text-amber-300 transition truncate">${escapeHtml(cTitle)}</div>
@@ -28939,47 +28943,6 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
         const guardianInfo = student.parentContact || {};
         const hasGuardian = guardianInfo.name || guardianInfo.phone;
 
-        let progressBarsHtml = '';
-        if (activeCourses.length === 0) {
-          progressBarsHtml = `
-            <div class="mt-2 py-2.5 px-3 rounded-xl bg-slate-950/40 border border-dashed border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
-              <span>${isHe ? 'אין עדיין קורסים פעילים' : 'No active courses created yet'}</span>
-              <span class="text-brand-400 font-medium">${isHe ? 'צור בלשונית לימוד' : 'Add in Study'}</span>
-            </div>
-          `;
-        } else {
-          progressBarsHtml = `
-            <div class="space-y-2 mt-2">
-              <div>
-                <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
-                  <span class="font-semibold text-slate-300">${isHe ? 'התקדמות בקורסים' : 'Course Progress'}</span>
-                  <span class="font-mono text-amber-400">${completedClasses} / ${totalClasses} ${isHe ? 'שיעורים' : 'Classes'}</span>
-                </div>
-                <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
-                  <div class="bg-gradient-to-r from-amber-500 to-emerald-400 h-1.5 rounded-full transition-all duration-300" style="width: ${overallPct}%"></div>
-                </div>
-              </div>
-              ${activeCourses.slice(0, 2).map(c => {
-                const cLessons = c.lessons || [];
-                const cDone = cLessons.filter(l => student.completedTopics && (student.completedTopics[c.id + '_' + l.id] || student.completedTopics[l.id])).length;
-                const cPct = cLessons.length > 0 ? Math.round((cDone / cLessons.length) * 100) : 0;
-                const cTitle = isHe ? (c.title_he || c.title_en) : (c.title_en || c.title_he);
-                return `
-                  <div>
-                    <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
-                      <span class="truncate max-w-[170px]">${escapeHtml(cTitle)}</span>
-                      <span class="font-mono">${cDone} / ${cLessons.length}</span>
-                    </div>
-                    <div class="w-full bg-slate-950 rounded-full h-1 overflow-hidden">
-                      <div class="bg-brand-500 h-1 rounded-full transition-all duration-300" style="width: ${cPct}%"></div>
-                    </div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          `;
-        }
-
         return `
           <div
             onclick="selectActiveStudent('${student.id}')"
@@ -28992,67 +28955,45 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
             <!-- Top Gradient Accent Strip -->
             <div class="modern-gradient-cover keep-white h-2 bg-gradient-to-r from-indigo-500 via-violet-500 to-amber-500"></div>
 
-            <div class="p-5 flex-1 flex flex-col justify-between">
-              <div>
-                <!-- Header: Avatar, Name & Percentage -->
-                <div class="flex items-start justify-between gap-2 mb-3.5">
-                  <div class="flex items-center gap-3.5 min-w-0">
-                    <div onclick="triggerPhotoUpload('${student.id}', event)" title="${t.changePhoto}" class="relative group/avatar shrink-0">
-                      ${avatarHtml}
-                      <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition">
-                        <i data-lucide="camera" class="w-3.5 h-3.5 text-white"></i>
-                      </div>
+            <div class="p-5 flex-1 flex flex-col justify-center">
+              <!-- Header: Avatar, Name & Percentage -->
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center gap-3.5 min-w-0">
+                  <div onclick="triggerPhotoUpload('${student.id}', event)" title="${t.changePhoto}" class="relative group/avatar shrink-0">
+                    ${avatarHtml}
+                    <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition">
+                      <i data-lucide="camera" class="w-3.5 h-3.5 text-white"></i>
                     </div>
-                    <div class="min-w-0 space-y-1">
-                      <div class="flex items-center gap-2">
-                        <h4 class="text-base sm:text-lg font-extrabold text-white truncate group-hover:text-indigo-400 transition">${student.name}</h4>
-                        ${statusBadgeHtml}
-                      </div>
-                      <div class="flex items-center gap-2 flex-wrap text-xs text-slate-400">
-                        <span class="inline-flex items-center gap-1 text-indigo-300 font-semibold">
-                          <i data-lucide="book-open" class="w-3.5 h-3.5 text-indigo-400 shrink-0"></i>
-                          <span class="truncate">${activeCourses.length} ${isHe ? (activeCourses.length === 1 ? 'קורס' : 'קורסים') : (activeCourses.length === 1 ? 'Course' : 'Courses')}</span>
+                  </div>
+                  <div class="min-w-0 space-y-1">
+                    <div class="flex items-center gap-2">
+                      <h4 class="text-base sm:text-lg font-extrabold text-white truncate group-hover:text-indigo-400 transition">${student.name}</h4>
+                      ${statusBadgeHtml}
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap text-xs text-slate-400">
+                      <span class="inline-flex items-center gap-1 text-indigo-300 font-semibold">
+                        <i data-lucide="book-open" class="w-3.5 h-3.5 text-indigo-400 shrink-0"></i>
+                        <span class="truncate">${activeCourses.length} ${isHe ? (activeCourses.length === 1 ? 'קורס' : 'קורסים') : (activeCourses.length === 1 ? 'Course' : 'Courses')}</span>
+                      </span>
+                      ${cardDate ? `
+                        <span class="text-slate-600 font-bold">•</span>
+                        <span class="inline-flex items-center gap-1 text-slate-300 font-mono text-[11px]">
+                          <i data-lucide="calendar" class="w-3 h-3 text-slate-400 shrink-0"></i>
+                          <span class="truncate">${cardDate}</span>
                         </span>
-                        ${cardDate ? `
-                          <span class="text-slate-600 font-bold">•</span>
-                          <span class="inline-flex items-center gap-1 text-slate-300 font-mono text-[11px]">
-                            <i data-lucide="calendar" class="w-3 h-3 text-slate-400 shrink-0"></i>
-                            <span class="truncate">${cardDate}</span>
-                          </span>
-                        ` : ''}
-                      </div>
+                      ` : ''}
                     </div>
                   </div>
-
-                  <!-- Clean Progress Badge -->
-                  <div class="flex items-center gap-1.5 shrink-0" onclick="event.stopPropagation()">
-                    <span class="text-xs font-mono font-extrabold px-3 py-1 rounded-full ${
-                      overallPct > 50 ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
-                    }">
-                      ${overallPct}%
-                    </span>
-                  </div>
                 </div>
 
-                <!-- Progress Bars -->
-                ${progressBarsHtml}
-              </div>
-
-              <!-- Footer: Portal Access Code + Tactile Open Workspace Button -->
-              <div class="mt-4 pt-3.5 border-t border-slate-800/80 flex items-center justify-between gap-2 text-[11px] text-slate-400">
-                <div class="flex items-center gap-1.5 min-w-0">
-                  <button type="button" onclick="event.stopPropagation(); copyStudentPortalInvite('${student.id}')" title="Copy Student Portal Link &amp; Code" class="px-2.5 py-1 rounded-xl bg-slate-950/80 hover:bg-indigo-500/20 text-indigo-300 border border-slate-800 text-[10px] font-mono font-bold transition flex items-center gap-1 shrink-0">
-                    <i data-lucide="key" class="w-3 h-3"></i>
-                    <span>${escapeHtml(student.studentAccessCode || 'Code')}</span>
-                  </button>
-                  <button onclick="event.stopPropagation(); deleteStudent('${student.id}')" title="${t.deleteStudentTitle}" class="text-slate-500 hover:text-red-400 p-1.5 rounded-xl hover:bg-slate-800 transition shrink-0">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                  </button>
+                <!-- Clean Progress Badge -->
+                <div class="flex items-center gap-1.5 shrink-0" onclick="event.stopPropagation()">
+                  <span class="text-xs font-mono font-extrabold px-3 py-1 rounded-full ${
+                    overallPct > 50 ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                  }">
+                    ${overallPct}%
+                  </span>
                 </div>
-                <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-500/15 group-hover:bg-indigo-600 text-indigo-300 group-hover:text-white text-xs font-bold transition shrink-0">
-                  <span>${isHe ? 'פתח פרופיל' : 'Open Profile'}</span>
-                  <i data-lucide="${isHe ? 'arrow-left' : 'arrow-right'}" class="w-3.5 h-3.5"></i>
-                </span>
               </div>
             </div>
           </div>

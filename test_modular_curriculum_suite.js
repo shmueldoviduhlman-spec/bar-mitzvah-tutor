@@ -1376,9 +1376,11 @@ drawerDetailEl.classList.remove('hidden');
 getOrCreateElem('drawer-header-content');
 getOrCreateElem('drawer-body-content');
 sandbox.openStudentDrawer(testDynamicStudent.id);
+const collapsedDrawerHtml = getOrCreateElem('drawer-body-content').innerHTML;
+assert(collapsedDrawerHtml.includes('Coding Fundamentals') && !collapsedDrawerHtml.includes('Intro to Neural Networks'), 'Student drawer renders educator custom course title collapsed by default');
+sandbox.toggleStudentDrawerCourseExpand('course_ai_prep');
 const drawerBodyHtml = getOrCreateElem('drawer-body-content').innerHTML;
-assert(drawerBodyHtml.includes('Coding Fundamentals'), 'Student drawer renders educator custom course title');
-assert(drawerBodyHtml.includes('Intro to Neural Networks'), 'Student drawer renders custom lesson title in checklist');
+assert(drawerBodyHtml.includes('Intro to Neural Networks'), 'Expanding course renders custom lesson title in checklist');
 assert(!drawerBodyHtml.includes('Red Booklet') && !drawerBodyHtml.includes('חוברת אדומה'), 'Student drawer does NOT render old reading booklets');
 assert(!drawerBodyHtml.includes('Aliyah 1') && !drawerBodyHtml.includes('עליה 1'), 'Student drawer does NOT render old ceremony aliyot');
 
@@ -3665,11 +3667,14 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(!getOrCreateElem('drawer-student-detail').classList.contains('hidden'), 'Creating student from AI automatically opens clean redesigned Student Profile Drawer');
 
   // Verify Clean Student Profile Layout: no blank CRM input wall at rest, no double ++, structured numbered lesson list
+  const ethanBodyHtmlCollapsed = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(!ethanBodyHtmlCollapsed.includes('drawer-crm-edit-card'), 'Redesigned Student Profile hides blank CRM form inputs at rest for calm readability');
+  assert(!ethanBodyHtmlCollapsed.includes('+ +'), 'Redesigned Student Profile eliminates duplicate ++ icons on buttons');
+  assert(ethanBodyHtmlCollapsed.includes('drawer-student-notes-input') && ethanBodyHtmlCollapsed.includes('studio-autogrow'), 'Tutor Notes renders full-width auto-growing dir="auto" textarea');
+  const firstCourse38 = (sandbox.APP_STATE.customCourses || []).find(c => (c.lessons || []).some(l => (l.title_en || '').includes('Time vs Space')));
+  if (firstCourse38) sandbox.toggleStudentDrawerCourseExpand(firstCourse38.id);
   const ethanBodyHtml = getOrCreateElem('drawer-body-content').innerHTML;
-  assert(!ethanBodyHtml.includes('drawer-crm-edit-card'), 'Redesigned Student Profile hides blank CRM form inputs at rest for calm readability');
-  assert(!ethanBodyHtml.includes('+ +'), 'Redesigned Student Profile eliminates duplicate ++ icons on buttons');
-  assert(ethanBodyHtml.includes('drawer-student-notes-input') && ethanBodyHtml.includes('studio-autogrow'), 'Tutor Notes renders full-width auto-growing dir="auto" textarea');
-  assert(ethanBodyHtml.includes('Time vs Space: The Architecture of Shabbat') && ethanBodyHtml.includes('1'), 'Enrolled Courses render clean vertical numbered Lesson List');
+  assert(ethanBodyHtml.includes('Time vs Space: The Architecture of Shabbat') && ethanBodyHtml.includes('1'), 'Enrolled Courses render clean vertical numbered Lesson List when expanded');
 
   // Verify Edit Info toggles inline CRM fields cleanly when clicked
   sandbox.toggleStudentDrawerCrmEdit(createdEthan.id);
@@ -6205,6 +6210,65 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     !sandbox.document.documentElement.classList.contains('student-portal-active') &&
     !getOrCreateElem('app-sidebar-shell').classList.contains('hidden'),
     'Logging out of Student Portal restores teacher sidebar shell cleanly'
+  );
+
+  // =========================================================================
+  // GATE 65: Ultra-Clean Student Roster Cards & Expandable/Collapsible Courses
+  // =========================================================================
+  console.log('\n[Gate 65] Ultra-Clean Student Cards & Expandable/Collapsible Course Accordions...');
+  const g65Stu = {
+    id: 'stu_g65_card',
+    name: 'Asher Clean Card',
+    studentAccessCode: 'ASHR65',
+    status: 'active',
+    completedTopics: {},
+    skills: sandbox.getDefaultStudentSkills()
+  };
+  const g65Course = {
+    id: 'course_g65_collapse',
+    title_en: 'Sefer Bereishit Expand Test',
+    lessons: [
+      { id: 'les_g65_1', lesson_num: 1, title_en: 'Parashat Bereishit' },
+      { id: 'les_g65_2', lesson_num: 2, title_en: 'Parashat Noach' }
+    ]
+  };
+  sandbox.APP_STATE.students.push(g65Stu);
+  sandbox.APP_STATE.customCourses.push(g65Course);
+  sandbox.renderStudents();
+  const g65CardsHtml = getOrCreateElem('students-list').innerHTML;
+  assert(
+    g65CardsHtml.includes('Asher Clean Card') &&
+    !g65CardsHtml.includes('Course Progress') &&
+    !g65CardsHtml.includes('Open Profile') &&
+    !g65CardsHtml.includes('copyStudentPortalInvite') &&
+    indexHtml.includes('id="btn-drawer-delete-student"'),
+    'Student Cards remove Course Progress bars, code/trash/Open Profile footer clutter, while moving Delete Student into Profile Drawer'
+  );
+
+  delete sandbox.drawerCourseExpandedMap[g65Course.id];
+  sandbox.openStudentDrawer(g65Stu.id);
+  const g65DrawerCollapsed = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(
+    g65DrawerCollapsed.includes('Sefer Bereishit Expand Test') &&
+    g65DrawerCollapsed.includes(`id="btn-toggle-drawer-course-${g65Course.id}"`) &&
+    !g65DrawerCollapsed.includes('Parashat Bereishit'),
+    'Courses start cleanly collapsed inside Student Profile Drawer with chevron toggle button'
+  );
+
+  sandbox.toggleStudentDrawerCourseExpand(g65Course.id);
+  const g65DrawerExpanded = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(
+    g65DrawerExpanded.includes('Parashat Bereishit') &&
+    g65DrawerExpanded.includes('Parashat Noach') &&
+    g65DrawerExpanded.includes('data-lucide="chevron-down"'),
+    'Clicking course expands to reveal all lessons with chevron-down indicator'
+  );
+
+  sandbox.toggleStudentDrawerCourseExpand(g65Course.id);
+  const g65DrawerRecollapsed = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(
+    !g65DrawerRecollapsed.includes('Parashat Bereishit'),
+    'Clicking expanded course again cleanly collapses lessons back down'
   );
 
   sandbox.APP_STATE.studentPortalMode = false;
