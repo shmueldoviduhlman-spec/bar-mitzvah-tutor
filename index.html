@@ -28622,6 +28622,8 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
         `;
 
         const activeProfileTab = (typeof studentProfileTabMap !== 'undefined' && studentProfileTabMap[student.id]) || 'progress';
+        const activeProgressSubTab = (typeof drawerProgressSubTabMap !== 'undefined' && drawerProgressSubTabMap[student.id]) || 'continuity';
+        const activePortalSubTab = (typeof drawerPortalSubTabMap !== 'undefined' && drawerPortalSubTabMap[student.id]) || 'homework';
 
         body.innerHTML = `
           ${studentAiCardHtml}
@@ -28649,65 +28651,105 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
             </button>
           </div>
 
-          <!-- TAB 1: PROGRESS & PRIVATE TUTOR NOTES (Teacher Only) -->
+          <!-- TAB 1: PROGRESS & PRIVATE TUTOR NOTES (Divided into 3 Clean Clickable Sections) -->
           <div id="student-profile-panel-progress" class="${activeProfileTab === 'progress' ? 'space-y-4' : 'hidden space-y-4'}">
-            <!-- Teaching Continuity: Last Taught & Next to Teach -->
-            <div id="drawer-teaching-continuity-card" class="p-4 rounded-2xl bg-slate-950/65 border border-indigo-500/25 space-y-3">
-              <div class="flex items-center justify-between gap-2 flex-wrap">
-                <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
-                  <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400"></i>
-                  <span>${isHe ? 'רצף הוראה (נלמד לאחרונה והשיעור הבא)' : 'Teaching Continuity'}</span>
-                </span>
-                <button type="button" onclick="closeStudentDrawer(); openAfterClassAiDebrief('${student.id}');" class="text-[11px] font-bold text-indigo-400 hover:underline flex items-center gap-1">
-                  <i data-lucide="sparkles" class="w-3 h-3"></i>
-                  <span>${isHe ? 'עדכן עם הסוכן שלי' : 'Update with My Agent'}</span>
-                </button>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div>
-                  <label class="text-[10px] uppercase font-bold text-emerald-400 block mb-1">${isHe ? 'השיעור האחרון שנלמד' : 'Last Taught'}${sk.lastTaughtAt ? ` (${escapeHtml(sk.lastTaughtAt)})` : ''}</label>
-                  <input type="text" id="drawer-student-last-taught-input" dir="auto" value="${escapeHtml(sk.lastTaught || '')}" onchange="updateStudentContinuityField('${student.id}', 'lastTaught', this.value)" placeholder="${isHe ? 'מה סיימנו ללמוד בשיעור האחרון...' : 'What we finished last class...'}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400" />
+            <div id="drawer-progress-subtabs-bar" class="grid grid-cols-3 gap-2">
+              <button type="button" id="btn-drawer-progress-sub-continuity" onclick="switchStudentDrawerProgressSubTab('${student.id}', 'continuity')" class="p-2.5 rounded-2xl border text-left rtl:text-right transition flex items-center gap-2 ${activeProgressSubTab === 'continuity' ? 'bg-indigo-500/20 border-indigo-400/60 text-white shadow-sm' : 'bg-slate-950/60 border-slate-800/90 text-slate-400 hover:text-slate-200 hover:border-slate-700'}">
+                <i data-lucide="compass" class="w-4 h-4 text-amber-400 shrink-0"></i>
+                <span class="text-xs font-bold truncate">${isHe ? 'רצף הוראה' : 'Teaching Continuity'}</span>
+              </button>
+              <button type="button" id="btn-drawer-progress-sub-courses" onclick="switchStudentDrawerProgressSubTab('${student.id}', 'courses')" class="p-2.5 rounded-2xl border text-left rtl:text-right transition flex items-center gap-2 ${activeProgressSubTab === 'courses' ? 'bg-amber-500/20 border-amber-400/60 text-white shadow-sm' : 'bg-slate-950/60 border-slate-800/90 text-slate-400 hover:text-slate-200 hover:border-slate-700'}">
+                <i data-lucide="layers" class="w-4 h-4 text-amber-400 shrink-0"></i>
+                <span class="text-xs font-bold truncate">${isHe ? 'קורסים' : 'Enrolled Courses'}</span>
+              </button>
+              <button type="button" id="btn-drawer-progress-sub-notes" onclick="switchStudentDrawerProgressSubTab('${student.id}', 'notes')" class="p-2.5 rounded-2xl border text-left rtl:text-right transition flex items-center gap-2 ${activeProgressSubTab === 'notes' ? 'bg-emerald-500/20 border-emerald-400/60 text-white shadow-sm' : 'bg-slate-950/60 border-slate-800/90 text-slate-400 hover:text-slate-200 hover:border-slate-700'}">
+                <i data-lucide="file-text" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                <span class="text-xs font-bold truncate">${isHe ? 'הערות המורה' : 'Teacher Notes'}</span>
+              </button>
+            </div>
+
+            <!-- 1A. Teaching Continuity -->
+            <div id="drawer-progress-section-continuity" class="${activeProgressSubTab === 'continuity' ? 'space-y-4' : 'hidden space-y-4'}">
+              <div id="drawer-teaching-continuity-card" class="p-4 rounded-2xl bg-slate-950/65 border border-indigo-500/25 space-y-3">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                  <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                    <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <span>${isHe ? 'רצף הוראה (נלמד לאחרונה והשיעור הבא)' : 'Teaching Continuity'}</span>
+                  </span>
+                  <button type="button" onclick="closeStudentDrawer(); openAfterClassAiDebrief('${student.id}');" class="text-[11px] font-bold text-indigo-400 hover:underline flex items-center gap-1">
+                    <i data-lucide="sparkles" class="w-3 h-3"></i>
+                    <span>${isHe ? 'עדכן עם הסוכן שלי' : 'Update with My Agent'}</span>
+                  </button>
                 </div>
-                <div>
-                  <label class="text-[10px] uppercase font-bold text-amber-400 block mb-1">${isHe ? 'מה ללמד בשיעור הבא' : 'Next to Teach'}</label>
-                  <input type="text" id="drawer-student-next-teach-input" dir="auto" value="${escapeHtml(sk.nextToTeach || '')}" onchange="updateStudentContinuityField('${student.id}', 'nextToTeach', this.value)" placeholder="${isHe ? 'הנושא או השיעור לשיעור הבא...' : 'What to teach next class...'}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400" />
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                  <div>
+                    <label class="text-[10px] uppercase font-bold text-emerald-400 block mb-1">${isHe ? 'השיעור האחרון שנלמד' : 'Last Taught'}${sk.lastTaughtAt ? ` (${escapeHtml(sk.lastTaughtAt)})` : ''}</label>
+                    <input type="text" id="drawer-student-last-taught-input" dir="auto" value="${escapeHtml(sk.lastTaught || '')}" onchange="updateStudentContinuityField('${student.id}', 'lastTaught', this.value)" placeholder="${isHe ? 'מה סיימנו ללמוד בשיעור האחרון...' : 'What we finished last class...'}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400" />
+                  </div>
+                  <div>
+                    <label class="text-[10px] uppercase font-bold text-amber-400 block mb-1">${isHe ? 'מה ללמד בשיעור הבא' : 'Next to Teach'}</label>
+                    <input type="text" id="drawer-student-next-teach-input" dir="auto" value="${escapeHtml(sk.nextToTeach || '')}" onchange="updateStudentContinuityField('${student.id}', 'nextToTeach', this.value)" placeholder="${isHe ? 'הנושא או השיעור לשיעור הבא...' : 'What to teach next class...'}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400" />
+                  </div>
                 </div>
               </div>
             </div>
 
-            ${coursesCurriculumHtml}
+            <!-- 1B. Enrolled Courses -->
+            <div id="drawer-progress-section-courses" class="${activeProgressSubTab === 'courses' ? 'space-y-4' : 'hidden space-y-4'}">
+              ${coursesCurriculumHtml}
+              ${(sk.assignedTest && sk.assignedTest.completed) ? assignedTestSummaryHtml : ''}
+            </div>
 
-            ${(sk.assignedTest && sk.assignedTest.completed) ? assignedTestSummaryHtml : ''}
-
-            <!-- Full-Width Private Tutor Notes (Hidden from Student) -->
-            <div class="bg-slate-950/65 border border-slate-800/90 rounded-2xl p-4 space-y-2">
-              <div class="flex items-center justify-between text-xs gap-2 flex-wrap">
-                <span class="font-bold text-slate-200 flex items-center gap-1.5">
-                  <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-400"></i>
-                  <span>${t.collaborativeNotesTitle}</span>
-                  <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">Private · Teacher Only</span>
-                </span>
-                <span class="text-[10px] font-mono text-emerald-400/90">✓ Auto-saves</span>
+            <!-- 1C. Teacher Notes -->
+            <div id="drawer-progress-section-notes" class="${activeProgressSubTab === 'notes' ? 'space-y-4' : 'hidden space-y-4'}">
+              <div class="bg-slate-950/65 border border-slate-800/90 rounded-2xl p-4 space-y-2">
+                <div class="flex items-center text-xs">
+                  <span class="font-bold text-slate-200">${isHe ? 'הערות המורה' : 'Teacher Notes'}</span>
+                </div>
+                <textarea
+                  id="drawer-student-notes-input"
+                  dir="auto"
+                  rows="${noteRows}"
+                  oninput="handleDrawerNotesInput('${student.id}', this.value); if(typeof autoGrowStudioTextarea==='function'){ autoGrowStudioTextarea(this); }"
+                  onblur="saveDrawerStudentNotes('${student.id}')"
+                  placeholder="${t.notesPlaceholder}"
+                  class="studio-autogrow w-full bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 leading-relaxed resize-none"
+                >${escapeHtml(student.notes || '')}</textarea>
               </div>
-              <textarea
-                id="drawer-student-notes-input"
-                dir="auto"
-                rows="${noteRows}"
-                oninput="handleDrawerNotesInput('${student.id}', this.value); if(typeof autoGrowStudioTextarea==='function'){ autoGrowStudioTextarea(this); }"
-                onblur="saveDrawerStudentNotes('${student.id}')"
-                placeholder="${t.notesPlaceholder}"
-                class="studio-autogrow w-full bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 leading-relaxed resize-none"
-              >${escapeHtml(student.notes || '')}</textarea>
             </div>
           </div>
 
-          <!-- TAB 2: STUDENT PORTAL ACCESS, HOMEWORK, GOALS & SHARED STUDENT NOTES -->
+          <!-- TAB 2: STUDENT PORTAL ACCESS & 3 CLEAN SECTIONS (Homework | Custom Student Goals | Shared Notes with Student) -->
           <div id="student-profile-panel-portal" class="${activeProfileTab === 'portal' ? 'space-y-4' : 'hidden space-y-4'}">
             ${portalAccessCardHtml}
-            ${homeworkBannerHtml}
-            ${assignedTestSummaryHtml}
-            ${cardCustomGoalsHtml}
-            ${sharedNotesCardHtml}
+
+            <div id="drawer-portal-subtabs-bar" class="grid grid-cols-3 gap-2">
+              <button type="button" id="btn-drawer-portal-sub-homework" onclick="switchStudentDrawerPortalSubTab('${student.id}', 'homework')" class="p-2.5 rounded-2xl border text-left rtl:text-right transition flex items-center gap-2 ${activePortalSubTab === 'homework' ? 'bg-amber-500/20 border-amber-400/60 text-white shadow-sm' : 'bg-slate-950/60 border-slate-800/90 text-slate-400 hover:text-slate-200 hover:border-slate-700'}">
+                <i data-lucide="clipboard-list" class="w-4 h-4 text-amber-400 shrink-0"></i>
+                <span class="text-xs font-bold truncate">${isHe ? 'שיעורי בית' : 'Homework'}</span>
+              </button>
+              <button type="button" id="btn-drawer-portal-sub-goals" onclick="switchStudentDrawerPortalSubTab('${student.id}', 'goals')" class="p-2.5 rounded-2xl border text-left rtl:text-right transition flex items-center gap-2 ${activePortalSubTab === 'goals' ? 'bg-emerald-500/20 border-emerald-400/60 text-white shadow-sm' : 'bg-slate-950/60 border-slate-800/90 text-slate-400 hover:text-slate-200 hover:border-slate-700'}">
+                <i data-lucide="check-square" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                <span class="text-xs font-bold truncate">${isHe ? 'יעדים אישיים' : 'Custom Student Goals'}</span>
+              </button>
+              <button type="button" id="btn-drawer-portal-sub-shared_notes" onclick="switchStudentDrawerPortalSubTab('${student.id}', 'shared_notes')" class="p-2.5 rounded-2xl border text-left rtl:text-right transition flex items-center gap-2 ${activePortalSubTab === 'shared_notes' ? 'bg-indigo-500/20 border-indigo-400/60 text-white shadow-sm' : 'bg-slate-950/60 border-slate-800/90 text-slate-400 hover:text-slate-200 hover:border-slate-700'}">
+                <i data-lucide="message-square-text" class="w-4 h-4 text-indigo-400 shrink-0"></i>
+                <span class="text-xs font-bold truncate">${isHe ? 'הערות לתלמיד' : 'Shared Notes with Student'}</span>
+              </button>
+            </div>
+
+            <div id="drawer-portal-section-homework" class="${activePortalSubTab === 'homework' ? 'space-y-4' : 'hidden space-y-4'}">
+              ${homeworkBannerHtml}
+              ${assignedTestSummaryHtml}
+            </div>
+
+            <div id="drawer-portal-section-goals" class="${activePortalSubTab === 'goals' ? 'space-y-4' : 'hidden space-y-4'}">
+              ${cardCustomGoalsHtml}
+            </div>
+
+            <div id="drawer-portal-section-shared_notes" class="${activePortalSubTab === 'shared_notes' ? 'space-y-4' : 'hidden space-y-4'}">
+              ${sharedNotesCardHtml}
+            </div>
           </div>
 
           ${cardParshaReadingHtml}
@@ -28726,10 +28768,24 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
     }
 
     var studentProfileTabMap = {};
+    var drawerProgressSubTabMap = {};
+    var drawerPortalSubTabMap = {};
 
     function switchStudentProfileTab(studentId, tabName) {
       if (!studentId) return;
       studentProfileTabMap[studentId] = tabName === 'portal' ? 'portal' : 'progress';
+      renderStudentDrawer(studentId, true);
+    }
+
+    function switchStudentDrawerProgressSubTab(studentId, sectionName) {
+      if (!studentId) return;
+      drawerProgressSubTabMap[studentId] = (sectionName === 'courses' || sectionName === 'notes') ? sectionName : 'continuity';
+      renderStudentDrawer(studentId, true);
+    }
+
+    function switchStudentDrawerPortalSubTab(studentId, sectionName) {
+      if (!studentId) return;
+      drawerPortalSubTabMap[studentId] = (sectionName === 'goals' || sectionName === 'shared_notes') ? sectionName : 'homework';
       renderStudentDrawer(studentId, true);
     }
 

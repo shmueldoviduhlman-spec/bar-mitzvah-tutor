@@ -3809,7 +3809,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   sandbox.openStudentDrawer(g40Student.id);
   const teacherDrawerHtml = getOrCreateElem('drawer-body-content').innerHTML;
   assert(teacherDrawerHtml.includes('drawer-student-portal-access-card') && teacherDrawerHtml.includes(g40Student.studentAccessCode), 'Teacher Student Profile displays Portal Access Code card');
-  assert(teacherDrawerHtml.includes('Private · Teacher Only') && teacherDrawerHtml.includes('drawer-shared-notes-card'), 'Teacher Student Profile separates Private Notes from Shared Notes for Student');
+  assert(teacherDrawerHtml.includes('Teacher Notes') && teacherDrawerHtml.includes('drawer-shared-notes-card'), 'Teacher Student Profile separates Teacher Notes from Shared Notes for Student');
 
   getOrCreateElem('input-drawer-shared-note').value = 'Remember to review the purple worksheet before Thursday!';
   sandbox.addStudentSharedNote(g40Student.id);
@@ -6321,6 +6321,61 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     g66PortalHtml.includes('Blessing after you wash hands') &&
     indexHtml.includes('.text-violet-200:not(.keep-white)'),
     'Student Portal heals stale Recording HH:MM stamps, shows renamed titles cleanly, and fixes Light Mode violet contrast'
+  );
+
+  // =========================================================================
+  // GATE 67: Student Profile Clean 3-Section Tabs (Progress & Portal) + Teacher Notes Label
+  // =========================================================================
+  console.log('\n[Gate 67] Student Profile 3-Section Organization (Tab 1 & Tab 2) & Clean Teacher Notes Header...');
+  sandbox.openStudentDrawer(g66Stu.id);
+  const g67InitHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(
+    g67InitHtml.includes('id="drawer-progress-subtabs-bar"') &&
+    g67InitHtml.includes('id="drawer-progress-section-continuity" class="space-y-4"') &&
+    g67InitHtml.includes('id="drawer-progress-section-courses" class="hidden space-y-4"') &&
+    g67InitHtml.includes('id="drawer-progress-section-notes" class="hidden space-y-4"') &&
+    !g67InitHtml.includes('Collaborative Teacher &amp; Student Notes') &&
+    !g67InitHtml.includes('Private · Teacher Only') &&
+    !g67InitHtml.includes('✓ Auto-saves'),
+    'Tab 1 organizes Progress into 3 clickable sections (Teaching Continuity, Enrolled Courses, Teacher Notes) with clean Teacher Notes heading'
+  );
+
+  sandbox.switchStudentDrawerProgressSubTab(g66Stu.id, 'courses');
+  const g67CoursesHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(
+    g67CoursesHtml.includes('id="drawer-progress-section-continuity" class="hidden space-y-4"') &&
+    g67CoursesHtml.includes('id="drawer-progress-section-courses" class="space-y-4"'),
+    'Clicking Enrolled Courses displays enrolled courses section inside Tab 1 cleanly'
+  );
+
+  sandbox.switchStudentDrawerProgressSubTab(g66Stu.id, 'notes');
+  const g67NotesHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(
+    g67NotesHtml.includes('id="drawer-progress-section-notes" class="space-y-4"') &&
+    g67NotesHtml.includes('Teacher Notes'),
+    'Clicking Teacher Notes displays clean Teacher Notes section inside Tab 1'
+  );
+
+  sandbox.switchStudentProfileTab(g66Stu.id, 'portal');
+  const g67PortalTabHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  assert(
+    g67PortalTabHtml.includes('id="drawer-portal-subtabs-bar"') &&
+    g67PortalTabHtml.includes('id="drawer-portal-section-homework" class="space-y-4"') &&
+    g67PortalTabHtml.includes('id="drawer-portal-section-goals" class="hidden space-y-4"') &&
+    g67PortalTabHtml.includes('id="drawer-portal-section-shared_notes" class="hidden space-y-4"'),
+    'Tab 2 organizes Student Portal & Shared into 3 clickable sections (Homework, Custom Student Goals, Shared Notes with Student)'
+  );
+
+  sandbox.switchStudentDrawerPortalSubTab(g66Stu.id, 'goals');
+  assert(
+    getOrCreateElem('drawer-body-content').innerHTML.includes('id="drawer-portal-section-goals" class="space-y-4"'),
+    'Clicking Custom Student Goals reveals Custom Student Goals workspace cleanly inside Tab 2'
+  );
+
+  sandbox.switchStudentDrawerPortalSubTab(g66Stu.id, 'shared_notes');
+  assert(
+    getOrCreateElem('drawer-body-content').innerHTML.includes('id="drawer-portal-section-shared_notes" class="space-y-4"'),
+    'Clicking Shared Notes with Student reveals shared notes section cleanly inside Tab 2'
   );
 
   sandbox.APP_STATE.studentPortalMode = false;
