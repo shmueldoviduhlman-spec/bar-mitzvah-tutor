@@ -5825,11 +5825,59 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(
     firstGoalCardStart !== -1 &&
     composerStart > firstGoalCardStart &&
-    savedGoalRowChunk.includes(`renameStudentCustomGoal('${g59StudentB.id}', '${g60SavedGoal.id}'`) &&
-    savedGoalRowChunk.includes(`deleteStudentCustomGoal('${g59StudentB.id}', '${g60SavedGoal.id}'`) &&
+    !savedGoalRowChunk.includes('renameStudentCustomGoal(') &&
+    savedGoalRowChunk.includes(`requestDeleteStudentCustomGoal('${g59StudentB.id}', '${g60SavedGoal.id}'`) &&
+    savedGoalRowChunk.includes('data-lucide="trash-2"') &&
+    !savedGoalRowChunk.includes('removeCustomGoalAttachment(') &&
     !savedGoalRowChunk.includes('toggleCustomGoalPanel(') &&
     !savedGoalRowChunk.includes('startGoalVoiceRecording('),
-    'Saved goal row keeps checkbox, inline rename input & delete button without Pic/PDF/Audio/Rec action clutter'
+    'Media-backed saved goal omits redundant top goal-title row and replaces X with garbage delete button'
+  );
+
+  // Text-only goal still renders checkbox, inline title rename, and garbage delete button
+  sandbox.APP_STATE.students.find(s => s.id === g59StudentB.id).skills.customGoals.push({
+    id: 'goal_text_only_61',
+    title: 'Practice Brachot',
+    completed: false,
+    images: [],
+    pdfs: [],
+    recordings: []
+  });
+  sandbox.renderStudentDrawer(g59StudentB.id, true);
+  const textGoalCardHtml = getOrCreateElem('drawer-body-content').innerHTML;
+  const textCardIdx = textGoalCardHtml.indexOf('id="goal-card-goal_text_only_61"');
+  const textComposerIdx = textGoalCardHtml.indexOf('id="custom-goal-composer"', textCardIdx);
+  const textCardSlice = textGoalCardHtml.slice(textCardIdx, textComposerIdx);
+  assert(
+    textCardIdx !== -1 &&
+    textComposerIdx > textCardIdx &&
+    textCardSlice.includes(`renameStudentCustomGoal('${g59StudentB.id}', 'goal_text_only_61'`) &&
+    textCardSlice.includes(`requestDeleteStudentCustomGoal('${g59StudentB.id}', 'goal_text_only_61'`),
+    'Text-only saved goal preserves inline rename input, checkbox, and double-verified delete button'
+  );
+
+  // Verify double-verification delete flow: request opens confirmation modal without deleting yet, cancel preserves, confirm deletes
+  const countBeforeDeleteReq = g59StudentB.skills.customGoals.length;
+  sandbox.deleteStudentCustomGoal(g59StudentB.id, 'goal_text_only_61');
+  const deleteModalEl = getOrCreateElem('modal-confirm-delete-goal');
+  assert(
+    !deleteModalEl.classList.contains('hidden') &&
+    g59StudentB.skills.customGoals.length === countBeforeDeleteReq,
+    'First click on garbage delete button opens double-verification modal without immediately deleting goal'
+  );
+  sandbox.closeDeleteGoalConfirmModal();
+  assert(
+    deleteModalEl.classList.contains('hidden') &&
+    g59StudentB.skills.customGoals.length === countBeforeDeleteReq,
+    'Cancelling delete confirmation closes modal and preserves custom goal'
+  );
+  sandbox.requestDeleteStudentCustomGoal(g59StudentB.id, 'goal_text_only_61');
+  sandbox.confirmDeleteStudentCustomGoal();
+  assert(
+    deleteModalEl.classList.contains('hidden') &&
+    g59StudentB.skills.customGoals.length === countBeforeDeleteReq - 1 &&
+    !g59StudentB.skills.customGoals.some(g => g.id === 'goal_text_only_61'),
+    'Confirming inside double-verification modal permanently deletes custom goal'
   );
 
   // Add recording + picture to a saved goal, then rename BOTH the goal and each attachment
