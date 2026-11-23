@@ -648,31 +648,37 @@ console.log('\n--- Gate 12: Individual User Authentication & Shared School Works
 
 // 1. Registry & School Model
 assert(sandbox.DEFAULT_SCHOOL !== undefined, 'DEFAULT_SCHOOL constant is defined');
-assert(sandbox.DEFAULT_SCHOOL.id === 'school_main_770', 'DEFAULT_SCHOOL id is school_main_770');
-assert(sandbox.DEFAULT_SCHOOL.join_code === '770770', 'DEFAULT_SCHOOL join_code is 770770');
+assert(sandbox.DEFAULT_SCHOOL.id === 'school_main_academy', 'DEFAULT_SCHOOL id is school_main_academy');
+assert(sandbox.DEFAULT_SCHOOL.join_code === '', 'DEFAULT_SCHOOL join_code is empty (no hardcoded join secret in client)');
 assert(typeof sandbox.getSchoolsRegistry === 'function', 'getSchoolsRegistry is a function');
 const schools = sandbox.getSchoolsRegistry();
 assert(Array.isArray(schools), 'getSchoolsRegistry returns an array');
-assert(schools.some(s => s.id === 'school_main_770'), 'Registry contains default Bar Mitzvah Academy');
+assert(schools.some(s => s.id === 'school_main_academy'), 'Registry contains default Bar Mitzvah Academy');
+
+// Seed an isolated test join code inside local registry for offline lookup checks (server rotates real codes in D1)
+const seededSchools = schools.map(s => s.id === 'school_main_academy' ? { ...s, join_code: 'ACAD99' } : s);
+sandbox.saveSchoolsRegistry(seededSchools);
 
 // 2. School Lookup by Join Code
 assert(typeof sandbox.findSchoolByJoinCode === 'function', 'findSchoolByJoinCode is a function');
-const foundSchool = sandbox.findSchoolByJoinCode('770770');
-assert(foundSchool !== null && foundSchool.id === 'school_main_770', 'findSchoolByJoinCode correctly resolves code 770770 to default school');
-const foundSchoolWhitespace = sandbox.findSchoolByJoinCode('  770770  ');
-assert(foundSchoolWhitespace !== null && foundSchoolWhitespace.id === 'school_main_770', 'findSchoolByJoinCode handles whitespace trimming');
+const foundSchool = sandbox.findSchoolByJoinCode('ACAD99');
+assert(foundSchool !== null && foundSchool.id === 'school_main_academy', 'findSchoolByJoinCode correctly resolves seeded code to default school');
+const foundSchoolWhitespace = sandbox.findSchoolByJoinCode('  ACAD99  ');
+assert(foundSchoolWhitespace !== null && foundSchoolWhitespace.id === 'school_main_academy', 'findSchoolByJoinCode handles whitespace trimming');
 const invalidSchool = sandbox.findSchoolByJoinCode('INVALID999');
 assert(invalidSchool === null, 'findSchoolByJoinCode returns null for nonexistent code');
 
 // 3. Dynamic School Scoping via getActiveSchoolId
 sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com' };
-assert(sandbox.getActiveSchoolId() === 'school_main_770', 'Shmuel resolves to school_main_770');
+assert(sandbox.getActiveSchoolId() === 'school_main_academy', 'Shmuel resolves to school_main_academy');
+sandbox.APP_STATE.currentUser = { email: 'coteacher@school.org', school_id: 'school_main_academy' };
+assert(sandbox.getActiveSchoolId() === 'school_main_academy', 'Co-teacher with school_main_academy resolves to school_main_academy');
 sandbox.APP_STATE.currentUser = { email: 'coteacher@school.org', school_id: 'school_main_770' };
-assert(sandbox.getActiveSchoolId() === 'school_main_770', 'Co-teacher with school_main_770 resolves to school_main_770');
+assert(sandbox.getActiveSchoolId() === 'school_main_academy', 'Legacy school_main_770 normalizes cleanly to school_main_academy');
 sandbox.APP_STATE.currentUser = { email: 'tutor@external.edu' };
 assert(sandbox.getActiveSchoolId() === 'tutor_external_edu', 'External tutor without school resolves to user-scoped ID');
-sandbox.APP_STATE.currentUser = { email: 'tutor@external.edu', school_id: 'school_main_770' };
-assert(sandbox.getActiveSchoolId() === 'school_main_770', 'External tutor who joined school resolves to school_main_770');
+sandbox.APP_STATE.currentUser = { email: 'tutor@external.edu', school_id: 'school_main_academy' };
+assert(sandbox.getActiveSchoolId() === 'school_main_academy', 'External tutor who joined school resolves to school_main_academy');
 
 // 4. Strict Individual Authentication via grantAuthSession
 assert(typeof sandbox.grantAuthSession === 'function', 'grantAuthSession is a function');
@@ -684,32 +690,33 @@ sandbox.grantAuthSession({
 assert(sandbox.APP_STATE.currentUser.email === 'shmueldoviduhlman@gmail.com', 'Shmuel session has his own email');
 assert(sandbox.APP_STATE.currentUser.role === 'super_admin', 'Shmuel session receives super_admin role');
 assert(sandbox.APP_STATE.currentUser.name_en === 'Shmuel Dovid Uhlman', 'Shmuel session preserves Shmuel full name');
-assert(sandbox.APP_STATE.currentUser.school_id === 'school_main_770', 'Shmuel session attached to school_main_770');
+assert(sandbox.APP_STATE.currentUser.school_id === 'school_main_academy', 'Shmuel session attached to school_main_academy');
 
 // Test Co-Teacher Login: Individual identity preserved (NOT overwritten with Shmuel's identity)
 sandbox.grantAuthSession({
   email: 'coteacher@school.org',
   name_en: 'Yossi Cohen',
-  school_id: 'school_main_770'
+  school_id: 'school_main_academy'
 });
 assert(sandbox.APP_STATE.currentUser.email === 'coteacher@school.org', 'Co-teacher session has their own email');
 assert(sandbox.APP_STATE.currentUser.name_en === 'Yossi Cohen', 'Co-teacher session preserves their own name (not Shmuel)');
-assert(sandbox.APP_STATE.currentUser.school_id === 'school_main_770', 'Co-teacher attached to shared school_main_770');
+assert(sandbox.APP_STATE.currentUser.school_id === 'school_main_academy', 'Co-teacher attached to shared school_main_academy');
 assert(sandbox.APP_STATE.currentUser.role === 'tutor', 'Co-teacher role is tutor');
 
 // Test Add/Remove Co-Teacher Handlers
 assert(typeof sandbox.handleAddTeacherToSchool === 'function', 'handleAddTeacherToSchool is a function');
 assert(typeof sandbox.handleRemoveTeacherFromSchool === 'function', 'handleRemoveTeacherFromSchool is a function');
+assert(typeof sandbox.handleRotateSchoolJoinCode === 'function', 'handleRotateSchoolJoinCode is a function');
 
 // 5. External Tutor Registration & Dynamic School Attachment
-// Case A: External tutor signs up with code 770770 -> joins shared school
+// Case A: External tutor joins via academy school_id -> joins shared school
 sandbox.grantAuthSession({
   email: 'assistant@shul.org',
   name_en: 'Assistant Levi',
-  school_id: 'school_main_770',
+  school_id: 'school_main_academy',
   school_name: 'Bar Mitzvah Academy'
 });
-assert(sandbox.APP_STATE.currentUser.school_id === 'school_main_770', 'Assistant with code 770770 joined school_main_770');
+assert(sandbox.APP_STATE.currentUser.school_id === 'school_main_academy', 'Assistant joined school_main_academy');
 assert(sandbox.getStudentStorageKey() === 'tutor_students_v1', 'Assistant accesses shared student roster storage');
 
 // Case B: External tutor signs up WITHOUT code -> gets isolated workspace
@@ -725,15 +732,15 @@ assert(typeof sandbox.handleJoinSchoolSubmit === 'function', 'handleJoinSchoolSu
 assert(typeof sandbox.openJoinSchoolModal === 'function', 'openJoinSchoolModal is a function');
 assert(typeof sandbox.closeJoinSchoolModal === 'function', 'closeJoinSchoolModal is a function');
 
-// Simulate private tutor joining Bar Mitzvah Academy via modal
-getOrCreateElem('input-join-school-code').value = '770770';
+// Simulate private tutor joining Bar Mitzvah Academy via modal using seeded local test code
+getOrCreateElem('input-join-school-code').value = 'ACAD99';
 sandbox.handleJoinSchoolSubmit({ preventDefault() {} });
-assert(sandbox.APP_STATE.currentUser.school_id === 'school_main_770', 'handleJoinSchoolSubmit transitioned private tutor into school_main_770');
+assert(sandbox.APP_STATE.currentUser.school_id === 'school_main_academy', 'handleJoinSchoolSubmit transitioned private tutor into school_main_academy');
 assert(sandbox.APP_STATE.currentUser.school_name === 'Bar Mitzvah Academy', 'handleJoinSchoolSubmit updated school_name');
 
 // Verify member was recorded into school registry
 const updatedSchools = sandbox.getSchoolsRegistry();
-const targetAcademy = updatedSchools.find(s => s.id === 'school_main_770');
+const targetAcademy = updatedSchools.find(s => s.id === 'school_main_academy');
 assert(targetAcademy && targetAcademy.members.some(m => m.email === 'private_tutor@math.com'), 'New member recorded in school registry');
 
 // 7. URL Join Code Detection
@@ -778,7 +785,7 @@ requiredTools.forEach(tool => {
 });
 
 // 2. Tool Execution: add_student with full schema & school_id
-sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com', school_id: 'school_main_770' };
+sandbox.APP_STATE.currentUser = { email: 'shmueldoviduhlman@gmail.com', school_id: 'school_main_academy' };
 sandbox.APP_STATE.students = [];
 const addRes = sandbox.executeAiToolCall({
   name: 'add_student',
@@ -798,7 +805,7 @@ assert(Array.isArray(createdStu.schedule), 'Student schedule initialized as an a
 assert(typeof createdStu.completedTopics === 'object', 'Student completedTopics initialized as an object');
 assert(typeof createdStu.completedParshiot === 'object', 'Student completedParshiot initialized as an object');
 assert(createdStu.skills && createdStu.skills.parshaReading.parshaName === 'Parshat Terumah', 'Student skills initialized with parshaName');
-assert(createdStu.completed_topics._meta.school_id === 'school_main_770', 'Student stamped with school_main_770');
+assert(createdStu.completed_topics._meta.school_id === 'school_main_academy', 'Student stamped with school_main_academy');
 
 // 3. Tool Execution: update_student
 const updateRes = sandbox.executeAiToolCall({
@@ -846,7 +853,7 @@ const onTheFlyRes = sandbox.executeAiToolCall({
 assert(onTheFlyRes.success === true, 'schedule_lesson on-the-fly creation succeeded');
 const onTheFlyStu = sandbox.APP_STATE.students.find(s => s.name === 'Daniel Newstudent');
 assert(onTheFlyStu !== undefined, 'On-the-fly student created in APP_STATE.students');
-assert(onTheFlyStu.completed_topics._meta.school_id === 'school_main_770', 'On-the-fly student stamped with active school ID');
+assert(onTheFlyStu.completed_topics._meta.school_id === 'school_main_academy', 'On-the-fly student stamped with active school ID');
 
 // 5. Tool Execution: cancel_lesson
 const cancelRes = sandbox.executeAiToolCall({
@@ -930,7 +937,7 @@ const portalData = sandbox.executeAiToolCall({
 });
 assert(portalData !== null && typeof portalData === 'object', 'get_portal_data returns object');
 assert(portalData.totalStudents >= 2, 'get_portal_data returns accurate student count');
-assert(portalData.activeSchoolId === 'school_main_770', 'get_portal_data returns active school ID');
+assert(portalData.activeSchoolId === 'school_main_academy', 'get_portal_data returns active school ID');
 assert(portalData.totalCustomMaterialsAdded >= 1, 'get_portal_data includes custom materials count');
 assert(Array.isArray(portalData.students), 'portalData.students is an array');
 assert(Array.isArray(portalData.courses), 'portalData.courses is an array');
@@ -1010,6 +1017,7 @@ assert(!fs.existsSync(path.join(__dirname, 'base44_openapi_schema.json')), 'Lega
 const extOpenApiRaw = fs.readFileSync(path.join(__dirname, 'tutorpilot-agent-openapi.json'), 'utf8');
 const extOpenApi = JSON.parse(extOpenApiRaw);
 assert(extOpenApi.openapi === '3.0.3', 'Universal External AI OpenAPI schema version is 3.0.3');
+assert(Array.isArray(extOpenApi.servers) && extOpenApi.servers[0]?.url === 'https://tutorpilot.us/api', 'Universal OpenAPI schema primary server points to https://tutorpilot.us/api');
 assert(extOpenApi.paths['/external-agent'] !== undefined, 'Universal OpenAPI schema defines /external-agent gateway');
 assert(extOpenApi.paths['/external-agent'].get !== undefined, 'Universal OpenAPI schema declares GET /external-agent');
 assert(extOpenApi.paths['/external-agent'].post !== undefined, 'Universal OpenAPI schema declares POST /external-agent');
@@ -1020,7 +1028,7 @@ assert(typeof sandbox.populateExternalAiGuideTextarea === 'function', 'populateE
 sandbox.populateExternalAiGuideTextarea();
 const extAiGuideVal = getOrCreateElem('external-ai-prompt-textarea').value;
 assert(extAiGuideVal.includes('TUTORPILOT UNIVERSAL EXTERNAL AI AGENT INSTRUCTIONS'), 'External AI guide populates universal instructions');
-assert(extAiGuideVal.includes('https://tutorpilot.pages.dev/api/external-agent'), 'External AI guide points to scoped server gateway');
+assert(extAiGuideVal.includes('https://tutorpilot.us/api/external-agent'), 'External AI guide points to scoped server gateway');
 assert(extAiGuideVal.includes('END OF CLASS STUDENT UPDATES'), 'External AI guide declares Capability 1: End of Class Updates');
 assert(extAiGuideVal.includes('CALENDAR & SCHEDULE'), 'External AI guide declares Capability 2: Calendar & Schedule');
 assert(extAiGuideVal.includes('TUTORPILOT APP HELP'), 'External AI guide declares Capability 3: TutorPilot App Help');
@@ -2376,7 +2384,7 @@ assert(updatedCourse && updatedCourse.lessons[0].id === 'les_1', 'Retained lesso
 sandbox.APP_STATE.customCourses.push({
   id: 'course_leaked_super',
   title_en: 'Super Admin Secret Course',
-  school_id: 'school_main_770',
+  school_id: 'school_main_academy',
   created_by: 'shmueldoviduhlman@gmail.com',
   lessons: []
 });
@@ -2567,7 +2575,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     id: 'usr_super_1',
     email: 'shmueldoviduhlman@gmail.com',
     role: 'super_admin',
-    school_id: 'school_main_770'
+    school_id: 'school_main_academy'
   };
   getOrCreateElem('input-quick-course-title-blank').value = 'Calculus AB';
   sandbox.handleQuickCreateCourseSubmit();
@@ -2607,7 +2615,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     id: 'usr_super_1',
     email: 'shmueldoviduhlman@gmail.com',
     role: 'super_admin',
-    school_id: 'school_main_770'
+    school_id: 'school_main_academy'
   };
   sandbox.APP_STATE.customCourses = [smithHistoryCourse];
   sandbox.loadCustomCoursesFromStorage();
@@ -2763,7 +2771,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   // 7. Student roster isolation: External user cannot see Super Admin students
   sandbox.APP_STATE.currentUser = davidSession;
   const testRoster = [
-    { id: 'stu_super_1', name: 'Super Student', owner_email: 'shmueldoviduhlman@gmail.com', school_id: 'school_main_770' },
+    { id: 'stu_super_1', name: 'Super Student', owner_email: 'shmueldoviduhlman@gmail.com', school_id: 'school_main_academy' },
     { id: 'stu_david_1', name: 'David Student', owner_email: 'shmueluhlman@gmail.com', school_id: 'school_shmueluhlman_gmail_com' }
   ];
   sandbox.localStorage.setItem(sandbox.getStudentStorageKey(), JSON.stringify(testRoster));
@@ -3086,15 +3094,17 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     };
   };
 
-  // Clear local custom key to verify built-in SYSTEM_DEFAULT_GEMINI_KEY via getEffectiveGeminiApiKey()
+  // Verify no hardcoded client-side Gemini API key exists (BYOK / Cloudflare Edge /api/ai architecture)
   sandbox.APP_STATE.geminiApiKey = '';
   sandbox.APP_STATE.geminiModel = '';
   sandbox.localStorage.removeItem('gemini_api_key');
   sandbox.localStorage.removeItem('tutor_gemini_key');
   sandbox.localStorage.removeItem('tutor_gemini_model');
+  assert(indexHtml.includes("const SYSTEM_DEFAULT_GEMINI_KEY = '';") && sandbox.getEffectiveGeminiApiKey() === '', 'SYSTEM_DEFAULT_GEMINI_KEY is empty in client bundle and getEffectiveGeminiApiKey() returns empty with zero leaked API key');
+  sandbox.APP_STATE.geminiApiKey = 'test_mock_key_g33';
 
   const directReply = await sandbox.callGeminiApi('Ping test');
-  assert(directReply === 'AI drafted custom block content via managed key', 'callGeminiApi skips 503 model and returns response using built-in managed key');
+  assert(directReply === 'AI drafted custom block content via managed key', 'callGeminiApi skips 503 model and returns response cleanly');
   assert(sandbox.APP_STATE.geminiModel === 'gemini-3-flash-preview', 'callGeminiApi routes standard requests through flagship gemini-3-flash-preview model');
 
   // Test Multi-turn Architect conversation
@@ -3135,8 +3145,9 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   await sandbox.handleStudioMiniBlockCustomAi(labCourse.id, labLessonId, tableSecId);
   const refreshedCourse = sandbox.APP_STATE.customCourses.find(c => c.id === labCourse.id);
   const secVal = refreshedCourse.lessons[0].sections[tableSecId];
-  assert(String(secVal).length > 0, 'handleStudioMiniBlockCustomAi invokes callGeminiApi with built-in key cleanly');
+  assert(String(secVal).length > 0, 'handleStudioMiniBlockCustomAi invokes callGeminiApi cleanly');
 
+  sandbox.APP_STATE.geminiApiKey = 'test_mock_key_offline';
   sandbox.fetch = prevFetch;
 
   // --- GATE 34: Clean 4/8 Class Studio, Inline Syllabus Planner & Embedded Conversational AI Co-Builder ---
@@ -4071,6 +4082,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(rescuedQueue[0] === 'gemini-3-flash-preview' && sandbox.localStorage.getItem('tutor_gemini_model') === null, 'getGeminiCandidateModelsForTier evicts poisoned/stalling model from localStorage');
 
   // Timeout/AbortError on slow primary model cleanly fails over to fast next candidate model instead of hanging forever
+  sandbox.APP_STATE.geminiApiKey = 'test_mock_key_g43';
   sandbox.fetch = async (url) => {
     if (url.includes('gemini-3-flash-preview:')) {
       const err = new Error('The operation was aborted due to timeout');
@@ -4100,6 +4112,7 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   const liteFallbackRes = await sandbox.callGeminiApi('Quick ping', null, { taskTier: 'standard' });
   assert(liteFallbackRes === 'Emergency lite response', 'callGeminiApi succeeds on emergency -lite overflow during overload');
   assert(sandbox.localStorage.getItem('tutor_gemini_model') === null, 'callGeminiApi NEVER permanently locks weak -lite model into localStorage');
+  sandbox.APP_STATE.geminiApiKey = 'test_mock_key_offline';
 
   // Standard / Deep Pro Toggle state & UI persistence
   assert(typeof sandbox.setAiQualityTier === 'function', 'setAiQualityTier is defined');
@@ -4125,46 +4138,115 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
 
   // Verify Cloudflare Pages Function proxy module (functions/api/ai.js)
   const proxySrc = fs.readFileSync(path.join(__dirname, 'functions/api/ai.js'), 'utf8');
-  assert(proxySrc.includes('export async function onRequestPost') && proxySrc.includes('X-TutorPilot-Role'), 'functions/api/ai.js implements Cloudflare Pages Function proxy with role checks');
-  assert(proxySrc.includes('ALLOWED_GEMINI_MODELS') && proxySrc.includes('incrementAndCheckQuota'), 'functions/api/ai.js enforces model allowlist and per-user daily quota limiting');
+  assert(proxySrc.includes('export async function onRequestPost') && proxySrc.includes('X-TutorPilot-Role') && proxySrc.includes('requireTutorAuth'), 'functions/api/ai.js implements authenticated Cloudflare Pages Function proxy with role checks');
+  assert(proxySrc.includes('ALLOWED_GEMINI_MODELS') && proxySrc.includes('checkAndIncrementQuota') && proxySrc.includes('needsApiKey') && proxySrc.includes('proRestricted') && proxySrc.includes('quotaExceeded'), 'functions/api/ai.js enforces model allowlist, Pro gating, key requirement, and per-user daily quota limiting');
 
-  // Behavioral test of proxy logic (role block, unconfigured secret fallback, quota cap)
-  const proxyCommonJs = proxySrc.replace(/export async function /g, 'async function ') + '\nmodule.exports = { onRequestPost, onRequestOptions };';
-  const proxySandbox = {
-    module: { exports: {} },
-    exports: {},
-    Response: class {
-      constructor(body, init = {}) {
-        this.body = body;
-        this.status = init.status || 200;
-        this.headers = init.headers || {};
+  // ESM Behavioral test of functions/api/ai.js (RS256 Clerk JWT + JWKS + D1 + KV + quota + Pro gate)
+  const { execFileSync } = require('child_process');
+  const aiModuleUrl = require('url').pathToFileURL(path.join(__dirname, 'functions/api/ai.js')).href;
+  const aiBehavioralScript = `
+    import assert from 'node:assert/strict';
+    import crypto from 'node:crypto';
+    import { onRequestPost } from ${JSON.stringify(aiModuleUrl)};
+
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+    const pubJwk = publicKey.export({ format: 'jwk' });
+    pubJwk.kid = 'test-kid-g43';
+    pubJwk.use = 'sig';
+    pubJwk.alg = 'RS256';
+
+    const b64u = (buf) => Buffer.from(buf).toString('base64url');
+    const hdr = b64u(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: 'test-kid-g43' }));
+    const now = Math.floor(Date.now() / 1000);
+    const pay = b64u(JSON.stringify({ sub: 'usr_g43_tutor', email: 'tutor@g43.edu', iss: 'https://clerk.tutorpilot.us', iat: now, exp: now + 3600 }));
+    const sig = b64u(crypto.sign('RSA-SHA256', Buffer.from(hdr + '.' + pay), privateKey));
+    const jwt = hdr + '.' + pay + '.' + sig;
+
+    const mockUser = {
+      id: 'usr_g43_tutor',
+      email: 'tutor@g43.edu',
+      full_name: 'Gate 43 Tutor',
+      role: 'tutor',
+      school_id: 'school_g43',
+      account_status: 'active',
+      subscription_status: 'active',
+      ai_enabled: 1,
+      ai_tier_access: 'standard',
+      ai_daily_limit: 2,
+      ai_pro_daily_limit: 1,
+      ai_allow_platform_fallback: 0
+    };
+    const kvMap = new Map();
+    const mockKv = {
+      async get(k) { return kvMap.has(k) ? kvMap.get(k) : null; },
+      async put(k, v) { kvMap.set(k, String(v)); }
+    };
+    const mockDb = {
+      prepare(sql) {
+        let params = [];
+        return {
+          bind(...args) { params = args; return this; },
+          async first() {
+            if (sql.includes('FROM users WHERE id = ?') && params[0] === mockUser.id) return { ...mockUser };
+            if (sql.includes('FROM user_api_keys WHERE user_id = ?')) return null;
+            return null;
+          },
+          async all() {
+            if (sql.includes('FROM platform_settings')) {
+              return { results: [{ key: 'global_ai_enabled', value_json: 'true' }, { key: 'default_ai_daily_limit', value_json: '2' }] };
+            }
+            return { results: [] };
+          },
+          async run() { return { success: true }; }
+        };
+      },
+      async batch() { return []; }
+    };
+
+    globalThis.fetch = async (url) => {
+      const s = String(url);
+      if (s.includes('jwks.json')) {
+        return new Response(JSON.stringify({ keys: [pubJwk] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
       }
-      async text() { return this.body; }
-      async json() { return JSON.parse(this.body); }
-    },
-    fetch: async () => ({ ok: true, status: 200, text: async () => JSON.stringify({ candidates: [{ content: { parts: [{ text: 'Proxied OK' }] } }] }) }),
-    Date, Math, Set, Map, JSON, String, Number, parseInt, encodeURIComponent, Object, Array
-  };
-  proxySandbox.exports = proxySandbox.module.exports;
-  vm.runInNewContext(proxyCommonJs, proxySandbox);
-  const { onRequestPost } = proxySandbox.module.exports;
+      return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: 'Proxied OK' }] } }] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    };
 
-  const mkReq = (bodyObj, hdrs = {}) => ({
-    headers: { get: (k) => hdrs[k] || hdrs[k.toLowerCase()] || '' },
-    json: async () => bodyObj
-  });
+    const mkReq = (bodyObj, hdrs = {}) => new Request('https://tutorpilot.us/api/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...hdrs },
+      body: JSON.stringify(bodyObj)
+    });
+    const baseEnv = { DB: mockDb, APP_KV: mockKv, CLERK_ISSUER: 'https://clerk.tutorpilot.us', CLERK_JWKS_URL: 'https://clerk.tutorpilot.us/.well-known/jwks.json' };
 
-  const stuBlockedResp = await onRequestPost({ request: mkReq({ model: 'gemini-3.8-flash', payload: {} }, { 'X-TutorPilot-Role': 'student_portal' }), env: { GEMINI_API_KEY: 'secret' } });
-  assert(stuBlockedResp.status === 403, 'Edge proxy rejects Student Portal accounts with HTTP 403');
+    const stuResp = await onRequestPost({ request: mkReq({ model: 'gemini-3-flash-preview', payload: {} }, { 'X-TutorPilot-Role': 'student_portal' }), env: { ...baseEnv, GEMINI_API_KEY: 'secret' } });
+    assert.equal(stuResp.status, 403);
 
-  const unconfigResp = await onRequestPost({ request: mkReq({ model: 'gemini-3.8-flash', payload: {} }, { 'CF-Connecting-IP': '1.2.3.4' }), env: {} });
-  assert(unconfigResp.status === 503 && (await unconfigResp.json()).fallbackDirect === true, 'Edge proxy signals fallbackDirect: true when GEMINI_API_KEY env secret is unset');
+    const noAuthResp = await onRequestPost({ request: mkReq({ model: 'gemini-3-flash-preview', payload: {} }), env: { ...baseEnv, GEMINI_API_KEY: 'secret' } });
+    assert.equal(noAuthResp.status, 401);
 
-  const okResp1 = await onRequestPost({ request: mkReq({ model: 'gemini-3.8-flash', payload: {} }, { 'CF-Connecting-IP': '9.9.9.9' }), env: { GEMINI_API_KEY: 'server-secret', AI_DAILY_LIMIT: '2' } });
-  assert(okResp1.status === 200 && okResp1.headers['X-TutorPilot-Proxy'] === 'cloudflare-pages', 'Edge proxy forwards request securely when GEMINI_API_KEY is configured');
-  await onRequestPost({ request: mkReq({ model: 'gemini-3.8-flash', payload: {} }, { 'CF-Connecting-IP': '9.9.9.9' }), env: { GEMINI_API_KEY: 'server-secret', AI_DAILY_LIMIT: '2' } });
-  const quotaExceededResp = await onRequestPost({ request: mkReq({ model: 'gemini-3.8-flash', payload: {} }, { 'CF-Connecting-IP': '9.9.9.9' }), env: { GEMINI_API_KEY: 'server-secret', AI_DAILY_LIMIT: '2' } });
-  assert(quotaExceededResp.status === 429 && (await quotaExceededResp.json()).quotaExceeded === true, 'Edge proxy blocks excessive requests beyond AI_DAILY_LIMIT with HTTP 429');
+    const noKeyResp = await onRequestPost({ request: mkReq({ model: 'gemini-3-flash-preview', payload: {} }, { Authorization: 'Bearer ' + jwt }), env: baseEnv });
+    assert.equal(noKeyResp.status, 503);
+    assert.equal((await noKeyResp.json()).needsApiKey, true);
+
+    const proResp = await onRequestPost({ request: mkReq({ model: 'gemini-3.1-pro-preview', payload: {} }, { Authorization: 'Bearer ' + jwt }), env: { ...baseEnv, GEMINI_API_KEY: 'server-secret' } });
+    assert.equal(proResp.status, 403);
+    assert.equal((await proResp.json()).proRestricted, true);
+
+    const ok1 = await onRequestPost({ request: mkReq({ model: 'gemini-3-flash-preview', payload: {} }, { Authorization: 'Bearer ' + jwt }), env: { ...baseEnv, GEMINI_API_KEY: 'server-secret' } });
+    assert.equal(ok1.status, 200);
+    assert.equal(ok1.headers.get('X-TutorPilot-Proxy'), 'cloudflare-pages');
+    const ok2 = await onRequestPost({ request: mkReq({ model: 'gemini-3-flash-preview', payload: {} }, { Authorization: 'Bearer ' + jwt }), env: { ...baseEnv, GEMINI_API_KEY: 'server-secret' } });
+    assert.equal(ok2.status, 200);
+    const overQuota = await onRequestPost({ request: mkReq({ model: 'gemini-3-flash-preview', payload: {} }, { Authorization: 'Bearer ' + jwt }), env: { ...baseEnv, GEMINI_API_KEY: 'server-secret' } });
+    assert.equal(overQuota.status, 429);
+    assert.equal((await overQuota.json()).quotaExceeded, true);
+    console.log('ESM_AI_PROXY_VERIFIED');
+  `;
+  const aiOut = execFileSync(process.execPath, ['--experimental-default-type=module', '--input-type=module', '-e', aiBehavioralScript], { encoding: 'utf8' });
+  assert(aiOut.includes('ESM_AI_PROXY_VERIFIED'), 'Edge proxy /api/ai enforces 403 student block, 401 Clerk JWT auth, 503 needsApiKey, 403 proRestricted, 200 forward, and 429 daily quota');
 
   // --- Gate 44: In-Flight Cloud Sync Race Immunity & Empty-Section Object Guard ---
   console.log('\n--- Running Gate 44: In-Flight Cloud Sync Race Immunity & Empty-Section Guard ---');
@@ -4649,59 +4731,134 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   const revokedTokenHash = cryptoMod.createHash('sha256').update(revokedRawToken).digest('hex');
   const todayStr49 = sandbox.formatDateToYMD(new Date());
 
-  const mockDbRows = [
-    {
-      id: '__external_agent_tokens__',
-      completed_topics: {
-        tokens: {
-          [validTokenHash]: {
-            schoolId: 'school_alpha',
-            ownerEmail: 'tutor@alpha.edu',
-            tutorName: 'Rabbi Alpha',
-            enabled: true,
-            revokedAt: null,
-            capabilities: { afterClass: true, schedule: true, appGuide: true }
-          },
-          [revokedTokenHash]: {
-            schoolId: 'school_alpha',
-            enabled: false,
-            revokedAt: '2026-11-18T10:00:00Z',
-            capabilities: { afterClass: true, schedule: true, appGuide: true }
-          }
-        }
-      }
+  const mockTokens = {
+    [validTokenHash]: {
+      tokenHash: validTokenHash,
+      userId: 'usr_alpha_1',
+      schoolId: 'school_alpha',
+      ownerEmail: 'tutor@alpha.edu',
+      tutorName: 'Rabbi Alpha',
+      revokedAt: null,
+      accountStatus: 'active',
+      capabilities: { afterClass: true, schedule: true, appGuide: true }
     },
+    [revokedTokenHash]: {
+      tokenHash: revokedTokenHash,
+      userId: 'usr_alpha_1',
+      schoolId: 'school_alpha',
+      ownerEmail: 'tutor@alpha.edu',
+      tutorName: 'Rabbi Alpha',
+      revokedAt: '2026-11-18T10:00:00Z',
+      accountStatus: 'active',
+      capabilities: { afterClass: true, schedule: true, appGuide: true }
+    }
+  };
+
+  const mockStudents49 = [
     {
       id: 'stu_alpha_1',
+      school_id: 'school_alpha',
+      owner_user_id: 'usr_alpha_1',
       name: 'David Cohen',
-      notes: 'Good focus',
-      completed_topics: {
-        _meta: {
-          school_id: 'school_alpha',
-          owner_email: 'tutor@alpha.edu',
-          subject: 'Jewish Foundations',
-          status: 'active',
-          hourlyRate: '$100/hr',
-          studentAccessCode: 'SECRET77',
-          parentContact: { name: 'Miriam Cohen', phone: '555-999-0000', email: 'miriam@private.com' },
-          skills: { lastTaught: 'Intro', nextToTeach: 'Lesson 1: Shabbat' },
-          schedule: [{ id: 's_today_1', dateStr: todayStr49, dayOfWeek: new Date().getDay(), time: '4:30 PM', topic: 'Lesson 1: Shabbat', status: 'scheduled' }]
-        }
-      }
+      parsha_or_date: 'Jewish Foundations',
+      status: 'active',
+      archived: 0,
+      sort_order: 0,
+      private_notes: 'Good focus',
+      profile_json: JSON.stringify({
+        subject: 'Jewish Foundations',
+        hourlyRate: '$100/hr',
+        studentAccessCode: 'SECRET77',
+        parentContact: { name: 'Miriam Cohen', phone: '555-999-0000', email: 'miriam@private.com' }
+      }),
+      skills_json: JSON.stringify({ lastTaught: 'Intro', nextToTeach: 'Lesson 1: Shabbat' }),
+      schedule_json: JSON.stringify([{ id: 's_today_1', dateStr: todayStr49, dayOfWeek: new Date().getDay(), time: '4:30 PM', topic: 'Lesson 1: Shabbat', status: 'scheduled' }]),
+      updated_at: '2026-11-18T10:00:00Z'
     },
     {
       id: 'stu_other_school',
+      school_id: 'school_beta',
+      owner_user_id: 'usr_beta_1',
       name: 'Other School Student',
-      notes: 'Confidential',
-      completed_topics: { _meta: { school_id: 'school_beta', owner_email: 'other@beta.edu', status: 'active', skills: {} } }
-    },
-    {
-      id: '__custom_courses__',
-      completed_topics: {
-        courses: [{ id: 'c_jf', title_en: 'Jewish Foundations', lessons: [{ id: 'l1', lesson_num: 1, title_en: 'Shabbat' }, { id: 'l2', lesson_num: 2, title_en: 'Kashrut' }] }]
-      }
+      parsha_or_date: '',
+      status: 'active',
+      archived: 0,
+      sort_order: 0,
+      private_notes: 'Confidential',
+      profile_json: JSON.stringify({}),
+      skills_json: JSON.stringify({}),
+      schedule_json: JSON.stringify([]),
+      updated_at: '2026-11-18T10:00:00Z'
     }
   ];
+
+  const mockCourses49 = [
+    {
+      id: 'c_jf',
+      school_id: 'school_alpha',
+      title: 'Jewish Foundations',
+      archived: 0,
+      deleted_at: null,
+      data_json: JSON.stringify({
+        id: 'c_jf',
+        title_en: 'Jewish Foundations',
+        lessons: [{ id: 'l1', lesson_num: 1, title_en: 'Shabbat' }, { id: 'l2', lesson_num: 2, title_en: 'Kashrut' }]
+      })
+    }
+  ];
+
+  const mockD149 = {
+    prepare(sql) {
+      let params = [];
+      return {
+        bind(...args) { params = args; return this; },
+        async first() {
+          if (sql.includes('FROM external_agent_tokens')) {
+            const rec = mockTokens[params[0]];
+            if (!rec) return null;
+            return {
+              token_hash: rec.tokenHash,
+              user_id: rec.userId,
+              school_id: rec.schoolId,
+              capabilities_json: JSON.stringify(rec.capabilities),
+              revoked_at: rec.revokedAt,
+              email: rec.ownerEmail,
+              full_name: rec.tutorName,
+              account_status: rec.accountStatus
+            };
+          }
+          return null;
+        },
+        async all() {
+          if (sql.includes('FROM students WHERE school_id = ?')) {
+            return { results: mockStudents49.filter(s => s.school_id === params[0] && !s.archived).map(s => ({ ...s })) };
+          }
+          if (sql.includes('FROM courses WHERE school_id = ?')) {
+            return { results: mockCourses49.filter(c => c.school_id === params[0] && !c.archived && !c.deleted_at).map(c => ({ ...c })) };
+          }
+          return { results: [] };
+        },
+        async run() {
+          if (sql.startsWith('UPDATE students SET private_notes = ?, skills_json = ?, schedule_json = ?, updated_at = ? WHERE id = ? AND school_id = ?')) {
+            const st = mockStudents49.find(s => s.id === params[4] && s.school_id === params[5]);
+            if (st) {
+              st.private_notes = params[0];
+              st.skills_json = params[1];
+              st.schedule_json = params[2];
+              st.updated_at = params[3];
+            }
+          } else if (sql.startsWith('UPDATE students SET schedule_json = ?, updated_at = ? WHERE id = ? AND school_id = ?')) {
+            const st = mockStudents49.find(s => s.id === params[2] && s.school_id === params[3]);
+            if (st) {
+              st.schedule_json = params[0];
+              st.updated_at = params[1];
+            }
+          }
+          return { success: true };
+        }
+      };
+    }
+  };
 
   const extSandbox = {
     module: { exports: {} },
@@ -4716,30 +4873,13 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
         this.headers = init.headers || {};
       }
       async json() { return JSON.parse(this.body); }
-    },
-    fetch: async (url, opts = {}) => {
-      const method = (opts.method || 'GET').toUpperCase();
-      if (method === 'GET' && url.includes('id=eq.__external_agent_tokens__')) {
-        return { ok: true, status: 200, text: async () => JSON.stringify([mockDbRows[0]]) };
-      }
-      if (method === 'GET' && url.includes('/rest/v1/students_sync')) {
-        return { ok: true, status: 200, text: async () => JSON.stringify(mockDbRows) };
-      }
-      if (method === 'PATCH' && url.includes('id=eq.stu_alpha_1')) {
-        const patch = JSON.parse(opts.body);
-        const target = mockDbRows.find(r => r.id === 'stu_alpha_1');
-        if (patch.notes !== undefined) target.notes = patch.notes;
-        if (patch.completed_topics !== undefined) target.completed_topics = patch.completed_topics;
-        return { ok: true, status: 204, text: async () => '' };
-      }
-      return { ok: false, status: 404, text: async () => 'Not found' };
     }
   };
   vm.runInNewContext(extAgentCjs, extSandbox);
   const extMod = extSandbox.module.exports;
 
   const makeReq = (method, urlPath, token, bodyObj) => ({
-    url: `https://tutorpilot.pages.dev${urlPath}`,
+    url: `https://tutorpilot.us${urlPath}`,
     headers: {
       get: (h) => {
         const k = String(h).toLowerCase();
@@ -4752,19 +4892,19 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   });
 
   // 1. Missing / Revoked token -> 401
-  const resNoAuth = await extMod.onRequestGet({ request: makeReq('GET', '/api/external-agent?action=overview', ''), env: {} });
+  const resNoAuth = await extMod.onRequestGet({ request: makeReq('GET', '/api/external-agent?action=overview', ''), env: { DB: mockD149 } });
   assert(resNoAuth.status === 401, 'Gateway rejects unauthenticated request with HTTP 401');
-  const resRevoked = await extMod.onRequestGet({ request: makeReq('GET', '/api/external-agent?action=overview', revokedRawToken), env: {} });
+  const resRevoked = await extMod.onRequestGet({ request: makeReq('GET', '/api/external-agent?action=overview', revokedRawToken), env: { DB: mockD149 } });
   assert(resRevoked.status === 401, 'Gateway rejects revoked Bearer token with HTTP 401');
 
   // 2. Undeclared destructive actions -> 403 Forbidden
-  const resDel = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'delete_student', studentNameOrId: 'David Cohen' }), env: {} });
+  const resDel = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'delete_student', studentNameOrId: 'David Cohen' }), env: { DB: mockD149 } });
   assert(resDel.status === 403, 'Gateway blocks undeclared delete_student with HTTP 403');
-  const resEditCourse = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'edit_course', courseId: 'c_jf' }), env: {} });
+  const resEditCourse = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'edit_course', courseId: 'c_jf' }), env: { DB: mockD149 } });
   assert(resEditCourse.status === 403, 'Gateway blocks undeclared edit_course with HTTP 403');
 
   // 3. GET overview: strict school scoping + zero guardian/billing PII
-  const resOverview = await extMod.onRequestGet({ request: makeReq('GET', '/api/external-agent?action=overview', validRawToken), env: {} });
+  const resOverview = await extMod.onRequestGet({ request: makeReq('GET', '/api/external-agent?action=overview', validRawToken), env: { DB: mockD149 } });
   assert(resOverview.status === 200, 'Valid Bearer token reads scoped overview with HTTP 200');
   const ovData = await resOverview.json();
   const ovStr = JSON.stringify(ovData);
@@ -4780,29 +4920,32 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
       nextToTeach: 'Lesson 2: Kashrut',
       homeworkTask: 'Review 39 Melachot'
     }),
-    env: {}
+    env: { DB: mockD149 }
   });
   assert(resDebrief.status === 200, 'Capability 1 log_after_class_update succeeds with HTTP 200');
-  const dbDavid = mockDbRows.find(r => r.id === 'stu_alpha_1');
-  assert(dbDavid.completed_topics._meta.skills.lastTaught === 'Lesson 1: Shabbat' && dbDavid.completed_topics._meta.skills.nextToTeach === 'Lesson 2: Kashrut' && dbDavid.completed_topics._meta.schedule[0].status === 'completed', 'log_after_class_update updates lastTaught, nextToTeach, and marks today session completed');
-  assert(dbDavid.completed_topics._meta.parentContact.email === 'miriam@private.com' && dbDavid.completed_topics._meta.studentAccessCode === 'SECRET77', 'log_after_class_update preserves existing private profile fields untouched');
+  const dbDavid = mockStudents49.find(r => r.id === 'stu_alpha_1');
+  const dbDavidSkills = JSON.parse(dbDavid.skills_json);
+  const dbDavidSchedule = JSON.parse(dbDavid.schedule_json);
+  const dbDavidProfile = JSON.parse(dbDavid.profile_json);
+  assert(dbDavidSkills.lastTaught === 'Lesson 1: Shabbat' && dbDavidSkills.nextToTeach === 'Lesson 2: Kashrut' && dbDavidSchedule[0].status === 'completed', 'log_after_class_update updates lastTaught, nextToTeach, and marks today session completed');
+  assert(dbDavidProfile.parentContact.email === 'miriam@private.com' && dbDavidProfile.studentAccessCode === 'SECRET77', 'log_after_class_update preserves existing private profile fields untouched');
 
   // 5. Capability 2: Schedule & Cancel + reject unknown student creation (404)
-  const resUnknown = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'schedule_lesson', studentNameOrId: 'Brand New Kid', date: '2026-11-25', timeSlot: '5:00 PM' }), env: {} });
+  const resUnknown = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'schedule_lesson', studentNameOrId: 'Brand New Kid', date: '2026-11-25', timeSlot: '5:00 PM' }), env: { DB: mockD149 } });
   assert(resUnknown.status === 404, 'Gateway refuses to silently create unknown students (HTTP 404)');
-  const resSched = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'schedule_lesson', studentNameOrId: 'David Cohen', date: '2026-11-25', timeSlot: '5:00 PM' }), env: {} });
-  assert(resSched.status === 200 && dbDavid.completed_topics._meta.schedule.some(s => s.dateStr === '2026-11-25'), 'Capability 2 schedule_lesson adds session on existing student');
-  const resCancel = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'cancel_lesson', studentNameOrId: 'David Cohen', date: '2026-11-25' }), env: {} });
-  assert(resCancel.status === 200 && !dbDavid.completed_topics._meta.schedule.some(s => s.dateStr === '2026-11-25'), 'Capability 2 cancel_lesson removes scheduled session cleanly');
+  const resSched = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'schedule_lesson', studentNameOrId: 'David Cohen', date: '2026-11-25', timeSlot: '5:00 PM' }), env: { DB: mockD149 } });
+  assert(resSched.status === 200 && JSON.parse(dbDavid.schedule_json).some(s => s.dateStr === '2026-11-25'), 'Capability 2 schedule_lesson adds session on existing student');
+  const resCancel = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'cancel_lesson', studentNameOrId: 'David Cohen', date: '2026-11-25' }), env: { DB: mockD149 } });
+  assert(resCancel.status === 200 && !JSON.parse(dbDavid.schedule_json).some(s => s.dateStr === '2026-11-25'), 'Capability 2 cancel_lesson removes scheduled session cleanly');
 
   // 6. Per-capability disable enforcement -> 403
-  mockDbRows[0].completed_topics.tokens[validTokenHash].capabilities.schedule = false;
-  const resCapBlocked = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'schedule_lesson', studentNameOrId: 'David Cohen', date: '2026-11-26', timeSlot: '5:00 PM' }), env: {} });
+  mockTokens[validTokenHash].capabilities.schedule = false;
+  const resCapBlocked = await extMod.onRequestPost({ request: makeReq('POST', '/api/external-agent', validRawToken, { action: 'schedule_lesson', studentNameOrId: 'David Cohen', date: '2026-11-26', timeSlot: '5:00 PM' }), env: { DB: mockD149 } });
   assert(resCapBlocked.status === 403, 'Disabling Schedule capability immediately blocks schedule_lesson with HTTP 403');
-  mockDbRows[0].completed_topics.tokens[validTokenHash].capabilities.schedule = true;
+  mockTokens[validTokenHash].capabilities.schedule = true;
 
   // 7. Capability 3: App Help Guide
-  const resGuide = await extMod.onRequestGet({ request: makeReq('GET', '/api/external-agent?action=guide&topic=settings', validRawToken), env: {} });
+  const resGuide = await extMod.onRequestGet({ request: makeReq('GET', '/api/external-agent?action=guide&topic=settings', validRawToken), env: { DB: mockD149 } });
   const guideData = await resGuide.json();
   assert(resGuide.status === 200 && guideData.guide && guideData.guide.settings.includes('Connect External AI'), 'Capability 3 get_app_guide returns accurate TutorPilot website guide');
 
@@ -4878,21 +5021,21 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(studioPreviewHtml.includes('id="studio-class-ai-partner" class="hidden lg:block'), 'AI Co-Builder hides on mobile while Lesson Preview tab is active');
   assert(studioPreviewHtml.includes('id="studio-modular-blocks-container" class=" lg:col-span-7'), 'Lesson Preview shows on mobile while Lesson Preview tab is active');
 
-  // --- Gate 51: Mobile / Static Host HTTP 405 Proxy Fallback Resilience ---
+  // --- Gate 51: Mobile / Static Host HTTP 405 Proxy Fallback & Zero Client Key Leakage ---
   console.log('\n--- Running Gate 51: Mobile / Static Host HTTP 405 Proxy Fallback Resilience ---');
   const prevLoc51 = sandbox.window.location;
   const prevFetch51 = sandbox.fetch;
   const prevKey51 = mockLocalStorage.getItem('tutor_gemini_key');
   mockLocalStorage.removeItem('tutor_gemini_key');
   sandbox.APP_STATE.geminiApiKey = '';
-  sandbox.aiProxyFallbackDisabledForSession = false;
+  vm.runInContext('aiProxyFallbackDisabledForSession = false;', sandbox);
 
   // 1. Static github.io host skips /api/ai proxy automatically
   sandbox.window.location = { protocol: 'https:', hostname: 'shmueldoviduhlman-spec.github.io', href: 'https://shmueldoviduhlman-spec.github.io/bar-mitzvah-tutor/' };
   assert(sandbox.shouldUseAiProxy() === false, 'shouldUseAiProxy skips /api/ai on static github.io hosts');
 
-  // 2. Any host returning HTTP 405 from POST /api/ai falls back cleanly to direct Gemini API
-  sandbox.window.location = { protocol: 'https:', hostname: 'tutorpilot.pages.dev', href: 'https://tutorpilot.pages.dev/' };
+  // 2. Without a custom key, HTTP 405 disables proxy and throws clean missing-key error (no hardcoded fallback secret)
+  sandbox.window.location = { protocol: 'https:', hostname: 'tutorpilot.us', href: 'https://tutorpilot.us/' };
   assert(sandbox.shouldUseAiProxy() === true, 'shouldUseAiProxy enables proxy on Cloudflare Pages host');
   let fetchUrlsHit = [];
   sandbox.fetch = async (url) => {
@@ -4915,20 +5058,34 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
       }
     };
   };
+  let noKeyErr51 = '';
+  try {
+    await sandbox.callGeminiApi('Hello My Agent');
+  } catch (err) {
+    noKeyErr51 = String(err && err.message || err);
+  }
+  assert(noKeyErr51.includes('No Gemini API key configured'), 'HTTP 405 without custom key fails closed instead of falling back to a hardcoded secret');
+
+  // 3. With an in-memory custom key, HTTP 405 from /api/ai disables proxy and falls back cleanly to direct Gemini API
+  sandbox.APP_STATE.geminiApiKey = 'test_fallback_key_g51';
+  vm.runInContext('aiProxyFallbackDisabledForSession = false;', sandbox);
+  fetchUrlsHit = [];
   const fallbackReply = await sandbox.callGeminiApi('Hello My Agent');
-  assert(fallbackReply === 'Fallback Gemini reply succeeded', 'callGeminiApi transparently falls back to direct Gemini when /api/ai returns HTTP 405');
+  assert(fallbackReply === 'Fallback Gemini reply succeeded', 'callGeminiApi transparently falls back to direct Gemini with custom key when /api/ai returns HTTP 405');
   assert(fetchUrlsHit[0] === '/api/ai' && fetchUrlsHit[1].includes('generativelanguage.googleapis.com'), 'callGeminiApi attempted /api/ai then immediately fell back to direct Gemini endpoint');
   assert(sandbox.shouldUseAiProxy() === false, 'HTTP 405 disables failing /api/ai proxy for remainder of session');
 
-  // Restore sandbox globals
+  // Restore sandbox globals and mock offline key for subsequent offline AI mock gates
+  vm.runInContext('aiProxyFallbackDisabledForSession = false;', sandbox);
   sandbox.window.location = prevLoc51;
   sandbox.fetch = prevFetch51;
+  sandbox.APP_STATE.geminiApiKey = 'test_mock_key_offline';
   if (prevKey51) mockLocalStorage.setItem('tutor_gemini_key', prevKey51);
 
-  // --- Gate 52: Supabase Egress Protection (Delta Sync & Compact Course Payloads) ---
-  console.log('\n--- Running Gate 52: Supabase Egress Protection (Delta Sync & Compact Course Payloads) ---');
+  // --- Gate 52: Cloudflare D1 Workspace Bootstrap Sync & Compact Course Payloads ---
+  console.log('\n--- Running Gate 52: Cloudflare D1 Workspace Bootstrap Sync & Compact Course Payloads ---');
   assert(!indexHtml.includes('fetchCloudStudents();\n      }\n    }, 15000);'), 'Legacy 15-second full-table polling loop is removed');
-  assert(indexHtml.includes('}, 300000);') && indexHtml.includes("select('id, updated_at')"), '5-minute lightweight delta sync using (id, updated_at) metadata is active');
+  assert(indexHtml.includes('}, 300000);') && indexHtml.includes('/api/workspace/bootstrap'), '5-minute refresh loop and Cloudflare D1 /api/workspace/bootstrap sync are active');
   assert(typeof sandbox.sanitizeCoursesForCloudPayload === 'function', 'sanitizeCoursesForCloudPayload helper is defined');
 
   const giantBlob = 'A'.repeat(50000);
@@ -4950,49 +5107,65 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   assert(compacted[0].lessons[0].ai_sources[0].extractedText === 'Preserved OCR text' && compacted[0].lessons[0].sections.sec1 === 'Keep all real lesson text intact', 'sanitizeCoursesForCloudPayload preserves extractedText and all lesson sections untouched');
   assert(bloatedCourses[0].lessons[0].ai_sources[0].base64Data.length === 50000, 'sanitizeCoursesForCloudPayload does not mutate local in-memory course object');
 
-  // Test delta-only Supabase fetch behavior
-  const prevCloudClient52 = sandbox.APP_STATE.cloud.client;
+  // Test Cloudflare D1 bootstrapWorkspaceFromApi / fetchCloudStudents hydration
+  const prevLoc52 = sandbox.window.location;
+  const prevFetch52 = sandbox.fetch;
+  const prevToken52 = sandbox.APP_STATE.authToken;
   const prevUser52 = sandbox.APP_STATE.currentUser;
-  sandbox.APP_STATE.currentUser = { id: 'u_master', email: 'shmueldoviduhlman@gmail.com', role: 'super_admin' };
-  const queryLog52 = [];
-  let mockRemoteRows52 = [
-    { id: '__custom_courses__', name: 'SYSTEM_CUSTOM_COURSES', updated_at: '2026-11-19T10:00:00Z', completed_topics: { courses: [] } },
-    { id: 'stu_delta_1', name: 'David', updated_at: '2026-11-19T10:00:00Z', completed_topics: { _meta: { school_id: 'school_main_770' } } }
-  ];
-  sandbox.APP_STATE.cloud.client = {
-    from(tbl) {
-      return {
-        select(cols) {
-          queryLog52.push({ tbl, cols, mode: 'select' });
-          return {
-            async order() {
-              queryLog52[queryLog52.length - 1].mode = 'full';
-              return { data: mockRemoteRows52.map(r => ({ ...r })), error: null };
-            },
-            async in(col, ids) {
-              queryLog52[queryLog52.length - 1].mode = 'delta:' + ids.join(',');
-              return { data: mockRemoteRows52.filter(r => ids.includes(r.id)).map(r => ({ ...r })), error: null };
-            },
-            then(resolve) {
-              queryLog52[queryLog52.length - 1].mode = 'meta';
-              resolve({ data: mockRemoteRows52.map(r => ({ id: r.id, updated_at: r.updated_at })), error: null });
-            }
-          };
-        }
-      };
+  const prevStudents52 = sandbox.APP_STATE.students;
+  const prevCourses52 = sandbox.APP_STATE.customCourses;
+
+  sandbox.window.location = { protocol: 'https:', hostname: 'tutorpilot.us', href: 'https://tutorpilot.us/' };
+  sandbox.APP_STATE.authToken = 'test_jwt_g52';
+  const apiHits52 = [];
+  const mkJsonResp52 = (obj, status = 200) => ({
+    ok: status >= 200 && status < 300,
+    status,
+    headers: { get: () => 'application/json' },
+    text: async () => JSON.stringify(obj),
+    json: async () => obj
+  });
+  sandbox.fetch = async (url, opts = {}) => {
+    apiHits52.push({ url: String(url), method: opts.method || 'GET', auth: opts.headers?.Authorization || '' });
+    if (String(url).includes('/api/workspace/bootstrap')) {
+      return mkJsonResp52({
+        user: {
+          id: 'u_master_52',
+          email: 'shmueldoviduhlman@gmail.com',
+          fullName: 'Shmuel Dovid Uhlman',
+          role: 'super_admin',
+          schoolId: 'school_main_academy',
+          subscriptionStatus: 'lifetime',
+          hasActivePlan: true
+        },
+        school: {
+          id: 'school_main_academy',
+          name: 'Bar Mitzvah Academy',
+          joinCode: 'D1SYNC88'
+        },
+        students: [
+          { id: 'stu_d1_1', name: 'David', schoolId: 'school_main_academy', status: 'active', updatedAt: '2026-11-23T10:00:00Z' }
+        ],
+        courses: [
+          { id: 'course_d1_1', title_en: 'Cloudflare D1 Course', school_id: 'school_main_academy', lessons: [], updated_at: '2026-11-23T10:00:00Z' }
+        ],
+        collections: []
+      });
     }
+    return mkJsonResp52({});
   };
   await sandbox.fetchCloudStudents(true);
-  assert(queryLog52.length === 1 && queryLog52[0].mode === 'full', 'Initial sync performs one full fetch');
-  queryLog52.length = 0;
-  await sandbox.fetchCloudStudents(false);
-  assert(queryLog52.length === 1 && queryLog52[0].cols === 'id, updated_at' && queryLog52[0].mode === 'meta', 'Unchanged delta sync downloads ONLY tiny (id, updated_at) metadata and 0 full rows');
-  queryLog52.length = 0;
-  mockRemoteRows52[1].updated_at = '2026-11-19T10:05:00Z';
-  await sandbox.fetchCloudStudents(false);
-  assert(queryLog52.length === 2 && queryLog52[1].mode === 'delta:stu_delta_1', 'Changed student delta sync downloads ONLY the modified student row and skips unchanged __custom_courses__');
-  sandbox.APP_STATE.cloud.client = prevCloudClient52;
+  assert(apiHits52.some(h => h.url.includes('/api/workspace/bootstrap') && h.auth === 'Bearer test_jwt_g52'), 'fetchCloudStudents queries /api/workspace/bootstrap with Bearer token');
+  assert(sandbox.APP_STATE.students.some(s => s.id === 'stu_d1_1' && s.name === 'David'), 'bootstrapWorkspaceFromApi hydrates D1 students into APP_STATE.students');
+  assert(sandbox.APP_STATE.customCourses.some(c => c.id === 'course_d1_1'), 'bootstrapWorkspaceFromApi hydrates D1 courses into APP_STATE.customCourses');
+  assert(sandbox.APP_STATE.currentUser && sandbox.APP_STATE.currentUser.school_id === 'school_main_academy', 'bootstrapWorkspaceFromApi attaches D1 school_id cleanly');
+
+  sandbox.window.location = prevLoc52;
+  sandbox.fetch = prevFetch52;
+  sandbox.APP_STATE.authToken = prevToken52;
   sandbox.APP_STATE.currentUser = prevUser52;
+  sandbox.APP_STATE.students = prevStudents52;
+  sandbox.APP_STATE.customCourses = prevCourses52;
 
   // --- Gate 53: Universal Workbook / PDF Pages, Per-Page Student Progress, Timed Homework & Assignable Quizzes ---
   console.log('\n--- Running Gate 53: Universal Workbook / PDF Pages, Per-Page Checklists, Timed Homework & Assignable Quizzes ---');
@@ -6616,6 +6789,109 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     chevEl70.style.transform === '',
     'Clicking section header again collapses body cleanly, clears border divider, and resets chevron in-place'
   );
+
+  // ============================================================================
+  // GATE 71: Cloudflare D1 + Clerk + R2 SaaS Migration Verification
+  // ============================================================================
+  console.log('\n[Gate 71] Verifying Cloudflare D1, Clerk Production Auth, R2 Media & Admin Control Plane...');
+
+  // 1. Security: Zero legacy Supabase refs, hardcoded keys, passcodes, or 770770 join codes in index.html
+  const forbiddenPatterns71 = [
+    '@supabase/supabase-js',
+    'bpkwnqbabokesuesvkex',
+    'sb_publishable_',
+    'students_sync',
+    'SDUtp123$',
+    'QVEuQWI4',
+    'c9512b812a',
+    '770770'
+  ];
+  forbiddenPatterns71.forEach(pat => {
+    assert(!indexHtml.includes(pat), `index.html contains zero legacy/secret literal: ${pat}`);
+  });
+
+  // 2. HTML UI: Clerk SDK, 4-tab Admin Control Plane, Join Code Rotation, Cloudflare Sync Modal
+  assert(indexHtml.includes('pk_live_Y2xlcmsudHV0b3JwaWxvdC51cyQ') && indexHtml.includes('clerk.tutorpilot.us'), 'index.html loads Clerk Production JS v5 for tutorpilot.us');
+  assert(indexHtml.includes('id="clerk-auth-mount"'), 'index.html contains #clerk-auth-mount container');
+  assert(indexHtml.includes('id="tab-admin-users"') && indexHtml.includes('id="tab-admin-schools"') && indexHtml.includes('id="tab-admin-settings"') && indexHtml.includes('id="tab-admin-audit"'), 'Admin modal contains all 4 Control Plane tabs');
+  assert(indexHtml.includes('id="admin-invite-panel"') && indexHtml.includes('id="btn-rotate-school-code"') && indexHtml.includes('id="modal-cloud"'), 'HTML contains Admin Invite Panel, Rotate Join Code button, and Cloudflare Cloud Sync modal');
+
+  // 3. resolveAuthenticatedMediaUrl token attachment (tutor ?t=, student ?st=, passthrough data:/external)
+  const prevSpMode71 = sandbox.APP_STATE.studentPortalMode;
+  const prevSpObj71 = sandbox.APP_STATE.studentPortal;
+  const prevSpSess71 = sandbox.APP_STATE.studentPortalSession;
+  const prevTok71 = sandbox.APP_STATE.authToken;
+
+  sandbox.APP_STATE.studentPortalMode = false;
+  sandbox.APP_STATE.studentPortal = null;
+  sandbox.APP_STATE.studentPortalSession = null;
+  sandbox.APP_STATE.authToken = 'jwt_tutor_71';
+  assert(sandbox.resolveAuthenticatedMediaUrl('/api/media/stu_1/avatar.jpg') === '/api/media/stu_1/avatar.jpg?t=jwt_tutor_71', 'resolveAuthenticatedMediaUrl attaches tutor Bearer query token for /api/media/ URLs');
+
+  sandbox.APP_STATE.studentPortalMode = true;
+  sandbox.APP_STATE.studentPortalSession = { studentId: 'stu_1' };
+  sandbox.APP_STATE.studentPortal = { token: 'sp_tok_71', studentId: 'stu_1' };
+  assert(sandbox.resolveAuthenticatedMediaUrl('/api/media/stu_1/avatar.jpg') === '/api/media/stu_1/avatar.jpg?st=sp_tok_71', 'resolveAuthenticatedMediaUrl attaches Student Portal query token (?st=) in student portal mode');
+  sandbox.APP_STATE.studentPortalMode = false;
+  sandbox.APP_STATE.studentPortalSession = null;
+  sandbox.APP_STATE.studentPortal = null;
+
+  assert(sandbox.resolveAuthenticatedMediaUrl('data:image/png;base64,ABC') === 'data:image/png;base64,ABC', 'resolveAuthenticatedMediaUrl preserves data: URLs untouched');
+  assert(sandbox.resolveAuthenticatedMediaUrl('https://cdn.example.com/audio.mp3') === 'https://cdn.example.com/audio.mp3', 'resolveAuthenticatedMediaUrl preserves external URLs untouched');
+
+  // 4. Online uploadMediaToR2, saveGeminiApiKeyFromView (BYOK Vault), and handleRotateSchoolJoinCode
+  const prevLoc71 = sandbox.window.location;
+  const prevFetch71 = sandbox.fetch;
+  const prevUser71 = sandbox.APP_STATE.currentUser;
+  const offlineUp71 = await sandbox.uploadMediaToR2({ dataUrl: 'data:audio/webm;base64,GkX=', originalName: 'memo.webm' });
+  assert(offlineUp71 && offlineUp71.fallbackLocal === true, 'uploadMediaToR2 returns local fallback cleanly when offline');
+
+  sandbox.window.location = { protocol: 'https:', hostname: 'tutorpilot.us', href: 'https://tutorpilot.us/' };
+  sandbox.APP_STATE.authToken = 'jwt_tutor_71';
+  sandbox.APP_STATE.currentUser = { id: 'usr_71', email: 'tutor71@tutorpilot.us', school_id: 'school_main_academy', role: 'school_owner' };
+  const apiCalls71 = [];
+  const mkJsonResp71 = (obj, status = 200) => ({
+    ok: status >= 200 && status < 300,
+    status,
+    headers: { get: () => 'application/json' },
+    text: async () => JSON.stringify(obj),
+    json: async () => obj
+  });
+  sandbox.fetch = async (url, opts = {}) => {
+    apiCalls71.push({ url: String(url), method: opts.method || 'GET', body: opts.body ? JSON.parse(opts.body) : null });
+    if (String(url).includes('/api/media/upload')) {
+      return mkJsonResp71({ ok: true, url: '/api/media/school_main_academy/memo.webm' });
+    }
+    if (String(url).includes('/api/me/api-key')) {
+      return mkJsonResp71({ ok: true, keyHint: '••••6789', label: 'Personal Key' });
+    }
+    if (String(url).includes('/api/schools')) {
+      return mkJsonResp71({ ok: true, joinCode: 'ROT871XY' });
+    }
+    return mkJsonResp71({});
+  };
+
+  const r2Up71 = await sandbox.uploadMediaToR2({ dataUrl: 'data:audio/webm;base64,GkX=', originalName: 'memo.webm', studentId: 'stu_1' });
+  assert(r2Up71 && r2Up71.ok === true && r2Up71.url === '/api/media/school_main_academy/memo.webm', 'uploadMediaToR2 uploads media to /api/media/upload when online');
+
+  mockLocalStorage.removeItem('tutor_gemini_key');
+  getOrCreateElem('ai-gemini-key-input').value = 'AIzaSyMockPersonalKey123456789';
+  await sandbox.saveGeminiApiKeyFromView();
+  const putKeyCall = apiCalls71.find(c => c.url.includes('/api/me/api-key') && c.method === 'PUT');
+  assert(!!putKeyCall && putKeyCall.body.apiKey === 'AIzaSyMockPersonalKey123456789', 'saveGeminiApiKeyFromView sends PUT /api/me/api-key online');
+  assert(sandbox.APP_STATE.currentUser.hasCustomApiKey === true && mockLocalStorage.getItem('tutor_gemini_key') === null, 'saveGeminiApiKeyFromView stores encrypted key server-side without persisting raw key in localStorage');
+
+  await sandbox.handleRotateSchoolJoinCode();
+  const rotateCall = apiCalls71.find(c => c.url.includes('/api/schools') && c.body && c.body.action === 'rotate_join_code');
+  assert(!!rotateCall && getOrCreateElem('school-join-code-value').textContent === 'ROT871XY', 'handleRotateSchoolJoinCode calls POST /api/schools rotate_join_code and updates displayed code');
+
+  sandbox.window.location = prevLoc71;
+  sandbox.fetch = prevFetch71;
+  sandbox.APP_STATE.authToken = prevTok71;
+  sandbox.APP_STATE.currentUser = prevUser71;
+  sandbox.APP_STATE.studentPortalMode = prevSpMode71;
+  sandbox.APP_STATE.studentPortal = prevSpObj71;
+  sandbox.APP_STATE.studentPortalSession = prevSpSess71;
 
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);

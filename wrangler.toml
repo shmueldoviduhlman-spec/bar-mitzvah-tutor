@@ -1,0 +1,26 @@
+name = "tutorpilot"
+pages_build_output_dir = "."
+compatibility_date = "2026-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+APP_ORIGIN = "https://tutorpilot.us"
+CLERK_PUBLISHABLE_KEY = "pk_live_Y2xlcmsudHV0b3JwaWxvdC51cyQ"
+CLERK_JWKS_URL = "https://clerk.tutorpilot.us/.well-known/jwks.json"
+CLERK_ISSUER = "https://clerk.tutorpilot.us"
+DEFAULT_TRIAL_DAYS = "35"
+SUPER_ADMIN_EMAILS = "shmueldoviduhlman@gmail.com"
+REQUIRE_AUTH_JWT = "true"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tutorpilot_db"
+database_id = "bdc81376-ff42-415c-974b-b4d270f92d7b"
+
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "tutorpilot-media"
+
+[[kv_namespaces]]
+binding = "APP_KV"
+id = "55626d7ab0cb4afabdf239a46fef9193"

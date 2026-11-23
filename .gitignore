@@ -8,3 +8,5 @@ scratch/
 backup_students_sync_full.json
 .migration_backup_supabase.json
 *.backup.json
+Supabase Snippet*.csv
+dist/

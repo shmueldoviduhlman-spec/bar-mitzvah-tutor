@@ -1,0 +1,23 @@
+.git/
+.wrangler/
+.dev.vars*
+.env*
+.gitignore
+.assetsignore
+.nojekyll
+.migration_backup_supabase.json
+Supabase Snippet*.csv
+*.csv
+*.backup.json
+backup_students_sync_full.json
+curriculum_backup_complete.json
+CURRICULUM_ARCHIVE_ALL_LESSONS.md
+README.md
+Screenshot*.png
+test_*.js
+scripts/
+migrations/
+functions/
+wrangler.toml
+scratch/
+dist/

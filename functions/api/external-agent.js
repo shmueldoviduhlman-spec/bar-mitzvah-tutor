@@ -1,22 +1,15 @@
 /**
- * TutorPilot Universal External AI Gateway & Strict Capability Sandbox
+ * TutorPilot Universal External AI Gateway & Strict Capability Sandbox (Cloudflare D1)
  * Cloudflare Pages Function: GET/POST /api/external-agent
- *
- * Allows any external AI platform (ChatGPT, Claude, Gemini, Make/Zapier/n8n, or custom agents)
- * to connect to a tutor's TutorPilot workspace using a revocable per-user Bearer token (`tp_ext_...`).
  *
  * Strictly enforces ONLY the 3 declared capabilities of My Agent:
  *   1. End of Class Student Updates (`get_overview`, `log_after_class_update`)
  *   2. Calendar & Schedule Management (`schedule_lesson`, `cancel_lesson`)
- *   3. TutorPilot App Help (`get_app_guide`)
+ *   3. TutorPilot Website Help Guide (`get_app_guide`)
  *
- * Explicitly blocks student deletion, student creation, course/lesson mutation, settings edits,
- * cross-school access, and private guardian/billing PII leakage.
+ * Explicitly blocks student deletion, student creation, course/lesson mutation,
+ * settings edits, cross-school access, and private guardian/billing PII leakage.
  */
-
-const DEFAULT_SUPABASE_URL = 'https://bpkwnqbabokesuesvkex.supabase.co';
-const DEFAULT_SUPABASE_KEY = 'sb_publishable_hVy0YYOOT9k_LD_ZMe24zg_iuqTC538';
-const TOKEN_REGISTRY_ROW_ID = '__external_agent_tokens__';
 
 const ALLOWED_ACTIONS = new Set([
   'get_overview',
@@ -48,12 +41,6 @@ function jsonResponse(payload, status, cors) {
     status,
     headers: { ...cors, 'Content-Type': 'application/json' }
   });
-}
-
-function getSupabaseConfig(env) {
-  const url = String((env && env.SUPABASE_URL) || DEFAULT_SUPABASE_URL).replace(/\/+$/, '');
-  const key = String((env && (env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_ANON_KEY)) || DEFAULT_SUPABASE_KEY);
-  return { url, key };
 }
 
 export async function sha256Hex(input) {
@@ -94,52 +81,45 @@ function extractBearerToken(request) {
   if (authHeader.toLowerCase().startsWith('bearer ')) {
     return authHeader.slice(7).trim();
   }
-  const alt = request.headers.get('X-TutorPilot-Token') || '';
-  return alt.trim();
+  return (request.headers.get('X-TutorPilot-Token') || '').trim();
 }
 
-async function supabaseRequest(cfg, path, options = {}) {
-  const resp = await fetch(`${cfg.url}/rest/v1/${path}`, {
-    method: options.method || 'GET',
-    headers: {
-      apikey: cfg.key,
-      Authorization: `Bearer ${cfg.key}`,
-      'Content-Type': 'application/json',
-      ...(options.headers || {})
-    },
-    body: options.body !== undefined ? JSON.stringify(options.body) : undefined
-  });
-  if (!resp.ok) {
-    const errText = await resp.text().catch(() => '');
-    throw new Error(`Supabase REST error (${resp.status}): ${errText.slice(0, 200)}`);
-  }
-  if (resp.status === 204) return null;
-  const text = await resp.text();
-  return text ? JSON.parse(text) : null;
+function safeParse(raw, fallback) {
+  if (!raw || typeof raw !== 'string') return fallback;
+  try { return JSON.parse(raw); } catch (_) { return fallback; }
 }
 
-async function verifyExternalToken(rawToken, cfg) {
+async function verifyExternalToken(rawToken, env) {
   if (!rawToken || !rawToken.startsWith('tp_ext_') || rawToken.length < 20) {
     return null;
   }
+  if (!env || !env.DB) return null;
   const tokenHash = await sha256Hex(rawToken);
-  const rows = await supabaseRequest(
-    cfg,
-    `students_sync?id=eq.${encodeURIComponent(TOKEN_REGISTRY_ROW_ID)}&select=id,completed_topics`
-  );
-  const registryRow = Array.isArray(rows) ? rows[0] : null;
-  const tokensMap = (registryRow && registryRow.completed_topics && registryRow.completed_topics.tokens) || {};
-  const record = tokensMap[tokenHash];
-  if (!record || record.enabled === false || record.revokedAt) {
+  const row = await env.DB.prepare(
+    `SELECT t.token_hash, t.user_id, t.school_id, t.capabilities_json, t.revoked_at,
+            u.email, u.full_name, u.account_status
+     FROM external_agent_tokens t
+     LEFT JOIN users u ON u.id = t.user_id
+     WHERE t.token_hash = ?`
+  ).bind(tokenHash).first();
+
+  if (!row || (row.revoked_at && String(row.revoked_at).trim() !== '')) {
     return null;
   }
-  const caps = record.capabilities || {};
+  if (row.account_status === 'suspended') {
+    return null;
+  }
+
+  await env.DB.prepare('UPDATE external_agent_tokens SET last_used_at = ? WHERE token_hash = ?')
+    .bind(new Date().toISOString(), tokenHash).run().catch(() => {});
+
+  const caps = safeParse(row.capabilities_json, {});
   return {
     tokenHash,
-    schoolId: String(record.schoolId || 'school_main_770'),
-    ownerEmail: String(record.ownerEmail || '').toLowerCase().trim(),
-    userId: String(record.userId || ''),
-    tutorName: String(record.tutorName || 'Tutor'),
+    schoolId: String(row.school_id || ''),
+    ownerEmail: String(row.email || '').toLowerCase().trim(),
+    userId: String(row.user_id || ''),
+    tutorName: String(row.full_name || 'Tutor'),
     capabilities: {
       afterClass: caps.afterClass !== false,
       schedule: caps.schedule !== false,
@@ -148,28 +128,15 @@ async function verifyExternalToken(rawToken, cfg) {
   };
 }
 
-function rowBelongsToToken(row, auth) {
-  if (!row || !row.id || String(row.id).startsWith('__')) return false;
-  const meta = (row.completed_topics && row.completed_topics._meta) || {};
-  const rowSchoolId = String(meta.school_id || '');
-  const rowOwner = String(meta.owner_email || '').toLowerCase().trim();
-  const rowUid = String(meta.user_id || '');
-  if (auth.schoolId && rowSchoolId && rowSchoolId === auth.schoolId) return true;
-  if (auth.ownerEmail && rowOwner && rowOwner === auth.ownerEmail) return true;
-  if (auth.userId && rowUid && rowUid === auth.userId) return true;
-  return false;
-}
-
 function sanitizeStudentRow(row) {
-  const meta = (row.completed_topics && row.completed_topics._meta) || {};
-  const skills = meta.skills || {};
-  const schedule = Array.isArray(meta.schedule) ? meta.schedule : [];
-  // Strictly strip private guardian PII, hourlyRate, portal access codes, and raw private notes
+  const profile = safeParse(row.profile_json, {});
+  const skills = safeParse(row.skills_json, {});
+  const schedule = safeParse(row.schedule_json, []);
   return {
     id: row.id,
     name: row.name || '',
-    subject: meta.subject || '',
-    status: meta.status || 'active',
+    subject: profile.subject || row.parsha_or_date || '',
+    status: row.status || 'active',
     lastTaught: String(skills.lastTaught || ''),
     lastTaughtAt: String(skills.lastTaughtAt || ''),
     nextToTeach: String(skills.nextToTeach || ''),
@@ -180,14 +147,14 @@ function sanitizeStudentRow(row) {
           assignedDate: String(skills.homework.assignedDate || '')
         }
       : null,
-    schedule: schedule.map(s => ({
-      id: s.id || '',
-      dateStr: s.dateStr || s.date || '',
-      dayOfWeek: typeof s.dayOfWeek === 'number' ? s.dayOfWeek : null,
-      repeatWeekly: Boolean(s.repeatWeekly),
-      time: s.time || s.timeSlot || '',
-      topic: s.topic || s.subject || '',
-      status: s.status || 'scheduled'
+    schedule: (Array.isArray(schedule) ? schedule : []).map(s => ({
+      id: (s && s.id) || '',
+      dateStr: (s && (s.dateStr || s.date)) || '',
+      dayOfWeek: s && typeof s.dayOfWeek === 'number' ? s.dayOfWeek : null,
+      repeatWeekly: Boolean(s && s.repeatWeekly),
+      time: (s && (s.time || s.timeSlot)) || '',
+      topic: (s && (s.topic || s.subject)) || '',
+      status: (s && s.status) || 'scheduled'
     }))
   };
 }
@@ -211,7 +178,7 @@ function buildTutorPilotAppGuide(topic) {
     schedule: 'Open Schedule for a full-width Month or Week calendar. Click any date to enter that date\'s clean view showing scheduled students and times, then click any student to inspect or edit what to teach him, mark attendance, or jump to AI After Class.',
     today_overview: 'Today\'s Overview sits right under Workspace in the sidebar and lists today\'s scheduled students, their class times, and what you need to teach each student next.',
     my_agent: 'Open My Agent to speak or type after any class what you taught today, schedule or cancel lessons, or ask how TutorPilot works.',
-    settings: 'Click your circular profile avatar at top-right of the sidebar to open Settings, where you can switch Warm Daylight vs Dark Mode, switch English vs Hebrew, toggle Hebrew Dates in the Schedule header and day grid, manage School & Team Workspace, Cloud Sync, and Connect External AI.'
+    settings: 'Click your circular profile avatar at top-right of the sidebar to open Settings, where you can switch Warm Daylight vs Dark Mode, switch English vs Hebrew, toggle Hebrew Dates in the Schedule header and day grid, manage School & Team Workspace, AI API Keys, and Connect External AI.'
   };
   const key = String(topic || '').trim().toLowerCase();
   return {
@@ -234,7 +201,7 @@ function isCapabilityAllowed(auth, action) {
   return Boolean(auth.capabilities[req]);
 }
 
-async function handleAction(action, params, auth, cfg, cors) {
+async function handleAction(action, params, auth, env, cors) {
   if (!ALLOWED_ACTIONS.has(action)) {
     return jsonResponse(
       {
@@ -248,9 +215,7 @@ async function handleAction(action, params, auth, cfg, cors) {
 
   if (!isCapabilityAllowed(auth, action)) {
     return jsonResponse(
-      {
-        error: `Capability for "${action}" is currently disabled by the tutor in Settings -> Connect External AI.`
-      },
+      { error: `Capability for "${action}" is currently disabled by the tutor in Settings -> Connect External AI.` },
       403,
       cors
     );
@@ -260,10 +225,10 @@ async function handleAction(action, params, auth, cfg, cors) {
     return jsonResponse({ success: true, ...buildTutorPilotAppGuide(params.topic) }, 200, cors);
   }
 
-  // Fetch rows once for scoped school reads / mutations
-  const allRows = await supabaseRequest(cfg, 'students_sync?select=id,name,parsha_or_date,notes,completed_topics,completed_parshiot,updated_at');
-  const rowsArr = Array.isArray(allRows) ? allRows : [];
-  const scopedStudents = rowsArr.filter(r => rowBelongsToToken(r, auth));
+  const studentsRes = await env.DB.prepare(
+    'SELECT * FROM students WHERE school_id = ? AND archived = 0 ORDER BY sort_order ASC, name ASC'
+  ).bind(auth.schoolId).all();
+  const scopedStudents = (studentsRes && studentsRes.results) || [];
 
   if (action === 'get_overview') {
     const today = new Date();
@@ -289,19 +254,20 @@ async function handleAction(action, params, auth, cfg, cors) {
       });
     });
 
-    // Include read-only course lesson titles (no private content) so external AI knows next sequential lesson
-    const coursesRow = rowsArr.find(r => r && r.id && String(r.id).startsWith('__custom_courses__'));
-    const rawCourses = (coursesRow && coursesRow.completed_topics && Array.isArray(coursesRow.completed_topics.courses))
-      ? coursesRow.completed_topics.courses
-      : [];
-    const courseOutlines = rawCourses.slice(0, 20).map(c => ({
-      id: c.id,
-      title: c.title_en || c.title_he || '',
-      lessons: (Array.isArray(c.lessons) ? c.lessons : []).slice(0, 30).map((l, idx) => ({
-        lessonNumber: l.lesson_num || (idx + 1),
-        title: l.title_en || l.title_he || ''
-      }))
-    }));
+    const coursesRes = await env.DB.prepare(
+      "SELECT id, title, data_json FROM courses WHERE school_id = ? AND archived = 0 AND (deleted_at IS NULL OR deleted_at = '') LIMIT 20"
+    ).bind(auth.schoolId).all();
+    const courseOutlines = ((coursesRes && coursesRes.results) || []).map(row => {
+      const c = safeParse(row.data_json, {});
+      return {
+        id: row.id,
+        title: c.title || row.title || '',
+        lessons: (Array.isArray(c.lessons) ? c.lessons : []).slice(0, 30).map((l, idx) => ({
+          lessonNumber: l.lesson_num || (idx + 1),
+          title: l.title || l.title_en || l.title_he || ''
+        }))
+      };
+    });
 
     return jsonResponse(
       {
@@ -321,19 +287,15 @@ async function handleAction(action, params, auth, cfg, cors) {
   const studentRow = findScopedStudent(scopedStudents, targetQuery);
   if (!studentRow) {
     return jsonResponse(
-      {
-        error: `Existing student not found in your workspace: "${targetQuery || ''}". External agents can only update existing students.`
-      },
+      { error: `Existing student not found in your workspace: "${targetQuery || ''}". External agents can only update existing students.` },
       404,
       cors
     );
   }
 
-  const completedTopics = { ...(studentRow.completed_topics || {}) };
-  const meta = { ...(completedTopics._meta || {}) };
-  const skills = { ...(meta.skills || {}) };
-  const schedule = Array.isArray(meta.schedule) ? meta.schedule.map(item => ({ ...item })) : [];
-  let updatedNotes = String(studentRow.notes || '');
+  const skills = safeParse(studentRow.skills_json, {});
+  const schedule = safeParse(studentRow.schedule_json, []).map(item => ({ ...item }));
+  let updatedNotes = String(studentRow.private_notes || '');
 
   if (action === 'log_after_class_update') {
     const today = new Date();
@@ -372,25 +334,22 @@ async function handleAction(action, params, auth, cfg, cors) {
       }
     }
 
-    meta.skills = skills;
-    meta.schedule = schedule;
-    completedTopics._meta = meta;
-
-    await supabaseRequest(cfg, `students_sync?id=eq.${encodeURIComponent(studentRow.id)}`, {
-      method: 'PATCH',
-      headers: { Prefer: 'return=minimal' },
-      body: {
-        notes: updatedNotes,
-        completed_topics: completedTopics,
-        updated_at: new Date().toISOString()
-      }
-    });
+    skills._updatedAt = Date.now();
+    const nowIso = new Date().toISOString();
+    await env.DB.prepare(
+      'UPDATE students SET private_notes = ?, skills_json = ?, schedule_json = ?, updated_at = ? WHERE id = ? AND school_id = ?'
+    ).bind(updatedNotes, JSON.stringify(skills), JSON.stringify(schedule), nowIso, studentRow.id, auth.schoolId).run();
 
     return jsonResponse(
       {
         success: true,
         action: 'log_after_class_update',
-        student: sanitizeStudentRow({ ...studentRow, notes: updatedNotes, completed_topics: completedTopics }),
+        student: sanitizeStudentRow({
+          ...studentRow,
+          private_notes: updatedNotes,
+          skills_json: JSON.stringify(skills),
+          schedule_json: JSON.stringify(schedule)
+        }),
         markedTodaySessionCompleted: markedTodaySession
       },
       200,
@@ -417,27 +376,10 @@ async function handleAction(action, params, auth, cfg, cors) {
       completedAt: null
     };
     schedule.push(newSession);
-    meta.schedule = schedule;
-    const lessonsMirror = Array.isArray(meta.lessons) ? [...meta.lessons] : [];
-    lessonsMirror.push({
-      id: newSession.id,
-      date: dateStr,
-      timeSlot,
-      subject: topic,
-      notes: topic,
-      status: 'scheduled'
-    });
-    meta.lessons = lessonsMirror;
-    completedTopics._meta = meta;
-
-    await supabaseRequest(cfg, `students_sync?id=eq.${encodeURIComponent(studentRow.id)}`, {
-      method: 'PATCH',
-      headers: { Prefer: 'return=minimal' },
-      body: {
-        completed_topics: completedTopics,
-        updated_at: new Date().toISOString()
-      }
-    });
+    const nowIso = new Date().toISOString();
+    await env.DB.prepare(
+      'UPDATE students SET schedule_json = ?, updated_at = ? WHERE id = ? AND school_id = ?'
+    ).bind(JSON.stringify(schedule), nowIso, studentRow.id, auth.schoolId).run();
 
     return jsonResponse(
       {
@@ -464,24 +406,10 @@ async function handleAction(action, params, auth, cfg, cors) {
       return true;
     });
     const removedCount = beforeCount - filteredSchedule.length;
-    meta.schedule = filteredSchedule;
-    if (Array.isArray(meta.lessons)) {
-      meta.lessons = meta.lessons.filter(l => {
-        if (sessionId && l.id === sessionId) return false;
-        if (dateStr && (l.date === dateStr || l.dateStr === dateStr)) return false;
-        return true;
-      });
-    }
-    completedTopics._meta = meta;
-
-    await supabaseRequest(cfg, `students_sync?id=eq.${encodeURIComponent(studentRow.id)}`, {
-      method: 'PATCH',
-      headers: { Prefer: 'return=minimal' },
-      body: {
-        completed_topics: completedTopics,
-        updated_at: new Date().toISOString()
-      }
-    });
+    const nowIso = new Date().toISOString();
+    await env.DB.prepare(
+      'UPDATE students SET schedule_json = ?, updated_at = ? WHERE id = ? AND school_id = ?'
+    ).bind(JSON.stringify(filteredSchedule), nowIso, studentRow.id, auth.schoolId).run();
 
     return jsonResponse(
       {
@@ -507,11 +435,10 @@ export async function onRequestGet(context) {
   const { request, env } = context;
   const origin = request.headers.get('Origin') || '*';
   const cors = buildCorsHeaders(origin);
-  const cfg = getSupabaseConfig(env);
 
   try {
     const rawToken = extractBearerToken(request);
-    const auth = await verifyExternalToken(rawToken, cfg);
+    const auth = await verifyExternalToken(rawToken, env);
     if (!auth) {
       return jsonResponse(
         { error: 'Unauthorized. Provide a valid TutorPilot Personal Connection Token (Authorization: Bearer tp_ext_...).' },
@@ -526,7 +453,7 @@ export async function onRequestGet(context) {
       ? 'get_overview'
       : (rawAction === 'guide' ? 'get_app_guide' : rawAction);
     const topic = url.searchParams.get('topic') || '';
-    return await handleAction(mappedAction, { topic }, auth, cfg, cors);
+    return await handleAction(mappedAction, { topic }, auth, env, cors);
   } catch (err) {
     return jsonResponse({ error: err && err.message ? err.message : 'External Agent Gateway error.' }, 500, cors);
   }
@@ -536,11 +463,10 @@ export async function onRequestPost(context) {
   const { request, env } = context;
   const origin = request.headers.get('Origin') || '*';
   const cors = buildCorsHeaders(origin);
-  const cfg = getSupabaseConfig(env);
 
   try {
     const rawToken = extractBearerToken(request);
-    const auth = await verifyExternalToken(rawToken, cfg);
+    const auth = await verifyExternalToken(rawToken, env);
     if (!auth) {
       return jsonResponse(
         { error: 'Unauthorized. Provide a valid TutorPilot Personal Connection Token (Authorization: Bearer tp_ext_...).' },
@@ -557,7 +483,7 @@ export async function onRequestPost(context) {
     }
 
     const action = String(body.action || '').trim();
-    return await handleAction(action, body, auth, cfg, cors);
+    return await handleAction(action, body, auth, env, cors);
   } catch (err) {
     return jsonResponse({ error: err && err.message ? err.message : 'External Agent Gateway error.' }, 500, cors);
   }

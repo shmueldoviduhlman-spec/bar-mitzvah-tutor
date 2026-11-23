@@ -7,8 +7,12 @@
   },
   "servers": [
     {
-      "url": "https://tutorpilot.pages.dev/api",
+      "url": "https://tutorpilot.us/api",
       "description": "TutorPilot Production External Agent Gateway"
+    },
+    {
+      "url": "https://tutorpilot.pages.dev/api",
+      "description": "TutorPilot Cloudflare Pages Fallback Gateway"
     }
   ],
   "security": [
