@@ -1,9 +1,10 @@
 # wrangler files
-.wrangler
+.wrangler/
 .dev.vars*
 !.dev.vars.example
 .env*
 !.env.example
 scratch/
 backup_students_sync_full.json
+.migration_backup_supabase.json
 *.backup.json

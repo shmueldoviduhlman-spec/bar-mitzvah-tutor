@@ -855,7 +855,7 @@
         </button>
 
         <p class="text-xs text-slate-400 text-center" id="lbl-signup-subtext">
-          14-day full access • No credit card required • Instant setup
+          35-day full access • No credit card required • Instant setup
         </p>
 
         <div class="text-center pt-0.5">
@@ -941,7 +941,7 @@
     <div class="flex items-center md:flex-col md:items-stretch gap-3 md:gap-5 min-w-0 flex-1">
 
       <!-- Brand Logo & Top-Right Circular User Profile Avatar -->
-      <div class="flex items-center justify-between gap-2.5 min-w-0">
+      <div class="w-full flex items-center justify-between gap-2.5 min-w-0">
         <div class="flex items-center gap-3 min-w-0">
           <!-- Mobile Logo Circle -->
           <div class="md:hidden w-9 h-9 shrink-0 rounded-full bg-gradient-to-tr from-indigo-600 via-brand-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 keep-white">
@@ -963,7 +963,7 @@
           </button>
 
           <!-- User Dropdown Menu (Opens cleanly below circular avatar, aligned to right edge) -->
-          <div id="user-dropdown-menu" class="hidden absolute right-0 rtl:right-auto rtl:left-0 top-full mt-2 w-60 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-2 z-50 text-xs space-y-1">
+          <div id="user-dropdown-menu" class="hidden absolute right-0 rtl:right-auto rtl:left-0 top-full mt-2 w-56 max-w-[calc(100vw-1.5rem)] max-h-[calc(100dvh-5rem)] overflow-y-auto bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-2 z-50 text-xs space-y-1">
             <div class="p-2 border-b border-slate-800">
               <span id="user-dropdown-full-name" class="font-bold text-white block truncate">Shmuel Dovid Uhlman</span>
               <span id="user-dropdown-email" class="text-[11px] text-slate-400 block truncate font-mono">shmueldoviduhlman@gmail.com</span>
@@ -4699,7 +4699,7 @@
   <!-- MODAL: APP SETTINGS (Cloud, Share, Backup)     -->
   <!-- ============================================== -->
   <div id="modal-settings" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 hidden backdrop-blur-sm">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-5 sm:p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-5 sm:p-6 shadow-2xl relative max-h-[90dvh] overflow-y-auto">
       <button onclick="closeSettingsModal()" class="absolute top-4 right-4 rtl:right-auto rtl:left-4 text-slate-400 hover:text-slate-200">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
@@ -5230,7 +5230,7 @@
               <h3 class="text-base sm:text-lg font-bold text-white tracking-tight" id="lbl-admin-directory-title">TutorPilot User Management Directory</h3>
               <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Super Admin</span>
             </div>
-            <p class="text-xs text-slate-400 mt-0.5" id="lbl-admin-directory-subtitle">Monitor registered tutors, active 14-day trials, and cloud workspace isolation</p>
+            <p class="text-xs text-slate-400 mt-0.5" id="lbl-admin-directory-subtitle">Monitor registered tutors, active 35-day trials, and cloud workspace isolation</p>
           </div>
         </div>
         <button onclick="closeAdminUserDirectoryModal()" class="text-slate-400 hover:text-white p-1 rounded-xl hover:bg-slate-800 transition">
@@ -6028,8 +6028,8 @@
         authOrgPlaceholder: "e.g. Congregation Beth Tefillah",
         authRememberMe: "Remember me for 30 days",
         authSignInBtn: "Sign In to TutorPilot",
-        authSignUpBtn: "Start 14-Day Free Trial",
-        authTrialSubtext: "14-day full access • No credit card required • Instant access",
+        authSignUpBtn: "Start 35-Day Free Trial",
+        authTrialSubtext: "35-day full access • No credit card required • Instant access",
         authOwnerQuickLogin: "Super Admin One-Tap Sign In (Shmuel Dovid)",
         authUseOtpLink: "Sign in with One-Time Email Code",
         authUsePasswordLink: "Sign in with Password",
@@ -6397,8 +6397,8 @@
         authOrgPlaceholder: "לדוגמה: קהילת בית ישראל",
         authRememberMe: "זכור אותי ל-30 יום",
         authSignInBtn: "התחבר למערכת",
-        authSignUpBtn: "התחל 14 יום ניסיון חינם",
-        authTrialSubtext: "14 יום גישה מלאה • ללא צורך בכרטיס אשראי • גישה מיידית",
+        authSignUpBtn: "התחל 35 יום ניסיון חינם",
+        authTrialSubtext: "35 יום גישה מלאה • ללא צורך בכרטיס אשראי • גישה מיידית",
         authOwnerQuickLogin: "כניסה מהירה כמנהל ראשי (שמואל דוד)",
         authUseOtpLink: "התחבר באמצעות קוד אימות חד פעמי",
         authUsePasswordLink: "התחבר באמצעות סיסמה",
@@ -8033,7 +8033,7 @@ alter publication supabase_realtime add table public.students_sync;`;
                 organization: meta.organization || (isMaster ? 'Lead TutorPilot Admin' : ''),
                 role: isMaster ? 'super_admin' : 'tutor',
                 subscription_status: isMaster ? 'lifetime' : 'trialing',
-                trial_days: isMaster ? 9999 : 14
+                trial_days: isMaster ? 9999 : 35
               });
               if (window.history && window.history.replaceState) {
                 window.history.replaceState(null, '', window.location.pathname);
@@ -9922,7 +9922,7 @@ alter publication supabase_realtime add table public.students_sync;`;
         school_id: schoolId,
         school_name: schoolName,
         subscription_status: isOwner ? 'lifetime' : (userRecord.subscription_status || 'active'),
-        trial_days: isOwner ? 9999 : (typeof userRecord.trial_days === 'number' ? userRecord.trial_days : 14),
+        trial_days: isOwner ? 9999 : (typeof userRecord.trial_days === 'number' ? userRecord.trial_days : 35),
         password_hash: userRecord.password_hash || '',
         createdAt: userRecord.createdAt || new Date().toISOString(),
         expiresAt: Date.now() + duration
@@ -10388,7 +10388,7 @@ alter publication supabase_realtime add table public.students_sync;`;
           school_id: userRecord.school_id || existing.school_id || (isOwner ? 'school_main_770' : ('school_' + email.replace(/[^a-z0-9]/g, '_'))),
           school_name: userRecord.school_name || existing.school_name || userRecord.organization || '',
           subscription_status: isOwner ? 'lifetime' : (userRecord.subscription_status || existing.subscription_status || 'trialing'),
-          trial_days: typeof userRecord.trial_days === 'number' ? userRecord.trial_days : (typeof existing.trial_days === 'number' ? existing.trial_days : 14),
+          trial_days: typeof userRecord.trial_days === 'number' ? userRecord.trial_days : (typeof existing.trial_days === 'number' ? existing.trial_days : 35),
           password_hash: userRecord.password_hash || existing.password_hash || '',
           createdAt: existing.createdAt || userRecord.createdAt || new Date().toISOString(),
           last_active: new Date().toISOString()
@@ -10548,9 +10548,9 @@ alter publication supabase_realtime add table public.students_sync;`;
             <i data-lucide="check" class="w-3 h-3 text-emerald-400"></i> ${isHe ? 'מנוי פעיל ($39/חודש)' : 'Active Subscriber ($39/mo)'}
           </span>`;
         } else {
-          const days = typeof u.trial_days === 'number' ? u.trial_days : 14;
+          const days = typeof u.trial_days === 'number' ? u.trial_days : 35;
           statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-brand-500/10 text-brand-300 border border-brand-500/30">
-            <i data-lucide="clock" class="w-3 h-3 text-brand-400"></i> ${isHe ? ('ניסיון חינם (' + days + ' ימים)') : ('14-Day Free Trial (' + days + 'd)')}
+            <i data-lucide="clock" class="w-3 h-3 text-brand-400"></i> ${isHe ? ('ניסיון חינם (' + days + ' ימים)') : ('35-Day Free Trial (' + days + 'd)')}
           </span>`;
         }
 
@@ -10621,7 +10621,7 @@ alter publication supabase_realtime add table public.students_sync;`;
     function extendUserTrial(email) {
       const registeredUsers = JSON.parse(localStorage.getItem('tutor_registered_users') || '{}');
       if (registeredUsers[email]) {
-        registeredUsers[email].trial_days = (registeredUsers[email].trial_days || 14) + 14;
+        registeredUsers[email].trial_days = (registeredUsers[email].trial_days || 35) + 14;
         localStorage.setItem('tutor_registered_users', JSON.stringify(registeredUsers));
         syncUserToCloudDirectory(registeredUsers[email]);
         renderAdminUserDirectory();
@@ -10673,7 +10673,7 @@ alter publication supabase_realtime add table public.students_sync;`;
 
       let csv = 'Full Name,Email,Organization,Role,Subscription Status,Trial Days,Registered Date\n';
       allUsers.forEach(u => {
-        csv += `"${u.name_en || u.name_he || ''}","${u.email || ''}","${u.organization || ''}","${u.role || ''}","${u.subscription_status || ''}","${u.trial_days || 14}","${u.createdAt || ''}"\n`;
+        csv += `"${u.name_en || u.name_he || ''}","${u.email || ''}","${u.organization || ''}","${u.role || ''}","${u.subscription_status || ''}","${u.trial_days || 35}","${u.createdAt || ''}"\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -10875,7 +10875,7 @@ alter publication supabase_realtime add table public.students_sync;`;
               school_id: existing.school_id || ('school_' + email.replace(/[^a-z0-9]/g, '_')),
               school_name: existing.school_name || existing.organization || 'My Classroom',
               subscription_status: existing.subscription_status || 'trialing',
-              trial_days: existing.trial_days || 14,
+              trial_days: existing.trial_days || 35,
               password_hash: pwdHash
             };
             grantAuthSession(userRecord, rememberMe);
@@ -11111,7 +11111,7 @@ alter publication supabase_realtime add table public.students_sync;`;
         school_id: assignedSchoolId,
         school_name: assignedSchoolName,
         subscription_status: isShmuel ? 'lifetime' : 'trialing',
-        trial_days: isShmuel ? 9999 : 14,
+        trial_days: isShmuel ? 9999 : 35,
         password_hash: pwdHash,
         createdAt: new Date().toISOString(),
         last_active: new Date().toISOString()
@@ -11246,7 +11246,7 @@ alter publication supabase_realtime add table public.students_sync;`;
         settingsDays.textContent = isSuperAdmin
           ? (isHe ? 'מנהל ראשי • גישה מלאה קבועה' : 'Super Admin • Permanent Lifetime Access')
           : (isClassOwner
-            ? (isHe ? 'מנהל כיתה • 14 יום ניסיון פעיל' : 'Classroom Owner • 14-Day Free Trial')
+            ? (isHe ? 'מנהל כיתה • 35 יום ניסיון פעיל' : 'Classroom Owner • 35-Day Free Trial')
             : (isHe ? 'מלמד שותף • מחובר' : 'Co-Teacher / Tutor • Active Member'));
       }
       lucide.createIcons();
@@ -11915,10 +11915,10 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (lblSignupSchoolCodeDesc) lblSignupSchoolCodeDesc.textContent = isHe ? "קיבלת קוד מבית הספר או מהמלמד הראשי? הזן אותו כאן כדי להצטרף לכיתה המשותפת." : "Have a code from your school or lead teacher? Enter it here to join their shared students and lessons.";
 
       const btnSignupText = document.getElementById('btn-signup-text');
-      if (btnSignupText) btnSignupText.textContent = isHe ? "צור חשבון והתחל 14 ימי ניסיון" : "Create Account & Start Trial";
+      if (btnSignupText) btnSignupText.textContent = isHe ? "צור חשבון והתחל 35 ימי ניסיון" : "Create Account & Start Trial";
 
       const lblSignupSubtext = document.getElementById('lbl-signup-subtext');
-      if (lblSignupSubtext) lblSignupSubtext.textContent = isHe ? "14 יום גישה מלאה • ללא צורך בכרטיס אשראי • גישה מיידית" : "14-day full access • No credit card required • Instant setup";
+      if (lblSignupSubtext) lblSignupSubtext.textContent = isHe ? "35 יום גישה מלאה • ללא צורך בכרטיס אשראי • גישה מיידית" : "35-day full access • No credit card required • Instant setup";
 
       const lblSigninSwitchPrompt = document.getElementById('lbl-signin-switch-prompt');
       if (lblSigninSwitchPrompt) lblSigninSwitchPrompt.textContent = isHe ? "פעם ראשונה כאן?" : "First time here?";
@@ -12018,7 +12018,7 @@ alter publication supabase_realtime add table public.students_sync;`;
       if (lblAdminDirTitle) lblAdminDirTitle.textContent = isHe ? "ניהול משתמשי טיוטור-פיילוט" : "TutorPilot User Management Directory";
 
       const lblAdminDirSub = document.getElementById('lbl-admin-directory-subtitle');
-      if (lblAdminDirSub) lblAdminDirSub.textContent = isHe ? "מעקב אחר מלמדים רשומים, תקופות ניסיון והפרדת נתונים" : "Monitor registered tutors, active 14-day trials, and cloud workspace isolation";
+      if (lblAdminDirSub) lblAdminDirSub.textContent = isHe ? "מעקב אחר מלמדים רשומים, תקופות ניסיון והפרדת נתונים" : "Monitor registered tutors, active 35-day trials, and cloud workspace isolation";
 
       const lblAdminStatTotal = document.getElementById('lbl-admin-stat-total');
       if (lblAdminStatTotal) lblAdminStatTotal.textContent = isHe ? "סה״כ מלמדים" : "Total Tutors";
