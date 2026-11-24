@@ -24,9 +24,12 @@
   <meta name="twitter:title" content="TutorPilot | AI Teaching Studio &amp; Student Portal">
   <meta name="twitter:description" content="Design interactive courses with AI, share a 6-digit student portal, and send 1-click WhatsApp, SMS, and Email progress updates.">
   <meta name="twitter:image" content="https://tutorpilot.us/icons/og-preview.png">
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FAF8F5" id="meta-theme-color">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="TutorPilot">
+  <meta name="application-name" content="TutorPilot">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,6 +41,7 @@
     #public-marketing-landing.hidden,
     #modal-first-login-onboarding.hidden,
     #modal-outreach-composer.hidden,
+    #modal-install-app.hidden,
     #drawer-student-detail.hidden {
       display: none;
     }
@@ -101,6 +105,31 @@
             hebrew: ['Heebo', 'Rubik', 'system-ui', 'sans-serif']
           }
         }
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      window.__tpDeferredInstallPrompt = null;
+      if (typeof window.addEventListener === 'function') {
+        window.addEventListener('beforeinstallprompt', function (e) {
+          if (e && typeof e.preventDefault === 'function') e.preventDefault();
+          window.__tpDeferredInstallPrompt = e;
+          if (typeof window.updatePwaInstallUiState === 'function') window.updatePwaInstallUiState();
+        });
+        window.addEventListener('appinstalled', function () {
+          window.__tpDeferredInstallPrompt = null;
+          if (window.APP_STATE) window.APP_STATE.pwaInstalled = true;
+          if (typeof window.updatePwaInstallUiState === 'function') window.updatePwaInstallUiState();
+        });
+        window.addEventListener('load', function () {
+          try {
+            var loc = window.location || {};
+            var okHost = loc.protocol === 'https:' || loc.hostname === 'localhost' || loc.hostname === '127.0.0.1';
+            if (okHost && typeof navigator !== 'undefined' && 'serviceWorker' in navigator && typeof navigator.serviceWorker.register === 'function') {
+              navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function () {});
+            }
+          } catch (_) {}
+        });
       }
     }
   </script>
@@ -5050,6 +5079,23 @@
           </button>
         </div>
 
+        <!-- Add App to Phone Home Screen (Standalone App Logo, No Chrome Badge) -->
+        <button type="button" id="btn-settings-install-app" onclick="handleInstallAppClick()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-indigo-500/35 hover:border-indigo-400 transition active:scale-98 text-left rtl:text-right">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-xl overflow-hidden shadow-md border border-indigo-400/35 shrink-0">
+              <img src="icons/apple-touch-icon.png" alt="TutorPilot" class="w-full h-full object-cover">
+            </div>
+            <div class="min-w-0">
+              <div class="text-xs font-bold text-white flex items-center gap-1.5 flex-wrap">
+                <span id="settings-install-app-title">Add App to Home Screen</span>
+                <span id="settings-install-app-badge" class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-300 font-semibold">App Icon</span>
+              </div>
+              <p id="settings-install-app-desc" class="text-[11px] text-slate-400 mt-0.5">Install on your phone with the TutorPilot logo &amp; full-screen app view</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 rtl:rotate-180 shrink-0"></i>
+        </button>
+
         <!-- Theme Appearance Tile (Light Mode / Dark Mode) -->
         <button type="button" id="btn-theme-toggle" onclick="toggleThemeMode()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-indigo-500/50 transition active:scale-98 text-left">
           <div class="flex items-center gap-3">
@@ -5237,6 +5283,29 @@
         </button>
 
       </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADD TUTORPILOT APP TO HOME SCREEN       -->
+  <!-- ============================================== -->
+  <div id="modal-install-app" class="fixed inset-0 z-[74] flex items-end sm:items-center justify-center bg-black/75 p-0 sm:p-4 hidden backdrop-blur-sm" onclick="if(event.target === this) closeInstallAppModal();">
+    <div class="bg-slate-900 border-t sm:border border-slate-700/80 rounded-t-3xl sm:rounded-3xl max-w-md w-full max-h-[92dvh] flex flex-col shadow-2xl overflow-hidden animate-slideUp" onclick="event.stopPropagation()">
+      <div class="px-5 py-4 border-b border-slate-800/80 bg-slate-950/85 flex items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl overflow-hidden shadow-md border border-indigo-400/35 shrink-0">
+            <img src="icons/apple-touch-icon.png" alt="TutorPilot" class="w-full h-full object-cover">
+          </div>
+          <div class="min-w-0">
+            <h3 id="install-app-modal-title" class="text-sm sm:text-base font-extrabold text-white truncate">Add TutorPilot App to Screen</h3>
+            <p id="install-app-modal-subtitle" class="text-[11px] text-slate-400 truncate">Pure TutorPilot logo &amp; full-screen launch</p>
+          </div>
+        </div>
+        <button type="button" id="btn-close-install-app" onclick="closeInstallAppModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition shrink-0">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="modal-install-app-body" class="flex-1 min-h-0 overflow-y-auto p-5 space-y-4"></div>
     </div>
   </div>
 
@@ -6227,7 +6296,8 @@
         client: null,
         channel: null,
         status: 'disconnected' // 'connected', 'syncing', 'offline', 'disconnected'
-      }
+      },
+      pwaInstalled: false
     };
     window.APP_STATE = APP_STATE;
 
@@ -8651,6 +8721,7 @@
 
     function openSettingsModal() {
       updateSettingsArchiveBadge();
+      if (typeof updatePwaInstallUiState === 'function') updatePwaInstallUiState();
       document.getElementById('modal-settings').classList.remove('hidden');
       if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
     }
@@ -10338,7 +10409,13 @@
             </div>
           ` : ''}
         </div>
-        <div id="student-portal-powered-by" class="pt-4 pb-2 text-center">
+        <div id="student-portal-powered-by" class="pt-4 pb-2 text-center flex flex-wrap items-center justify-center gap-2">
+          ${(typeof isRunningStandalonePwa !== 'function' || !isRunningStandalonePwa()) ? `
+            <button type="button" id="btn-portal-install-app" onclick="handleInstallAppClick()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-400/35 text-[11px] font-bold text-indigo-300 transition active:scale-95">
+              <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+              <span>${isHe ? 'הוסף אפליקציה לנייד' : 'Add App to Phone'}</span>
+            </button>
+          ` : ''}
           <a href="https://tutorpilot.us" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-900/70 border border-slate-800 text-[11px] font-semibold text-slate-400 hover:text-indigo-400 transition">
             <span>✦</span>
             <span>${isHe ? 'מופעל על ידי TutorPilot.us' : 'Powered by TutorPilot.us'}</span>
@@ -12370,6 +12447,8 @@
 
       const settingsLockDesc = document.getElementById('settings-lock-desc');
       if (settingsLockDesc) settingsLockDesc.textContent = t.settingsLockDesc;
+
+      if (typeof updatePwaInstallUiState === 'function') updatePwaInstallUiState();
 
       // Modal: Share
       const modalShareTitle = document.getElementById('modal-share-title');
@@ -37568,6 +37647,255 @@ ${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output 
     }
 
     // =========================================================================
+    // NATIVE-STYLE HOME SCREEN APP INSTALL ENGINE (WebAPK / iOS Add to Home Screen)
+    // =========================================================================
+    var installAppModalSelectedPlatform = '';
+
+    function isRunningStandalonePwa() {
+      try {
+        if (APP_STATE && APP_STATE.pwaInstalled) return true;
+        if (typeof window !== 'undefined') {
+          if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+          if (window.navigator && window.navigator.standalone === true) return true;
+        }
+      } catch (_) {}
+      return false;
+    }
+
+    function detectPwaInstallPlatform(uaOverride, vendorOverride) {
+      const hasOverride = typeof uaOverride === 'string' && uaOverride.length > 0;
+      if (!hasOverride && isRunningStandalonePwa()) return 'standalone';
+      const rawUa = hasOverride
+        ? uaOverride
+        : (typeof navigator !== 'undefined' && navigator.userAgent ? String(navigator.userAgent) : '');
+      const ua = rawUa.toLowerCase();
+      const rawVendor = typeof vendorOverride === 'string'
+        ? vendorOverride
+        : (typeof navigator !== 'undefined' && navigator.vendor ? String(navigator.vendor) : '');
+      const isIos = /iphone|ipad|ipod/.test(ua) || (ua.includes('macintosh') && typeof navigator !== 'undefined' && navigator.maxTouchPoints > 1 && /apple/i.test(rawVendor));
+      if (isIos) {
+        if (ua.includes('crios')) return 'ios_chrome';
+        return 'ios_safari';
+      }
+      if (ua.includes('android')) return 'android_chrome';
+      return 'desktop';
+    }
+
+    function updatePwaInstallUiState() {
+      const isHe = APP_STATE && APP_STATE.lang === 'he';
+      const installed = isRunningStandalonePwa();
+      const hasNativePrompt = typeof window !== 'undefined' && !!window.__tpDeferredInstallPrompt;
+
+      const titleEl = document.getElementById('settings-install-app-title');
+      if (titleEl) {
+        titleEl.textContent = isHe ? 'הוסף אפליקציה למסך הבית' : 'Add App to Home Screen';
+      }
+      const descEl = document.getElementById('settings-install-app-desc');
+      if (descEl) {
+        descEl.textContent = installed
+          ? (isHe ? 'מותקן כאפליקציה עצמאית עם הלוגו של TutorPilot' : 'Running cleanly as an installed TutorPilot app')
+          : (hasNativePrompt
+              ? (isHe ? 'לחיצה אחת להתקנה עם הלוגו של TutorPilot ללא סמל Chrome' : '1-click install with the pure TutorPilot logo & zero Chrome badge')
+              : (isHe ? 'התקן בנייד עם הלוגו של TutorPilot בתצוגת אפליקציה מלאה' : 'Install on your phone with the TutorPilot logo & full-screen app view'));
+      }
+      const badgeEl = document.getElementById('settings-install-app-badge');
+      if (badgeEl) {
+        if (installed) {
+          badgeEl.textContent = isHe ? 'מותקן ✓' : 'Installed ✓';
+          badgeEl.className = 'text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold';
+        } else if (hasNativePrompt) {
+          badgeEl.textContent = isHe ? 'לחיצה אחת' : '1-Click Ready';
+          badgeEl.className = 'text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold';
+        } else {
+          badgeEl.textContent = isHe ? 'סמל אפליקציה' : 'App Icon';
+          badgeEl.className = 'text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-300 font-semibold';
+        }
+      }
+      const modalEl = document.getElementById('modal-install-app');
+      if (modalEl && modalEl.classList && !modalEl.classList.contains('hidden')) {
+        renderInstallAppModal();
+      }
+    }
+    if (typeof window !== 'undefined') window.updatePwaInstallUiState = updatePwaInstallUiState;
+
+    async function triggerNativePwaInstall() {
+      const promptEvt = (typeof window !== 'undefined' && window.__tpDeferredInstallPrompt) ? window.__tpDeferredInstallPrompt : null;
+      if (!promptEvt || typeof promptEvt.prompt !== 'function') {
+        openInstallAppModal();
+        return false;
+      }
+      const isHe = APP_STATE && APP_STATE.lang === 'he';
+      try {
+        await promptEvt.prompt();
+        const choice = await (promptEvt.userChoice || Promise.resolve({ outcome: 'dismissed' }));
+        window.__tpDeferredInstallPrompt = null;
+        if (choice && choice.outcome === 'accepted') {
+          if (APP_STATE) APP_STATE.pwaInstalled = true;
+          updatePwaInstallUiState();
+          closeInstallAppModal();
+          showToast(isHe ? 'אפליקציית TutorPilot נוספה למסך הבית!' : 'TutorPilot App added to your screen with its own logo!');
+          return true;
+        }
+      } catch (_) {
+        window.__tpDeferredInstallPrompt = null;
+      }
+      updatePwaInstallUiState();
+      openInstallAppModal();
+      return false;
+    }
+
+    async function handleInstallAppClick() {
+      if (typeof closeSettingsModal === 'function') {
+        try { closeSettingsModal(); } catch (_) {}
+      }
+      const promptEvt = (typeof window !== 'undefined' && window.__tpDeferredInstallPrompt) ? window.__tpDeferredInstallPrompt : null;
+      if (promptEvt && typeof promptEvt.prompt === 'function') {
+        return await triggerNativePwaInstall();
+      }
+      openInstallAppModal();
+      return false;
+    }
+
+    function setInstallAppModalPlatform(platform) {
+      installAppModalSelectedPlatform = platform;
+      renderInstallAppModal();
+    }
+
+    function renderInstallAppModal() {
+      const body = document.getElementById('modal-install-app-body');
+      if (!body) return;
+      const isHe = APP_STATE && APP_STATE.lang === 'he';
+      const installed = isRunningStandalonePwa();
+      const hasNativePrompt = typeof window !== 'undefined' && !!window.__tpDeferredInstallPrompt;
+      const detected = detectPwaInstallPlatform();
+      const activePlatform = installAppModalSelectedPlatform || (detected === 'standalone' ? 'android_chrome' : detected);
+
+      const modalTitle = document.getElementById('install-app-modal-title');
+      if (modalTitle) modalTitle.textContent = isHe ? 'הוסף את אפליקציית TutorPilot למסך' : 'Add TutorPilot App to Screen';
+      const modalSubtitle = document.getElementById('install-app-modal-subtitle');
+      if (modalSubtitle) modalSubtitle.textContent = isHe ? 'לוגו TutorPilot נקי ללא סמל דפדפן Chrome' : 'Pure TutorPilot logo • Zero Chrome badge';
+
+      const tabs = [
+        { id: 'android_chrome', label: isHe ? 'אנדרואיד / Chrome' : 'Android / Chrome' },
+        { id: 'ios_safari', label: isHe ? 'אייפון Safari' : 'iPhone Safari' },
+        { id: 'ios_chrome', label: isHe ? 'אייפון Chrome' : 'iPhone Chrome' },
+        { id: 'desktop', label: isHe ? 'מחשב' : 'Desktop' }
+      ];
+
+      let stepsHtml = '';
+      if (activePlatform === 'ios_safari') {
+        stepsHtml = isHe ? `
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">1</span><span>לחץ על כפתור <strong>שתף (Share)</strong> בתחתית המסך ב-Safari.</span></li>
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">2</span><span>גלול למטה ובחר <strong>הוסף למסך הבית (Add to Home Screen)</strong>.</span></li>
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">3</span><span>לחץ על <strong>הוסף (Add)</strong> — הסמל יופיע כאפליקציה עצמאית עם הלוגו של TutorPilot בלבד.</span></li>
+        ` : `
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">1</span><span>Tap the <strong>Share</strong> button (square with arrow pointing up) at the bottom of Safari.</span></li>
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">2</span><span>Scroll down and tap <strong>Add to Home Screen</strong>.</span></li>
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">3</span><span>Tap <strong>Add</strong> — your phone creates a full-screen TutorPilot app with only your logo.</span></li>
+        `;
+      } else if (activePlatform === 'ios_chrome') {
+        stepsHtml = isHe ? `
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">1</span><span>לחץ על כפתור <strong>שתף (Share)</strong> בפינה העליונה של שורת הכתובת ב-Chrome.</span></li>
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">2</span><span>בחר <strong>הוסף למסך הבית (Add to Home Screen)</strong>.</span></li>
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">3</span><span>לחץ על <strong>הוסף (Add)</strong> לקבלת אייקון אפליקציה נקי של TutorPilot ללא סמל Chrome.</span></li>
+        ` : `
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">1</span><span>Tap the <strong>Share</strong> icon in the top-right corner of Chrome's address bar.</span></li>
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">2</span><span>Tap <strong>Add to Home Screen</strong>.</span></li>
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">3</span><span>Tap <strong>Add</strong> — it launches full screen with only the TutorPilot icon and no browser badge.</span></li>
+        `;
+      } else if (activePlatform === 'desktop') {
+        stepsHtml = isHe ? `
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">1</span><span>לחץ על סמל ההתקנה בשורת הכתובת ב-Chrome או Edge (או בחר <strong>התקן TutorPilot</strong> מהתפריט).</span></li>
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">2</span><span>אשר <strong>התקן (Install)</strong> כדי להוסיף ל-Dock או לשולחן העבודה כחלון אפליקציה עצמאי.</span></li>
+        ` : `
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">1</span><span>Click the install app icon on the right side of Chrome or Edge's address bar (or menu <strong>⋮ → Cast, save, and share → Install TutorPilot</strong>).</span></li>
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">2</span><span>Click <strong>Install</strong> to run TutorPilot in its own app window with its own dock icon.</span></li>
+        `;
+      } else {
+        stepsHtml = isHe ? `
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">1</span><span>לחץ על הכפתור הסגול למעלה (אם מופיע), או פתח את תפריט <strong>⋮</strong> של Chrome ובחר <strong>הוסף למסך הבית ← התקן אפליקציה (Install app)</strong>.</span></li>
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">2</span><span>אם מופיע דיאלוג שבו כתוב <strong>התקן (Install)</strong> ולא רק <em>צור קיצור דרך</em>, אנדרואיד יתקין אפליקציה אמיתית עם הלוגו הנקי של TutorPilot.</span></li>
+        ` : `
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">1</span><span>Tap <strong>Install TutorPilot App Now</strong> above (when shown), or tap Chrome's <strong>⋮</strong> menu → <strong>Add to home screen → Install app</strong>.</span></li>
+          <li class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0">2</span><span>Choose <strong>Install</strong> (not plain Create Shortcut) so Android installs the pure TutorPilot app icon with zero Chrome badge.</span></li>
+        `;
+      }
+
+      body.innerHTML = `
+        <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center gap-4">
+          <div class="flex flex-col items-center gap-1.5 shrink-0">
+            <div class="w-16 h-16 rounded-2xl overflow-hidden shadow-lg ring-2 ring-indigo-400/40">
+              <img src="icons/apple-touch-icon.png" alt="TutorPilot App Icon" class="w-full h-full object-cover">
+            </div>
+            <span class="text-[11px] font-bold text-slate-200 tracking-tight">TutorPilot</span>
+          </div>
+          <div class="space-y-1.5 min-w-0">
+            <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-bold text-emerald-300">
+              <span>✓</span>
+              <span>${isHe ? 'ללא סמל Chrome בפינה' : 'Your TutorPilot Logo Only'}</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              ${isHe
+                ? 'נפתח במסך מלא בדיוק כמו אפליקציה מהחנות, ישירות למסך הבית של הטלפון.'
+                : 'Opens full screen directly from your phone home screen just like a native app.'}
+            </p>
+          </div>
+        </div>
+
+        ${installed ? `
+          <div id="install-app-already-banner" class="p-3.5 rounded-xl bg-emerald-950/35 border border-emerald-500/35 text-xs text-emerald-200 font-semibold flex items-center gap-2">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+            <span>${isHe ? 'מעולה! TutorPilot כבר פועל כעת כאפליקציה מותקנת במסך הבית.' : 'Great! TutorPilot is already running as an installed full-screen app on this device.'}</span>
+          </div>
+        ` : ''}
+
+        ${hasNativePrompt ? `
+          <button type="button" id="btn-install-app-native" onclick="triggerNativePwaInstall()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-sm shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition active:scale-95 keep-white">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>${isHe ? 'התקן את אפליקציית TutorPilot עכשיו' : 'Install TutorPilot App Now'}</span>
+          </button>
+        ` : ''}
+
+        <div class="space-y-2.5">
+          <div class="flex flex-wrap gap-1.5">
+            ${tabs.map(tb => `
+              <button type="button" onclick="setInstallAppModalPlatform('${tb.id}')" class="px-2.5 py-1 rounded-xl text-[11px] font-bold border transition ${activePlatform === tb.id ? 'bg-indigo-600 text-white border-indigo-500 keep-white' : 'bg-slate-800 text-slate-300 border-slate-700 hover:border-indigo-400'}">
+                ${tb.label}
+              </button>
+            `).join('')}
+          </div>
+          <ol class="space-y-2.5 p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs text-slate-200 leading-relaxed">
+            ${stepsHtml}
+          </ol>
+        </div>
+
+        <div class="p-3 rounded-xl bg-amber-950/30 border border-amber-500/30 text-[11px] text-amber-200 leading-relaxed">
+          ${isHe
+            ? '<strong>טיפ חשוב:</strong> אם שמרת בעבר קיצור דרך ישן שהופיע עם סמל קטן של Chrome, מחק קודם את הסמל הישן ממסך הבית, רענן את העמוד, והתקן מחדש כדי לקבל את האייקון הנקי החדש.'
+            : '<strong>Replacing an old shortcut?</strong> If you previously saved an older shortcut with a small Chrome badge on your home screen, delete that old icon first, refresh this page, and add it again so your phone uses the clean TutorPilot app icon.'}
+        </div>
+
+        <button type="button" onclick="closeInstallAppModal()" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition">
+          ${isHe ? 'הבנתי, סגור' : 'Got It, Close'}
+        </button>
+      `;
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function openInstallAppModal() {
+      installAppModalSelectedPlatform = '';
+      renderInstallAppModal();
+      const modal = document.getElementById('modal-install-app');
+      if (modal) modal.classList.remove('hidden');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function closeInstallAppModal() {
+      const modal = document.getElementById('modal-install-app');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // =========================================================================
     // UNIVERSAL DESKTOP & MOBILE BACK NAVIGATION ENGINE (History API / popstate)
     // =========================================================================
     const SPA_MODAL_REGISTRY = [
@@ -37579,6 +37907,7 @@ ${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output 
       { key: 'share', id: 'modal-share', open: 'openShareModal', close: 'closeShareModal' },
       { key: 'external_ai', id: 'modal-external-ai-connect', open: 'openExternalAiModal', close: 'closeExternalAiModal' },
       { key: 'settings', id: 'modal-settings', open: 'openSettingsModal', close: 'closeSettingsModal' },
+      { key: 'install_app', id: 'modal-install-app', open: 'openInstallAppModal', close: 'closeInstallAppModal' },
       { key: 'create_course', id: 'modal-create-course', open: 'openCreateCourseModal', close: 'closeCreateCourseModal' },
       { key: 'add_student', id: 'modal-add-student', open: 'openAddStudentModal', close: 'closeAddStudentModal' },
       { key: 'schedule_lesson', id: 'modal-schedule-lesson', open: 'openScheduleLessonModal', close: 'closeScheduleLessonModal' },

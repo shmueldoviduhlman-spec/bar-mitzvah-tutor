@@ -7061,6 +7061,91 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   sandbox.APP_STATE.students = prevStudents72;
   sandbox.APP_STATE.customCourses = prevCourses72;
 
+  // --- Gate 73: Native-Style Home Screen App Install (Service Worker, Maskable Icons, Settings Tile & Modal) ---
+  console.log('\n[Gate 73] Native-Style Home Screen App Install (WebAPK / iOS Add to Home Screen)...');
+
+  const swPath73 = path.join(__dirname, 'sw.js');
+  assert(fs.existsSync(swPath73), 'sw.js exists at repository root');
+  const swSrc73 = fs.readFileSync(swPath73, 'utf8');
+  let swCompiled73 = false;
+  try {
+    new vm.Script(swSrc73, { filename: 'sw.js' });
+    swCompiled73 = true;
+  } catch (e) {}
+  assert(
+    swCompiled73 &&
+    swSrc73.includes("url.pathname.startsWith('/api/')") &&
+    swSrc73.includes("addEventListener('fetch'"),
+    'sw.js compiles cleanly and bypasses /api/ and cross-origin network requests'
+  );
+
+  const mask512Path73 = path.join(iconsDir72, 'icon-maskable-512.png');
+  const mask192Path73 = path.join(iconsDir72, 'icon-maskable-192.png');
+  const appleIconPath73 = path.join(iconsDir72, 'apple-touch-icon.png');
+  const appleHeader73 = fs.readFileSync(appleIconPath73);
+  assert(
+    fs.existsSync(mask512Path73) && fs.statSync(mask512Path73).size > 5000 &&
+    fs.existsSync(mask192Path73) && fs.statSync(mask192Path73).size > 2000 &&
+    appleHeader73[25] === 2,
+    'Maskable icons (512 & 192) and opaque RGB apple-touch-icon.png (zero transparent corners) exist in icons/'
+  );
+
+  const manifestJson73 = JSON.parse(fs.readFileSync(path.join(__dirname, 'manifest.json'), 'utf8'));
+  assert(
+    manifestJson73.display === 'standalone' &&
+    manifestJson73.start_url === '/' &&
+    Array.isArray(manifestJson73.icons) &&
+    manifestJson73.icons.some(i => i.purpose === 'any' && i.src === 'icons/icon-512.png') &&
+    manifestJson73.icons.some(i => i.purpose === 'maskable' && i.src === 'icons/icon-maskable-512.png'),
+    'manifest.json declares standalone display and separates purpose="any" and purpose="maskable" icon entries'
+  );
+
+  assert(
+    indexHtml.includes('id="btn-settings-install-app"') &&
+    indexHtml.includes('id="modal-install-app"') &&
+    indexHtml.includes("key: 'install_app'") &&
+    indexHtml.includes("navigator.serviceWorker.register('/sw.js'"),
+    'index.html includes #btn-settings-install-app, #modal-install-app, SPA_MODAL_REGISTRY install_app entry, and /sw.js registration'
+  );
+
+  assert(
+    sandbox.detectPwaInstallPlatform('Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1') === 'ios_safari' &&
+    sandbox.detectPwaInstallPlatform('Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/124.0.6367.88 Mobile/15E148 Safari/604.1') === 'ios_chrome' &&
+    sandbox.detectPwaInstallPlatform('Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36') === 'android_chrome',
+    'detectPwaInstallPlatform accurately detects iOS Safari, iOS Chrome, and Android Chrome'
+  );
+
+  // Test 1-click native WebAPK prompt path when beforeinstallprompt has been captured
+  const prevPwaState73 = sandbox.APP_STATE.pwaInstalled;
+  let promptCalled73 = 0;
+  sandbox.APP_STATE.pwaInstalled = false;
+  sandbox.window.__tpDeferredInstallPrompt = {
+    prompt() { promptCalled73++; return Promise.resolve(); },
+    userChoice: Promise.resolve({ outcome: 'accepted' })
+  };
+  const nativeAccepted73 = await sandbox.handleInstallAppClick();
+  assert(
+    nativeAccepted73 === true &&
+    promptCalled73 === 1 &&
+    sandbox.APP_STATE.pwaInstalled === true,
+    'handleInstallAppClick triggers 1-click native install prompt and marks pwaInstalled when accepted'
+  );
+
+  // Test iOS / Safari guided Add-to-Home-Screen modal path when no native prompt is present
+  sandbox.APP_STATE.pwaInstalled = false;
+  sandbox.window.__tpDeferredInstallPrompt = null;
+  await sandbox.handleInstallAppClick();
+  const installModalEl73 = getOrCreateElem('modal-install-app');
+  const installModalBody73 = getOrCreateElem('modal-install-app-body');
+  assert(
+    !installModalEl73.classList.contains('hidden') &&
+    installModalBody73.innerHTML.includes('icons/apple-touch-icon.png') &&
+    installModalBody73.innerHTML.includes('TutorPilot'),
+    'handleInstallAppClick opens #modal-install-app with pure TutorPilot app icon preview when native prompt is absent'
+  );
+  sandbox.closeInstallAppModal();
+  sandbox.APP_STATE.pwaInstalled = prevPwaState73;
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);
