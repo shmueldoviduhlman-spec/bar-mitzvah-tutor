@@ -29,9 +29,18 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-  <!-- Pre-Paint Critical FOUC Guard -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=Heebo:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..600&display=swap">
+
+  <!-- Pre-Paint Critical FOUC Guard (never override responsive hidden md:flex utilities) -->
   <style id="tp-critical-fouc-guard">
-    .hidden { display: none !important; }
+    #public-marketing-landing.hidden,
+    #modal-first-login-onboarding.hidden,
+    #modal-outreach-composer.hidden,
+    #drawer-student-detail.hidden {
+      display: none;
+    }
     html.theme-daylight, html.theme-daylight body {
       background-color: #FAF8F5;
       color: #18181B;
@@ -97,8 +106,6 @@
   </script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=Heebo:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..600&display=swap');
-
     body {
       font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       -webkit-tap-highlight-color: transparent;
@@ -480,7 +487,6 @@
     .keep-white .preserve-ink {
       color: #312E81 !important;
     }
-    }
     html.theme-daylight .text-slate-50:not(.keep-white),
     html.theme-daylight .text-slate-100:not(.keep-white),
     html.theme-daylight .text-slate-200:not(.keep-white) {
@@ -570,6 +576,18 @@
     html.theme-daylight .text-teal-300,
     html.theme-daylight .text-teal-400 {
       color: #0F766E !important;
+    }
+    html.theme-daylight .text-orange-100:not(.keep-white),
+    html.theme-daylight .text-orange-200:not(.keep-white),
+    html.theme-daylight .text-orange-300:not(.keep-white),
+    html.theme-daylight .text-orange-400:not(.keep-white) {
+      color: #9A3412 !important;
+    }
+    html.theme-daylight .text-yellow-100:not(.keep-white),
+    html.theme-daylight .text-yellow-200:not(.keep-white),
+    html.theme-daylight .text-yellow-300:not(.keep-white),
+    html.theme-daylight .text-yellow-400:not(.keep-white) {
+      color: #854D0E !important;
     }
 
     /* Responsive 2-Column & 3-Column Visual Course Gallery Grid on Desktop */
@@ -732,17 +750,19 @@
   <!-- PRE-LOGIN PUBLIC MARKETING WEBSITE             -->
   <!-- Shown cleanly at tutorpilot.us to cold visitors-->
   <!-- ============================================== -->
-  <div id="public-marketing-landing" class="hidden fixed inset-0 z-[55] overflow-y-auto bg-slate-950 text-slate-100 transition-colors duration-300">
-    <!-- Top Banner if signed-in tutor is previewing -->
-    <div id="landing-return-studio-bar" class="hidden sticky top-0 z-50 bg-indigo-600 text-white px-4 py-2 text-xs font-bold flex items-center justify-center gap-3 shadow-md keep-white">
-      <span id="lbl-landing-preview-banner">Previewing public landing page while signed in</span>
-      <button type="button" onclick="hideMarketingLanding()" class="preserve-ink px-3 py-1 rounded-full bg-white text-indigo-700 hover:bg-indigo-50 transition font-extrabold text-[11px] shadow-sm">
-        Return to My Studio →
-      </button>
-    </div>
+  <div id="public-marketing-landing" class="hidden fixed inset-0 z-[55] overflow-y-auto bg-slate-950 text-slate-100">
+    <!-- Unified Sticky Top Wrapper (Prevents preview bar overlapping nav) -->
+    <div class="sticky top-0 z-50">
+      <!-- Top Banner if signed-in tutor is previewing -->
+      <div id="landing-return-studio-bar" class="hidden bg-indigo-600 text-white px-4 py-2 text-xs font-bold flex items-center justify-center gap-3 shadow-sm keep-white">
+        <span id="lbl-landing-preview-banner">Previewing public landing page while signed in</span>
+        <button type="button" onclick="hideMarketingLanding()" class="preserve-ink px-3 py-1 rounded-full bg-white text-indigo-700 hover:bg-indigo-50 transition font-extrabold text-[11px] shadow-sm">
+          Return to My Studio →
+        </button>
+      </div>
 
-    <!-- Sticky Landing Navigation -->
-    <header class="sticky top-0 z-40 glass-nav border-b border-slate-800/80">
+      <!-- Sticky Landing Navigation -->
+      <header class="glass-nav border-b border-slate-800/80">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
         <a href="#top" onclick="event.preventDefault(); document.getElementById('public-marketing-landing')?.scrollTo({ top: 0, behavior: 'smooth' });" class="flex items-center gap-2.5 shrink-0">
           <img src="/icons/favicon.svg" alt="TutorPilot Logo" class="w-9 h-9 rounded-xl shadow-md" />
@@ -776,10 +796,11 @@
           </button>
         </div>
       </div>
-    </header>
+      </header>
+    </div>
 
-    <!-- Main Landing Flow (Strictly No Pricing) -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-20">
+    <!-- Main Landing Flow (Strictly No Pricing; non-main landmark preserves single <main>) -->
+    <div id="landing-main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-20">
 
       <!-- HERO SECTION -->
       <section class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
@@ -1011,7 +1032,7 @@
           </div>
         </div>
       </section>
-    </main>
+    </div>
 
     <footer class="border-t border-slate-800/80 py-8 px-4 text-center text-xs text-slate-400 space-y-2">
       <div class="font-bold text-slate-300">TutorPilot · Operating System for Tutors &amp; Educators</div>
@@ -2241,8 +2262,8 @@
           <input
             type="password"
             id="ai-gemini-key-input"
-            placeholder="AIzaSy... (encrypted on server; leave blank for built-in AI)"
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="Paste personal AIzaSy... or AQ... key (optional)"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
           <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
             <button
@@ -5277,13 +5298,15 @@
       <div class="p-5 space-y-4 overflow-y-auto flex-1">
         <!-- Audience Switcher: Parent Progress Summary vs Student Practice Reminder -->
         <div class="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-slate-950 border border-slate-800" id="outreach-audience-tabs">
-          <button type="button" id="tab-outreach-parent" onclick="switchOutreachRecipient('parent')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow">
+          <button type="button" id="tab-outreach-parent" onclick="switchOutreachRecipient('parent')" class="py-2.5 px-2.5 sm:px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 sm:gap-2 bg-emerald-600 text-white shadow keep-white">
             <i data-lucide="heart-handshake" class="w-4 h-4 shrink-0"></i>
-            <span class="truncate">Parent Progress Summary</span>
+            <span class="hidden sm:inline truncate">Parent Progress Summary</span>
+            <span class="sm:hidden truncate">Parent Update</span>
           </button>
-          <button type="button" id="tab-outreach-student" onclick="switchOutreachRecipient('student')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 text-slate-400 hover:text-white">
+          <button type="button" id="tab-outreach-student" onclick="switchOutreachRecipient('student')" class="py-2.5 px-2.5 sm:px-3 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1.5 sm:gap-2 text-slate-400 hover:text-white">
             <i data-lucide="bell-ring" class="w-4 h-4 shrink-0"></i>
-            <span class="truncate">Student Reminder</span>
+            <span class="hidden sm:inline truncate">Student Reminder</span>
+            <span class="sm:hidden truncate">Remind Student</span>
           </button>
         </div>
 
@@ -5334,24 +5357,24 @@
       </div>
 
       <!-- Footer Delivery Bar -->
-      <div class="px-5 py-3.5 border-t border-slate-800/80 bg-slate-950/90 flex items-center justify-between gap-2 flex-wrap shrink-0">
-        <button type="button" onclick="closeOutreachModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+      <div class="px-4 sm:px-5 py-3.5 border-t border-slate-800/80 bg-slate-950/90 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 shrink-0">
+        <button type="button" onclick="closeOutreachModal()" class="hidden sm:inline-flex px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
           Close
         </button>
-        <div class="flex items-center gap-2 flex-wrap">
-          <button type="button" id="btn-outreach-copy" onclick="copyOutreachMessage()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition active:scale-95">
+        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+          <button type="button" id="btn-outreach-copy" onclick="copyOutreachMessage()" class="justify-center px-3.5 py-2.5 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition active:scale-95">
             <i data-lucide="copy" class="w-3.5 h-3.5 text-brand-400"></i>
             <span>Copy</span>
           </button>
-          <button type="button" id="btn-outreach-whatsapp" onclick="sendOutreachViaWhatsApp()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md transition active:scale-95 keep-white">
+          <button type="button" id="btn-outreach-whatsapp" onclick="sendOutreachViaWhatsApp()" class="justify-center px-4 py-2.5 sm:py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md transition active:scale-95 keep-white">
             <i data-lucide="message-circle" class="w-4 h-4"></i>
             <span>WhatsApp</span>
           </button>
-          <button type="button" id="btn-outreach-sms" onclick="sendOutreachViaSms()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md transition active:scale-95 keep-white">
+          <button type="button" id="btn-outreach-sms" onclick="sendOutreachViaSms()" class="justify-center px-4 py-2.5 sm:py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md transition active:scale-95 keep-white">
             <i data-lucide="message-square" class="w-4 h-4"></i>
             <span>SMS Text</span>
           </button>
-          <button type="button" id="btn-outreach-email" onclick="sendOutreachViaEmail()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md transition active:scale-95 keep-white">
+          <button type="button" id="btn-outreach-email" onclick="sendOutreachViaEmail()" class="justify-center px-4 py-2.5 sm:py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md transition active:scale-95 keep-white">
             <i data-lucide="mail" class="w-4 h-4"></i>
             <span>Email</span>
           </button>
@@ -5837,7 +5860,7 @@
   </div>
 
   <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 text-white text-xs py-2.5 px-5 rounded-full shadow-2xl z-50 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2 font-medium">
+  <div id="toast" class="fixed bottom-24 sm:bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 text-white keep-white text-xs py-2.5 px-5 rounded-full shadow-2xl z-[80] opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2 font-medium max-w-[calc(100vw-2rem)]">
     <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
     <span id="toast-text">Success</span>
   </div>
@@ -18181,7 +18204,7 @@ ${forceSchemaLines}`;
               </div>
               <button type="button" id="btn-studio-batch-ai-fill" onclick="autoPopulateDraftLessonsWithAi('${activeCourse.id}')" class="px-3.5 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold transition shadow-sm flex items-center gap-1.5 shrink-0">
                 <i data-lucide="wand-2" class="w-3.5 h-3.5"></i>
-                <span>${isHe ? `מלא הכל עם AI (${draftCount})` : `✨ AI Fill Draft Lessons (${draftCount})`}</span>
+                <span>${isHe ? `מלא הכל עם AI (${draftCount})` : `AI Fill Draft Lessons (${draftCount})`}</span>
               </button>
             `}
           </div>
@@ -36845,7 +36868,7 @@ ${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output 
                     <button type="button" id="btn-onboarding-niche-${k}" onclick="selectOnboardingNiche('${k}')" class="p-3.5 rounded-2xl border text-left rtl:text-right flex items-start gap-3 transition ${selected ? 'bg-indigo-500/15 border-indigo-400 ring-2 ring-indigo-500/30' : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'}">
                       <span class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center text-xl shrink-0">${p.icon}</span>
                       <div class="min-w-0 space-y-0.5">
-                        <div class="text-xs sm:text-sm font-extrabold text-white truncate">${escapeHtml(p.label)}</div>
+                        <div class="text-xs sm:text-sm font-extrabold text-white leading-snug">${escapeHtml(p.label)}</div>
                         <div class="text-[11px] text-slate-400 leading-snug">${escapeHtml(p.shortDesc)}</div>
                       </div>
                     </button>
@@ -36906,11 +36929,11 @@ ${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output 
               </div>
             </div>
 
-            <div class="pt-2 flex items-center justify-between gap-2 flex-wrap">
-              <button type="button" onclick="goToOnboardingStep(1)" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition">← Back</button>
-              <div class="flex items-center gap-2">
-                <button type="button" onclick="completeOnboardingWizard({ blank: true })" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">Start Completely Blank</button>
-                <button type="button" id="btn-onboarding-build-studio" onclick="completeOnboardingWizard({ blank: false })" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs sm:text-sm font-extrabold shadow-lg transition active:scale-95 keep-white">
+            <div class="pt-2 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2.5">
+              <button type="button" onclick="goToOnboardingStep(1)" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition text-center">← Back</button>
+              <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+                <button type="button" onclick="completeOnboardingWizard({ blank: true })" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition text-center">Start Completely Blank</button>
+                <button type="button" id="btn-onboarding-build-studio" onclick="completeOnboardingWizard({ blank: false })" class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs sm:text-sm font-extrabold shadow-lg transition active:scale-95 keep-white text-center">
                   Build My Starter Studio →
                 </button>
               </div>
