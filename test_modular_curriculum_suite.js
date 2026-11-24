@@ -6810,8 +6810,14 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
     assert(!indexHtml.includes(pat), `index.html contains zero legacy/secret literal: ${pat}`);
   });
 
-  // 2. HTML UI: Clerk SDK, 4-tab Admin Control Plane, Join Code Rotation, Cloudflare Sync Modal
-  assert(indexHtml.includes('pk_live_Y2xlcmsudHV0b3JwaWxvdC51cyQ') && indexHtml.includes('clerk.tutorpilot.us'), 'index.html loads Clerk Production JS v5 for tutorpilot.us');
+  // 2. HTML UI: Clerk SDK v6 + @clerk/ui@1, 4-tab Admin Control Plane, Join Code Rotation, Cloudflare Sync Modal
+  assert(
+    indexHtml.includes('pk_live_Y2xlcmsudHV0b3JwaWxvdC51cyQ') &&
+    indexHtml.includes('https://clerk.tutorpilot.us/npm/@clerk/clerk-js@6/dist/clerk.browser.js') &&
+    indexHtml.includes('https://clerk.tutorpilot.us/npm/@clerk/ui@1/dist/ui.browser.js') &&
+    indexHtml.includes('ClerkUI: window.__internal_ClerkUICtor'),
+    'index.html loads Clerk Production JS v6 + @clerk/ui@1 with ClerkUI constructor wiring for tutorpilot.us'
+  );
   assert(indexHtml.includes('id="clerk-auth-mount"'), 'index.html contains #clerk-auth-mount container');
   assert(indexHtml.includes('id="tab-admin-users"') && indexHtml.includes('id="tab-admin-schools"') && indexHtml.includes('id="tab-admin-settings"') && indexHtml.includes('id="tab-admin-audit"'), 'Admin modal contains all 4 Control Plane tabs');
   assert(indexHtml.includes('id="admin-invite-panel"') && indexHtml.includes('id="btn-rotate-school-code"') && indexHtml.includes('id="modal-cloud"'), 'HTML contains Admin Invite Panel, Rotate Join Code button, and Cloudflare Cloud Sync modal');

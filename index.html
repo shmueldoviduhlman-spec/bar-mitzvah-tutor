@@ -16,13 +16,20 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Clerk JS v5 Production SDK -->
+  <!-- Clerk UI v1 + Clerk JS v6 Production SDK -->
+  <script
+    id="clerk-ui-script"
+    async
+    crossorigin="anonymous"
+    src="https://clerk.tutorpilot.us/npm/@clerk/ui@1/dist/ui.browser.js"
+    type="text/javascript"
+  ></script>
   <script
     id="clerk-sdk-script"
     async
     crossorigin="anonymous"
     data-clerk-publishable-key="pk_live_Y2xlcmsudHV0b3JwaWxvdC51cyQ"
-    src="https://clerk.tutorpilot.us/npm/@clerk/clerk-js@5/dist/clerk.browser.js"
+    src="https://clerk.tutorpilot.us/npm/@clerk/clerk-js@6/dist/clerk.browser.js"
     type="text/javascript"
   ></script>
   <!-- QRCode CDN for instant sharing -->
@@ -9698,11 +9705,12 @@
         }
         mountEl.innerHTML = '';
         const appearance = getClerkMountAppearance();
+        const fallbackRedirectUrl = ((typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin !== 'null') ? window.location.origin : '') + '/';
         if (targetMode === 'signup' && typeof window.Clerk.mountSignUp === 'function') {
-          window.Clerk.mountSignUp(mountEl, { appearance });
+          window.Clerk.mountSignUp(mountEl, { appearance, routing: 'hash', fallbackRedirectUrl });
           _clerkMountedWidget = 'signup';
         } else if (typeof window.Clerk.mountSignIn === 'function') {
-          window.Clerk.mountSignIn(mountEl, { appearance });
+          window.Clerk.mountSignIn(mountEl, { appearance, routing: 'hash', fallbackRedirectUrl });
           _clerkMountedWidget = 'signin';
         }
       } catch (err) {
@@ -9710,10 +9718,10 @@
       }
     }
 
-    async function waitForClerkSdk(timeoutMs = 8000) {
+    async function waitForClerkSdk(timeoutMs = 10000) {
       if (typeof window === 'undefined') return null;
       const start = Date.now();
-      while (!window.Clerk && (Date.now() - start) < timeoutMs) {
+      while ((!window.Clerk || !window.__internal_ClerkUICtor) && (Date.now() - start) < timeoutMs) {
         await new Promise(r => setTimeout(r, 120));
       }
       return window.Clerk || null;
@@ -9758,7 +9766,7 @@
         }).catch(() => {});
       }
 
-      const clerk = await waitForClerkSdk(8000);
+      const clerk = await waitForClerkSdk(10000);
       if (!clerk) {
         if (lockScreen) lockScreen.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
         if (mountEl) {
@@ -9772,7 +9780,10 @@
 
       try {
         if (!clerk.loaded && typeof clerk.load === 'function') {
-          await clerk.load();
+          const loadOpts = window.__internal_ClerkUICtor
+            ? { ui: { ClerkUI: window.__internal_ClerkUICtor } }
+            : {};
+          await clerk.load(loadOpts);
         }
       } catch (err) {
         console.warn('Clerk load error:', err);
