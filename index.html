@@ -4419,12 +4419,12 @@
       </div>
 
       <!-- Drawer Sticky Top Bar -->
-      <div class="px-4 py-3.5 sm:px-6 sm:py-4 border-b border-slate-800/80 flex items-center justify-between gap-3 shrink-0 bg-slate-950/90 backdrop-blur-md">
-        <div class="flex items-center gap-3 min-w-0" id="drawer-header-content">
+      <div class="px-4 py-3.5 sm:px-6 sm:py-4 border-b border-slate-800/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 shrink-0 bg-slate-950/90 backdrop-blur-md">
+        <div class="flex items-center gap-3.5 min-w-0 w-full sm:w-auto" id="drawer-header-content">
           <!-- Populated by renderStudentDrawer -->
         </div>
 
-        <div class="flex items-center gap-2 shrink-0" id="drawer-header-actions">
+        <div class="flex items-center justify-between sm:justify-end gap-2 shrink-0 w-full sm:w-auto pt-2 sm:pt-0 border-t border-slate-800/50 sm:border-t-0" id="drawer-header-actions">
           <button type="button" id="btn-drawer-toggle-ai" onclick="toggleStudentDrawerAi()" class="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-200 border border-indigo-400/35 text-xs rounded-xl font-bold transition">
             <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-300"></i>
             <span>AI Update</span>
@@ -28370,8 +28370,8 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       const header = document.getElementById('drawer-header-content');
       if (header) {
         const avatarHtml = student.avatar
-          ? `<img src="${escapeHtml(resolveAuthenticatedMediaUrl(student.avatar))}" class="w-12 h-12 rounded-2xl object-cover border border-brand-500/60 shadow-sm shrink-0">`
-          : `<div class="w-12 h-12 rounded-2xl bg-brand-600/20 text-brand-300 border border-brand-500/30 flex items-center justify-center font-extrabold text-lg shrink-0">
+          ? `<img src="${escapeHtml(resolveAuthenticatedMediaUrl(student.avatar))}" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border border-brand-500/60 shadow-sm shrink-0">`
+          : `<div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-brand-600/20 text-brand-300 border border-brand-500/30 flex items-center justify-center font-extrabold text-xl shrink-0">
               ${escapeHtml((student.name || 'S').charAt(0).toUpperCase())}
             </div>`;
 
@@ -28382,28 +28382,28 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
               <i data-lucide="camera" class="w-4 h-4 text-white"></i>
             </div>
           </div>
-          <div class="min-w-0 space-y-1">
+          <div class="min-w-0 flex-1 space-y-1.5">
             <div class="flex items-center gap-2 flex-wrap">
-              <h3 dir="auto" class="text-base sm:text-lg font-extrabold text-white tracking-tight truncate">${escapeHtml(student.name)}</h3>
-              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg border ${statusBadgeCls}">${escapeHtml(statusLabel)}</span>
-              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg ${overallPct > 50 ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-800 text-slate-300'}">
+              <h3 dir="auto" class="text-lg sm:text-xl font-extrabold text-white tracking-tight leading-snug break-words">${escapeHtml(student.name)}</h3>
+              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg border shrink-0 ${statusBadgeCls}">${escapeHtml(statusLabel)}</span>
+              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg shrink-0 ${overallPct > 50 ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-800 text-slate-300'}">
                 ${overallPct}%
               </span>
             </div>
-            <div class="flex items-center gap-2.5 flex-wrap text-xs text-slate-400">
-              <span id="drawer-header-courses-badge" class="flex items-center gap-1 text-brand-300 font-medium">
-                <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400"></i>
+            <div class="flex items-center gap-x-3 gap-y-1 flex-wrap text-xs sm:text-[13px] text-slate-400">
+              <span id="drawer-header-courses-badge" class="flex items-center gap-1.5 text-brand-300 font-semibold whitespace-nowrap">
+                <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-400 shrink-0"></i>
                 <span id="drawer-header-courses-badge-text">${activeCourses.length} ${isHe ? (activeCourses.length === 1 ? 'קורס' : 'קורסים') : (activeCourses.length === 1 ? 'Course' : 'Courses')}</span>
               </span>
-              ${currentGradeLevel && currentGradeLevel !== 'Standard / All Levels' ? `<span class="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[11px] text-slate-300">${escapeHtml(currentGradeLevel)}</span>` : ''}
+              ${currentGradeLevel && currentGradeLevel !== 'Standard / All Levels' ? `<span class="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[11px] text-slate-300 whitespace-nowrap">${escapeHtml(currentGradeLevel)}</span>` : ''}
               ${studentDate ? `
-                <span class="flex items-center gap-1 text-slate-300 font-mono text-[11px]">
-                  <i data-lucide="calendar" class="w-3 h-3 text-slate-400 shrink-0"></i>
+                <span class="flex items-center gap-1.5 text-slate-300 font-mono text-xs whitespace-nowrap">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
                   <span>${escapeHtml(studentDate)}</span>
                 </span>
               ` : ''}
               ${student.avatar ? `
-                <button type="button" onclick="removeStudentPhoto('${student.id}', event)" class="hover:text-red-400 text-[11px] text-slate-500 transition">
+                <button type="button" onclick="removeStudentPhoto('${student.id}', event)" class="hover:text-red-400 text-[11px] text-slate-500 transition whitespace-nowrap">
                   ${t.removePhoto}
                 </button>
               ` : ''}
@@ -28952,23 +28952,23 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
           ${cardCrmGuardianHtml}
 
           <!-- Clean 2-Tab Student Profile Switcher (1. Progress & Tutor Notes | 2. Student Portal & Shared) -->
-          <div id="student-profile-tabs-bar" class="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-950 border border-slate-800">
+          <div id="student-profile-tabs-bar" class="flex items-center gap-1.5 p-1.5 rounded-2xl bg-slate-950 border border-slate-800">
             <button
               type="button"
               id="btn-student-profile-tab-progress"
               onclick="switchStudentProfileTab('${student.id}', 'progress')"
-              class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeProfileTab === 'progress' ? 'bg-brand-600 text-white shadow' : 'text-slate-400 hover:text-white'}"
+              class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 leading-tight ${activeProfileTab === 'progress' ? 'bg-brand-600 text-white shadow' : 'text-slate-400 hover:text-white'}"
             >
-              <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+              <i data-lucide="layers" class="w-4 h-4 shrink-0"></i>
               <span>${isHe ? '1. קורסים והערות מורה' : '1. Progress & Tutor Notes'}</span>
             </button>
             <button
               type="button"
               id="btn-student-profile-tab-portal"
               onclick="switchStudentProfileTab('${student.id}', 'portal')"
-              class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${activeProfileTab === 'portal' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}"
+              class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 leading-tight ${activeProfileTab === 'portal' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}"
             >
-              <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+              <i data-lucide="share-2" class="w-4 h-4 shrink-0"></i>
               <span>${isHe ? '2. אזור התלמיד ומשימות' : '2. Student Portal & Shared'}</span>
             </button>
           </div>
