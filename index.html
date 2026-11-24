@@ -1802,9 +1802,10 @@
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
-          <!-- Hidden technical setup hooks (accessible via Settings) -->
-          <button type="button" onclick="toggleAiKeySettings()" class="hidden" aria-hidden="true">
-            <span id="lbl-ai-btn-custom-key">Custom Key</span>
+          <!-- Personal Gemini API Key setup toggle (BYOK) -->
+          <button type="button" id="btn-ai-custom-key" onclick="toggleAiKeySettings()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-xs font-semibold transition active:scale-95" title="Configure your personal Gemini API key">
+            <i data-lucide="key-round" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span id="lbl-ai-btn-custom-key" class="hidden sm:inline">API Key</span>
           </button>
           <button type="button" onclick="openExternalAiModal()" class="hidden" aria-hidden="true">
             <span id="lbl-ai-btn-external">Connect External AI</span>
@@ -4708,7 +4709,7 @@
         </button>
 
         <!-- Google Gemini API Key Tile -->
-        <button onclick="closeSettingsModal(); switchTab('ai');" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-amber-700/50 transition active:scale-98 text-left">
+        <button onclick="closeSettingsModal(); switchTab('ai'); toggleAiKeySettings(true);" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-amber-700/50 transition active:scale-98 text-left">
           <div class="flex items-center gap-3">
             <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
             <div>
@@ -5442,9 +5443,11 @@
                   throw new Error(pData.error || 'Pro AI model access requires Pro tier or your own Gemini API key.');
                 }
                 if (resp.status === 429 && pData.quotaExceeded) {
+                  if (typeof toggleAiKeySettings === 'function') toggleAiKeySettings(true);
                   throw new Error(pData.error || 'Daily AI quota exceeded. Add your own Gemini API key in AI Settings.');
                 }
                 if (resp.status === 503 && pData.needsApiKey) {
+                  if (typeof toggleAiKeySettings === 'function') toggleAiKeySettings(true);
                   throw new Error(pData.error || 'AI service requires a personal Gemini API key or admin activation.');
                 }
                 if (resp.status === 404 || resp.status === 405 || resp.status === 501 || pData.fallbackDirect || (!hasProxyHeader && !!key)) {
@@ -31892,10 +31895,19 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       }
     }
 
-    function toggleAiKeySettings() {
+    function toggleAiKeySettings(forceOpen) {
       const banner = document.getElementById('ai-api-key-banner');
-      if (banner) {
+      if (!banner) return;
+      if (forceOpen === true) {
+        banner.classList.remove('hidden');
+      } else if (forceOpen === false) {
+        banner.classList.add('hidden');
+      } else {
         banner.classList.toggle('hidden');
+      }
+      if (!banner.classList.contains('hidden')) {
+        const keyInput = document.getElementById('ai-gemini-key-input');
+        if (keyInput) setTimeout(() => keyInput.focus(), 50);
       }
     }
 
