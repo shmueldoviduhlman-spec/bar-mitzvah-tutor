@@ -271,7 +271,17 @@
         transform-origin: top right;
       }
 
-      #app-main-canvas {
+      html:not([dir="rtl"]):not(.sidebar-scroll-collapsed):not(.student-portal-active) #app-main-canvas {
+        padding-left: 18rem !important;
+      }
+
+      html[dir="rtl"]:not(.sidebar-scroll-collapsed):not(.student-portal-active) #app-main-canvas {
+        padding-left: 1.5rem !important;
+        padding-right: 18rem !important;
+      }
+
+      html.sidebar-scroll-collapsed #app-main-canvas,
+      html.sidebar-scroll-unrolling #app-main-canvas {
         transition: padding 0.48s cubic-bezier(0.22, 1, 0.36, 1);
       }
 
