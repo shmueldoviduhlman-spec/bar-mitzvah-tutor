@@ -6,11 +6,41 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>TutorPilot | The Operating System for Tutors & Educators</title>
+  <title>TutorPilot | The Operating System for Tutors &amp; Educators</title>
+  <meta name="description" content="TutorPilot is the all-in-one AI curriculum studio, zero-password student portal, and 1-click WhatsApp parent and student update platform for private tutors and Bar/Bat Mitzvah educators.">
+  <link rel="canonical" href="https://tutorpilot.us/">
+  <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TutorPilot">
+  <meta property="og:title" content="TutorPilot | The Operating System for Private Tutors &amp; Educators">
+  <meta property="og:description" content="Build bilingual modular courses in seconds, give every student a zero-password portal, and send 1-click parent progress &amp; practice reminders via WhatsApp, SMS, or Email.">
+  <meta property="og:url" content="https://tutorpilot.us/">
+  <meta property="og:image" content="https://tutorpilot.us/icons/og-preview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="TutorPilot | AI Teaching Studio &amp; Student Portal">
+  <meta name="twitter:description" content="Design interactive courses with AI, share a 6-digit student portal, and send 1-click WhatsApp, SMS, and Email progress updates.">
+  <meta name="twitter:image" content="https://tutorpilot.us/icons/og-preview.png">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#FAF8F5" id="meta-theme-color">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <!-- Pre-Paint Critical FOUC Guard -->
+  <style id="tp-critical-fouc-guard">
+    .hidden { display: none !important; }
+    html.theme-daylight, html.theme-daylight body {
+      background-color: #FAF8F5;
+      color: #18181B;
+    }
+    html.dark, html.dark body {
+      background-color: #020617;
+      color: #F8FAFC;
+    }
+  </style>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -57,6 +87,8 @@
           },
           fontFamily: {
             sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+            serif: ['Source Serif 4', 'Georgia', 'serif'],
+            hebrewSerif: ['Frank Ruhl Libre', 'Heebo', 'serif'],
             hebrew: ['Heebo', 'Rubik', 'system-ui', 'sans-serif']
           }
         }
@@ -65,7 +97,7 @@
   </script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=Heebo:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..600&display=swap');
 
     body {
       font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -336,12 +368,46 @@
     html.theme-daylight [class*="bg-slate-950"]:not(.modern-gradient-cover) {
       background-color: #F8FAFC !important;
     }
+    /* Fix Warm Daylight Gradient Collisions on Dark Banners/Callouts */
+    html.theme-daylight [class*="from-slate-900"]:not(.modern-gradient-cover):not(.keep-white),
+    html.theme-daylight [class*="from-slate-950"]:not(.modern-gradient-cover):not(.keep-white),
+    html.theme-daylight [class*="via-slate-900"]:not(.modern-gradient-cover):not(.keep-white),
+    html.theme-daylight [class*="via-slate-950"]:not(.modern-gradient-cover):not(.keep-white),
+    html.theme-daylight [class*="to-slate-900"]:not(.modern-gradient-cover):not(.keep-white),
+    html.theme-daylight [class*="to-slate-950"]:not(.modern-gradient-cover):not(.keep-white) {
+      background-image: linear-gradient(135deg, #FFFFFF 0%, #FAF8F5 58%, #EEF2FF 100%) !important;
+      background-color: #FFFFFF !important;
+    }
+    html.theme-daylight [class*="from-indigo-950"]:not(.modern-gradient-cover):not(.keep-white),
+    html.theme-daylight [class*="via-indigo-950"]:not(.modern-gradient-cover):not(.keep-white) {
+      background-image: linear-gradient(135deg, #EEF2FF 0%, #FFFFFF 100%) !important;
+      background-color: #EEF2FF !important;
+    }
+    html.theme-daylight [class*="from-amber-950"]:not(.modern-gradient-cover):not(.keep-white) {
+      background-image: linear-gradient(135deg, #FFFBEB 0%, #FFFFFF 100%) !important;
+      background-color: #FFFBEB !important;
+    }
+    html.theme-daylight [class*="from-teal-950"]:not(.modern-gradient-cover):not(.keep-white),
+    html.theme-daylight #architect-planned-lessons-card {
+      background-image: linear-gradient(135deg, #F0FDFA 0%, #FFFFFF 100%) !important;
+      background-color: #F0FDFA !important;
+    }
+    html.theme-daylight #ai-api-key-banner {
+      background-image: linear-gradient(135deg, #FFFBEB 0%, #FFFFFF 58%, #EEF2FF 100%) !important;
+      background-color: #FFFBEB !important;
+      border-color: rgba(245, 158, 11, 0.35) !important;
+    }
+    html.theme-daylight #public-marketing-landing {
+      background-color: #FAF8F5 !important;
+      color: #18181B !important;
+    }
     html.theme-daylight #lock-screen,
     html.theme-daylight #educator-command-center-backdrop {
       background-color: rgba(241, 245, 249, 0.92) !important;
     }
     html.theme-daylight #educator-command-center {
       background: #FFFFFF !important;
+      background-image: none !important;
       border-color: #E2E8F0 !important;
     }
     html.theme-daylight [class*="bg-slate-800"]:not(.modern-gradient-cover),
@@ -400,6 +466,7 @@
     html.theme-daylight .bg-indigo-500.text-white,
     html.theme-daylight .bg-emerald-600.text-white,
     html.theme-daylight .bg-emerald-500.text-white,
+    html.theme-daylight .bg-teal-600.text-white,
     html.theme-daylight .bg-rose-600.text-white,
     html.theme-daylight [class*="from-brand-600"].text-white,
     html.theme-daylight [class*="from-indigo-"].text-white,
@@ -408,6 +475,11 @@
     html.theme-daylight .bg-indigo-500 .text-white,
     html.theme-daylight .bg-emerald-600 .text-white {
       color: #FFFFFF !important;
+    }
+    html.theme-daylight .keep-white .preserve-ink,
+    .keep-white .preserve-ink {
+      color: #312E81 !important;
+    }
     }
     html.theme-daylight .text-slate-50:not(.keep-white),
     html.theme-daylight .text-slate-100:not(.keep-white),
@@ -517,19 +589,32 @@
       }
     }
 
-    /* Book-Quality Larger Lesson Typography & Quotes */
+    /* Book-Quality Editorial Lesson Typography & Quotes */
     #reader-sections-body p,
     #reader-sections-body li,
+    #reader-sections-body blockquote,
     .lesson-doc-prose p,
-    .lesson-doc-prose li {
-      font-size: 1.0625rem !important;
-      line-height: 1.75 !important;
+    .lesson-doc-prose li,
+    .lesson-doc-prose blockquote {
+      font-family: 'Source Serif 4', 'Plus Jakarta Sans', Georgia, serif;
+      font-size: 1.08rem !important;
+      line-height: 1.8 !important;
     }
     #reader-sections-body [dir="rtl"],
     .lesson-doc-prose [dir="rtl"] {
-      font-family: 'Heebo', sans-serif;
-      font-size: 1.15rem !important;
-      line-height: 1.8 !important;
+      font-family: 'Frank Ruhl Libre', 'Heebo', serif;
+      font-size: 1.2rem !important;
+      line-height: 1.85 !important;
+    }
+
+    @keyframes tpShimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .tp-skeleton-shimmer {
+      background: linear-gradient(90deg, rgba(148,163,184,0.12) 25%, rgba(148,163,184,0.24) 50%, rgba(148,163,184,0.12) 75%);
+      background-size: 200% 100%;
+      animation: tpShimmer 1.4s ease-in-out infinite;
     }
 
     .badge-glow {
@@ -644,13 +729,316 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col pb-16 antialiased selection:bg-brand-600 selection:text-white overflow-x-hidden w-full">
 
   <!-- ============================================== -->
+  <!-- PRE-LOGIN PUBLIC MARKETING WEBSITE             -->
+  <!-- Shown cleanly at tutorpilot.us to cold visitors-->
+  <!-- ============================================== -->
+  <div id="public-marketing-landing" class="hidden fixed inset-0 z-[55] overflow-y-auto bg-slate-950 text-slate-100 transition-colors duration-300">
+    <!-- Top Banner if signed-in tutor is previewing -->
+    <div id="landing-return-studio-bar" class="hidden sticky top-0 z-50 bg-indigo-600 text-white px-4 py-2 text-xs font-bold flex items-center justify-center gap-3 shadow-md keep-white">
+      <span id="lbl-landing-preview-banner">Previewing public landing page while signed in</span>
+      <button type="button" onclick="hideMarketingLanding()" class="preserve-ink px-3 py-1 rounded-full bg-white text-indigo-700 hover:bg-indigo-50 transition font-extrabold text-[11px] shadow-sm">
+        Return to My Studio →
+      </button>
+    </div>
+
+    <!-- Sticky Landing Navigation -->
+    <header class="sticky top-0 z-40 glass-nav border-b border-slate-800/80">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+        <a href="#top" onclick="event.preventDefault(); document.getElementById('public-marketing-landing')?.scrollTo({ top: 0, behavior: 'smooth' });" class="flex items-center gap-2.5 shrink-0">
+          <img src="/icons/favicon.svg" alt="TutorPilot Logo" class="w-9 h-9 rounded-xl shadow-md" />
+          <span class="text-lg font-extrabold tracking-tight text-white">TutorPilot</span>
+        </a>
+
+        <nav class="hidden md:flex items-center gap-6 text-xs font-bold text-slate-300">
+          <a href="#landing-features" onclick="event.preventDefault(); scrollLandingSection('landing-features');" class="hover:text-brand-400 transition" id="nav-landing-features">Features</a>
+          <a href="#landing-interactive-sandbox" onclick="event.preventDefault(); scrollLandingSection('landing-interactive-sandbox');" class="hover:text-brand-400 transition" id="nav-landing-demo">Live Sandbox</a>
+          <a href="#landing-study-planner" onclick="event.preventDefault(); scrollLandingSection('landing-study-planner');" class="hover:text-brand-400 transition" id="nav-landing-planner">Study Planner</a>
+          <a href="#landing-how-it-works" onclick="event.preventDefault(); scrollLandingSection('landing-how-it-works');" class="hover:text-brand-400 transition" id="nav-landing-how">60s Setup</a>
+        </nav>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <button type="button" onclick="toggleLanguage()" class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition">
+            <i data-lucide="languages" class="w-3.5 h-3.5 text-brand-400"></i>
+            <span id="landing-lang-indicator">עברית</span>
+          </button>
+          <button type="button" onclick="toggleThemeMode()" class="p-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition" title="Toggle Daylight / Dark Mode">
+            <i data-lucide="sun-moon" class="w-4 h-4 text-amber-400"></i>
+          </button>
+          <button type="button" id="btn-landing-student-login" onclick="openAuthFromLanding('student')" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-100 border border-slate-700 text-xs font-bold transition">
+            <i data-lucide="user-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span id="lbl-landing-student-btn">Student Portal</span>
+          </button>
+          <button type="button" id="btn-landing-signin" onclick="openAuthFromLanding('signin')" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800 transition">
+            <span id="lbl-landing-signin-btn">Log In</span>
+          </button>
+          <button type="button" id="btn-landing-get-started" onclick="openAuthFromLanding('signup')" class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs sm:text-sm font-extrabold shadow-lg shadow-indigo-500/25 transition active:scale-95 keep-white">
+            <span id="lbl-landing-cta-btn">Start Studio</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Landing Flow (Strictly No Pricing) -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-20">
+
+      <!-- HERO SECTION -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        <div class="lg:col-span-6 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span id="landing-hero-badge">Built for Private Tutors, Hebrew Educators &amp; Coaches</span>
+          </div>
+
+          <h1 id="landing-hero-title" class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-[1.12]">
+            Run your entire tutoring studio, AI curriculum, and parent updates in one place.
+          </h1>
+
+          <p id="landing-hero-desc" class="text-base sm:text-lg text-slate-300 leading-relaxed max-w-xl">
+            Design structured courses in 60 seconds, give every learner a zero password portal on any phone, and send 1 click WhatsApp, SMS, or Email progress summaries and practice reminders.
+          </p>
+
+          <div class="flex flex-wrap items-center gap-3 pt-1">
+            <button type="button" id="btn-hero-create-studio" onclick="openAuthFromLanding('signup')" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-sm sm:text-base shadow-xl shadow-indigo-500/25 flex items-center gap-2 transition active:scale-95 keep-white">
+              <span id="lbl-hero-cta">Create Your Tutor Studio</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 rtl:rotate-180"></i>
+            </button>
+            <button type="button" onclick="scrollLandingSection('landing-interactive-sandbox')" class="px-5 py-3.5 rounded-2xl bg-slate-900 border border-slate-700 hover:border-indigo-400/60 text-slate-100 font-bold text-sm sm:text-base flex items-center gap-2 transition">
+              <i data-lucide="play-circle" class="w-4 h-4 text-amber-400"></i>
+              <span id="lbl-hero-demo">Try Live Demo</span>
+            </button>
+            <button type="button" onclick="openAuthFromLanding('student')" class="sm:hidden w-full justify-center px-4 py-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/35 text-emerald-300 font-bold text-sm flex items-center gap-2">
+              <i data-lucide="key-round" class="w-4 h-4"></i>
+              <span>Student Portal Login (6-Digit Code)</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3 pt-2 max-w-lg text-xs">
+            <div class="p-3 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-0.5">
+              <div class="font-extrabold text-white text-sm">60 Seconds</div>
+              <div class="text-slate-400">Guided Studio Setup</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-0.5">
+              <div class="font-extrabold text-white text-sm">Zero Email</div>
+              <div class="text-slate-400">Student Portal Access</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-0.5">
+              <div class="font-extrabold text-white text-sm">1-Tap Outreach</div>
+              <div class="text-slate-400">WhatsApp, SMS &amp; Mail</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Right Visual Stack -->
+        <div class="lg:col-span-6">
+          <div class="rounded-3xl bg-slate-900 border border-slate-800 p-5 sm:p-6 shadow-2xl space-y-4">
+            <div class="modern-gradient-cover keep-white rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-amber-500 p-5 text-white space-y-2 shadow-lg">
+              <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider opacity-90">
+                <span>Live Lesson Reader · Bilingual Ready</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-white/20">AI Powered</span>
+              </div>
+              <div class="text-lg sm:text-xl font-extrabold">Torah Aliyah Blessings &amp; Parsha Fluency</div>
+              <p class="text-xs sm:text-sm opacity-90 leading-relaxed">Clean book typography, side by side Hebrew &amp; English blocks, private tutor cheat sheet cues, and printable worksheets.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-400">Student Portal</span>
+                  <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-bold">78% Ready</span>
+                </div>
+                <div class="text-sm font-bold text-white">Practice &amp; Checklists</div>
+                <div class="text-xs text-slate-400 leading-relaxed">Homework, study audio clips, custom goals, and countdown timer with 1-tap code entry.</div>
+              </div>
+              <div class="p-4 rounded-2xl bg-slate-950/80 border border-emerald-500/35 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">WhatsApp &amp; SMS</span>
+                  <span class="text-[11px] font-mono text-slate-400">1 Click</span>
+                </div>
+                <div class="text-sm font-bold text-white">Parent &amp; Student Nudges</div>
+                <div class="text-xs text-slate-400 leading-relaxed">"Great class today! Homework &amp; voice practice posted in Student Portal — tap to open."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- INTERACTIVE LIVE SANDBOX -->
+      <section id="landing-interactive-sandbox" class="space-y-6 scroll-mt-20">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div class="space-y-2">
+            <span class="text-xs font-extrabold uppercase tracking-widest text-indigo-400">Interactive Product Preview</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Explore TutorPilot by Teaching Specialty</h2>
+            <p class="text-sm text-slate-400 max-w-2xl">Switch between tutoring subjects and inspect how Course Studio, the zero password Student Portal, and WhatsApp outreach work together.</p>
+          </div>
+
+          <div class="flex items-center gap-1.5 flex-wrap bg-slate-900 p-1.5 rounded-2xl border border-slate-800" id="landing-sandbox-niche-tabs">
+            <button type="button" id="btn-landing-niche-barmitzvah" onclick="selectLandingNiche('barmitzvah')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow transition">📜 Bar/Bat Mitzvah</button>
+            <button type="button" id="btn-landing-niche-languages" onclick="selectLandingNiche('languages')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition">🌍 Languages &amp; ESL</button>
+            <button type="button" id="btn-landing-niche-music" onclick="selectLandingNiche('music')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition">🎵 Music &amp; Voice</button>
+            <button type="button" id="btn-landing-niche-stem" onclick="selectLandingNiche('stem')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition">📐 Math &amp; STEM</button>
+          </div>
+        </div>
+
+        <div class="rounded-3xl bg-slate-900 border border-slate-800 overflow-hidden shadow-2xl">
+          <div class="px-4 sm:px-6 py-3.5 border-b border-slate-800 bg-slate-950/70 flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-2" id="landing-sandbox-view-tabs">
+              <button type="button" id="btn-landing-view-studio" onclick="selectLandingView('studio')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 shadow transition">1. Course &amp; Reader</button>
+              <button type="button" id="btn-landing-view-portal" onclick="selectLandingView('portal')" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition">2. Student Portal</button>
+              <button type="button" id="btn-landing-view-outreach" onclick="selectLandingView('outreach')" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition">3. WhatsApp &amp; SMS</button>
+            </div>
+            <button type="button" onclick="openAuthFromLanding('signup', landingState.niche)" class="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition">
+              <span>Use This Starter Pack</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5 rtl:rotate-180"></i>
+            </button>
+          </div>
+          <div id="landing-sandbox-body" class="p-5 sm:p-8">
+            <!-- Populated dynamically by renderLandingSandbox() -->
+          </div>
+        </div>
+      </section>
+
+      <!-- CAPABILITIES BENTO GRID -->
+      <section id="landing-features" class="space-y-6 scroll-mt-20">
+        <div class="text-center max-w-2xl mx-auto space-y-2">
+          <span class="text-xs font-extrabold uppercase tracking-widest text-amber-400">Everything Included</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Built Specifically for Real 1-on-1 Teaching</h2>
+          <p class="text-sm text-slate-400">Replace scattered docs, manual reminder texts, and forgotten homework sheets with one calm workspace.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-2.5 shadow-sm">
+            <div class="w-10 h-10 rounded-2xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center"><i data-lucide="sparkles" class="w-5 h-5"></i></div>
+            <h3 class="text-base font-extrabold text-white">AI Course &amp; Lesson Architect</h3>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">Define your teaching structure once (sources, drills, pitfalls, homework) and generate clean lessons tailored to your student.</p>
+          </div>
+          <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-2.5 shadow-sm">
+            <div class="w-10 h-10 rounded-2xl bg-amber-500/15 text-amber-400 flex items-center justify-center"><i data-lucide="book-open" class="w-5 h-5"></i></div>
+            <h3 class="text-base font-extrabold text-white">Book-Grade Bilingual Reader</h3>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">Editorial serif reading mode, side by side RTL Hebrew &amp; English layouts, private tutor cues, and clean PDF worksheets.</p>
+          </div>
+          <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-2.5 shadow-sm">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center"><i data-lucide="smartphone" class="w-5 h-5"></i></div>
+            <h3 class="text-base font-extrabold text-white">Zero-Password Student Portal</h3>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">Students open their assignments, voice practice recordings, and interactive quizzes in one tap using a 6-character code.</p>
+          </div>
+          <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-2.5 shadow-sm">
+            <div class="w-10 h-10 rounded-2xl bg-green-500/15 text-green-400 flex items-center justify-center"><i data-lucide="message-circle" class="w-5 h-5"></i></div>
+            <h3 class="text-base font-extrabold text-white">1-Click Parent &amp; Student Updates</h3>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">Draft warm parent progress recaps or quick student practice reminders in English or Hebrew and launch WhatsApp, SMS, or Email.</p>
+          </div>
+          <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-2.5 shadow-sm">
+            <div class="w-10 h-10 rounded-2xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center"><i data-lucide="compass" class="w-5 h-5"></i></div>
+            <h3 class="text-base font-extrabold text-white">Teaching Continuity &amp; Calendar</h3>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">Never forget where last class ended. Track Last Taught, Next to Teach, attendance, and recurring schedules in sync.</p>
+          </div>
+          <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-2.5 shadow-sm">
+            <div class="w-10 h-10 rounded-2xl bg-purple-500/15 text-purple-400 flex items-center justify-center"><i data-lucide="users" class="w-5 h-5"></i></div>
+            <h3 class="text-base font-extrabold text-white">Teams &amp; External AI Agents</h3>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">Share courses across co-teachers via school invite codes, and connect external AI copilots with strict permission boundaries.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- INTERACTIVE STUDY TIMELINE PLANNER LEAD MAGNET -->
+      <section id="landing-study-planner" class="rounded-3xl bg-slate-900 border border-slate-800 p-6 sm:p-8 shadow-xl space-y-6 scroll-mt-20">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1.5">
+            <span class="text-xs font-extrabold uppercase tracking-widest text-teal-400">Free Planning Tool</span>
+            <h2 class="text-2xl font-extrabold text-white tracking-tight">Target Milestone &amp; Study Pacing Planner</h2>
+            <p class="text-xs sm:text-sm text-slate-400">Pick a target date for a Bar/Bat Mitzvah, language proficiency goal, recital, or exam to generate a weekly roadmap.</p>
+          </div>
+          <button type="button" onclick="openAuthFromLanding('signup', document.getElementById('landing-planner-track')?.value || 'barmitzvah')" class="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs sm:text-sm transition active:scale-95 shrink-0 shadow">
+            Launch This Roadmap Inside TutorPilot →
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label for="landing-planner-track" class="block text-xs font-bold text-slate-300 mb-1.5">Learning Goal / Program</label>
+            <select id="landing-planner-track" onchange="renderLandingStudyPlanner()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="barmitzvah">Bar / Bat Mitzvah Preparation (Torah, Blessings &amp; Speech)</option>
+              <option value="languages">Conversational Hebrew / Language Fluency</option>
+              <option value="music">Instrument &amp; Recital Readiness</option>
+              <option value="stem">Math &amp; Academic Exam Mastery</option>
+            </select>
+          </div>
+          <div>
+            <label for="landing-planner-date" class="block text-xs font-bold text-slate-300 mb-1.5">Target Milestone / Ceremony Date</label>
+            <input type="date" id="landing-planner-date" onchange="renderLandingStudyPlanner()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        </div>
+
+        <div id="landing-planner-output" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <!-- Populated by renderLandingStudyPlanner() -->
+        </div>
+      </section>
+
+      <!-- HOW IT WORKS (60 SECONDS) -->
+      <section id="landing-how-it-works" class="space-y-6 scroll-mt-20">
+        <div class="text-center space-y-2">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Ready to Teach in 60 Seconds</h2>
+          <p class="text-sm text-slate-400">Your first-login onboarding wizard builds your starter curriculum automatically.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-2">
+            <div class="text-xs font-mono font-extrabold text-indigo-400">STEP 01</div>
+            <h3 class="text-base font-extrabold text-white">Pick Your Specialty</h3>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">Choose Bar/Bat Mitzvah, Languages, Music, STEM, or Custom and name your studio.</p>
+          </div>
+          <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-2">
+            <div class="text-xs font-mono font-extrabold text-amber-400">STEP 02</div>
+            <h3 class="text-base font-extrabold text-white">Seed Starter Course &amp; Student</h3>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">Start with ready to teach bilingual lessons and a demo student portal or begin completely blank.</p>
+          </div>
+          <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-2">
+            <div class="text-xs font-mono font-extrabold text-emerald-400">STEP 03</div>
+            <h3 class="text-base font-extrabold text-white">Teach &amp; Keep Families Updated</h3>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">Share 1-tap student login links and send parents weekly progress recaps via WhatsApp, SMS, or Email.</p>
+          </div>
+        </div>
+
+        <div class="modern-gradient-cover keep-white rounded-3xl bg-gradient-to-r from-indigo-600 via-violet-600 to-amber-500 p-7 sm:p-10 text-center text-white space-y-4 shadow-xl">
+          <h3 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Bring Calm &amp; Clarity to Every Tutoring Session</h3>
+          <p class="text-sm sm:text-base opacity-90 max-w-xl mx-auto">Sign in with Google or email to launch your private TutorPilot studio in under a minute.</p>
+          <div class="flex items-center justify-center gap-3 flex-wrap pt-1">
+            <button type="button" onclick="openAuthFromLanding('signup')" class="preserve-ink px-7 py-3.5 rounded-2xl bg-white text-indigo-700 hover:bg-indigo-50 font-extrabold text-sm sm:text-base shadow-lg transition active:scale-95">
+              Create Your Studio Now →
+            </button>
+            <button type="button" onclick="openAuthFromLanding('student')" class="px-6 py-3.5 rounded-2xl bg-black/20 hover:bg-black/30 text-white border border-white/30 font-bold text-sm sm:text-base transition">
+              Student Login
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-slate-800/80 py-8 px-4 text-center text-xs text-slate-400 space-y-2">
+      <div class="font-bold text-slate-300">TutorPilot · Operating System for Tutors &amp; Educators</div>
+      <div class="flex items-center justify-center gap-4 flex-wrap">
+        <a href="https://tutorpilot.us" class="hover:text-indigo-400 transition">tutorpilot.us</a>
+        <span>•</span>
+        <button type="button" onclick="openAuthFromLanding('signin')" class="hover:text-indigo-400 transition">Teacher Log In</button>
+        <span>•</span>
+        <button type="button" onclick="openAuthFromLanding('student')" class="hover:text-indigo-400 transition">Student Portal</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ============================================== -->
   <!-- ============================================== -->
   <!-- TUTOR MULTI-TENANT AUTHENTICATION GATE          -->
   <!-- ============================================== -->
   <div id="lock-screen" class="fixed inset-0 z-50 flex flex-col items-center overflow-y-auto bg-slate-950 px-4 py-6 sm:py-10 transition-all duration-300">
     <div class="max-w-[420px] w-full my-auto bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-7 shadow-xl relative space-y-4">
 
-      <!-- Language Toggle in Auth Screen -->
+      <!-- Overview & Language Controls in Auth Screen -->
+      <div class="absolute top-4 left-4 rtl:left-auto rtl:right-4">
+        <button type="button" id="btn-lock-view-landing" onclick="showMarketingLanding()" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition active:scale-95">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5 text-brand-400 rtl:rotate-180"></i>
+          <span id="lbl-lock-overview">Overview</span>
+        </button>
+      </div>
       <div class="absolute top-4 right-4 rtl:right-auto rtl:left-4">
         <button onclick="toggleLanguage()" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition active:scale-95">
           <i data-lucide="languages" class="w-3.5 h-3.5 text-brand-400"></i>
@@ -1105,7 +1493,7 @@
             </p>
           </div>
 
-          <div class="pt-1">
+          <div class="pt-1 flex flex-wrap items-center justify-center gap-2.5">
             <button
               type="button"
               onclick="openCreateCourseModal('ai')"
@@ -1115,6 +1503,15 @@
               <i data-lucide="plus" class="w-5 h-5"></i>
               <span id="lbl-tutor-hub-add-btn">Create a New Course</span>
               <span class="sr-only">+ Add a Course</span>
+            </button>
+            <button
+              type="button"
+              onclick="openFirstLoginOnboardingModal()"
+              id="btn-blank-onboarding-wizard"
+              class="inline-flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/35 font-bold text-sm transition active:scale-95"
+            >
+              <i data-lucide="wand-2" class="w-4 h-4"></i>
+              <span id="lbl-blank-onboarding-btn">Guided 60s Setup Wizard</span>
             </button>
           </div>
 
@@ -3310,15 +3707,15 @@
             <div>
               <span class="text-[11px] text-slate-400 block mb-1">Gateway Endpoint URL</span>
               <div class="flex items-center gap-1.5">
-                <input type="text" readonly value="https://tutorpilot.pages.dev/api/external-agent" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-slate-300" />
-                <button type="button" onclick="copyToClipboardText('https://tutorpilot.pages.dev/api/external-agent', 'Gateway URL Copied!')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold shrink-0">Copy</button>
+                <input type="text" readonly value="https://tutorpilot.us/api/external-agent" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-slate-300" />
+                <button type="button" onclick="copyToClipboardText('https://tutorpilot.us/api/external-agent', 'Gateway URL Copied!')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold shrink-0">Copy</button>
               </div>
             </div>
             <div>
               <span class="text-[11px] text-slate-400 block mb-1">Universal OpenAPI Schema URL</span>
               <div class="flex items-center gap-1.5">
-                <input type="text" readonly value="https://tutorpilot.pages.dev/tutorpilot-agent-openapi.json" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-slate-300" />
-                <button type="button" onclick="copyToClipboardText('https://tutorpilot.pages.dev/tutorpilot-agent-openapi.json', 'OpenAPI URL Copied!')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold shrink-0">Copy</button>
+                <input type="text" readonly value="https://tutorpilot.us/tutorpilot-agent-openapi.json" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-slate-300" />
+                <button type="button" onclick="copyToClipboardText('https://tutorpilot.us/tutorpilot-agent-openapi.json', 'OpenAPI URL Copied!')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold shrink-0">Copy</button>
               </div>
             </div>
           </div>
@@ -3851,6 +4248,15 @@
           >
             <i data-lucide="message-circle" class="w-4 h-4"></i>
             <span id="lbl-recap-whatsapp">Send WhatsApp</span>
+          </button>
+          <button
+            type="button"
+            onclick="sendParentRecapSms()"
+            class="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white keep-white text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-md"
+            id="btn-recap-sms"
+          >
+            <i data-lucide="message-square" class="w-4 h-4"></i>
+            <span id="lbl-recap-sms">SMS</span>
           </button>
           <button
             type="button"
@@ -4424,7 +4830,11 @@
           <!-- Populated by renderStudentDrawer -->
         </div>
 
-        <div class="flex items-center justify-between sm:justify-end gap-2 shrink-0 w-full sm:w-auto pt-2 sm:pt-0 border-t border-slate-800/50 sm:border-t-0" id="drawer-header-actions">
+        <div class="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 flex-wrap shrink-0 w-full sm:w-auto pt-2 sm:pt-0 border-t border-slate-800/50 sm:border-t-0" id="drawer-header-actions">
+          <button type="button" id="btn-drawer-outreach" onclick="if(APP_STATE.activeStudentDrawerId) openOutreachModal(APP_STATE.activeStudentDrawerId, 'parent')" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/35 text-xs rounded-xl font-bold transition">
+            <i data-lucide="send" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>Update / Remind</span>
+          </button>
           <button type="button" id="btn-drawer-toggle-ai" onclick="toggleStudentDrawerAi()" class="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-200 border border-indigo-400/35 text-xs rounded-xl font-bold transition">
             <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-300"></i>
             <span>AI Update</span>
@@ -4696,6 +5106,30 @@
           <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
         </button>
 
+        <!-- 60s Studio Setup Wizard Tile -->
+        <button type="button" id="btn-settings-open-onboarding" onclick="closeSettingsModal(); openFirstLoginOnboardingModal();" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-amber-500/50 transition active:scale-98 text-left">
+          <div class="flex items-center gap-3">
+            <i data-lucide="wand-2" class="w-4 h-4 text-amber-400"></i>
+            <div>
+              <div id="settings-onboarding-title" class="text-xs font-bold text-white">60s Studio Setup Wizard</div>
+              <p id="settings-onboarding-desc" class="text-[11px] text-slate-400 mt-0.5">Pick your specialty &amp; seed a starter course + demo student anytime</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+        </button>
+
+        <!-- Preview Public Marketing Website Tile -->
+        <button type="button" id="btn-settings-open-landing" onclick="closeSettingsModal(); showMarketingLanding(true);" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-indigo-500/50 transition active:scale-98 text-left">
+          <div class="flex items-center gap-3">
+            <i data-lucide="globe" class="w-4 h-4 text-indigo-400"></i>
+            <div>
+              <div id="settings-landing-title" class="text-xs font-bold text-white">Preview Public Website</div>
+              <p id="settings-landing-desc" class="text-[11px] text-slate-400 mt-0.5">Inspect the visitor welcome page &amp; interactive demo</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+        </button>
+
         <!-- Universal External AI Connection Tile -->
         <button onclick="closeSettingsModal(); openExternalAiModal();" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-indigo-500/50 transition active:scale-98 text-left">
           <div class="flex items-center gap-3">
@@ -4771,6 +5205,157 @@
           <i data-lucide="trash-2" class="w-4 h-4 text-slate-500"></i>
         </button>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: 60-SECOND FIRST-LOGIN ONBOARDING WIZARD -->
+  <!-- ============================================== -->
+  <div id="modal-first-login-onboarding" class="fixed inset-0 z-[72] flex items-end sm:items-center justify-center bg-black/75 p-0 sm:p-4 hidden backdrop-blur-sm">
+    <div class="bg-slate-900 border-t sm:border border-slate-700/80 rounded-t-3xl sm:rounded-3xl max-w-2xl w-full max-h-[94vh] flex flex-col shadow-2xl overflow-hidden animate-slideUp" onclick="event.stopPropagation()">
+      <!-- Top Bar -->
+      <div class="px-5 py-4 border-b border-slate-800/80 bg-slate-950/85 flex items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-500 to-amber-500 flex items-center justify-center text-white shadow-md shrink-0 keep-white">
+            <i data-lucide="wand-2" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0">
+            <h3 id="onboarding-modal-title" class="text-sm sm:text-base font-extrabold text-white truncate">Welcome to TutorPilot · 60s Studio Setup</h3>
+            <p id="onboarding-modal-subtitle" class="text-[11px] text-slate-400 truncate">Tailor your workspace &amp; sample curriculum in 3 quick clicks</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button type="button" onclick="toggleLanguage(); renderOnboardingWizardStep();" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition">
+            <span id="onboarding-lang-badge">עברית</span>
+          </button>
+          <button type="button" id="btn-onboarding-skip" onclick="closeFirstLoginOnboardingModal(true)" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+            Skip
+          </button>
+        </div>
+      </div>
+
+      <!-- 3-Step Progress Strip -->
+      <div class="px-5 pt-3.5 pb-2 bg-slate-900/60 border-b border-slate-800/60 shrink-0">
+        <div class="grid grid-cols-3 gap-2 text-[11px] font-bold" id="onboarding-step-pills">
+          <div id="onboarding-pill-1" class="px-2.5 py-1.5 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-center truncate">1. Specialty</div>
+          <div id="onboarding-pill-2" class="px-2.5 py-1.5 rounded-xl bg-slate-800 text-slate-400 border border-slate-800 text-center truncate">2. Starter Pack</div>
+          <div id="onboarding-pill-3" class="px-2.5 py-1.5 rounded-xl bg-slate-800 text-slate-400 border border-slate-800 text-center truncate">3. Ready!</div>
+        </div>
+      </div>
+
+      <!-- Dynamic Body -->
+      <div id="onboarding-wizard-body" class="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1">
+        <!-- Populated by renderOnboardingWizardStep() -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ONE-CLICK PARENT & STUDENT OUTREACH     -->
+  <!-- WhatsApp / SMS / Email Progress & Reminders    -->
+  <!-- ============================================== -->
+  <div id="modal-outreach-composer" class="fixed inset-0 z-[72] flex items-end sm:items-center justify-center bg-black/75 p-0 sm:p-4 hidden backdrop-blur-sm" onclick="if(event.target === this) closeOutreachModal();">
+    <div class="bg-slate-900 border-t sm:border border-slate-700/80 rounded-t-3xl sm:rounded-3xl max-w-2xl w-full max-h-[94vh] flex flex-col shadow-2xl overflow-hidden animate-slideUp" onclick="event.stopPropagation()">
+      <!-- Header -->
+      <div class="px-5 py-4 border-b border-slate-800/80 bg-slate-950/90 flex items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-500/15 border border-emerald-500/35 text-emerald-400 flex items-center justify-center shrink-0">
+            <i data-lucide="send" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0">
+            <h3 id="outreach-modal-title" class="text-sm sm:text-base font-extrabold text-white truncate">Send Progress Update &amp; Reminders</h3>
+            <p id="outreach-modal-subtitle" class="text-[11px] text-slate-400 truncate">1-click WhatsApp, SMS, or Email for parents &amp; students</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeOutreachModal()" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition shrink-0" title="Close">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-5 space-y-4 overflow-y-auto flex-1">
+        <!-- Audience Switcher: Parent Progress Summary vs Student Practice Reminder -->
+        <div class="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-slate-950 border border-slate-800" id="outreach-audience-tabs">
+          <button type="button" id="tab-outreach-parent" onclick="switchOutreachRecipient('parent')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow">
+            <i data-lucide="heart-handshake" class="w-4 h-4 shrink-0"></i>
+            <span class="truncate">Parent Progress Summary</span>
+          </button>
+          <button type="button" id="tab-outreach-student" onclick="switchOutreachRecipient('student')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 text-slate-400 hover:text-white">
+            <i data-lucide="bell-ring" class="w-4 h-4 shrink-0"></i>
+            <span class="truncate">Student Reminder</span>
+          </button>
+        </div>
+
+        <!-- Inline Quick Contact Bar (Auto-Saves to Student Record & D1) -->
+        <div id="outreach-contact-bar" class="p-3.5 rounded-2xl bg-slate-950/75 border border-slate-800 space-y-2.5">
+          <!-- Populated dynamically for Parent vs Student -->
+        </div>
+
+        <!-- Presets + Language + AI Polish Toolbar -->
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <div id="outreach-presets-row" class="flex items-center gap-1.5 flex-wrap">
+            <!-- Populated dynamically -->
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <div class="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-0.5 text-[11px] font-bold">
+              <button type="button" id="btn-outreach-lang-en" onclick="setOutreachLanguage('en')" class="px-2.5 py-1 rounded-lg bg-brand-600 text-white transition">EN</button>
+              <button type="button" id="btn-outreach-lang-he" onclick="setOutreachLanguage('he')" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition">עברית</button>
+            </div>
+            <button type="button" id="btn-outreach-ai-polish" onclick="polishOutreachMessageWithAi()" class="px-3 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-400/35 text-xs font-bold flex items-center gap-1.5 transition active:scale-95">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
+              <span>Polish with AI</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Email Subject Line -->
+        <div class="space-y-1">
+          <label for="outreach-email-subject-input" class="block text-[11px] font-bold text-slate-400">Email Subject / Title</label>
+          <input type="text" id="outreach-email-subject-input" dir="auto" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+
+        <!-- Message Composer -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <label for="outreach-message-textarea" class="font-bold text-slate-300">Message Preview (Editable)</label>
+            <label class="flex items-center gap-1.5 text-[11px] text-slate-400 cursor-pointer select-none">
+              <input type="checkbox" id="chk-outreach-viral-footer" checked onchange="regenerateOutreachDraft()" class="rounded border-slate-700 accent-emerald-500" />
+              <span>Include TutorPilot.us signature</span>
+            </label>
+          </div>
+          <textarea id="outreach-message-textarea" dir="auto" rows="8" class="w-full bg-slate-950 border border-slate-700 rounded-2xl p-3.5 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-sans leading-relaxed resize-y"></textarea>
+        </div>
+
+        <!-- Portal Quick Link Chip -->
+        <div id="outreach-portal-link-preview" class="px-3.5 py-2.5 rounded-xl bg-indigo-950/35 border border-indigo-500/30 flex items-center justify-between gap-2 flex-wrap text-xs">
+          <!-- Populated dynamically with 1-tap Portal URL -->
+        </div>
+      </div>
+
+      <!-- Footer Delivery Bar -->
+      <div class="px-5 py-3.5 border-t border-slate-800/80 bg-slate-950/90 flex items-center justify-between gap-2 flex-wrap shrink-0">
+        <button type="button" onclick="closeOutreachModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+          Close
+        </button>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button type="button" id="btn-outreach-copy" onclick="copyOutreachMessage()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition active:scale-95">
+            <i data-lucide="copy" class="w-3.5 h-3.5 text-brand-400"></i>
+            <span>Copy</span>
+          </button>
+          <button type="button" id="btn-outreach-whatsapp" onclick="sendOutreachViaWhatsApp()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md transition active:scale-95 keep-white">
+            <i data-lucide="message-circle" class="w-4 h-4"></i>
+            <span>WhatsApp</span>
+          </button>
+          <button type="button" id="btn-outreach-sms" onclick="sendOutreachViaSms()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md transition active:scale-95 keep-white">
+            <i data-lucide="message-square" class="w-4 h-4"></i>
+            <span>SMS Text</span>
+          </button>
+          <button type="button" id="btn-outreach-email" onclick="sendOutreachViaEmail()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md transition active:scale-95 keep-white">
+            <i data-lucide="mail" class="w-4 h-4"></i>
+            <span>Email</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -8416,6 +9001,8 @@
             return {
               ...st,
               school_id: normalizeActiveSchoolId(st.schoolId || st.school_id || schoolId),
+              studentContact: (st.studentContact && typeof st.studentContact === 'object') ? st.studentContact : { phone: '', email: '' },
+              outreachLog: (st.outreachLog && typeof st.outreachLog === 'object') ? st.outreachLog : {},
               schedule: sched,
               skills: (st.skills && typeof st.skills === 'object') ? st.skills : getDefaultStudentSkills(),
               sharedNotes: Array.isArray(st.sharedNotes) ? st.sharedNotes : [],
@@ -8460,6 +9047,7 @@
           updateUserSessionDisplay(mappedUser);
           if (typeof updateAiStatusPill === 'function') updateAiStatusPill();
           renderAllViews();
+          if (typeof maybeTriggerFirstLoginOnboarding === 'function') maybeTriggerFirstLoginOnboarding();
           return activeBoot;
         } catch (err) {
           console.error('Bootstrap workspace error:', err);
@@ -8630,8 +9218,11 @@
       if (boxStudent) boxStudent.classList.toggle('hidden', !isStudent);
 
       if (isStudent) {
+        if (typeof applyStudentQueryParamsPrefill === 'function') applyStudentQueryParamsPrefill();
         const nameInp = document.getElementById('student-login-name');
-        if (nameInp) setTimeout(() => nameInp.focus(), 80);
+        const codeInp = document.getElementById('student-login-code');
+        if (nameInp && !nameInp.value) setTimeout(() => nameInp.focus(), 80);
+        else if (codeInp && !codeInp.value) setTimeout(() => codeInp.focus(), 80);
       } else {
         handleAuthTabSwitch('signin');
       }
@@ -8810,6 +9401,8 @@
       }
       const lockScreen = document.getElementById('lock-screen');
       if (lockScreen) lockScreen.classList.add('hidden');
+      const landingScreen = document.getElementById('public-marketing-landing');
+      if (landingScreen) landingScreen.classList.add('hidden');
       const sidebarShell = document.getElementById('app-sidebar-shell');
       if (sidebarShell) sidebarShell.classList.add('hidden');
       const teacherHeader = document.getElementById('teacher-header-controls');
@@ -8924,6 +9517,8 @@
       const bottomDock = document.getElementById('main-bottom-dock');
       if (bottomDock) bottomDock.classList.remove('hidden');
 
+      const landingScreen = document.getElementById('public-marketing-landing');
+      if (landingScreen) landingScreen.classList.add('hidden');
       const lockScreen = document.getElementById('lock-screen');
       if (lockScreen) lockScreen.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
       handleAuthRoleSwitch('student');
@@ -9710,6 +10305,12 @@
             </div>
           ` : ''}
         </div>
+        <div id="student-portal-powered-by" class="pt-4 pb-2 text-center">
+          <a href="https://tutorpilot.us" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-900/70 border border-slate-800 text-[11px] font-semibold text-slate-400 hover:text-indigo-400 transition">
+            <span>✦</span>
+            <span>${isHe ? 'מופעל על ידי TutorPilot.us' : 'Powered by TutorPilot.us'}</span>
+          </a>
+        </div>
         </div>
       `;
       if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
@@ -9909,9 +10510,13 @@
         return true;
       }
 
-      if (lockScreen) {
+      const landingScreen = document.getElementById('public-marketing-landing');
+      const landingVisible = landingScreen && !landingScreen.classList.contains('hidden');
+      if (lockScreen && !landingVisible) {
         lockScreen.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
-        if (typeof handleAuthRoleSwitch === 'function') handleAuthRoleSwitch('teacher');
+        const studentBox = document.getElementById('auth-student-container');
+        const studentAlreadyActive = studentBox && !studentBox.classList.contains('hidden');
+        if (!studentAlreadyActive && typeof handleAuthRoleSwitch === 'function') handleAuthRoleSwitch('teacher');
         const savedJoinCode = (typeof localStorage !== 'undefined' ? (localStorage.getItem('tutor_pending_join_code') || '') : '').trim().toUpperCase();
         if (savedJoinCode) {
           const codeInput = document.getElementById('signup-school-code');
@@ -10026,6 +10631,8 @@
       if (typeof seedInitialSpaHistoryState === 'function') seedInitialSpaHistoryState();
       initCloudflareSync();
 
+      const landingScreen = document.getElementById('public-marketing-landing');
+      if (landingScreen) landingScreen.classList.add('hidden');
       const lockScreen = document.getElementById('lock-screen');
       if (lockScreen) {
         lockScreen.classList.add('opacity-0', 'pointer-events-none');
@@ -11120,6 +11727,8 @@
       APP_STATE.studyAdditions = {};
       renderAllViews();
 
+      const landingScreen = document.getElementById('public-marketing-landing');
+      if (landingScreen) landingScreen.classList.add('hidden');
       const lockScreen = document.getElementById('lock-screen');
       if (lockScreen) {
         lockScreen.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
@@ -11211,11 +11820,37 @@
       return null;
     }
 
+    var _lastPrefilledStudentSearch = '';
+    function applyStudentQueryParamsPrefill() {
+      try {
+        const searchStr = typeof window !== 'undefined' && window.location ? String(window.location.search || '') : '';
+        if (!searchStr || searchStr === _lastPrefilledStudentSearch) return;
+        const qMap = {};
+        searchStr.replace(/^\?/, '').split('&').forEach(part => {
+          if (!part) return;
+          const eqIdx = part.indexOf('=');
+          const rawK = eqIdx >= 0 ? part.slice(0, eqIdx) : part;
+          const rawV = eqIdx >= 0 ? part.slice(eqIdx + 1) : '';
+          try {
+            qMap[decodeURIComponent(rawK)] = decodeURIComponent(rawV.replace(/\+/g, ' '));
+          } catch (_) {}
+        });
+        const sName = String(qMap.student_name || qMap.name || '').trim();
+        const sCode = String(qMap.student_code || qMap.code || '').toUpperCase().replace(/[^A-Z0-9]/g, '').trim();
+        if (!sName && !sCode) return;
+        _lastPrefilledStudentSearch = searchStr;
+        const nameEl = document.getElementById('student-login-name');
+        const codeEl = document.getElementById('student-login-code');
+        if (sName && nameEl) nameEl.value = sName;
+        if (sCode && codeEl) codeEl.value = sCode;
+      } catch (_) {}
+    }
+
     async function checkPasscodeAuth() {
       const lockScreen = document.getElementById('lock-screen');
       const searchStr = typeof window !== 'undefined' ? (window.location.search || '') : '';
       const hashStr = typeof window !== 'undefined' ? (window.location.hash || '') : '';
-      const isStudentLink = searchStr.includes('student=1') || hashStr.includes('student-login');
+      const isStudentLink = searchStr.includes('student=1') || searchStr.includes('student_code=') || hashStr.includes('student-login');
 
       // 0. Check active persistent Student Portal session
       const rawStudentSess = localStorage.getItem('tutor_student_portal_session');
@@ -11236,11 +11871,18 @@
         } catch (e) {}
       }
 
-      // 1. Live browser runtime uses Clerk Production session verification
+      // 1. Live browser runtime uses Clerk Production session verification + Pre-Login Marketing Gate for cold visitors
       if (isHttpRuntime()) {
         if (isStudentLink && lockScreen) {
+          if (typeof hideMarketingLanding === 'function') hideMarketingLanding();
           lockScreen.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
           if (typeof handleAuthRoleSwitch === 'function') handleAuthRoleSwitch('student');
+          initClerkAuth().catch(() => {});
+          return false;
+        }
+        if (typeof shouldBypassMarketingLanding === 'function' && !shouldBypassMarketingLanding()) {
+          if (typeof showMarketingLanding === 'function') showMarketingLanding(false);
+          if (lockScreen) lockScreen.classList.add('hidden');
           initClerkAuth().catch(() => {});
           return false;
         }
@@ -11457,6 +12099,7 @@
       } else {
         renderAllViews();
       }
+      if (typeof applyLandingLocalization === 'function') applyLandingLocalization();
       showToast(I18N[APP_STATE.lang].toastLangSwitch);
     }
 
@@ -28188,19 +28831,27 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       renderStudentDrawer(student.id, true);
     }
 
+    function getStudentPortalDirectUrl(student) {
+      const baseOrigin = (typeof window !== 'undefined' && window.location && window.location.origin && !window.location.origin.startsWith('file:') && window.location.origin !== 'null')
+        ? window.location.origin
+        : 'https://tutorpilot.us';
+      if (!student) return `${baseOrigin}/?student=1`;
+      const sName = String(student.name || '').trim();
+      const sCode = String(student.studentAccessCode || '').toUpperCase().trim();
+      if (!sName || !sCode) return `${baseOrigin}/?student=1`;
+      return `${baseOrigin}/?student=1&student_name=${encodeURIComponent(sName)}&student_code=${encodeURIComponent(sCode)}`;
+    }
+
     function copyStudentPortalInvite(studentId) {
       const student = (APP_STATE.students || []).find(s => s.id === studentId);
       if (!student) return;
       ensureStudentSkills(student);
       saveStudentsToStorage(true);
       pushStudentToCloud(student);
-      const baseOrigin = (typeof window !== 'undefined' && window.location && window.location.origin && !window.location.origin.startsWith('file:'))
-        ? window.location.origin
-        : 'https://tutorpilot.pages.dev';
-      const inviteUrl = `${baseOrigin}/?student=1`;
-      const inviteText = `TutorPilot Student Portal\nLink: ${inviteUrl}\nName: ${student.name}\nCode: ${student.studentAccessCode}`;
+      const inviteUrl = getStudentPortalDirectUrl(student);
+      const inviteText = `TutorPilot Student Portal\n1-Tap Link: ${inviteUrl}\nName: ${student.name}\nCode: ${student.studentAccessCode}`;
       if (typeof copyToClipboardText === 'function') {
-        copyToClipboardText(inviteText, 'Copied Student Login link & access code!');
+        copyToClipboardText(inviteText, 'Copied 1-Tap Student Portal link & code!');
       } else {
         showToast(`Code: ${student.studentAccessCode}`);
       }
@@ -28324,6 +28975,16 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       }
     }
 
+    function renderCircularProgressSvg(pct, sizePx = 58, strokeWidth = 3.5) {
+      const clamped = Math.max(0, Math.min(100, Number(pct) || 0));
+      const r = (sizePx - strokeWidth) / 2;
+      const circ = +(2 * Math.PI * r).toFixed(2);
+      const offset = +(circ - (clamped / 100) * circ).toFixed(2);
+      const cx = sizePx / 2;
+      const strokeColor = clamped >= 75 ? '#10b981' : (clamped >= 35 ? '#6366f1' : '#f59e0b');
+      return `<svg aria-hidden="true" width="${sizePx}" height="${sizePx}" viewBox="0 0 ${sizePx} ${sizePx}" class="pointer-events-none shrink-0 -rotate-90"><circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="rgba(148,163,184,0.22)" stroke-width="${strokeWidth}"/><circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/></svg>`;
+    }
+
     function renderStudentDrawer(studentId, force = false) {
       const drawer = document.getElementById('drawer-student-detail');
       if (!drawer || drawer.classList.contains('hidden')) return;
@@ -28376,9 +29037,12 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
             </div>`;
 
         header.innerHTML = `
-          <div class="relative group cursor-pointer shrink-0" onclick="triggerPhotoUpload('${student.id}', event)" title="${t.photoUploadHint}">
-            ${avatarHtml}
-            <div class="absolute inset-0 bg-black/45 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+          <div class="relative group cursor-pointer shrink-0 w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center" onclick="triggerPhotoUpload('${student.id}', event)" title="${t.photoUploadHint}">
+            <div class="absolute inset-0 flex items-center justify-center">
+              ${renderCircularProgressSvg(overallPct, 60, 3.5)}
+            </div>
+            <div class="relative z-10">${avatarHtml}</div>
+            <div class="absolute inset-0 z-20 bg-black/45 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
               <i data-lucide="camera" class="w-4 h-4 text-white"></i>
             </div>
           </div>
@@ -28531,6 +29195,17 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
               <div>
                 <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">${t.guardianEmailLabel || 'Guardian Email'}</label>
                 <input type="email" id="drawer-student-guardian-email-input" value="${escapeHtml(guardian.email || '')}" onchange="updateStudentDrawerGuardianField('${student.id}', 'email', this.value)" placeholder="e.g. parent@example.com" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs pt-1 border-t border-slate-800/70">
+              <div>
+                <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Student WhatsApp / SMS (Reminders)</label>
+                <input type="tel" id="drawer-student-own-phone-input" value="${escapeHtml((student.studentContact && student.studentContact.phone) || '')}" onchange="updateStudentDrawerOwnContactField('${student.id}', 'phone', this.value)" placeholder="Optional student cell / WhatsApp" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-teal-400" />
+              </div>
+              <div>
+                <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Student Email (Optional)</label>
+                <input type="email" id="drawer-student-own-email-input" value="${escapeHtml((student.studentContact && student.studentContact.email) || '')}" onchange="updateStudentDrawerOwnContactField('${student.id}', 'email', this.value)" placeholder="Optional student email" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-teal-400" />
               </div>
             </div>
           </div>
@@ -28897,6 +29572,14 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
               </div>
             </div>
             <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
+              <button type="button" id="btn-drawer-remind-student" onclick="openOutreachModal('${student.id}', 'student', 'practice_nudge')" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/35 font-bold text-[11px] transition active:scale-95 flex items-center gap-1.5">
+                <i data-lucide="bell-ring" class="w-3 h-3"></i>
+                <span>${isHe ? 'תזכורת לתלמיד' : 'Remind Student'}</span>
+              </button>
+              <button type="button" id="btn-drawer-update-parent" onclick="openOutreachModal('${student.id}', 'parent', 'progress_summary')" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/35 font-bold text-[11px] transition active:scale-95 flex items-center gap-1.5">
+                <i data-lucide="heart-handshake" class="w-3 h-3"></i>
+                <span>${isHe ? 'עדכון להורה' : 'Parent Summary'}</span>
+              </button>
               <button type="button" id="btn-preview-student-portal" onclick="openStudentViewPreviewModal('${student.id}')" class="px-3 py-1.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-200 border border-teal-500/35 font-bold text-[11px] transition active:scale-95 flex items-center gap-1.5">
                 <i data-lucide="eye" class="w-3 h-3"></i>
                 <span>${isHe ? 'תצוגת תלמיד' : 'Student View'}</span>
@@ -29362,13 +30045,14 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
         return;
       }
 
-      // Render Cards for filtered students
+      // Render Cards for filtered students (preserving minimalist card layout + subtle SVG progress ring)
       container.innerHTML = filteredStudents.map((student) => {
         const isActive = student.id === APP_STATE.activeStudentId;
+        const progressInfo = typeof getStudentCourseProgress === 'function' ? getStudentCourseProgress(student) : { overallPct: 0 };
 
         const avatarHtml = student.avatar
-          ? `<img src="${escapeHtml(resolveAuthenticatedMediaUrl(student.avatar))}" class="w-12 h-12 rounded-full object-cover border border-brand-500/40 shrink-0 shadow-sm">`
-          : `<div class="w-12 h-12 rounded-full bg-brand-600/20 text-brand-400 border border-brand-500/30 flex items-center justify-center font-extrabold text-base shrink-0">
+          ? `<img src="${escapeHtml(resolveAuthenticatedMediaUrl(student.avatar))}" class="w-11 h-11 rounded-full object-cover border border-brand-500/40 shrink-0 shadow-sm">`
+          : `<div class="w-11 h-11 rounded-full bg-brand-600/20 text-brand-400 border border-brand-500/30 flex items-center justify-center font-extrabold text-base shrink-0">
               ${escapeHtml((student.name || 'S').charAt(0).toUpperCase())}
             </div>`;
 
@@ -29385,9 +30069,12 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
             <div class="modern-gradient-cover keep-white h-2 bg-gradient-to-r from-indigo-500 via-violet-500 to-amber-500"></div>
 
             <div class="p-5 flex-1 flex items-center gap-4 min-w-0">
-              <div onclick="triggerPhotoUpload('${student.id}', event)" title="${t.changePhoto}" class="relative group/avatar shrink-0">
-                ${avatarHtml}
-                <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition">
+              <div onclick="triggerPhotoUpload('${student.id}', event)" title="${t.changePhoto}" class="relative group/avatar shrink-0 w-14 h-14 flex items-center justify-center">
+                <div class="absolute inset-0 flex items-center justify-center">
+                  ${renderCircularProgressSvg(progressInfo.overallPct || 0, 56, 3)}
+                </div>
+                <div class="relative z-10">${avatarHtml}</div>
+                <div class="absolute inset-0 z-20 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition">
                   <i data-lucide="camera" class="w-3.5 h-3.5 text-white"></i>
                 </div>
               </div>
@@ -29421,6 +30108,8 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
             if (!s.gradeLevel) s.gradeLevel = 'Standard / All Levels';
             if (!s.status) s.status = 'active';
             if (!s.parentContact) s.parentContact = { name: '', phone: '', email: '' };
+            if (!s.studentContact) s.studentContact = { phone: '', email: '' };
+            if (!s.outreachLog) s.outreachLog = {};
             if (!s.hourlyRate) s.hourlyRate = '';
             ensureStudentSkills(s);
           });
@@ -29615,6 +30304,11 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
           phone: guardianPhone,
           email: guardianEmail
         },
+        studentContact: {
+          phone: '',
+          email: ''
+        },
+        outreachLog: {},
         hourlyRate: hourlyRate,
         studentAccessCode: generateStudentAccessCode(APP_STATE.students),
         sharedNotes: [],
@@ -31320,6 +32014,24 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       window.open(url, '_blank');
     }
 
+    function sendParentRecapSms() {
+      const textarea = document.getElementById('recap-message-textarea');
+      if (!textarea) return;
+      const text = textarea.value;
+      const sessionInfo = APP_STATE.activeRecapSession;
+      let phone = '';
+      if (sessionInfo) {
+        const student = (APP_STATE.students || []).find(st => st.id === sessionInfo.studentId);
+        if (student && student.parentContact && student.parentContact.phone) {
+          phone = student.parentContact.phone.replace(/[^0-9+]/g, '');
+        }
+      }
+      const smsUrl = typeof buildSmsUrl === 'function'
+        ? buildSmsUrl(phone, text)
+        : `sms:${phone}?&body=${encodeURIComponent(text)}`;
+      if (typeof window !== 'undefined' && window.location) window.location.href = smsUrl;
+    }
+
     function sendParentRecapEmail() {
       const textarea = document.getElementById('recap-message-textarea');
       if (!textarea) return;
@@ -32825,6 +33537,11 @@ Respond ONLY with strict JSON (no markdown fences):
           phone: d.guardianPhone || '',
           email: d.guardianEmail || ''
         },
+        studentContact: {
+          phone: '',
+          email: ''
+        },
+        outreachLog: {},
         hourlyRate: d.hourlyRate || '',
         studentAccessCode: generateStudentAccessCode(APP_STATE.students),
         sharedNotes: [],
@@ -33166,6 +33883,11 @@ Guidelines:
             phone: guardianPhone,
             email: guardianEmail
           },
+          studentContact: {
+            phone: '',
+            email: ''
+          },
+          outreachLog: {},
           hourlyRate: hourlyRate,
           studentAccessCode: generateStudentAccessCode(APP_STATE.students),
           sharedNotes: [],
@@ -34827,11 +35549,20 @@ STRICT BOUNDARIES (ENFORCED BY SERVER):
 
               <button
                 type="button"
-                onclick="openParentRecapModal('${s.studentId}', '${s.id}')"
-                class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-emerald-300 transition"
-                title="Send Parent Recap"
+                onclick="openOutreachModal('${s.studentId}', 'student', 'practice_nudge')"
+                class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 transition"
+                title="Remind Student on WhatsApp / SMS"
               >
-                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                <i data-lucide="bell-ring" class="w-3.5 h-3.5"></i>
+              </button>
+
+              <button
+                type="button"
+                onclick="openOutreachModal('${s.studentId}', 'parent', 'progress_summary')"
+                class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-emerald-300 transition"
+                title="Send Parent Update"
+              >
+                <i data-lucide="send" class="w-3.5 h-3.5"></i>
               </button>
             </div>
           </div>
@@ -35377,6 +36108,1433 @@ ${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output 
     }, 300000);
 
     // =========================================================================
+    // M140 PILLAR 4: PRE-LOGIN MARKETING WEBSITE, LIVE SANDBOX & STUDY PLANNER
+    // (Pricing-free public landing gate for https://tutorpilot.us)
+    // =========================================================================
+    var landingState = {
+      niche: 'barmitzvah',
+      view: 'studio',
+      demoHwDone: false
+    };
+
+    const LANDING_NICHE_PREVIEWS = {
+      barmitzvah: {
+        label: 'Bar / Bat Mitzvah & Hebrew',
+        badge: '📜 Bar / Bat Mitzvah Track',
+        courseTitle: 'Torah Aliyah Blessings & Parsha Fluency',
+        courseMeta: 'Bilingual RTL · Audio Practice · Tutor Cues',
+        bilingualLeft: 'בָּרְכוּ אֶת ה׳ הַמְּבֹרָךְ. בָּרוּךְ ה׳ הַמְּבֹרָךְ לְעוֹלָם וָעֶד.',
+        bilingualRight: 'Bless Hashem, the Blessed One! Pause briefly before repeating each phrase clearly.',
+        lessonPoints: [
+          'Master trope cadence & clear pronunciation on Aliyah opening lines',
+          'Prepare a 3 minute personal Parsha takeaway story for family & guests'
+        ],
+        studentName: 'Ari Cohen',
+        studentCode: 'K7M9P2',
+        progressPct: 78,
+        homework: 'Listen 2x to Aliyah 1 recording and read lines 1 to 6 aloud.',
+        parentMsg: 'Shalom Sarah! Ari had an awesome Bar Mitzvah lesson today. His Aliyah blessings are smooth and we posted a 5 minute practice clip in his Student Portal.\n\n1-Tap Portal: https://tutorpilot.us/?student=1&student_code=K7M9P2\n✨ Powered by TutorPilot.us',
+        studentMsg: 'Hey Ari! Quick reminder to open your TutorPilot portal for 5 minutes today and run through Aliyah 1 before our next session!\n\nTap to open: https://tutorpilot.us/?student=1&student_code=K7M9P2'
+      },
+      languages: {
+        label: 'Languages, Hebrew & ESL',
+        badge: '🌍 Conversational Fluency',
+        courseTitle: 'Everyday Hebrew & Real World Dialogue',
+        courseMeta: 'Bilingual Split · Speaking Drills · Vocabulary',
+        bilingualLeft: 'אֵיפֹה הַקָּפֶה הֲכִי טוֹב בַּשְּׁכוּנָה? בּוֹא נֵלֵךְ לְשָׁם עַכְשָׁו.',
+        bilingualRight: 'Where is the best cafe in the neighborhood? Let us head there right now.',
+        lessonPoints: [
+          'Natural café ordering & greeting idioms without robotic textbook phrasing',
+          'Vowel pattern recognition across present tense masculine & feminine verbs'
+        ],
+        studentName: 'Maya Chen',
+        studentCode: 'L4N8R3',
+        progressPct: 84,
+        homework: 'Practice all 5 dialogue lines out loud and mark your confidence goal.',
+        parentMsg: 'Hi Mei! Maya jumped from reading isolated words to speaking full café dialogues smoothly today. Practice dialogue flashcards are ready in her portal.\n\n1-Tap Portal: https://tutorpilot.us/?student=1&student_code=L4N8R3\n✨ Powered by TutorPilot.us',
+        studentMsg: 'Hi Maya! Take 4 minutes tonight to run through your Hebrew dialogue cards in your TutorPilot portal before Thursday!\n\nTap to open: https://tutorpilot.us/?student=1&student_code=L4N8R3'
+      },
+      music: {
+        label: 'Music, Voice & Piano',
+        badge: '🎵 Studio Repertoire',
+        courseTitle: 'Piano Technique, Rhythm & Melody Expression',
+        courseMeta: 'Warmup Scales · Practice Audio · Daily Streak',
+        bilingualLeft: 'G Major Arpeggio · 76 BPM · Light wrist rotation on beats 1 and 4',
+        bilingualRight: 'Keep fingers curved and connect measures 9 to 16 at steady tempo.',
+        lessonPoints: [
+          'C and G major chord inversions with smooth pedal transition timing',
+          'Left hand accompaniment dynamics beneath vocal/melody phrasing'
+        ],
+        studentName: 'Noah Miller',
+        studentCode: 'M2P9T6',
+        progressPct: 72,
+        homework: '10 minutes slow metronome practice on measures 9 to 16 (76 BPM).',
+        parentMsg: 'Hi Rachel! Noah nailed his G major inversions today and is building great rhythm control. Tonight’s 10 minute metronome goal is live in his portal.\n\n1-Tap Portal: https://tutorpilot.us/?student=1&student_code=M2P9T6\n✨ Powered by TutorPilot.us',
+        studentMsg: 'Hey Noah! Quick practice nudge — set your Student Portal timer for 10 mins and lock in measures 9 to 16 at 76 BPM today!\n\nTap to open: https://tutorpilot.us/?student=1&student_code=M2P9T6'
+      },
+      stem: {
+        label: 'Math, STEM & Exams',
+        badge: '📐 Concept & Drill Lab',
+        courseTitle: 'Algebra Mastery: Equations & Word Problems',
+        courseMeta: 'Worked Examples · Common Traps · Practice Drills',
+        bilingualLeft: '2(x + 3) - 5 = 11  ->  Expand carefully before combining constants',
+        bilingualRight: 'Watch the classic sign trap: distribute 2 to BOTH x and +3 before adding 5.',
+        lessonPoints: [
+          'Translate real word problem sentences step by step into linear equations',
+          'Zero sign error habit when balancing expressions across both sides'
+        ],
+        studentName: 'Ethan Patel',
+        studentCode: 'W6R3V8',
+        progressPct: 88,
+        homework: 'Solve the 4 guided distribution drills in Student Portal (12 mins).',
+        parentMsg: 'Hi Anita! Ethan mastered two-step distribution word problems today with zero sign errors on his check-in quiz. Short practice sheet is posted!\n\n1-Tap Portal: https://tutorpilot.us/?student=1&student_code=W6R3V8\n✨ Powered by TutorPilot.us',
+        studentMsg: 'Hey Ethan! Your 4 Algebra distribution warmups are waiting in Student Portal — knocks out in 10 mins!\n\nTap to open: https://tutorpilot.us/?student=1&student_code=W6R3V8'
+      }
+    };
+
+    function shouldBypassMarketingLanding() {
+      if (typeof isStudentPortalActive === 'function' && isStudentPortalActive()) return true;
+      try {
+        if (typeof localStorage !== 'undefined') {
+          if (localStorage.getItem('tutor_auth_unlocked') === 'true') return true;
+          const sRaw = localStorage.getItem('tutor_student_portal_session');
+          if (sRaw) {
+            const sParsed = JSON.parse(sRaw);
+            if (sParsed && sParsed.expiresAt && Date.now() < sParsed.expiresAt) return true;
+          }
+        }
+      } catch (_) {}
+      if (typeof window !== 'undefined' && window.location) {
+        const search = String(window.location.search || '');
+        const hash = String(window.location.hash || '');
+        if (/student=1|student_code=|join=|auth=|login|signup|__clerk/i.test(search) || /student-login|#sync=/i.test(hash)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function showMarketingLanding(isPreview = false) {
+      const landingEl = document.getElementById('public-marketing-landing');
+      if (!landingEl) return;
+      const previewBar = document.getElementById('landing-return-studio-bar');
+      if (previewBar) {
+        const hasSignedUser = !!(isPreview || (APP_STATE && APP_STATE.currentUser));
+        previewBar.classList.toggle('hidden', !hasSignedUser);
+      }
+      const lockScreen = document.getElementById('lock-screen');
+      if (lockScreen) lockScreen.classList.add('hidden');
+      landingEl.classList.remove('hidden');
+      applyLandingLocalization();
+      renderLandingSandbox();
+      renderLandingStudyPlanner();
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function hideMarketingLanding() {
+      const landingEl = document.getElementById('public-marketing-landing');
+      if (landingEl) landingEl.classList.add('hidden');
+    }
+
+    function scrollLandingSection(sectionId) {
+      const el = document.getElementById(sectionId);
+      if (el && typeof el.scrollIntoView === 'function') {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function openAuthFromLanding(mode = 'signup', preferredNiche = '') {
+      if (preferredNiche && typeof localStorage !== 'undefined') {
+        try { localStorage.setItem('tutor_preferred_onboarding_niche', String(preferredNiche)); } catch (_) {}
+      }
+      if (APP_STATE && APP_STATE.currentUser) {
+        hideMarketingLanding();
+        showToast(APP_STATE.lang === 'he' ? 'חזרת אל המערכת שלך!' : 'Returned to your TutorPilot studio!');
+        return;
+      }
+      hideMarketingLanding();
+      const lockScreen = document.getElementById('lock-screen');
+      if (lockScreen) {
+        lockScreen.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+      }
+      if (mode === 'student') {
+        if (typeof handleAuthRoleSwitch === 'function') handleAuthRoleSwitch('student');
+      } else {
+        if (typeof handleAuthRoleSwitch === 'function') handleAuthRoleSwitch('teacher');
+        if (typeof handleAuthTabSwitch === 'function') handleAuthTabSwitch(mode === 'signin' ? 'signin' : 'signup');
+      }
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function applyLandingLocalization() {
+      const isHe = APP_STATE && APP_STATE.lang === 'he';
+      const setTxt = (id, en, he) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = isHe ? he : en;
+      };
+      setTxt('landing-lang-indicator', 'עברית', 'English');
+      setTxt('lbl-landing-signin-btn', 'Log In', 'התחברות');
+      setTxt('lbl-landing-cta-btn', 'Start Studio', 'פתח סטודיו');
+      setTxt('lbl-landing-student-btn', 'Student Portal', 'אזור תלמיד');
+      setTxt('landing-hero-badge', 'Built for Private Tutors, Hebrew Educators & Coaches', 'נבנה במיוחד למורים פרטיים, מלמדים ומנחים');
+      setTxt('landing-hero-title', 'Run your entire tutoring studio, AI curriculum, and parent updates in one place.', 'נהל את כל הסטודיו להוראה, מערכי השיעור ועדכוני ההורים במקום אחד.');
+      setTxt('landing-hero-desc', 'Design structured courses in 60 seconds, give every learner a zero password portal on any phone, and send 1 click WhatsApp, SMS, or Email progress summaries and practice reminders.', 'בנה קורסים מסודרים ב-60 שניות, תן לכל תלמיד פורטל אישי ללא סיסמה, ושלח בלחיצת כפתור עדכוני התקדמות ותזכורות בוואטסאפ, SMS או מייל.');
+      setTxt('lbl-hero-cta', 'Create Your Tutor Studio', 'התחל ליצור את הסטודיו שלך');
+      setTxt('lbl-hero-demo', 'Try Live Demo', 'צפה בהדגמה חיה');
+      setTxt('lbl-lock-overview', 'Overview', 'סקירה');
+      renderLandingStudyPlanner();
+    }
+
+    function selectLandingNiche(niche) {
+      if (!LANDING_NICHE_PREVIEWS[niche]) return;
+      landingState.niche = niche;
+      landingState.demoHwDone = false;
+      renderLandingSandbox();
+    }
+
+    function selectLandingView(view) {
+      landingState.view = ['studio', 'portal', 'outreach'].includes(view) ? view : 'studio';
+      renderLandingSandbox();
+    }
+
+    function toggleLandingDemoHomework() {
+      landingState.demoHwDone = !landingState.demoHwDone;
+      renderLandingSandbox();
+    }
+
+    function renderLandingSandbox() {
+      const body = document.getElementById('landing-sandbox-body');
+      if (!body) return;
+      const spec = LANDING_NICHE_PREVIEWS[landingState.niche] || LANDING_NICHE_PREVIEWS.barmitzvah;
+
+      ['barmitzvah', 'languages', 'music', 'stem'].forEach(k => {
+        const b = document.getElementById('btn-landing-niche-' + k);
+        if (!b) return;
+        b.className = k === landingState.niche
+          ? 'px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow transition keep-white'
+          : 'px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition';
+      });
+      ['studio', 'portal', 'outreach'].forEach(v => {
+        const b = document.getElementById('btn-landing-view-' + v);
+        if (!b) return;
+        b.className = v === landingState.view
+          ? 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 shadow transition'
+          : 'px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition';
+      });
+
+      if (landingState.view === 'portal') {
+        const effectivePct = landingState.demoHwDone ? Math.min(100, spec.progressPct + 12) : spec.progressPct;
+        body.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+            <div class="md:col-span-5 modern-gradient-cover keep-white rounded-3xl bg-gradient-to-br from-indigo-600 via-violet-600 to-amber-500 p-6 text-white space-y-4 shadow-lg">
+              <div class="flex items-center justify-between text-xs font-bold opacity-90">
+                <span>Student Portal View</span>
+                <span class="font-mono px-2.5 py-0.5 rounded-full bg-black/25">Code: ${escapeHtml(spec.studentCode)}</span>
+              </div>
+              <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-xl font-extrabold">${escapeHtml(spec.studentName.charAt(0))}</div>
+                <div>
+                  <div class="text-lg font-extrabold">${escapeHtml(spec.studentName)}</div>
+                  <div class="text-xs opacity-90">${escapeHtml(spec.courseTitle)}</div>
+                </div>
+              </div>
+              <div class="space-y-1.5">
+                <div class="flex justify-between text-xs font-bold"><span>Overall Readiness</span><span>${effectivePct}%</span></div>
+                <div class="w-full h-2.5 rounded-full bg-black/25 overflow-hidden">
+                  <div class="h-full rounded-full bg-emerald-400 transition-all duration-300" style="width:${effectivePct}%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="md:col-span-7 space-y-4">
+              <div class="p-5 rounded-2xl bg-slate-950/80 border ${landingState.demoHwDone ? 'border-emerald-500/45' : 'border-amber-500/45'} space-y-3">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                  <span class="text-xs font-extrabold uppercase tracking-wider ${landingState.demoHwDone ? 'text-emerald-400' : 'text-amber-400'}">Active Homework Assignment</span>
+                  <button type="button" onclick="toggleLandingDemoHomework()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${landingState.demoHwDone ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow'}">
+                    ${landingState.demoHwDone ? '✓ Completed (Tap to Undo)' : 'Mark Homework Done'}
+                  </button>
+                </div>
+                <p class="text-sm text-slate-200 leading-relaxed ${landingState.demoHwDone ? 'line-through opacity-60' : ''}">${escapeHtml(spec.homework)}</p>
+              </div>
+              <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between gap-3 flex-wrap text-xs">
+                <span class="text-slate-300">Zero student email required — students tap a 1-click link sent over WhatsApp or SMS.</span>
+                <span class="font-mono font-bold text-indigo-400">tutorpilot.us/?student=1</span>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (landingState.view === 'outreach') {
+        body.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="p-5 rounded-2xl bg-slate-950/80 border border-emerald-500/35 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">Parent Progress Summary (1 Click)</span>
+                <span class="text-[11px] font-mono text-slate-400">WhatsApp / SMS / Email</span>
+              </div>
+              <pre class="whitespace-pre-wrap font-sans text-xs sm:text-sm text-slate-200 leading-relaxed bg-slate-900/90 p-3.5 rounded-xl border border-slate-800">${escapeHtml(spec.parentMsg)}</pre>
+            </div>
+            <div class="p-5 rounded-2xl bg-slate-950/80 border border-indigo-500/35 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-400">Student Practice Reminder</span>
+                <span class="text-[11px] font-mono text-slate-400">Direct 1-Tap Link</span>
+              </div>
+              <pre class="whitespace-pre-wrap font-sans text-xs sm:text-sm text-slate-200 leading-relaxed bg-slate-900/90 p-3.5 rounded-xl border border-slate-800">${escapeHtml(spec.studentMsg)}</pre>
+            </div>
+          </div>
+        `;
+      } else {
+        body.innerHTML = `
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div class="lg:col-span-5 space-y-3">
+              <span class="inline-block px-3 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-xs font-bold">${escapeHtml(spec.badge)}</span>
+              <h3 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">${escapeHtml(spec.courseTitle)}</h3>
+              <p class="text-xs font-mono text-amber-400">${escapeHtml(spec.courseMeta)}</p>
+              <ul class="space-y-2 pt-1 text-xs sm:text-sm text-slate-300">
+                ${spec.lessonPoints.map(pt => `<li class="flex items-start gap-2"><span class="text-emerald-400 font-bold">✦</span><span>${escapeHtml(pt)}</span></li>`).join('')}
+              </ul>
+            </div>
+            <div class="lg:col-span-7 space-y-3">
+              <div class="p-5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-3">
+                <div class="text-[11px] font-mono uppercase tracking-wider text-indigo-400 font-bold">Side by Side Bilingual / Guided Block</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div dir="auto" class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-teal-200 leading-relaxed" style="font-family: 'Frank Ruhl Libre', 'Source Serif 4', serif;">${escapeHtml(spec.bilingualLeft)}</div>
+                  <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-xs sm:text-sm text-slate-200 leading-relaxed" style="font-family: 'Source Serif 4', serif;">${escapeHtml(spec.bilingualRight)}</div>
+                </div>
+              </div>
+              <div class="p-4 rounded-2xl bg-amber-950/25 border border-amber-500/30 text-xs text-amber-200 flex items-center justify-between gap-2 flex-wrap">
+                <span><strong>Assigned Practice:</strong> ${escapeHtml(spec.homework)}</span>
+                <span class="font-mono text-[11px] px-2.5 py-0.5 rounded-lg bg-slate-900 border border-amber-500/30">Ready to Assign</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function renderLandingStudyPlanner() {
+      const trackEl = document.getElementById('landing-planner-track');
+      const dateEl = document.getElementById('landing-planner-date');
+      const outEl = document.getElementById('landing-planner-output');
+      if (!outEl) return;
+
+      if (dateEl && !dateEl.value) {
+        const defDate = new Date(Date.now() + 98 * 24 * 60 * 60 * 1000);
+        dateEl.value = defDate.toISOString().slice(0, 10);
+      }
+
+      const track = (trackEl && trackEl.value) || 'barmitzvah';
+      const targetStr = (dateEl && dateEl.value) || '';
+      let weeksLeft = 14;
+      if (targetStr) {
+        const diffMs = new Date(targetStr + 'T12:00:00').getTime() - Date.now();
+        weeksLeft = Math.max(2, Math.min(104, Math.ceil(diffMs / (7 * 24 * 60 * 60 * 1000))));
+      }
+
+      const phaseMap = {
+        barmitzvah: [
+          { title: 'Phase 1 · Foundations & Reading Fluency', pct: '25%', detail: 'Alphabet & vowel accuracy + clean Aliyah blessing pronunciation.' },
+          { title: 'Phase 2 · Core Torah / Haftarah Verses', pct: '50%', detail: 'Record weekly segments into Student Portal audio practice cards.' },
+          { title: 'Phase 3 · Speech & Personal Parsha Message', pct: '75%', detail: 'Draft & rehearse confident 3 minute family talk with real life lessons.' },
+          { title: 'Phase 4 · Full Run-Through & Celebration', pct: '100%', detail: 'Back to back dry runs, Tefillin & confidence polish.' }
+        ],
+        languages: [
+          { title: 'Phase 1 · Sound & Script Foundations', pct: '25%', detail: 'Core pronunciation drills & 80 essential everyday words.' },
+          { title: 'Phase 2 · Guided Sentence Building', pct: '50%', detail: 'Bilingual side by side reading passages & verb patterns.' },
+          { title: 'Phase 3 · Live Dialogue Fluency', pct: '75%', detail: 'Real scenario roleplays + 5 minute Portal audio prompts.' },
+          { title: 'Phase 4 · Natural Conversation Confidence', pct: '100%', detail: 'Spontaneous discussion & mastery review.' }
+        ],
+        music: [
+          { title: 'Phase 1 · Posture, Warmups & Rhythm', pct: '25%', detail: 'Core scales, steady pulse exercises & sight reading.' },
+          { title: 'Phase 2 · Piece Breakdown', pct: '50%', detail: 'Measure by measure chunks with metronome Portal timers.' },
+          { title: 'Phase 3 · Dynamics & Musicality', pct: '75%', detail: 'Phrasing, tone control & practice clips for parent feedback.' },
+          { title: 'Phase 4 · Recital Run-Throughs', pct: '100%', detail: 'Complete piece performance & confidence pacing.' }
+        ],
+        stem: [
+          { title: 'Phase 1 · Diagnostic & Core Formulas', pct: '25%', detail: 'Spot knowledge gaps and lock in foundational theorems.' },
+          { title: 'Phase 2 · Worked Walkthroughs', pct: '50%', detail: 'Guided examples paired with Common Exam Trap alerts.' },
+          { title: 'Phase 3 · Independent Problem Sets', pct: '75%', detail: 'Auto-graded Student Portal quizzes & speed drills.' },
+          { title: 'Phase 4 · Timed Mock Exam Prep', pct: '100%', detail: 'Full timed simulation & targeted error review.' }
+        ]
+      };
+
+      const phases = phaseMap[track] || phaseMap.barmitzvah;
+      const wPerPhase = Math.max(1, Math.round(weeksLeft / 4));
+      outEl.innerHTML = phases.map((ph, idx) => `
+        <div class="p-4 rounded-2xl bg-slate-950/75 border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between text-[11px] font-mono">
+            <span class="font-bold text-teal-400">Weeks ${(idx * wPerPhase) + 1}–${(idx + 1) * wPerPhase}</span>
+            <span class="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 font-bold">${ph.pct}</span>
+          </div>
+          <div class="text-xs sm:text-sm font-extrabold text-white">${escapeHtml(ph.title)}</div>
+          <p class="text-xs text-slate-400 leading-relaxed">${escapeHtml(ph.detail)}</p>
+        </div>
+      `).join('');
+    }
+
+    // =========================================================================
+    // M140 PILLAR 2: 60-SECOND FIRST-LOGIN ONBOARDING WIZARD
+    // =========================================================================
+    var onboardingState = {
+      step: 1,
+      niche: 'barmitzvah',
+      studioName: '',
+      seedCourse: true,
+      seedStudent: true,
+      createdCourseId: null,
+      createdStudentId: null
+    };
+
+    const ONBOARDING_STARTER_PACKS = {
+      barmitzvah: {
+        icon: '📜',
+        color: 'amber',
+        label: 'Bar / Bat Mitzvah & Jewish Studies',
+        shortDesc: 'Aliyah blessings, Parsha Torah ideas & personal speech roadmap.',
+        studentName: 'Ari Cohen (Sample)',
+        studentSubject: 'Bar Mitzvah Prep · Bereshit',
+        homeworkTask: 'Listen twice to Torah Aliyah 1 & practice the opening blessing clearly.',
+        goals: ['Master Torah Aliyah Blessings', 'Outline 3-Minute Dvar Torah Talk'],
+        sharedNote: 'Welcome! Tap Lesson 1 above and read the bilingual blessings twice this week.',
+        course: {
+          title_en: 'Bar Mitzvah Mastery: Parsha, Blessings & Speech',
+          title_he: 'מסע בר מצווה: עלייה לתורה, ברכות ודבר תורה',
+          category: 'Bar / Bat Mitzvah',
+          target_level: 'Ages 12-13',
+          description_en: 'Ready to teach starter course covering Torah Aliyah blessings, confidence on the Bimah, and crafting a memorable speech.',
+          description_he: 'קורס מוכן להוראה הכולל ברכות העלייה לתורה, ביטחון בקריאה וכתיבת דבר תורה.',
+          blueprintSections: [
+            { id: 'sec_ob_1', type: 'text', name: 'Class Goal & Warm Welcome', ai_rule: 'Concise practical lesson hook for teen student' },
+            { id: 'sec_ob_2', type: 'bilingual_split', name: 'Source Text & Plain Meaning', ai_rule: 'Hebrew text paired with clear English explanation' },
+            { id: 'sec_ob_3', type: 'steps', name: 'Step by Step Practice Flow', ai_rule: 'Actionable 3-step live session guide' },
+            { id: 'sec_ob_4', type: 'homework', name: '5-Minute Weekly Practice', ai_rule: 'Simple achievable home goal' }
+          ],
+          lessons: [
+            {
+              title_en: 'Torah Aliyah Blessings & Confidence on the Bimah',
+              title_he: 'ברכות העלייה לתורה וביטחון על הבימה',
+              sectionsData: [
+                { _structured: true, summary: 'Opening every Aliyah with poised Hebrew flow and calm breathing.', body: 'Before chanting Torah blessings in front of family, slow down after the very first word ("Barchu") and wait cleanly for the congregation to respond. Confidence comes from steady pacing, not rushing.' },
+                { _structured: true, rtl: true, leftLabel: 'Hebrew Blessing', rightLabel: 'English Meaning & Pause Cue', rows: [
+                  { orig: 'בָּרְכוּ אֶת ה׳ הַמְּבֹרָךְ', trans: 'Bless Hashem, the Blessed One! Pause briefly for the congregation.' },
+                  { orig: 'בָּרוּךְ אַתָּה ה׳ אֱלֹקֵינוּ מֶלֶךְ הָעוֹלָם אֲשֶׁר בָּחַר בָּנוּ מִכָּל הָעַמִּים', trans: 'Blessed are You... Who chose us from all nations and gave us Your Torah.' }
+                ]},
+                { _structured: true, steps: [
+                  { mins: '4m', text: 'Read each Hebrew phrase syllable by syllable pointing gently with a Yad.' },
+                  { mins: '5m', text: 'Practice holding a steady speaking voice louder for the back row.' },
+                  { mins: '3m', text: 'Do one complete smooth stand-and-chant dress rehearsal.' }
+                ]},
+                { _structured: true, task: 'Chant both opening and closing Torah blessings aloud 3 times without stopping.', estMinutes: '10m' }
+              ]
+            },
+            {
+              title_en: 'Crafting a Meaningful 3-Minute Bar Mitzvah Speech',
+              title_he: 'בניית דבר תורה אישי ומשמעותי',
+              sectionsData: [
+                { _structured: true, summary: 'Turn one timeless Torah verse into a real life story guests remember.', body: 'The best Bar/Bat Mitzvah talks follow a simple rhythm: pick one surprising question from your Parsha, share one commentator insight, and connect it honestly to real teen life.' },
+                { _structured: true, rtl: true, leftLabel: 'Parsha Inspiration', rightLabel: 'Core Theme', rows: [
+                  { orig: 'לֶךְ לְךָ מֵאַרְצְךָ וּמִמּוֹלַדְתְּךָ', trans: 'Go forth for yourself — stepping out of your comfort zone unlocks growth.' }
+                ]},
+                { _structured: true, steps: [
+                  { mins: '5m', text: 'Highlight the single moment in your Parsha that felt most intriguing.' },
+                  { mins: '6m', text: 'Write 3 short bullet points linking that story to school, sports, or friendship.' },
+                  { mins: '4m', text: 'Practice your opening gratitude line smiling at parents & family.' }
+                ]},
+                { _structured: true, task: 'Jot down 3 things you appreciate about your parents to weave into your speech.', estMinutes: '10m' }
+              ]
+            }
+          ]
+        }
+      },
+      languages: {
+        icon: '🌍',
+        color: 'emerald',
+        label: 'Languages, Hebrew & ESL',
+        shortDesc: 'Dialogue splits, pronunciation steps & fluency checklists.',
+        studentName: 'Maya Chen (Sample)',
+        studentSubject: 'Conversational Hebrew & Fluency',
+        homeworkTask: 'Read the 4 café phrases aloud and complete both speaking goals.',
+        goals: ['Master Natural Everyday Greetings', 'Build 20 High-Frequency Verbs'],
+        sharedNote: 'Welcome to class! Practice each bilingual dialogue line twice slowly.',
+        course: {
+          title_en: 'Conversational Language & Practical Fluency',
+          title_he: 'שפה חיה ודיבור שוטף בחיי היומיום',
+          category: 'Languages & ESL',
+          target_level: 'Beginner to Intermediate',
+          description_en: 'Practical speaking lessons combining side by side expressions, pronunciation tips, and real scenario dialogues.',
+          description_he: 'שיעורי שיחה מעשיים עם ביטויים מקבילים ותרגול הגייה.',
+          blueprintSections: [
+            { id: 'sec_ob_1', type: 'text', name: 'Real-World Context', ai_rule: 'Why this situation matters right away' },
+            { id: 'sec_ob_2', type: 'bilingual_split', name: 'Target Phrase & Translation', ai_rule: 'Natural spoken expressions paired side by side' },
+            { id: 'sec_ob_3', type: 'steps', name: 'Guided Speaking Drills', ai_rule: 'Live tutor roleplay flow' },
+            { id: 'sec_ob_4', type: 'homework', name: 'Home Speaking Practice', ai_rule: 'Short vocal fluency check' }
+          ],
+          lessons: [
+            {
+              title_en: 'Warm Greetings & Ordering with Confidence',
+              title_he: 'ברכות פתיחה והזמנה בטבעיות',
+              sectionsData: [
+                { _structured: true, summary: 'Sound warm and natural within your first 30 seconds of speaking.', body: 'Skip stiff textbook translations and build instant rapport using natural everyday fillers and polite expressions.' },
+                { _structured: true, rtl: true, leftLabel: 'Target Language', rightLabel: 'Natural English', rows: [
+                  { orig: 'שָׁלוֹם, מַה נִּשְׁמָע הַיּוֹם?', trans: 'Hi there! How are things going today?' },
+                  { orig: 'אֶפְשָׁר בְּבַקָּשָׁה כּוֹס קָפֶה קַר?', trans: 'Could I please have an iced coffee?' }
+                ]},
+                { _structured: true, steps: [
+                  { mins: '4m', text: 'Listen to vowel stress at natural conversation speed.' },
+                  { mins: '6m', text: 'Swap cafe items & polite requests in live roleplay.' },
+                  { mins: '5m', text: 'Respond spontaneously without reading notes.' }
+                ]},
+                { _structured: true, task: 'Say both greeting and cafe phrases 5 times smoothly at conversational pace.', estMinutes: '8m' }
+              ]
+            },
+            {
+              title_en: 'Asking Directions & Connecting Ideas',
+              title_he: 'בקשת הכוונה וחיבור משפטים',
+              sectionsData: [
+                { _structured: true, summary: 'Link short thoughts smoothly instead of pausing word by word.', body: 'Use simple connector words ("because", "right after", "maybe") to double how fluent your speaking sounds immediately.' },
+                { _structured: true, rtl: true, leftLabel: 'Useful Phrases', rightLabel: 'Meaning', rows: [
+                  { orig: 'סְלִיחָה, אֵיךְ מַגִּיעִים לַתַּחֲנָה הַקְּרוֹבָה?', trans: 'Excuse me, how do you get to the nearest station?' }
+                ]},
+                { _structured: true, steps: [
+                  { mins: '5m', text: 'Drill left, right, straight ahead, and block landmarks.' },
+                  { mins: '5m', text: 'Combine two clauses cleanly using "because" and "then".' }
+                ]},
+                { _structured: true, task: 'Describe your morning walk to school or work using 3 connected sentences.', estMinutes: '10m' }
+              ]
+            }
+          ]
+        }
+      },
+      music: {
+        icon: '🎵',
+        color: 'purple',
+        label: 'Music, Voice & Piano',
+        shortDesc: 'Warmup scales, technique drills & timed home practice.',
+        studentName: 'Noah Miller (Sample)',
+        studentSubject: 'Piano & Rhythm Mastery',
+        homeworkTask: 'Run 10 minutes with your Student Portal metronome timer on G Major.',
+        goals: ['Play G Major Scale Smoothly Both Hands', 'Lock In Measures 1-16 at 80 BPM'],
+        sharedNote: 'Great wrist posture today! Keep practicing slowly before speeding up.',
+        course: {
+          title_en: 'Instrumental Technique & Musical Expression',
+          title_he: 'טכניקת נגינה, קצב והבעה מוזיקלית',
+          category: 'Music & Voice',
+          target_level: 'All Levels',
+          description_en: 'Hands on weekly repertoire curriculum pairing warmups, phrasing examples, and focused daily practice.',
+          description_he: 'מערכי שיעור בנגינה המשלבים חימום, טכניקה ותרגול יומי ממוקד.',
+          blueprintSections: [
+            { id: 'sec_ob_1', type: 'steps', name: 'Warmup & Technique Scales', ai_rule: '5-minute technical warmup routine' },
+            { id: 'sec_ob_2', type: 'example', name: 'Phrasing & Piece Spotlight', ai_rule: 'Focused measures and musical feel cue' },
+            { id: 'sec_ob_3', type: 'pitfalls', name: 'Tension & Rhythm Traps', ai_rule: 'Common mistakes to fix early' },
+            { id: 'sec_ob_4', type: 'homework', name: 'Weekly Tempo Goal', ai_rule: 'Measurable 10-minute home practice target' }
+          ],
+          lessons: [
+            {
+              title_en: 'Relaxed Finger Weight & Steady Quarter-Note Pulse',
+              title_he: 'משקל אצבעות רפוי ושמירה על קצב אחיד',
+              sectionsData: [
+                { _structured: true, steps: [
+                  { mins: '3m', text: 'Slow five-finger breathing warmup checking relaxed shoulders.' },
+                  { mins: '5m', text: 'Play G Major pentascale ascending and descending with even tone.' }
+                ]},
+                { _structured: true, setup: 'Think of singing each 4-bar phrase out loud while your right hand shapes the rise and fall of the melody.', takeaway: 'Tone quality starts in the forearm weight and wrist release, never stiff fingers.' },
+                { _structured: true, items: [{ trap: 'Speeding up on easy measures and slowing down at shifts', fix: 'Set a gentle 72 BPM pulse and breathe before every transition.' }] },
+                { _structured: true, task: 'Play G Major scale + first 8 bars at 72 BPM three clean times daily.', estMinutes: '10m' }
+              ]
+            },
+            {
+              title_en: 'Left-Hand Accompaniment Balance & Dynamics',
+              title_he: 'איזון יד שמאל ודינמיקה בנגינה',
+              sectionsData: [
+                { _structured: true, steps: [
+                  { mins: '4m', text: 'Ghost-tap the left-hand chords gently while singing the melody.' },
+                  { mins: '6m', text: 'Balance left hand softly at piano (p) while melody projects mezzo-forte (mf).' }
+                ]},
+                { _structured: true, setup: 'Imagine the right hand as a vocalist on stage while the left hand cushions the harmony underneath.', takeaway: 'Contrast between loud and quiet measures immediately elevates beginner pieces.' },
+                { _structured: true, items: [{ trap: 'Heavy left-hand thumb overpowering the melody line', fix: 'Practice hands separate with exaggerated softness on chord fifths.' }] },
+                { _structured: true, task: 'Record 30 seconds of bars 1 to 16 keeping left hand lighter than right.', estMinutes: '12m' }
+              ]
+            }
+          ]
+        }
+      },
+      stem: {
+        icon: '📐',
+        color: 'blue',
+        label: 'Math, STEM & Academic Prep',
+        shortDesc: 'Core formulas, worked walkthroughs & exam trap alerts.',
+        studentName: 'Ethan Patel (Sample)',
+        studentSubject: 'Algebra 1 Foundations',
+        homeworkTask: 'Complete all 3 distribution practice problems without peeking at steps.',
+        goals: ['Eliminate Negative Sign Distribution Errors', 'Solve Multi-Step Word Equations'],
+        sharedNote: 'Awesome clarity today! Remember to circle every negative sign first.',
+        course: {
+          title_en: 'STEM Concept Clarity & Problem Solving Lab',
+          title_he: 'מעבדת פתרון בעיות, מתמטיקה ומדעים',
+          category: 'Math & STEM',
+          target_level: 'Middle & High School',
+          description_en: 'Clear step by step lessons built around intuition first, worked walkthroughs, and classic exam traps.',
+          description_he: 'שיעורים מובנים עם דוגמאות פתורות, מלכודות נפוצות ותרגילי מיומנות.',
+          blueprintSections: [
+            { id: 'sec_ob_1', type: 'text', name: 'Core Principle & Intuition', ai_rule: 'Plain explanation before symbolic notation' },
+            { id: 'sec_ob_2', type: 'example', name: 'Worked Walkthrough Example', ai_rule: 'Step by step solved sample problem' },
+            { id: 'sec_ob_3', type: 'pitfalls', name: 'Classic Test Traps', ai_rule: 'Common sign or setup errors students make' },
+            { id: 'sec_ob_4', type: 'exercise', name: 'Guided Practice Drills', ai_rule: 'Question || Answer format' }
+          ],
+          lessons: [
+            {
+              title_en: 'Linear Equations & Sign-Safe Distribution',
+              title_he: 'משוואות לינאריות ופתיחת סוגריים בטוחה',
+              sectionsData: [
+                { _structured: true, summary: 'Distribute across EVERY term inside parentheses before moving numbers across the equals sign.', body: 'Think of an equation as a balanced scale: every operation you apply to the left pan must match the right pan equally.' },
+                { _structured: true, setup: 'Solve: 3(x - 4) + 2 = 17. First multiply 3*x and 3*(-4) -> 3x - 12 + 2 = 17 -> 3x - 10 = 17 -> 3x = 27 -> x = 9.', takeaway: 'Quick check: plug 9 back into 3(9-4)+2 = 15+2 = 17!' },
+                { _structured: true, items: [{ trap: 'Multiplying the outer factor only to x and forgetting the second constant inside', fix: 'Draw two tiny arrows from the outer multiplier to BOTH terms inside before computing.' }] },
+                { _structured: true, items: [{ q: 'Solve 2(x + 5) = 18', a: 'x = 4' }, { q: 'Solve 4(n - 2) + 3 = 19', a: 'n = 6' }] }
+              ]
+            },
+            {
+              title_en: 'Turning Word Problems into Clean Equations',
+              title_he: 'תרגום בעיות מילוליות למשוואות ברורות',
+              sectionsData: [
+                { _structured: true, summary: 'Define your variable with units in 1 line before touching any numbers.', body: 'Most word problem errors happen in sentence 1, not in arithmetic. Name your unknown clearly and translate phrase by phrase.' },
+                { _structured: true, setup: 'A tutor charges $40 flat studio setup plus $30 per hour. Total bill was $160. Write 40 + 30h = 160 -> 30h = 120 -> h = 4 hours.', takeaway: 'Units check: dollars per hour times hours yields dollars.' },
+                { _structured: true, items: [{ trap: 'Writing "4 less than x" backwards as 4 - x', fix: '"Less than" flips order cleanly: x - 4.' }] },
+                { _structured: true, items: [{ q: '7 more than twice a number is 23. Find the number.', a: '2n + 7 = 23 -> n = 8' }] }
+              ]
+            }
+          ]
+        }
+      },
+      custom: {
+        icon: '✦',
+        color: 'amber',
+        label: 'Custom / Multi-Subject Studio',
+        shortDesc: 'Flexible 4-block structure ready for any private subject.',
+        studentName: 'Jordan Lee (Sample)',
+        studentSubject: 'Foundational Study Skills',
+        homeworkTask: 'Bring your two top priority topics to review in next session.',
+        goals: ['Build Consistent Weekly Study Routine', 'Complete Milestone Project Outline'],
+        sharedNote: 'Welcome! Check back here anytime for your weekly focus and practice.',
+        course: {
+          title_en: 'Foundational Coaching & Guided Mastery',
+          title_he: 'קורס הדרכה אישי ומותאם',
+          category: 'General Curriculum',
+          target_level: 'Standard / All Levels',
+          description_en: 'Clean modular curriculum designed to teach any topic with clarity, real examples, and active recall.',
+          description_he: 'תבנית שיעור גמישה ונקייה לכל תחום הוראה.',
+          blueprintSections: [
+            { id: 'sec_ob_1', type: 'text', name: 'Core Concept & Context', ai_rule: 'Clear summary and intuitive overview' },
+            { id: 'sec_ob_2', type: 'list', name: 'Key Takeaways', ai_rule: '3 to 5 crisp memorable points' },
+            { id: 'sec_ob_3', type: 'example', name: 'Practical Walkthrough', ai_rule: 'One real scenario demonstration' },
+            { id: 'sec_ob_4', type: 'homework', name: 'Next Step Practice', ai_rule: 'Simple actionable assignment' }
+          ],
+          lessons: [
+            {
+              title_en: 'Diagnostic Kickoff & Personal Learning Map',
+              title_he: 'פתיחת תהליך ומיפוי יעדים אישי',
+              sectionsData: [
+                { _structured: true, summary: 'Define clear milestones early so every weekly session moves the needle.', body: 'Students thrive when they can literally see where they started, what they mastered this week, and what comes next.' },
+                { _structured: true, items: ['Clarify student baseline confidence', 'Pick 2 motivating short-term wins', 'Establish a predictable weekly rhythm'] },
+                { _structured: true, setup: 'Ask your student to teach back one concept in their own words within the final 3 minutes of session.', takeaway: 'Active recall reveals true understanding twice as fast as passive review.' },
+                { _structured: true, task: 'Write down one question or concept you want to master in our next class.', estMinutes: '5m' }
+              ]
+            },
+            {
+              title_en: 'Building Retention Between Live Sessions',
+              title_he: 'חיזוק הלמידה והזיכרון בין המפגשים',
+              sectionsData: [
+                { _structured: true, summary: 'Two short 8-minute check-ins beat one long last-minute cram session.', body: 'Sharing concise visual notes and a 1-tap reminder link right after class makes home follow through effortless.' },
+                { _structured: true, items: ['Keep home assignments under 12 minutes', 'Use concrete examples over abstract rules', 'Celebrate completed checklists visibly'] },
+                { _structured: true, setup: 'Send a brief Student Portal reminder mid-week linking straight to their active homework card.', takeaway: 'Gentle consistency keeps students engaged for months.' },
+                { _structured: true, task: 'Check off your active practice goal inside Student Portal before our next session.', estMinutes: '8m' }
+              ]
+            }
+          ]
+        }
+      }
+    };
+
+    function getOnboardingCompletedKey() {
+      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || 'guest').toLowerCase().trim();
+      return 'tutor_onboarding_completed_' + email;
+    }
+
+    function openFirstLoginOnboardingModal(presetNiche = '') {
+      const modal = document.getElementById('modal-first-login-onboarding');
+      if (!modal) return;
+      const savedPref = presetNiche || (typeof localStorage !== 'undefined' ? (localStorage.getItem('tutor_preferred_onboarding_niche') || '') : '');
+      onboardingState.step = 1;
+      if (savedPref && ONBOARDING_STARTER_PACKS[savedPref]) {
+        onboardingState.niche = savedPref;
+      }
+      const activeSchool = typeof getActiveSchool === 'function' ? getActiveSchool() : null;
+      const userFirst = ((APP_STATE.currentUser && (APP_STATE.currentUser.name_en || APP_STATE.currentUser.name)) || 'My').split(' ')[0];
+      onboardingState.studioName = (activeSchool && activeSchool.name) || (APP_STATE.currentUser && APP_STATE.currentUser.school_name) || `${userFirst}'s Studio`;
+      onboardingState.seedCourse = true;
+      onboardingState.seedStudent = true;
+      onboardingState.createdCourseId = null;
+      onboardingState.createdStudentId = null;
+      modal.classList.remove('hidden');
+      renderOnboardingWizardStep();
+    }
+
+    function closeFirstLoginOnboardingModal(markSkipped = false) {
+      const modal = document.getElementById('modal-first-login-onboarding');
+      if (modal) modal.classList.add('hidden');
+      if (markSkipped && typeof localStorage !== 'undefined') {
+        try { localStorage.setItem(getOnboardingCompletedKey(), 'true'); } catch (_) {}
+      }
+    }
+
+    function selectOnboardingNiche(niche) {
+      if (!ONBOARDING_STARTER_PACKS[niche]) return;
+      onboardingState.niche = niche;
+      const studioEl = document.getElementById('onboarding-studio-name');
+      if (studioEl) onboardingState.studioName = studioEl.value;
+      renderOnboardingWizardStep();
+    }
+
+    function goToOnboardingStep(step) {
+      if (onboardingState.step === 1) {
+        const studioEl = document.getElementById('onboarding-studio-name');
+        if (studioEl && typeof studioEl.value === 'string' && studioEl.value.trim()) {
+          onboardingState.studioName = studioEl.value.trim();
+        }
+      } else if (onboardingState.step === 2) {
+        const courseChk = document.getElementById('chk-onboarding-seed-course');
+        if (courseChk && typeof courseChk.checked === 'boolean') onboardingState.seedCourse = courseChk.checked;
+        const stuChk = document.getElementById('chk-onboarding-seed-student');
+        if (stuChk && typeof stuChk.checked === 'boolean') onboardingState.seedStudent = stuChk.checked;
+      }
+      onboardingState.step = Math.max(1, Math.min(3, Number(step) || 1));
+      renderOnboardingWizardStep();
+    }
+
+    function renderOnboardingWizardStep() {
+      const body = document.getElementById('onboarding-wizard-body');
+      if (!body) return;
+      const isHe = APP_STATE && APP_STATE.lang === 'he';
+      const langBadge = document.getElementById('onboarding-lang-badge');
+      if (langBadge) langBadge.textContent = isHe ? 'English' : 'עברית';
+
+      const pillActive = 'px-2.5 py-1.5 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-center truncate';
+      const pillDone = 'px-2.5 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-300 border border-emerald-500/35 text-center truncate';
+      const pillIdle = 'px-2.5 py-1.5 rounded-xl bg-slate-800 text-slate-400 border border-slate-800 text-center truncate';
+      [1, 2, 3].forEach(n => {
+        const el = document.getElementById('onboarding-pill-' + n);
+        if (!el) return;
+        el.className = n === onboardingState.step ? pillActive : (n < onboardingState.step ? pillDone : pillIdle);
+      });
+
+      const pack = ONBOARDING_STARTER_PACKS[onboardingState.niche] || ONBOARDING_STARTER_PACKS.barmitzvah;
+
+      if (onboardingState.step === 1) {
+        body.innerHTML = `
+          <div class="space-y-4">
+            <div class="space-y-1.5">
+              <label for="onboarding-studio-name" class="block text-xs font-extrabold uppercase tracking-wider text-slate-300">${isHe ? 'שם הסטודיו או האקדמיה שלך' : 'Your Studio or Classroom Name'}</label>
+              <input type="text" id="onboarding-studio-name" dir="auto" value="${escapeHtml(onboardingState.studioName)}" oninput="onboardingState.studioName = this.value" placeholder="e.g. Rabbi Cohen Teaching Studio" class="w-full bg-slate-950 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+
+            <div class="space-y-2">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-slate-300">${isHe ? 'מה התחום העיקרי שאתה מלמד?' : 'What do you primarily teach?'}</div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                ${Object.keys(ONBOARDING_STARTER_PACKS).map(k => {
+                  const p = ONBOARDING_STARTER_PACKS[k];
+                  const selected = onboardingState.niche === k;
+                  return `
+                    <button type="button" id="btn-onboarding-niche-${k}" onclick="selectOnboardingNiche('${k}')" class="p-3.5 rounded-2xl border text-left rtl:text-right flex items-start gap-3 transition ${selected ? 'bg-indigo-500/15 border-indigo-400 ring-2 ring-indigo-500/30' : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'}">
+                      <span class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center text-xl shrink-0">${p.icon}</span>
+                      <div class="min-w-0 space-y-0.5">
+                        <div class="text-xs sm:text-sm font-extrabold text-white truncate">${escapeHtml(p.label)}</div>
+                        <div class="text-[11px] text-slate-400 leading-snug">${escapeHtml(p.shortDesc)}</div>
+                      </div>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <div class="pt-2 flex items-center justify-end gap-2">
+              <button type="button" id="btn-onboarding-next-1" onclick="goToOnboardingStep(2)" class="px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-extrabold shadow-lg transition active:scale-95 keep-white flex items-center gap-2">
+                <span>${isHe ? 'המשך לחבילת הפתיחה' : 'Continue to Starter Pack'}</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 rtl:rotate-180"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (onboardingState.step === 2) {
+        const isDay = getThemeMode() === 'light';
+        body.innerHTML = `
+          <div class="space-y-4">
+            <div class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center gap-3">
+              <span class="text-2xl shrink-0">${pack.icon}</span>
+              <div class="min-w-0">
+                <div class="text-xs font-extrabold text-indigo-300 uppercase tracking-wider">${escapeHtml(pack.label)}</div>
+                <div class="text-sm font-bold text-white truncate">${escapeHtml(pack.course.title_en)}</div>
+              </div>
+            </div>
+
+            <div class="space-y-2.5">
+              <label class="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-950/75 border border-slate-800 cursor-pointer hover:border-indigo-500/40 transition">
+                <input type="checkbox" id="chk-onboarding-seed-course" ${onboardingState.seedCourse ? 'checked' : ''} onchange="onboardingState.seedCourse = this.checked" class="mt-1 w-4 h-4 accent-indigo-500 shrink-0" />
+                <div class="space-y-0.5">
+                  <div class="text-xs sm:text-sm font-extrabold text-white">${isHe ? 'צור קורס לדוגמה מוכן להוראה (2 שיעורים מלאים)' : 'Add Ready-to-Teach Sample Course (2 Full Lessons)'}</div>
+                  <p class="text-xs text-slate-400 leading-relaxed">${escapeHtml(pack.course.description_en)}</p>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-950/75 border border-slate-800 cursor-pointer hover:border-emerald-500/40 transition">
+                <input type="checkbox" id="chk-onboarding-seed-student" ${onboardingState.seedStudent ? 'checked' : ''} onchange="onboardingState.seedStudent = this.checked" class="mt-1 w-4 h-4 accent-emerald-500 shrink-0" />
+                <div class="space-y-0.5">
+                  <div class="text-xs sm:text-sm font-extrabold text-white">${isHe ? 'הוסף תלמיד הדגמה לבדיקת פורטל התלמיד והוואטסאפ' : 'Add Demo Student ("' + escapeHtml(pack.studentName) + '") with Portal & Goals'}</div>
+                  <p class="text-xs text-slate-400 leading-relaxed">Test the zero-password Student Portal and 1-click Parent WhatsApp / SMS summaries immediately. You can delete it anytime.</p>
+                </div>
+              </label>
+            </div>
+
+            <div class="space-y-1.5">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-slate-300">Workspace Appearance</div>
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="applyThemeMode('light'); renderOnboardingWizardStep();" class="p-3 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 transition ${isDay ? 'bg-amber-500/15 border-amber-400 text-amber-300' : 'bg-slate-950/60 border-slate-800 text-slate-300'}">
+                  <i data-lucide="sun" class="w-4 h-4"></i>
+                  <span>Warm Daylight</span>
+                </button>
+                <button type="button" onclick="applyThemeMode('dark'); renderOnboardingWizardStep();" class="p-3 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 transition ${!isDay ? 'bg-indigo-500/20 border-indigo-400 text-indigo-300' : 'bg-slate-950/60 border-slate-800 text-slate-300'}">
+                  <i data-lucide="moon" class="w-4 h-4"></i>
+                  <span>Midnight Dark</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="pt-2 flex items-center justify-between gap-2 flex-wrap">
+              <button type="button" onclick="goToOnboardingStep(1)" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition">← Back</button>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="completeOnboardingWizard({ blank: true })" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">Start Completely Blank</button>
+                <button type="button" id="btn-onboarding-build-studio" onclick="completeOnboardingWizard({ blank: false })" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs sm:text-sm font-extrabold shadow-lg transition active:scale-95 keep-white">
+                  Build My Starter Studio →
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        body.innerHTML = `
+          <div class="space-y-5 text-center">
+            <div class="w-16 h-16 mx-auto rounded-3xl bg-emerald-500/15 border border-emerald-500/35 text-emerald-400 flex items-center justify-center text-3xl shadow-inner">✦</div>
+            <div class="space-y-1">
+              <h4 class="text-xl font-extrabold text-white">${escapeHtml(onboardingState.studioName || 'Your TutorPilot Studio')} is Ready!</h4>
+              <p class="text-xs sm:text-sm text-slate-400 max-w-md mx-auto">Choose what you would like to explore first, or jump straight into your workspace.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left rtl:text-right">
+              <button type="button" onclick="launchOnboardingAction('course')" class="p-4 rounded-2xl bg-slate-950/75 border border-indigo-500/35 hover:border-indigo-400 space-y-1.5 transition">
+                <div class="text-xs font-extrabold text-indigo-400 flex items-center gap-1.5"><i data-lucide="book-open" class="w-4 h-4"></i><span>Open Sample Course</span></div>
+                <p class="text-[11px] text-slate-400">Inspect book-grade Lesson Reader &amp; Studio blocks.</p>
+              </button>
+              <button type="button" onclick="launchOnboardingAction('portal')" class="p-4 rounded-2xl bg-slate-950/75 border border-teal-500/35 hover:border-teal-400 space-y-1.5 transition">
+                <div class="text-xs font-extrabold text-teal-400 flex items-center gap-1.5"><i data-lucide="eye" class="w-4 h-4"></i><span>Student Portal</span></div>
+                <p class="text-[11px] text-slate-400">See what your student experiences on their phone.</p>
+              </button>
+              <button type="button" onclick="launchOnboardingAction('outreach')" class="p-4 rounded-2xl bg-slate-950/75 border border-emerald-500/35 hover:border-emerald-400 space-y-1.5 transition">
+                <div class="text-xs font-extrabold text-emerald-400 flex items-center gap-1.5"><i data-lucide="send" class="w-4 h-4"></i><span>Try Parent &amp; Student Outreach</span></div>
+                <p class="text-[11px] text-slate-400">Preview 1-click WhatsApp &amp; SMS progress messages.</p>
+              </button>
+            </div>
+
+            <div class="pt-1">
+              <button type="button" id="btn-onboarding-finish-dashboard" onclick="closeFirstLoginOnboardingModal(true)" class="px-7 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-sm font-extrabold shadow-lg transition active:scale-95">
+                Go to My Dashboard →
+              </button>
+            </div>
+          </div>
+        `;
+      }
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    async function completeOnboardingWizard(opts = {}) {
+      const isBlank = !!opts.blank;
+      const studioInput = document.getElementById('onboarding-studio-name');
+      const finalName = ((studioInput && studioInput.value) || onboardingState.studioName || '').trim();
+      const email = (APP_STATE.currentUser && APP_STATE.currentUser.email || '').toLowerCase().trim();
+      const userId = (APP_STATE.currentUser && APP_STATE.currentUser.id) || '';
+      const schoolId = (typeof getActiveSchoolId === 'function' ? getActiveSchoolId() : 'school_main_academy') || 'school_main_academy';
+
+      if (finalName && APP_STATE.school && finalName !== APP_STATE.school.name) {
+        APP_STATE.school.name = finalName;
+        if (APP_STATE.currentUser) APP_STATE.currentUser.school_name = finalName;
+        if (typeof saveSchoolsRegistry === 'function' && typeof getSchoolsRegistry === 'function') {
+          const reg = getSchoolsRegistry();
+          const idx = reg.findIndex(s => s && s.id === APP_STATE.school.id);
+          if (idx >= 0) {
+            reg[idx].name = finalName;
+            saveSchoolsRegistry(reg);
+          }
+        }
+        if (isHttpRuntime() && typeof apiFetch === 'function') {
+          apiFetch('/api/schools', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'update_name', name: finalName })
+          }).catch(() => {});
+        }
+        if (typeof updateUserSessionDisplay === 'function' && APP_STATE.currentUser) {
+          updateUserSessionDisplay(APP_STATE.currentUser);
+        }
+      }
+
+      const pack = ONBOARDING_STARTER_PACKS[onboardingState.niche] || ONBOARDING_STARTER_PACKS.barmitzvah;
+      const shouldSeedCourse = !isBlank && onboardingState.seedCourse !== false;
+      const shouldSeedStudent = !isBlank && onboardingState.seedStudent !== false;
+      let createdCourse = null;
+      let createdStudent = null;
+
+      if (shouldSeedCourse) {
+        const ts = Date.now();
+        const cId = 'course_starter_' + ts + '_' + Math.random().toString(36).slice(2, 6);
+        const sectionsList = pack.course.blueprintSections.map(s => ({ ...s }));
+        const lessons = pack.course.lessons.map((lesSpec, lIdx) => {
+          const secObj = {};
+          sectionsList.forEach((sec, sIdx) => {
+            const payload = lesSpec.sectionsData[sIdx];
+            if (payload) secObj[sec.id] = JSON.stringify(payload);
+          });
+          return {
+            id: 'lesson_starter_' + ts + '_' + (lIdx + 1),
+            lesson_num: lIdx + 1,
+            title_en: lesSpec.title_en,
+            title_he: lesSpec.title_he,
+            duration: '35 min',
+            sections: secObj,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+        });
+
+        createdCourse = {
+          id: cId,
+          title_en: pack.course.title_en,
+          title_he: pack.course.title_he,
+          format_type: 'custom_blueprint',
+          category: pack.course.category,
+          target_level: pack.course.target_level,
+          description_en: pack.course.description_en,
+          description_he: pack.course.description_he,
+          color: pack.color || 'indigo',
+          icon: pack.icon || '✦',
+          created_by: email,
+          owner_id: userId,
+          school_id: schoolId,
+          blueprint: {
+            version: '2.0',
+            student_profile: pack.course.target_level,
+            guidelines: pack.course.description_en,
+            lesson_builder_instructions: pack.course.description_en,
+            theme_style: 'glass_dark',
+            density: 'balanced',
+            sections: sectionsList
+          },
+          lessons,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        if (!Array.isArray(APP_STATE.customCourses)) APP_STATE.customCourses = [];
+        APP_STATE.customCourses.push(createdCourse);
+        APP_STATE.activeCourseId = createdCourse.id;
+        onboardingState.createdCourseId = createdCourse.id;
+        if (typeof saveCustomCoursesToStorage === 'function') saveCustomCoursesToStorage(true);
+      }
+
+      if (shouldSeedStudent) {
+        const sTs = Date.now();
+        const sId = 'stu_starter_' + sTs;
+        const completedTopics = {};
+        if (createdCourse && createdCourse.lessons && createdCourse.lessons[0]) {
+          completedTopics[createdCourse.id + '_' + createdCourse.lessons[0].id] = true;
+        }
+        const defaultSkills = typeof getDefaultStudentSkills === 'function' ? getDefaultStudentSkills() : { customGoals: [], homework: { task: '', completed: false } };
+        defaultSkills.homework = {
+          task: pack.homeworkTask,
+          completed: false,
+          assignedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        };
+        defaultSkills.customGoals = (pack.goals || []).map((gTitle, idx) => ({
+          id: 'goal_starter_' + sTs + '_' + idx,
+          title: gTitle,
+          completed: idx === 0,
+          images: [],
+          pdfs: [],
+          recordings: []
+        }));
+        defaultSkills.lastTaught = (createdCourse && createdCourse.lessons && createdCourse.lessons[0]?.title_en) || 'Introductory Session';
+        defaultSkills.lastTaughtAt = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        defaultSkills.nextToTeach = (createdCourse && createdCourse.lessons && createdCourse.lessons[1]?.title_en) || 'Session 2';
+
+        createdStudent = {
+          id: sId,
+          name: pack.studentName,
+          subject: pack.studentSubject,
+          gradeOrDate: 'Sample Student',
+          parsha: pack.studentSubject,
+          barMitzvahDate: '',
+          parshaOrDate: pack.studentSubject,
+          gradeLevel: 'Standard / All Levels',
+          status: 'active',
+          parentContact: { name: 'Parent / Guardian', phone: '', email: '' },
+          studentContact: { phone: '', email: '' },
+          outreachLog: {},
+          hourlyRate: '',
+          studentAccessCode: typeof generateStudentAccessCode === 'function' ? generateStudentAccessCode(APP_STATE.students) : 'TP2026',
+          sharedNotes: [{
+            id: 'snote_starter_' + sTs,
+            text: pack.sharedNote,
+            dateLabel: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            created_at: new Date().toISOString()
+          }],
+          avatar: '',
+          orderIndex: (APP_STATE.students || []).length,
+          school_id: schoolId,
+          owner_email: email,
+          notes: 'Demo student seeded by 60s Onboarding Wizard. Feel free to edit or archive anytime.',
+          skills: defaultSkills,
+          schedule: [],
+          completedTopics,
+          completedParshiot: {}
+        };
+        if (!Array.isArray(APP_STATE.students)) APP_STATE.students = [];
+        APP_STATE.students.push(createdStudent);
+        APP_STATE.activeStudentId = createdStudent.id;
+        onboardingState.createdStudentId = createdStudent.id;
+        if (typeof saveStudentsToStorage === 'function') saveStudentsToStorage(true);
+        if (typeof pushStudentToCloud === 'function') pushStudentToCloud(createdStudent);
+      }
+
+      if (typeof localStorage !== 'undefined') {
+        try {
+          localStorage.setItem(getOnboardingCompletedKey(), 'true');
+          localStorage.removeItem('tutor_preferred_onboarding_niche');
+        } catch (_) {}
+      }
+      if (typeof renderAllViews === 'function') renderAllViews();
+      if (isBlank) {
+        closeFirstLoginOnboardingModal(true);
+        showToast('Your blank studio is ready!');
+      } else {
+        onboardingState.step = 3;
+        renderOnboardingWizardStep();
+      }
+    }
+
+    function launchOnboardingAction(action) {
+      const courseId = onboardingState.createdCourseId || (APP_STATE.customCourses && APP_STATE.customCourses[0]?.id);
+      const studentId = onboardingState.createdStudentId || (APP_STATE.students && APP_STATE.students[0]?.id);
+      closeFirstLoginOnboardingModal(true);
+      if (action === 'course' && courseId && typeof openCourseClassesView === 'function') {
+        if (typeof switchTab === 'function') switchTab('study');
+        openCourseClassesView(courseId);
+        const course = (APP_STATE.customCourses || []).find(c => c.id === courseId);
+        if (course && course.lessons && course.lessons[0] && typeof navigateToLesson === 'function') {
+          navigateToLesson(course.id, course.lessons[0].id);
+        }
+      } else if (action === 'portal' && studentId && typeof openStudentViewPreviewModal === 'function') {
+        if (typeof switchTab === 'function') switchTab('students');
+        openStudentViewPreviewModal(studentId);
+      } else if (action === 'outreach' && studentId && typeof openOutreachModal === 'function') {
+        if (typeof switchTab === 'function') switchTab('students');
+        openOutreachModal(studentId, 'parent', 'progress_summary');
+      }
+    }
+
+    function maybeTriggerFirstLoginOnboarding() {
+      if (!isHttpRuntime() || !APP_STATE.currentUser || isStudentPortalActive()) return;
+      const email = (APP_STATE.currentUser.email || '').toLowerCase().trim();
+      if (!email || email === 'shmueldoviduhlman@gmail.com') return;
+      try {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem(getOnboardingCompletedKey()) === 'true') return;
+      } catch (_) {}
+      const activeCoursesCount = (APP_STATE.customCourses || []).filter(c => c && !c.archived).length;
+      const activeStudentsCount = (APP_STATE.students || []).filter(s => s && !s.archived).length;
+      if (activeCoursesCount === 0 && activeStudentsCount === 0) {
+        const modal = document.getElementById('modal-first-login-onboarding');
+        if (modal && modal.classList.contains('hidden')) {
+          openFirstLoginOnboardingModal();
+        }
+      }
+    }
+
+    // =========================================================================
+    // M140 PILLAR 3: ONE-CLICK PARENT PROGRESS SUMMARY & STUDENT REMINDERS
+    // WhatsApp / SMS / Email Outreach Engine with 1-Tap Pre-Filled Portal URL
+    // =========================================================================
+    var outreachState = {
+      studentId: null,
+      recipient: 'parent',
+      preset: 'progress_summary',
+      lang: 'en',
+      aiPolishing: false
+    };
+
+    function updateStudentDrawerOwnContactField(studentId, field, value) {
+      const student = (APP_STATE.students || []).find(s => s.id === studentId);
+      if (!student) return;
+      if (!student.studentContact || typeof student.studentContact !== 'object') {
+        student.studentContact = { phone: '', email: '' };
+      }
+      student.studentContact[field] = String(value || '').trim();
+      saveStudentsToStorage(true);
+      pushStudentToCloud(student);
+    }
+
+    function openOutreachModal(studentId, recipient = 'parent', preset = '') {
+      const targetId = studentId || APP_STATE.activeStudentDrawerId || APP_STATE.activeStudentId || (APP_STATE.students && APP_STATE.students[0]?.id);
+      const student = (APP_STATE.students || []).find(s => s.id === targetId);
+      if (!student) {
+        showToast('Please select or add a student first.');
+        return;
+      }
+      outreachState.studentId = student.id;
+      outreachState.recipient = recipient === 'student' ? 'student' : 'parent';
+      outreachState.preset = preset || (outreachState.recipient === 'student' ? 'practice_nudge' : 'progress_summary');
+      outreachState.lang = APP_STATE.lang === 'he' ? 'he' : 'en';
+      outreachState.aiPolishing = false;
+
+      const modal = document.getElementById('modal-outreach-composer');
+      if (modal) modal.classList.remove('hidden');
+      renderOutreachModalContent(true);
+    }
+
+    function closeOutreachModal() {
+      const modal = document.getElementById('modal-outreach-composer');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function switchOutreachRecipient(recipient) {
+      outreachState.recipient = recipient === 'student' ? 'student' : 'parent';
+      outreachState.preset = outreachState.recipient === 'student' ? 'practice_nudge' : 'progress_summary';
+      renderOutreachModalContent(true);
+    }
+
+    function selectOutreachPreset(preset) {
+      outreachState.preset = preset;
+      renderOutreachModalContent(true);
+    }
+
+    function setOutreachLanguage(lang) {
+      outreachState.lang = lang === 'he' ? 'he' : 'en';
+      renderOutreachModalContent(true);
+    }
+
+    function handleOutreachContactInput(field, value) {
+      const student = (APP_STATE.students || []).find(s => s.id === outreachState.studentId);
+      if (!student) return;
+      const cleanVal = String(value || '').trim();
+      if (outreachState.recipient === 'parent') {
+        if (!student.parentContact || typeof student.parentContact !== 'object') {
+          student.parentContact = { name: '', phone: '', email: '' };
+        }
+        student.parentContact[field] = cleanVal;
+        regenerateOutreachDraft();
+      } else {
+        if (!student.studentContact || typeof student.studentContact !== 'object') {
+          student.studentContact = { phone: '', email: '' };
+        }
+        student.studentContact[field] = cleanVal;
+      }
+      saveStudentsToStorage(true);
+      pushStudentToCloud(student);
+    }
+
+    function buildOutreachDraftText(student, opts = {}) {
+      const recipient = opts.recipient || outreachState.recipient || 'parent';
+      const preset = opts.preset || outreachState.preset || (recipient === 'student' ? 'practice_nudge' : 'progress_summary');
+      const lang = opts.lang || outreachState.lang || 'en';
+      const isHe = lang === 'he';
+      const includeViral = opts.includeViral !== undefined
+        ? !!opts.includeViral
+        : Boolean(document.getElementById('chk-outreach-viral-footer')?.checked ?? true);
+
+      const sk = student.skills || {};
+      const hwTask = (sk.homework && sk.homework.task) ? sk.homework.task.trim() : '';
+      const hwDone = Boolean(sk.homework && sk.homework.completed);
+      const goals = Array.isArray(sk.customGoals) ? sk.customGoals : [];
+      const doneGoals = goals.filter(g => g.completed).length;
+      const lastTaught = (sk.lastTaught || '').trim();
+      const nextTeach = (sk.nextToTeach || '').trim();
+      const progress = typeof getStudentCourseProgress === 'function' ? getStudentCourseProgress(student) : { overallPct: 0, completedClasses: 0, totalClasses: 0 };
+      const guardianName = (student.parentContact && student.parentContact.name) ? student.parentContact.name.trim() : '';
+      const firstName = String(student.name || 'Student').trim().split(' ')[0];
+      const tutorName = (APP_STATE.currentUser && (isHe ? (APP_STATE.currentUser.name_he || APP_STATE.currentUser.name_en) : (APP_STATE.currentUser.name_en || APP_STATE.currentUser.name))) || (isHe ? 'המורה שלך' : 'Your Tutor');
+      const portalUrl = getStudentPortalDirectUrl(student);
+
+      let subject = '';
+      let body = '';
+
+      if (recipient === 'student') {
+        if (isHe) {
+          subject = `תזכורת תרגול קצרה מ${tutorName} · ${student.name}`;
+          if (preset === 'new_homework') {
+            body = `היי ${firstName}! העליתי עבורך משימת תרגול והערות חדשות באזור התלמיד שלך.${hwTask ? '\n\nמשימה לשבוע:\n' + hwTask : ''}\n\nכנס בקליק אחד לתרגול:\n${portalUrl}\n(קוד כניסה: ${student.studentAccessCode})\n\nבהצלחה,\n${tutorName}`;
+          } else if (preset === 'upcoming_class') {
+            body = `היי ${firstName}! מחכים לשיעור הקרוב שלנו.${nextTeach ? ' נמשיך עם: ' + nextTeach + '.' : ''}${hwTask && !hwDone ? '\n\nתזכורת קטנה לעבור על: ' + hwTask : ''}\n\nפתח את האזור האישי שלך בקליק:\n${portalUrl}\n\nנתראה בשיעור,\n${tutorName}`;
+          } else {
+            body = `היי ${firstName}! תזכורת חברית לפתוח ל-5 דקות את פורטל התלמיד שלך ולסמן את היעדים השבועיים.${hwTask ? '\n\nלביצוע השבוע:\n' + hwTask : ''}\n\nפתיחה בקליק אחד (ללא סיסמה):\n${portalUrl}\n(שם: ${student.name} | קוד: ${student.studentAccessCode})\n\n${tutorName}`;
+          }
+        } else {
+          subject = `Quick Practice Reminder for ${firstName} from ${tutorName}`;
+          if (preset === 'new_homework') {
+            body = `Hi ${firstName}! I just posted fresh practice notes and homework in your Student Portal.${hwTask ? '\n\nHomework Focus:\n' + hwTask : ''}\n\nTap below to open your portal right on your phone:\n${portalUrl}\n(Name: ${student.name} | Code: ${student.studentAccessCode})\n\nBest,\n${tutorName}`;
+          } else if (preset === 'upcoming_class') {
+            body = `Hey ${firstName}! Looking forward to our upcoming session${nextTeach ? ' (' + nextTeach + ')' : ''}.${hwTask && !hwDone ? '\n\nQuick reminder to review: ' + hwTask : ''}\n\nOpen your Student Portal in 1 tap:\n${portalUrl}\n\nSee you soon,\n${tutorName}`;
+          } else {
+            body = `Hey ${firstName}! Quick friendly nudge to check your TutorPilot Student Portal for 5 minutes today and stay ahead of your goals.${hwTask ? '\n\nThis week’s practice:\n' + hwTask : ''}\n\n1-Tap Student Portal Link:\n${portalUrl}\n(Code: ${student.studentAccessCode})\n\nKeep going!\n${tutorName}`;
+          }
+        }
+      } else {
+        if (isHe) {
+          subject = `עדכון התקדמות: ${student.name} · ${tutorName}`;
+          const greeting = guardianName ? `שלום ${guardianName},` : 'שלום וברכה,';
+          if (preset === 'great_class') {
+            body = `${greeting}\n\nרציתי לשתף ש${firstName} התקדם בצורה נהדרת בשיעור היום!${lastTaught ? '\n📖 למדנו היום: ' + lastTaught : ''}${hwTask ? '\n📝 לתרגול בבית: ' + hwTask : ''}\n\nאפשר לצפות בכל היעדים והחומרים בקישור לאזור התלמיד:\n${portalUrl}\n\nבברכה,\n${tutorName}`;
+          } else if (preset === 'milestone_checkin') {
+            body = `${greeting}\n\nעדכון ביניים על ההתקדמות של ${student.name}:\n📊 השלמת מסלול: ${progress.overallPct}%${goals.length ? ' · יעדים שהושלמו: ' + doneGoals + '/' + goals.length : ''}${nextTeach ? '\n🎯 היעד הבא שלנו: ' + nextTeach : ''}\n\nפורטל תרגול ישיר לתלמיד:\n${portalUrl}\n\nשבוע טוב ומבורך,\n${tutorName}`;
+          } else {
+            body = `${greeting}\n\nהנה סיכום התקדמות עדכני עבור ${student.name}:${lastTaught ? '\n📖 נלמד לאחרונה: ' + lastTaught : ''}${nextTeach ? '\n➡️ בשיעור הבא: ' + nextTeach : ''}\n📊 התקדמות כוללת: ${progress.overallPct}% (${progress.completedClasses}/${progress.totalClasses} שיעורים)${hwTask ? '\n📝 שיעורי בית: ' + hwTask : ''}\n\nקישור ישיר לתלמיד (ללא סיסמה):\n${portalUrl}\n\nבברכה,\n${tutorName}`;
+          }
+        } else {
+          subject = `Progress Update: ${student.name} · ${tutorName}`;
+          const greeting = guardianName ? `Hi ${guardianName},` : 'Hello!';
+          if (preset === 'great_class') {
+            body = `${greeting}\n\nQuick note to share that ${firstName} did a fantastic job in class today!${lastTaught ? '\n📖 Covered today: ' + lastTaught : ''}${hwTask ? '\n📝 Home practice: ' + hwTask : ''}\n\n${firstName} can tap straight into their Student Portal anytime here:\n${portalUrl}\n\nWarm regards,\n${tutorName}`;
+          } else if (preset === 'milestone_checkin') {
+            body = `${greeting}\n\nHere is a milestone check-in on ${student.name}'s progress:\n📊 Course Progress: ${progress.overallPct}% (${progress.completedClasses}/${progress.totalClasses} classes)${goals.length ? ' | Goals mastered: ' + doneGoals + '/' + goals.length : ''}${nextTeach ? '\n🎯 Up next: ' + nextTeach : ''}\n\n1-Tap Student Portal Link:\n${portalUrl}\n\nBest,\n${tutorName}`;
+          } else {
+            body = `${greeting}\n\nHere is a quick progress summary for ${student.name}:${lastTaught ? '\n📖 Last taught: ' + lastTaught : ''}${nextTeach ? '\n➡️ Up next: ' + nextTeach : ''}\n📊 Overall progress: ${progress.overallPct}%${goals.length ? ' (' + doneGoals + '/' + goals.length + ' goals completed)' : ''}${hwTask ? '\n📝 Practice / Homework: ' + hwTask : ''}\n\nStudent Portal (1-tap access, no password):\n${portalUrl}\n\nBest regards,\n${tutorName}`;
+          }
+        }
+      }
+
+      if (includeViral) {
+        body += isHe
+          ? '\n\n✦ מופעל על ידי TutorPilot.us'
+          : '\n\n✦ Powered by TutorPilot.us';
+      }
+
+      return { subject, body, portalUrl };
+    }
+
+    function regenerateOutreachDraft() {
+      const student = (APP_STATE.students || []).find(s => s.id === outreachState.studentId);
+      if (!student) return;
+      const draft = buildOutreachDraftText(student);
+      const subjEl = document.getElementById('outreach-email-subject-input');
+      const msgEl = document.getElementById('outreach-message-textarea');
+      if (subjEl) subjEl.value = draft.subject;
+      if (msgEl) msgEl.value = draft.body;
+    }
+
+    function renderOutreachModalContent(rebuildDraft = true) {
+      const student = (APP_STATE.students || []).find(s => s.id === outreachState.studentId);
+      if (!student) return;
+      const isParent = outreachState.recipient === 'parent';
+      const isHe = outreachState.lang === 'he';
+
+      const tabParent = document.getElementById('tab-outreach-parent');
+      const tabStudent = document.getElementById('tab-outreach-student');
+      if (tabParent) {
+        tabParent.className = isParent
+          ? 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow keep-white'
+          : 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 text-slate-400 hover:text-white';
+      }
+      if (tabStudent) {
+        tabStudent.className = !isParent
+          ? 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 bg-indigo-600 text-white shadow keep-white'
+          : 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 text-slate-400 hover:text-white';
+      }
+
+      const btnEn = document.getElementById('btn-outreach-lang-en');
+      const btnHe = document.getElementById('btn-outreach-lang-he');
+      if (btnEn) btnEn.className = !isHe ? 'px-2.5 py-1 rounded-lg bg-brand-600 text-white transition keep-white' : 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition';
+      if (btnHe) btnHe.className = isHe ? 'px-2.5 py-1 rounded-lg bg-brand-600 text-white transition keep-white' : 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition';
+
+      const contactBar = document.getElementById('outreach-contact-bar');
+      if (contactBar) {
+        const guardian = student.parentContact || { name: '', phone: '', email: '' };
+        const own = student.studentContact || { phone: '', email: '' };
+        if (isParent) {
+          contactBar.innerHTML = `
+            <div class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-400">Parent / Guardian Contact (Auto-Saves)</div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+              <input type="text" id="outreach-input-parent-name" value="${escapeHtml(guardian.name || '')}" onchange="handleOutreachContactInput('name', this.value)" placeholder="Parent Name" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400" />
+              <input type="tel" id="outreach-input-parent-phone" value="${escapeHtml(guardian.phone || '')}" onchange="handleOutreachContactInput('phone', this.value)" placeholder="WhatsApp / SMS Phone" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400" />
+              <input type="email" id="outreach-input-parent-email" value="${escapeHtml(guardian.email || '')}" onchange="handleOutreachContactInput('email', this.value)" placeholder="Parent Email" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400" />
+            </div>
+          `;
+        } else {
+          contactBar.innerHTML = `
+            <div class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-400">Student Contact for Practice Reminders (Auto-Saves)</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <input type="tel" id="outreach-input-student-phone" value="${escapeHtml(own.phone || '')}" onchange="handleOutreachContactInput('phone', this.value)" placeholder="Student WhatsApp / Cell" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" />
+              <input type="email" id="outreach-input-student-email" value="${escapeHtml(own.email || '')}" onchange="handleOutreachContactInput('email', this.value)" placeholder="Student Email" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400" />
+            </div>
+          `;
+        }
+      }
+
+      const presetsRow = document.getElementById('outreach-presets-row');
+      if (presetsRow) {
+        const presets = isParent
+          ? [
+              { id: 'progress_summary', label: 'Progress & Homework' },
+              { id: 'great_class', label: 'Great Class Praise' },
+              { id: 'milestone_checkin', label: 'Milestone Check-In' }
+            ]
+          : [
+              { id: 'practice_nudge', label: '5-Min Portal Nudge' },
+              { id: 'new_homework', label: 'New Homework Posted' },
+              { id: 'upcoming_class', label: 'Upcoming Class' }
+            ];
+        presetsRow.innerHTML = presets.map(p => `
+          <button type="button" onclick="selectOutreachPreset('${p.id}')" class="px-3 py-1 rounded-xl text-[11px] font-bold border transition ${outreachState.preset === p.id ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-sm' : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700'}">
+            ${escapeHtml(p.label)}
+          </button>
+        `).join('');
+      }
+
+      const linkPreview = document.getElementById('outreach-portal-link-preview');
+      if (linkPreview) {
+        const portalUrl = getStudentPortalDirectUrl(student);
+        linkPreview.innerHTML = `
+          <div class="min-w-0 flex-1 truncate">
+            <span class="font-bold text-indigo-300">1-Tap Student Portal Link:</span>
+            <code class="ml-1 font-mono text-[11px] text-amber-300">${escapeHtml(portalUrl)}</code>
+          </div>
+          <button type="button" onclick="copyToClipboardText('${escapeHtml(portalUrl)}', '1-Tap Portal URL copied!')" class="px-2.5 py-1 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/35 text-[11px] font-bold shrink-0">Copy Link</button>
+        `;
+      }
+
+      if (rebuildDraft) {
+        regenerateOutreachDraft();
+      }
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    async function polishOutreachMessageWithAi() {
+      const student = (APP_STATE.students || []).find(s => s.id === outreachState.studentId);
+      const msgEl = document.getElementById('outreach-message-textarea');
+      const btn = document.getElementById('btn-outreach-ai-polish');
+      if (!student || !msgEl) return;
+
+      outreachState.aiPolishing = true;
+      if (btn) btn.disabled = true;
+      try {
+        const sk = student.skills || {};
+        const safeContext = {
+          firstName: String(student.name || '').trim().split(' ')[0],
+          recipient: outreachState.recipient,
+          preset: outreachState.preset,
+          language: outreachState.lang === 'he' ? 'Hebrew' : 'English',
+          lastTaught: scrubAiPii(sk.lastTaught || ''),
+          nextToTeach: scrubAiPii(sk.nextToTeach || ''),
+          homework: scrubAiPii((sk.homework && sk.homework.task) || ''),
+          portalUrlPlaceholder: '[[PORTAL_URL]]'
+        };
+        const prompt = `Polish this warm, concise tutoring message for a ${safeContext.recipient} in ${safeContext.language}. Keep plain conversational text with zero markdown formatting or asterisks. Preserve the exact placeholder [[PORTAL_URL]] where the student link appears. Context: ${JSON.stringify(safeContext)}\nDraft:\n${scrubAiPii(msgEl.value)}`;
+        const aiText = await callGeminiApi({
+          tier: 'standard',
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.45 }
+        });
+        const cleanOut = stripAiMarkdownFormatting(String(aiText || '').trim()).replace(/\[\[PORTAL_URL\]\]/g, getStudentPortalDirectUrl(student));
+        if (cleanOut) {
+          msgEl.value = cleanOut;
+          showToast('Message polished cleanly!');
+        }
+      } catch (err) {
+        showToast((err && err.message) || 'AI polish unavailable — your draft is ready to edit.');
+      } finally {
+        outreachState.aiPolishing = false;
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    function buildWhatsAppUrl(phone, text) {
+      const cleanDigits = String(phone || '').replace(/[^0-9]/g, '');
+      const enc = encodeURIComponent(String(text || ''));
+      return cleanDigits ? `https://wa.me/${cleanDigits}?text=${enc}` : `https://wa.me/?text=${enc}`;
+    }
+
+    function buildSmsUrl(phone, text) {
+      const cleanPhone = String(phone || '').replace(/[^0-9+]/g, '');
+      const enc = encodeURIComponent(String(text || ''));
+      return cleanPhone ? `sms:${cleanPhone}?&body=${enc}` : `sms:?&body=${enc}`;
+    }
+
+    function buildMailtoUrl(email, subject, text) {
+      const cleanEmail = String(email || '').trim();
+      const subj = encodeURIComponent(String(subject || 'TutorPilot Update'));
+      const body = encodeURIComponent(String(text || ''));
+      return `mailto:${cleanEmail}?subject=${subj}&body=${body}`;
+    }
+
+    function recordOutreachDispatch(channel) {
+      const student = (APP_STATE.students || []).find(s => s.id === outreachState.studentId);
+      if (!student) return;
+      if (!student.outreachLog || typeof student.outreachLog !== 'object') student.outreachLog = {};
+      student.outreachLog[outreachState.recipient] = {
+        channel,
+        preset: outreachState.preset,
+        sentAt: new Date().toISOString()
+      };
+      saveStudentsToStorage(true);
+      pushStudentToCloud(student);
+    }
+
+    function getActiveOutreachRecipientTarget() {
+      const student = (APP_STATE.students || []).find(s => s.id === outreachState.studentId);
+      if (!student) return { phone: '', email: '' };
+      if (outreachState.recipient === 'student') {
+        const c = student.studentContact || {};
+        return { phone: c.phone || '', email: c.email || '' };
+      }
+      const p = student.parentContact || {};
+      return { phone: p.phone || '', email: p.email || '' };
+    }
+
+    function sendOutreachViaWhatsApp() {
+      const msg = document.getElementById('outreach-message-textarea')?.value || '';
+      const target = getActiveOutreachRecipientTarget();
+      const url = buildWhatsAppUrl(target.phone, msg);
+      recordOutreachDispatch('whatsapp');
+      if (typeof window !== 'undefined' && typeof window.open === 'function') window.open(url, '_blank');
+    }
+
+    function sendOutreachViaSms() {
+      const msg = document.getElementById('outreach-message-textarea')?.value || '';
+      const target = getActiveOutreachRecipientTarget();
+      const url = buildSmsUrl(target.phone, msg);
+      recordOutreachDispatch('sms');
+      if (typeof window !== 'undefined' && window.location) window.location.href = url;
+    }
+
+    function sendOutreachViaEmail() {
+      const msg = document.getElementById('outreach-message-textarea')?.value || '';
+      const subj = document.getElementById('outreach-email-subject-input')?.value || 'TutorPilot Progress Update';
+      const target = getActiveOutreachRecipientTarget();
+      const url = buildMailtoUrl(target.email, subj, msg);
+      recordOutreachDispatch('email');
+      if (typeof window !== 'undefined' && window.location) window.location.href = url;
+    }
+
+    function copyOutreachMessage() {
+      const msg = document.getElementById('outreach-message-textarea')?.value || '';
+      recordOutreachDispatch('copy');
+      if (typeof copyToClipboardText === 'function') {
+        copyToClipboardText(msg, 'Message copied to clipboard!');
+      } else {
+        showToast('Message copied!');
+      }
+    }
+
+    // =========================================================================
     // UNIVERSAL DESKTOP & MOBILE BACK NAVIGATION ENGINE (History API / popstate)
     // =========================================================================
     const SPA_MODAL_REGISTRY = [
@@ -35396,6 +37554,8 @@ ${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output 
       { key: 'pedagogical_ai', id: 'modal-pedagogical-ai-tools', open: 'openPedagogicalAiModal', close: 'closePedagogicalAiModal' },
       { key: 'print_plan', id: 'modal-print-lesson-plan', open: 'openPrintLessonPlanModal', close: 'closePrintLessonPlanModal' },
       { key: 'parent_recap', id: 'modal-parent-recap', open: 'openParentRecapModal', close: 'closeParentRecapModal' },
+      { key: 'outreach_composer', id: 'modal-outreach-composer', open: 'openOutreachModal', close: 'closeOutreachModal' },
+      { key: 'onboarding_wizard', id: 'modal-first-login-onboarding', open: 'openFirstLoginOnboardingModal', close: 'closeFirstLoginOnboardingModal' },
       { key: 'add_lesson', id: 'modal-add-custom-lesson', open: 'openAddCustomLessonModal', close: 'closeAddCustomLessonModal' },
       { key: 'batch_outline', id: 'modal-studio-batch-outline', open: 'openStudioBatchOutlineModal', close: 'closeStudioBatchOutlineModal' },
       { key: 'studio_copilot', id: 'modal-studio-ai-copilot', open: 'openStudioAiCoPilotModal', close: 'closeStudioAiCoPilotModal' },

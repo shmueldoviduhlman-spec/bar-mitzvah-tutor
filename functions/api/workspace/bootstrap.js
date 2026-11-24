@@ -39,6 +39,8 @@ export function mapStudentRowToClient(row) {
     avatar: avatarUrl,
     avatarMediaKey: mediaKey,
     parentContact: profile.parentContact || { name: '', phone: '', email: '' },
+    studentContact: profile.studentContact || { phone: '', email: '' },
+    outreachLog: profile.outreachLog && typeof profile.outreachLog === 'object' ? profile.outreachLog : {},
     studentAccessCode: row.access_code || '',
     sharedNotes: Array.isArray(sharedNotes) ? sharedNotes : [],
     skills: skills && typeof skills === 'object' ? skills : {},

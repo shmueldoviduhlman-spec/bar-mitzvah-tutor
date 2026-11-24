@@ -6899,6 +6899,168 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   sandbox.APP_STATE.studentPortal = prevSpObj71;
   sandbox.APP_STATE.studentPortalSession = prevSpSess71;
 
+  // --- Gate 72: Visual Polish, 60s First-Login Onboarding Wizard, Parent/Student Outreach & Pre-Login Marketing Landing ---
+  console.log('\n[Gate 72] Visual Polish, 60s Onboarding Wizard, Parent/Student Outreach & Pre-Login Landing Page...');
+
+  // 1. Visual polish & physical brand/OG/PWA icon assets
+  const iconsDir72 = path.join(__dirname, 'icons');
+  const manifestJson72 = JSON.parse(fs.readFileSync(path.join(__dirname, 'manifest.json'), 'utf8'));
+  assert(
+    fs.existsSync(path.join(iconsDir72, 'favicon.svg')) &&
+    fs.existsSync(path.join(iconsDir72, 'icon-192.png')) &&
+    fs.existsSync(path.join(iconsDir72, 'icon-512.png')) &&
+    fs.existsSync(path.join(iconsDir72, 'apple-touch-icon.png')) &&
+    fs.existsSync(path.join(iconsDir72, 'og-preview.png')) &&
+    fs.statSync(path.join(iconsDir72, 'og-preview.png')).size > 10000,
+    'PWA icons, SVG favicon, Apple touch icon, and non-empty 1200x630 OpenGraph preview exist in icons/'
+  );
+  assert(
+    manifestJson72.start_url === '/' &&
+    Array.isArray(manifestJson72.icons) && manifestJson72.icons.some(i => i.src === 'icons/icon-512.png'),
+    'manifest.json uses root start_url and registers generated PNG/SVG brand icons'
+  );
+  assert(
+    indexHtml.includes('og:image" content="https://tutorpilot.us/icons/og-preview.png"') &&
+    indexHtml.includes('id="tp-critical-fouc-guard"') &&
+    indexHtml.includes('html.theme-daylight #ai-api-key-banner') &&
+    indexHtml.includes('Source Serif 4') &&
+    indexHtml.includes('Frank Ruhl Libre') &&
+    indexHtml.includes('id="student-portal-powered-by"'),
+    'index.html includes OpenGraph meta, critical FOUC CSS guard, Warm Daylight dark-gradient fix, editorial serif typography, and Student Portal footer'
+  );
+  assert(
+    typeof sandbox.renderCircularProgressSvg === 'function' &&
+    sandbox.renderCircularProgressSvg(64, 56, 3).includes('<svg') &&
+    !sandbox.renderCircularProgressSvg(64, 56, 3).includes('%'),
+    'renderCircularProgressSvg renders clean pure-SVG progress ring without polluting card text assertions'
+  );
+
+  // 2. D1 studentContact persistence (buildStudentDbFields + mapStudentRowToClient)
+  const stuApiMod = await import('./functions/api/students/index.js');
+  const bootApiMod = await import('./functions/api/workspace/bootstrap.js');
+  const builtStuFields72 = stuApiMod.buildStudentDbFields({
+    id: 'stu_gate72_d1',
+    name: 'Ari Sample',
+    parentContact: { name: 'Sarah', phone: '+1 555-0190', email: 'sarah@example.com' },
+    studentContact: { phone: '+1 555-0199', email: 'ari@example.com' },
+    outreachLog: { parent: { channel: 'whatsapp', sentAt: '2026-11-24T05:00:00Z' } }
+  }, null, { id: 'usr_72', school_id: 'school_72', full_name: 'Tutor 72', email: 'tutor72@example.com' });
+  const mappedStu72 = bootApiMod.mapStudentRowToClient(builtStuFields72);
+  assert(
+    mappedStu72.studentContact.phone === '+1 555-0199' &&
+    mappedStu72.studentContact.email === 'ari@example.com' &&
+    mappedStu72.outreachLog.parent.channel === 'whatsapp',
+    'D1 student schema builders persist and hydrate studentContact and outreachLog accurately'
+  );
+
+  // 3. 60-Second First-Login Onboarding Wizard (5 niches, starter course + student seeding)
+  const prevStudents72 = sandbox.APP_STATE.students;
+  const prevCourses72 = sandbox.APP_STATE.customCourses;
+  sandbox.APP_STATE.currentUser = { id: 'usr_72', email: 'newtutor72@example.com', name_en: 'New Tutor', role: 'tutor', school_id: 'school_new_72' };
+  sandbox.APP_STATE.students = [];
+  sandbox.APP_STATE.customCourses = [];
+
+  // Offline VM check must never auto-open Onboarding Wizard
+  sandbox.maybeTriggerFirstLoginOnboarding();
+  assert(
+    getOrCreateElem('modal-first-login-onboarding').classList.contains('hidden') &&
+    sandbox.getActiveTopSpaModal() !== 'onboarding_wizard',
+    'Onboarding wizard does not auto-open during offline test bootstrap'
+  );
+
+  sandbox.openFirstLoginOnboardingModal();
+  assert(!getOrCreateElem('modal-first-login-onboarding').classList.contains('hidden'), 'openFirstLoginOnboardingModal opens cleanly');
+  sandbox.selectOnboardingNiche('music');
+  sandbox.goToOnboardingStep(2);
+  assert(sandbox.onboardingState.step === 2 && getOrCreateElem('onboarding-wizard-body').innerHTML.includes('Build My Starter Studio'), 'Step 2 renders Music starter pack options cleanly');
+  await sandbox.completeOnboardingWizard({ blank: false });
+  assert(
+    sandbox.onboardingState.step === 3 &&
+    sandbox.APP_STATE.customCourses.length === 1 &&
+    sandbox.APP_STATE.customCourses[0].format_type === 'custom_blueprint' &&
+    sandbox.APP_STATE.customCourses[0].lessons.length === 2 &&
+    sandbox.APP_STATE.students.length === 1 &&
+    sandbox.APP_STATE.students[0].studentAccessCode.length >= 6,
+    'completeOnboardingWizard seeds a custom_blueprint 2-lesson course and sample student with Portal code'
+  );
+  sandbox.closeFirstLoginOnboardingModal(true);
+  assert(getOrCreateElem('modal-first-login-onboarding').classList.contains('hidden'), 'closeFirstLoginOnboardingModal closes cleanly');
+
+  // 4. Parent Progress Summary & Student Practice Reminder Outreach Composer (WhatsApp / SMS / Email + 1-Tap URL)
+  const sampleStu72 = sandbox.APP_STATE.students[0];
+  const directUrl72 = sandbox.getStudentPortalDirectUrl(sampleStu72);
+  assert(
+    directUrl72.includes('?student=1') &&
+    directUrl72.includes('student_name=') &&
+    directUrl72.includes('student_code=' + sampleStu72.studentAccessCode),
+    'getStudentPortalDirectUrl produces 1-tap pre-filled Student Portal link'
+  );
+
+  sandbox.openOutreachModal(sampleStu72.id, 'parent', 'progress_summary');
+  sandbox.handleOutreachContactInput('name', 'Rachel');
+  sandbox.handleOutreachContactInput('phone', '+1 555-222-3333');
+  sandbox.handleOutreachContactInput('email', 'rachel@example.com');
+  const parentMsg72 = getOrCreateElem('outreach-message-textarea').value;
+  assert(
+    parentMsg72.includes('Rachel') &&
+    parentMsg72.includes('TutorPilot.us') &&
+    sandbox.buildWhatsAppUrl('+1 555-222-3333', 'Hi').startsWith('https://wa.me/15552223333?text=') &&
+    sandbox.buildSmsUrl('+1 555-222-3333', 'Hi').startsWith('sms:+15552223333?&body=') &&
+    sandbox.buildMailtoUrl('rachel@example.com', 'Subj', 'Hi').startsWith('mailto:rachel@example.com?subject='),
+    'Outreach modal builds Parent Progress Summary with WhatsApp, SMS, Email URIs and viral signature'
+  );
+
+  sandbox.switchOutreachRecipient('student');
+  sandbox.handleOutreachContactInput('phone', '+1 555-777-8888');
+  sandbox.setOutreachLanguage('he');
+  const heStudentMsg72 = getOrCreateElem('outreach-message-textarea').value;
+  assert(
+    sampleStu72.studentContact.phone === '+1 555-777-8888' &&
+    heStudentMsg72.includes(directUrl72) &&
+    heStudentMsg72.includes('פורטל התלמיד'),
+    'Student Reminder mode saves studentContact.phone and generates Hebrew reminder with 1-tap Student Portal URL'
+  );
+  sandbox.closeOutreachModal();
+
+  // 5. Pre-Login Marketing Website (#public-marketing-landing) — Pricing-Free & Safe Routing
+  const landingStart = indexHtml.indexOf('id="public-marketing-landing"');
+  const lockStart = indexHtml.indexOf('id="lock-screen"');
+  const landingSlice72 = indexHtml.slice(landingStart, lockStart);
+  assert(
+    landingStart !== -1 && lockStart > landingStart && !landingSlice72.includes('$'),
+    '#public-marketing-landing exists before #lock-screen and strictly skips all pricing and dollar amounts'
+  );
+
+  sandbox.APP_STATE.currentUser = null;
+  sandbox.showMarketingLanding(false);
+  assert(!getOrCreateElem('public-marketing-landing').classList.contains('hidden'), 'showMarketingLanding reveals public marketing website cleanly');
+  sandbox.selectLandingNiche('stem');
+  sandbox.selectLandingView('portal');
+  assert(getOrCreateElem('landing-sandbox-body').innerHTML.includes('Algebra Mastery'), 'Interactive Live Sandbox switches niche and view cleanly');
+  sandbox.renderLandingStudyPlanner();
+  assert(getOrCreateElem('landing-planner-output').innerHTML.includes('Weeks 1'), 'Interactive Study Timeline Planner computes milestone phases cleanly');
+
+  sandbox.openAuthFromLanding('signup', 'barmitzvah');
+  assert(
+    getOrCreateElem('public-marketing-landing').classList.contains('hidden') &&
+    !getOrCreateElem('lock-screen').classList.contains('hidden'),
+    'openAuthFromLanding transitions cleanly from marketing landing to Clerk auth card'
+  );
+
+  // Query param ?student=1&student_name=...&student_code=... pre-fill test
+  const prevWinLoc72 = sandbox.window.location;
+  sandbox.window.location = { protocol: 'https:', origin: 'https://tutorpilot.us', search: '?student=1&student_name=Ari%20Cohen&student_code=K7M9P2', hash: '', href: 'https://tutorpilot.us/?student=1&student_name=Ari%20Cohen&student_code=K7M9P2' };
+  sandbox.handleAuthRoleSwitch('student');
+  assert(
+    getOrCreateElem('student-login-name').value === 'Ari Cohen' &&
+    getOrCreateElem('student-login-code').value === 'K7M9P2',
+    'Student login form automatically pre-fills name and code from 1-tap Portal URL parameters'
+  );
+  sandbox.window.location = prevWinLoc72;
+
+  sandbox.APP_STATE.students = prevStudents72;
+  sandbox.APP_STATE.customCourses = prevCourses72;
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);

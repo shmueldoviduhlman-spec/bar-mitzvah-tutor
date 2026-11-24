@@ -1,22 +1,30 @@
 {
   "short_name": "TutorPilot",
-  "name": "TutorPilot — The Operating System for Tutors & Educators",
-  "description": "The complete teaching companion and student management operating system for tutors and educators.",
+  "name": "TutorPilot | The Operating System for Tutors & Educators",
+  "description": "The complete AI teaching studio, password free student portal, and parent communication platform for tutors and educators.",
   "icons": [
     {
       "src": "icons/icon-192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any"
     },
     {
       "src": "icons/icon-512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
     }
   ],
-  "start_url": "./index.html",
-  "background_color": "#0f172a",
-  "theme_color": "#1e293b",
+  "start_url": "/",
+  "scope": "/",
+  "background_color": "#FAF8F5",
+  "theme_color": "#4f46e5",
   "display": "standalone",
   "orientation": "portrait"
 }

@@ -21,12 +21,24 @@ export function buildStudentDbFields(body, existingRow, user) {
   }
   const avatarInProfile = rawAvatar.startsWith('http') || rawAvatar.startsWith('data:') ? rawAvatar : (existingProfile.avatar || '');
 
+  const rawStudentContact = (body && body.studentContact && typeof body.studentContact === 'object')
+    ? body.studentContact
+    : (existingProfile.studentContact || { phone: '', email: '' });
+  const rawOutreachLog = (body && body.outreachLog && typeof body.outreachLog === 'object')
+    ? body.outreachLog
+    : (existingProfile.outreachLog || {});
+
   const profileObj = {
     subject: String((body && body.subject) ?? existingProfile.subject ?? ''),
     gradeOrDate: String((body && body.gradeOrDate) ?? existingProfile.gradeOrDate ?? ''),
     gradeLevel: String((body && body.gradeLevel) ?? existingProfile.gradeLevel ?? 'Standard / All Levels'),
     hourlyRate: String((body && body.hourlyRate) ?? existingProfile.hourlyRate ?? ''),
     parentContact: (body && body.parentContact && typeof body.parentContact === 'object') ? body.parentContact : (existingProfile.parentContact || { name: '', phone: '', email: '' }),
+    studentContact: {
+      phone: String(rawStudentContact.phone || '').trim(),
+      email: String(rawStudentContact.email || '').trim()
+    },
+    outreachLog: rawOutreachLog,
     avatar: avatarMediaKey ? '' : avatarInProfile,
     lessons: Array.isArray(body && body.lessons)
       ? body.lessons
