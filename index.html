@@ -9672,19 +9672,32 @@
     }
 
     let currentAuthTab = 'signin';
-    let _clerkMountedWidget = '';
+    let _clerkActiveMount = null;
 
     function getClerkMountAppearance() {
+      const isDaylight = typeof document !== 'undefined' && document.documentElement && document.documentElement.classList && document.documentElement.classList.contains('theme-daylight');
       return {
-        variables: {
-          colorPrimary: '#f59e0b',
-          colorBackground: '#020617',
-          colorText: '#f8fafc',
-          colorTextSecondary: '#94a3b8',
-          colorInputBackground: '#0f172a',
-          colorInputText: '#f8fafc',
-          borderRadius: '0.75rem'
-        },
+        variables: isDaylight
+          ? {
+              colorPrimary: '#4f46e5',
+              colorBackground: '#ffffff',
+              colorText: '#0f172a',
+              colorTextSecondary: '#475569',
+              colorInputBackground: '#ffffff',
+              colorInputText: '#0f172a',
+              colorNeutral: '#334155',
+              borderRadius: '0.75rem'
+            }
+          : {
+              colorPrimary: '#f59e0b',
+              colorBackground: '#020617',
+              colorText: '#f8fafc',
+              colorTextSecondary: '#cbd5e1',
+              colorInputBackground: '#0f172a',
+              colorInputText: '#f8fafc',
+              colorNeutral: '#94a3b8',
+              borderRadius: '0.75rem'
+            },
         elements: {
           card: 'shadow-none bg-transparent border-0',
           rootBox: 'w-full'
@@ -9697,21 +9710,39 @@
       const mountEl = document.getElementById('clerk-auth-mount');
       if (!mountEl) return;
       if (typeof window === 'undefined' || !window.Clerk || !window.Clerk.loaded || window.Clerk.user) return;
+      if (_clerkActiveMount && _clerkActiveMount.mode === targetMode && _clerkActiveMount.node && _clerkActiveMount.node.isConnected) {
+        return;
+      }
       try {
-        if (_clerkMountedWidget === 'signin' && typeof window.Clerk.unmountSignIn === 'function') {
-          try { window.Clerk.unmountSignIn(mountEl); } catch (_) {}
-        } else if (_clerkMountedWidget === 'signup' && typeof window.Clerk.unmountSignUp === 'function') {
-          try { window.Clerk.unmountSignUp(mountEl); } catch (_) {}
+        const loadingEl = document.getElementById('clerk-auth-loading');
+        if (loadingEl) loadingEl.classList.add('hidden');
+
+        const prev = _clerkActiveMount;
+        _clerkActiveMount = null;
+        if (prev && prev.node) {
+          prev.node.classList.add('hidden');
+          if (prev.mode === 'signin' && typeof window.Clerk.unmountSignIn === 'function') {
+            try { window.Clerk.unmountSignIn(prev.node); } catch (_) {}
+          } else if (prev.mode === 'signup' && typeof window.Clerk.unmountSignUp === 'function') {
+            try { window.Clerk.unmountSignUp(prev.node); } catch (_) {}
+          }
+          setTimeout(() => {
+            try { prev.node.remove(); } catch (_) {}
+          }, 1500);
         }
-        mountEl.innerHTML = '';
+
+        const host = document.createElement('div');
+        host.className = 'w-full flex justify-center';
+        mountEl.appendChild(host);
+
         const appearance = getClerkMountAppearance();
         const fallbackRedirectUrl = ((typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin !== 'null') ? window.location.origin : '') + '/';
         if (targetMode === 'signup' && typeof window.Clerk.mountSignUp === 'function') {
-          window.Clerk.mountSignUp(mountEl, { appearance, routing: 'hash', fallbackRedirectUrl });
-          _clerkMountedWidget = 'signup';
+          window.Clerk.mountSignUp(host, { appearance, routing: 'hash', fallbackRedirectUrl });
+          _clerkActiveMount = { mode: 'signup', node: host };
         } else if (typeof window.Clerk.mountSignIn === 'function') {
-          window.Clerk.mountSignIn(mountEl, { appearance, routing: 'hash', fallbackRedirectUrl });
-          _clerkMountedWidget = 'signin';
+          window.Clerk.mountSignIn(host, { appearance, routing: 'hash', fallbackRedirectUrl });
+          _clerkActiveMount = { mode: 'signin', node: host };
         }
       } catch (err) {
         console.warn('Clerk widget mount notice:', err);
