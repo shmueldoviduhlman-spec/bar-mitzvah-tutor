@@ -1,5 +1,5 @@
 import { handleOptions, jsonResponse } from '../_lib/cors.js';
-import { requireTutorAuth } from '../_lib/auth.js';
+import { requireTutorAuth, requireTutorWriteAccess } from '../_lib/auth.js';
 
 function mapCourseRow(row) {
   let parsed = {};
@@ -31,7 +31,7 @@ export async function onRequestGet(context) {
 }
 
 export async function onRequestPut(context) {
-  const auth = await requireTutorAuth(context);
+  const auth = await requireTutorWriteAccess(context);
   if (auth.errorResponse) return auth.errorResponse;
   const { request, env } = context;
 

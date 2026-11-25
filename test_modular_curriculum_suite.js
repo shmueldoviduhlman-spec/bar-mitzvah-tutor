@@ -7146,6 +7146,312 @@ assert(typeof sandbox.handleDeleteActiveCustomCourse === 'function', 'handleDele
   sandbox.closeInstallAppModal();
   sandbox.APP_STATE.pwaInstalled = prevPwaState73;
 
+  // ============================================================================
+  // GATE 74: M141.1 WebAPK Manifest & M142 Calendar AI Recaps, Missed-Session Rules,
+  // 2-Step 0%-Cut Payments, Subscriptions, $15 Waiver + $1/Student Share, Adult Portal
+  // ============================================================================
+  console.log('\n[Gate 74] M141.1 WebAPK Manifest + M142 Recaps, Billing Rules, 0%-Cut Payments, Waiver/$1 Share & Read-Only Mode...');
+
+  // 1. M141.1 WebAPK Installability & Headers Verification
+  const manifest74 = JSON.parse(fs.readFileSync(path.join(__dirname, 'manifest.json'), 'utf8'));
+  assert(
+    manifest74.prefer_related_applications === false &&
+    Array.isArray(manifest74.icons) &&
+    manifest74.icons.every(ic => !String(ic.src || '').endsWith('.svg') && ic.sizes !== 'any'),
+    'manifest.json excludes SVG sizes=any icon blocker for Android WebAPK minting and sets prefer_related_applications=false'
+  );
+  const headers74 = fs.readFileSync(path.join(__dirname, '_headers'), 'utf8');
+  const sw74 = fs.readFileSync(path.join(__dirname, 'sw.js'), 'utf8');
+  assert(
+    headers74.includes('Service-Worker-Allowed: /') &&
+    headers74.includes('application/manifest+json') &&
+    sw74.includes("'/'") && sw74.includes('tutorpilot-pwa-v2'),
+    '_headers configures Service-Worker-Allowed and manifest MIME; sw.js v2 precaches root /'
+  );
+
+  // 2. Configurable Pricing, Rules, Rate Parser & Charge Calculator
+  const billingCfgMod = await import('./functions/api/_lib/billing_config.js');
+  const reconcileMod = await import('./functions/api/_lib/reconcile_billing.js');
+  const wranglerToml74 = fs.readFileSync(path.join(__dirname, 'wrangler.toml'), 'utf8');
+  assert(
+    wranglerToml74.includes('PARENT_SUBSCRIPTION_PRICE_CENTS = "500"') &&
+    wranglerToml74.includes('PARENT_TRIAL_DAYS = "7"') &&
+    wranglerToml74.includes('TUTOR_SUBSCRIPTION_PRICE_CENTS = "1500"') &&
+    wranglerToml74.includes('TUTOR_TRIAL_DAYS = "35"') &&
+    wranglerToml74.includes('TUTOR_WAIVER_MIN_PAYING_STUDENTS = "5"') &&
+    wranglerToml74.includes('TUTOR_SHARE_PER_STUDENT_CENTS = "100"') &&
+    wranglerToml74.includes('LESSON_PLATFORM_FEE_BPS = "0"'),
+    'wrangler.toml exposes configurable subscription prices, trial windows, 5-student waiver threshold, $1 share, and 0 bps cut'
+  );
+
+  const defaultCfg74 = billingCfgMod.getBillingConfig({});
+  const overrideCfg74 = billingCfgMod.getBillingConfig({ PARENT_SUBSCRIPTION_PRICE_CENTS: '700', TUTOR_WAIVER_MIN_PAYING_STUDENTS: '6' });
+  assert(
+    defaultCfg74.parentSubscriptionPriceCents === 500 &&
+    defaultCfg74.tutorSubscriptionPriceCents === 1500 &&
+    defaultCfg74.tutorWaiverMinPayingStudents === 5 &&
+    defaultCfg74.tutorSharePerStudentCents === 100 &&
+    defaultCfg74.lessonPlatformFeeBps === 0 &&
+    overrideCfg74.parentSubscriptionPriceCents === 700 &&
+    overrideCfg74.tutorWaiverMinPayingStudents === 6,
+    'getBillingConfig applies defaults cleanly and honors env overrides'
+  );
+
+  const policy74 = billingCfgMod.normalizeTutorBillingPolicy({
+    defaultRateCents: 6000,
+    currency: 'USD',
+    defaultDurationMins: 60,
+    cancelRule: { mode: 'free', value: 0 },
+    lateCancelRule: { mode: 'percent', value: 50 },
+    noShowRule: { mode: 'percent', value: 100 }
+  });
+  assert(
+    billingCfgMod.computeSessionChargeCents({ status: 'completed', studentRateCents: 6000, tutorPolicy: policy74 }).chargeCents === 6000 &&
+    billingCfgMod.computeSessionChargeCents({ status: 'canceled', studentRateCents: 6000, tutorPolicy: policy74 }).chargeCents === 0 &&
+    billingCfgMod.computeSessionChargeCents({ status: 'late_canceled', studentRateCents: 6000, tutorPolicy: policy74 }).chargeCents === 3000 &&
+    billingCfgMod.computeSessionChargeCents({ status: 'no_show', studentRateCents: 6000, tutorPolicy: policy74 }).chargeCents === 6000 &&
+    billingCfgMod.computeSessionChargeCents({ status: 'no_show', studentRateCents: 6000, tutorPolicy: policy74, overrideChargeCents: 0 }).chargeCents === 0,
+    'computeSessionChargeCents enforces configurable completed/canceled/late_canceled/no_show/waiveFee rules'
+  );
+
+  // 3. Stripe HMAC-SHA256 Webhook Verification (valid, wrong secret, tampered body, stale timestamp)
+  const samplePayload74 = JSON.stringify({ id: 'evt_test_74', type: 'checkout.session.completed' });
+  const nowSec74 = Math.floor(Date.now() / 1000);
+  const webhookSecret74 = 'whsec_test_tutorpilot_m142';
+  const cryptoKey74 = await crypto.subtle.importKey('raw', new TextEncoder().encode(webhookSecret74), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sigBytes74 = await crypto.subtle.sign('HMAC', cryptoKey74, new TextEncoder().encode(`${nowSec74}.${samplePayload74}`));
+  const sigHex74 = Array.from(new Uint8Array(sigBytes74)).map(b => b.toString(16).padStart(2, '0')).join('');
+  assert(
+    (await reconcileMod.verifyStripeWebhookSignature(samplePayload74, `t=${nowSec74},v1=${sigHex74}`, webhookSecret74)) === true &&
+    (await reconcileMod.verifyStripeWebhookSignature(samplePayload74 + 'x', `t=${nowSec74},v1=${sigHex74}`, webhookSecret74)) === false &&
+    (await reconcileMod.verifyStripeWebhookSignature(samplePayload74, `t=${nowSec74},v1=${sigHex74}`, 'wrong_secret')) === false &&
+    (await reconcileMod.verifyStripeWebhookSignature(samplePayload74, `t=${nowSec74 - 900},v1=${sigHex74}`, webhookSecret74)) === false,
+    'verifyStripeWebhookSignature validates Web Crypto HMAC-SHA256 signatures and rejects tampered/stale requests'
+  );
+
+  // 4. Tutor Waiver (<5 vs >=5 Active Paying Students), Auto-Resume, $1/Student Share, Lifetime Account Exemption & Read-Only Mode
+  function createBillingMockDb(initialState) {
+    const state = {
+      users: [...(initialState.users || [])],
+      students: [...(initialState.students || [])],
+      student_subscriptions: [...(initialState.student_subscriptions || [])],
+      tutor_earnings_ledger: [...(initialState.tutor_earnings_ledger || [])]
+    };
+    const mkStmt = (sql) => {
+      let args = [];
+      const stmt = {
+        bind(...b) { args = b; return stmt; },
+        async run() {
+          if (sql.includes('UPDATE users SET tutor_fee_waived = ?, active_paying_students_count = ? WHERE id = ?')) {
+            const u = state.users.find(x => x.id === args[2]);
+            if (u) { u.tutor_fee_waived = args[0]; u.active_paying_students_count = args[1]; }
+          } else if (sql.includes("UPDATE users SET subscription_status = 'expired'")) {
+            const u = state.users.find(x => x.id === args[1]);
+            if (u) u.subscription_status = 'expired';
+          } else if (sql.includes('INSERT INTO tutor_earnings_ledger')) {
+            state.tutor_earnings_ledger.push({
+              id: args[0], tutor_user_id: args[1], student_id: args[2], period_month: args[3],
+              active_paying_students_snapshot: args[4], amount_cents: args[5], status: args[6],
+              stripe_invoice_id: args[7], stripe_transfer_id: args[8], created_at: args[9]
+            });
+          }
+          return { success: true };
+        },
+        async first() {
+          if (sql.includes('SELECT * FROM users WHERE id = ?')) {
+            return state.users.find(x => x.id === args[0]) || null;
+          }
+          if (sql.includes('SELECT stripe_connect_account_id, stripe_connect_onboarded FROM users WHERE id = ?')) {
+            return state.users.find(x => x.id === args[0]) || null;
+          }
+          if (sql.includes('FROM student_subscriptions ss')) {
+            const tid = args[0];
+            const cnt = state.student_subscriptions.filter(ss => {
+              const s = state.students.find(st => st.id === ss.student_id);
+              return ss.tutor_user_id === tid && s && Number(s.archived || 0) === 0 && ss.status === 'active';
+            }).length;
+            return { cnt };
+          }
+          if (sql.includes('COALESCE(SUM(amount_cents), 0) AS total_cents')) {
+            const tid = args[0];
+            const total_cents = state.tutor_earnings_ledger
+              .filter(r => r.tutor_user_id === tid && r.status !== 'reversed')
+              .reduce((sum, r) => sum + Number(r.amount_cents || 0), 0);
+            return { total_cents };
+          }
+          if (sql.includes('SELECT id FROM tutor_earnings_ledger WHERE stripe_invoice_id = ?')) {
+            return state.tutor_earnings_ledger.find(r => r.stripe_invoice_id === args[0]) || null;
+          }
+          return null;
+        },
+        async all() {
+          if (sql.includes('FROM platform_settings')) return { results: [] };
+          return { results: [] };
+        }
+      };
+      return stmt;
+    };
+    return { state, prepare: mkStmt, batch: async (stmts) => Promise.all(stmts.map(s => s.run())) };
+  }
+
+  const pastIso74 = new Date(Date.now() - 86400000).toISOString();
+  const mockDb74 = createBillingMockDb({
+    users: [
+      { id: 'usr_super_74', email: 'shmueldoviduhlman@gmail.com', role: 'super_admin', subscription_status: 'lifetime', trial_ends_at: pastIso74, account_status: 'active', tutor_fee_waived: 0, active_paying_students_count: 0 },
+      { id: 'usr_std_74', email: 'regular@example.com', role: 'tutor', subscription_status: 'trialing', trial_ends_at: pastIso74, account_status: 'active', tutor_fee_waived: 0, active_paying_students_count: 0 }
+    ],
+    students: [
+      { id: 's74_1', archived: 0 }, { id: 's74_2', archived: 0 }, { id: 's74_3', archived: 0 },
+      { id: 's74_4', archived: 0 }, { id: 's74_5', archived: 0 }
+    ],
+    student_subscriptions: [
+      { student_id: 's74_1', tutor_user_id: 'usr_std_74', status: 'active' },
+      { student_id: 's74_2', tutor_user_id: 'usr_std_74', status: 'active' },
+      { student_id: 's74_3', tutor_user_id: 'usr_std_74', status: 'active' },
+      { student_id: 's74_4', tutor_user_id: 'usr_std_74', status: 'active' }
+    ]
+  });
+
+  // Super Admin at 0 active paying students NEVER pays $15/mo or enters read_only
+  const superAt0 = await reconcileMod.reconcileTutorBillingState(mockDb74, {}, 'usr_super_74');
+  assert(
+    superAt0.isLifetimeFreeTutor === true && superAt0.accessMode === 'full' && superAt0.activePayingStudentsCount === 0,
+    'Super Admin / lifetime tutor stays permanent full access even at 0 paying students'
+  );
+
+  // Regular tutor with expired 35-day trial & 4 (<5) active paying students enters read_only
+  const stdAt4 = await reconcileMod.reconcileTutorBillingState(mockDb74, {}, 'usr_std_74');
+  assert(
+    stdAt4.accessMode === 'read_only' && stdAt4.tutorFeeWaived === false && stdAt4.activePayingStudentsCount === 4,
+    'Standard tutor with <5 active paying students after 35-day trial enters Read-Only Mode'
+  );
+
+  // Add 5th active paying student -> $15/mo automatically waived, full access restored, and $1/student invoice accrual succeeds + deduplicates
+  mockDb74.state.student_subscriptions.push({ student_id: 's74_5', tutor_user_id: 'usr_std_74', status: 'active' });
+  const stdAt5 = await reconcileMod.reconcileTutorBillingState(mockDb74, {}, 'usr_std_74');
+  const share1 = await reconcileMod.accrueMonthlyTutorShareForInvoice(mockDb74, {}, { tutorUserId: 'usr_std_74', studentId: 's74_5', stripeInvoiceId: 'in_74_001', periodMonth: '2026-11' });
+  const shareDup = await reconcileMod.accrueMonthlyTutorShareForInvoice(mockDb74, {}, { tutorUserId: 'usr_std_74', studentId: 's74_5', stripeInvoiceId: 'in_74_001', periodMonth: '2026-11' });
+  assert(
+    stdAt5.accessMode === 'full' && stdAt5.tutorFeeWaived === true && stdAt5.monthlyShareCents === 500 &&
+    share1.accrued === true && share1.amountCents === 100 && shareDup.accrued === false && shareDup.reason === 'duplicate_invoice',
+    'Reaching 5 active paying students auto-waives $15/mo, restores full access, and accrues deduplicated $1/student ledger shares'
+  );
+
+  // Drop back to 4 paying students -> waiver lifts and read_only / $15/mo billing resumes automatically
+  mockDb74.state.student_subscriptions[4].status = 'canceled';
+  const stdDrop4 = await reconcileMod.reconcileTutorBillingState(mockDb74, {}, 'usr_std_74');
+  assert(
+    stdDrop4.tutorFeeWaived === false && stdDrop4.accessMode === 'read_only' && stdDrop4.monthlyShareCents === 0,
+    'Dropping from 5 to 4 active paying students post-trial lifts $15 waiver and resumes Read-Only until reactivated'
+  );
+
+  // 5. Existing Unactivated Student Portal Blocked (403 PORTAL_NOT_ACTIVATED), Read-Only Preserves Notes/HW
+  const stuLoginSrc74 = fs.readFileSync(path.join(__dirname, 'functions/api/student-portal/login.js'), 'utf8');
+  const stuProgSrc74 = fs.readFileSync(path.join(__dirname, 'functions/api/student-portal/progress.js'), 'utf8');
+  const checkoutSrc74 = fs.readFileSync(path.join(__dirname, 'functions/api/billing/checkout.js'), 'utf8');
+  const settleSrc74 = fs.readFileSync(path.join(__dirname, 'functions/api/payments/settle.js'), 'utf8');
+  assert(
+    stuLoginSrc74.includes('PORTAL_NOT_ACTIVATED') && stuLoginSrc74.includes('portalReadOnly') &&
+    stuProgSrc74.includes('SUBSCRIPTION_READ_ONLY') &&
+    checkoutSrc74.includes('application_fee_amount: platformFeeCents') &&
+    settleSrc74.includes('pending_confirmation') && settleSrc74.includes('confirm_received'),
+    'Backend login/progress enforce portal activation and Read-Only 402; checkout passes 0% application_fee_amount; settle implements 2-step P2P confirm'
+  );
+
+  // 6. Frontend End-to-End Sandbox Tests: Recurring Per-Date Isolation, AI Recap Missed Intent, Child vs Adult 4-Tab View, Read-Only Guard
+  const prevStudents74 = sandbox.APP_STATE.students;
+  const prevUser74 = sandbox.APP_STATE.currentUser;
+  const prevAccess74 = sandbox.APP_STATE.accessMode;
+  const prevSp74 = sandbox.APP_STATE.studentPortalStudent;
+  const prevTab74 = sandbox.studentPortalActiveTab;
+
+  sandbox.APP_STATE.currentUser = { id: 'usr_t74', email: 'tutor74@example.com', role: 'tutor', subscription_status: 'active' };
+  sandbox.APP_STATE.accessMode = 'full';
+  sandbox.APP_STATE.billingPolicy = { defaultRateCents: 6000, currency: 'USD', defaultDurationMins: 60, cancelRule: { mode: 'free', value: 0 }, lateCancelRule: { mode: 'percent', value: 50 }, noShowRule: { mode: 'percent', value: 100 } };
+
+  const testStu74 = {
+    id: 'stu_74_test',
+    name: 'Eliot Cohen',
+    lessonRateCents: 6000,
+    hourlyRate: '$60/hr',
+    learnerType: 'child',
+    portalStatus: 'active',
+    studentAccessCode: 'ELI74X',
+    notes: '',
+    sharedNotes: [{ id: 'sn74', text: 'Practice Aliyah 1', dateLabel: 'Mon' }],
+    skills: { customGoals: [{ id: 'g74', title: 'Review tropes', completed: false }], homework: { task: 'Page 4', completed: false } },
+    schedule: [{ id: 'slot_74_thu', dayOfWeek: 4, time: '4:30 PM', repeatWeekly: true, status: 'scheduled', topic: 'Aliyah 1' }],
+    sessionInstances: [],
+    completedTopics: {},
+    completedParshiot: {}
+  };
+  sandbox.APP_STATE.students = [testStu74];
+
+  // 6a. AI tool `record_session_recap` logs completed lesson on Thu 2026-11-26 -> increments taught=1, balance=$60, leaves next Thursday scheduled!
+  const recapDone74 = sandbox.executeAiToolCall({
+    name: 'record_session_recap',
+    args: { studentNameOrId: 'Eliot Cohen', date: '2026-11-26', outcome: 'completed', summaryTaught: 'Aliyah 1 mastered', homeworkTask: 'Practice lines 1-6', nextToTeach: 'Aliyah 2' }
+  });
+  // 6b. Following Thursday 2026-12-03 marked `canceled` ("no session") -> lessonsTaught stays 1, balance stays $60, slot stays visible with canceled!
+  const recapCancel74 = sandbox.executeAiToolCall({
+    name: 'record_session_recap',
+    args: { studentNameOrId: 'Eliot Cohen', date: '2026-12-03', outcome: 'canceled', cancelReason: 'Family trip', waiveFee: true }
+  });
+  const thu1Sessions74 = sandbox.getScheduledSessionsForDate(new Date(2026, 10, 26));
+  const thu2Sessions74 = sandbox.getScheduledSessionsForDate(new Date(2026, 11, 3));
+  const thu3Sessions74 = sandbox.getScheduledSessionsForDate(new Date(2026, 11, 10));
+  assert(
+    recapDone74.success === true && recapDone74.lessonsTaught === 1 && recapDone74.balanceOwedCents === 6000 &&
+    recapCancel74.success === true && recapCancel74.lessonsTaught === 1 && recapCancel74.chargeCents === 0 &&
+    thu1Sessions74[0].status === 'completed' &&
+    (thu2Sessions74[0].status === 'canceled' || thu2Sessions74[0].status === 'cancelled') &&
+    thu3Sessions74[0].status === 'scheduled',
+    'record_session_recap & recurring schedule keep per-date statuses isolated and count Lessons Taught strictly on completed'
+  );
+
+  // 6c. Child student portal NEVER renders billing UI even if ledger has balance; Adult Student renders unified 4th tab (#btn-student-tab-billing)
+  sandbox.APP_STATE.studentPortalMode = true;
+  sandbox.APP_STATE.studentPortalStudent = { ...testStu74, isUnifiedAdultStudent: false };
+  sandbox.renderStudentPortalView();
+  const childHtml74 = getOrCreateElem('view-student-portal').innerHTML;
+  assert(
+    !childHtml74.includes('btn-student-tab-billing') &&
+    !childHtml74.includes('$60.00') &&
+    childHtml74.includes('Recent Session Recaps'),
+    'Child Student Portal keeps billing completely hidden while displaying completed homework and session recaps'
+  );
+
+  sandbox.APP_STATE.studentPortalStudent = { ...testStu74, learnerType: 'adult', isUnifiedAdultStudent: true, ledger: { lessonsTaught: 1, balanceOwedCents: 6000, openRequests: [{ id: 'pr_74', amountCents: 6000, description: '1 lesson', status: 'unpaid', payToken: 'tok_74' }], recentPayments: [] } };
+  sandbox.switchStudentPortalTab('billing');
+  const adultHtml74 = getOrCreateElem('view-student-portal').innerHTML;
+  assert(
+    adultHtml74.includes('btn-student-tab-billing') &&
+    adultHtml74.includes('student-portal-panel-billing') &&
+    adultHtml74.includes('I Sent Payment') &&
+    adultHtml74.includes('$60.00'),
+    'Adult Student Unified Portal renders 4th Billing & Plan tab with unpaid balance and I Sent Payment settlement action'
+  );
+
+  // 6d. Read-Only banner + guardTutorWriteAllowed blocks mutations on lapsed standard tutor but permits permanent lifetime tutor
+  sandbox.APP_STATE.studentPortalMode = false;
+  sandbox.APP_STATE.accessMode = 'read_only';
+  sandbox.APP_STATE.tutorBilling = { activePayingStudentCount: 2, waiverThreshold: 5 };
+  sandbox.updateTutorReadOnlyBanner();
+  const roBanner74 = getOrCreateElem('tutor-readonly-banner');
+  const blocked74 = sandbox.guardTutorWriteAllowed();
+  sandbox.APP_STATE.currentUser = { id: 'usr_super_74', email: 'shmueldoviduhlman@gmail.com', role: 'super_admin', subscription_status: 'lifetime' };
+  const superAllowed74 = sandbox.guardTutorWriteAllowed();
+  assert(
+    !roBanner74.classList.contains('hidden') && blocked74 === false && superAllowed74 === true,
+    'Read-Only banner shows for lapsed standard tutor and guardTutorWriteAllowed blocks writes while exempting Super Admin'
+  );
+
+  sandbox.APP_STATE.students = prevStudents74;
+  sandbox.APP_STATE.currentUser = prevUser74;
+  sandbox.APP_STATE.accessMode = prevAccess74;
+  sandbox.APP_STATE.studentPortalStudent = prevSp74;
+  sandbox.studentPortalActiveTab = prevTab74;
+
   console.log(`\n========================================`);
   console.log(`ALL TESTS PASSED! (${passedTests}/${totalTests} gates verified)`);
   console.log(`========================================\n`);

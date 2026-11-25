@@ -42,6 +42,13 @@
     #modal-first-login-onboarding.hidden,
     #modal-outreach-composer.hidden,
     #modal-install-app.hidden,
+    #modal-session-recap.hidden,
+    #modal-billing-settings.hidden,
+    #modal-payment-request.hidden,
+    #modal-public-payment-request.hidden,
+    #modal-portal-invite.hidden,
+    #view-parent-portal.hidden,
+    #tutor-readonly-banner.hidden,
     #drawer-student-detail.hidden {
       display: none;
     }
@@ -394,6 +401,23 @@
     }
 
     html.student-portal-active #app-main-canvas {
+      padding-left: 1.5rem !important;
+      padding-right: 1.5rem !important;
+      max-width: 1080px !important;
+      width: 100% !important;
+    }
+
+    html.parent-portal-active {
+      scrollbar-gutter: stable;
+    }
+
+    html.parent-portal-active #app-sidebar-shell,
+    html.parent-portal-active #btn-sidebar-scroll-toggle,
+    html.parent-portal-active #main-bottom-dock {
+      display: none !important;
+    }
+
+    html.parent-portal-active #app-main-canvas {
       padding-left: 1.5rem !important;
       padding-right: 1.5rem !important;
       max-width: 1080px !important;
@@ -1117,26 +1141,40 @@
         </div>
       </div>
 
-      <!-- Primary Role Switcher: Teacher Login vs Student Login -->
-      <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 gap-1" id="auth-role-switcher">
+      <!-- Primary Role Switcher: Teacher vs Parent / Adult Student vs Child Student -->
+      <div class="grid grid-cols-3 bg-slate-950 p-1 rounded-xl border border-slate-800 gap-1" id="auth-role-switcher">
         <button
           type="button"
           id="tab-lock-role-teacher"
           onclick="handleAuthRoleSwitch('teacher')"
-          class="flex-1 py-2 px-2 text-xs font-bold rounded-lg transition bg-brand-600 text-white shadow flex items-center justify-center gap-1.5"
+          class="py-2 px-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition bg-brand-600 text-white shadow flex items-center justify-center gap-1"
         >
-          <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
-          <span>Teacher Login</span>
+          <i data-lucide="graduation-cap" class="w-3.5 h-3.5 shrink-0"></i>
+          <span>Teacher</span>
+        </button>
+        <button
+          type="button"
+          id="tab-lock-role-parent"
+          onclick="handleAuthRoleSwitch('parent')"
+          class="py-2 px-1.5 text-[11px] sm:text-xs font-semibold rounded-lg transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1"
+        >
+          <i data-lucide="users" class="w-3.5 h-3.5 shrink-0"></i>
+          <span>Parent / Adult</span>
         </button>
         <button
           type="button"
           id="tab-lock-role-student"
           onclick="handleAuthRoleSwitch('student')"
-          class="flex-1 py-2 px-2 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5"
+          class="py-2 px-1.5 text-[11px] sm:text-xs font-semibold rounded-lg transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1"
         >
-          <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
-          <span>Student Login</span>
+          <i data-lucide="user-check" class="w-3.5 h-3.5 shrink-0"></i>
+          <span>Student</span>
         </button>
+      </div>
+
+      <!-- Parent / Adult Activation Contextual Notice (Shown when Parent / Adult selected) -->
+      <div id="auth-parent-adult-hint" class="hidden p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 text-[11px] sm:text-xs text-emerald-200 leading-relaxed">
+        Sign in or create your Parent / Adult Student account via Clerk to oversee linked students, view lesson recaps, pay balances with <strong>0% TutorPilot fees</strong>, and manage your <strong>$5/mo</strong> (7-day free trial) subscription.
       </div>
 
       <!-- ============================================== -->
@@ -1398,6 +1436,24 @@
 
   <!-- Main Open Workspace Canvas (Offset on Desktop for Left Sidebar Shell) -->
   <main id="app-main-canvas" class="md:pl-72 rtl:md:pl-6 rtl:md:pr-72 max-w-[1440px] mx-auto px-4 sm:px-8 py-6 sm:py-8 w-full flex-1">
+
+    <!-- Read-Only Mode Sticky Banner (Shown ONLY when standard Tutor subscription lapsed & < 5 paying students) -->
+    <div id="tutor-readonly-banner" class="hidden mb-5 p-4 rounded-2xl bg-rose-950/50 border border-rose-500/45 shadow-lg flex items-center justify-between gap-3 flex-wrap">
+      <div class="flex items-start gap-3 min-w-0 flex-1">
+        <div class="w-9 h-9 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-400/35 flex items-center justify-center shrink-0">
+          <i data-lucide="lock" class="w-4 h-4"></i>
+        </div>
+        <div class="min-w-0">
+          <div id="tutor-readonly-title" class="text-xs sm:text-sm font-extrabold text-white">Read-Only Mode Active — All Notes, Courses & History Preserved</div>
+          <p id="tutor-readonly-desc" class="text-[11px] sm:text-xs text-slate-300 mt-0.5 leading-relaxed">Your trial or $15/mo subscription has ended and you currently have fewer than 5 active paying students. Past lessons, homework, and payment history stay 100% visible.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 flex-wrap">
+        <button type="button" onclick="openBillingSettingsModal('plan')" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-xs shadow transition active:scale-95">
+          Reactivate Studio Plan ($15/mo)
+        </button>
+      </div>
+    </div>
 
     <!-- ============================================== -->
     <!-- TEACHER COMMAND CENTER (HOME OVERVIEW COCKPIT) -->
@@ -2378,9 +2434,14 @@
     </section>
 
     <!-- ============================================== -->
-    <!-- ISOLATED STUDENT PORTAL VIEW (STUDENT ACCESS)  -->
+    <!-- ISOLATED STUDENT PORTAL VIEW (STUDENT / ADULT) -->
     <!-- ============================================== -->
     <section id="view-student-portal" class="hidden w-full max-w-4xl mx-auto space-y-6"></section>
+
+    <!-- ============================================== -->
+    <!-- PARENT / GUARDIAN MULTI-STUDENT PORTAL VIEW    -->
+    <!-- ============================================== -->
+    <section id="view-parent-portal" class="hidden w-full max-w-4xl mx-auto space-y-6"></section>
 
   </main>
 
@@ -5156,6 +5217,21 @@
           <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
         </button>
 
+        <!-- Studio Billing, Cancellation Rules & 0%-Cut Payouts Tile -->
+        <button type="button" id="btn-settings-billing-payouts" onclick="closeSettingsModal(); openBillingSettingsModal('plan');" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-emerald-500/50 transition active:scale-98 text-left">
+          <div class="flex items-center gap-3">
+            <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
+            <div>
+              <div class="text-xs font-bold text-white flex items-center gap-1.5 flex-wrap">
+                <span id="settings-billing-title">Rates, Rules &amp; 0%-Cut Payouts</span>
+                <span id="settings-billing-badge" class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono font-bold">$1/Stu Share</span>
+              </div>
+              <p id="settings-billing-desc" class="text-[11px] text-slate-400 mt-0.5">Set cancel/no-show policies, Zelle/Stripe payouts, $15 waiver &amp; .ics calendar</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+        </button>
+
         <!-- Live Cloud Sync Status Tile -->
         <button onclick="closeSettingsModal(); openCloudModal();" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition active:scale-98 text-left">
           <div class="flex items-center gap-3">
@@ -5538,6 +5614,124 @@
         <button type="button" onclick="closeStudentViewPreviewModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold border border-slate-700 transition">Close Preview</button>
       </div>
       <div id="student-preview-modal-body" style="scrollbar-gutter: stable;" class="flex-1 min-h-0 overflow-y-auto p-5 sm:p-7 space-y-6 w-full max-w-4xl mx-auto"></div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: END-OF-SESSION AI RECAP & ATTENDANCE    -->
+  <!-- ============================================== -->
+  <div id="modal-session-recap" class="fixed inset-0 z-[78] flex items-end sm:items-center justify-center bg-black/80 p-0 sm:p-4 hidden backdrop-blur-sm" onclick="if(event.target === this) closeSessionRecapModal();">
+    <div class="bg-slate-900 border-t sm:border border-slate-700/80 rounded-t-3xl sm:rounded-3xl max-w-xl w-full max-h-[92dvh] flex flex-col shadow-2xl overflow-hidden animate-slideUp" onclick="event.stopPropagation()">
+      <div class="px-5 py-4 border-b border-slate-800/80 bg-slate-950/85 flex items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-400/35 text-indigo-300 flex items-center justify-center shrink-0">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <h3 id="session-recap-modal-title" class="text-sm sm:text-base font-extrabold text-white truncate">End-of-Session AI Recap</h3>
+            <p id="session-recap-modal-subtitle" class="text-[11px] text-slate-400 truncate">Speak or jot a quick note to log summary, homework, or missed session</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeSessionRecapModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="modal-session-recap-body" class="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 space-y-4"></div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: TUTOR BILLING, RULES & 0%-CUT PAYOUTS   -->
+  <!-- ============================================== -->
+  <div id="modal-billing-settings" class="fixed inset-0 z-[75] flex items-end sm:items-center justify-center bg-black/80 p-0 sm:p-4 hidden backdrop-blur-sm" onclick="if(event.target === this) closeBillingSettingsModal();">
+    <div class="bg-slate-900 border-t sm:border border-slate-700/80 rounded-t-3xl sm:rounded-3xl max-w-2xl w-full max-h-[92dvh] flex flex-col shadow-2xl overflow-hidden animate-slideUp" onclick="event.stopPropagation()">
+      <div class="px-5 py-4 border-b border-slate-800/80 bg-slate-950/85 flex items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <button type="button" onclick="navigateAppBack()" class="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition shrink-0" title="Back">
+            <i data-lucide="arrow-left" class="w-4 h-4 rtl:rotate-180"></i>
+          </button>
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/35 text-emerald-300 flex items-center justify-center shrink-0">
+            <i data-lucide="wallet" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <h3 id="billing-settings-title" class="text-sm sm:text-base font-extrabold text-white truncate">Rates, Cancellation Rules &amp; 0%-Cut Payouts</h3>
+            <p class="text-[11px] text-slate-400 truncate">0% TutorPilot commission on lesson earnings • Auto $15 waiver + $1/student share at 5+</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeBillingSettingsModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="modal-billing-settings-body" class="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 space-y-4"></div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: TUTOR REQUEST / RECORD LESSON PAYMENT   -->
+  <!-- ============================================== -->
+  <div id="modal-payment-request" class="fixed inset-0 z-[79] flex items-end sm:items-center justify-center bg-black/80 p-0 sm:p-4 hidden backdrop-blur-sm" onclick="if(event.target === this) closePaymentRequestModal();">
+    <div class="bg-slate-900 border-t sm:border border-slate-700/80 rounded-t-3xl sm:rounded-3xl max-w-lg w-full max-h-[92dvh] flex flex-col shadow-2xl overflow-hidden animate-slideUp" onclick="event.stopPropagation()">
+      <div class="px-5 py-4 border-b border-slate-800/80 bg-slate-950/85 flex items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/35 text-amber-300 flex items-center justify-center shrink-0">
+            <i data-lucide="receipt" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <h3 id="payment-request-modal-title" class="text-sm sm:text-base font-extrabold text-white truncate">Request or Record Payment</h3>
+            <p class="text-[11px] text-slate-400 truncate">0% TutorPilot cut — keep 100% via Stripe Direct or Zelle / Venmo / Cash</p>
+          </div>
+        </div>
+        <button type="button" onclick="closePaymentRequestModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="modal-payment-request-body" class="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 space-y-4"></div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: STANDALONE PARENT/ADULT PAYMENT (?pay=) -->
+  <!-- ============================================== -->
+  <div id="modal-public-payment-request" class="fixed inset-0 z-[90] flex items-center justify-center bg-black/85 p-3 sm:p-5 hidden backdrop-blur-sm">
+    <div class="bg-slate-900 border border-emerald-500/40 rounded-3xl max-w-lg w-full max-h-[92dvh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-800 bg-slate-950/85 flex items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/35 text-emerald-300 flex items-center justify-center shrink-0">
+            <i data-lucide="credit-card" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-sm sm:text-base font-extrabold text-white truncate">TutorPilot Lesson Invoice</h3>
+            <p class="text-[11px] text-slate-400 truncate">0% Platform Commission • Direct to Tutor</p>
+          </div>
+        </div>
+        <button type="button" onclick="closePublicPaymentModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="modal-public-payment-body" class="flex-1 min-h-0 overflow-y-auto p-5 space-y-4"></div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ACTIVATE PARENT / STUDENT PORTAL INVITE -->
+  <!-- ============================================== -->
+  <div id="modal-portal-invite" class="fixed inset-0 z-[79] flex items-end sm:items-center justify-center bg-black/80 p-0 sm:p-4 hidden backdrop-blur-sm" onclick="if(event.target === this) closePortalActivationModal();">
+    <div class="bg-slate-900 border-t sm:border border-indigo-500/40 rounded-t-3xl sm:rounded-3xl max-w-lg w-full max-h-[92dvh] flex flex-col shadow-2xl overflow-hidden animate-slideUp" onclick="event.stopPropagation()">
+      <div class="px-5 py-4 border-b border-slate-800/80 bg-slate-950/85 flex items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-400/35 text-indigo-300 flex items-center justify-center shrink-0">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-sm sm:text-base font-extrabold text-white truncate">Activate Parent / Student Portal</h3>
+            <p class="text-[11px] text-slate-400 truncate">Starts a 7-day free trial ($5/mo afterward) • Earns you $1/mo at 5+ paying students</p>
+          </div>
+        </div>
+        <button type="button" onclick="closePortalActivationModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="modal-portal-invite-body" class="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 space-y-4"></div>
     </div>
   </div>
 
@@ -6339,6 +6533,9 @@
 
     async function apiFetch(path, options = {}) {
       const headers = Object.assign({ 'X-TutorPilot-Client': 'web' }, options.headers || {});
+      if (typeof APP_STATE !== 'undefined' && APP_STATE && APP_STATE.pendingClerkAccountType && !headers['X-TutorPilot-Account-Type']) {
+        headers['X-TutorPilot-Account-Type'] = APP_STATE.pendingClerkAccountType;
+      }
       const isFormData = (typeof FormData !== 'undefined') && (options.body instanceof FormData);
       if (!isFormData && !headers['Content-Type']) {
         headers['Content-Type'] = 'application/json';
@@ -9009,10 +9206,25 @@
             return null;
           }
 
-          // Consume any pending School Join Code from sign-up/invite link once authenticated
+          // Consume any pending School Join Code or Portal Activation Invite from sign-up/invite link once authenticated
           let activeBoot = boot;
+          const pendingActivateTok = (typeof sessionStorage !== 'undefined' ? (sessionStorage.getItem('tp_pending_activate_token') || '') : '').trim();
+          let redeemedActivationRes = null;
+          if (pendingActivateTok) {
+            try {
+              sessionStorage.removeItem('tp_pending_activate_token');
+              redeemedActivationRes = await apiFetch('/api/family-portal/activate', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'redeem_invite', inviteToken: pendingActivateTok })
+              });
+              activeBoot = await apiFetch('/api/workspace/bootstrap');
+            } catch (actErr) {
+              console.warn('Portal invite activation notice:', actErr?.message || actErr);
+            }
+          }
+
           const pendingJoinCode = (typeof localStorage !== 'undefined' ? (localStorage.getItem('tutor_pending_join_code') || '') : '').trim().toUpperCase();
-          if (pendingJoinCode && (!boot.school || String(boot.school.joinCode || '').toUpperCase() !== pendingJoinCode)) {
+          if (pendingJoinCode && (!activeBoot.school || String(activeBoot.school.joinCode || '').toUpperCase() !== pendingJoinCode)) {
             try {
               localStorage.removeItem('tutor_pending_join_code');
               await apiFetch('/api/schools', {
@@ -9034,13 +9246,24 @@
             name_he: u.displayNameHe || u.fullName || u.email.split('@')[0],
             organization: u.organization || activeBoot.school?.name || '',
             role: u.role || 'tutor',
+            accountType: u.accountType || 'tutor',
+            redirectPortalRole: (redeemedActivationRes && redeemedActivationRes.accountType) || u.redirectPortalRole || '',
             school_id: schoolId,
             school_name: activeBoot.school?.name || u.organization || 'Bar Mitzvah Academy',
             accountStatus: u.accountStatus || 'active',
             subscription_status: u.subscriptionStatus || 'trialing',
             hasActivePlan: u.hasActivePlan !== false,
+            accessMode: u.accessMode || (u.hasActivePlan !== false ? 'full' : 'read_only'),
+            readOnlyReason: u.readOnlyReason || '',
             trial_days: typeof u.trialDays === 'number' ? u.trialDays : 35,
             trialEndsAt: u.trialEndsAt || '',
+            billingPolicy: u.billingPolicy || null,
+            payoutMethods: u.payoutMethods || null,
+            tutorBilling: u.tutorBilling || null,
+            earningsLedger: Array.isArray(u.earningsLedger) ? u.earningsLedger : [],
+            stripeConfigured: !!u.stripeConfigured,
+            stripeConnectOnboarded: !!u.stripeConnectOnboarded,
+            calendarIcsUrl: u.calendarIcsUrl || '',
             aiEnabled: u.aiEnabled !== false,
             aiTierAccess: u.aiTierAccess || 'standard',
             aiAllowPlatformFallback: !!u.aiAllowPlatformFallback,
@@ -9051,6 +9274,9 @@
             expiresAt: Date.now() + ONE_MONTH_MS
           };
           APP_STATE.currentUser = mappedUser;
+          APP_STATE.billingPolicy = mappedUser.billingPolicy || APP_STATE.billingPolicy;
+          APP_STATE.payoutMethods = mappedUser.payoutMethods || APP_STATE.payoutMethods;
+          APP_STATE.tutorBilling = mappedUser.tutorBilling || null;
           localStorage.setItem('tutor_auth_session', JSON.stringify(mappedUser));
           localStorage.setItem('tutor_auth_unlocked', 'true');
 
@@ -9149,7 +9375,14 @@
           lastCloudDeltaCheckTs = _lastCloudSyncTs;
           updateCloudStatusPill('connected');
           updateUserSessionDisplay(mappedUser);
+          if (typeof updateTutorReadOnlyBanner === 'function') updateTutorReadOnlyBanner();
           if (typeof updateAiStatusPill === 'function') updateAiStatusPill();
+
+          if (mappedUser.redirectPortalRole && mappedUser.redirectPortalRole !== 'tutor' && typeof enterFamilyPortalMode === 'function') {
+            await enterFamilyPortalMode(mappedUser.redirectPortalRole, redeemedActivationRes);
+            return activeBoot;
+          }
+
           renderAllViews();
           if (typeof maybeTriggerFirstLoginOnboarding === 'function') maybeTriggerFirstLoginOnboarding();
           return activeBoot;
@@ -9216,6 +9449,11 @@
         });
         updateCloudStatusPill('connected');
       } catch (err) {
+        if (err && (err.code === 'SUBSCRIPTION_READ_ONLY' || err.status === 402)) {
+          APP_STATE.accessMode = 'read_only';
+          if (typeof updateTutorReadOnlyBanner === 'function') updateTutorReadOnlyBanner();
+          if (typeof showToast === 'function') showToast('Read-Only Mode active. Reactivate your plan to save changes.', true);
+        }
         console.error('Failed to push student to Cloudflare D1:', err);
         updateCloudStatusPill('offline');
       }
@@ -9303,23 +9541,42 @@
 
     function handleAuthRoleSwitch(role) {
       const btnTeacher = document.getElementById('tab-lock-role-teacher');
+      const btnParent = document.getElementById('tab-lock-role-parent');
       const btnStudent = document.getElementById('tab-lock-role-student');
       const boxTeacher = document.getElementById('auth-teacher-container');
       const boxStudent = document.getElementById('auth-student-container');
+      const parentHint = document.getElementById('auth-parent-adult-hint');
+      const schoolDisclosure = document.getElementById('auth-school-code-disclosure');
+      const signupSub = document.getElementById('lbl-signup-subtext');
       const isStudent = role === 'student';
+      const isParent = role === 'parent' || role === 'adult_student';
+
+      APP_STATE.pendingClerkAccountType = isParent ? 'parent' : 'tutor';
 
       if (btnTeacher) {
-        btnTeacher.className = isStudent
-          ? 'flex-1 py-2 px-2 text-xs font-semibold rounded-xl transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5'
-          : 'flex-1 py-2 px-2 text-xs font-bold rounded-xl transition bg-brand-600 text-white shadow flex items-center justify-center gap-1.5';
+        btnTeacher.className = (!isStudent && !isParent)
+          ? 'py-2 px-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition bg-brand-600 text-white shadow flex items-center justify-center gap-1'
+          : 'py-2 px-1.5 text-[11px] sm:text-xs font-semibold rounded-lg transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1';
+      }
+      if (btnParent) {
+        btnParent.className = isParent
+          ? 'py-2 px-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition bg-emerald-600 text-white shadow flex items-center justify-center gap-1'
+          : 'py-2 px-1.5 text-[11px] sm:text-xs font-semibold rounded-lg transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1';
       }
       if (btnStudent) {
         btnStudent.className = isStudent
-          ? 'flex-1 py-2 px-2 text-xs font-bold rounded-xl transition bg-indigo-600 text-white shadow flex items-center justify-center gap-1.5'
-          : 'flex-1 py-2 px-2 text-xs font-semibold rounded-xl transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5';
+          ? 'py-2 px-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition bg-indigo-600 text-white shadow flex items-center justify-center gap-1'
+          : 'py-2 px-1.5 text-[11px] sm:text-xs font-semibold rounded-lg transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1';
       }
       if (boxTeacher) boxTeacher.classList.toggle('hidden', isStudent);
       if (boxStudent) boxStudent.classList.toggle('hidden', !isStudent);
+      if (parentHint) parentHint.classList.toggle('hidden', !isParent);
+      if (schoolDisclosure) schoolDisclosure.classList.toggle('hidden', isParent);
+      if (signupSub) {
+        signupSub.textContent = isParent
+          ? '7-day free trial ($5/mo per active student) • Direct 0%-cut lesson payments'
+          : '35-day full access • Free when 5+ active paying students ($1/student share)';
+      }
 
       if (isStudent) {
         if (typeof applyStudentQueryParamsPrefill === 'function') applyStudentQueryParamsPrefill();
@@ -9328,7 +9585,7 @@
         if (nameInp && !nameInp.value) setTimeout(() => nameInp.focus(), 80);
         else if (codeInp && !codeInp.value) setTimeout(() => codeInp.focus(), 80);
       } else {
-        handleAuthTabSwitch('signin');
+        handleAuthTabSwitch(isParent && sessionStorage.getItem('tp_pending_activate_token') ? 'signup' : 'signin');
       }
       if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
     }
@@ -9597,6 +9854,7 @@
 
       if (typeof document !== 'undefined' && document.documentElement && document.documentElement.classList) {
         document.documentElement.classList.remove('student-portal-active');
+        document.documentElement.classList.remove('parent-portal-active');
       }
       const portalEl = document.getElementById('view-student-portal');
       if (portalEl) {
@@ -9665,12 +9923,14 @@
 
       const studentToken = (APP_STATE.studentPortal && APP_STATE.studentPortal.token)
         || (typeof localStorage !== 'undefined' ? (localStorage.getItem('tutor_student_portal_token') || '') : '');
-      if (!isHttpRuntime() || !studentToken) return;
+      const hasClerk = !!(typeof clerkSessionUser !== 'undefined' && clerkSessionUser && isHttpRuntime());
+      if (!isHttpRuntime() || (!studentToken && !hasClerk)) return;
       try {
         const goalCompletions = Array.isArray(stu.skills.customGoals)
           ? stu.skills.customGoals.map(g => ({ id: g.id, completed: !!g.completed }))
           : [];
         const payload = {
+          studentId: stu.id,
           homeworkCompleted: !!(stu.skills.homework && stu.skills.homework.completed),
           goalCompletions
         };
@@ -9682,7 +9942,7 @@
         }
         const res = await apiFetch('/api/student-portal/progress', {
           method: 'POST',
-          studentToken,
+          studentToken: studentToken || undefined,
           body: JSON.stringify(payload)
         });
         if (res && res.student) {
@@ -9690,6 +9950,11 @@
           localStorage.setItem('tutor_student_portal_snapshot', JSON.stringify(res.student));
         }
       } catch (err) {
+        if (err && (err.code === 'SUBSCRIPTION_READ_ONLY' || err.status === 402)) {
+          stu.portalReadOnly = true;
+          renderStudentPortalView();
+          if (typeof showToast === 'function') showToast('Read-Only Mode active. Reactivate subscription to save updates.', true);
+        }
         console.warn('Student portal sync push warning:', err);
       }
     }
@@ -9745,7 +10010,12 @@
     var studentPortalSettingsOpen = false;
 
     function switchStudentPortalTab(tabName) {
-      studentPortalActiveTab = (tabName === 'goals' || tabName === 'notes') ? tabName : 'homework';
+      const { stu } = getStudentPortalActiveContext();
+      if (tabName === 'billing' && stu && stu.isUnifiedAdultStudent) {
+        studentPortalActiveTab = 'billing';
+      } else {
+        studentPortalActiveTab = (tabName === 'goals' || tabName === 'notes') ? tabName : 'homework';
+      }
       studentPortalSettingsOpen = false;
       renderStudentPortalView();
     }
@@ -9894,8 +10164,12 @@
     }
 
     function selectStudentPortalTestAnswer(qIdx, optIdx, testId) {
-      const { stu } = getStudentPortalActiveContext();
+      const { stu, isPreview } = getStudentPortalActiveContext();
       if (!stu || !stu.skills) return;
+      if (!isPreview && stu.portalReadOnly) {
+        showToast('Portal is in Read-Only Mode. History stays visible while inactive.', true);
+        return;
+      }
       const allTests = getStudentAllAssignedTests(stu.skills);
       const targetId = testId || (stu.skills.assignedTest && stu.skills.assignedTest.id) || (allTests[0] && allTests[0].id);
       const findRealTest = () => {
@@ -9921,6 +10195,10 @@
     function submitStudentPortalTest(testId) {
       const { stu, isPreview } = getStudentPortalActiveContext();
       if (!stu || !stu.skills) return;
+      if (!isPreview && stu.portalReadOnly) {
+        showToast('Portal is in Read-Only Mode. History stays visible while inactive.', true);
+        return;
+      }
       const allTests = getStudentAllAssignedTests(stu.skills);
       const targetId = testId || (stu.skills.assignedTest && stu.skills.assignedTest.id) || (allTests[0] && allTests[0].id);
       const test = (stu.skills.assignedTest && (!targetId || String(stu.skills.assignedTest.id || 'assigned_test_default') === String(targetId)))
@@ -9951,6 +10229,10 @@
     function toggleStudentPortalHomework() {
       const { stu, isPreview } = getStudentPortalActiveContext();
       if (!stu) return;
+      if (!isPreview && stu.portalReadOnly) {
+        showToast('Portal is in Read-Only Mode. Homework history remains saved.', true);
+        return;
+      }
       if (!stu.skills) stu.skills = getDefaultStudentSkills();
       if (!stu.skills.homework) stu.skills.homework = { task: '', assignedDate: '', completed: false };
       stu.skills.homework.completed = !stu.skills.homework.completed;
@@ -9962,6 +10244,10 @@
     function toggleStudentPortalGoal(goalId) {
       const { stu, isPreview } = getStudentPortalActiveContext();
       if (!stu || !stu.skills || !Array.isArray(stu.skills.customGoals)) return;
+      if (!isPreview && stu.portalReadOnly) {
+        showToast('Portal is in Read-Only Mode. Goals remain saved.', true);
+        return;
+      }
       const g = stu.skills.customGoals.find(x => x.id === goalId);
       if (!g) return;
       g.completed = !g.completed;
@@ -10010,7 +10296,11 @@
       if (!container || !stu) return;
       const isHe = APP_STATE.lang === 'he';
       const isDark = typeof getThemeMode === 'function' ? getThemeMode() === 'dark' : false;
-      const activeTab = (studentPortalActiveTab === 'goals' || studentPortalActiveTab === 'notes') ? studentPortalActiveTab : 'homework';
+      const isAdultUnified = !!(stu.isUnifiedAdultStudent || stu.learnerType === 'adult_student' || stu.learnerType === 'adult');
+      const isPortalReadOnly = !!(stu.portalReadOnly || (stu.portalAccess && stu.portalAccess.readOnly));
+      const activeTab = (studentPortalActiveTab === 'billing' && isAdultUnified)
+        ? 'billing'
+        : ((studentPortalActiveTab === 'goals' || studentPortalActiveTab === 'notes') ? studentPortalActiveTab : 'homework');
       const skills = stu.skills || {};
       const hw = skills.homework || {};
       const allTests = getStudentAllAssignedTests(skills);
@@ -10019,9 +10309,11 @@
       const timerSt = ensureStudentHwTimerState(hw);
       const goals = Array.isArray(skills.customGoals) ? skills.customGoals : [];
       const sharedNotes = Array.isArray(stu.sharedNotes) ? stu.sharedNotes : [];
+      const recentRecaps = Array.isArray(stu.recentRecaps) ? stu.recentRecaps : (Array.isArray(stu.sessions) ? stu.sessions : []);
+      const adultLedger = stu.ledger || { balanceOwedCents: 0, lessonsTaught: 0, openRequests: [] };
       const todayStr = new Date().toISOString().split('T')[0];
       const upcomingSessions = (Array.isArray(stu.schedule) ? stu.schedule : [])
-        .filter(s => s && s.status !== 'cancelled' && (!s.dateStr || s.dateStr >= todayStr))
+        .filter(s => s && s.status !== 'cancelled' && s.status !== 'canceled' && (!s.dateStr || s.dateStr >= todayStr))
         .slice(0, 6);
 
       const initial = (stu.name || 'S').charAt(0).toUpperCase();
@@ -10124,8 +10416,29 @@
           ` : ''}
         </div>
 
-        <!-- Three Big Eye-Catching Interactive Tabs -->
-        <div id="student-portal-tabs-bar" class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
+        ${isPortalReadOnly ? `
+          <div id="student-portal-readonly-banner" class="p-4 sm:p-5 rounded-3xl bg-amber-950/35 border border-amber-500/45 flex items-center justify-between gap-3 flex-wrap shadow-sm">
+            <div class="flex items-start gap-3 min-w-0 flex-1">
+              <div class="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center justify-center shrink-0">
+                <i data-lucide="lock" class="w-5 h-5"></i>
+              </div>
+              <div class="min-w-0 space-y-0.5">
+                <div class="text-sm font-extrabold text-amber-200">${isHe ? 'מצב קריאה בלבד' : 'Read-Only Mode'}</div>
+                <p class="text-xs text-amber-100/80 leading-relaxed">${isAdultUnified
+                  ? (isHe ? 'המנוי שלך לא פעיל כרגע. כל היסטוריית השיעורים והקבצים שמורה, אך יש להפעיל מנוי כדי לעדכן התקדמות.' : 'Your subscription is paused. All past lessons, homework, audio, and notes remain visible. Reactivate to log updates.')
+                  : (isHe ? 'פורטל הלמידה נמצא כעת במצב קריאה בלבד. כל השיעורים, שיעורי הבית וההקלטות שלך שמורים. בקש מההורה או מהמורה לחדש גישה.' : 'This portal is currently in Read-Only Mode. All your past lessons, homework, audio, and notes remain saved. Ask your parent or teacher to reactivate access.')}</p>
+              </div>
+            </div>
+            ${isAdultUnified ? `
+              <button type="button" onclick="openSubscriptionCheckoutForStudent('${escapeHtml(stu.id)}')" class="px-4 py-2 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs transition shrink-0 shadow">
+                ${isHe ? 'חדש מנוי ($5/חודש)' : 'Reactivate Plan ($5/mo)'}
+              </button>
+            ` : ''}
+          </div>
+        ` : ''}
+
+        <!-- Interactive Portal Navigation Tabs -->
+        <div id="student-portal-tabs-bar" class="grid grid-cols-1 ${isAdultUnified ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-3.5 sm:gap-4">
           <button type="button" id="btn-student-tab-homework" onclick="switchStudentPortalTab('homework')" class="${activeTab === 'homework' ? 'modern-gradient-cover bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 text-white keep-white shadow-lg ring-2 ring-amber-300/60 border-transparent' : 'bg-slate-900/85 border-slate-800 hover:border-amber-400/60 text-slate-100'} p-4 sm:p-5 rounded-3xl border text-left rtl:text-right flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer">
             <div class="${activeTab === 'homework' ? 'bg-white/20 text-white' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'} w-12 h-12 rounded-2xl flex items-center justify-center shrink-0">
               <i data-lucide="clipboard-list" class="w-6 h-6"></i>
@@ -10161,6 +10474,19 @@
               </div>
             </div>
           </button>
+          ${isAdultUnified ? `
+          <button type="button" id="btn-student-tab-billing" onclick="switchStudentPortalTab('billing')" class="${activeTab === 'billing' ? 'modern-gradient-cover bg-gradient-to-br from-emerald-600 via-teal-600 to-indigo-600 text-white keep-white shadow-lg ring-2 ring-emerald-300/60 border-transparent' : 'bg-slate-900/85 border-slate-800 hover:border-emerald-400/60 text-slate-100'} p-4 sm:p-5 rounded-3xl border text-left rtl:text-right flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer">
+            <div class="${activeTab === 'billing' ? 'bg-white/20 text-white' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'} w-12 h-12 rounded-2xl flex items-center justify-center shrink-0">
+              <i data-lucide="wallet" class="w-6 h-6"></i>
+            </div>
+            <div class="min-w-0 flex-1 space-y-0.5">
+              <div class="text-base sm:text-lg font-extrabold tracking-tight truncate">${isHe ? 'תשלומים ומנוי' : 'Billing & Plan'}</div>
+              <div class="${activeTab === 'billing' ? 'text-white/90' : 'text-slate-400'} text-xs sm:text-sm font-mono font-semibold truncate">
+                ${typeof formatMoneyCents === 'function' ? formatMoneyCents(adultLedger.balanceOwedCents || 0) : ('$0.00')} ${(adultLedger.balanceOwedCents || 0) > 0 ? (isHe ? 'יתרה' : 'owed') : (isHe ? 'מאוזן' : 'settled')}
+              </div>
+            </div>
+          </button>
+          ` : ''}
         </div>
 
         <!-- TAB 1 PANEL: MY HOMEWORK (Homework Task, Timer, Practice Page, Sent Lessons & Quizzes) -->
@@ -10392,6 +10718,35 @@
             `}
           </div>
 
+          ${recentRecaps.length > 0 ? `
+            <div id="student-portal-recaps-card" class="p-6 sm:p-7 rounded-3xl bg-slate-900/85 border border-emerald-500/30 space-y-3.5 shadow-md">
+              <h2 class="text-base sm:text-lg font-extrabold text-emerald-300 flex items-center gap-2">
+                <i data-lucide="notebook-pen" class="w-5 h-5 text-emerald-400"></i>
+                <span>${isHe ? 'סיכומי שיעורים אחרונים' : 'Recent Session Recaps'}</span>
+              </h2>
+              <div class="space-y-3">
+                ${recentRecaps.map(r => {
+                  const st = String(r.outcome || r.status || 'completed');
+                  const stBadge = st === 'completed'
+                    ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-300'
+                    : (st === 'no_show'
+                      ? 'bg-rose-500/15 border-rose-500/35 text-rose-300'
+                      : 'bg-amber-500/15 border-amber-500/35 text-amber-300');
+                  return `
+                  <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-1.5">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                      <span class="text-xs font-mono font-bold text-slate-300">${escapeHtml(r.sessionDate || r.session_date || '')}${r.startTime || r.start_time ? ` · ${escapeHtml(r.startTime || r.start_time)}` : ''}</span>
+                      <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${stBadge}">${escapeHtml(st.replace(/_/g, ' '))}</span>
+                    </div>
+                    ${r.summaryTaught || r.summary_taught ? `<p dir="auto" class="text-sm text-slate-100 leading-relaxed">${escapeHtml(r.summaryTaught || r.summary_taught)}</p>` : ''}
+                    ${r.homeworkTask || r.homework_task ? `<div dir="auto" class="text-xs text-amber-300"><b>Homework:</b> ${escapeHtml(r.homeworkTask || r.homework_task)}</div>` : ''}
+                    ${r.nextToTeach || r.next_to_teach ? `<div dir="auto" class="text-xs text-indigo-300"><b>Next:</b> ${escapeHtml(r.nextToTeach || r.next_to_teach)}</div>` : ''}
+                  </div>`;
+                }).join('')}
+              </div>
+            </div>
+          ` : ''}
+
           ${upcomingSessions.length > 0 ? `
             <div id="student-portal-schedule-card" class="p-6 sm:p-7 rounded-3xl bg-slate-900/85 border border-sky-500/35 space-y-3.5 shadow-md">
               <h2 class="text-base sm:text-lg font-extrabold text-sky-300 flex items-center gap-2">
@@ -10409,6 +10764,11 @@
             </div>
           ` : ''}
         </div>
+        ${isAdultUnified ? `
+        <div id="student-portal-panel-billing" class="${activeTab === 'billing' ? 'space-y-5 min-h-[440px] sm:min-h-[480px]' : 'hidden space-y-5 min-h-[440px] sm:min-h-[480px]'}">
+          ${typeof renderAdultStudentBillingPanelHtml === 'function' ? renderAdultStudentBillingPanelHtml(stu, isHe) : ''}
+        </div>
+        ` : ''}
         <div id="student-portal-powered-by" class="pt-4 pb-2 text-center flex flex-wrap items-center justify-center gap-2">
           ${(typeof isRunningStandalonePwa !== 'function' || !isRunningStandalonePwa()) ? `
             <button type="button" id="btn-portal-install-app" onclick="handleInstallAppClick()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-400/35 text-[11px] font-bold text-indigo-300 transition active:scale-95">
@@ -11835,6 +12195,13 @@
       APP_STATE.customReadingMaterials = [];
       APP_STATE.customMilestones = [];
       APP_STATE.studyAdditions = {};
+      APP_STATE.accessMode = 'full';
+      APP_STATE.tutorBilling = null;
+      APP_STATE.billingPolicy = null;
+      APP_STATE.payoutMethods = null;
+      APP_STATE.familyPortal = null;
+      if (typeof exitFamilyPortalMode === 'function') exitFamilyPortalMode(true);
+      if (typeof updateTutorReadOnlyBanner === 'function') updateTutorReadOnlyBanner();
       renderAllViews();
 
       const landingScreen = document.getElementById('public-marketing-landing');
@@ -11914,10 +12281,15 @@
       if (settingsAvatar) settingsAvatar.textContent = name.charAt(0).toUpperCase();
       if (settingsName) settingsName.textContent = name;
       if (settingsDays) {
-        if (isSuperAdmin || session.subscription_status === 'lifetime') {
-          settingsDays.textContent = isHe ? 'מנהל ראשי • גישה מלאה קבועה' : 'Permanent Lifetime Access';
+        const tb = APP_STATE.tutorBilling || {};
+        if (APP_STATE.accessMode === 'read_only' && !isSuperAdmin && session.subscription_status !== 'lifetime') {
+          settingsDays.textContent = isHe ? 'מצב קריאה בלבד • חדש מנוי' : 'Read-Only Mode • Reactivate Plan';
+        } else if (isSuperAdmin || session.subscription_status === 'lifetime') {
+          settingsDays.textContent = isHe ? 'מנהל ראשי • גישה מלאה קבועה' : 'Permanent Lifetime Access (Free Forever)';
+        } else if (tb.tutorFeeWaived || session.subscription_status === 'tutor_fee_waived') {
+          settingsDays.textContent = isHe ? 'דמי מנוי מבוטלים (5+ תלמידים)' : 'Fee Waived (5+ Active Students)';
         } else if (session.subscription_status === 'active') {
-          settingsDays.textContent = isHe ? 'מנוי פעיל • מחובר' : 'Active Subscriber';
+          settingsDays.textContent = isHe ? 'מנוי פעיל • מחובר' : 'Active Subscriber ($15/mo)';
         } else {
           const days = typeof session.trial_days === 'number' ? session.trial_days : 35;
           settingsDays.textContent = isHe ? `ניסיון חינם • ${days} יום` : `${days}-Day Free Trial`;
@@ -11961,6 +12333,21 @@
       const searchStr = typeof window !== 'undefined' ? (window.location.search || '') : '';
       const hashStr = typeof window !== 'undefined' ? (window.location.hash || '') : '';
       const isStudentLink = searchStr.includes('student=1') || searchStr.includes('student_code=') || hashStr.includes('student-login');
+      const activateMatch = searchStr.match(/[?&]activate=([^&#]+)/i);
+      const payMatch = searchStr.match(/[?&]pay=([^&#]+)/i);
+
+      if (payMatch && payMatch[1] && typeof openPublicPaymentModalByToken === 'function') {
+        if (typeof hideMarketingLanding === 'function') hideMarketingLanding();
+        openPublicPaymentModalByToken(decodeURIComponent(payMatch[1]));
+      }
+      if (activateMatch && activateMatch[1]) {
+        try { sessionStorage.setItem('tp_pending_activate_token', decodeURIComponent(activateMatch[1])); } catch (_) {}
+      }
+      if (searchStr.includes('lesson_paid=1')) {
+        setTimeout(() => { if (typeof showToast === 'function') showToast('Lesson payment completed! Balance updated with 0% TutorPilot fee.'); }, 350);
+      } else if (searchStr.includes('subscription_success=1') || searchStr.includes('plan_updated=1')) {
+        setTimeout(() => { if (typeof showToast === 'function') showToast('Subscription updated cleanly!'); }, 350);
+      }
 
       // 0. Check active persistent Student Portal session
       const rawStudentSess = localStorage.getItem('tutor_student_portal_session');
@@ -11989,6 +12376,11 @@
           if (typeof handleAuthRoleSwitch === 'function') handleAuthRoleSwitch('student');
           initClerkAuth().catch(() => {});
           return false;
+        }
+        if (activateMatch && activateMatch[1] && lockScreen) {
+          if (typeof hideMarketingLanding === 'function') hideMarketingLanding();
+          lockScreen.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+          if (typeof handleAuthRoleSwitch === 'function') handleAuthRoleSwitch('parent');
         }
         if (typeof shouldBypassMarketingLanding === 'function' && !shouldBypassMarketingLanding()) {
           if (typeof showMarketingLanding === 'function') showMarketingLanding(false);
@@ -12078,6 +12470,9 @@
       applyThemeMode(next);
       if ((typeof isStudentPortalActive === 'function' && isStudentPortalActive()) || APP_STATE.previewPortalStudent) {
         if (typeof renderStudentPortalView === 'function') renderStudentPortalView();
+      }
+      if (typeof document !== 'undefined' && document.documentElement.classList.contains('parent-portal-active') && typeof renderParentPortalView === 'function') {
+        renderParentPortalView();
       }
       const isHe = APP_STATE.lang === 'he';
       if (typeof showToast === 'function') {
@@ -12204,7 +12599,9 @@
       APP_STATE.lang = APP_STATE.lang === 'en' ? 'he' : 'en';
       localStorage.setItem('tutor_lang', APP_STATE.lang);
       applyLanguageDirection();
-      if (typeof isStudentPortalActive === 'function' && isStudentPortalActive()) {
+      if (typeof document !== 'undefined' && document.documentElement.classList.contains('parent-portal-active') && typeof renderParentPortalView === 'function') {
+        renderParentPortalView();
+      } else if (typeof isStudentPortalActive === 'function' && isStudentPortalActive()) {
         renderStudentPortalView();
       } else {
         renderAllViews();
@@ -23747,6 +24144,7 @@ Return STRICT JSON ONLY:
     }
 
     function openCreateCourseModal(initialMode = 'ai') {
+      if (typeof guardTutorWriteAllowed === 'function' && !guardTutorWriteAllowed()) return;
       const modal = document.getElementById('modal-create-course');
       if (!modal) return;
       editingCourseId = null;
@@ -29663,10 +30061,128 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
           `;
         }
 
-        // 5. Student Portal Access Bar + Shared Student Notes + Full-Width Private Tutor Notes
+        // 5. Student Portal Access Bar + Billing Ledger & Role Card + Shared Notes
         const noteRows = typeof estimateTextareaRows === 'function' ? estimateTextareaRows(student.notes || '', 3, 12) : 3;
         const sharedNotes = Array.isArray(student.sharedNotes) ? student.sharedNotes : [];
         const portalCode = student.studentAccessCode || '';
+        const portalStatusRaw = String(student.portalStatus || 'not_activated');
+        const portalSubStatus = String((student.subscription && student.subscription.status) || portalStatusRaw || 'not_activated');
+        const portalBadgeCls = portalSubStatus === 'active'
+          ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/35'
+          : (portalSubStatus === 'trialing'
+            ? 'bg-sky-500/15 text-sky-300 border-sky-500/35'
+            : ((portalSubStatus === 'past_due' || portalSubStatus === 'canceled' || portalSubStatus === 'read_only')
+              ? 'bg-amber-500/15 text-amber-300 border-amber-500/35'
+              : 'bg-slate-800/90 text-slate-300 border-slate-700'));
+        const portalBadgeLabel = portalSubStatus === 'active'
+          ? (isHe ? 'מנוי פעיל ($5)' : 'Active ($5/mo)')
+          : (portalSubStatus === 'trialing'
+            ? (isHe ? 'ניסיון 7 ימים' : '7-Day Trial')
+            : ((portalSubStatus === 'past_due' || portalSubStatus === 'canceled' || portalSubStatus === 'read_only')
+              ? (isHe ? 'קריאה בלבד' : 'Read-Only')
+              : (isHe ? 'לא הופעל עדיין' : 'Not Activated')));
+
+        const ledger = typeof getStudentLedgerSnapshot === 'function'
+          ? getStudentLedgerSnapshot(student)
+          : {
+              lessonRateCents: Number(student.lessonRateCents || 0),
+              lessonsTaught: Number(student.lessonsTaught || 0),
+              lessonsMissed: 0,
+              totalBilledCents: 0,
+              totalPaidCents: 0,
+              balanceOwedCents: 0,
+              openRequests: []
+            };
+        const learnerTypeVal = (student.learnerType === 'adult_student' || student.learnerType === 'adult') ? 'adult_student' : 'child';
+        const rateDollars = ledger.lessonRateCents > 0 ? (ledger.lessonRateCents / 100).toFixed(ledger.lessonRateCents % 100 === 0 ? 0 : 2) : '';
+        const openReqs = Array.isArray(ledger.openRequests) ? ledger.openRequests : [];
+
+        const billingLedgerCardHtml = `
+          <div id="drawer-student-billing-card" class="p-4 rounded-2xl bg-slate-950/75 border border-emerald-500/30 space-y-3">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 flex items-center justify-center shrink-0">
+                  <i data-lucide="wallet" class="w-4 h-4"></i>
+                </span>
+                <div class="min-w-0">
+                  <div class="text-xs font-extrabold text-emerald-200 flex items-center gap-2 flex-wrap">
+                    <span>${isHe ? 'נוכחות, יתרה ובקשות תשלום (0% עמלה)' : 'Lessons, Balance & 0%-Cut Payments'}</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${portalBadgeCls}">${escapeHtml(portalBadgeLabel)}</span>
+                  </div>
+                  <div class="text-[11px] text-slate-400">${isHe ? 'שיעורים שבוצעו נספרים אוטומטית; ביטולים מופעלים לפי הכללים שלך' : 'Completed sessions increment automatically; missed sessions follow your rules'}</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <button type="button" id="btn-drawer-ai-recap" onclick="openSessionRecapModal('${student.id}')" class="px-2.5 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/35 text-[11px] font-bold flex items-center gap-1 transition">
+                  <i data-lucide="mic" class="w-3 h-3"></i>
+                  <span>${isHe ? 'סיכום AI' : 'AI Recap'}</span>
+                </button>
+                <button type="button" id="btn-drawer-request-payment" onclick="openPaymentRequestModal('${student.id}')" class="px-2.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[11px] font-extrabold flex items-center gap-1 transition shadow-sm">
+                  <i data-lucide="send" class="w-3 h-3"></i>
+                  <span>${isHe ? 'בקש תשלום' : 'Request Payment'}</span>
+                </button>
+                <button type="button" id="btn-drawer-record-paid" onclick="openPaymentRequestModal('${student.id}', 'record_paid')" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] font-bold transition">
+                  ${isHe ? 'סמן ששולם' : 'Record Paid'}
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                <div class="text-[10px] text-slate-400 font-semibold">${isHe ? 'שיעורים שנלמדו' : 'Lessons Taught'}</div>
+                <div class="text-base font-extrabold text-white font-mono">${ledger.lessonsTaught || 0}</div>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                <div class="text-[10px] text-slate-400 font-semibold">${isHe ? 'יתרה לתשלום' : 'Balance Owed'}</div>
+                <div class="text-base font-extrabold font-mono ${(ledger.balanceOwedCents || 0) > 0 ? 'text-amber-300' : 'text-emerald-300'}">${typeof formatMoneyCents === 'function' ? formatMoneyCents(ledger.balanceOwedCents || 0) : ('$0.00')}</div>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1">
+                <label class="text-[10px] text-slate-400 font-semibold block">${isHe ? 'תעריף לשיעור ($)' : 'Rate ($/lesson)'}</label>
+                <input id="drawer-student-rate-input" type="number" min="0" step="1" value="${escapeHtml(rateDollars)}" placeholder="e.g. 60" onchange="updateStudentBillingMeta('${student.id}', { lessonRateDollars: this.value })" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white font-mono focus:outline-none focus:border-emerald-400" />
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1">
+                <label class="text-[10px] text-slate-400 font-semibold block">${isHe ? 'סוג פורטל' : 'Portal Type'}</label>
+                <select id="drawer-student-learner-type" onchange="updateStudentBillingMeta('${student.id}', { learnerType: this.value })" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-indigo-400">
+                  <option value="child" ${learnerTypeVal === 'child' ? 'selected' : ''}>${isHe ? 'ילד + הורה משלם' : 'Child + Parent Pays'}</option>
+                  <option value="adult_student" ${learnerTypeVal === 'adult_student' ? 'selected' : ''}>${isHe ? 'תלמיד בוגר (משלם בעצמו)' : 'Adult Student (Self-Pay)'}</option>
+                </select>
+              </div>
+            </div>
+
+            ${openReqs.length > 0 ? `
+              <div class="space-y-1.5 pt-1 border-t border-slate-800/80">
+                ${openReqs.map(req => {
+                  const isPendingConfirm = req.status === 'pending_confirmation';
+                  return `
+                    <div class="p-2.5 rounded-xl ${isPendingConfirm ? 'bg-amber-500/15 border border-amber-400/45' : 'bg-slate-900/85 border border-slate-800'} flex items-center justify-between gap-2 flex-wrap text-xs">
+                      <div class="min-w-0 flex-1">
+                        <div class="font-bold ${isPendingConfirm ? 'text-amber-200' : 'text-slate-100'} flex items-center gap-2 flex-wrap">
+                          <span class="font-mono">${typeof formatMoneyCents === 'function' ? formatMoneyCents(req.amountCents || req.amount_cents || 0) : ''}</span>
+                          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isPendingConfirm ? 'bg-amber-500/25 text-amber-200' : 'bg-slate-800 text-slate-300'}">${isPendingConfirm ? (isHe ? 'ממתין לאישור קבלה' : 'Parent Reported Sent') : (isHe ? 'נשלח / פתוח' : 'Sent / Open')}</span>
+                          ${req.reportedMethod || req.reported_method ? `<span class="text-[11px] text-amber-300 font-semibold">(${escapeHtml(req.reportedMethod || req.reported_method)})</span>` : ''}
+                        </div>
+                        ${req.description ? `<div class="text-[11px] text-slate-400 truncate">${escapeHtml(req.description)}</div>` : ''}
+                      </div>
+                      <div class="flex items-center gap-1.5 shrink-0">
+                        ${isPendingConfirm ? `
+                          <button type="button" onclick="confirmLessonPaymentReceived('${req.id}', '${student.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-[11px] transition">
+                            ${isHe ? 'אשר קבלה ✓' : 'Confirm Received ✓'}
+                          </button>
+                          <button type="button" onclick="reopenLessonPaymentRequest('${req.id}', '${student.id}')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold">
+                            ${isHe ? 'טרם התקבל' : 'Still Waiting'}
+                          </button>
+                        ` : `
+                          ${req.payToken || req.pay_token ? `<button type="button" onclick="copyPaymentRequestLink('${escapeHtml(req.payToken || req.pay_token)}')" class="px-2 py-1 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/35 text-[11px] font-bold">${isHe ? 'העתק קישור' : 'Copy Pay Link'}</button>` : ''}
+                          <button type="button" onclick="confirmLessonPaymentReceived('${req.id}', '${student.id}')" class="px-2 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/35 text-[11px] font-bold">${isHe ? 'סמן שולם' : 'Mark Paid'}</button>
+                        `}
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `;
 
         const portalAccessCardHtml = `
           <div id="drawer-student-portal-access-card" class="px-4 py-3 rounded-2xl bg-indigo-950/35 border border-indigo-500/35 flex items-center justify-between gap-3 flex-wrap">
@@ -29675,7 +30191,10 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
                 <i data-lucide="key-round" class="w-4 h-4"></i>
               </span>
               <div class="min-w-0">
-                <div class="text-[11px] font-bold text-indigo-200">${isHe ? 'גישת תלמיד לאזור האישי' : 'Student Portal Access'}</div>
+                <div class="text-[11px] font-bold text-indigo-200 flex items-center gap-2 flex-wrap">
+                  <span>${isHe ? 'גישת תלמיד לאזור האישי' : 'Student Portal Access'}</span>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${portalBadgeCls}">${escapeHtml(portalBadgeLabel)}</span>
+                </div>
                 <div class="text-xs text-slate-300 flex items-center gap-2 flex-wrap">
                   <span>${isHe ? 'שם מדויק:' : 'Name:'} <strong class="text-white">${escapeHtml(student.name)}</strong></span>
                   <span>•</span>
@@ -29684,6 +30203,10 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
               </div>
             </div>
             <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
+              <button type="button" id="btn-drawer-activate-portal" onclick="openPortalActivationModal('${student.id}')" class="px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-200 border border-sky-400/35 font-bold text-[11px] transition active:scale-95 flex items-center gap-1.5">
+                <i data-lucide="user-check" class="w-3 h-3"></i>
+                <span>${isHe ? 'הפעל גישת משפחה' : 'Activate Portal'}</span>
+              </button>
               <button type="button" id="btn-drawer-remind-student" onclick="openOutreachModal('${student.id}', 'student', 'practice_nudge')" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/35 font-bold text-[11px] transition active:scale-95 flex items-center gap-1.5">
                 <i data-lucide="bell-ring" class="w-3 h-3"></i>
                 <span>${isHe ? 'תזכורת לתלמיד' : 'Remind Student'}</span>
@@ -29745,6 +30268,7 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
         body.innerHTML = `
           ${studentAiCardHtml}
           ${cardCrmGuardianHtml}
+          ${billingLedgerCardHtml}
 
           <!-- Clean 2-Tab Student Profile Switcher (1. Progress & Tutor Notes | 2. Student Portal & Shared) -->
           <div id="student-profile-tabs-bar" class="flex items-center gap-1.5 p-1.5 rounded-2xl bg-slate-950 border border-slate-800">
@@ -30273,6 +30797,7 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
     }
 
     function openAddStudentModal() {
+      if (typeof guardTutorWriteAllowed === 'function' && !guardTutorWriteAllowed()) return;
       const form = document.getElementById('add-student-form');
       if (form) form.reset();
 
@@ -30774,28 +31299,58 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       (APP_STATE.students || []).forEach(student => {
         if (!student || student.archived) return;
         const parshaInfo = getStudentParshaAndDate(student);
+        const instances = Array.isArray(student.sessionInstances) ? student.sessionInstances : [];
+        const matchedInstanceIds = new Set();
         (student.schedule || []).forEach(s => {
-          if (s.repeatWeekly && s.dayOfWeek === dayOfWeek) {
-            sessions.push({
-              ...s,
-              studentId: student.id,
-              studentName: student.name,
-              studentAvatar: student.avatar,
-              studentParsha: parshaInfo.parsha,
-              studentDate: parshaInfo.date,
-              studentNotes: student.notes || ''
-            });
-          } else if (!s.repeatWeekly && s.dateStr === dateStr) {
-            sessions.push({
-              ...s,
-              studentId: student.id,
-              studentName: student.name,
-              studentAvatar: student.avatar,
-              studentParsha: parshaInfo.parsha,
-              studentDate: parshaInfo.date,
-              studentNotes: student.notes || ''
-            });
-          }
+          const matchesWeekly = !!(s.repeatWeekly && s.dayOfWeek === dayOfWeek);
+          const matchesSingle = !!(!s.repeatWeekly && s.dateStr === dateStr);
+          if (!matchesWeekly && !matchesSingle) return;
+
+          const inst = instances.find(item =>
+            item && (item.session_date === dateStr || item.sessionDate === dateStr) &&
+            ((item.series_schedule_id || item.schedule_slot_id || item.scheduleSlotId) === s.id || (!(item.series_schedule_id || item.schedule_slot_id || item.scheduleSlotId) && (item.start_time || item.startTime) === (s.time || '')))
+          );
+          if (inst && inst.id) matchedInstanceIds.add(inst.id);
+          const perDateStatus = (s.dateStatuses && s.dateStatuses[dateStr]) || '';
+          const resolvedStatus = (inst && inst.status) || (s.repeatWeekly ? (perDateStatus || 'scheduled') : (s.status || perDateStatus || 'scheduled'));
+
+          sessions.push({
+            ...s,
+            status: resolvedStatus,
+            dateStr,
+            sessionInstanceId: (inst && inst.id) || null,
+            recapSummary: (inst && (inst.recap_summary || inst.summary_taught || inst.summaryTaught)) || '',
+            chargeCents: inst ? Number(inst.charge_cents ?? inst.chargeCents ?? 0) : null,
+            studentId: student.id,
+            studentName: student.name,
+            studentAvatar: student.avatar,
+            studentParsha: parshaInfo.parsha,
+            studentDate: parshaInfo.date,
+            studentNotes: student.notes || ''
+          });
+        });
+
+        instances.forEach(inst => {
+          if (!inst || matchedInstanceIds.has(inst.id)) return;
+          const instDate = inst.session_date || inst.sessionDate || '';
+          if (instDate !== dateStr) return;
+          sessions.push({
+            id: inst.series_schedule_id || inst.schedule_slot_id || inst.id,
+            sessionInstanceId: inst.id,
+            time: inst.start_time || inst.startTime || '',
+            dateStr,
+            repeatWeekly: false,
+            status: inst.status || 'scheduled',
+            topic: inst.next_to_teach || inst.nextToTeach || '',
+            recapSummary: inst.recap_summary || inst.summary_taught || inst.summaryTaught || '',
+            chargeCents: Number(inst.charge_cents ?? inst.chargeCents ?? 0),
+            studentId: student.id,
+            studentName: student.name,
+            studentAvatar: student.avatar,
+            studentParsha: parshaInfo.parsha,
+            studentDate: parshaInfo.date,
+            studentNotes: student.notes || ''
+          });
         });
       });
 
@@ -30924,11 +31479,13 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
 
               const statusPill = sessionStatus === 'completed'
                 ? `<span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">✓ ${t.sessionStatusCompleted || 'Completed'}</span>`
-                : sessionStatus === 'cancelled'
+                : (sessionStatus === 'cancelled' || sessionStatus === 'canceled')
                   ? `<span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-bold line-through">✗ ${t.sessionStatusCancelled || 'Cancelled'}</span>`
-                  : sessionStatus === 'no_show'
-                    ? `<span class="px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30 text-[10px] font-bold">⚠ ${t.sessionStatusNoShow || 'No-Show'}</span>`
-                    : '';
+                  : sessionStatus === 'late_canceled'
+                    ? `<span class="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-bold">⏱ Late Cancel</span>`
+                    : sessionStatus === 'no_show'
+                      ? `<span class="px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30 text-[10px] font-bold">⚠ ${t.sessionStatusNoShow || 'No-Show'}</span>`
+                      : '';
 
               const studentObj = (APP_STATE.students || []).find(st => st.id === s.studentId);
               const resolvedNext = resolveStudentNextToTeach(studentObj, s.topic);
@@ -31010,11 +31567,17 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
 
                       <div class="flex items-center justify-between gap-2 flex-wrap pt-1">
                         <div class="flex items-center gap-1.5 flex-wrap">
-                          <button type="button" onclick="updateSessionAttendance('${s.studentId}', '${s.id}', 'completed')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${sessionStatus === 'completed' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'}">${t.markSessionCompletedBtn || 'Completed ✓'}</button>
-                          <button type="button" onclick="updateSessionAttendance('${s.studentId}', '${s.id}', 'scheduled')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${sessionStatus === 'scheduled' ? 'bg-brand-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'}">${t.markSessionScheduledBtn || 'Scheduled'}</button>
-                          <button type="button" onclick="updateSessionAttendance('${s.studentId}', '${s.id}', 'cancelled')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${sessionStatus === 'cancelled' ? 'bg-rose-700 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'}">${t.markSessionCancelledBtn || 'Cancelled'}</button>
+                          <button type="button" onclick="updateSessionAttendance('${s.studentId}', '${s.id}', 'completed', '${escapeHtml(dateStr)}')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${sessionStatus === 'completed' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'}">${t.markSessionCompletedBtn || 'Completed ✓'}</button>
+                          <button type="button" onclick="updateSessionAttendance('${s.studentId}', '${s.id}', 'scheduled', '${escapeHtml(dateStr)}')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${sessionStatus === 'scheduled' ? 'bg-brand-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'}">${t.markSessionScheduledBtn || 'Scheduled'}</button>
+                          <button type="button" onclick="updateSessionAttendance('${s.studentId}', '${s.id}', 'late_canceled', '${escapeHtml(dateStr)}')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${sessionStatus === 'late_canceled' ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'}">${isHe ? 'ביטול מאוחר' : 'Late Cancel'}</button>
+                          <button type="button" onclick="updateSessionAttendance('${s.studentId}', '${s.id}', 'no_show', '${escapeHtml(dateStr)}')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${sessionStatus === 'no_show' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'}">${t.sessionStatusNoShow || 'No-Show'}</button>
+                          <button type="button" onclick="updateSessionAttendance('${s.studentId}', '${s.id}', 'cancelled', '${escapeHtml(dateStr)}')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${(sessionStatus === 'cancelled' || sessionStatus === 'canceled') ? 'bg-rose-700 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'}">${t.markSessionCancelledBtn || 'Cancelled'}</button>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <button type="button" onclick="openSessionRecapModal('${s.studentId}', '${s.id}', '${escapeHtml(dateStr)}')" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-400/30 text-[11px] font-bold flex items-center gap-1 transition">
+                            <i data-lucide="mic" class="w-3 h-3"></i>
+                            <span>${isHe ? 'סיכום AI' : 'AI Recap'}</span>
+                          </button>
                           <button type="button" onclick="openAfterClassAiDebrief('${s.studentId}')" class="px-2.5 py-1 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-400/30 text-[11px] font-bold flex items-center gap-1 transition">
                             <i data-lucide="sparkles" class="w-3 h-3"></i>
                             <span>${isHe ? 'עדכן עם AI' : 'AI After Class'}</span>
@@ -31998,24 +32561,61 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
       lucide.createIcons();
     }
 
-    function updateSessionAttendance(studentId, sessionId, newStatus) {
+    async function updateSessionAttendance(studentId, sessionId, newStatus, dateStrOverride) {
+      if (typeof guardTutorWriteAllowed === 'function' && !guardTutorWriteAllowed()) return;
       const student = (APP_STATE.students || []).find(st => st.id === studentId);
       if (!student || !Array.isArray(student.schedule)) return;
       const session = student.schedule.find(s => s.id === sessionId);
       if (!session) return;
 
-      session.status = newStatus;
-      if (newStatus === 'completed') {
-        session.completedAt = new Date().toISOString();
+      const targetDateStr = dateStrOverride || session.dateStr || (APP_STATE.calendar && APP_STATE.calendar.selectedDateStr) || formatDateToYMD(new Date());
+      if (session.repeatWeekly) {
+        if (!session.dateStatuses || typeof session.dateStatuses !== 'object') session.dateStatuses = {};
+        session.dateStatuses[targetDateStr] = newStatus;
       } else {
-        session.completedAt = null;
+        session.status = newStatus;
+        session.completedAt = newStatus === 'completed' ? new Date().toISOString() : null;
+      }
+
+      if (typeof applyLocalSessionOutcomeUpdate === 'function') {
+        applyLocalSessionOutcomeUpdate(student, session, newStatus, targetDateStr);
       }
 
       saveStudentsToStorage(true);
-      pushStudentToCloud(student);
+      if (isHttpRuntime()) {
+        try {
+          const res = await apiFetch('/api/sessions/recap', {
+            method: 'POST',
+            body: JSON.stringify({
+              studentId: student.id,
+              sessionId: session.id,
+              sessionDate: targetDateStr,
+              startTime: session.time || '',
+              outcome: newStatus === 'cancelled' ? 'canceled' : newStatus,
+              recapSource: 'calendar_button'
+            })
+          });
+          if (res && res.ledger) student.ledger = res.ledger;
+          if (res && Array.isArray(res.sessions)) student.sessionInstances = res.sessions;
+          saveStudentsToStorage(true);
+        } catch (err) {
+          if (err && err.code === 'SUBSCRIPTION_READ_ONLY') {
+            APP_STATE.accessMode = 'read_only';
+            if (typeof updateTutorReadOnlyBanner === 'function') updateTutorReadOnlyBanner();
+            showToast('Read-Only Mode active. Reactivate your plan to save attendance.', true);
+            return;
+          }
+          pushStudentToCloud(student);
+        }
+      } else {
+        pushStudentToCloud(student);
+      }
 
       renderExistingLessonsInModal();
       renderCalendar();
+      if (APP_STATE.activeStudentDrawerId === student.id && typeof renderStudentDrawer === 'function') {
+        renderStudentDrawer(student.id, true);
+      }
       showToast(I18N[APP_STATE.lang].toastAttendanceUpdated || 'Session attendance updated');
     }
 
@@ -32264,6 +32864,7 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
 
     function handleSaveScheduledLesson(e) {
       e.preventDefault();
+      if (typeof guardTutorWriteAllowed === 'function' && !guardTutorWriteAllowed()) return;
       const t = I18N[APP_STATE.lang];
       const studentSelect = document.getElementById('schedule-student-select');
       const studentId = studentSelect ? studentSelect.value : '';
@@ -33298,6 +33899,25 @@ Set fields to null/empty array unless the tutor asked to set or add them. Preser
             }
           },
           {
+            name: "record_session_recap",
+            description: "Log an end-of-session recap OR mark a missed/canceled/no-show calendar session accurately. Increments lessons taught and bills the student ledger ONLY according to outcome and tutor cancellation rules.",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                studentNameOrId: { type: "STRING", description: "Student name or ID" },
+                date: { type: "STRING", description: "YYYY-MM-DD session date (defaults to today)" },
+                outcome: { type: "STRING", description: "One of: completed, canceled, late_canceled, no_show" },
+                summaryTaught: { type: "STRING", description: "Summary of what was taught if session was completed" },
+                homeworkTask: { type: "STRING", description: "New homework assignment to set for student (completed sessions only)" },
+                nextToTeach: { type: "STRING", description: "Topic or next lesson planned for upcoming session" },
+                cancelReason: { type: "STRING", description: "Reason if canceled, late_canceled, or no_show" },
+                privateNote: { type: "STRING", description: "Private tutor note" },
+                waiveFee: { type: "BOOLEAN", description: "Set true if tutor explicitly waives the fee ($0 charge)" }
+              },
+              required: ["studentNameOrId", "outcome"]
+            }
+          },
+          {
             name: "schedule_lesson",
             description: "Schedule a tutoring lesson on the calendar for a student",
             parameters: {
@@ -33778,6 +34398,11 @@ Respond ONLY with strict JSON (no markdown fences):
     }
 
     async function sendAiPromptToGemini(userText) {
+      if (APP_STATE.accessMode === 'read_only' && typeof guardTutorWriteAllowed === 'function' && !guardTutorWriteAllowed()) {
+        APP_STATE.aiIsThinking = false;
+        renderAiMessages();
+        return;
+      }
       const apiKey = getEffectiveGeminiApiKey();
       const portalContext = getPortalContextData();
 
@@ -33816,6 +34441,7 @@ Portal Capabilities & Your Authorized Tools:
 10. create_course: Create a new class/course subject container in the Study Hub.
 11. create_full_class: Create an entire new course with a complete multi-lesson curriculum in one go.
 12. copy_student_goals: Copy a student's custom goals (INCLUDING all attached PDFs, recordings, and pictures) to one, multiple, or all other students in one step, optionally excluding specific goals or students. NEVER ask the user to paste binary files or copy PDFs/recordings manually — just call copy_student_goals directly!
+13. record_session_recap: Log an end-of-session recap ("completed") OR record a missed/canceled/no-show session ("canceled", "late_canceled", "no_show"), updating calendar session status, lessons taught count, and unpaid balance accurately without deleting the calendar event.
 
 Current Database State:
 ${JSON.stringify(portalContext)}
@@ -33834,10 +34460,8 @@ Curriculum & Lesson Studio Guidelines:
 
 Debriefing & Intelligent Planning Guidelines:
 - Core Mission (End-of-Class Progress & Next Lesson Loop): Whenever the tutor shares what they just finished teaching a student (e.g. "With Ari we finished lesson 2" or "DEBRIEF [Student]: today we learned X"):
-  1. ALWAYS call update_student with BOTH:
-     * lastTaught: clear concise summary of what was just taught today.
-     * nextToTeach: clear concise title/topic of what to teach him in the NEXT class (automatically looking at the next sequential lesson in the student's Course syllabus or notes if the tutor didn't specify it explicitly).
-  2. Record a brief note via appendNotes if helpful, and call mark_topic_progress / mark_parsha_progress if a topic was completed.
+  1. Call record_session_recap with outcome="completed", clear summaryTaught, homeworkTask (if mentioned), and nextToTeach (inferring the next lesson from their syllabus when helpful), AND if specific course/topic progress flags changed call update_student / mark_topic_progress / mark_parsha_progress.
+  2. MISSED / CANCELLED / NO-SHOW SESSION RULES: Whenever the tutor tells you there was NO session, the student canceled, missed class, or did not show up (e.g. "no session with Ari today", "Daniel cancelled", "Moshe didn't show up"), ALWAYS call record_session_recap with outcome="canceled", "late_canceled", or "no_show". NEVER mark "completed", NEVER increment lessons taught, and NEVER delete the calendar event. If the tutor says "don't charge them" or "waive the fee", pass waiveFee: true.
   3. If asked to schedule their next lesson, set the lesson subject to nextToTeach and call schedule_lesson.
 
 Guidelines:
@@ -34105,9 +34729,21 @@ Guidelines:
             const todayYMD = typeof formatDateToYMD === 'function' ? formatDateToYMD(nowObj) : student.skills.lastTaughtAt;
             const todayDow = nowObj.getDay();
             const todaySess = student.schedule.find(sess => sess && (sess.dateStr === todayYMD || (sess.repeatWeekly && sess.dayOfWeek === todayDow)));
-            if (todaySess && todaySess.status !== 'cancelled') {
-              todaySess.status = 'completed';
-              todaySess.completedAt = nowObj.toISOString();
+            if (todaySess && todaySess.status !== 'cancelled' && todaySess.status !== 'canceled') {
+              if (todaySess.repeatWeekly) {
+                if (!todaySess.dateStatuses || typeof todaySess.dateStatuses !== 'object') todaySess.dateStatuses = {};
+                todaySess.dateStatuses[todayYMD] = 'completed';
+              } else {
+                todaySess.status = 'completed';
+                todaySess.completedAt = nowObj.toISOString();
+              }
+              if (typeof applyLocalSessionOutcomeUpdate === 'function') {
+                applyLocalSessionOutcomeUpdate(student, todaySess, 'completed', todayYMD, {
+                  summaryTaught: student.skills.lastTaught,
+                  homeworkTask: args.homeworkTask || '',
+                  nextToTeach: args.nextToTeach || ''
+                });
+              }
             }
           }
         }
@@ -34170,14 +34806,36 @@ Guidelines:
           student.schedule.push(session);
         }
 
-        session.status = newStatus;
-        session.completedAt = (newStatus === 'completed') ? new Date().toISOString() : null;
+        if (session.repeatWeekly) {
+          if (!session.dateStatuses || typeof session.dateStatuses !== 'object') session.dateStatuses = {};
+          session.dateStatuses[targetDate] = newStatus;
+        } else {
+          session.status = newStatus;
+          session.completedAt = (newStatus === 'completed') ? new Date().toISOString() : null;
+        }
         if (args.notes) {
           session.topic = (session.topic ? (session.topic + ' - ') : '') + args.notes.trim();
         }
+        if (typeof applyLocalSessionOutcomeUpdate === 'function') {
+          applyLocalSessionOutcomeUpdate(student, session, newStatus, targetDate, {
+            privateNote: args.notes || ''
+          });
+        }
 
         saveStudentsToStorage(true);
-        pushStudentToCloud(student);
+        if (typeof syncSessionRecapToCloud === 'function' && isHttpRuntime()) {
+          syncSessionRecapToCloud({
+            studentId: student.id,
+            sessionId: session.id,
+            sessionDate: targetDate,
+            startTime: session.time || '',
+            outcome: newStatus === 'cancelled' ? 'canceled' : newStatus,
+            privateNote: args.notes || '',
+            recapSource: 'ai_agent'
+          });
+        } else {
+          pushStudentToCloud(student);
+        }
         renderStudents();
         renderCalendar();
 
@@ -34187,6 +34845,100 @@ Guidelines:
           sessionId: session.id,
           status: newStatus,
           message: isHe ? `נוכחות עודכנה ל-${newStatus} עבור ${student.name}` : `Session marked as ${newStatus} for ${student.name}`
+        };
+      }
+
+      if (name === 'record_session_recap') {
+        const student = findStudentFlexible(args.studentNameOrId);
+        if (!student) return { success: false, error: `Student not found: ${args.studentNameOrId}` };
+        const rawOut = String(args.outcome || 'completed').toLowerCase().trim();
+        const outcome = rawOut === 'cancelled' ? 'canceled'
+          : (['completed', 'canceled', 'late_canceled', 'no_show'].includes(rawOut) ? rawOut : 'completed');
+        const targetDate = String(args.date || new Date().toISOString().split('T')[0]).trim();
+        if (!Array.isArray(student.schedule)) student.schedule = [];
+
+        const dayOfWeek = (new Date(targetDate + 'T12:00:00')).getDay();
+        let session = student.schedule.find(s => s && s.dateStr === targetDate && !s.repeatWeekly);
+        if (!session) {
+          session = student.schedule.find(s => s && s.repeatWeekly && s.dayOfWeek === dayOfWeek);
+        }
+        if (!session) {
+          session = {
+            id: 'les_' + Date.now(),
+            dateStr: targetDate,
+            dayOfWeek,
+            time: '4:30 PM',
+            repeatWeekly: false,
+            topic: String(args.nextToTeach || args.summaryTaught || (isHe ? 'שיעור פרטי' : 'Tutoring Session')).trim(),
+            status: outcome === 'canceled' ? 'cancelled' : outcome
+          };
+          student.schedule.push(session);
+        }
+
+        if (session.repeatWeekly) {
+          if (!session.dateStatuses || typeof session.dateStatuses !== 'object') session.dateStatuses = {};
+          session.dateStatuses[targetDate] = outcome === 'canceled' ? 'cancelled' : outcome;
+        } else {
+          session.status = outcome === 'canceled' ? 'cancelled' : outcome;
+          session.completedAt = outcome === 'completed' ? new Date().toISOString() : null;
+        }
+
+        const localRes = typeof applyLocalSessionOutcomeUpdate === 'function'
+          ? applyLocalSessionOutcomeUpdate(student, session, outcome, targetDate, args)
+          : { ledger: student.ledger || { lessonsTaught: 0, balanceOwedCents: 0 }, chargeCents: 0 };
+
+        saveStudentsToStorage(true);
+        if (typeof syncSessionRecapToCloud === 'function' && isHttpRuntime()) {
+          syncSessionRecapToCloud({
+            studentId: student.id,
+            studentNameOrId: student.name,
+            sessionId: session.id,
+            sessionDate: targetDate,
+            startTime: session.time || '',
+            outcome,
+            summaryTaught: args.summaryTaught || '',
+            homeworkTask: args.homeworkTask || '',
+            nextToTeach: args.nextToTeach || '',
+            cancelReason: args.cancelReason || '',
+            privateNote: args.privateNote || '',
+            waiveFee: !!args.waiveFee,
+            recapSource: 'ai_agent'
+          });
+        } else {
+          pushStudentToCloud(student);
+        }
+
+        renderStudents();
+        renderCalendar();
+        if (typeof renderSidebarDailyOverview === 'function') renderSidebarDailyOverview();
+        if (APP_STATE.activeStudentDrawerId === student.id && typeof renderStudentDrawer === 'function') {
+          renderStudentDrawer(student.id, true);
+        }
+
+        const ledger = localRes.ledger || student.ledger || { lessonsTaught: 0, balanceOwedCents: 0 };
+        const chargeLabel = typeof formatMoneyCents === 'function' ? formatMoneyCents(localRes.chargeCents || 0) : ('$0.00');
+        const outcomeLabel = outcome === 'completed' ? 'Completed ✓'
+          : (outcome === 'no_show' ? 'No-Show' : (outcome === 'late_canceled' ? 'Late Canceled' : 'Canceled (No Session)'));
+
+        return {
+          success: true,
+          studentId: student.id,
+          sessionId: session.id,
+          sessionDate: targetDate,
+          outcome,
+          lessonsTaught: ledger.lessonsTaught || 0,
+          chargeCents: localRes.chargeCents || 0,
+          balanceOwedCents: ledger.balanceOwedCents || 0,
+          actionCards: [
+            {
+              type: 'student',
+              title: `${student.name} · ${outcomeLabel}`,
+              studentId: student.id,
+              studentName: student.name,
+              detail: `${targetDate} · Taught: ${ledger.lessonsTaught || 0} · Charge: ${chargeLabel}`
+            }
+          ],
+          message: `Session recap logged (${outcomeLabel}) for ${student.name} on ${targetDate}. Taught: ${ledger.lessonsTaught || 0}.`
         };
       }
 
@@ -36319,7 +37071,7 @@ ${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output 
       if (typeof window !== 'undefined' && window.location) {
         const search = String(window.location.search || '');
         const hash = String(window.location.hash || '');
-        if (/student=1|student_code=|join=|auth=|login|signup|__clerk/i.test(search) || /student-login|#sync=/i.test(hash)) {
+        if (/student=1|student_code=|activate=|pay=|join=|auth=|login|signup|__clerk/i.test(search) || /student-login|#sync=/i.test(hash)) {
           return true;
         }
       }
@@ -37896,6 +38648,1749 @@ ${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output 
     }
 
     // =========================================================================
+    // M142 BILLING, SESSION RECAPS, 2-STEP PAYMENTS & FAMILY PORTAL CONTROLLERS
+    // =========================================================================
+    let activeSessionRecapState = null;
+    let activeBillingSettingsTab = 'plan';
+    let activePaymentRequestState = null;
+    let activePublicPaymentState = { token: '', data: null, loading: false, error: '' };
+    let activePortalInviteState = { studentId: '', result: null, loading: false };
+    let sessionRecapVoiceRecognition = null;
+    let isSessionRecapVoiceActive = false;
+
+    function formatMoneyCents(cents) {
+      const n = Number(cents);
+      const safe = Number.isFinite(n) ? Math.round(n) : 0;
+      const neg = safe < 0;
+      const abs = Math.abs(safe);
+      return `${neg ? '-' : ''}$${(abs / 100).toFixed(2)}`;
+    }
+
+    function parseDollarsInputToCents(raw) {
+      if (raw === null || raw === undefined || raw === '') return 0;
+      const cleaned = String(raw).replace(/[^0-9.-]/g, '').trim();
+      const val = parseFloat(cleaned);
+      if (!Number.isFinite(val) || val < 0) return 0;
+      return Math.round(val * 100);
+    }
+
+    function isAdultLearnerType(val) {
+      return val === 'adult_student' || val === 'adult';
+    }
+
+    function normalizeClientRuleEntry(rawRule, fallbackMode = 'free', fallbackValue = 0) {
+      const r = rawRule && typeof rawRule === 'object' ? rawRule : {};
+      const mode = (r.mode === 'percent' || r.mode === 'flat' || r.mode === 'free') ? r.mode : fallbackMode;
+      let val = Number(r.value);
+      if (Number.isNaN(val) || val < 0) val = fallbackValue;
+      if (mode === 'free') val = 0;
+      if (mode === 'percent') val = Math.min(200, Math.round(val));
+      if (mode === 'flat') val = Math.round(val);
+      return { mode, value: val };
+    }
+
+    function getEffectiveTutorBillingPolicy() {
+      const p = (APP_STATE && APP_STATE.billingPolicy) || {};
+      const rawRate = p.defaultRateCents ?? p.defaultLessonRateCents ?? 0;
+      const cancelRule = (p.cancelRule && typeof p.cancelRule === 'object')
+        ? normalizeClientRuleEntry(p.cancelRule, 'free', 0)
+        : normalizeClientRuleEntry({ mode: p.onTimeCancelRule === 'fixed' ? 'flat' : (p.onTimeCancelRule === 'full' ? 'percent' : p.onTimeCancelRule), value: p.onTimeCancelRule === 'full' ? 100 : (p.onTimeCancelValue ?? 0) }, 'free', 0);
+      const lateCancelRule = (p.lateCancelRule && typeof p.lateCancelRule === 'object')
+        ? normalizeClientRuleEntry(p.lateCancelRule, 'percent', 50)
+        : normalizeClientRuleEntry({ mode: p.lateCancelRule === 'fixed' ? 'flat' : (p.lateCancelRule === 'full' ? 'percent' : p.lateCancelRule), value: p.lateCancelRule === 'full' ? 100 : (p.lateCancelValue ?? 50) }, 'percent', 50);
+      const noShowRule = (p.noShowRule && typeof p.noShowRule === 'object')
+        ? normalizeClientRuleEntry(p.noShowRule, 'percent', 100)
+        : normalizeClientRuleEntry({ mode: p.noShowRule === 'fixed' ? 'flat' : (p.noShowRule === 'full' ? 'percent' : p.noShowRule), value: p.noShowRule === 'full' ? 100 : (p.noShowValue ?? 100) }, 'percent', 100);
+      return {
+        defaultRateCents: Math.max(0, Math.round(Number(rawRate) || 0)),
+        currency: String(p.currency || 'USD').toUpperCase(),
+        defaultDurationMins: Math.min(240, Math.max(15, Math.round(Number(p.defaultDurationMins) || 60))),
+        cancelRule,
+        lateCancelRule,
+        noShowRule
+      };
+    }
+
+    function getEffectivePayoutMethods() {
+      const m = (APP_STATE && APP_STATE.payoutMethods) || {};
+      return {
+        zelle: String(m.zelle || '').trim(),
+        venmo: String(m.venmo || '').trim(),
+        cashapp: String(m.cashapp || '').trim(),
+        paypal: String(m.paypal || '').trim(),
+        bankInstructions: String(m.bankInstructions || '').trim(),
+        customPaymentUrl: String(m.customPaymentUrl || '').trim(),
+        stripeConnectReady: !!m.stripeConnectReady
+      };
+    }
+
+    function computeLocalSessionCharge(rawOutcome, lessonRateCents, policy, opts) {
+      const o = String(rawOutcome || 'completed').toLowerCase().trim();
+      const outcome = o === 'cancelled' ? 'canceled' : o;
+      const cfg = policy || getEffectiveTutorBillingPolicy();
+      const rate = Math.max(0, Number(lessonRateCents ?? cfg.defaultRateCents ?? 0) || 0);
+      const options = opts || {};
+      if (options.waiveFee) return 0;
+      if (options.overrideChargeCents !== undefined && options.overrideChargeCents !== null && options.overrideChargeCents !== '') {
+        return Math.max(0, Math.round(Number(options.overrideChargeCents) || 0));
+      }
+      if (outcome === 'completed') return rate;
+      if (outcome === 'scheduled') return 0;
+      const applyRule = (ruleObj) => {
+        const r = normalizeClientRuleEntry(ruleObj, 'free', 0);
+        if (r.mode === 'percent') return Math.round((rate * r.value) / 100);
+        if (r.mode === 'flat') return Math.max(0, Math.round(r.value));
+        return 0;
+      };
+      if (outcome === 'late_canceled') return applyRule(cfg.lateCancelRule);
+      if (outcome === 'no_show') return applyRule(cfg.noShowRule);
+      return applyRule(cfg.cancelRule);
+    }
+
+    function getStudentLedgerSnapshot(student) {
+      if (!student) {
+        return { lessonRateCents: 0, lessonsTaught: 0, lessonsMissed: 0, totalBilledCents: 0, totalPaidCents: 0, balanceOwedCents: 0, openRequests: [], recentPayments: [] };
+      }
+      const policy = getEffectiveTutorBillingPolicy();
+      const parsedRate = Number(student.lessonRateCents || 0) || parseDollarsInputToCents(student.hourlyRate) || policy.defaultRateCents || 0;
+      if (student.ledger && typeof student.ledger === 'object' && !student._localLedgerDirty) {
+        const mergedReqs = [
+          ...(Array.isArray(student.ledger.pendingConfirmationRequests) ? student.ledger.pendingConfirmationRequests : []),
+          ...(Array.isArray(student.ledger.openRequests) ? student.ledger.openRequests : [])
+        ];
+        const dedupReqs = [];
+        const seenReqIds = new Set();
+        mergedReqs.forEach(r => {
+          if (!r || seenReqIds.has(r.id)) return;
+          seenReqIds.add(r.id);
+          dedupReqs.push(r);
+        });
+        const recentPayments = Array.isArray(student.recentPayments)
+          ? student.recentPayments
+          : (Array.isArray(student.payments) ? student.payments : (Array.isArray(student.ledger.recentPayments) ? student.ledger.recentPayments : []));
+        return {
+          lessonRateCents: Number(student.ledger.effectiveRateCents ?? student.ledger.lessonRateCents ?? parsedRate) || 0,
+          lessonsTaught: Number(student.ledger.lessonsTaught ?? student.lessonsTaught ?? 0) || 0,
+          lessonsMissed: Number(student.ledger.lessonsMissed ?? ((Number(student.ledger.canceledSessionsCount || 0)) + (Number(student.ledger.noShowSessionsCount || 0)))) || 0,
+          totalBilledCents: Number(student.ledger.totalChargesCents ?? student.ledger.totalBilledCents ?? 0) || 0,
+          totalPaidCents: Number(student.ledger.totalConfirmedPaidCents ?? student.ledger.totalPaidCents ?? 0) || 0,
+          balanceOwedCents: Math.max(0, Number(student.ledger.balanceOwedCents || 0) || 0),
+          openRequests: dedupReqs,
+          recentPayments
+        };
+      }
+      const instances = Array.isArray(student.sessionInstances) ? student.sessionInstances : [];
+      let lessonsTaught = 0;
+      let lessonsMissed = 0;
+      let totalBilledCents = 0;
+      instances.forEach(inst => {
+        if (!inst) return;
+        const st = String(inst.status || 'scheduled').toLowerCase();
+        if (st === 'completed') lessonsTaught += 1;
+        else if (['canceled', 'cancelled', 'late_canceled', 'no_show'].includes(st)) lessonsMissed += 1;
+        totalBilledCents += Math.max(0, Number(inst.charge_cents ?? inst.chargeCents ?? 0) || 0);
+      });
+      const existingPayments = Array.isArray(student.recentPayments)
+        ? student.recentPayments
+        : (Array.isArray(student.payments) ? student.payments : ((student.ledger && Array.isArray(student.ledger.recentPayments)) ? student.ledger.recentPayments : []));
+      const totalPaidCents = existingPayments.reduce((sum, p) => sum + (Number(p.amount_cents ?? p.amountCents ?? 0) || 0), 0);
+      const openReqs = student.ledger
+        ? [...(Array.isArray(student.ledger.pendingConfirmationRequests) ? student.ledger.pendingConfirmationRequests : []), ...(Array.isArray(student.ledger.openRequests) ? student.ledger.openRequests : [])]
+        : [];
+      return {
+        lessonRateCents: parsedRate,
+        lessonsTaught,
+        lessonsMissed,
+        totalBilledCents,
+        totalPaidCents,
+        balanceOwedCents: Math.max(0, totalBilledCents - totalPaidCents),
+        openRequests: openReqs,
+        recentPayments: existingPayments
+      };
+    }
+
+    function applyLocalSessionOutcomeUpdate(student, session, rawOutcome, dateStr, details) {
+      if (!student) return { ledger: null, chargeCents: 0 };
+      const opts = details || {};
+      const o = String(rawOutcome || 'completed').toLowerCase().trim();
+      const outcome = o === 'cancelled' ? 'canceled' : o;
+      const targetDate = String(dateStr || (session && session.dateStr) || new Date().toISOString().split('T')[0]);
+      const policy = getEffectiveTutorBillingPolicy();
+      const rateCents = Number(student.lessonRateCents || 0) || parseDollarsInputToCents(student.hourlyRate) || policy.defaultRateCents || 0;
+      const chargeCents = computeLocalSessionCharge(outcome, rateCents, policy, {
+        waiveFee: !!opts.waiveFee,
+        overrideChargeCents: opts.overrideChargeCents
+      });
+
+      if (!Array.isArray(student.sessionInstances)) student.sessionInstances = [];
+      const slotId = session ? session.id : null;
+      let inst = student.sessionInstances.find(item =>
+        item && (item.session_date === targetDate || item.sessionDate === targetDate) &&
+        (!slotId || (item.series_schedule_id || item.schedule_slot_id || item.scheduleSlotId) === slotId)
+      );
+      if (!inst) {
+        inst = {
+          id: 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          student_id: student.id,
+          series_schedule_id: slotId || '',
+          schedule_slot_id: slotId,
+          session_date: targetDate,
+          start_time: (session && session.time) || '',
+          status: outcome,
+          charge_cents: chargeCents,
+          counts_as_taught: outcome === 'completed' ? 1 : 0
+        };
+        student.sessionInstances.unshift(inst);
+      } else {
+        inst.status = outcome;
+        inst.charge_cents = chargeCents;
+        inst.counts_as_taught = outcome === 'completed' ? 1 : 0;
+      }
+      if (opts.summaryTaught !== undefined) {
+        inst.recap_summary = String(opts.summaryTaught || '').trim();
+        inst.summary_taught = inst.recap_summary;
+      }
+      if (opts.homeworkTask !== undefined) {
+        inst.homework_assigned = String(opts.homeworkTask || '').trim();
+        inst.homework_task = inst.homework_assigned;
+      }
+      if (opts.nextToTeach !== undefined) inst.next_to_teach = String(opts.nextToTeach || '').trim();
+      if (opts.cancelReason !== undefined) inst.cancel_reason = String(opts.cancelReason || '').trim();
+      if (opts.privateNote !== undefined) inst.tutor_private_note = String(opts.privateNote || '').trim();
+
+      if (typeof ensureStudentSkills === 'function') ensureStudentSkills(student);
+      if (student.skills) {
+        if (outcome === 'completed' && opts.summaryTaught) {
+          student.skills.lastTaught = String(opts.summaryTaught).trim();
+          student.skills.lastTaughtAt = targetDate;
+        }
+        if (outcome === 'completed' && opts.homeworkTask) {
+          student.skills.homework = {
+            task: String(opts.homeworkTask).trim(),
+            completed: false,
+            assignedDate: targetDate
+          };
+        }
+        if (opts.nextToTeach) {
+          student.skills.nextToTeach = String(opts.nextToTeach).trim();
+          if (session) session.topic = String(opts.nextToTeach).trim();
+        }
+      }
+
+      if (!Array.isArray(student.recentRecaps)) student.recentRecaps = [];
+      student.recentRecaps = [
+        {
+          id: inst.id,
+          sessionDate: targetDate,
+          startTime: inst.start_time || '',
+          outcome,
+          summaryTaught: inst.summary_taught || '',
+          homeworkTask: inst.homework_task || '',
+          nextToTeach: inst.next_to_teach || ''
+        },
+        ...student.recentRecaps.filter(r => r && r.sessionDate !== targetDate)
+      ].slice(0, 12);
+
+      student._localLedgerDirty = true;
+      const computedLedger = getStudentLedgerSnapshot(student);
+      student.ledger = computedLedger;
+      student.lessonsTaught = computedLedger.lessonsTaught;
+      return { ledger: computedLedger, chargeCents, instance: inst };
+    }
+
+    async function syncSessionRecapToCloud(payload) {
+      if (!isHttpRuntime() || !payload || !payload.studentId) return null;
+      const token = typeof getClerkAuthToken === 'function' ? await getClerkAuthToken(false) : null;
+      if (!token) return null;
+      try {
+        const res = await apiFetch('/api/sessions/recap', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const student = (APP_STATE.students || []).find(s => s.id === payload.studentId);
+        if (student && res) {
+          student._localLedgerDirty = false;
+          if (res.ledger) student.ledger = res.ledger;
+          if (Array.isArray(res.sessions)) student.sessionInstances = res.sessions;
+          if (res.lessonsTaught !== undefined) student.lessonsTaught = res.lessonsTaught;
+          saveStudentsToStorage(true);
+          if (APP_STATE.activeStudentDrawerId === student.id && typeof renderStudentDrawer === 'function') {
+            renderStudentDrawer(student.id, true);
+          }
+          renderCalendar();
+        }
+        return res;
+      } catch (err) {
+        if (err && (err.code === 'SUBSCRIPTION_READ_ONLY' || err.status === 402)) {
+          APP_STATE.accessMode = 'read_only';
+          updateTutorReadOnlyBanner();
+          showToast('Read-Only Mode active. Reactivate your Studio plan to save changes.', true);
+        } else {
+          console.warn('Session recap sync warning:', err);
+        }
+        return null;
+      }
+    }
+
+    async function updateStudentBillingMeta(studentId, patch) {
+      if (!guardTutorWriteAllowed()) return;
+      const student = (APP_STATE.students || []).find(s => s.id === studentId);
+      if (!student || !patch) return;
+      if (patch.lessonRateDollars !== undefined) {
+        const cents = parseDollarsInputToCents(patch.lessonRateDollars);
+        student.lessonRateCents = cents;
+        student.hourlyRate = cents > 0 ? `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}/hr` : '';
+        if (student.ledger) student.ledger.lessonRateCents = cents;
+      }
+      if (patch.learnerType === 'adult_student' || patch.learnerType === 'adult' || patch.learnerType === 'child') {
+        student.learnerType = isAdultLearnerType(patch.learnerType) ? 'adult_student' : 'child';
+      }
+      saveStudentsToStorage(true);
+      await pushStudentToCloud(student);
+      if (APP_STATE.activeStudentDrawerId === student.id) renderStudentDrawer(student.id, true);
+      showToast('Student billing settings updated');
+    }
+
+    function updateTutorReadOnlyBanner() {
+      const banner = document.getElementById('tutor-readonly-banner');
+      if (!banner) return;
+      const user = APP_STATE.currentUser || {};
+      const isExempt = (typeof isSuperAdminUser === 'function' && isSuperAdminUser()) || user.subscription_status === 'lifetime';
+      const isReadOnly = !isExempt && APP_STATE.accessMode === 'read_only';
+      banner.classList.toggle('hidden', !isReadOnly);
+      if (isReadOnly) {
+        const tb = APP_STATE.tutorBilling || {};
+        const descEl = document.getElementById('tutor-readonly-desc');
+        if (descEl) {
+          const payingCnt = Number(tb.activePayingStudentsCount ?? tb.activePayingStudentCount ?? 0);
+          const minNeeded = Number(tb.waiverThreshold || 5);
+          descEl.textContent = `You currently have ${payingCnt} of ${minNeeded} active paying students needed to waive the $15/mo studio fee. Past lessons, homework, notes, and history stay 100% readable.`;
+        }
+        if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+      }
+    }
+
+    function guardTutorWriteAllowed() {
+      const user = APP_STATE.currentUser || {};
+      if ((typeof isSuperAdminUser === 'function' && isSuperAdminUser()) || user.subscription_status === 'lifetime') {
+        return true;
+      }
+      if (APP_STATE.accessMode === 'read_only') {
+        showToast('Read-Only Mode is active. Reactivate your Studio plan or reach 5 paying students to resume edits.', true);
+        openBillingSettingsModal('plan');
+        return false;
+      }
+      return true;
+    }
+
+    async function startTutorSubscriptionCheckout() {
+      if (!isHttpRuntime()) {
+        showToast('Connect online at tutorpilot.us to start Stripe Checkout.', true);
+        return;
+      }
+      try {
+        const res = await apiFetch('/api/billing/checkout', {
+          method: 'POST',
+          body: JSON.stringify({ kind: 'tutor_subscription' })
+        });
+        if (res && res.url) {
+          window.location.href = res.url;
+          return;
+        }
+        showToast((res && res.message) || 'Stripe billing keys are not yet connected on this environment.', true);
+      } catch (err) {
+        showToast((err && err.message) || 'Unable to launch Studio Checkout right now.', true);
+      }
+    }
+
+    async function openSubscriptionCheckoutForStudent(studentId) {
+      if (!studentId || !isHttpRuntime()) {
+        showToast('Connect online to activate or manage your $5/mo subscription.', true);
+        return;
+      }
+      try {
+        const res = await apiFetch('/api/billing/checkout', {
+          method: 'POST',
+          body: JSON.stringify({ kind: 'student_subscription', studentId })
+        });
+        if (res && res.url) {
+          window.location.href = res.url;
+          return;
+        }
+        showToast((res && res.message) || 'Stripe subscription checkout is not configured yet.', true);
+      } catch (err) {
+        showToast((err && err.message) || 'Could not start subscription checkout.', true);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // MODAL 1: END-OF-SESSION AI RECAP & MISSED SESSION LOGGER
+    // -------------------------------------------------------------------------
+    function openSessionRecapModal(studentId, sessionId, dateStr) {
+      if (!guardTutorWriteAllowed()) return;
+      const students = Array.isArray(APP_STATE.students) ? APP_STATE.students.filter(s => s && !s.archived) : [];
+      const fallbackStu = studentId ? students.find(s => s.id === studentId) : students[0];
+      const chosenDate = dateStr || (APP_STATE.calendar && APP_STATE.calendar.selectedDateStr) || new Date().toISOString().split('T')[0];
+      let chosenSess = null;
+      if (fallbackStu && Array.isArray(fallbackStu.schedule)) {
+        chosenSess = (sessionId && fallbackStu.schedule.find(item => item.id === sessionId)) ||
+          fallbackStu.schedule.find(item => item.dateStr === chosenDate) ||
+          null;
+      }
+      activeSessionRecapState = {
+        studentId: fallbackStu ? fallbackStu.id : '',
+        sessionId: chosenSess ? chosenSess.id : (sessionId || ''),
+        sessionDate: chosenDate,
+        startTime: (chosenSess && chosenSess.time) || '',
+        outcome: 'completed',
+        rawNote: '',
+        summaryTaught: '',
+        homeworkTask: '',
+        nextToTeach: '',
+        cancelReason: '',
+        privateNote: '',
+        waiveFee: false,
+        overrideDollars: '',
+        aiBusy: false
+      };
+      renderSessionRecapModalBody();
+      const modal = document.getElementById('modal-session-recap');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof markModalOpened === 'function') markModalOpened('session_recap');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function closeSessionRecapModal() {
+      if (typeof stopSessionRecapVoiceCapture === 'function') stopSessionRecapVoiceCapture();
+      const modal = document.getElementById('modal-session-recap');
+      if (modal) modal.classList.add('hidden');
+      if (typeof markModalClosed === 'function') markModalClosed('session_recap');
+    }
+
+    function parseSessionRecapIntentDeterministic(rawText) {
+      const text = String(rawText || '').trim();
+      const lower = text.toLowerCase();
+      let outcome = 'completed';
+      let waiveFee = false;
+      if (/\b(no[- ]?show|didn'?t show|never showed|missed without)\b/i.test(lower)) {
+        outcome = 'no_show';
+      } else if (/\b(late cancel|cancelled late|canceled late|last[- ]?minute|same[- ]?day cancel)\b/i.test(lower)) {
+        outcome = 'late_canceled';
+      } else if (/\b(no session|no class|didn'?t meet|did not meet|canceled|cancelled|rescheduled|called off|off today|sick)\b/i.test(lower)) {
+        outcome = 'canceled';
+      }
+      if (/\b(don'?t charge|no charge|waive|free|no fee)\b/i.test(lower)) {
+        waiveFee = true;
+      }
+
+      let homeworkTask = '';
+      const hwMatch = text.match(/(?:homework|practice|assign(?:ed)?)[\s:]+([^\n.!?]+(?:[.!?]|$))/i);
+      if (hwMatch && hwMatch[1]) homeworkTask = hwMatch[1].trim();
+
+      let nextToTeach = '';
+      const nextMatch = text.match(/(?:next lesson|next class|next time|next week)[\s:]+([^\n.!?]+(?:[.!?]|$))/i);
+      if (nextMatch && nextMatch[1]) nextToTeach = nextMatch[1].trim();
+
+      return {
+        outcome,
+        waiveFee,
+        summaryTaught: outcome === 'completed' ? text : '',
+        cancelReason: outcome !== 'completed' ? text : '',
+        homeworkTask,
+        nextToTeach
+      };
+    }
+
+    function setSessionRecapField(field, value) {
+      if (!activeSessionRecapState) return;
+      activeSessionRecapState[field] = value;
+      if (field === 'outcome' || field === 'studentId' || field === 'waiveFee' || field === 'overrideDollars') {
+        renderSessionRecapModalBody();
+      }
+    }
+
+    let sessionRecapMediaRecorder = null;
+    let sessionRecapAudioChunks = [];
+
+    function stopSessionRecapVoiceCapture() {
+      if (sessionRecapVoiceRecognition) {
+        try { sessionRecapVoiceRecognition.stop(); } catch (_) {}
+      }
+      if (sessionRecapMediaRecorder && sessionRecapMediaRecorder.state !== 'inactive') {
+        try { sessionRecapMediaRecorder.stop(); } catch (_) {}
+      }
+      isSessionRecapVoiceActive = false;
+    }
+
+    async function toggleSessionRecapVoiceInput() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (isSessionRecapVoiceActive) {
+        stopSessionRecapVoiceCapture();
+        renderSessionRecapModalBody();
+        return;
+      }
+
+      if (!SpeechRec) {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
+          showToast('Voice dictation unavailable in this browser — type your quick note below.', true);
+          return;
+        }
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const mimeType = MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+          sessionRecapAudioChunks = [];
+          sessionRecapMediaRecorder = new MediaRecorder(stream, { mimeType });
+          sessionRecapMediaRecorder.ondataavailable = (ev) => {
+            if (ev.data && ev.data.size > 0) sessionRecapAudioChunks.push(ev.data);
+          };
+          sessionRecapMediaRecorder.onstop = async () => {
+            stream.getTracks().forEach(t => t.stop());
+            isSessionRecapVoiceActive = false;
+            const blob = new Blob(sessionRecapAudioChunks, { type: mimeType });
+            if (blob.size > 0 && activeSessionRecapState) {
+              try {
+                const base64 = await new Promise((resolve, reject) => {
+                  const r = new FileReader();
+                  r.onloadend = () => resolve(String(r.result || '').split(',')[1] || '');
+                  r.onerror = reject;
+                  r.readAsDataURL(blob);
+                });
+                const transcriptText = await callGeminiApi([
+                  {
+                    role: 'user',
+                    parts: [
+                      { text: 'Transcribe this short tutor voice note verbatim in its spoken language, nothing else.' },
+                      { inlineData: { mimeType, data: base64 } }
+                    ]
+                  }
+                ]);
+                const cleanSpoken = String(transcriptText || '').trim();
+                if (cleanSpoken) {
+                  activeSessionRecapState.rawNote = activeSessionRecapState.rawNote ? `${activeSessionRecapState.rawNote} ${cleanSpoken}` : cleanSpoken;
+                  await applySmartParseOnRecapNote();
+                  return;
+                }
+              } catch (err) {
+                showToast('Recorded audio could not be transcribed online; please type note.', true);
+              }
+            }
+            renderSessionRecapModalBody();
+          };
+          sessionRecapMediaRecorder.start();
+          isSessionRecapVoiceActive = true;
+          renderSessionRecapModalBody();
+          showToast('Recording voice recap... Click Speak again to stop & transcribe.');
+          return;
+        } catch (err) {
+          isSessionRecapVoiceActive = false;
+          showToast('Microphone permission denied or unavailable.', true);
+          return;
+        }
+      }
+
+      try {
+        sessionRecapVoiceRecognition = new SpeechRec();
+        sessionRecapVoiceRecognition.lang = APP_STATE.lang === 'he' ? 'he-IL' : 'en-US';
+        sessionRecapVoiceRecognition.interimResults = false;
+        sessionRecapVoiceRecognition.maxAlternatives = 1;
+        sessionRecapVoiceRecognition.onstart = () => {
+          isSessionRecapVoiceActive = true;
+          renderSessionRecapModalBody();
+        };
+        sessionRecapVoiceRecognition.onresult = (evt) => {
+          const spoken = (evt.results && evt.results[0] && evt.results[0][0] && evt.results[0][0].transcript) || '';
+          if (spoken && activeSessionRecapState) {
+            activeSessionRecapState.rawNote = activeSessionRecapState.rawNote ? `${activeSessionRecapState.rawNote} ${spoken}` : spoken;
+            const inferred = parseSessionRecapIntentDeterministic(activeSessionRecapState.rawNote);
+            activeSessionRecapState.outcome = inferred.outcome;
+            activeSessionRecapState.waiveFee = inferred.waiveFee;
+            if (inferred.summaryTaught && !activeSessionRecapState.summaryTaught) activeSessionRecapState.summaryTaught = inferred.summaryTaught;
+            if (inferred.homeworkTask && !activeSessionRecapState.homeworkTask) activeSessionRecapState.homeworkTask = inferred.homeworkTask;
+            if (inferred.nextToTeach && !activeSessionRecapState.nextToTeach) activeSessionRecapState.nextToTeach = inferred.nextToTeach;
+            if (inferred.cancelReason && !activeSessionRecapState.cancelReason) activeSessionRecapState.cancelReason = inferred.cancelReason;
+          }
+          renderSessionRecapModalBody();
+        };
+        sessionRecapVoiceRecognition.onerror = () => {
+          isSessionRecapVoiceActive = false;
+          renderSessionRecapModalBody();
+        };
+        sessionRecapVoiceRecognition.onend = () => {
+          isSessionRecapVoiceActive = false;
+          renderSessionRecapModalBody();
+        };
+        sessionRecapVoiceRecognition.start();
+      } catch (e) {
+        isSessionRecapVoiceActive = false;
+        showToast('Could not start microphone dictation.', true);
+      }
+    }
+
+    async function applySmartParseOnRecapNote() {
+      if (!activeSessionRecapState) return;
+      const rawEl = document.getElementById('input-recap-raw-note');
+      if (rawEl) activeSessionRecapState.rawNote = rawEl.value;
+      const rawText = String(activeSessionRecapState.rawNote || '').trim();
+      let inferred = parseSessionRecapIntentDeterministic(rawText);
+
+      if (rawText && (typeof shouldUseAiProxy === 'function' && shouldUseAiProxy() || getEffectiveGeminiApiKey())) {
+        try {
+          activeSessionRecapState.aiBusy = true;
+          const aiJsonText = await callGeminiApi(
+            `Analyze this end-of-session tutor note and return strict JSON ONLY with keys: outcome ("completed"|"canceled"|"late_canceled"|"no_show"), waiveFee (boolean), summaryTaught (string), homeworkTask (string), nextToTeach (string), cancelReason (string).\nNote: "${rawText}"`,
+            undefined,
+            { responseMimeType: 'application/json', timeoutMs: 12000 }
+          );
+          const parsedAi = JSON.parse(String(aiJsonText || '{}').replace(/```json|```/gi, '').trim());
+          if (parsedAi && ['completed', 'canceled', 'late_canceled', 'no_show'].includes(parsedAi.outcome)) {
+            inferred = {
+              outcome: parsedAi.outcome,
+              waiveFee: !!parsedAi.waiveFee,
+              summaryTaught: String(parsedAi.summaryTaught || '').trim(),
+              homeworkTask: String(parsedAi.homeworkTask || '').trim(),
+              nextToTeach: String(parsedAi.nextToTeach || '').trim(),
+              cancelReason: String(parsedAi.cancelReason || '').trim()
+            };
+          }
+        } catch (_) {
+          // Graceful deterministic fallback preserved above
+        } finally {
+          if (activeSessionRecapState) activeSessionRecapState.aiBusy = false;
+        }
+      }
+
+      activeSessionRecapState.outcome = inferred.outcome;
+      activeSessionRecapState.waiveFee = inferred.waiveFee;
+      if (inferred.outcome === 'completed') {
+        if (inferred.summaryTaught) activeSessionRecapState.summaryTaught = inferred.summaryTaught;
+        if (inferred.homeworkTask) activeSessionRecapState.homeworkTask = inferred.homeworkTask;
+        if (inferred.nextToTeach) activeSessionRecapState.nextToTeach = inferred.nextToTeach;
+      } else {
+        if (inferred.cancelReason) activeSessionRecapState.cancelReason = inferred.cancelReason;
+      }
+      renderSessionRecapModalBody();
+      showToast('Parsed session status & details from your note');
+    }
+
+    function renderSessionRecapModalBody() {
+      const body = document.getElementById('modal-session-recap-body');
+      if (!body || !activeSessionRecapState) return;
+      const st = activeSessionRecapState;
+      const students = Array.isArray(APP_STATE.students) ? APP_STATE.students.filter(s => s && !s.archived) : [];
+      const student = students.find(s => s.id === st.studentId) || students[0] || null;
+      if (student && !st.studentId) st.studentId = student.id;
+      const policy = getEffectiveTutorBillingPolicy();
+      const rateCents = student ? (Number(student.lessonRateCents || 0) || parseDollarsInputToCents(student.hourlyRate) || policy.defaultRateCents || 0) : policy.defaultRateCents;
+      const overrideVal = st.overrideDollars !== '' ? parseDollarsInputToCents(st.overrideDollars) : null;
+      const previewCharge = computeLocalSessionCharge(st.outcome, rateCents, policy, { waiveFee: st.waiveFee, overrideChargeCents: overrideVal });
+      const outcomes = [
+        { id: 'completed', label: 'Completed ✓', cls: 'emerald' },
+        { id: 'canceled', label: 'Canceled', cls: 'slate' },
+        { id: 'late_canceled', label: 'Late Cancel', cls: 'amber' },
+        { id: 'no_show', label: 'No-Show', cls: 'rose' }
+      ];
+
+      body.innerHTML = `
+        <form onsubmit="submitSessionRecapForm(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">Student</label>
+              <select id="select-recap-student" onchange="setSessionRecapField('studentId', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-400">
+                ${students.map(s => `<option value="${escapeHtml(s.id)}" ${s.id === st.studentId ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">Session Date</label>
+              <input id="input-recap-date" type="date" value="${escapeHtml(st.sessionDate)}" onchange="setSessionRecapField('sessionDate', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-400" />
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-xs font-bold text-slate-300">Session Outcome</label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              ${outcomes.map(o => `
+                <button type="button" onclick="setSessionRecapField('outcome', '${o.id}')" class="px-3 py-2 rounded-xl border text-xs font-bold transition ${st.outcome === o.id ? 'bg-indigo-600 border-indigo-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-600'}">
+                  ${o.label}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <label class="text-xs font-bold text-indigo-300">Voice Dictation or Quick Note</label>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="toggleSessionRecapVoiceInput()" class="px-2.5 py-1 rounded-lg border text-[11px] font-bold flex items-center gap-1 transition ${isSessionRecapVoiceActive ? 'bg-rose-600 border-rose-400 text-white animate-pulse' : 'bg-slate-900 border-slate-700 text-slate-200 hover:border-indigo-400'}">
+                  <i data-lucide="mic" class="w-3 h-3"></i>
+                  <span>${isSessionRecapVoiceActive ? 'Listening...' : 'Speak'}</span>
+                </button>
+                <button type="button" onclick="applySmartParseOnRecapNote()" class="px-2.5 py-1 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-400/35 text-indigo-200 text-[11px] font-bold">
+                  Auto-Detect
+                </button>
+              </div>
+            </div>
+            <textarea id="input-recap-raw-note" rows="3" dir="auto" oninput="if(activeSessionRecapState) activeSessionRecapState.rawNote = this.value" placeholder="e.g. We finished Aliyah 2; homework is practice lines 8-12. OR: No session today, parent cancelled 2 hours prior." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400 resize-none">${escapeHtml(st.rawNote || '')}</textarea>
+          </div>
+
+          ${st.outcome === 'completed' ? `
+            <div class="space-y-2.5 text-xs">
+              <div>
+                <label class="block font-bold text-slate-300 mb-1">Summary Taught</label>
+                <input id="input-recap-summary" type="text" dir="auto" value="${escapeHtml(st.summaryTaught || '')}" oninput="if(activeSessionRecapState) activeSessionRecapState.summaryTaught = this.value" placeholder="What did you cover today?" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400" />
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block font-bold text-slate-300 mb-1">New Homework</label>
+                  <input id="input-recap-homework" type="text" dir="auto" value="${escapeHtml(st.homeworkTask || '')}" oninput="if(activeSessionRecapState) activeSessionRecapState.homeworkTask = this.value" placeholder="Practice assignment..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400" />
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-300 mb-1">Next Class Topic</label>
+                  <input id="input-recap-next" type="text" dir="auto" value="${escapeHtml(st.nextToTeach || '')}" oninput="if(activeSessionRecapState) activeSessionRecapState.nextToTeach = this.value" placeholder="What to teach next..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-400" />
+                </div>
+              </div>
+            </div>
+          ` : `
+            <div class="space-y-2 text-xs">
+              <label class="block font-bold text-slate-300 mb-1">Cancellation / Missed Reason (Optional)</label>
+              <input id="input-recap-cancel-reason" type="text" dir="auto" value="${escapeHtml(st.cancelReason || '')}" oninput="if(activeSessionRecapState) activeSessionRecapState.cancelReason = this.value" placeholder="e.g. Student sick / No-show / Rescheduled" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400" />
+            </div>
+          `}
+
+          <div class="p-3.5 rounded-2xl bg-emerald-950/25 border border-emerald-500/30 flex items-center justify-between gap-3 flex-wrap text-xs">
+            <div>
+              <div class="font-bold text-emerald-200">Session Charge: <span class="font-mono text-white">${formatMoneyCents(previewCharge)}</span></div>
+              <div class="text-[11px] text-slate-400">${st.outcome === 'completed' ? 'Counts +1 Lessons Taught & updates balance' : 'Keeps Lessons Taught unchanged (0% fee on direct payment)'}</div>
+            </div>
+            <div class="flex items-center gap-3 flex-wrap">
+              <label class="inline-flex items-center gap-1.5 text-slate-200 font-semibold cursor-pointer">
+                <input type="checkbox" ${st.waiveFee ? 'checked' : ''} onchange="setSessionRecapField('waiveFee', this.checked)" class="rounded bg-slate-950 border-slate-700 text-emerald-500" />
+                <span>Waive ($0)</span>
+              </label>
+              <input type="number" min="0" step="1" placeholder="Override $" value="${escapeHtml(st.overrideDollars || '')}" oninput="setSessionRecapField('overrideDollars', this.value)" class="w-24 bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white font-mono" />
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+            <button type="button" onclick="closeSessionRecapModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">Cancel</button>
+            <button type="submit" id="btn-submit-session-recap" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold shadow">Save Session Recap</button>
+          </div>
+        </form>
+      `;
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    async function submitSessionRecapForm(e) {
+      e.preventDefault();
+      if (!guardTutorWriteAllowed() || !activeSessionRecapState) return;
+      const st = activeSessionRecapState;
+      const student = (APP_STATE.students || []).find(s => s.id === st.studentId);
+      if (!student) {
+        showToast('Please select a student first.', true);
+        return;
+      }
+
+      const rawEl = document.getElementById('input-recap-raw-note');
+      if (rawEl) st.rawNote = rawEl.value;
+      const inferred = parseSessionRecapIntentDeterministic(st.rawNote);
+      const summaryTaught = (st.summaryTaught || '').trim() || (st.outcome === 'completed' ? (st.rawNote || '').trim() : '');
+      const homeworkTask = (st.homeworkTask || inferred.homeworkTask || '').trim();
+      const nextToTeach = (st.nextToTeach || inferred.nextToTeach || '').trim();
+      const cancelReason = (st.cancelReason || (st.outcome !== 'completed' ? (st.rawNote || '').trim() : '')).trim();
+      const overrideCents = st.overrideDollars !== '' ? parseDollarsInputToCents(st.overrideDollars) : undefined;
+
+      const session = Array.isArray(student.schedule)
+        ? (student.schedule.find(s => s.id === st.sessionId) || student.schedule.find(s => s.dateStr === st.sessionDate) || null)
+        : null;
+      if (session) {
+        if (session.repeatWeekly) {
+          if (!session.dateStatuses || typeof session.dateStatuses !== 'object') session.dateStatuses = {};
+          session.dateStatuses[st.sessionDate] = st.outcome === 'canceled' ? 'cancelled' : st.outcome;
+        } else {
+          session.status = st.outcome === 'canceled' ? 'cancelled' : st.outcome;
+        }
+      }
+
+      applyLocalSessionOutcomeUpdate(student, session, st.outcome, st.sessionDate, {
+        summaryTaught,
+        homeworkTask,
+        nextToTeach,
+        cancelReason,
+        waiveFee: st.waiveFee,
+        overrideChargeCents: overrideCents
+      });
+      saveStudentsToStorage(true);
+      await syncSessionRecapToCloud({
+        studentId: student.id,
+        sessionId: st.sessionId || (session && session.id) || '',
+        sessionDate: st.sessionDate,
+        startTime: st.startTime || (session && session.time) || '',
+        outcome: st.outcome,
+        summaryTaught,
+        homeworkTask,
+        nextToTeach,
+        cancelReason,
+        waiveFee: !!st.waiveFee,
+        overrideChargeCents: overrideCents,
+        recapSource: 'modal'
+      });
+      renderStudents();
+      renderCalendar();
+      if (APP_STATE.activeStudentDrawerId === student.id) renderStudentDrawer(student.id, true);
+      closeSessionRecapModal();
+      showToast('Session recap & balance updated!');
+    }
+
+    // -------------------------------------------------------------------------
+    // MODAL 2: TUTOR BILLING, CANCELLATION RULES & 0%-CUT PAYOUTS
+    // -------------------------------------------------------------------------
+    function openBillingSettingsModal(initialTab) {
+      activeBillingSettingsTab = (initialTab === 'rules' || initialTab === 'payouts') ? initialTab : 'plan';
+      renderBillingSettingsModalBody();
+      const modal = document.getElementById('modal-billing-settings');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof markModalOpened === 'function') markModalOpened('billing_settings');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function closeBillingSettingsModal() {
+      const modal = document.getElementById('modal-billing-settings');
+      if (modal) modal.classList.add('hidden');
+      if (typeof markModalClosed === 'function') markModalClosed('billing_settings');
+    }
+
+    function switchBillingSettingsTab(tab) {
+      activeBillingSettingsTab = (tab === 'rules' || tab === 'payouts') ? tab : 'plan';
+      renderBillingSettingsModalBody();
+    }
+
+    function renderBillingSettingsModalBody() {
+      const body = document.getElementById('modal-billing-settings-body');
+      if (!body) return;
+      const tb = APP_STATE.tutorBilling || {};
+      const user = APP_STATE.currentUser || {};
+      const isLifetime = (typeof isSuperAdminUser === 'function' && isSuperAdminUser()) || user.subscription_status === 'lifetime' || !!tb.isLifetimeFreeTutor || !!tb.isLifetimeExempt;
+      const payingCount = Number(tb.activePayingStudentsCount ?? tb.activePayingStudentCount ?? 0);
+      const waiverMin = Number(tb.waiverThreshold || 5);
+      const progressPct = Math.min(100, Math.round((payingCount / Math.max(1, waiverMin)) * 100));
+      const ledgerRows = Array.isArray(APP_STATE.earningsLedger) ? APP_STATE.earningsLedger : [];
+      const policy = getEffectiveTutorBillingPolicy();
+      const payouts = getEffectivePayoutMethods();
+      const tabs = [
+        { id: 'plan', label: 'Plan & $1 Share' },
+        { id: 'rules', label: 'Rates & Rules' },
+        { id: 'payouts', label: '0%-Cut Payouts & .ics' }
+      ];
+
+      body.innerHTML = `
+        <div class="grid grid-cols-3 gap-2 p-1 rounded-2xl bg-slate-950 border border-slate-800 text-xs">
+          ${tabs.map(t => `
+            <button type="button" onclick="switchBillingSettingsTab('${t.id}')" class="py-2 px-2.5 rounded-xl font-bold transition ${activeBillingSettingsTab === t.id ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}">
+              ${t.label}
+            </button>
+          `).join('')}
+        </div>
+
+        ${activeBillingSettingsTab === 'plan' ? `
+          <div class="space-y-4 text-xs">
+            <div class="p-4 rounded-2xl bg-slate-950/90 border border-indigo-500/35 space-y-2.5">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <div class="text-sm font-extrabold text-white">${isLifetime ? 'Permanent Free Tutor Account' : (tb.tutorFeeWaived ? 'Studio Subscription Waived ($0/mo)' : (APP_STATE.accessMode === 'read_only' ? 'Read-Only Mode — Plan Paused' : 'Tutor Studio Plan ($15/mo after 35-day trial)'))}</div>
+                <span class="px-2.5 py-1 rounded-full font-bold text-[10px] ${isLifetime || tb.tutorFeeWaived ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/35' : 'bg-amber-500/20 text-amber-300 border border-amber-500/35'}">
+                  ${isLifetime ? 'Lifetime Free Forever' : (tb.tutorFeeWaived ? 'Waived (5+ Paying)' : `${payingCount} / ${waiverMin} Paying Students`)}
+                </span>
+              </div>
+              <p class="text-slate-300 leading-relaxed">
+                ${isLifetime
+                  ? 'Your Super Admin / Founder account never pays the $15/mo tutor fee at any student count. Your activated paying families follow the 7-day trial -> $5/mo plan and still count toward your $1/mo per-student reward once you pass 5 active paying students.'
+                  : `Reach ${waiverMin} active paying students to waive your $15/mo tutor subscription automatically and earn $1/mo per active paying student. If active paying students drop below ${waiverMin} after your 35-day trial, the $15/mo plan resumes automatically.`}
+              </p>
+              <div class="space-y-1">
+                <div class="flex items-center justify-between text-[11px] font-semibold text-slate-300">
+                  <span>Active Paying Students Progress</span>
+                  <span class="font-mono text-emerald-300">${payingCount} / ${waiverMin}</span>
+                </div>
+                <div class="w-full h-2.5 rounded-full bg-slate-900 overflow-hidden border border-slate-800">
+                  <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all" style="width:${progressPct}%"></div>
+                </div>
+              </div>
+              ${(!isLifetime && !tb.tutorFeeWaived) ? `
+                <button type="button" onclick="startTutorSubscriptionCheckout()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold transition shadow">
+                  ${APP_STATE.accessMode === 'read_only' ? 'Reactivate Studio Plan ($15/mo)' : 'Manage / Activate Studio Plan ($15/mo)'}
+                </button>
+              ` : ''}
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="font-extrabold text-emerald-300">Monthly $1/Student Tutor Share Ledger</span>
+                <span class="font-mono font-bold text-white">${formatMoneyCents(tb.totalShareEarnedCents ?? tb.totalEarningsCents ?? 0)} earned</span>
+              </div>
+              ${ledgerRows.length === 0 ? `
+                <p class="text-slate-400">Your $1/mo per active paying student share appears here automatically once 5+ paying students renew monthly.</p>
+              ` : `
+                <div class="space-y-1.5 max-h-40 overflow-y-auto">
+                  ${ledgerRows.map(row => `
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-slate-900 border border-slate-800">
+                      <span class="font-mono text-slate-200">${escapeHtml(row.period_month || row.periodMonth || '')}</span>
+                      <span class="text-slate-400">${Number(row.active_paying_students_snapshot ?? row.active_paying_students_count ?? row.activePayingStudentsCount ?? 0)} paying students</span>
+                      <span class="font-mono font-bold text-emerald-300">${formatMoneyCents(row.amount_cents ?? row.share_amount_cents ?? row.shareAmountCents ?? 0)}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              `}
+            </div>
+          </div>
+        ` : ''}
+
+        ${activeBillingSettingsTab === 'rules' ? `
+          <form onsubmit="saveTutorBillingPolicyFromModal(event, 'rules')" class="space-y-3.5 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block font-bold text-slate-300 mb-1">Default Lesson Rate ($)</label>
+                <input id="input-policy-rate" type="number" min="0" step="1" value="${escapeHtml(policy.defaultRateCents > 0 ? (policy.defaultRateCents / 100) : '')}" placeholder="e.g. 65" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-300 mb-1">Default Lesson Duration (Minutes)</label>
+                <input id="input-policy-duration" type="number" min="15" max="240" step="15" value="${escapeHtml(policy.defaultDurationMins || 60)}" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-2xl bg-slate-950 border border-slate-800">
+              <div>
+                <label class="block font-bold text-slate-300 mb-1">Advance / Standard Cancel Rule</label>
+                <select id="select-policy-cancel-rule" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+                  <option value="free" ${policy.cancelRule.mode === 'free' ? 'selected' : ''}>Free ($0 Charge)</option>
+                  <option value="percent" ${policy.cancelRule.mode === 'percent' ? 'selected' : ''}>Percentage of Rate (%)</option>
+                  <option value="flat" ${policy.cancelRule.mode === 'flat' ? 'selected' : ''}>Flat Fee (cents)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-300 mb-1">Advance Cancel Value (% or cents)</label>
+                <input id="input-policy-cancel-val" type="number" min="0" step="1" value="${escapeHtml(policy.cancelRule.value || 0)}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-2xl bg-slate-950 border border-slate-800">
+              <div>
+                <label class="block font-bold text-slate-300 mb-1">Late Cancellation Rule</label>
+                <select id="select-policy-late-rule" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+                  <option value="free" ${policy.lateCancelRule.mode === 'free' ? 'selected' : ''}>Free ($0)</option>
+                  <option value="percent" ${policy.lateCancelRule.mode === 'percent' ? 'selected' : ''}>Percentage of Rate (%)</option>
+                  <option value="flat" ${policy.lateCancelRule.mode === 'flat' ? 'selected' : ''}>Flat Fee (cents)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-300 mb-1">Late Cancel Value (% or cents)</label>
+                <input id="input-policy-late-val" type="number" min="0" step="1" value="${escapeHtml(policy.lateCancelRule.value || 0)}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-2xl bg-slate-950 border border-slate-800">
+              <div>
+                <label class="block font-bold text-slate-300 mb-1">Student No-Show Rule</label>
+                <select id="select-policy-noshow-rule" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+                  <option value="free" ${policy.noShowRule.mode === 'free' ? 'selected' : ''}>Free (No Charge)</option>
+                  <option value="percent" ${policy.noShowRule.mode === 'percent' ? 'selected' : ''}>Percentage of Rate (% — 100 for Full)</option>
+                  <option value="flat" ${policy.noShowRule.mode === 'flat' ? 'selected' : ''}>Flat Fee (cents)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-300 mb-1">No-Show Value (% or cents)</label>
+                <input id="input-policy-noshow-val" type="number" min="0" step="1" value="${escapeHtml(policy.noShowRule.value || 0)}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+              </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+              <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold transition shadow">Save Rates &amp; Rules</button>
+            </div>
+          </form>
+        ` : ''}
+
+        ${activeBillingSettingsTab === 'payouts' ? `
+          <div class="space-y-4 text-xs">
+            <div class="p-4 rounded-2xl bg-emerald-950/25 border border-emerald-500/35 flex items-center justify-between gap-3 flex-wrap">
+              <div class="min-w-0 flex-1">
+                <div class="font-extrabold text-emerald-200">Stripe Direct Payouts (0% TutorPilot Cut)</div>
+                <p class="text-[11px] text-slate-300 mt-0.5">${payouts.stripeConnectReady ? 'Connected! Card lesson payments settle directly to your account with 0% TutorPilot fee.' : 'Optional: Connect Stripe Express so parents can pay by card directly to your bank (0% platform commission).'}</p>
+              </div>
+              <button type="button" onclick="startStripeConnectOnboarding()" class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold transition shrink-0">
+                ${payouts.stripeConnectReady ? 'Stripe Dashboard' : 'Connect Stripe Direct'}
+              </button>
+            </div>
+
+            <form onsubmit="saveTutorBillingPolicyFromModal(event, 'payouts')" class="space-y-2.5 p-4 rounded-2xl bg-slate-950 border border-slate-800">
+              <div class="font-bold text-white">Direct Off-Platform Methods (0% Fee — Two-Step Parent + Tutor Confirm)</div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <input id="input-payout-zelle" type="text" value="${escapeHtml(payouts.zelle)}" placeholder="Zelle phone or email" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white" />
+                <input id="input-payout-venmo" type="text" value="${escapeHtml(payouts.venmo)}" placeholder="Venmo @handle" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white" />
+                <input id="input-payout-cashapp" type="text" value="${escapeHtml(payouts.cashapp)}" placeholder="CashApp $cashtag" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white" />
+                <input id="input-payout-paypal" type="text" value="${escapeHtml(payouts.paypal)}" placeholder="PayPal email / handle" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white" />
+              </div>
+              <input id="input-payout-bank" type="text" value="${escapeHtml(payouts.bankInstructions)}" placeholder="Cash, Check, or Bank Transfer instructions" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white" />
+              <div class="flex justify-end pt-1">
+                <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold">Save Payout Handles</button>
+              </div>
+            </form>
+
+            ${APP_STATE.calendarIcsUrl ? `
+              <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-2 flex-wrap">
+                <div class="min-w-0 flex-1">
+                  <div class="font-bold text-sky-300">Calendar Sync Feed (.ics)</div>
+                  <div class="text-[11px] text-slate-400 truncate">${escapeHtml(APP_STATE.calendarIcsUrl)}</div>
+                </div>
+                <button type="button" onclick="copyCalendarIcsFeedUrl()" class="px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-200 border border-sky-400/35 font-bold shrink-0">Copy .ics URL</button>
+              </div>
+            ` : ''}
+          </div>
+        ` : ''}
+      `;
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    async function saveTutorBillingPolicyFromModal(e, section) {
+      e.preventDefault();
+      const policy = getEffectiveTutorBillingPolicy();
+      const payouts = getEffectivePayoutMethods();
+      if (section === 'rules') {
+        policy.defaultRateCents = parseDollarsInputToCents(document.getElementById('input-policy-rate')?.value || '');
+        policy.defaultDurationMins = Math.min(240, Math.max(15, parseInt(document.getElementById('input-policy-duration')?.value || '60', 10) || 60));
+        policy.cancelRule = normalizeClientRuleEntry({
+          mode: document.getElementById('select-policy-cancel-rule')?.value || 'free',
+          value: parseInt(document.getElementById('input-policy-cancel-val')?.value || '0', 10) || 0
+        }, 'free', 0);
+        policy.lateCancelRule = normalizeClientRuleEntry({
+          mode: document.getElementById('select-policy-late-rule')?.value || 'percent',
+          value: parseInt(document.getElementById('input-policy-late-val')?.value || '50', 10) || 0
+        }, 'percent', 50);
+        policy.noShowRule = normalizeClientRuleEntry({
+          mode: document.getElementById('select-policy-noshow-rule')?.value || 'percent',
+          value: parseInt(document.getElementById('input-policy-noshow-val')?.value || '100', 10) || 0
+        }, 'percent', 100);
+      } else {
+        payouts.zelle = (document.getElementById('input-payout-zelle')?.value || '').trim();
+        payouts.venmo = (document.getElementById('input-payout-venmo')?.value || '').trim();
+        payouts.cashapp = (document.getElementById('input-payout-cashapp')?.value || '').trim();
+        payouts.paypal = (document.getElementById('input-payout-paypal')?.value || '').trim();
+        payouts.bankInstructions = (document.getElementById('input-payout-bank')?.value || '').trim();
+      }
+      APP_STATE.billingPolicy = policy;
+      APP_STATE.payoutMethods = payouts;
+      if (isHttpRuntime()) {
+        try {
+          const res = await apiFetch('/api/billing/policy', {
+            method: 'PUT',
+            body: JSON.stringify({ billingPolicy: policy, payoutMethods: payouts })
+          });
+          if (res && res.billingPolicy) APP_STATE.billingPolicy = res.billingPolicy;
+          if (res && res.payoutMethods) APP_STATE.payoutMethods = res.payoutMethods;
+        } catch (err) {
+          showToast((err && err.message) || 'Saved locally, cloud save failed.', true);
+          return;
+        }
+      }
+      renderBillingSettingsModalBody();
+      showToast(section === 'rules' ? 'Rates & cancellation rules saved!' : '0%-cut payout methods saved!');
+    }
+
+    async function startStripeConnectOnboarding() {
+      if (!isHttpRuntime()) return;
+      try {
+        const res = await apiFetch('/api/billing/connect', { method: 'POST', body: JSON.stringify({}) });
+        if (res && res.url) {
+          window.location.href = res.url;
+          return;
+        }
+        showToast((res && res.message) || 'Stripe Connect requires platform STRIPE_SECRET_KEY configured on Cloudflare.', true);
+      } catch (err) {
+        showToast((err && err.message) || 'Unable to launch Stripe Connect.', true);
+      }
+    }
+
+    function copyCalendarIcsFeedUrl() {
+      if (!APP_STATE.calendarIcsUrl) return;
+      if (typeof copyToClipboardText === 'function') {
+        copyToClipboardText(APP_STATE.calendarIcsUrl, 'Calendar .ics feed URL copied!');
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // MODAL 3: TUTOR REQUEST PAYMENT OR RECORD DIRECT PAYMENT
+    // -------------------------------------------------------------------------
+    function openPaymentRequestModal(studentId, mode) {
+      if (!guardTutorWriteAllowed()) return;
+      const student = (APP_STATE.students || []).find(s => s.id === studentId) || (APP_STATE.students || [])[0];
+      if (!student) return;
+      const ledger = getStudentLedgerSnapshot(student);
+      const suggestedCents = ledger.balanceOwedCents > 0 ? ledger.balanceOwedCents : (ledger.lessonRateCents || 0);
+      activePaymentRequestState = {
+        studentId: student.id,
+        mode: mode === 'record_paid' ? 'record_paid' : 'request',
+        amountDollars: suggestedCents > 0 ? (suggestedCents / 100).toFixed(suggestedCents % 100 === 0 ? 0 : 2) : '',
+        description: `Tutoring balance (${ledger.lessonsTaught || 0} taught)`,
+        method: 'zelle',
+        note: '',
+        createdPayUrl: '',
+        createdPayToken: ''
+      };
+      renderPaymentRequestModalBody();
+      const modal = document.getElementById('modal-payment-request');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof markModalOpened === 'function') markModalOpened('payment_request');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function closePaymentRequestModal() {
+      const modal = document.getElementById('modal-payment-request');
+      if (modal) modal.classList.add('hidden');
+      if (typeof markModalClosed === 'function') markModalClosed('payment_request');
+    }
+
+    function renderPaymentRequestModalBody() {
+      const body = document.getElementById('modal-payment-request-body');
+      if (!body || !activePaymentRequestState) return;
+      const st = activePaymentRequestState;
+      const student = (APP_STATE.students || []).find(s => s.id === st.studentId);
+      const ledger = getStudentLedgerSnapshot(student);
+
+      body.innerHTML = `
+        <div class="space-y-4 text-xs">
+          <div class="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-slate-950 border border-slate-800">
+            <button type="button" onclick="activePaymentRequestState.mode='request'; renderPaymentRequestModalBody()" class="py-2 rounded-xl font-bold transition ${st.mode === 'request' ? 'bg-emerald-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'}">Send Payment Request</button>
+            <button type="button" onclick="activePaymentRequestState.mode='record_paid'; renderPaymentRequestModalBody()" class="py-2 rounded-xl font-bold transition ${st.mode === 'record_paid' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}">Record Paid Directly</button>
+          </div>
+
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+            <span class="font-bold text-white">${escapeHtml(student ? student.name : '')}</span>
+            <span class="font-mono text-amber-300 font-bold">Current Balance: ${formatMoneyCents(ledger.balanceOwedCents)}</span>
+          </div>
+
+          ${st.createdPayUrl ? `
+            <div class="p-4 rounded-2xl bg-emerald-950/35 border border-emerald-500/40 space-y-2.5">
+              <div class="font-extrabold text-emerald-300">Payment Request Created! (0% TutorPilot Cut)</div>
+              <div class="text-[11px] text-slate-300 break-all font-mono bg-slate-950 p-2 rounded-xl border border-slate-800">${escapeHtml(st.createdPayUrl)}</div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <button type="button" onclick="copyPaymentRequestLink('${escapeHtml(st.createdPayToken)}')" class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold">Copy Pay Link</button>
+                <a href="https://wa.me/?text=${encodeURIComponent(`Hi! Here is the TutorPilot payment link for ${student ? student.name : 'lessons'} (${formatMoneyCents(parseDollarsInputToCents(st.amountDollars))}): ${st.createdPayUrl}`)}" target="_blank" rel="noopener" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold">Share on WhatsApp</a>
+              </div>
+            </div>
+          ` : `
+            <form onsubmit="submitPaymentRequestModal(event)" class="space-y-3">
+              <div>
+                <label class="block font-bold text-slate-300 mb-1">Amount ($ USD)</label>
+                <input id="input-pay-req-amount" type="number" min="1" step="0.01" required value="${escapeHtml(st.amountDollars)}" oninput="activePaymentRequestState.amountDollars=this.value" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-emerald-400" />
+              </div>
+              ${st.mode === 'request' ? `
+                <div>
+                  <label class="block font-bold text-slate-300 mb-1">Itemized Note</label>
+                  <input id="input-pay-req-desc" type="text" value="${escapeHtml(st.description)}" oninput="activePaymentRequestState.description=this.value" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-400" />
+                </div>
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold shadow">Create Payment Request Link</button>
+              ` : `
+                <div>
+                  <label class="block font-bold text-slate-300 mb-1">Direct Payment Method (0% Commission)</label>
+                  <select id="select-direct-pay-method" onchange="activePaymentRequestState.method=this.value" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white">
+                    <option value="zelle">Zelle</option>
+                    <option value="venmo">Venmo</option>
+                    <option value="cash">Cash</option>
+                    <option value="bank_transfer">Bank Transfer / Check</option>
+                    <option value="cashapp">CashApp</option>
+                    <option value="paypal">PayPal Direct</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-300 mb-1">Optional Note</label>
+                  <input id="input-direct-pay-note" type="text" value="${escapeHtml(st.note)}" oninput="activePaymentRequestState.note=this.value" placeholder="e.g. Received via Zelle today" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white" />
+                </div>
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold shadow">Record Payment Now</button>
+              `}
+            </form>
+          `}
+        </div>
+      `;
+    }
+
+    async function submitPaymentRequestModal(e) {
+      e.preventDefault();
+      if (!guardTutorWriteAllowed() || !activePaymentRequestState) return;
+      const st = activePaymentRequestState;
+      const amountCents = parseDollarsInputToCents(st.amountDollars);
+      if (amountCents <= 0) {
+        showToast('Enter an amount greater than $0.', true);
+        return;
+      }
+      const student = (APP_STATE.students || []).find(s => s.id === st.studentId);
+      if (!isHttpRuntime()) {
+        showToast('Connect online to issue cloud payment links.', true);
+        return;
+      }
+      try {
+        if (st.mode === 'request') {
+          const res = await apiFetch('/api/payments/requests', {
+            method: 'POST',
+            body: JSON.stringify({ studentId: st.studentId, amountCents, description: st.description })
+          });
+          if (student && res && res.ledger) student.ledger = res.ledger;
+          st.createdPayUrl = (res && res.payUrl) || '';
+          st.createdPayToken = (res && res.payToken) || '';
+          renderPaymentRequestModalBody();
+          if (APP_STATE.activeStudentDrawerId === st.studentId) renderStudentDrawer(st.studentId, true);
+          showToast('Payment request sent!');
+        } else {
+          const res = await apiFetch('/api/payments/settle', {
+            method: 'POST',
+            body: JSON.stringify({
+              action: 'record_direct_payment',
+              studentId: st.studentId,
+              amountCents,
+              method: st.method || 'zelle',
+              note: st.note || ''
+            })
+          });
+          if (student && res && res.ledger) student.ledger = res.ledger;
+          closePaymentRequestModal();
+          if (APP_STATE.activeStudentDrawerId === st.studentId) renderStudentDrawer(st.studentId, true);
+          showToast('Direct payment recorded (0% fee)!');
+        }
+      } catch (err) {
+        showToast((err && err.message) || 'Payment action failed.', true);
+      }
+    }
+
+    async function confirmLessonPaymentReceived(paymentRequestId, studentId) {
+      if (!guardTutorWriteAllowed()) return;
+      try {
+        const res = await apiFetch('/api/payments/settle', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'confirm_received', paymentRequestId })
+        });
+        const student = (APP_STATE.students || []).find(s => s.id === studentId);
+        if (student && res && res.ledger) {
+          student._localLedgerDirty = false;
+          student.ledger = res.ledger;
+          saveStudentsToStorage(true);
+        }
+        if (APP_STATE.activeStudentDrawerId === studentId) renderStudentDrawer(studentId, true);
+        showToast('Payment confirmed & balance settled!');
+      } catch (err) {
+        showToast((err && err.message) || 'Could not confirm payment.', true);
+      }
+    }
+
+    async function reopenLessonPaymentRequest(paymentRequestId, studentId) {
+      if (!guardTutorWriteAllowed()) return;
+      try {
+        const res = await apiFetch('/api/payments/settle', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'reopen_request', paymentRequestId })
+        });
+        const student = (APP_STATE.students || []).find(s => s.id === studentId);
+        if (student && res && res.ledger) {
+          student.ledger = res.ledger;
+          saveStudentsToStorage(true);
+        }
+        if (APP_STATE.activeStudentDrawerId === studentId) renderStudentDrawer(studentId, true);
+        showToast('Request kept open — waiting for receipt.');
+      } catch (err) {
+        showToast((err && err.message) || 'Failed to reopen request.', true);
+      }
+    }
+
+    function copyPaymentRequestLink(payToken) {
+      const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : 'https://tutorpilot.us';
+      const url = `${origin}/?pay=${encodeURIComponent(payToken)}`;
+      if (typeof copyToClipboardText === 'function') copyToClipboardText(url, 'Payment link copied!');
+    }
+
+    // -------------------------------------------------------------------------
+    // MODAL 4: PUBLIC / STANDALONE PAYMENT VIEW (?pay=) + 2-STEP P2P SETTLEMENT
+    // -------------------------------------------------------------------------
+    async function openPublicPaymentModalByToken(payToken) {
+      activePublicPaymentState = { token: payToken, data: null, loading: true, error: '' };
+      const modal = document.getElementById('modal-public-payment-request');
+      if (modal) modal.classList.remove('hidden');
+      renderPublicPaymentModalBody();
+      try {
+        const res = await apiFetch('/api/payments/requests?payToken=' + encodeURIComponent(payToken), { method: 'GET' });
+        activePublicPaymentState = { token: payToken, data: res, loading: false, error: '' };
+      } catch (err) {
+        activePublicPaymentState = { token: payToken, data: null, loading: false, error: (err && err.message) || 'Payment link invalid or expired.' };
+      }
+      renderPublicPaymentModalBody();
+    }
+
+    function closePublicPaymentModal() {
+      const modal = document.getElementById('modal-public-payment-request');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function renderPublicPaymentModalBody() {
+      const body = document.getElementById('modal-public-payment-body');
+      if (!body) return;
+      const st = activePublicPaymentState;
+      if (st.loading) {
+        body.innerHTML = `<div class="py-10 text-center text-xs text-slate-400">Loading payment request...</div>`;
+        return;
+      }
+      if (st.error || !st.data || !st.data.paymentRequest) {
+        body.innerHTML = `<div class="p-4 rounded-2xl bg-rose-950/35 border border-rose-500/40 text-xs text-rose-200">${escapeHtml(st.error || 'Payment request not found.')}</div>`;
+        return;
+      }
+      const req = st.data.paymentRequest;
+      const tutor = st.data.tutor || {};
+      const tutorDisplayName = req.tutorName || tutor.name || 'Tutor';
+      const studentDisplayName = req.studentName || req.studentFirstName || '';
+      const payouts = req.payoutMethods || st.data.payoutMethods || {};
+      const stripeCardReady = !!(req.stripeCardAvailable || payouts.stripeConnectReady);
+      const isPaid = req.status === 'paid';
+      const isPendingConfirm = req.status === 'pending_confirmation';
+
+      body.innerHTML = `
+        <div class="space-y-4 text-xs">
+          <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-slate-400">Tutor: <strong class="text-white">${escapeHtml(tutorDisplayName)}</strong></span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isPaid ? 'bg-emerald-500/20 text-emerald-300' : (isPendingConfirm ? 'bg-amber-500/20 text-amber-300' : 'bg-indigo-500/20 text-indigo-300')}">${escapeHtml(req.status.replace(/_/g, ' '))}</span>
+            </div>
+            <div class="text-2xl font-black text-white font-mono">${formatMoneyCents(req.amount_cents ?? req.amountCents ?? 0)}</div>
+            <div class="text-slate-300">${escapeHtml(studentDisplayName)} ${req.description ? `• ${escapeHtml(req.description)}` : ''}</div>
+          </div>
+
+          ${isPaid ? `
+            <div class="p-4 rounded-2xl bg-emerald-950/35 border border-emerald-500/40 text-emerald-200 font-bold">
+              ✓ Payment Confirmed &amp; Settled! Thank you.
+            </div>
+          ` : isPendingConfirm ? `
+            <div class="p-4 rounded-2xl bg-amber-950/35 border border-amber-500/40 text-amber-200 space-y-1">
+              <div class="font-extrabold">Payment Reported — Waiting for Tutor Confirmation</div>
+              <p class="text-[11px] text-amber-100/80">You reported paying via ${escapeHtml(req.reportedMethod || req.reported_method || 'direct P2P')}. Your balance updates immediately once your tutor confirms receipt.</p>
+            </div>
+          ` : `
+            ${stripeCardReady ? `
+              <button type="button" onclick="startStripeDirectLessonCheckout('${escapeHtml(st.token)}', '${escapeHtml(req.id)}')" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold shadow-lg">
+                Pay by Card Directly to Tutor (0% Platform Fee)
+              </button>
+            ` : ''}
+
+            <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5">
+              <div class="font-bold text-white">Direct Zero-Fee Methods to ${escapeHtml(tutorDisplayName)}</div>
+              <div class="grid grid-cols-1 gap-1.5 text-[11px] text-slate-300">
+                ${payouts.zelle ? `<div><b>Zelle:</b> <span class="font-mono text-white">${escapeHtml(payouts.zelle)}</span></div>` : ''}
+                ${payouts.venmo ? `<div><b>Venmo:</b> <span class="font-mono text-white">${escapeHtml(payouts.venmo)}</span></div>` : ''}
+                ${payouts.cashapp ? `<div><b>CashApp:</b> <span class="font-mono text-white">${escapeHtml(payouts.cashapp)}</span></div>` : ''}
+                ${payouts.paypal ? `<div><b>PayPal:</b> <span class="font-mono text-white">${escapeHtml(payouts.paypal)}</span></div>` : ''}
+                ${payouts.bankInstructions ? `<div><b>Other:</b> ${escapeHtml(payouts.bankInstructions)}</div>` : ''}
+              </div>
+              <div class="pt-2 border-t border-slate-800 space-y-2">
+                <div class="font-bold text-amber-300">Already sent payment directly? Let your tutor know:</div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <select id="select-public-report-method" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+                    <option value="zelle">Zelle</option>
+                    <option value="venmo">Venmo</option>
+                    <option value="cash">Cash</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                  </select>
+                  <button type="button" onclick="submitReportPaymentSent({ payToken: '${escapeHtml(st.token)}', methodElId: 'select-public-report-method' })" class="flex-1 py-2 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold">
+                    I Sent Payment ✓
+                  </button>
+                </div>
+              </div>
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    async function startStripeDirectLessonCheckout(payToken, paymentRequestId) {
+      try {
+        const res = await apiFetch('/api/billing/checkout', {
+          method: 'POST',
+          body: JSON.stringify({ kind: 'lesson_payment_request', payToken, paymentRequestId })
+        });
+        if (res && res.url) {
+          window.location.href = res.url;
+          return;
+        }
+        showToast((res && res.message) || 'Card checkout unavailable — use direct Zelle/Venmo below.', true);
+      } catch (err) {
+        showToast((err && err.message) || 'Card checkout failed.', true);
+      }
+    }
+
+    async function submitReportPaymentSent(opts) {
+      const o = opts || {};
+      const methodEl = o.methodElId ? document.getElementById(o.methodElId) : null;
+      const method = o.method || (methodEl ? methodEl.value : 'zelle');
+      try {
+        const res = await apiFetch('/api/payments/settle', {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'report_sent',
+            payToken: o.payToken || undefined,
+            paymentRequestId: o.paymentRequestId || undefined,
+            method,
+            note: o.note || ''
+          })
+        });
+        if (o.payToken && activePublicPaymentState && activePublicPaymentState.data) {
+          activePublicPaymentState.data.paymentRequest = res.paymentRequest;
+          renderPublicPaymentModalBody();
+        }
+        if (typeof enterFamilyPortalMode === 'function' && (document.documentElement.classList.contains('parent-portal-active') || (APP_STATE.studentPortalStudent && APP_STATE.studentPortalStudent.isUnifiedAdultStudent))) {
+          await enterFamilyPortalMode();
+        }
+        showToast('Reported sent! Your tutor can now tap Confirm Received.');
+      } catch (err) {
+        showToast((err && err.message) || 'Could not submit payment report.', true);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // MODAL 5: ACTIVATE PARENT / ADULT STUDENT PORTAL INVITE
+    // -------------------------------------------------------------------------
+    function openPortalActivationModal(studentId) {
+      if (!guardTutorWriteAllowed()) return;
+      const student = (APP_STATE.students || []).find(s => s.id === studentId);
+      if (!student) return;
+      const guardian = student.parentContact || {};
+      const isAdult = isAdultLearnerType(student.learnerType);
+      activePortalInviteState = {
+        studentId: student.id,
+        learnerType: isAdult ? 'adult_student' : 'child',
+        name: guardian.name || (isAdult ? student.name : ''),
+        email: guardian.email || '',
+        phone: guardian.phone || '',
+        result: null
+      };
+      renderPortalActivationModalBody();
+      const modal = document.getElementById('modal-portal-invite');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof markModalOpened === 'function') markModalOpened('portal_invite');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function closePortalActivationModal() {
+      const modal = document.getElementById('modal-portal-invite');
+      if (modal) modal.classList.add('hidden');
+      if (typeof markModalClosed === 'function') markModalClosed('portal_invite');
+    }
+
+    function renderPortalActivationModalBody() {
+      const body = document.getElementById('modal-portal-invite-body');
+      if (!body || !activePortalInviteState) return;
+      const st = activePortalInviteState;
+      const student = (APP_STATE.students || []).find(s => s.id === st.studentId);
+
+      body.innerHTML = `
+        <div class="space-y-4 text-xs">
+          ${st.result ? `
+            <div class="p-4 rounded-2xl bg-emerald-950/35 border border-emerald-500/40 space-y-2.5">
+              <div class="font-extrabold text-emerald-300">Portal Activation Invite Ready!</div>
+              <div class="text-[11px] text-slate-300">Account starts a 7-day free trial ($5/mo per active student afterward) upon sign-up.</div>
+              <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-[11px] break-all text-white">${escapeHtml(st.result.activateUrl || '')}</div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <button type="button" onclick="copyToClipboardText('${escapeHtml(st.result.activateUrl || '')}', 'Activation link copied!')" class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold">Copy Activation Link</button>
+                <a href="https://wa.me/?text=${encodeURIComponent(`Hi! Join TutorPilot to track ${student ? student.name : 'your'} lessons & homework (7-day free trial): ${st.result.activateUrl}`)}" target="_blank" rel="noopener" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold">Send on WhatsApp</a>
+              </div>
+            </div>
+          ` : `
+            <form onsubmit="submitPortalActivationInvite(event)" class="space-y-3">
+              <div>
+                <label class="block font-bold text-slate-300 mb-1">Student: <span class="text-white">${escapeHtml(student ? student.name : '')}</span></label>
+                <select onchange="activePortalInviteState.learnerType=this.value" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white">
+                  <option value="child" ${st.learnerType === 'child' ? 'selected' : ''}>Child Student + Parent Payer</option>
+                  <option value="adult_student" ${isAdultLearnerType(st.learnerType) ? 'selected' : ''}>Adult Student (Unified Learning + Billing)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-300 mb-1">Parent / Adult Email (Required for Account Linking)</label>
+                <input type="email" required value="${escapeHtml(st.email)}" oninput="activePortalInviteState.email=this.value" placeholder="parent@example.com" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white" />
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <input type="text" value="${escapeHtml(st.name)}" oninput="activePortalInviteState.name=this.value" placeholder="Guardian / Adult Name" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white" />
+                <input type="tel" value="${escapeHtml(st.phone)}" oninput="activePortalInviteState.phone=this.value" placeholder="WhatsApp / Phone" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white" />
+              </div>
+              <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold shadow">Generate Activation Invite</button>
+            </form>
+          `}
+        </div>
+      `;
+    }
+
+    async function submitPortalActivationInvite(e) {
+      e.preventDefault();
+      if (!guardTutorWriteAllowed() || !activePortalInviteState) return;
+      const st = activePortalInviteState;
+      try {
+        const res = await apiFetch('/api/family-portal/activate', {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'create_invite',
+            studentId: st.studentId,
+            learnerType: st.learnerType,
+            email: st.email,
+            name: st.name,
+            phone: st.phone
+          })
+        });
+        st.result = res;
+        const student = (APP_STATE.students || []).find(s => s.id === st.studentId);
+        if (student) {
+          student.learnerType = st.learnerType;
+          if (st.learnerType === 'child') {
+            student.parentContact = { ...(student.parentContact || {}), name: st.name, email: st.email, phone: st.phone };
+          }
+          saveStudentsToStorage(true);
+        }
+        renderPortalActivationModalBody();
+        if (APP_STATE.activeStudentDrawerId === st.studentId) renderStudentDrawer(st.studentId, true);
+        showToast('Portal activation invite generated!');
+      } catch (err) {
+        showToast((err && err.message) || 'Could not create activation invite.', true);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // PARENT / FAMILY MULTI-STUDENT PORTAL & ADULT UNIFIED BILLING TAB
+    // -------------------------------------------------------------------------
+    async function enterFamilyPortalMode(preferredRole) {
+      if (!isHttpRuntime()) return;
+      try {
+        const res = await apiFetch('/api/family-portal/bootstrap', { method: 'GET' });
+        APP_STATE.familyPortal = res;
+        const linked = Array.isArray(res && res.linkedStudents) ? res.linkedStudents : [];
+        const userType = (res && res.user && (res.user.accountType || res.user.account_type)) || preferredRole || 'parent';
+
+        // Unified Adult Student: render single seamless 4-tab view (Learning + Billing)
+        if ((userType === 'adult_student' || (linked.length === 1 && isAdultLearnerType(linked[0].learnerType))) && linked.length > 0) {
+          const unifiedStu = { ...linked[0], isUnifiedAdultStudent: true };
+          exitFamilyPortalMode(true);
+          if (typeof activateStudentPortalSession === 'function') {
+            activateStudentPortalSession(unifiedStu, unifiedStu.studentAccessCode || 'ADULT', '');
+          }
+          return;
+        }
+
+        document.documentElement.classList.add('parent-portal-active');
+        document.documentElement.classList.remove('student-portal-active');
+        const lockScreen = document.getElementById('lock-screen');
+        if (lockScreen) lockScreen.classList.add('hidden');
+        const parentSec = document.getElementById('view-parent-portal');
+        if (parentSec) parentSec.classList.remove('hidden');
+        renderParentPortalView();
+      } catch (err) {
+        showToast((err && err.message) || 'Unable to load family portal.', true);
+      }
+    }
+
+    function exitFamilyPortalMode(silent) {
+      document.documentElement.classList.remove('parent-portal-active');
+      const parentSec = document.getElementById('view-parent-portal');
+      if (parentSec) {
+        parentSec.classList.add('hidden');
+        parentSec.innerHTML = '';
+      }
+      if (!silent) {
+        handleLogout();
+      }
+    }
+
+    function openChildStudentPreviewFromFamily(studentId) {
+      const linked = (APP_STATE.familyPortal && Array.isArray(APP_STATE.familyPortal.linkedStudents)) ? APP_STATE.familyPortal.linkedStudents : [];
+      const stu = linked.find(s => s.id === studentId);
+      if (!stu) return;
+      if (typeof openStudentViewPreviewModal === 'function') {
+        APP_STATE.previewPortalStudent = stu;
+        openStudentViewPreviewModal(studentId);
+      }
+    }
+
+    function renderAdultStudentBillingPanelHtml(stu, isHe) {
+      const ledger = getStudentLedgerSnapshot(stu);
+      const subStatus = (stu && stu.portalAccess && stu.portalAccess.portalStatus) || (stu && stu.subscription && stu.subscription.status) || (stu && stu.portalStatus) || 'trialing';
+      const payouts = (stu && (stu.payoutMethods || (stu.tutor && stu.tutor.payoutMethods))) || getEffectivePayoutMethods();
+      const stripeReady = !!(stu && (stu.stripeCardAvailable || payouts.stripeConnectReady));
+      const openReqs = Array.isArray(ledger.openRequests) ? ledger.openRequests : [];
+      const recentPayments = Array.isArray(ledger.recentPayments) ? ledger.recentPayments : [];
+
+      return `
+        <div class="space-y-4">
+          <div class="p-5 sm:p-6 rounded-3xl bg-slate-900/90 border border-emerald-500/35 space-y-3 shadow-md">
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <h2 class="text-lg font-extrabold text-emerald-300">${isHe ? 'תשלומים ומנוי TutorPilot' : 'Lessons Balance & Subscription'}</h2>
+                <p class="text-xs text-slate-400">App plan: $5/mo after 7-day free trial • Lesson payments go 100% to your tutor (0% fee)</p>
+              </div>
+              <button type="button" onclick="openSubscriptionCheckoutForStudent('${escapeHtml(stu.id)}')" class="px-4 py-2 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold shadow">
+                ${subStatus === 'active' ? 'Manage Subscription' : (subStatus === 'trialing' ? 'Trial Active ($5/mo later)' : 'Reactivate Plan ($5/mo)')}
+              </button>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+              <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800">
+                <div class="text-slate-400">Lessons Taught</div>
+                <div class="text-xl font-black text-white font-mono">${ledger.lessonsTaught || 0}</div>
+              </div>
+              <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800">
+                <div class="text-slate-400">Balance Owed</div>
+                <div class="text-xl font-black font-mono ${(ledger.balanceOwedCents || 0) > 0 ? 'text-amber-300' : 'text-emerald-300'}">${formatMoneyCents(ledger.balanceOwedCents || 0)}</div>
+              </div>
+              <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800">
+                <div class="text-slate-400">Portal Status</div>
+                <div class="text-sm font-bold text-emerald-300 capitalize">${escapeHtml(String(subStatus || 'active'))}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-5 sm:p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-3 shadow-md">
+            <h3 class="text-base font-extrabold text-white">Open Payment Requests</h3>
+            ${openReqs.length === 0 ? `<p class="text-xs text-slate-400">No unpaid payment requests right now.</p>` : openReqs.map(req => `
+              <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5 text-xs">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <div class="text-base font-black text-white font-mono">${formatMoneyCents(req.amount_cents ?? req.amountCents ?? 0)}</div>
+                    <div class="text-slate-400">${escapeHtml(req.description || 'Tutoring lessons')}</div>
+                  </div>
+                  <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${req.status === 'pending_confirmation' ? 'bg-amber-500/20 text-amber-300' : 'bg-indigo-500/20 text-indigo-300'}">${req.status === 'pending_confirmation' ? 'Waiting Tutor Confirmation' : 'Due Now'}</span>
+                </div>
+                ${req.status !== 'pending_confirmation' ? `
+                  <div class="flex items-center gap-2 flex-wrap">
+                    ${stripeReady && (req.pay_token || req.payToken) ? `<button type="button" onclick="startStripeDirectLessonCheckout('${escapeHtml(req.pay_token || req.payToken)}', '${escapeHtml(req.id)}')" class="px-3.5 py-2 rounded-xl bg-emerald-500 text-slate-950 font-extrabold">Pay by Card</button>` : ''}
+                    <button type="button" onclick="submitReportPaymentSent({ paymentRequestId: '${escapeHtml(req.id)}', method: 'zelle' })" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold">I Sent Payment (Zelle/Venmo/Cash)</button>
+                  </div>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>
+
+          ${recentPayments.length > 0 ? `
+            <div class="p-5 sm:p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-2.5 shadow-md text-xs">
+              <h3 class="text-sm font-extrabold text-emerald-300">Confirmed Payment History</h3>
+              ${recentPayments.map(p => `
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+                  <span>${escapeHtml(p.method || 'direct')} • ${(p.paid_at || p.paidAt || '').slice(0, 10)}</span>
+                  <span class="font-mono font-bold text-emerald-300">${formatMoneyCents(p.amount_cents ?? p.amountCents ?? 0)}</span>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function renderParentPortalView() {
+      const container = document.getElementById('view-parent-portal');
+      if (!container) return;
+      const fp = APP_STATE.familyPortal || {};
+      const user = fp.user || APP_STATE.currentUser || {};
+      const displayUserName = user.fullName || user.name || 'Family Account';
+      const linked = Array.isArray(fp.linkedStudents) ? fp.linkedStudents : [];
+      const isHe = APP_STATE.lang === 'he';
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div class="rounded-3xl modern-gradient-cover bg-gradient-to-br from-indigo-600 via-violet-600 to-emerald-600 p-6 sm:p-8 shadow-xl text-white keep-white flex items-center justify-between gap-4 flex-wrap">
+            <div class="space-y-1.5">
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/25 text-xs font-bold uppercase">Family Dashboard</div>
+              <h1 class="text-2xl sm:text-3xl font-black tracking-tight">${isHe ? `שלום, ${escapeHtml(displayUserName)}` : `Welcome, ${escapeHtml(displayUserName)}`}</h1>
+              <p class="text-xs sm:text-sm text-white/85">Progress summaries, lesson attendance, $5/mo plans &amp; 0%-commission tutor payments</p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0 flex-wrap">
+              <button type="button" onclick="enterFamilyPortalMode('parent')" class="px-3.5 py-2 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 text-xs font-bold">Sync</button>
+              <button type="button" onclick="toggleThemeMode()" class="px-3.5 py-2 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 text-xs font-bold">Theme</button>
+              <button type="button" onclick="exitFamilyPortalMode(false)" class="px-3.5 py-2 rounded-2xl bg-rose-500/80 hover:bg-rose-500 text-white text-xs font-bold">Log Out</button>
+            </div>
+          </div>
+
+          ${linked.length === 0 ? `
+            <div class="p-8 rounded-3xl bg-slate-900 border border-slate-800 text-center space-y-2 text-sm text-slate-300">
+              <div class="text-3xl">👨‍👩‍👧</div>
+              <p>No student profiles are linked to <strong>${escapeHtml(user.email || 'this email')}</strong> yet. Ask your tutor for your activation link or ensure your guardian email matches.</p>
+            </div>
+          ` : linked.map(stu => {
+            const ledger = getStudentLedgerSnapshot(stu);
+            const subStatus = (stu.portalAccess && stu.portalAccess.portalStatus) || (stu.subscription && stu.subscription.status) || stu.portalStatus || 'trialing';
+            const isReadOnly = !!(stu.portalReadOnly || (stu.portalAccess && stu.portalAccess.readOnly));
+            const recaps = Array.isArray(stu.recentRecaps) ? stu.recentRecaps : (Array.isArray(stu.sessions) ? stu.sessions : []);
+            const payouts = stu.payoutMethods || (stu.tutor && stu.tutor.payoutMethods) || {};
+            const stripeReady = !!(stu.stripeCardAvailable || payouts.stripeConnectReady);
+            const tutorDisplayName = stu.tutorName || (stu.tutor && stu.tutor.name) || 'Tutor';
+            return `
+              <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4 shadow-lg">
+                <div class="flex items-center justify-between gap-3 flex-wrap">
+                  <div>
+                    <h2 class="text-xl font-extrabold text-white">${escapeHtml(stu.name)}</h2>
+                    <div class="text-xs text-slate-400">Tutor: <strong class="text-slate-200">${escapeHtml(tutorDisplayName)}</strong> ${stu.subject ? `• ${escapeHtml(stu.subject)}` : ''}</div>
+                  </div>
+                  <div class="flex items-center gap-2 flex-wrap text-xs">
+                    <span class="px-3 py-1 rounded-full font-bold border ${subStatus === 'active' || subStatus === 'trialing' ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-300' : 'bg-amber-500/15 border-amber-500/35 text-amber-300'}">${escapeHtml(String(subStatus || 'trialing'))} ($5/mo)</span>
+                    <button type="button" onclick="openSubscriptionCheckoutForStudent('${escapeHtml(stu.id)}')" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold">Manage Plan</button>
+                  </div>
+                </div>
+
+                ${isReadOnly ? `
+                  <div class="p-3.5 rounded-2xl bg-amber-950/35 border border-amber-500/45 text-xs text-amber-200 flex items-center justify-between gap-2 flex-wrap">
+                    <span><strong>Read-Only Mode:</strong> All homework &amp; notes stay saved. Reactivate $5/mo subscription to resume live interactive updates.</span>
+                    <button type="button" onclick="openSubscriptionCheckoutForStudent('${escapeHtml(stu.id)}')" class="px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-extrabold">Reactivate</button>
+                  </div>
+                ` : ''}
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                  <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800">
+                    <div class="text-slate-400">Lessons Taught</div>
+                    <div class="text-lg font-black text-white font-mono">${ledger.lessonsTaught || 0}</div>
+                  </div>
+                  <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800">
+                    <div class="text-slate-400">Balance Owed</div>
+                    <div class="text-lg font-black font-mono ${(ledger.balanceOwedCents || 0) > 0 ? 'text-amber-300' : 'text-emerald-300'}">${formatMoneyCents(ledger.balanceOwedCents || 0)}</div>
+                  </div>
+                  <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 col-span-2">
+                    <div class="text-slate-400">Current Homework</div>
+                    <div class="text-sm font-semibold text-white truncate">${escapeHtml((stu.skills && stu.skills.homework && stu.skills.homework.task) || 'None assigned yet')}</div>
+                  </div>
+                </div>
+
+                ${(ledger.openRequests || []).length > 0 ? `
+                  <div class="space-y-2">
+                    <div class="text-xs font-extrabold text-amber-300">Open Payment Requests (0% Platform Cut)</div>
+                    ${ledger.openRequests.map(req => `
+                      <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-3 flex-wrap text-xs">
+                        <div>
+                          <div class="font-mono font-black text-white text-sm">${formatMoneyCents(req.amount_cents ?? req.amountCents ?? 0)}</div>
+                          <div class="text-slate-400">${escapeHtml(req.description || 'Lesson Balance')} ${payouts.zelle ? `• Zelle: ${escapeHtml(payouts.zelle)}` : ''} ${payouts.venmo ? `• Venmo: ${escapeHtml(payouts.venmo)}` : ''}</div>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                          ${req.status === 'pending_confirmation'
+                            ? `<span class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-200 font-bold">Sent — Awaiting Tutor Confirmation</span>`
+                            : `
+                              ${stripeReady && (req.pay_token || req.payToken) ? `<button type="button" onclick="startStripeDirectLessonCheckout('${escapeHtml(req.pay_token || req.payToken)}', '${escapeHtml(req.id)}')" class="px-3.5 py-2 rounded-xl bg-emerald-500 text-slate-950 font-extrabold">Pay by Card</button>` : ''}
+                              <button type="button" onclick="submitReportPaymentSent({ paymentRequestId: '${escapeHtml(req.id)}', method: 'zelle' })" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold">I Sent Payment</button>
+                            `}
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : ''}
+
+                ${recaps.length > 0 ? `
+                  <div class="space-y-1.5 text-xs">
+                    <div class="font-extrabold text-indigo-300">Latest Session Updates</div>
+                    ${recaps.slice(0, 3).map(r => `
+                      <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-2 flex-wrap">
+                        <span class="font-mono text-slate-300">${escapeHtml(r.sessionDate || r.session_date || '')}</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-200">${escapeHtml(String(r.outcome || r.status || 'completed').replace(/_/g, ' '))}</span>
+                        <span class="text-slate-200 flex-1 truncate">${escapeHtml(r.recapSummary || r.summaryTaught || r.summary_taught || r.cancelReason || r.cancel_reason || '')}</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    // =========================================================================
     // UNIVERSAL DESKTOP & MOBILE BACK NAVIGATION ENGINE (History API / popstate)
     // =========================================================================
     const SPA_MODAL_REGISTRY = [
@@ -37924,7 +40419,11 @@ ${isHe ? 'Author the output in clear Hebrew (עברית).' : 'Author the output 
       { key: 'add_material', id: 'modal-add-study-material', open: 'openAddStudyMaterialModal', close: 'closeAddStudyMaterialModal' },
       { key: 'review_materials', id: 'modal-review-study-materials', open: 'openReviewStudyMaterialsModal', close: 'closeReviewStudyMaterialsModal' },
       { key: 'extension_bridge', id: 'modal-extension-bridge', open: 'openExtensionBridgeModal', close: 'closeExtensionBridgeModal' },
-      { key: 'ai_builder', id: 'modal-ai-curriculum-builder', open: 'openAiCurriculumBuilderModal', close: 'closeAiCurriculumBuilderModal' }
+      { key: 'ai_builder', id: 'modal-ai-curriculum-builder', open: 'openAiCurriculumBuilderModal', close: 'closeAiCurriculumBuilderModal' },
+      { key: 'session_recap', id: 'modal-session-recap', open: 'openSessionRecapModal', close: 'closeSessionRecapModal' },
+      { key: 'billing_settings', id: 'modal-billing-settings', open: 'openBillingSettingsModal', close: 'closeBillingSettingsModal' },
+      { key: 'payment_request', id: 'modal-payment-request', open: 'openPaymentRequestModal', close: 'closePaymentRequestModal' },
+      { key: 'portal_invite', id: 'modal-portal-invite', open: 'openPortalActivationModal', close: 'closePortalActivationModal' }
     ];
 
     var spaHistoryInitialized = false;

@@ -1,24 +1,27 @@
 /**
  * TutorPilot Root Service Worker
  * Enables standalone WebAPK home screen installation with the custom TutorPilot icon
- * while keeping Clerk authentication, D1 APIs, AI calls, and R2 media strictly network-live.
+ * while keeping Clerk authentication, D1 APIs, AI calls, Stripe billing, and R2 media strictly network-live.
  */
-const CACHE_NAME = 'tutorpilot-pwa-v1';
+const CACHE_NAME = 'tutorpilot-pwa-v2';
 const PRECACHE_ASSETS = [
+  '/',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-maskable-192.png',
   '/icons/icon-maskable-512.png',
   '/icons/apple-touch-icon.png',
+  '/icons/favicon-32.png',
   '/icons/favicon.svg'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_ASSETS))
-      .catch(() => {})
+      .then((cache) => Promise.all(
+        PRECACHE_ASSETS.map((assetUrl) => cache.add(assetUrl).catch(() => {}))
+      ))
       .then(() => self.skipWaiting())
   );
 });
@@ -44,7 +47,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Never intercept cross-origin requests (Clerk, Tailwind, Google Fonts) or dynamic API routes
+  // Never intercept cross-origin requests (Clerk, Stripe, Tailwind, Google Fonts) or dynamic API routes
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith('/api/')) return;
 
@@ -57,6 +60,10 @@ self.addEventListener('fetch', (event) => {
         }
         return networkRes;
       })
-      .catch(() => caches.match(req).then((cached) => cached || Response.error()))
+      .catch(() => caches.match(req).then((cached) => {
+        if (cached) return cached;
+        if (req.mode === 'navigate') return caches.match('/');
+        return Response.error();
+      }))
   );
 });

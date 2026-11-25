@@ -1,5 +1,5 @@
 import { handleOptions, jsonResponse } from '../_lib/cors.js';
-import { requireTutorAuth } from '../_lib/auth.js';
+import { requireTutorWriteAccess } from '../_lib/auth.js';
 
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024; // 25 MB
 
@@ -39,7 +39,7 @@ export async function onRequestOptions(context) {
 }
 
 export async function onRequestPost(context) {
-  const auth = await requireTutorAuth(context);
+  const auth = await requireTutorWriteAccess(context);
   if (auth.errorResponse) return auth.errorResponse;
   const { request, env } = context;
 

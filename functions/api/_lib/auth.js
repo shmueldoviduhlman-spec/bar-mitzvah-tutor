@@ -4,6 +4,10 @@
 
 import { fromBase64Url, generateRandomCode } from './crypto.js';
 import { jsonResponse } from './cors.js';
+import { ensureM142Schema, getPlatformSettings } from './billing_config.js';
+import { reconcileTutorBillingState } from './reconcile_billing.js';
+
+export { getPlatformSettings };
 
 const textDecoder = new TextDecoder();
 const jwksCache = new Map(); // jwksUrl -> { expiresAt, keysByKid: Map<string, CryptoKey> }
@@ -138,26 +142,6 @@ async function fetchClerkCanonicalUser(userId, env) {
   }
 }
 
-export async function getPlatformSettings(db) {
-  const defaults = {
-    default_trial_days: 35,
-    global_ai_enabled: true,
-    default_ai_daily_limit: 25,
-    default_ai_pro_daily_limit: 3,
-    announcement_banner: ''
-  };
-  try {
-    const rows = await db.prepare('SELECT key, value_json FROM platform_settings').all();
-    const list = (rows && rows.results) || [];
-    for (const row of list) {
-      try {
-        defaults[row.key] = JSON.parse(row.value_json);
-      } catch (_) {}
-    }
-  } catch (_) {}
-  return defaults;
-}
-
 export async function logAdminAudit(db, actor, target, action, details = {}) {
   try {
     const id = 'aud_' + crypto.randomUUID().replace(/-/g, '');
@@ -194,9 +178,29 @@ async function relinkPendingUserToClerkId(db, oldUserId, newClerkId) {
   await db.batch(statements);
 }
 
-export async function ensureD1User(db, clerkProfile, env) {
+async function linkMatchingGuardianRecords(db, user, nowIso) {
+  if (!db || !user || !user.id || !user.email) return;
+  try {
+    await db.prepare(
+      `UPDATE student_guardians
+       SET guardian_user_id = ?, linked_at = CASE WHEN linked_at = '' THEN ? ELSE linked_at END
+       WHERE lower(guardian_email) = lower(?) AND (guardian_user_id = '' OR guardian_user_id IS NULL)`
+    ).bind(user.id, nowIso, user.email).run();
+    await db.prepare(
+      `UPDATE students
+       SET adult_user_id = ?
+       WHERE id IN (
+         SELECT student_id FROM student_guardians
+         WHERE guardian_user_id = ? AND relationship = 'self_adult'
+       ) AND (adult_user_id = '' OR adult_user_id IS NULL)`
+    ).bind(user.id, user.id).run();
+  } catch (_) {}
+}
+
+export async function ensureD1User(db, clerkProfile, env, requestedAccountType = 'tutor') {
   const superAdmins = getSuperAdminEmailSet(env);
   const nowIso = new Date().toISOString();
+  await ensureM142Schema(db);
 
   // Fast path: user already exists by exact Clerk sub
   let user = await db.prepare('SELECT * FROM users WHERE id = ?').bind(clerkProfile.sub).first();
@@ -224,6 +228,10 @@ export async function ensureD1User(db, clerkProfile, env) {
     }
   }
 
+  const normalizedReqType = (requestedAccountType === 'parent' || requestedAccountType === 'adult_student')
+    ? requestedAccountType
+    : 'tutor';
+
   if (!user) {
     if (!email) {
       email = `${clerkProfile.sub}@clerk.local`;
@@ -232,15 +240,25 @@ export async function ensureD1User(db, clerkProfile, env) {
     const settings = await getPlatformSettings(db);
     const invite = await db.prepare('SELECT * FROM user_invites WHERE lower(email) = lower(?)').bind(email).first();
 
+    let accountType = isSuper ? 'tutor' : normalizedReqType;
+    if (!isSuper && !invite && accountType === 'tutor') {
+      try {
+        const preGuardian = await db.prepare('SELECT relationship FROM student_guardians WHERE lower(guardian_email) = lower(?) LIMIT 1').bind(email).first();
+        if (preGuardian && requestedAccountType === 'auto') {
+          accountType = preGuardian.relationship === 'self_adult' ? 'adult_student' : 'parent';
+        }
+      } catch (_) {}
+    }
+
     const defaultTrialDays = parseInt(settings.default_trial_days || env.DEFAULT_TRIAL_DAYS || '35', 10) || 35;
-    const role = isSuper ? 'super_admin' : ((invite && invite.role) || 'school_owner');
+    const role = isSuper ? 'super_admin' : ((invite && invite.role) || (accountType === 'tutor' ? 'school_owner' : 'tutor'));
     const subStatus = isSuper ? 'lifetime' : ((invite && invite.subscription_status) || 'trialing');
     const trialDays = isSuper ? 9999 : ((invite && typeof invite.trial_days === 'number') ? invite.trial_days : defaultTrialDays);
     const trialEndsAt = subStatus === 'trialing'
       ? new Date(Date.now() + trialDays * 86400 * 1000).toISOString()
       : '';
     const resolvedName = (invite && invite.full_name) || fullName || email.split('@')[0];
-    const orgName = (invite && invite.organization) || (isSuper ? 'Bar Mitzvah Academy' : `${resolvedName}'s Studio`);
+    const orgName = (invite && invite.organization) || (isSuper ? 'Bar Mitzvah Academy' : (accountType === 'tutor' ? `${resolvedName}'s Studio` : `${resolvedName} Family`));
 
     let schoolId = invite && invite.school_id ? invite.school_id : '';
     if (schoolId) {
@@ -264,10 +282,10 @@ export async function ensureD1User(db, clerkProfile, env) {
     await db.prepare(
       `INSERT INTO users (
         id, email, full_name, display_name_he, organization, role, school_id,
-        account_status, suspended_reason, subscription_status, trial_days, trial_ends_at,
+        account_type, account_status, suspended_reason, subscription_status, trial_days, trial_ends_at,
         ai_enabled, ai_tier_access, ai_daily_limit, ai_pro_daily_limit, ai_allow_platform_fallback,
         admin_notes, last_active_at, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, 'active', '', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', '', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       clerkProfile.sub,
       email,
@@ -276,6 +294,7 @@ export async function ensureD1User(db, clerkProfile, env) {
       orgName,
       role,
       schoolId,
+      accountType,
       subStatus,
       trialDays,
       trialEndsAt,
@@ -322,6 +341,7 @@ export async function ensureD1User(db, clerkProfile, env) {
     }
   }
 
+  await linkMatchingGuardianRecords(db, user, nowIso);
   return user;
 }
 
@@ -349,7 +369,8 @@ export async function requireTutorAuth(context) {
   if (!clerkProfile) {
     return { errorResponse: jsonResponse({ error: 'Invalid or expired session token' }, 401, request, env) };
   }
-  const user = await ensureD1User(env.DB, clerkProfile, env);
+  const reqAccType = String((request.headers && request.headers.get('X-TutorPilot-Account-Type')) || 'tutor').toLowerCase().trim();
+  const user = await ensureD1User(env.DB, clerkProfile, env, reqAccType);
   if (!user) {
     return { errorResponse: jsonResponse({ error: 'Unable to resolve user workspace' }, 401, request, env) };
   }
@@ -364,6 +385,31 @@ export async function requireTutorAuth(context) {
     };
   }
   return { user, clerk: clerkProfile };
+}
+
+export async function requireTutorWriteAccess(context) {
+  const auth = await requireTutorAuth(context);
+  if (auth.errorResponse) return auth;
+  const { user } = auth;
+  const { request, env } = context;
+  const billingState = await reconcileTutorBillingState(env.DB, env, user.id, user).catch(() => null);
+  const canWrite = billingState ? (billingState.accessMode !== 'read_only') : hasActivePlanAccess(user);
+  if (!canWrite) {
+    return {
+      errorResponse: jsonResponse(
+        {
+          error: 'Your Tutor workspace is in Read-Only Mode. Past notes, homework, and payment history remain visible. Reactivate your $15/mo plan (or reach 5 active paying students) to edit.',
+          code: 'SUBSCRIPTION_READ_ONLY',
+          readOnly: true,
+          billingState
+        },
+        402,
+        request,
+        env
+      )
+    };
+  }
+  return { ...auth, billingState };
 }
 
 export async function requireAdminAuth(context, { superAdminOnly = false } = {}) {
@@ -388,6 +434,7 @@ export function hasActivePlanAccess(user) {
   if (!user) return false;
   if (user.role === 'super_admin') return true;
   if (user.account_status === 'suspended') return false;
+  if (Number(user.tutor_fee_waived || 0) === 1) return true;
   const st = String(user.subscription_status || '').toLowerCase();
   if (st === 'lifetime' || st === 'active') return true;
   if (st === 'trialing') {

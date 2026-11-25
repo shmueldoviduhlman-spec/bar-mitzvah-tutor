@@ -5,6 +5,7 @@
 
 import { handleOptions, jsonResponse, buildCorsHeaders } from './_lib/cors.js';
 import { requireTutorAuth, getPlatformSettings, hasActivePlanAccess } from './_lib/auth.js';
+import { reconcileTutorBillingState } from './_lib/reconcile_billing.js';
 import { decryptSecret } from './_lib/crypto.js';
 
 const ALLOWED_GEMINI_MODELS = new Set([
@@ -88,8 +89,14 @@ export async function onRequestPost(context) {
     return jsonResponse({ error: 'Platform AI is temporarily paused by administrator.' }, 503, request, env);
   }
 
-  if (!hasActivePlanAccess(user)) {
-    return jsonResponse({ error: 'Your free trial or subscription has ended. Contact support or upgrade to continue using AI.' }, 403, request, env);
+  const billingState = await reconcileTutorBillingState(db, env, user.id, user).catch(() => null);
+  const planOk = billingState ? (billingState.accessMode !== 'read_only') : hasActivePlanAccess(user);
+  if (!planOk) {
+    return jsonResponse({
+      error: 'Your workspace is in Read-Only Mode. Past notes and courses remain visible. Reactivate your subscription (or reach 5 active paying students) to resume AI.',
+      code: 'SUBSCRIPTION_READ_ONLY',
+      readOnly: true
+    }, 402, request, env);
   }
 
   if (!user.ai_enabled) {

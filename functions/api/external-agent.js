@@ -11,6 +11,15 @@
  * settings edits, cross-school access, and private guardian/billing PII leakage.
  */
 
+function normalizeExternalOutcome(raw) {
+  const s = String(raw || 'completed').trim().toLowerCase().replace(/-/g, '_');
+  if (s === 'cancelled' || s === 'cancel' || s === 'canceled') return 'canceled';
+  if (s === 'late_cancelled' || s === 'late_cancel' || s === 'late_canceled') return 'late_canceled';
+  if (s === 'no_show' || s === 'noshow' || s === 'missed') return 'no_show';
+  if (s === 'scheduled') return 'scheduled';
+  return 'completed';
+}
+
 const ALLOWED_ACTIONS = new Set([
   'get_overview',
   'log_after_class_update',
@@ -97,7 +106,7 @@ async function verifyExternalToken(rawToken, env) {
   const tokenHash = await sha256Hex(rawToken);
   const row = await env.DB.prepare(
     `SELECT t.token_hash, t.user_id, t.school_id, t.capabilities_json, t.revoked_at,
-            u.email, u.full_name, u.account_status
+            u.email, u.full_name, u.account_status, u.role, u.subscription_status, u.trial_ends_at, u.tutor_fee_waived
      FROM external_agent_tokens t
      LEFT JOIN users u ON u.id = t.user_id
      WHERE t.token_hash = ?`
@@ -113,6 +122,11 @@ async function verifyExternalToken(rawToken, env) {
   await env.DB.prepare('UPDATE external_agent_tokens SET last_used_at = ? WHERE token_hash = ?')
     .bind(new Date().toISOString(), tokenHash).run().catch(() => {});
 
+  const subSt = String(row.subscription_status || '').toLowerCase();
+  const isLifetimeOrWaived = (row.role === 'super_admin') || subSt === 'lifetime' || subSt === 'active' || Number(row.tutor_fee_waived || 0) === 1;
+  const trialExpired = subSt === 'trialing' && row.trial_ends_at && Date.parse(row.trial_ends_at) <= Date.now();
+  const isReadOnly = !isLifetimeOrWaived && (subSt === 'expired' || subSt === 'canceled' || subSt === 'past_due' || trialExpired);
+
   const caps = safeParse(row.capabilities_json, {});
   return {
     tokenHash,
@@ -120,6 +134,7 @@ async function verifyExternalToken(rawToken, env) {
     ownerEmail: String(row.email || '').toLowerCase().trim(),
     userId: String(row.user_id || ''),
     tutorName: String(row.full_name || 'Tutor'),
+    isReadOnly,
     capabilities: {
       afterClass: caps.afterClass !== false,
       schedule: caps.schedule !== false,
@@ -225,6 +240,14 @@ async function handleAction(action, params, auth, env, cors) {
     return jsonResponse({ success: true, ...buildTutorPilotAppGuide(params.topic) }, 200, cors);
   }
 
+  if (auth.isReadOnly && action !== 'get_overview') {
+    return jsonResponse(
+      { error: 'Account is in Read-Only Mode. Reactivate subscription in TutorPilot Settings to log updates or modify schedule.', code: 'SUBSCRIPTION_READ_ONLY', readOnly: true },
+      402,
+      cors
+    );
+  }
+
   const studentsRes = await env.DB.prepare(
     'SELECT * FROM students WHERE school_id = ? AND archived = 0 ORDER BY sort_order ASC, name ASC'
   ).bind(auth.schoolId).all();
@@ -299,17 +322,19 @@ async function handleAction(action, params, auth, env, cors) {
 
   if (action === 'log_after_class_update') {
     const today = new Date();
-    const todayYMD = formatYmd(today);
-    const todayDow = today.getDay();
+    const todayYMD = String(params.date || formatYmd(today)).trim();
+    const todayDow = (new Date(`${todayYMD}T12:00:00`)).getDay();
+    const outcome = params.sessionOutcome ? normalizeExternalOutcome(params.sessionOutcome) : 'completed';
+    const isMissed = outcome === 'canceled' || outcome === 'late_canceled' || outcome === 'no_show';
 
-    if (params.lastTaught !== undefined) {
+    if (!isMissed && params.lastTaught !== undefined) {
       skills.lastTaught = String(params.lastTaught).trim();
       skills.lastTaughtAt = todayYMD;
     }
     if (params.nextToTeach !== undefined) {
       skills.nextToTeach = String(params.nextToTeach).trim();
     }
-    if (params.homeworkTask !== undefined && String(params.homeworkTask).trim()) {
+    if (!isMissed && params.homeworkTask !== undefined && String(params.homeworkTask).trim()) {
       skills.homework = {
         task: String(params.homeworkTask).trim(),
         completed: false,
@@ -323,13 +348,18 @@ async function handleAction(action, params, auth, env, cors) {
 
     const markCompleted = params.markTodayCompleted !== false;
     let markedTodaySession = false;
-    if (markCompleted && params.lastTaught !== undefined) {
-      const todaySess = schedule.find(
-        s => s && ((s.dateStr === todayYMD) || (s.repeatWeekly && s.dayOfWeek === todayDow))
-      );
-      if (todaySess && todaySess.status !== 'cancelled') {
-        todaySess.status = 'completed';
-        todaySess.completedAt = today.toISOString();
+    const todaySess = schedule.find(
+      s => s && ((s.dateStr === todayYMD) || (s.repeatWeekly && s.dayOfWeek === todayDow))
+    );
+    if (isMissed || (markCompleted && params.lastTaught !== undefined)) {
+      const targetUiStatus = outcome === 'canceled' ? 'cancelled' : outcome;
+      if (todaySess) {
+        if (todaySess.repeatWeekly && isMissed) {
+          todaySess.dateStatuses = { ...(todaySess.dateStatuses || {}), [todayYMD]: targetUiStatus };
+        } else if (todaySess.status !== 'cancelled' || isMissed) {
+          todaySess.status = targetUiStatus;
+          todaySess.completedAt = outcome === 'completed' ? today.toISOString() : null;
+        }
         markedTodaySession = true;
       }
     }
@@ -340,17 +370,81 @@ async function handleAction(action, params, auth, env, cors) {
       'UPDATE students SET private_notes = ?, skills_json = ?, schedule_json = ?, updated_at = ? WHERE id = ? AND school_id = ?'
     ).bind(updatedNotes, JSON.stringify(skills), JSON.stringify(schedule), nowIso, studentRow.id, auth.schoolId).run();
 
+    try {
+      const tutorRow = await env.DB.prepare('SELECT billing_policy_json FROM users WHERE id = ?').bind(auth.userId).first();
+      const policy = safeParse(tutorRow && tutorRow.billing_policy_json, {});
+      const rateCents = Number(studentRow.lesson_rate_cents || 0) || Number(policy.defaultRateCents || 0);
+      const currency = String(studentRow.lesson_currency || policy.currency || 'USD');
+      let chargeCents = 0;
+      if (params.waiveFee === true) {
+        chargeCents = 0;
+      } else if (outcome === 'completed') {
+        chargeCents = rateCents;
+      } else if (isMissed) {
+        const ruleKey = outcome === 'canceled' ? 'cancelRule' : (outcome === 'late_canceled' ? 'lateCancelRule' : 'noShowRule');
+        const r = (policy && policy[ruleKey]) || { mode: 'free', value: 0 };
+        if (r.mode === 'percent') chargeCents = Math.round((rateCents * Number(r.value || 0)) / 100);
+        else if (r.mode === 'flat') chargeCents = Math.max(0, Math.round(Number(r.value || 0)));
+      }
+      const existingCs = await env.DB.prepare(
+        'SELECT id FROM calendar_sessions WHERE student_id = ? AND session_date = ? LIMIT 1'
+      ).bind(studentRow.id, todayYMD).first();
+      const csId = (existingCs && existingCs.id) || `cs_ext_${todayYMD}_${studentRow.id.slice(-8)}`;
+      await env.DB.prepare(
+        `INSERT INTO calendar_sessions (
+          id, school_id, tutor_user_id, student_id, series_schedule_id, course_id, lesson_id,
+          session_date, start_time, duration_minutes, topic, status, counts_as_taught,
+          charge_cents, charge_overridden, currency, recap_summary, homework_assigned,
+          next_to_teach, tutor_private_note, cancel_reason, recap_source,
+          completed_at, canceled_at, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, '', '', ?, ?, 60, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'external_agent', ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+          status = excluded.status,
+          counts_as_taught = excluded.counts_as_taught,
+          charge_cents = excluded.charge_cents,
+          recap_summary = CASE WHEN excluded.recap_summary != '' THEN excluded.recap_summary ELSE calendar_sessions.recap_summary END,
+          homework_assigned = CASE WHEN excluded.homework_assigned != '' THEN excluded.homework_assigned ELSE calendar_sessions.homework_assigned END,
+          next_to_teach = CASE WHEN excluded.next_to_teach != '' THEN excluded.next_to_teach ELSE calendar_sessions.next_to_teach END,
+          cancel_reason = CASE WHEN excluded.cancel_reason != '' THEN excluded.cancel_reason ELSE calendar_sessions.cancel_reason END,
+          updated_at = excluded.updated_at`
+      ).bind(
+        csId,
+        auth.schoolId,
+        auth.userId,
+        studentRow.id,
+        (todaySess && todaySess.repeatWeekly) ? (todaySess.id || '') : '',
+        todayYMD,
+        (todaySess && (todaySess.time || todaySess.timeSlot)) || '4:30 PM',
+        (!isMissed && params.lastTaught) ? String(params.lastTaught).trim() : ((todaySess && todaySess.topic) || 'Tutoring Session'),
+        outcome,
+        outcome === 'completed' ? 1 : 0,
+        chargeCents,
+        params.waiveFee === true ? 1 : 0,
+        currency,
+        !isMissed ? String(params.lastTaught || '').trim() : '',
+        !isMissed ? String(params.homeworkTask || '').trim() : '',
+        String(params.nextToTeach || '').trim(),
+        String(params.appendNote || '').trim(),
+        isMissed ? String(params.cancelReason || params.appendNote || outcome).trim() : '',
+        outcome === 'completed' ? nowIso : '',
+        isMissed ? nowIso : '',
+        nowIso,
+        nowIso
+      ).run();
+    } catch (_) {}
+
     return jsonResponse(
       {
         success: true,
         action: 'log_after_class_update',
+        sessionOutcome: outcome,
         student: sanitizeStudentRow({
           ...studentRow,
           private_notes: updatedNotes,
           skills_json: JSON.stringify(skills),
           schedule_json: JSON.stringify(schedule)
         }),
-        markedTodaySessionCompleted: markedTodaySession
+        markedTodaySessionCompleted: outcome === 'completed' && markedTodaySession
       },
       200,
       cors

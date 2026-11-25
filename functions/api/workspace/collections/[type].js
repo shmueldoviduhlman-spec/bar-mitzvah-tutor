@@ -1,5 +1,5 @@
 import { handleOptions, jsonResponse } from '../../_lib/cors.js';
-import { requireTutorAuth } from '../../_lib/auth.js';
+import { requireTutorAuth, requireTutorWriteAccess } from '../../_lib/auth.js';
 
 const ALLOWED_COLLECTION_TYPES = new Set(['reading_materials', 'milestones', 'study_materials']);
 
@@ -27,7 +27,7 @@ export async function onRequestGet(context) {
 }
 
 export async function onRequestPut(context) {
-  const auth = await requireTutorAuth(context);
+  const auth = await requireTutorWriteAccess(context);
   if (auth.errorResponse) return auth.errorResponse;
   const { request, env, params } = context;
   const colType = String((params && params.type) || '').trim();

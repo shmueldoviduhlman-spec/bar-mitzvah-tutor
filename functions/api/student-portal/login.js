@@ -1,5 +1,7 @@
 import { handleOptions, jsonResponse } from '../_lib/cors.js';
 import { signStudentToken } from '../_lib/crypto.js';
+import { ensureM142Schema } from '../_lib/billing_config.js';
+import { evaluateStudentPortalAccess } from '../_lib/reconcile_billing.js';
 
 function safeJson(raw, fallback) {
   if (!raw || typeof raw !== 'string') return fallback;
@@ -10,11 +12,12 @@ function normalizeStudentName(name) {
   return String(name || '').trim().replace(/\s+/g, ' ').toLowerCase();
 }
 
-export function sanitizeStudentForPortal(row) {
+export function sanitizeStudentForPortal(row, opts = {}) {
   const profile = safeJson(row.profile_json, {});
   const sharedNotes = safeJson(row.shared_notes_json, []);
   const skills = safeJson(row.skills_json, {});
   const schedule = safeJson(row.schedule_json, []);
+  const access = opts.portalAccess || evaluateStudentPortalAccess(opts.subRow || null, row);
 
   const mediaKey = String(row.avatar_media_key || '');
   const avatarUrl = mediaKey
@@ -23,23 +26,40 @@ export function sanitizeStudentForPortal(row) {
         : `/api/media/${encodeURIComponent(mediaKey)}`)
     : (profile.avatar || '');
 
-  // Zero-Leak Guarantee: explicitly omit private_notes, parentContact, hourlyRate, owner_user_id
+  const recentRecaps = Array.isArray(opts.sessions)
+    ? opts.sessions.slice(0, 15).map(cs => ({
+        id: cs.id,
+        sessionDate: cs.session_date,
+        startTime: cs.start_time,
+        topic: cs.topic || '',
+        status: cs.status,
+        recapSummary: cs.recap_summary || '',
+        homeworkAssigned: cs.homework_assigned || ''
+      }))
+    : [];
+
+  // Zero-Leak Guarantee: explicitly omit private_notes, parentContact, hourlyRate, owner_user_id, and all charges/billing
   return {
     id: row.id,
     name: row.name,
     subject: profile.subject || row.parsha_or_date || '',
     gradeOrDate: profile.gradeOrDate || row.parsha_or_date || '',
     gradeLevel: profile.gradeLevel || 'Standard / All Levels',
+    learnerType: row.learner_type || 'child',
+    portalStatus: access.portalStatus,
+    portalReadOnly: Boolean(access.readOnly),
     avatar: avatarUrl,
     studentAccessCode: String(row.access_code || '').toUpperCase().trim(),
     sharedNotes: Array.isArray(sharedNotes) ? sharedNotes : [],
     skills: skills && typeof skills === 'object' ? skills : {},
+    recentRecaps,
     schedule: Array.isArray(schedule) ? schedule.map(l => ({
       id: (l && l.id) || '',
       dateStr: (l && l.dateStr) || '',
       time: (l && l.time) || '',
       status: (l && l.status) || 'scheduled',
-      repeatWeekly: !!(l && l.repeatWeekly)
+      repeatWeekly: !!(l && l.repeatWeekly),
+      dateStatuses: (l && l.dateStatuses && typeof l.dateStatuses === 'object') ? l.dateStatuses : undefined
     })) : []
   };
 }
@@ -94,6 +114,22 @@ export async function onRequestPost(context) {
     return jsonResponse({ error: 'Exact name and Student Code did not match. Ask your teacher to check your code.' }, 401, request, env);
   }
 
+  await ensureM142Schema(env.DB);
+  const subRow = await env.DB.prepare('SELECT * FROM student_subscriptions WHERE student_id = ?')
+    .bind(matchRow.id).first().catch(() => null);
+  const portalAccess = evaluateStudentPortalAccess(subRow, matchRow);
+  if (!portalAccess.canLogin) {
+    return jsonResponse({
+      error: 'Your Student Portal is not activated yet. Ask your parent or tutor to activate your 7-day free trial first.',
+      code: 'PORTAL_NOT_ACTIVATED',
+      portalStatus: portalAccess.portalStatus
+    }, 403, request, env);
+  }
+
+  const sessRes = await env.DB.prepare(
+    'SELECT id, session_date, start_time, topic, status, recap_summary, homework_assigned FROM calendar_sessions WHERE student_id = ? ORDER BY session_date DESC LIMIT 15'
+  ).bind(matchRow.id).all().catch(() => ({ results: [] }));
+
   const studentToken = await signStudentToken(
     { studentId: matchRow.id, schoolId: matchRow.school_id, accessCode: enteredCode },
     secret,
@@ -103,6 +139,6 @@ export async function onRequestPost(context) {
   return jsonResponse({
     ok: true,
     studentToken,
-    student: sanitizeStudentForPortal(matchRow)
+    student: sanitizeStudentForPortal(matchRow, { subRow, portalAccess, sessions: (sessRes && sessRes.results) || [] })
   }, 200, request, env);
 }

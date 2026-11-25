@@ -1,5 +1,14 @@
 import { handleOptions, jsonResponse } from '../_lib/cors.js';
 import { requireTutorAuth, getPlatformSettings, hasActivePlanAccess } from '../_lib/auth.js';
+import {
+  ensureM142Schema,
+  getBillingConfig,
+  normalizeTutorBillingPolicy,
+  normalizePayoutMethods,
+  computeStudentLedgerSummary
+} from '../_lib/billing_config.js';
+import { reconcileTutorBillingState, evaluateStudentPortalAccess } from '../_lib/reconcile_billing.js';
+import { buildUserCalendarFeedSignature } from '../calendar/ics.js';
 
 function safeJsonParse(raw, fallback) {
   if (!raw || typeof raw !== 'string') return fallback;
@@ -51,7 +60,14 @@ export function mapStudentRowToClient(row) {
     schoolId: row.school_id,
     ownerUserId: row.owner_user_id,
     lastUpdatedBy: row.updated_by || '',
-    updatedAt: row.updated_at || ''
+    updatedAt: row.updated_at || '',
+    learnerType: row.learner_type || profile.learnerType || 'child',
+    portalStatus: row.portal_status || 'not_activated',
+    lessonRateCents: Number(row.lesson_rate_cents || 0),
+    lessonCurrency: row.lesson_currency || 'USD',
+    customBillingPolicy: safeJsonParse(row.custom_billing_policy_json, {}),
+    openingLessonsTaught: Number(row.opening_lessons_taught || 0),
+    openingBalanceCents: Number(row.opening_balance_cents || 0)
   };
 }
 
@@ -67,9 +83,11 @@ export async function onRequestGet(context) {
   const db = env.DB;
 
   const settings = await getPlatformSettings(db);
+  const billingConfig = getBillingConfig(env, settings);
+  await ensureM142Schema(db);
   const todayUtc = new Date().toISOString().slice(0, 10);
 
-  const [schoolRow, membersRes, studentsRes, coursesRes, collectionsRes, keyRow, usageRow] = await Promise.all([
+  const [schoolRow, membersRes, studentsRes, coursesRes, collectionsRes, keyRow, usageRow, sessionsRes, paymentsRes, requestsRes, subsRes, earningsRes, guardiansRes, tutorBilling] = await Promise.all([
     db.prepare('SELECT id, name, owner_user_id, join_code, created_at FROM schools WHERE id = ?').bind(user.school_id).first(),
     db.prepare(
       `SELECT sm.user_id, sm.role AS member_role, sm.joined_at, u.email, u.full_name, u.display_name_he
@@ -82,10 +100,92 @@ export async function onRequestGet(context) {
     db.prepare("SELECT * FROM courses WHERE school_id = ? AND (deleted_at IS NULL OR deleted_at = '') ORDER BY created_at ASC").bind(user.school_id).all(),
     db.prepare('SELECT collection_type, data_json, updated_at FROM curriculum_collections WHERE school_id = ?').bind(user.school_id).all(),
     db.prepare('SELECT key_hint, label, updated_at FROM user_api_keys WHERE user_id = ?').bind(user.id).first(),
-    db.prepare('SELECT standard_count, pro_count, used_custom_key_count FROM ai_usage_daily WHERE user_id = ? AND date_utc = ?').bind(user.id, todayUtc).first()
+    db.prepare('SELECT standard_count, pro_count, used_custom_key_count FROM ai_usage_daily WHERE user_id = ? AND date_utc = ?').bind(user.id, todayUtc).first(),
+    db.prepare('SELECT * FROM calendar_sessions WHERE school_id = ? ORDER BY session_date DESC, start_time ASC LIMIT 800').bind(user.school_id).all().catch(() => ({ results: [] })),
+    db.prepare('SELECT * FROM lesson_payments WHERE school_id = ? ORDER BY paid_at DESC LIMIT 500').bind(user.school_id).all().catch(() => ({ results: [] })),
+    db.prepare('SELECT * FROM payment_requests WHERE school_id = ? ORDER BY created_at DESC LIMIT 300').bind(user.school_id).all().catch(() => ({ results: [] })),
+    db.prepare('SELECT * FROM student_subscriptions WHERE school_id = ?').bind(user.school_id).all().catch(() => ({ results: [] })),
+    db.prepare('SELECT * FROM tutor_earnings_ledger WHERE tutor_user_id = ? ORDER BY created_at DESC LIMIT 50').bind(user.id).all().catch(() => ({ results: [] })),
+    db.prepare('SELECT * FROM student_guardians WHERE school_id = ?').bind(user.school_id).all().catch(() => ({ results: [] })),
+    reconcileTutorBillingState(db, env, user.id, user).catch(() => null)
   ]);
 
-  const students = ((studentsRes && studentsRes.results) || []).map(mapStudentRowToClient);
+  const tutorPolicy = normalizeTutorBillingPolicy(user.billing_policy_json);
+  const payoutMethods = normalizePayoutMethods(user.payout_methods_json);
+  const sessionsByStudent = new Map();
+  for (const cs of ((sessionsRes && sessionsRes.results) || [])) {
+    if (!sessionsByStudent.has(cs.student_id)) sessionsByStudent.set(cs.student_id, []);
+    sessionsByStudent.get(cs.student_id).push(cs);
+  }
+  const paymentsByStudent = new Map();
+  for (const lp of ((paymentsRes && paymentsRes.results) || [])) {
+    if (!paymentsByStudent.has(lp.student_id)) paymentsByStudent.set(lp.student_id, []);
+    paymentsByStudent.get(lp.student_id).push(lp);
+  }
+  const requestsByStudent = new Map();
+  for (const pr of ((requestsRes && requestsRes.results) || [])) {
+    if (!requestsByStudent.has(pr.student_id)) requestsByStudent.set(pr.student_id, []);
+    requestsByStudent.get(pr.student_id).push(pr);
+  }
+  const subByStudent = new Map();
+  for (const sub of ((subsRes && subsRes.results) || [])) {
+    subByStudent.set(sub.student_id, sub);
+  }
+  const guardiansByStudent = new Map();
+  for (const g of ((guardiansRes && guardiansRes.results) || [])) {
+    if (!guardiansByStudent.has(g.student_id)) guardiansByStudent.set(g.student_id, []);
+    guardiansByStudent.get(g.student_id).push(g);
+  }
+
+  const students = ((studentsRes && studentsRes.results) || []).map(row => {
+    const mapped = mapStudentRowToClient(row);
+    const stuSessions = sessionsByStudent.get(row.id) || [];
+    const stuPayments = paymentsByStudent.get(row.id) || [];
+    const stuRequests = requestsByStudent.get(row.id) || [];
+    const stuSub = subByStudent.get(row.id) || null;
+    const stuAccess = evaluateStudentPortalAccess(stuSub, row);
+    const ledger = computeStudentLedgerSummary({
+      studentRow: row,
+      sessions: stuSessions,
+      payments: stuPayments,
+      paymentRequests: stuRequests,
+      tutorPolicy
+    });
+    return {
+      ...mapped,
+      portalStatus: stuAccess.portalStatus,
+      portalAccess: stuAccess,
+      subscription: stuSub ? {
+        status: stuSub.status,
+        trialEndsAt: stuSub.trial_ends_at || '',
+        currentPeriodEnd: stuSub.current_period_end || '',
+        payerRole: stuSub.payer_role || 'parent',
+        priceCents: Number(stuSub.price_cents || billingConfig.parentSubscriptionPriceCents)
+      } : null,
+      ledger,
+      sessionInstances: stuSessions.slice(0, 60),
+      recentPayments: stuPayments.slice(0, 20),
+      guardians: (guardiansByStudent.get(row.id) || []).map(g => ({
+        email: g.guardian_email,
+        name: g.guardian_name || '',
+        phone: g.guardian_phone || '',
+        relationship: g.relationship || 'parent',
+        linked: Boolean(g.guardian_user_id)
+      }))
+    };
+  });
+
+  const rawAccType = String(user.account_type || 'tutor').toLowerCase();
+  let linkedAsFamily = false;
+  if (rawAccType === 'parent' || rawAccType === 'adult_student') {
+    const ownedCount = students.filter(s => s.ownerUserId === user.id).length;
+    if (ownedCount === 0) linkedAsFamily = true;
+  }
+
+  const icsSig = await buildUserCalendarFeedSignature(user.id, env.STUDENT_TOKEN_SECRET || env.API_KEY_ENCRYPTION_SECRET || '');
+  const appOrigin = String((env && env.APP_ORIGIN) || new URL(request.url).origin).replace(/\/+$/, '');
+  const calendarIcsUrl = `${appOrigin}/api/calendar/ics?u=${encodeURIComponent(user.id)}&sig=${icsSig}`;
+  const effectiveAccessMode = tutorBilling ? tutorBilling.accessMode : (hasActivePlanAccess(user) ? 'full' : 'read_only');
   const courses = ((coursesRes && coursesRes.results) || []).map(row => {
     const parsed = safeJsonParse(row.data_json, {});
     return {
@@ -120,10 +220,21 @@ export async function onRequestGet(context) {
       role: user.role,
       schoolId: user.school_id,
       accountStatus: user.account_status,
+      accountType: rawAccType,
+      redirectPortalRole: linkedAsFamily ? rawAccType : '',
       subscriptionStatus: user.subscription_status,
-      hasActivePlan: hasActivePlanAccess(user),
+      hasActivePlan: effectiveAccessMode !== 'read_only',
+      accessMode: effectiveAccessMode,
+      readOnlyReason: (tutorBilling && tutorBilling.readOnlyReason) || '',
       trialDays: user.trial_days,
       trialEndsAt: user.trial_ends_at,
+      billingPolicy: tutorPolicy,
+      payoutMethods,
+      tutorBilling,
+      earningsLedger: (earningsRes && earningsRes.results) || [],
+      stripeConfigured: Boolean(env && env.STRIPE_SECRET_KEY),
+      stripeConnectOnboarded: Boolean(user.stripe_connect_onboarded),
+      calendarIcsUrl,
       aiEnabled: !!user.ai_enabled,
       aiTierAccess: user.ai_tier_access || 'standard',
       aiAllowPlatformFallback: !!user.ai_allow_platform_fallback,
@@ -150,7 +261,8 @@ export async function onRequestGet(context) {
     platform: {
       defaultTrialDays: Number(settings.default_trial_days || 35),
       globalAiEnabled: settings.global_ai_enabled !== false,
-      announcementBanner: String(settings.announcement_banner || '')
+      announcementBanner: String(settings.announcement_banner || ''),
+      billingConfig
     }
   }, 200, request, env);
 }

@@ -1,12 +1,12 @@
 import { handleOptions, jsonResponse } from '../_lib/cors.js';
-import { requireTutorAuth } from '../_lib/auth.js';
+import { requireTutorWriteAccess } from '../_lib/auth.js';
 
 export async function onRequestOptions(context) {
   return handleOptions(context, 'PUT, DELETE, OPTIONS');
 }
 
 export async function onRequestPut(context) {
-  const auth = await requireTutorAuth(context);
+  const auth = await requireTutorWriteAccess(context);
   if (auth.errorResponse) return auth.errorResponse;
   const { request, env, params } = context;
   const courseId = String((params && params.id) || '').trim();
@@ -46,7 +46,7 @@ export async function onRequestPut(context) {
 }
 
 export async function onRequestDelete(context) {
-  const auth = await requireTutorAuth(context);
+  const auth = await requireTutorWriteAccess(context);
   if (auth.errorResponse) return auth.errorResponse;
   const { request, env, params } = context;
   const courseId = String((params && params.id) || '').trim();

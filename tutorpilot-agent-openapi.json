@@ -142,6 +142,15 @@
             "default": true,
             "description": "When logging lastTaught, automatically mark today's matching scheduled class as completed."
           },
+          "sessionOutcome": {
+            "type": "string",
+            "enum": ["completed", "canceled", "late_canceled", "no_show"],
+            "description": "Explicit session status for log_after_class_update. Use canceled, late_canceled, or no_show if there was no session."
+          },
+          "cancelReason": {
+            "type": "string",
+            "description": "Optional reason when sessionOutcome is canceled, late_canceled, or no_show."
+          },
           "date": {
             "type": "string",
             "description": "For schedule_lesson or cancel_lesson: target date in YYYY-MM-DD format."
